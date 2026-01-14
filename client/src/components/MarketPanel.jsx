@@ -228,9 +228,9 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
                 {/* SEARCH AND FILTERS (Only visible in BUY tab) */}
                 {activeTab === 'BUY' && (
-                    <div style={{ display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
                         {/* Search Input */}
-                        <div style={{ flex: '1 1 0%', position: 'relative', minWidth: '200px' }}>
+                        <div style={{ position: 'relative', width: '100%' }}>
                             <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-dim)' }} />
                             <input
                                 placeholder="Search items..."
@@ -250,7 +250,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                         </div>
 
                         {/* Filter Buttons */}
-                        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px', flex: '2 1 0%' }}>
+                        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px', width: '100%' }}>
                             {[
                                 { id: 'ALL', label: 'All Items', icon: <ShoppingBag size={14} /> },
                                 { id: 'EQUIPMENT', label: 'Equipment', icon: <Shield size={14} /> },

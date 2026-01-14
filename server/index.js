@@ -281,13 +281,33 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('sell_item', async ({ itemId, quantity }) => {
+        try {
+            const result = await gameManager.sellItem(socket.user.id, itemId, quantity);
+            socket.emit('item_sold', result);
+            socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('stop_activity', async () => {
+        try {
+            await gameManager.stopActivity(socket.user.id);
+            socket.emit('activity_stopped');
+            socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
     });
 });
 
 // --- LOOP GLOBAL DE TRABALHO (TICKS) ---
-// Processa atividades de todos os usuários conectados a cada 3 segundos
+// Processa atividades de todos os usuários conectados a cada 1 segundo (High Tick Rate for Combat)
 setInterval(async () => {
     const sockets = await io.fetchSockets();
     for (const s of sockets) {
@@ -296,7 +316,7 @@ setInterval(async () => {
                 const result = await gameManager.processTick(s.user.id);
                 if (result) {
                     // Se houve ganho, envia atualização para o cliente
-                    console.log(`Tick for ${s.user.email}:`, result.message);
+                    // console.log(`Tick for ${s.user.email}:`, result.message);
                     s.emit('action_result', result);
                     s.emit('status_update', await gameManager.getStatus(s.user.id));
 
@@ -309,7 +329,7 @@ setInterval(async () => {
             }
         }
     }
-}, 3000); // 3 segundos por tick
+}, 1000); // 1 segundo por tick (Antes era 3s)
 
 
 httpServer.listen(PORT, () => {

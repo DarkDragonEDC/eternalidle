@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Play, CheckCircle, Clock, Square, Zap, Hammer, Pickaxe, Box, Loader, Hourglass, Sword, Skull, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const ActivityWidget = ({ gameState, onClaim, socket, onNavigate }) => {
+const ActivityWidget = ({ gameState, onStop, socket, onNavigate }) => { // Changed onClaim to onStop
     const [isOpen, setIsOpen] = useState(false);
     const [elapsed, setElapsed] = useState(0);
     const [combatElapsed, setCombatElapsed] = useState(0);
@@ -243,7 +243,7 @@ const ActivityWidget = ({ gameState, onClaim, socket, onNavigate }) => {
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            onClaim();
+                                            if (onStop) onStop(); // Use onStop prop from App.jsx
                                             setIsOpen(false);
                                         }}
                                         style={{
@@ -276,6 +276,7 @@ const ActivityWidget = ({ gameState, onClaim, socket, onNavigate }) => {
                                     initial={{ opacity: 0, x: 20, scale: 0.95 }}
                                     animate={{ opacity: 1, x: 0, scale: 1 }}
                                     exit={{ opacity: 0, x: 20, scale: 0.95 }}
+                                    onClick={() => onNavigate && onNavigate('combat')} // Navigate to combat tab
                                     style={{
                                         width: '320px',
                                         background: 'rgba(20, 10, 10, 0.95)',
@@ -284,7 +285,8 @@ const ActivityWidget = ({ gameState, onClaim, socket, onNavigate }) => {
                                         borderRadius: '16px',
                                         padding: '20px',
                                         boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
-                                        overflow: 'hidden'
+                                        overflow: 'hidden',
+                                        cursor: 'pointer'
                                     }}
                                 >
                                     {/* Header Combat */}

@@ -671,6 +671,10 @@ function App() {
   };
 
   const handleNavigate = (itemId) => {
+    if (itemId === 'combat') {
+      setActiveTab('combat');
+      return;
+    }
     // Procurar em Gathering
     for (const [category, tiers] of Object.entries(ITEMS.RAW)) {
       for (const [t, item] of Object.entries(tiers)) {

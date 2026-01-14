@@ -36,12 +36,12 @@ export class GameManager {
 
         if (!baseItem || !QUALITIES[qualityIndex]) return null;
 
-        // Retorna item "virtual" com stats ajustados
         return {
             ...baseItem,
             name: `${QUALITIES[qualityIndex].name} ${baseItem.name}`,
             ip: (baseItem.ip || 0) + QUALITIES[qualityIndex].ipBonus,
             quality: qualityIndex,
+            rarityColor: QUALITIES[qualityIndex].color,
             originalId: id // Para fins de debug/tracking
         };
     }
@@ -399,14 +399,20 @@ export class GameManager {
 
             const currentEquip = state.equipment.food;
             if (currentEquip) {
-                // Devolve o antigo
-                const oldId = currentEquip.id;
-                const oldAmount = currentEquip.amount || 1;
-                state.inventory[oldId] = (state.inventory[oldId] || 0) + oldAmount;
+                if (currentEquip.id === itemId) {
+                    // Mesmo item: soma
+                    currentEquip.amount = (currentEquip.amount || 0) + amount;
+                } else {
+                    // Item diferente: Devolve o antigo e subititui
+                    const oldId = currentEquip.id;
+                    const oldAmount = currentEquip.amount || 1;
+                    state.inventory[oldId] = (state.inventory[oldId] || 0) + oldAmount;
+                    state.equipment.food = { ...item, amount: amount };
+                }
+            } else {
+                // Equipa novo com quantidade
+                state.equipment.food = { ...item, amount: amount };
             }
-
-            // Equipa novo com quantidade
-            state.equipment.food = { ...item, amount: amount };
         } else {
             // Lógica Padrão (1 item)
             state.inventory[itemId]--;
@@ -420,6 +426,8 @@ export class GameManager {
 
             state.equipment[slotName] = item;
         }
+
+        // Recalcular status se necessário (não implementado full ainda) ver calc damage
 
         // Salvar estado
         await this.saveState(char.id, state);
@@ -471,18 +479,11 @@ export class GameManager {
         const char = await this.getCharacter(userId);
         if (!char) return null;
 
-        // Se não tem atividade E não tem combate, não processa nada
-        // MAS precisamos processar comida se tiver HP faltando, mesmo fora de combate?
-        // O usuário disse: "estando vivo ou morto, caso precise, vai começar a usar instantaneamente"
-        // Então deve processar sempre. Mas o loop original filtrava quem não tinha nada pra fazer.
-        // Vou manter o filtro mas adicionar verificação de regeneração se necessário, ou assumir que food só roda com atividade/combate por enquanto para não pesar o loop. 
-        // "permita que a food seja usada ate mesmo durante o combate".
-        // Vou processar food SEMPRE que tiver char.
-
         let foodUsed = this.processFood(char);
 
         if (!char.current_activity && !char.state.combat && !foodUsed) return null;
 
+        const now = Date.now();
         let leveledUp = false;
         let itemsGained = 0;
         let lastActivityResult = null;
@@ -491,14 +492,18 @@ export class GameManager {
 
         // 1. Processar Atividade (Coleta, Refino, Craft)
         if (char.current_activity) {
-            const { type, item_id, actions_remaining, time_per_action = 3 } = char.current_activity;
-            const item = ITEM_LOOKUP[item_id];
+            const { type, item_id, actions_remaining, time_per_action = 3, next_action_at } = char.current_activity;
 
-            if (item && actions_remaining > 0) {
-                const actionsPerTick = Math.max(1, Math.floor(3 / time_per_action));
-                const actionsToProcess = Math.min(actionsPerTick, actions_remaining);
+            // Inicializa next_action_at se não existir (primeira execução)
+            if (!next_action_at) {
+                char.current_activity.next_action_at = now + (time_per_action * 1000);
+            }
 
-                for (let i = 0; i < actionsToProcess; i++) {
+            // Verifica se está na hora de processar
+            if (now >= (char.current_activity.next_action_at || 0)) {
+                const item = ITEM_LOOKUP[item_id];
+
+                if (item && actions_remaining > 0) {
                     let result = null;
                     const normalizedType = type.toUpperCase();
                     switch (normalizedType) {
@@ -507,33 +512,52 @@ export class GameManager {
                         case 'CRAFTING': result = await this.processCrafting(char, item); break;
                     }
 
+                    // Atualiza próximo tempo
+                    char.current_activity.next_action_at = now + (time_per_action * 1000);
+
                     if (result && !result.error) {
                         itemsGained++;
                         if (result.leveledUp) leveledUp = true;
                         lastActivityResult = result;
-                    } else {
-                        lastActivityResult = result;
-                        break;
-                    }
-                }
 
-                if (itemsGained > 0) {
-                    const newActionsRemaining = actions_remaining - itemsGained;
-                    activityFinished = newActionsRemaining <= 0;
-                    char.current_activity = activityFinished ? null : { ...char.current_activity, actions_remaining: newActionsRemaining };
-                    char.activity_started_at = activityFinished ? null : char.activity_started_at;
+                        const newActionsRemaining = actions_remaining - 1;
+                        activityFinished = newActionsRemaining <= 0;
+                        if (activityFinished) {
+                            char.current_activity = null;
+                            char.activity_started_at = null;
+                        } else {
+                            char.current_activity.actions_remaining = newActionsRemaining;
+                        }
+                    } else {
+                        // Se deu erro (inventário cheio, etc), para.
+                        lastActivityResult = result;
+                        char.current_activity = null; // Para atividade em erro
+                    }
                 }
             }
         }
 
         // 2. Processar Combate
         if (char.state.combat) {
-            combatResult = await this.processCombatRound(char);
-            if (combatResult && combatResult.leveledUp) leveledUp = true;
+            // Inicializa next_attack_at
+            if (!char.state.combat.next_attack_at) {
+                // Ataque inicial imediato ou delay? Vamos dar um delay pequeno
+                char.state.combat.next_attack_at = now + 1000;
+            }
+
+            if (now >= char.state.combat.next_attack_at) {
+                combatResult = await this.processCombatRound(char);
+                // Reset cooldown (1s base for now, can be modified by stats later)
+                // TODO: Implement atk speed stat
+                char.state.combat.next_attack_at = now + 1000;
+
+                if (combatResult && combatResult.leveledUp) leveledUp = true;
+            }
         }
 
-        // 3. Salvar Estado no Banco (apenas se houve mudança)
-        if (itemsGained > 0 || combatResult) {
+        // 3. Salvar Estado no Banco (apenas se houve mudança significativa ou intervalo de save)
+        // Para otimizar, salvamos sempre que houver ganho ou combate
+        if (itemsGained > 0 || combatResult || foodUsed) {
             await this.supabase
                 .from('characters')
                 .update({
@@ -544,16 +568,15 @@ export class GameManager {
                 })
                 .eq('id', char.id);
 
-            // Montar mensagem combinada para o log
+            // Montar mensagem
             let finalMessage = "";
             if (itemsGained > 0) {
-                const activeItem = ITEM_LOOKUP[char.current_activity?.item_id] || ITEM_LOOKUP[lastActivityResult?.itemId];
-                const itemName = activeItem ? activeItem.name : "itens";
-                finalMessage = itemsGained > 1 ? `${itemsGained}x ${itemName} processados` : lastActivityResult.message;
+                finalMessage = lastActivityResult.message;
             }
             if (combatResult) {
                 finalMessage += (finalMessage ? " | " : "") + combatResult.message;
             }
+            if (!finalMessage && foodUsed) finalMessage = "Usou comida";
 
             return {
                 success: true,
@@ -572,27 +595,56 @@ export class GameManager {
         const combat = char.state.combat;
         if (!combat) return null;
 
-        // 1. Calculate Player Damage (Simplified for now)
+        // 1. Calculate Player Damage (Incluindo Equips)
         const stats = char.state.stats || { str: 0 };
-        const playerDmg = 5 + (stats.str * 1);
+        const baseDmg = 5;
+        const strBonus = (stats.str * 1);
 
-        // 2. Calculate Mob Damage
+        // Weapon Damage
+        let weaponDmg = 0;
+        if (char.state.equipment && char.state.equipment.mainHand && char.state.equipment.mainHand.stats) {
+            const weapon = char.state.equipment.mainHand;
+            weaponDmg = weapon.stats.damage || 0;
+            // Apply Quality Multiplier logic if needed, but assuming stats are flat stored or calc'd elsewhere?
+            // Actually resolveItem adds IP, but damage in stats property is likely base. 
+            // We should use IP to scale damage ideally, but for now lets trust the item stats + IP bonus if any.
+            // If the item in state has updated stats from quality, good. If not, we rely on base.
+            // (Note: resolveItem returns adjusted IP, but 'stats' object inside is static from DB usually)
+            // Lets assume 'ip' does the lifting or simple add for now:
+            weaponDmg += (weapon.ip || 0) / 10; // 10 IP = 1 Dmg roughly
+        }
+
+        const playerDmg = Math.floor(baseDmg + strBonus + weaponDmg);
+
+        // 2. Calculate Mob Damage & Stats
         let mobData = null;
         if (MONSTERS[combat.tier]) {
             mobData = MONSTERS[combat.tier].find(m => m.id === combat.mobId);
         }
-        const mobDmg = mobData ? mobData.damage : 5;
+        let mobDmg = mobData ? mobData.damage : 5;
+
+        // Player Defense mitigation
+        let playerDef = 0;
+        if (char.state.equipment) {
+            if (char.state.equipment.chest) playerDef += (char.state.equipment.chest.stats?.defense || 0);
+            if (char.state.equipment.head) playerDef += (char.state.equipment.head.stats?.defense || 0);
+            if (char.state.equipment.shoes) playerDef += (char.state.equipment.shoes.stats?.defense || 0);
+        }
+
+        // Simple mitigation: Damage reduction percent or flat? 
+        // Let's do flat reduction with a cap (min 1 dmg)
+        const mitigatedMobDmg = Math.max(1, mobDmg - Math.floor(playerDef / 2));
 
         // 3. Apply Damage
         combat.mobHealth -= playerDmg;
-        combat.playerHealth -= mobDmg;
+        combat.playerHealth -= mitigatedMobDmg;
 
         // Update main health too
         char.state.health = Math.max(0, combat.playerHealth);
 
         let roundDetails = {
             playerDmg,
-            mobDmg,
+            mobDmg: mitigatedMobDmg,
             silverGained: 0,
             lootGained: [],
             xpGained: 0,
@@ -600,7 +652,7 @@ export class GameManager {
             defeat: false
         };
 
-        let message = `Dano causado: ${playerDmg} | Dano recebido: ${mobDmg}`;
+        let message = `Dmg: ${playerDmg} | Recebeu: ${mitigatedMobDmg}`;
         let leveledUp = false;
 
         // 4. Check Death
