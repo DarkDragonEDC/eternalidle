@@ -92,7 +92,7 @@ const InventoryPanel = ({ inventory = {}, socket, silver = 0, onShowInfo, onList
             {/* Grid */}
             <div className="inventory-grid" style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
+                gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
                 gap: '8px',
                 overflowY: 'auto',
                 paddingBottom: '20px',
@@ -105,7 +105,8 @@ const InventoryPanel = ({ inventory = {}, socket, silver = 0, onShowInfo, onList
                                 background: 'rgba(255, 255, 255, 0.02)',
                                 borderRadius: '6px',
                                 border: '1px solid var(--border)',
-                                aspectRatio: '1/1'
+                                aspectRatio: '1/1',
+                                minHeight: '80px'
                             }} />
                         );
                     }
@@ -135,6 +136,7 @@ const InventoryPanel = ({ inventory = {}, socket, silver = 0, onShowInfo, onList
                                 fontSize: '0.65rem',
                                 border: borderStyle,
                                 aspectRatio: '1/1', // Maintain square aspect ratio
+                                minHeight: '80px', // Fallback height
                                 cursor: 'pointer',
                                 overflow: 'hidden'
                             }}>
