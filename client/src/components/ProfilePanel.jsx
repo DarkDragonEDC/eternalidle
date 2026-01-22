@@ -6,11 +6,13 @@ import {
     User, Target, Star, Layers,
     Axe, Pickaxe, Scissors, Anchor, Apple, Info
 } from 'lucide-react';
-import { getTierColor } from '../data/items';
+import { resolveItem, getTierColor } from '@shared/items';
+import StatBreakdownModal from './StatBreakdownModal';
 
 const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
     const [selectedSlot, setSelectedSlot] = useState(null);
     const [infoModal, setInfoModal] = useState(null);
+    const [breakdownModal, setBreakdownModal] = useState(null);
 
     const handleEquip = (itemId) => {
         socket.emit('equip_item', { itemId });
@@ -19,9 +21,9 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
     const handleUnequip = (slot) => {
         socket.emit('unequip_item', { slot });
     };
-    if (!gameState) return <div style={{ padding: 20, textAlign: 'center', opacity: 0.5 }}>Carregando dados...</div>;
+    if (!gameState) return <div style={{ padding: 20, textAlign: 'center', opacity: 0.5 }}>Loading data...</div>;
 
-    const { name = 'Explorador', state } = gameState;
+    const { name = 'Explorer', state } = gameState;
     const { skills = {}, silver = 0, health = 100, maxHealth = 100, equipment = {} } = state || {};
 
     const charStats = state?.stats || { str: 0, agi: 0, int: 0 };
@@ -67,21 +69,21 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
                 ...gameState.calculatedStats,
                 hp: health, // HP atual vem do state
                 maxHp: gameState.calculatedStats.maxHP, // O servidor chama de maxHP
-                efficiency: {
-                    WOOD: (gameState.calculatedStats.int * 1) + ((skills.LUMBERJACK?.level || 1) * 0.5),
-                    ORE: (gameState.calculatedStats.int * 1) + ((skills.ORE_MINER?.level || 1) * 0.5),
-                    HIDE: (gameState.calculatedStats.int * 1) + ((skills.ANIMAL_SKINNER?.level || 1) * 0.5),
-                    FIBER: (gameState.calculatedStats.int * 1) + ((skills.FIBER_HARVESTER?.level || 1) * 0.5),
-                    FISH: (gameState.calculatedStats.int * 1) + ((skills.FISHING?.level || 1) * 0.5),
-                    PLANK: (gameState.calculatedStats.int * 1) + ((skills.PLANK_REFINER?.level || 1) * 0.5),
-                    METAL: (gameState.calculatedStats.int * 1) + ((skills.METAL_BAR_REFINER?.level || 1) * 0.5),
-                    LEATHER: (gameState.calculatedStats.int * 1) + ((skills.LEATHER_REFINER?.level || 1) * 0.5),
-                    CLOTH: (gameState.calculatedStats.int * 1) + ((skills.CLOTH_REFINER?.level || 1) * 0.5),
-                    WARRIOR: (gameState.calculatedStats.int * 1) + ((skills.WARRIOR_CRAFTER?.level || 1) * 0.5),
-                    HUNTER: (gameState.calculatedStats.int * 1) + ((skills.HUNTER_CRAFTER?.level || 1) * 0.5),
-                    MAGE: (gameState.calculatedStats.int * 1) + ((skills.MAGE_CRAFTER?.level || 1) * 0.5),
-                    COOKING: (gameState.calculatedStats.int * 1) + ((skills.COOKING?.level || 1) * 0.5),
-                    GLOBAL: gameState.calculatedStats.int * 1
+                efficiency: gameState.calculatedStats.efficiency || {
+                    WOOD: (skills.LUMBERJACK?.level || 1) * 1,
+                    ORE: (skills.ORE_MINER?.level || 1) * 1,
+                    HIDE: (skills.ANIMAL_SKINNER?.level || 1) * 1,
+                    FIBER: (skills.FIBER_HARVESTER?.level || 1) * 1,
+                    FISH: (skills.FISHING?.level || 1) * 1,
+                    PLANK: (skills.PLANK_REFINER?.level || 1) * 1,
+                    METAL: (skills.METAL_BAR_REFINER?.level || 1) * 1,
+                    LEATHER: (skills.LEATHER_REFINER?.level || 1) * 1,
+                    CLOTH: (skills.CLOTH_REFINER?.level || 1) * 1,
+                    WARRIOR: (skills.WARRIOR_CRAFTER?.level || 1) * 1,
+                    HUNTER: (skills.HUNTER_CRAFTER?.level || 1) * 1,
+                    MAGE: (skills.MAGE_CRAFTER?.level || 1) * 1,
+                    COOKING: (skills.COOKING?.level || 1) * 1,
+                    GLOBAL: 0
                 },
                 silverMultiplier: 1.0 + (gameState.calculatedStats.int * 0.02)
             };
@@ -98,20 +100,20 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
             agi: calculatedStats.agi,
             int: calculatedStats.int,
             efficiency: {
-                WOOD: (calculatedStats.int * 1) + ((skills.LUMBERJACK?.level || 1) * 0.5),
-                ORE: (calculatedStats.int * 1) + ((skills.ORE_MINER?.level || 1) * 0.5),
-                HIDE: (calculatedStats.int * 1) + ((skills.ANIMAL_SKINNER?.level || 1) * 0.5),
-                FIBER: (calculatedStats.int * 1) + ((skills.FIBER_HARVESTER?.level || 1) * 0.5),
-                FISH: (calculatedStats.int * 1) + ((skills.FISHING?.level || 1) * 0.5),
-                PLANK: (calculatedStats.int * 1) + ((skills.PLANK_REFINER?.level || 1) * 0.5),
-                METAL: (calculatedStats.int * 1) + ((skills.METAL_BAR_REFINER?.level || 1) * 0.5),
-                LEATHER: (calculatedStats.int * 1) + ((skills.LEATHER_REFINER?.level || 1) * 0.5),
-                CLOTH: (calculatedStats.int * 1) + ((skills.CLOTH_REFINER?.level || 1) * 0.5),
-                WARRIOR: (calculatedStats.int * 1) + ((skills.WARRIOR_CRAFTER?.level || 1) * 0.5),
-                HUNTER: (calculatedStats.int * 1) + ((skills.HUNTER_CRAFTER?.level || 1) * 0.5),
-                MAGE: (calculatedStats.int * 1) + ((skills.MAGE_CRAFTER?.level || 1) * 0.5),
-                COOKING: (calculatedStats.int * 1) + ((skills.COOKING?.level || 1) * 0.5),
-                GLOBAL: calculatedStats.int * 1
+                WOOD: (skills.LUMBERJACK?.level || 1) * 1,
+                ORE: (skills.ORE_MINER?.level || 1) * 1,
+                HIDE: (skills.ANIMAL_SKINNER?.level || 1) * 1,
+                FIBER: (skills.FIBER_HARVESTER?.level || 1) * 1,
+                FISH: (skills.FISHING?.level || 1) * 1,
+                PLANK: (skills.PLANK_REFINER?.level || 1) * 1,
+                METAL: (skills.METAL_BAR_REFINER?.level || 1) * 1,
+                LEATHER: (skills.LEATHER_REFINER?.level || 1) * 1,
+                CLOTH: (skills.CLOTH_REFINER?.level || 1) * 1,
+                WARRIOR: (skills.WARRIOR_CRAFTER?.level || 1) * 1,
+                HUNTER: (skills.HUNTER_CRAFTER?.level || 1) * 1,
+                MAGE: (skills.MAGE_CRAFTER?.level || 1) * 1,
+                COOKING: (skills.COOKING?.level || 1) * 1,
+                GLOBAL: 0
             },
             silverMultiplier: 1.0 + (calculatedStats.int * 0.02)
         };
@@ -133,10 +135,15 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
         return count > 0 ? Math.floor(totalIP / count) : 0;
     }, [equipment]);
 
-    const EquipmentSlot = ({ slot, icon, label, item, onClick, onShowInfo }) => {
+    const EquipmentSlot = ({ slot, icon, label, item: rawItem, onClick, onShowInfo }) => {
+        // Resolve item to ensure we have latest stats and rarity color (even for Normal items if logic changes, but mostly for _Q items)
+        const item = rawItem ? { ...resolveItem(rawItem.id), ...rawItem } : null;
+
         const tierColor = item ? getTierColor(item.tier) : 'rgba(255,255,255,0.05)';
-        // Se tiver qualidade, usa a cor da raridade, senão usa a cor do tier
-        const borderColor = item && item.rarityColor ? item.rarityColor : tierColor;
+
+        // Logic: STRICTLY use rarity color. Tier color does NOT affect border.
+        // Normal items (Quality 0) will use their defined rarity color (usually White/#fff).
+        const borderColor = item && item.rarityColor ? item.rarityColor : 'rgba(255,255,255,0.1)';
         const hasQuality = item && item.quality > 0;
 
         return (
@@ -144,7 +151,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
                 width: '64px',
                 height: '64px',
                 background: 'rgba(0,0,0,0.3)',
-                border: `2px solid ${item ? borderColor : 'rgba(255,255,255,0.05)'}`,
+                border: `2px solid ${borderColor}`,
                 borderRadius: '10px',
                 display: 'flex',
                 alignItems: 'center',
@@ -152,7 +159,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
                 position: 'relative',
                 cursor: 'pointer',
                 transition: '0.2s',
-                boxShadow: item ? `0 0 10px ${borderColor}${hasQuality ? '44' : '33'}` : 'none'
+                boxShadow: hasQuality ? `0 0 10px ${borderColor}66` : 'none' // Glow only for Rare items to reduce visual noise
             }}
                 onClick={onClick}
             >
@@ -198,19 +205,11 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
                         <PackageIcon type={item.type} size={24} />
                     </div>
                 ) : (
-                    <div style={{ opacity: 0.1, color: '#fff' }}>{icon}</div>
+                    <div style={{ opacity: 0.3, color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        {icon}
+                        <span style={{ fontSize: '0.5rem', fontWeight: 'bold', marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</span>
+                    </div>
                 )}
-                <div style={{
-                    position: 'absolute',
-                    bottom: '-18px',
-                    fontSize: '0.55rem',
-                    color: '#555',
-                    whiteSpace: 'nowrap',
-                    textTransform: 'uppercase',
-                    fontWeight: 'bold'
-                }}>
-                    {label}
-                </div>
             </div>
         );
     };
@@ -259,41 +258,55 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
                 {/* Barra de Vida - Sophisticated */}
                 <div style={{ marginBottom: '35px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', marginBottom: '8px', fontWeight: '900', letterSpacing: '1px', color: '#888' }}>
-                        <span>VITALIDADE</span>
-                        <span style={{ color: '#fff' }}>{health} / {maxHealth} HP</span>
+                        <span>VITALITY</span>
+                        <span style={{ color: '#fff' }}>{Math.floor(stats.hp)} / {Math.floor(stats.maxHp)} HP</span>
                     </div>
                     <div style={{ background: 'rgba(255, 0, 0, 0.05)', height: '6px', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255, 0, 0, 0.1)' }}>
                         <motion.div
                             initial={{ width: 0 }}
-                            animate={{ width: `${(health / maxHealth) * 100}%` }}
+                            animate={{ width: `${(stats.hp / stats.maxHp) * 100}%` }}
                             style={{ height: '100%', background: 'linear-gradient(90deg, #ff4d4d, #b30000)' }}
                         />
                     </div>
                 </div>
 
-                {/* Grid de Equipamentos - Thinner Slots */}
+                {/* Grid de Equipamentos - Compact Layout */}
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
-                    gap: isMobile ? '10px' : '30px',
+                    gridTemplateColumns: 'repeat(3, auto)',
+                    gap: isMobile ? '10px' : '15px',
                     marginBottom: '40px',
-                    justifyItems: 'center',
+                    justifyContent: 'center',
                     padding: isMobile ? '10px 5px' : '25px',
                 }}>
-                    <EquipmentSlot slot="cape" icon={<Layers size={24} />} label="CAPA" item={equipment.cape} onClick={() => setSelectedSlot('cape')} onShowInfo={onShowInfo} />
-                    <EquipmentSlot slot="helmet" icon={<User size={24} />} label="CABEÇA" item={equipment.helmet} onClick={() => setSelectedSlot('helmet')} onShowInfo={onShowInfo} />
-                    <EquipmentSlot slot="food" icon={<Apple size={24} />} label="COMIDA" item={equipment.food} onClick={() => setSelectedSlot('food')} onShowInfo={onShowInfo} />
+                    <EquipmentSlot slot="cape" icon={<Layers size={20} />} label="CAPE" item={equipment.cape} onClick={() => setSelectedSlot('cape')} onShowInfo={onShowInfo} />
+                    <EquipmentSlot slot="helmet" icon={<User size={20} />} label="HEAD" item={equipment.helmet} onClick={() => setSelectedSlot('helmet')} onShowInfo={onShowInfo} />
+                    <EquipmentSlot slot="food" icon={<Apple size={20} />} label="FOOD" item={equipment.food} onClick={() => setSelectedSlot('food')} onShowInfo={onShowInfo} />
 
-                    <EquipmentSlot slot="gloves" icon={<Shield size={24} />} label="MÃOS" item={equipment.gloves} onClick={() => setSelectedSlot('gloves')} onShowInfo={onShowInfo} />
-                    <EquipmentSlot slot="chest" icon={<Shield size={24} />} label="PEITO" item={equipment.chest} onClick={() => setSelectedSlot('chest')} onShowInfo={onShowInfo} />
-                    <EquipmentSlot slot="offHand" icon={<Target size={24} />} label="SECUND." item={equipment.offHand} onClick={() => setSelectedSlot('offHand')} onShowInfo={onShowInfo} />
+                    <EquipmentSlot slot="gloves" icon={<Shield size={20} />} label="HANDS" item={equipment.gloves} onClick={() => setSelectedSlot('gloves')} onShowInfo={onShowInfo} />
+                    <EquipmentSlot slot="chest" icon={<Shield size={20} />} label="CHEST" item={equipment.chest} onClick={() => setSelectedSlot('chest')} onShowInfo={onShowInfo} />
+                    <EquipmentSlot slot="offHand" icon={<Target size={20} />} label="OFF-HAND" item={equipment.offHand} onClick={() => setSelectedSlot('offHand')} onShowInfo={onShowInfo} />
 
-                    <EquipmentSlot slot="mainHand" icon={<Sword size={24} />} label="ARMA" item={equipment.mainHand} onClick={() => setSelectedSlot('mainHand')} onShowInfo={onShowInfo} />
-                    <EquipmentSlot slot="boots" icon={<Target size={24} />} label="PÉS" item={equipment.boots} onClick={() => setSelectedSlot('boots')} onShowInfo={onShowInfo} />
-                    <EquipmentSlot slot="cape" icon={<Layers size={24} />} label="CAPA" item={equipment.cape} onClick={() => setSelectedSlot('cape')} onShowInfo={onShowInfo} />
+                    <EquipmentSlot slot="mainHand" icon={<Sword size={20} />} label="WEAPON" item={equipment.mainHand} onClick={() => setSelectedSlot('mainHand')} onShowInfo={onShowInfo} />
+                    <EquipmentSlot slot="boots" icon={<Target size={20} />} label="FEET" item={equipment.boots} onClick={() => setSelectedSlot('boots')} onShowInfo={onShowInfo} />
+                    <div style={{
+                        width: '64px',
+                        height: '64px',
+                        border: '2px dashed rgba(255,255,255,0.1)',
+                        borderRadius: '12px',
+                        background: 'rgba(0,0,0,0.2)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'rgba(255,255,255,0.15)',
+                        cursor: 'not-allowed'
+                    }}>
+                        <div style={{ fontSize: '0.6rem', fontWeight: 'bold' }}>LOCKED</div>
+                    </div>
                 </div>
 
-                {/* Ferramentas de Coleta - New Section */}
+                {/* Gathering Tools - New Section */}
                 <div style={{ marginBottom: '40px' }}>
                     <h4 style={{ color: 'var(--accent, #d4af37)', fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '1rem', textAlign: 'center', letterSpacing: '1px' }}>Gathering Tools</h4>
                     <div style={{
@@ -325,7 +338,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
                     />
                 )}
 
-                {/* Atributos - Clean HUB Style */}
+                {/* Attributes - Clean HUB Style */}
                 <div style={{
                     display: 'flex',
                     justifyContent: 'space-around',
@@ -336,9 +349,9 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
                     border: '1px solid var(--border)'
                 }}>
                     {[
-                        { label: 'STR', value: stats.str, color: '#ff4444', desc: 'Cada ponto concede: +10 HP e +1 Dano Base' },
-                        { label: 'AGI', value: stats.agi, color: '#4caf50', desc: 'Cada ponto concede: +5 Velocidade de Ataque e +1 Dano Base' },
-                        { label: 'INT', value: stats.int, color: '#2196f3', desc: 'Cada ponto concede: +1% XP Global (Eficiência), +2% Prata e +2 Dano Base' }
+                        { label: 'STR', value: stats.str, color: '#ff4444', desc: 'Each point grants: +10 HP and +1 Base Damage' },
+                        { label: 'AGI', value: stats.agi, color: '#4caf50', desc: 'Each point grants: +5 Attack Speed and +1 Base Damage' },
+                        { label: 'INT', value: stats.int, color: '#2196f3', desc: 'Each point grants: +1% Global XP (Efficiency), +2% Silver and +2 Base Damage' }
                     ].map(stat => (
                         <div key={stat.label} style={{ textAlign: 'center' }}>
                             <div
@@ -355,65 +368,77 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
                     ))}
                 </div>
 
-                {/* Combat Stats - New Section */}
+                {/* Combat & Action Stats - New Section */}
                 <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-around',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(4, 1fr)',
+                    gap: '10px',
                     background: 'rgba(0,0,0,0.2)',
-                    padding: '15px',
+                    padding: '12px',
                     borderRadius: '12px',
                     marginBottom: '30px',
                     border: '1px solid var(--border)'
                 }}>
-                    <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.6rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}><Sword size={12} color="#ff4444" /> DAMAGE</div>
-                        <div style={{ fontSize: '1.2rem', fontWeight: '900', color: '#fff' }}>{Math.floor(stats.damage)}</div>
+                    <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'DAMAGE', value: Math.floor(stats.damage) })}>
+                        <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
+                            <Sword size={10} color="#ff4444" /> DMG
+                        </div>
+                        <div style={{ fontSize: '1rem', fontWeight: '900', color: '#fff' }}>{Math.floor(stats.damage)}</div>
                     </div>
-                    <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.6rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}><Shield size={12} color="#4caf50" /> DEFENSE</div>
-                        <div style={{ fontSize: '1.2rem', fontWeight: '900', color: '#fff' }}>{Math.floor(stats.defense)}</div>
+                    <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'DEFENSE', value: Math.floor(stats.defense) })}>
+                        <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
+                            <Shield size={10} color="#4caf50" /> DEF
+                        </div>
+                        <div style={{ fontSize: '1rem', fontWeight: '900', color: '#fff' }}>{Math.floor(stats.defense)}</div>
                     </div>
-                    <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.6rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}><Zap size={12} color="#2196f3" /> SPEED</div>
-                        <div style={{ fontSize: '1.2rem', fontWeight: '900', color: '#fff' }}>{Math.floor(stats.attackSpeed)}</div>
+                    <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'SPEED', value: Math.floor(stats.attackSpeed) })}>
+                        <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
+                            <Zap size={10} color="#2196f3" /> SPEED
+                        </div>
+                        <div style={{ fontSize: '1rem', fontWeight: '900', color: '#fff' }}>{Math.floor(stats.attackSpeed)}</div>
+                    </div>
+                    <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'EFFICIENCY', value: { total: `+${stats.efficiency.GLOBAL}%`, id: 'GLOBAL' } })}>
+                        <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
+                            <Star size={10} color="#d4af37" /> EFF
+                        </div>
+                        <div style={{ fontSize: '1rem', fontWeight: '900', color: '#d4af37' }}>+{stats.efficiency.GLOBAL}%</div>
                     </div>
                 </div>
 
-                {/* Eficiências - Sophisticated Sub-HUB */}
+                {breakdownModal && (
+                    <StatBreakdownModal
+                        statType={breakdownModal.type}
+                        value={typeof breakdownModal.value === 'object' ? breakdownModal.value.total : breakdownModal.value}
+                        stats={{ ...stats, skills }} // Pass skills for efficiency breakdown
+                        equipment={equipment}
+                        onClose={() => setBreakdownModal(null)}
+                    />
+                )}
+
+                {/* Efficiencies - Sophisticated Sub-HUB */}
                 <div style={{ borderTop: '1px solid var(--border)', paddingTop: '30px' }}>
-                    <h4 style={{ color: '#fff', fontSize: '0.7rem', fontWeight: '900', textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '2px', opacity: 0.8 }}>Eficácia de Habilidades</h4>
+                    <h4 style={{ color: '#fff', fontSize: '0.7rem', fontWeight: '900', textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '2px', opacity: 0.8 }}>Skill Efficiency</h4>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '10px' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '10px' }}>
-                            <EfficiencyCard title="Coleta" items={[
+                            <EfficiencyCard title="Gathering" items={[
                                 { id: 'WOOD', label: 'Woodcutting' },
                                 { id: 'ORE', label: 'Mining' },
                                 { id: 'HIDE', label: 'Skinning' },
                                 { id: 'FIBER', label: 'Fiber' },
                                 { id: 'FISH', label: 'Fishing' }
-                            ]} stats={stats} />
-                            <EfficiencyCard title="Refino" items={[
+                            ]} stats={stats} onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })} />
+                            <EfficiencyCard title="Refining" items={[
                                 { id: 'PLANK', label: 'Planks' },
                                 { id: 'METAL', label: 'Bars' },
                                 { id: 'LEATHER', label: 'Leathers' },
                                 { id: 'CLOTH', label: 'Cloth' }
-                            ]} stats={stats} />
-                            <EfficiencyCard title="Craft" items={[
+                            ]} stats={stats} onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })} />
+                            <EfficiencyCard title="Crafting" items={[
                                 { id: 'WARRIOR', label: 'Warrior Gear' },
                                 { id: 'HUNTER', label: 'Hunter Gear' },
                                 { id: 'MAGE', label: 'Mage Gear' },
                                 { id: 'COOKING', label: 'Cooking' }
-                            ]} stats={stats} />
-                        </div>
-                        {/* Global */}
-                        <div style={{
-                            marginTop: '15px',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            gap: '10px'
-                        }}>
-                            <span style={{ color: '#555', fontWeight: 'bold', fontSize: '0.65rem', letterSpacing: '1px', textTransform: 'uppercase' }}>Global Efficiency</span>
-                            <span style={{ color: '#d4af37', fontWeight: '900', fontSize: '1.2rem' }}>+{stats.efficiency.GLOBAL}%</span>
+                            ]} stats={stats} onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })} />
                         </div>
                     </div>
                 </div>
@@ -454,7 +479,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
                                 cursor: 'pointer'
                             }}
                         >
-                            Entendi
+                            Got it
                         </button>
                     </div>
                 </div>
@@ -463,13 +488,16 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
     );
 };
 
-const EfficiencyCard = ({ title, items, stats }) => (
+const EfficiencyCard = ({ title, items, stats, onShowBreakdown }) => (
     <div style={{ background: 'rgba(0,0,0,0.1)', padding: '15px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.02)' }}>
         <div style={{ fontSize: '0.55rem', color: '#d4af37', fontWeight: '900', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>{title}</div>
         {items.map(item => (
-            <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', marginBottom: '5px', opacity: 0.8 }}>
+            <div key={item.id}
+                style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', marginBottom: '5px', opacity: 0.8, cursor: 'pointer' }}
+                onClick={() => onShowBreakdown && onShowBreakdown(item.id, `+${stats.efficiency[item.id] || 0}%`)}
+            >
                 <span style={{ color: '#888' }}>{item.label}</span>
-                <span style={{ color: '#fff', fontWeight: 'bold' }}>+{stats.efficiency[item.id] || 0}%</span>
+                <span style={{ color: '#fff', fontWeight: 'bold' }}>+{stats.efficiency[item.id] || 0}% <Info size={10} color="#555" /></span>
             </div>
         ))}
     </div>

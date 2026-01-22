@@ -4,38 +4,38 @@ import { Trophy, Users, Star, Coins, Crown, ChevronDown } from 'lucide-react';
 
 const CATEGORIES = {
     GENERAL: {
-        label: 'GERAL',
+        label: 'GENERAL',
         options: [
-            { key: 'LEVEL', label: 'Nível Total' },
+            { key: 'LEVEL', label: 'Total Level' },
             { key: 'SILVER', label: 'Total Silver' }
         ]
     },
     GATHERING: {
-        label: 'COLETA',
+        label: 'GATHERING',
         options: [
-            { key: 'LUMBERJACK', label: 'Lenhador' },
-            { key: 'ORE_MINER', label: 'Mineração' },
-            { key: 'ANIMAL_SKINNER', label: 'Esfolamento' },
-            { key: 'FIBER_HARVESTER', label: 'Tecelagem' },
-            { key: 'FISHING', label: 'Pescaria' }
+            { key: 'LUMBERJACK', label: 'Lumberjack' },
+            { key: 'ORE_MINER', label: 'Mining' },
+            { key: 'ANIMAL_SKINNER', label: 'Skinning' },
+            { key: 'FIBER_HARVESTER', label: 'Harvesting' },
+            { key: 'FISHING', label: 'Fishing' }
         ]
     },
     REFINING: {
-        label: 'REFINO',
+        label: 'REFINING',
         options: [
-            { key: 'PLANK_REFINER', label: 'Madeira' },
-            { key: 'METAL_BAR_REFINER', label: 'Barras' },
-            { key: 'LEATHER_REFINER', label: 'Couro' },
-            { key: 'CLOTH_REFINER', label: 'Tecido' }
+            { key: 'PLANK_REFINER', label: 'Plank Refining' },
+            { key: 'METAL_BAR_REFINER', label: 'Smelting' },
+            { key: 'LEATHER_REFINER', label: 'Leather Refining' },
+            { key: 'CLOTH_REFINER', label: 'Cloth Refining' }
         ]
     },
     CRAFTING: {
-        label: 'FORJA',
+        label: 'CRAFTING',
         options: [
-            { key: 'WARRIOR_CRAFTER', label: 'Guerreiro' },
-            { key: 'HUNTER_CRAFTER', label: 'Caçador' },
-            { key: 'MAGE_CRAFTER', label: 'Mago' },
-            { key: 'COOKING', label: 'Cozinha' }
+            { key: 'WARRIOR_CRAFTER', label: 'Warrior' },
+            { key: 'HUNTER_CRAFTER', label: 'Hunter' },
+            { key: 'MAGE_CRAFTER', label: 'Mage' },
+            { key: 'COOKING', label: 'Cooking' }
         ]
     }
 };
@@ -108,8 +108,8 @@ const RankingPanel = ({ socket, isMobile }) => {
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                     <div>
-                        <h2 style={{ margin: 0, color: '#fff', fontSize: '1.4rem', fontWeight: '900', letterSpacing: '2px' }}>HALL DA FAMA</h2>
-                        <div style={{ fontSize: '0.6rem', color: '#555', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>Os melhores de Albion Lands</div>
+                        <h2 style={{ margin: 0, color: '#fff', fontSize: '1.4rem', fontWeight: '900', letterSpacing: '2px' }}>HALL OF FAME</h2>
+                        <div style={{ fontSize: '0.6rem', color: '#555', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>The best of Albion Lands</div>
                     </div>
                     <div style={{ padding: '10px 20px', background: 'rgba(212, 175, 55, 0.05)', borderRadius: '8px', border: '1px solid rgba(212, 175, 55, 0.1)', display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Trophy size={18} color="#d4af37" />
@@ -171,7 +171,7 @@ const RankingPanel = ({ socket, isMobile }) => {
                     {loading ? (
                         <div style={{ textAlign: 'center', padding: '100px 0', opacity: 0.3 }}>
                             <div className="loading-spinner" />
-                            <p style={{ marginTop: '20px', fontSize: '0.8rem', fontWeight: 'bold', letterSpacing: '1px' }}>BUSCANDO LENDA...</p>
+                            <p style={{ marginTop: '20px', fontSize: '0.8rem', fontWeight: 'bold', letterSpacing: '1px' }}>SEARCHING FOR LEGENDS...</p>
                         </div>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

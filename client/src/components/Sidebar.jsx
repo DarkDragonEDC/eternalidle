@@ -48,58 +48,58 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
         const xp = skill.xp || 0;
         const nextLevelXp = Math.floor(100 * Math.pow(1.15, level - 1));
         const progress = Math.min(100, (xp / nextLevelXp) * 100);
-        const remainingXp = nextLevelXp - xp;
 
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0px' }}>
-                <div style={{ fontSize: '0.6rem', fontWeight: '900', color: '#d4af37' }}>
-                    Lv {level} <span style={{ color: '#666', fontSize: '0.5rem' }}>({Math.floor(progress)}%)</span>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px', minWidth: '45px' }}>
+                <div style={{ fontSize: '0.6rem', fontWeight: '900', color: '#d4af37', display: 'flex', gap: '4px', alignItems: 'center' }}>
+                    <span style={{ opacity: 0.6, fontSize: '0.45rem' }}>LV</span>
+                    {level}
                 </div>
-                <div style={{ width: '40px', height: '2px', background: 'rgba(255,255,255,0.05)', borderRadius: '1px', overflow: 'hidden', marginTop: '3px' }}>
-                    <div style={{ width: `${progress}%`, height: '100%', background: '#d4af37' }} />
+                <div style={{ width: '40px', height: '2px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
+                    <div style={{ width: `${progress}%`, height: '100%', background: 'linear-gradient(90deg, #d4af37, #f2d06b)', boxShadow: '0 0 5px rgba(212, 175, 55, 0.3)' }} />
                 </div>
             </div>
         );
     };
 
     const menuItems = [
-        { id: 'profile', label: 'Perfil', icon: <User size={18} /> },
-        { id: 'inventory', label: 'Inventário', icon: <Package size={18} /> },
+        { id: 'profile', label: 'Profile', icon: <User size={18} /> },
+        { id: 'inventory', label: 'Inventory', icon: <Package size={18} /> },
         {
             id: 'gathering',
-            label: 'Coleta',
+            label: 'Gathering',
             icon: <Pickaxe size={18} />,
             children: [
-                { id: 'WOOD', label: 'Lenhador', skill: 'LUMBERJACK' },
-                { id: 'ORE', label: 'Mineração', skill: 'ORE_MINER' },
-                { id: 'HIDE', label: 'Esfolamento', skill: 'ANIMAL_SKINNER' },
-                { id: 'FIBER', label: 'Tecelagem', skill: 'FIBER_HARVESTER' },
-                { id: 'FISH', label: 'Pescaria', skill: 'FISHING' },
+                { id: 'WOOD', label: 'Lumberjack', skill: 'LUMBERJACK' },
+                { id: 'ORE', label: 'Mining', skill: 'ORE_MINER' },
+                { id: 'HIDE', label: 'Skinning', skill: 'ANIMAL_SKINNER' },
+                { id: 'FIBER', label: 'Harvesting', skill: 'FIBER_HARVESTER' },
+                { id: 'FISH', label: 'Fishing', skill: 'FISHING' },
             ]
         },
         {
             id: 'refining',
-            label: 'Refino',
+            label: 'Refining',
             icon: <Box size={18} />,
             children: [
-                { id: 'PLANK', label: 'Serraria', skill: 'PLANK_REFINER' },
-                { id: 'BAR', label: 'Fundição', skill: 'METAL_BAR_REFINER' },
-                { id: 'LEATHER', label: 'Curtume', skill: 'LEATHER_REFINER' },
-                { id: 'CLOTH', label: 'Tear', skill: 'CLOTH_REFINER' },
+                { id: 'PLANK', label: 'Lumber Mill', skill: 'PLANK_REFINER' },
+                { id: 'BAR', label: 'Smelting', skill: 'METAL_BAR_REFINER' },
+                { id: 'LEATHER', label: 'Tannery', skill: 'LEATHER_REFINER' },
+                { id: 'CLOTH', label: 'Loom', skill: 'CLOTH_REFINER' },
             ]
         },
         {
             id: 'crafting',
-            label: 'Forja',
+            label: 'Crafting',
             icon: <Hammer size={18} />,
             children: [
-                { id: 'WARRIORS_FORGE', label: 'Forja de Guerreiro', skill: 'WARRIOR_CRAFTER' },
-                { id: 'HUNTERS_LODGE', label: 'Cabana de Caçador', skill: 'HUNTER_CRAFTER' },
-                { id: 'MAGES_TOWER', label: 'Torre de Mago', skill: 'MAGE_CRAFTER' },
-                { id: 'COOKING_STATION', label: 'Cozinha', skill: 'COOKING' },
+                { id: 'WARRIORS_FORGE', label: "Warrior's Forge", skill: 'WARRIOR_CRAFTER' },
+                { id: 'HUNTERS_LODGE', label: "Hunter's Lodge", skill: 'HUNTER_CRAFTER' },
+                { id: 'MAGES_TOWER', label: "Mage's Tower", skill: 'MAGE_CRAFTER' },
+                { id: 'COOKING_STATION', label: 'Kitchen', skill: 'COOKING' },
             ]
         },
-        { id: 'combat', label: 'Combate', icon: <Sword size={18} />, skill: 'COMBAT' },
+        { id: 'combat', label: 'Combat', icon: <Sword size={18} />, skill: 'COMBAT' },
         { id: 'dungeon', label: 'Dungeons', icon: <Castle size={18} />, skill: 'DUNGEONEERING' },
         { id: 'ranking', label: 'Ranking', icon: <Trophy size={18} /> },
     ];
@@ -138,126 +138,129 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                     <ChevronRight size={20} />
                 </button>
             )}
-            <div style={{
-                margin: '20px 10px 5px 10px',
-                padding: '8px',
-                background: 'rgba(212, 175, 55, 0.03)',
-                border: '1px solid rgba(212, 175, 55, 0.1)',
-                borderRadius: '6px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px'
-            }}>
-                <Coins size={14} color="#d4af37" />
-                <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#d4af37', fontFamily: 'monospace' }}>
-                    {silver.toLocaleString()}
-                </span>
-            </div>
 
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1fr',
-                gap: '5px',
-                padding: '0 10px',
-                marginBottom: '10px'
-            }}>
-                {[
-                    { id: 'profile', label: 'PERFIL', icon: <User size={14} /> },
-                    { id: 'inventory', label: 'MOCHILA', icon: <Package size={14} /> },
-                    { id: 'market', label: 'MERCADO', icon: <Tag size={14} /> }
-                ].map(item => (
-                    <button
-                        key={item.id}
-                        onClick={() => {
-                            setActiveTab(item.id);
-                            if (isMobile) onClose();
-                        }}
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '4px',
-                            padding: '6px 0',
-                            borderRadius: '6px',
-                            border: '1px solid',
-                            borderColor: activeTab === item.id ? 'var(--border-active)' : 'transparent',
-                            background: activeTab === item.id ? 'var(--accent-soft)' : 'rgba(255,255,255,0.01)',
-                            color: activeTab === item.id ? '#d4af37' : '#666',
-                        }}
-                    >
-                        {item.icon}
-                        <span style={{ fontSize: '0.6rem', fontWeight: '900', letterSpacing: '0.5px' }}>{item.label}</span>
-                    </button>
-                ))}
-            </div>
-
-            <div className="scroll-container" style={{ padding: '2px 8px', flex: 1 }}>
-                {menuItems.slice(2).map(item => (
-                    <div key={item.id} style={{ marginBottom: '1px' }}>
+            <div style={{ padding: '20px 15px 10px 15px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                    {[
+                        { id: 'profile', label: 'PROFILE', icon: <User size={14} /> },
+                        { id: 'inventory', label: 'BAG', icon: <Package size={14} /> },
+                        { id: 'market', label: 'TRADE', icon: <Tag size={14} /> }
+                    ].map(item => (
                         <button
+                            key={item.id}
                             onClick={() => {
-                                if (item.children) {
-                                    toggleExpand(item.id);
-                                } else {
-                                    setActiveTab(item.id);
-                                    if (isMobile) onClose();
-                                }
+                                setActiveTab(item.id);
+                                if (isMobile) onClose();
                             }}
                             style={{
-                                width: '100%',
-                                padding: '8px 10px',
                                 display: 'flex',
+                                flexDirection: 'column',
                                 alignItems: 'center',
-                                gap: '8px',
-                                background: activeTab === item.id ? 'var(--accent-soft)' : 'transparent',
-                                borderRadius: '6px',
-                                color: activeTab === item.id ? '#fff' : '#666',
-                                textAlign: 'left'
+                                padding: '10px 0',
+                                borderRadius: '10px',
+                                border: '1px solid',
+                                borderColor: activeTab === item.id ? 'rgba(212, 175, 55, 0.3)' : 'rgba(255,255,255,0.05)',
+                                background: activeTab === item.id ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255,255,255,0.02)',
+                                color: activeTab === item.id ? '#d4af37' : '#888',
+                                transition: '0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                                cursor: 'pointer'
                             }}
                         >
-                            <span style={{ color: activeTab === item.id ? '#d4af37' : '#444' }}>{item.icon}</span>
-                            <span style={{ flex: 1, fontWeight: activeTab === item.id ? '700' : '400', fontSize: '0.95rem', letterSpacing: '0.3px' }}>{item.label}</span>
-
-                            {item.skill && !item.children && <SkillInfo skillKey={item.skill} />}
-                            {item.children && (
-                                <span style={{ opacity: 0.3 }}>
-                                    {expanded[item.id] ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-                                </span>
-                            )}
+                            {item.icon}
+                            <span style={{ fontSize: '0.55rem', fontWeight: '900', marginTop: '4px', letterSpacing: '1px' }}>{item.label}</span>
                         </button>
+                    ))}
+                </div>
+            </div>
 
-                        {item.children && expanded[item.id] && (
-                            <div style={{ paddingLeft: '15px', marginTop: '1px', display: 'flex', flexDirection: 'column', gap: '1px' }}>
-                                {item.children.map(child => (
-                                    <button
-                                        key={child.id}
-                                        onClick={() => {
+            <div className="scroll-container" style={{ padding: '0 15px', flex: 1 }}>
+                <div style={{ color: '#444', fontSize: '0.55rem', fontWeight: '900', letterSpacing: '2px', padding: '15px 0 8px 10px', borderBottom: '1px solid rgba(255,255,255,0.02)', marginBottom: '10px' }}>ACTIVITIES</div>
+
+                {menuItems.slice(2).map(item => {
+                    const isMainItemActive = activeTab === item.id;
+                    const isGroupHeader = !!item.children;
+
+                    // Header para separar o Combate/Adventure do resto se necessário
+                    const showAdventureHeader = item.id === 'combat';
+
+                    return (
+                        <React.Fragment key={item.id}>
+                            {showAdventureHeader && (
+                                <div style={{ color: '#444', fontSize: '0.55rem', fontWeight: '900', letterSpacing: '2px', padding: '25px 0 8px 10px', borderBottom: '1px solid rgba(255,255,255,0.02)', marginBottom: '10px' }}>WORLD</div>
+                            )}
+
+                            <div style={{ marginBottom: '4px' }}>
+                                <button
+                                    onClick={() => {
+                                        if (isGroupHeader) {
+                                            toggleExpand(item.id);
+                                        } else {
                                             setActiveTab(item.id);
-                                            setActiveCategory(child.id);
                                             if (isMobile) onClose();
-                                        }}
-                                        style={{
-                                            width: '100%',
-                                            padding: '5px 8px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'space-between',
-                                            background: (activeTab === item.id && activeCategory === child.id) ? 'rgba(255, 255, 255, 0.03)' : 'transparent',
-                                            borderRadius: '4px',
-                                            color: (activeTab === item.id && activeCategory === child.id) ? '#d4af37' : '#555',
-                                            fontSize: '0.9rem'
-                                        }}
-                                    >
-                                        <span style={{ fontWeight: (activeTab === item.id && activeCategory === child.id) ? '600' : '400' }}>{child.label}</span>
-                                        {child.skill && <SkillInfo skillKey={child.skill} />}
-                                    </button>
-                                ))}
+                                        }
+                                    }}
+                                    style={{
+                                        width: '100%',
+                                        padding: '10px 12px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        background: isMainItemActive ? 'linear-gradient(90deg, rgba(212, 175, 55, 0.1), transparent)' : 'transparent',
+                                        borderRadius: '8px',
+                                        color: isMainItemActive ? '#fff' : '#888',
+                                        textAlign: 'left',
+                                        border: '1px solid',
+                                        borderColor: isMainItemActive ? 'rgba(212, 175, 55, 0.2)' : 'transparent',
+                                        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                                    }}
+                                >
+                                    <span style={{ color: isMainItemActive ? '#d4af37' : '#555', transition: '0.2s' }}>{item.icon}</span>
+                                    <span style={{ flex: 1, fontWeight: isMainItemActive ? '700' : '500', fontSize: '0.85rem', letterSpacing: '0.3px' }}>{item.label}</span>
+
+                                    {item.skill && !item.children && <SkillInfo skillKey={item.skill} />}
+                                    {isGroupHeader && (
+                                        <span style={{ opacity: 0.3, transform: expanded[item.id] ? 'rotate(180deg)' : 'rotate(0deg)', transition: '0.3s' }}>
+                                            <ChevronDown size={14} />
+                                        </span>
+                                    )}
+                                </button>
+
+                                {isGroupHeader && expanded[item.id] && (
+                                    <div style={{ paddingLeft: '28px', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '4px', borderLeft: '1px solid rgba(212, 175, 55, 0.1)', marginLeft: '20px' }}>
+                                        {item.children.map(child => {
+                                            const isChildActive = activeTab === item.id && activeCategory === child.id;
+                                            return (
+                                                <button
+                                                    key={child.id}
+                                                    onClick={() => {
+                                                        setActiveTab(item.id);
+                                                        setActiveCategory(child.id);
+                                                        if (isMobile) onClose();
+                                                    }}
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '6px 10px',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'space-between',
+                                                        background: isChildActive ? 'rgba(212, 175, 55, 0.05)' : 'transparent',
+                                                        borderRadius: '6px',
+                                                        color: isChildActive ? '#d4af37' : '#666',
+                                                        fontSize: '0.8rem',
+                                                        transition: '0.2s'
+                                                    }}
+                                                >
+                                                    <span style={{ fontWeight: isChildActive ? '700' : '400' }}>{child.label}</span>
+                                                    {child.skill && <SkillInfo skillKey={child.skill} />}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
-                ))}
+                        </React.Fragment>
+                    );
+                })}
             </div>
 
             {/* Footer Buttons */}
@@ -266,23 +269,26 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                     onClick={onSwitchCharacter}
                     style={{
                         width: '100%',
-                        padding: '10px',
-                        background: 'rgba(255,255,255,0.03)',
+                        padding: '12px',
+                        background: 'rgba(255,255,255,0.02)',
                         border: '1px solid rgba(255,255,255,0.05)',
-                        borderRadius: '6px',
-                        color: '#888',
-                        fontSize: '0.7rem',
+                        borderRadius: '10px',
+                        color: '#666',
+                        fontSize: '0.65rem',
                         fontWeight: '900',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '8px',
                         cursor: 'pointer',
-                        transition: '0.2s'
+                        transition: '0.2s',
+                        letterSpacing: '1px'
                     }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#888'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.color = '#666'; }}
                 >
                     <Users size={14} />
-                    TROCAR PERSONAGEM
+                    SWITCH CHARACTER
                 </button>
                 <div style={{ textAlign: 'center', fontSize: '0.55rem', color: '#333', marginTop: '10px', fontWeight: 'bold' }}>
                     v2.0.1

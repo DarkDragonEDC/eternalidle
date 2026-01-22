@@ -1,41 +1,82 @@
 import React, { useState, useEffect } from 'react';
 import { Play, CheckCircle, Clock, Square, Zap, Hammer, Pickaxe, Box, Loader, Hourglass, Sword, Skull, Heart, Apple } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { resolveItem, formatItemId } from '@shared/items';
 
-const ActivityWidget = ({ gameState, onStop, socket, onNavigate, serverTimeOffset = 0 }) => { // Changed onClaim to onStop
+const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serverTimeOffset = 0, skillProgress = 0 }) => { // Added skillProgress prop
     const [isOpen, setIsOpen] = useState(false);
     const [elapsed, setElapsed] = useState(0);
     const [combatElapsed, setCombatElapsed] = useState(0);
+    const [syncedElapsed, setSyncedElapsed] = useState(0);
 
     const activity = gameState?.current_activity;
     const combat = gameState?.state?.combat;
 
-    // Timer para Atividade
+    // Derived stats
+    const initialQty = activity?.initial_quantity || activity?.actions_remaining || 1;
+    const remainingQty = activity?.actions_remaining || 0;
+    const doneQty = Math.max(0, initialQty - remainingQty);
+    const timePerAction = activity?.time_per_action || 3;
+
+    // Timer para Atividade (Legacy/Fallback)
     useEffect(() => {
         if (!activity || !gameState?.activity_started_at) return;
-
         const interval = setInterval(() => {
             const start = new Date(gameState?.activity_started_at).getTime();
             const now = Date.now() + serverTimeOffset;
             setElapsed((now - start) / 1000);
         }, 100);
-
         return () => clearInterval(interval);
-    }, [activity, gameState?.activity_started_at]);
+    }, [activity, gameState?.activity_started_at, serverTimeOffset]);
 
     // Timer para Combate
     useEffect(() => {
         if (!combat) return;
-
-        // Se started_at não existir no combat, usa data atual (fallback)
         const startTime = combat.started_at ? new Date(combat.started_at).getTime() : Date.now();
-
         const interval = setInterval(() => {
             setCombatElapsed(Math.floor((Date.now() - startTime) / 1000));
         }, 1000);
-
         return () => clearInterval(interval);
     }, [combat, combat?.started_at]);
+
+    // Accurate Time Calculation using next_action_at
+    useEffect(() => {
+        if (!activity) return;
+
+        const range = (ms) => Math.max(0, Math.min(ms, timePerAction * 1000));
+
+        const updateTimer = () => {
+            const now = Date.now() + serverTimeOffset;
+            let currentItemProgressMs = 0;
+
+            if (activity.next_action_at) {
+                const endTime = new Date(activity.next_action_at).getTime();
+                const timeRemaining = endTime - now;
+                currentItemProgressMs = range((timePerAction * 1000) - timeRemaining);
+            } else if (gameState?.activity_started_at) {
+                const startTime = new Date(gameState.activity_started_at).getTime();
+                currentItemProgressMs = range(now - startTime);
+            }
+
+            const totalMs = (doneQty * timePerAction * 1000) + currentItemProgressMs;
+            setSyncedElapsed(totalMs / 1000);
+        };
+
+        const interval = setInterval(updateTimer, 50);
+        updateTimer();
+
+        return () => clearInterval(interval);
+    }, [activity, gameState?.activity_started_at, doneQty, timePerAction, serverTimeOffset]);
+
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' && isOpen) {
+                setIsOpen(false);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen]);
 
     // Se não há nada ativo, não renderiza
     if (!activity && !combat) return null;
@@ -44,19 +85,10 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, serverTimeOffse
     const isRefining = activity?.type === 'REFINING';
     const isCrafting = activity?.type === 'CRAFTING';
 
-    // Stats Calculations (Activity)
-    const initialQty = activity?.initial_quantity || activity?.actions_remaining || 1;
-    const remainingQty = activity?.actions_remaining || 0;
-    const doneQty = Math.max(0, initialQty - remainingQty);
-    const timePerAction = activity?.time_per_action || 3;
-
-    // Tempo total decorrido considerando itens já feitos + tempo no item atual
-    const totalElapsed = (doneQty * timePerAction) + (elapsed % timePerAction);
     const totalDuration = initialQty * timePerAction;
-    const totalProgress = Math.min(100, (totalElapsed / totalDuration) * 100);
-    const remainingSeconds = Math.max(0, totalDuration - totalElapsed);
-
-    // Formatar Tempo (MM:SS)
+    const totalProgress = Math.min(100, (syncedElapsed / totalDuration) * 100);
+    const remainingSeconds = Math.max(0, totalDuration - syncedElapsed);
+    const skillProgressCapped = Math.min(100, ((syncedElapsed % timePerAction) / timePerAction) * 100);
     // Formatar Tempo (HH:MM:SS)
     const formatTime = (secs) => {
         const h = Math.floor(secs / 3600);
@@ -73,10 +105,10 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, serverTimeOffse
     };
 
     const getActionName = () => {
-        if (isGathering) return 'COLETANDO';
-        if (isRefining) return 'REFINANDO';
+        if (isGathering) return 'GATHERING';
+        if (isRefining) return 'REFINING';
         if (isCrafting) return 'CRAFTING';
-        return 'TRABALHANDO';
+        return 'WORKING';
     };
 
     const stopCombat = () => {
@@ -91,8 +123,8 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, serverTimeOffse
                 onClick={() => setIsOpen(!isOpen)}
                 style={{
                     position: 'fixed',
-                    bottom: '80px',
-                    right: '30px',
+                    bottom: '30px',
+                    right: isMobile ? '20px' : '30px',
                     width: '64px',
                     height: '64px',
                     borderRadius: '16px',
@@ -169,8 +201,8 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, serverTimeOffse
                         />
                         <div style={{
                             position: 'fixed',
-                            bottom: '160px',
-                            right: '30px',
+                            bottom: '110px',
+                            right: isMobile ? '20px' : '30px',
                             display: 'flex',
                             flexDirection: 'column',
                             gap: '15px',
@@ -186,23 +218,23 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, serverTimeOffse
                                     exit={{ opacity: 0, x: 20, scale: 0.95 }}
                                     onClick={() => onNavigate && onNavigate(activity.item_id)}
                                     style={{
-                                        width: '320px',
+                                        width: '280px',
                                         maxWidth: 'calc(100vw - 60px)',
                                         background: 'rgba(15, 20, 30, 0.95)',
                                         backdropFilter: 'blur(20px)',
                                         border: '1px solid rgba(212, 175, 55, 0.2)',
-                                        borderRadius: '16px',
-                                        padding: '20px',
-                                        boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+                                        borderRadius: '12px',
+                                        padding: '12px',
+                                        boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
                                         overflow: 'hidden',
-                                        cursor: 'pointer' // Indicate clickable
+                                        cursor: 'pointer'
                                     }}
                                 >
                                     {/* Header Activity */}
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                             <div style={{
-                                                width: '40px', height: '40px', borderRadius: '10px',
+                                                width: '32px', height: '32px', borderRadius: '8px',
                                                 background: 'rgba(212, 175, 55, 0.1)',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                 border: '1px solid rgba(212, 175, 55, 0.2)'
@@ -211,18 +243,18 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, serverTimeOffse
                                                     animate={{ rotate: isRefining || isCrafting ? 360 : 0, y: isGathering ? [0, -2, 0] : 0 }}
                                                     transition={{ repeat: Infinity, duration: isGathering ? 0.5 : 2, ease: "linear" }}
                                                 >
-                                                    {getActivityIcon()}
+                                                    {React.cloneElement(getActivityIcon(), { size: 18 })}
                                                 </motion.div>
                                             </div>
                                             <div>
-                                                <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: '900', letterSpacing: '1px' }}>ATIVIDADE ATUAL</div>
-                                                <div style={{ fontSize: '0.9rem', color: '#d4af37', fontWeight: '900', letterSpacing: '0.5px' }}>{getActionName()}</div>
+                                                <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: '900', letterSpacing: '0.5px' }}>CURRENT ACTIVITY</div>
+                                                <div style={{ fontSize: '0.8rem', color: '#d4af37', fontWeight: '900' }}>{getActionName()}</div>
                                             </div>
                                         </div>
                                         <div style={{ textAlign: 'right' }}>
-                                            <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: 'bold' }}>DECORRIDO</div>
-                                            <div style={{ fontFamily: 'monospace', fontSize: '1rem', color: '#fff', fontWeight: 'bold' }}>
-                                                {formatTime(elapsed)}
+                                            <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold' }}>ELAPSED</div>
+                                            <div style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: '#fff', fontWeight: 'bold' }}>
+                                                {formatTime(syncedElapsed)}
                                             </div>
                                         </div>
                                     </div>
@@ -230,24 +262,36 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, serverTimeOffse
                                     {/* Info Activity */}
                                     <div style={{
                                         background: 'rgba(255,255,255,0.03)',
-                                        borderRadius: '8px',
-                                        padding: '10px',
-                                        marginBottom: '15px',
+                                        borderRadius: '6px',
+                                        padding: '8px',
+                                        marginBottom: '10px',
                                         border: '1px solid rgba(255,255,255,0.05)'
                                     }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
-                                            <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.9rem' }}>{activity.item_id || 'Item Desconhecido'}</span>
-                                            <span style={{ color: '#d4af37', fontWeight: 'bold', fontSize: '0.9rem' }}>{doneQty} <span style={{ fontSize: '0.7rem', color: '#666' }}>/ {initialQty}</span></span>
+                                            <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.8rem' }}>
+                                                {(() => {
+                                                    const item = resolveItem(activity.item_id);
+                                                    if (item) return `T${item.tier} ${item.name}`;
+
+                                                    // Fallback: try to extract tier from ID (e.g. T2_FISH)
+                                                    const match = activity.item_id?.match(/^T(\d+)_/);
+                                                    const tierPart = match ? `T${match[1]} ` : '';
+                                                    const namePart = formatItemId(activity.item_id);
+
+                                                    return formatItemId(activity.item_id) || 'Unknown Item';
+                                                })()}
+                                            </span>
+                                            <span style={{ color: '#d4af37', fontWeight: 'bold', fontSize: '0.8rem' }}>{doneQty} <span style={{ fontSize: '0.6rem', color: '#666' }}>/ {initialQty}</span></span>
                                         </div>
 
                                         {/* Barra de Progresso do Item Atual */}
                                         <div style={{ height: '6px', background: 'rgba(0,0,0,0.5)', borderRadius: '3px', overflow: 'hidden', position: 'relative', marginBottom: '4px' }}>
                                             <div
                                                 style={{
-                                                    width: `${Math.max(0, Math.min(100, (1 - ((Number(activity?.next_action_at) - (Date.now() + serverTimeOffset)) / (timePerAction * 1000))) * 100))}% `,
+                                                    width: `${skillProgressCapped}%`,
                                                     height: '100%',
                                                     background: '#d4af37',
-                                                    transition: 'width 0.1s linear'
+                                                    transition: 'width 0.3s ease-out'
                                                 }}
                                             />
                                         </div>
@@ -256,10 +300,10 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, serverTimeOffse
                                         <div style={{ height: '2px', background: 'rgba(255,255,255,0.05)', borderRadius: '1px', overflow: 'hidden', position: 'relative' }}>
                                             <div style={{ width: `${totalProgress}% `, height: '100%', background: 'rgba(212, 175, 55, 0.4)', transition: 'width 0.3s' }} />
                                         </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '0.65rem', color: '#666' }}>
-                                            <span>{doneQty} concluídos</span>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '0.55rem', color: '#666' }}>
+                                            <span>{doneQty} completed</span>
                                             <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                                <Hourglass size={8} /> Restam ~{formatTime(remainingSeconds)}
+                                                <Hourglass size={8} /> ~{formatTime(remainingSeconds)}
                                             </span>
                                         </div>
                                     </div>
@@ -275,21 +319,21 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, serverTimeOffse
                                             background: 'rgba(212, 175, 55, 0.1)',
                                             border: '1px solid rgba(212, 175, 55, 0.3)',
                                             color: '#d4af37',
-                                            padding: '12px',
-                                            borderRadius: '8px',
+                                            padding: '8px',
+                                            borderRadius: '6px',
                                             cursor: 'pointer',
                                             fontWeight: '900',
-                                            fontSize: '0.8rem',
+                                            fontSize: '0.7rem',
                                             letterSpacing: '1px',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            gap: '8px',
+                                            gap: '6px',
                                             transition: '0.2s'
                                         }}
                                     >
                                         <Square size={14} fill="#d4af37" />
-                                        PARAR
+                                        STOP
                                     </button>
                                 </motion.div>
                             )}
@@ -307,23 +351,23 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, serverTimeOffse
                                         }
                                     }}
                                     style={{
-                                        width: '320px',
+                                        width: '280px',
                                         maxWidth: 'calc(100vw - 60px)',
                                         background: 'rgba(20, 10, 10, 0.95)',
                                         backdropFilter: 'blur(20px)',
                                         border: '1px solid rgba(255, 68, 68, 0.3)',
-                                        borderRadius: '16px',
-                                        padding: '20px',
-                                        boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+                                        borderRadius: '12px',
+                                        padding: '12px',
+                                        boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
                                         overflow: 'hidden',
                                         cursor: 'pointer'
                                     }}
                                 >
                                     {/* Header Combat */}
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                             <div style={{
-                                                width: '40px', height: '40px', borderRadius: '10px',
+                                                width: '32px', height: '32px', borderRadius: '8px',
                                                 background: 'rgba(255, 68, 68, 0.1)',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                 border: '1px solid rgba(255, 68, 68, 0.3)',
@@ -333,13 +377,13 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, serverTimeOffse
                                                     animate={{ rotate: [-10, 10, -10], scale: [1, 1.1, 1] }}
                                                     transition={{ repeat: Infinity, duration: 1 }}
                                                 >
-                                                    <Sword size={24} color="#ff4444" />
+                                                    <Sword size={18} color="#ff4444" />
                                                 </motion.div>
                                                 {gameState?.state?.equipment?.food?.amount > 0 && (
                                                     <div style={{
-                                                        position: 'absolute', top: -5, right: -5,
-                                                        background: '#ff4d4d', color: '#fff', fontSize: '0.55rem',
-                                                        fontWeight: '900', padding: '1px 4px', borderRadius: '4px',
+                                                        position: 'absolute', top: -4, right: -4,
+                                                        background: '#ff4d4d', color: '#fff', fontSize: '0.45rem',
+                                                        fontWeight: '900', padding: '1px 3px', borderRadius: '3px',
                                                         border: '1px solid rgba(255,255,255,0.2)'
                                                     }}>
                                                         x{gameState.state.equipment.food.amount}
@@ -347,13 +391,16 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, serverTimeOffse
                                                 )}
                                             </div>
                                             <div>
-                                                <div style={{ fontSize: '0.65rem', color: '#ff8888', fontWeight: '900', letterSpacing: '1px' }}>COMBATE ATIVO</div>
-                                                <div style={{ fontSize: '0.9rem', color: '#ff4444', fontWeight: '900', letterSpacing: '0.5px' }}>{combat.mobName}</div>
+                                                <div style={{ fontSize: '0.55rem', color: '#ff8888', fontWeight: '900', letterSpacing: '0.5px', display: 'flex', gap: '8px' }}>
+                                                    <span>ACTIVE COMBAT</span>
+                                                    {combat.kills > 0 && <span style={{ color: '#fff' }}>• {combat.kills} KILLS</span>}
+                                                </div>
+                                                <div style={{ fontSize: '0.8rem', color: '#ff4444', fontWeight: '900' }}>{combat.mobName}</div>
                                             </div>
                                         </div>
                                         <div style={{ textAlign: 'right' }}>
-                                            <div style={{ fontSize: '0.65rem', color: '#ff8888', fontWeight: 'bold' }}>DURAÇÃO</div>
-                                            <div style={{ fontFamily: 'monospace', fontSize: '1rem', color: '#fff', fontWeight: 'bold' }}>
+                                            <div style={{ fontSize: '0.55rem', color: '#ff8888', fontWeight: 'bold' }}>DURATION</div>
+                                            <div style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: '#fff', fontWeight: 'bold' }}>
                                                 {formatTime(combatElapsed)}
                                             </div>
                                         </div>
@@ -362,15 +409,15 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, serverTimeOffse
                                     {/* Info Combat */}
                                     <div style={{
                                         background: 'rgba(0,0,0,0.3)',
-                                        borderRadius: '8px',
-                                        padding: '10px',
-                                        marginBottom: '15px',
+                                        borderRadius: '6px',
+                                        padding: '8px',
+                                        marginBottom: '10px',
                                         border: '1px solid rgba(255, 68, 68, 0.1)'
                                     }}>
                                         {/* Barra HP Mob */}
                                         <div style={{ marginBottom: '8px' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-                                                <span style={{ fontSize: '0.7rem', color: '#ff4444', fontWeight: 'bold' }}>Inimigo</span>
+                                                <span style={{ fontSize: '0.7rem', color: '#ff4444', fontWeight: 'bold' }}>Enemy</span>
                                                 <span style={{ fontSize: '0.7rem', color: '#fff' }}>{Math.ceil(combat.mobHealth)} HP</span>
                                             </div>
                                             <div style={{ height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
@@ -386,7 +433,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, serverTimeOffse
                                         {/* Barra HP Player */}
                                         <div>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-                                                <span style={{ fontSize: '0.7rem', color: '#4caf50', fontWeight: 'bold' }}>Você</span>
+                                                <span style={{ fontSize: '0.7rem', color: '#4caf50', fontWeight: 'bold' }}>You</span>
                                                 <span style={{ fontSize: '0.7rem', color: '#fff' }}>{Math.ceil(combat.playerHealth)} HP</span>
                                             </div>
                                             <div style={{ height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
@@ -407,21 +454,21 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, serverTimeOffse
                                             background: 'rgba(255, 68, 68, 0.1)',
                                             border: '1px solid rgba(255, 68, 68, 0.5)',
                                             color: '#ff4444',
-                                            padding: '12px',
-                                            borderRadius: '8px',
+                                            padding: '8px',
+                                            borderRadius: '6px',
                                             cursor: 'pointer',
                                             fontWeight: '900',
-                                            fontSize: '0.8rem',
+                                            fontSize: '0.7rem',
                                             letterSpacing: '1px',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            gap: '8px',
+                                            gap: '6px',
                                             transition: '0.2s'
                                         }}
                                     >
                                         <Skull size={14} />
-                                        FUGIR
+                                        FLEE
                                     </button>
                                 </motion.div>
                             )}

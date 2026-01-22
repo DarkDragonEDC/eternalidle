@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { X, Sword, Shield, Heart, Zap, Play, Layers, User, Pickaxe, Target, Apple, Star, Info } from 'lucide-react';
-import { resolveItem, getTierColor } from '../data/items';
+import { resolveItem, getTierColor } from '@shared/items';
 
 const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, inventory, onShowInfo }) => {
 
@@ -78,7 +78,8 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    background: 'rgba(0,0,0,0.2)'
+                    background: 'rgba(0,0,0,0.2)',
+                    flexShrink: 0 // Prevent header from shrinking
                 }}>
                     <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', textTransform: 'uppercase', letterSpacing: '1px' }}>
                         Select {slot}
@@ -87,14 +88,22 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                         <X size={24} />
                     </button>
                 </div>
-
-                <div style={{ padding: '20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div style={{
+                    flex: 1,
+                    padding: '20px',
+                    paddingBottom: '0px', // Reset padding bottom
+                    overflowY: 'auto',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '20px',
+                    minHeight: 0
+                }}>
 
                     {/* Current Item Section */}
                     {currentItem && (
                         <div>
                             <div style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', marginBottom: '10px', fontWeight: 'bold' }}>
-                                Equipado Atualmente
+                                Currently Equipped
                             </div>
                             <div style={{
                                 background: 'rgba(76, 175, 80, 0.1)',
@@ -155,7 +164,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                     {/* Inventory List */}
                     <div>
                         <div style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', marginBottom: '10px', fontWeight: 'bold' }}>
-                            Disponível no Inventário
+                            Available in Inventory
                         </div>
                         {candidates.length === 0 ? (
                             <div style={{
@@ -166,7 +175,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                 borderRadius: '12px',
                                 fontSize: '0.9rem'
                             }}>
-                                Nenhum item compatível encontrado.
+                                No compatible items found.
                             </div>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -239,7 +248,8 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                             </div>
                         )}
                     </div>
-
+                    {/* SPACER ELEMENT TO FIX SCROLL CUTOFF */}
+                    <div style={{ minHeight: '40px', flexShrink: 0 }}></div>
                 </div>
             </div>
         </div>

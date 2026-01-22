@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Sword, Shield, Heart, Star } from 'lucide-react';
-import { QUALITIES } from '../data/items';
+import { QUALITIES } from '@shared/items';
 
 const ItemInfoModal = ({ item, onClose }) => {
     if (!item) return null;
@@ -12,19 +12,22 @@ const ItemInfoModal = ({ item, onClose }) => {
     };
 
     const baseStats = item.stats || {};
-    const mainStatKey = baseStats.damage ? 'damage' : (baseStats.hp ? 'hp' : (baseStats.defense ? 'defense' : null));
-    const mainStatLabel = mainStatKey === 'damage' ? 'Dmg' : (mainStatKey === 'hp' ? 'HP' : (mainStatKey === 'defense' ? 'Def' : 'Stat'));
+    const statKeys = Object.keys(baseStats).filter(k => typeof baseStats[k] === 'number' && ['damage', 'defense', 'hp', 'str', 'agi', 'int'].includes(k));
 
     const calculateStat = (baseValue, ipBonus) => {
-        // Fórmula aproximada baseada no feedback do usuário: +100 IP = +100% (dobra o stat)
-        // Isso é linear: Stat * (1 + BonusIP/100)
-        return Math.floor(baseValue * (1 + ipBonus / 100));
+        return parseFloat((baseValue * (1 + ipBonus / 100)).toFixed(1)); // Permitir decimais (ex: 3.5 Dmg)
     };
 
-    const rarityComparison = Object.values(QUALITIES).map(q => ({
-        ...q,
-        value: mainStatKey ? calculateStat(baseStats[mainStatKey], q.ipBonus) : null
-    }));
+    const rarityComparison = Object.values(QUALITIES).map(q => {
+        const calculatedStats = {};
+        statKeys.forEach(key => {
+            calculatedStats[key] = calculateStat(baseStats[key], q.ipBonus);
+        });
+        return {
+            ...q,
+            calculatedStats
+        };
+    });
 
     return (
         <div style={{
@@ -109,12 +112,16 @@ const ItemInfoModal = ({ item, onClose }) => {
                             {baseStats.damage && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#ff4444' }}><Sword size={14} /> {item.stats.damage} Dmg</div>}
                             {baseStats.hp && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#ff4d4d' }}><Heart size={14} /> {item.stats.hp} HP</div>}
                             {baseStats.defense && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#4caf50' }}><Shield size={14} /> {item.stats.defense} Def</div>}
+                            {baseStats.str && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#ff4444' }}>STR +{item.stats.str}</div>}
+                            {baseStats.agi && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#4caf50' }}>AGI +{item.stats.agi}</div>}
+                            {baseStats.int && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#2196f3' }}>INT +{item.stats.int}</div>}
+                            {item.heal && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#4caf50' }}><Heart size={14} /> Heals {item.heal}</div>}
                         </div>
                     </div>
                 </div>
 
                 {/* Rarity Comparison Section */}
-                {mainStatKey && (
+                {statKeys.length > 0 && (
                     <div>
                         <h4 style={{
                             fontSize: '0.85rem',
@@ -127,7 +134,7 @@ const ItemInfoModal = ({ item, onClose }) => {
                             alignItems: 'center',
                             gap: '8px'
                         }}>
-                            Rarity Comparison <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>(Est. {mainStatLabel})</span>
+                            Rarity Comparison <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>(Est. Stats)</span>
                         </h4>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                             {rarityComparison.map(q => (
@@ -155,12 +162,16 @@ const ItemInfoModal = ({ item, onClose }) => {
                                                 fontWeight: '900',
                                                 marginLeft: '5px'
                                             }}>
-                                                ATUAL
+                                                CURRENT
                                             </span>
                                         )}
                                     </div>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: q.id === (item.quality || 0) ? '#fff' : '#aaa' }}>
-                                        {mainStatLabel}: {q.value}
+                                    <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: q.id === (item.quality || 0) ? '#fff' : '#aaa', display: 'flex', gap: '8px' }}>
+                                        {Object.entries(q.calculatedStats).map(([key, val]) => (
+                                            <span key={key}>
+                                                {key === 'damage' ? 'Dmg' : (key === 'defense' ? 'Def' : key.toUpperCase())}: {val}
+                                            </span>
+                                        ))}
                                     </div>
                                 </div>
                             ))}

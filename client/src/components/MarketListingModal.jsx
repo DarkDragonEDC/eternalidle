@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Package, X } from 'lucide-react';
-import { resolveItem, getTierColor } from '../data/items';
+import { resolveItem, getTierColor, formatItemId } from '@shared/items';
 
 const MarketListingModal = ({ listingItem, onClose, socket }) => {
-    // listingItem should contain { itemId, max, name } (name optional if we resolve it)
-    // We maintain internal state for values being edited
     const [amount, setAmount] = useState('1');
-    const [price, setPrice] = useState('');
+    const [unitPrice, setUnitPrice] = useState('');
 
     useEffect(() => {
         if (listingItem) {
             setAmount('1');
-            setPrice('');
+            setUnitPrice('');
         }
     }, [listingItem]);
 
@@ -21,22 +19,24 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
     const tierColor = getTierColor(itemData?.tier || 1);
 
     const handleConfirm = () => {
-        if (!price || !amount) return;
+        if (!unitPrice || !amount) return;
+
+        const total = Math.floor(parseInt(amount) * parseInt(unitPrice));
 
         socket.emit('list_market_item', {
             itemId: listingItem.itemId,
             amount: parseInt(amount),
-            price: parseInt(price)
+            price: total
         });
 
-        // We assume success and close for immediate feedback, 
-        // or we could wait for server response if we passed a callback.
-        // For now, let's close it. The App socket listener for 'market_action_success' might show a notification.
         onClose();
     };
 
-    const fee = price ? Math.floor(parseInt(price) * 0.05) : 0;
-    const receive = price ? parseInt(price) - fee : 0;
+    const parsedAmount = parseInt(amount) || 0;
+    const parsedUnitPrice = parseInt(unitPrice) || 0;
+    const totalPrice = parsedAmount * parsedUnitPrice;
+    const fee = Math.floor(totalPrice * 0.05);
+    const receive = totalPrice - fee;
 
     return (
         <div style={{
@@ -46,7 +46,7 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
             right: 0,
             bottom: 0,
             background: 'rgba(0,0,0,0.8)',
-            zIndex: 1000, // High z-index to sit on top of everything
+            zIndex: 1000,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -55,7 +55,7 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
             if (e.target === e.currentTarget) onClose();
         }}>
             <div style={{
-                background: '#1a1a1a', // Using a hardcoded dark bg similar to var(--bg-dark) or we can use the variable if global css is available
+                background: '#1a1a1a',
                 border: '1px solid var(--border)',
                 borderRadius: '16px',
                 width: '90%',
@@ -92,7 +92,7 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                         <span style={{ color: tierColor, fontWeight: 'bold' }}>T{itemData?.tier}</span>
                     </div>
                     <div>
-                        <div style={{ fontWeight: 'bold', color: '#fff' }}>{itemData?.name}</div>
+                        <div style={{ fontWeight: 'bold', color: '#fff' }}>{itemData?.name || formatItemId(listingItem.itemId)}</div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Owned: {listingItem.max}</div>
                     </div>
                 </div>
@@ -124,7 +124,10 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                             max={listingItem.max}
                             type="number"
                             value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
+                            onChange={(e) => {
+                                const val = Math.min(listingItem.max, parseInt(e.target.value) || 0);
+                                setAmount(String(val || ''));
+                            }}
                             style={{
                                 width: '100%',
                                 background: 'rgba(0, 0, 0, 0.3)',
@@ -139,14 +142,14 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                         />
                     </div>
 
-                    {/* Price Input */}
+                    {/* Unit Price Input */}
                     <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '8px' }}>Total Price (Silver):</label>
+                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '8px' }}>Price per Unit (Silver):</label>
                         <input
                             min="1"
                             type="number"
-                            value={price}
-                            onChange={(e) => setPrice(e.target.value)}
+                            value={unitPrice}
+                            onChange={(e) => setUnitPrice(e.target.value)}
                             placeholder="0"
                             style={{
                                 width: '100%',
@@ -164,6 +167,10 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
 
                     {/* Calculation Box */}
                     <div style={{ background: 'rgba(0, 0, 0, 0.2)', padding: '12px', borderRadius: '8px', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: 'var(--text-dim)' }}>Total Price:</span>
+                            <span style={{ color: '#fff', fontWeight: 'bold' }}>{totalPrice.toLocaleString()} Silver</span>
+                        </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                             <span style={{ color: 'var(--text-dim)' }}>Market Tax (5%):</span>
                             <span style={{ color: 'rgb(255, 68, 68)' }}>

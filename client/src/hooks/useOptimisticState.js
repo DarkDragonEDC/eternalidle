@@ -75,74 +75,16 @@ export function useOptimisticState(authoritativeState) {
     useEffect(() => {
         if (!localState || !localState.current_activity) return;
 
-        const timer = setInterval(() => {
-            const now = Date.now() + clockOffset.current;
-            setLocalState(prev => {
-                if (!prev || !prev.current_activity) return prev;
-
-                const activity = prev.current_activity;
-                const nextActionAt = Number(activity.next_action_at);
-
-                // Previsão Otimista: Se passou o tempo da próxima ação
-                if (now >= nextActionAt && activity.actions_remaining > 0) {
-                    console.log(`[OPTIMISTIC] Simulating action completion for ${activity.item_id}. Remaining: ${activity.actions_remaining - 1}`);
-                    const newState = JSON.parse(JSON.stringify(prev));
-                    const act = newState.current_activity;
-
-                    // 1. Simular Ação (Coleta/Refino/Craft)
-                    act.actions_remaining -= 1;
-                    act.next_action_at = now + (act.time_per_action * 1000);
-
-                    // 2. Simular Recompensas (Inventory/XP)
-                    // Buscamos o item nos metadados (ITEMS) se necessário? 
-                    // No client, 'App.js' usa ITEMS, mas aqui vamos tentar inferir ou usar o que vem do activity.
-                    // Para simplificar, assumimos XP base
-                    const skillKey = getSkillKey(act.type, act.item_id);
-
-                    if (act.type === 'GATHERING') {
-                        addItemToInventory(newState, act.item_id, 1);
-                        addXP(newState, skillKey, 10); // Valor genérico, o server corrigirá
-                    } else if (act.type === 'REFINING' || act.type === 'CRAFTING') {
-                        // Nota: Consumo de ingredientes no refino/craft é mais complexo sem os dados completos
-                        // Mas podemos tentar se o act.req estiver disponível (enviado pelo server ou App)
-                        if (act.req) consumeItems(newState, act.req);
-                        addItemToInventory(newState, act.item_id, 1);
-                        addXP(newState, skillKey, 25);
-                    }
-
-                    if (act.actions_remaining <= 0) {
-                        newState.current_activity = null;
-                        newState.activity_started_at = null;
-                    }
-
-                    return newState;
-                }
-                return prev;
-            });
-        }, 500); // Check faster (500ms) for smoother response
-
-        return () => clearInterval(timer);
+        // Note: We removed the optimistic data prediction (XP/Items) 
+        // to avoid visual rollbacks and keep the UI perfectly synced with the server.
+        // The bars are now static and jumps only when server confirms progress.
     }, [localState?.current_activity?.next_action_at]);
 
     // Simulação de Combate (Simple HP prediction)
     useEffect(() => {
         if (!localState || !localState.state?.combat) return;
 
-        const combatTimer = setInterval(() => {
-            setLocalState(prev => {
-                if (!prev || !prev.state?.combat) return prev;
-                const newState = JSON.parse(JSON.stringify(prev));
-                const combat = newState.state.combat;
-
-                // Simulação visual de dano (aprox 1s)
-                // Se o servidor manda update, ele sobrescreve isso aqui (Perfect Sync)
-                // combat.mobHealth -= 5; 
-
-                return newState;
-            });
-        }, 1000);
-
-        return () => clearInterval(combatTimer);
+        // Removed visual HP prediction to keep authoritative state sync
     }, [localState?.state?.combat]);
 
     return localState;

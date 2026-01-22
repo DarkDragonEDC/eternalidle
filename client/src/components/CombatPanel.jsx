@@ -1,6 +1,7 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Sword, Shield, Skull, Coins, Zap, Clock, Trophy, ChevronRight, User, Terminal, Activity, TrendingUp, Star, Apple } from 'lucide-react';
-import { MONSTERS } from '../data/monsters';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MONSTERS } from '@shared/monsters';
 
 const CombatPanel = ({ socket, gameState, isMobile }) => {
     const [activeTier, setActiveTier] = useState(1);
@@ -20,6 +21,17 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
     const prevCombatRef = useRef(null);
     const [isRestored, setIsRestored] = useState(false);
     const [currentTime, setCurrentTime] = useState(Date.now());
+    const [isPlayerHit, setIsPlayerHit] = useState(false);
+    const [isMobHit, setIsMobHit] = useState(false);
+    const [floatingTexts, setFloatingTexts] = useState([]);
+
+    const spawnFloatingText = (content, type, x, y) => {
+        const id = Date.now() + Math.random();
+        setFloatingTexts(prev => [...prev, { id, content, type, x, y }]);
+        setTimeout(() => {
+            setFloatingTexts(prev => prev.filter(t => t.id !== id));
+        }, 1000);
+    };
 
     // Cálculo de Stats (Replicado do ProfilePanel para consistência)
     const stats = useMemo(() => {
@@ -90,7 +102,7 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
             kills: 0,
             startTime: Date.now()
         });
-        setBattleLogs([{ id: 'start', type: 'info', content: `Iniciando combate contra ${combat.mobName}...` }]);
+        setBattleLogs([{ id: 'start', type: 'info', content: `Starting combat against ${combat.mobName}...` }]);
         setIsRestored(true);
     }, [combat?.mobId, gameState?.name]);
 
@@ -128,6 +140,17 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
                 const details = update.details;
 
                 if (details) {
+                    if (details.playerDmg > 0) {
+                        setIsMobHit(true);
+                        setTimeout(() => setIsMobHit(false), 200);
+                        spawnFloatingText(`-${details.playerDmg}`, 'damage-deal', 75, 50);
+                    }
+                    if (details.mobDmg > 0) {
+                        setIsPlayerHit(true);
+                        setTimeout(() => setIsPlayerHit(false), 200);
+                        spawnFloatingText(`-${details.mobDmg}`, 'damage-take', 25, 50);
+                    }
+
                     setBattleStats(prev => ({
                         ...prev,
                         totalDmgDealt: prev.totalDmgDealt + details.playerDmg,
@@ -141,13 +164,13 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
                     newLogs.push({
                         id: Date.now() + Math.random(),
                         type: 'combat',
-                        content: `Você causou ${details.playerDmg} de dano.`,
+                        content: `You dealt ${details.playerDmg} damage.`,
                         color: '#4a90e2'
                     });
                     newLogs.push({
                         id: Date.now() + Math.random(),
                         type: 'combat',
-                        content: `${update.details?.mobName || 'Inimigo'} causou ${details.mobDmg} de dano.`,
+                        content: `${update.details?.mobName || 'Enemy'} dealt ${details.mobDmg} damage.`,
                         color: '#ff4444'
                     });
 
@@ -155,7 +178,7 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
                         newLogs.push({
                             id: Date.now() + Math.random(),
                             type: 'reward',
-                            content: `+${details.silverGained} Silver coletado!`,
+                            content: `+${details.silverGained} Silver collected!`,
                             color: '#d4af37'
                         });
                     }
@@ -172,7 +195,7 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
                             newLogs.push({
                                 id: Date.now() + Math.random(),
                                 type: 'loot',
-                                content: `Item encontrado: ${item}!`,
+                                content: `Item found: ${item}!`,
                                 color: '#ae00ff'
                             });
                         });
@@ -182,7 +205,7 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
                         newLogs.push({
                             id: Date.now() + Math.random(),
                             type: 'victory',
-                            content: `Vitória! ${update.details?.mobName || 'Inimigo'} abatido.`,
+                            content: `Victory! ${update.details?.mobName || 'Enemy'} defeated.`,
                             color: '#4caf50'
                         });
                     }
@@ -191,7 +214,7 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
                         newLogs.push({
                             id: Date.now() + Math.random(),
                             type: 'defeat',
-                            content: `Você foi derrotado! Retornando à cidade...`,
+                            content: `You were defeated! Returning to town...`,
                             color: '#ff4444'
                         });
                     }
@@ -268,27 +291,27 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
             <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: isMobile ? '8px' : '10px', padding: isMobile ? '8px' : '10px', overflowY: 'auto' }}>
                 {/* Battle Header */}
                 <div className="glass-panel" style={{
-                    padding: isMobile ? '15px' : '20px',
+                    padding: '8px 15px',
                     display: 'flex',
-                    flexDirection: isMobile ? 'column' : 'row',
+                    flexDirection: 'row',
                     justifyContent: 'space-between',
-                    alignItems: isMobile ? 'flex-start' : 'center',
-                    gap: isMobile ? '10px' : '0',
-                    background: 'rgba(255, 68, 68, 0.05)',
-                    border: '1px solid rgba(255, 68, 68, 0.2)'
+                    alignItems: 'center',
+                    background: 'rgba(255, 68, 68, 0.08)',
+                    border: '1px solid rgba(255, 68, 68, 0.2)',
+                    borderRadius: '8px'
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                        <div style={{ background: '#ff4444', padding: '10px', borderRadius: '8px' }}>
-                            <Sword color="#fff" size={24} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ background: '#ff4444', padding: '6px', borderRadius: '6px', display: 'flex' }}>
+                            <Sword color="#fff" size={16} />
                         </div>
                         <div>
-                            <div style={{ fontSize: '0.7rem', color: '#ff4444', fontWeight: '900', letterSpacing: '2px' }}>EM COMBATE</div>
-                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Tier {combat.tier}: {combat.mobName}</div>
+                            <div style={{ fontSize: '0.55rem', color: '#ff4444', fontWeight: '900', letterSpacing: '1px' }}>IN COMBAT</div>
+                            <div style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>T{combat.tier}: {combat.mobName}</div>
                         </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>DURAÇÃO</div>
-                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                        <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', letterSpacing: '1px' }}>DURATION</div>
+                        <div style={{ fontSize: '1rem', fontWeight: 'bold', fontFamily: 'monospace', color: '#fff' }}>
                             {Math.floor(duration / 60)}:{(duration % 60).toString().padStart(2, '0')}
                         </div>
                     </div>
@@ -302,16 +325,20 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
 
                         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-around', zIndex: 1, padding: isMobile ? '10px' : '15px' }}>
                             {/* Player Side */}
-                            <div style={{ textAlign: 'center' }}>
-                                <div style={{
-                                    width: isMobile ? '50px' : '100px', height: isMobile ? '50px' : '100px',
-                                    background: 'linear-gradient(135deg, #d4af37 0%, #8a6d0a 100%)',
-                                    borderRadius: '50%', border: isMobile ? '2px solid #fff' : '4px solid #fff',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    boxShadow: '0 0 20px rgba(212, 175, 55, 0.4)',
-                                    marginBottom: '10px',
-                                    position: 'relative'
-                                }}>
+                            <div style={{ textAlign: 'center', position: 'relative' }}>
+                                <motion.div
+                                    animate={isPlayerHit ? { x: [-10, 10, -10, 10, 0], filter: 'brightness(2)' } : {}}
+                                    transition={{ duration: 0.2 }}
+                                    style={{
+                                        width: isMobile ? '50px' : '100px', height: isMobile ? '50px' : '100px',
+                                        background: 'linear-gradient(135deg, #d4af37 0%, #8a6d0a 100%)',
+                                        borderRadius: '50%', border: isMobile ? '2px solid #fff' : '4px solid #fff',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        boxShadow: '0 0 20px rgba(212, 175, 55, 0.4)',
+                                        marginBottom: '10px',
+                                        position: 'relative',
+                                        zIndex: 2
+                                    }}>
                                     <User size={isMobile ? 25 : 50} color="#000" />
                                     {/* Food Badge */}
                                     {gameState?.state?.equipment?.food?.amount > 0 && (
@@ -335,7 +362,7 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
                                             <Apple size={10} /> {gameState.state.equipment.food.amount}
                                         </div>
                                     )}
-                                </div>
+                                </motion.div>
                                 <div style={{ fontSize: isMobile ? '0.6rem' : '0.9rem', fontWeight: '900', color: '#fff' }}>{gameState?.name?.toUpperCase()}</div>
                                 <div style={{ fontSize: isMobile ? '0.9rem' : '1.3rem', fontWeight: '900', color: '#4caf50', marginTop: '2px' }}>{Math.round(combat.playerHealth)} HP</div>
                             </div>
@@ -343,33 +370,65 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
                             <div style={{ fontSize: isMobile ? '1rem' : '1.5rem', fontWeight: '900', color: 'rgba(255,255,255,0.1)' }}>VS</div>
 
                             {/* Mob Side */}
-                            <div style={{ textAlign: 'center' }}>
-                                <div style={{
-                                    width: isMobile ? '50px' : '100px', height: isMobile ? '50px' : '100px',
-                                    background: 'rgba(20, 20, 25, 0.8)',
-                                    borderRadius: '50%', border: isMobile ? '2px solid #ff4444' : '4px solid #ff4444',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    boxShadow: '0 0 20px rgba(255, 68, 68, 0.4)',
-                                    marginBottom: '10px'
-                                }}>
+                            <div style={{ textAlign: 'center', position: 'relative' }}>
+                                <motion.div
+                                    animate={isMobHit ? { x: [10, -10, 10, -10, 0], filter: 'brightness(2)' } : {}}
+                                    transition={{ duration: 0.2 }}
+                                    style={{
+                                        width: isMobile ? '50px' : '100px', height: isMobile ? '50px' : '100px',
+                                        background: 'rgba(20, 20, 25, 0.8)',
+                                        borderRadius: '50%', border: isMobile ? '2px solid #ff4444' : '4px solid #ff4444',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        boxShadow: '0 0 20px rgba(255, 68, 68, 0.4)',
+                                        marginBottom: '10px',
+                                        position: 'relative',
+                                        zIndex: 2
+                                    }}>
                                     <Skull size={isMobile ? 25 : 50} color="#ff4444" />
-                                </div>
+                                </motion.div>
                                 <div style={{ fontSize: isMobile ? '0.6rem' : '0.9rem', fontWeight: '900', color: '#fff' }}>{combat.mobName.toUpperCase()}</div>
                                 <div style={{ fontSize: isMobile ? '0.9rem' : '1.3rem', fontWeight: '900', color: '#ff4444', marginTop: '2px' }}>{Math.round(combat.mobHealth)} HP</div>
                             </div>
+
+                            {/* Floating Texts Container */}
+                            <AnimatePresence>
+                                {floatingTexts.map(text => (
+                                    <motion.div
+                                        key={text.id}
+                                        initial={{ opacity: 1, y: 0, scale: 0.5 }}
+                                        animate={{ opacity: 0, y: -100, scale: 1.5 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.8 }}
+                                        style={{
+                                            position: 'absolute',
+                                            left: `${text.x}%`,
+                                            top: `${text.y}%`,
+                                            transform: 'translate(-50%, -50%)',
+                                            color: text.type === 'damage-take' ? '#ff4d4d' : '#4a90e2',
+                                            fontWeight: 'bold',
+                                            fontSize: '1.5rem',
+                                            textShadow: '0 0 10px rgba(0,0,0,0.8)',
+                                            pointerEvents: 'none',
+                                            zIndex: 10
+                                        }}
+                                    >
+                                        {text.content}
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
                         </div>
 
                         {/* Health Bars Overlay */}
                         <div style={{ padding: '15px', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.2)' }}>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
                                 <div style={{ flex: 1, minWidth: '120px' }}>
-                                    <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', marginBottom: '3px' }}>VIDA DO PERSONAGEM</div>
+                                    <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', marginBottom: '3px' }}>CHARACTER HEALTH</div>
                                     <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
                                         <div style={{ width: `${(combat.playerHealth / stats.hp) * 100}%`, height: '100%', background: '#4caf50', transition: 'width 0.3s' }} />
                                     </div>
                                 </div>
                                 <div style={{ flex: 1, minWidth: '120px' }}>
-                                    <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', textAlign: isMobile ? 'left' : 'right', marginBottom: '3px' }}>VIDA DO MONSTRO</div>
+                                    <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', textAlign: isMobile ? 'left' : 'right', marginBottom: '3px' }}>MONSTER HEALTH</div>
                                     <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
                                         <div style={{ width: `${(combat.mobHealth / combat.mobMaxHealth) * 100}%`, height: '100%', background: '#ff4444', transition: 'width 0.3s' }} />
                                     </div>
@@ -395,25 +454,25 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
                             </div>
                             <div style={{ background: 'rgba(0,0,0,0.2)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.03)' }}>
                                 <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <Trophy size={10} /> ABATES
+                                    <Trophy size={10} /> KILLS
                                 </div>
                                 <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4caf50' }}>{battleStats.kills}</div>
                             </div>
                             <div style={{ background: 'rgba(0,0,0,0.2)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.03)' }}>
                                 <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <TrendingUp size={10} /> DANO
+                                    <TrendingUp size={10} /> DAMAGE
                                 </div>
                                 <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>{battleStats.totalDmgDealt.toLocaleString()}</div>
                             </div>
                             <div style={{ background: 'rgba(212, 175, 55, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(212, 175, 55, 0.2)' }}>
                                 <div style={{ fontSize: '0.55rem', color: '#d4af37', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <Coins size={10} /> PRATA
+                                    <Coins size={10} /> SILVER
                                 </div>
                                 <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#d4af37' }}>{battleStats.silverGained.toLocaleString()}</div>
                             </div>
                             <div style={{ background: 'rgba(76, 175, 80, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(76, 175, 80, 0.2)' }}>
                                 <div style={{ fontSize: '0.55rem', color: '#4caf50', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <Star size={10} /> XP TOTAL
+                                    <Star size={10} /> TOTAL XP
                                 </div>
                                 <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>{battleStats.xpGained.toLocaleString()}</div>
                             </div>
@@ -432,7 +491,7 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
                             </div>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                                 {Object.entries(sessionLoot).length === 0 ? (
-                                    <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontStyle: 'italic' }}>Aguardando drops...</span>
+                                    <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontStyle: 'italic' }}>Waiting for drops...</span>
                                 ) : (
                                     Object.entries(sessionLoot).map(([id, qty]) => (
                                         <div key={id} style={{
@@ -505,7 +564,7 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
                                         gap: '5px'
                                     }}
                                 >
-                                    <Clock size={10} /> NOVAS MENSAGENS ↓
+                                    <Clock size={10} /> NEW MESSAGES ↓
                                 </button>
                             )}
                         </div>
@@ -530,10 +589,10 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
                             onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255, 68, 68, 0.2)'; }}
                             onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255, 68, 68, 0.1)'; }}
                         >
-                            FUGIR DA BATALHA
+                            FLEE FROM BATTLE
                         </button>
                     </div>
-                </div>
+                </div >
             </div >
         );
     }
@@ -542,45 +601,47 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             {/* Header / Filter */}
-            <div style={{ padding: '20px', borderBottom: '1px solid var(--border)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <h2 style={{ margin: 0, color: '#fff', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '2px' }}>HUNTING GROUNDS</h2>
-                    <button style={{ background: 'none', border: '1px solid var(--border)', padding: '4px 8px', borderRadius: '4px', color: 'var(--text-dim)', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Clock size={14} /> Histórico
+            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', background: 'rgba(0,0,0,0.2)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <Sword size={18} color="#ff4444" />
+                        <h2 style={{ margin: 0, color: '#fff', fontSize: '0.9rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase' }}>Hunting Grounds</h2>
+                    </div>
+                    <button style={{ background: 'none', border: '1px solid var(--border)', padding: '3px 8px', borderRadius: '4px', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '0.65rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Clock size={12} /> History
                     </button>
                 </div>
 
-                {/* Tier Selector Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(5, 1fr)' : 'repeat(10, 1fr)', gap: '6px', marginTop: '15px' }}>
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(tier => {
-                        return (
-                            <button key={tier}
-                                onClick={() => setActiveTier(tier)}
-                                style={{
-                                    padding: '8px',
-                                    background: activeTier === tier ? 'var(--accent-soft)' : 'rgba(255, 255, 255, 0.02)',
-                                    border: activeTier === tier ? '1px solid var(--border-active)' : '1px solid rgba(255, 255, 255, 0.05)',
-                                    borderRadius: '4px',
-                                    color: activeTier === tier ? 'var(--accent-text)' : '#555',
-                                    fontSize: '0.75rem',
-                                    fontWeight: '900',
-                                    cursor: 'pointer',
-                                    transition: '0.2s'
-                                }}>
-                                T{tier}
-                            </button>
-                        );
-                    })}
+                {/* Tier Selector - Compact Horizontal */}
+                <div style={{ display: 'flex', gap: '4px', overflowX: 'auto', paddingBottom: '4px', className: 'hide-scrollbar' }}>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(tier => (
+                        <button key={tier}
+                            onClick={() => setActiveTier(tier)}
+                            style={{
+                                padding: '4px 12px',
+                                flexShrink: 0,
+                                background: activeTier === tier ? 'rgba(255, 68, 68, 0.15)' : 'rgba(255, 255, 255, 0.02)',
+                                border: `1px solid ${activeTier === tier ? '#ff4444' : 'rgba(255, 255, 255, 0.05)'}`,
+                                borderRadius: '4px',
+                                color: activeTier === tier ? '#ff4444' : '#555',
+                                fontSize: '0.7rem',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                transition: '0.2s'
+                            }}>
+                            T{tier}
+                        </button>
+                    ))}
                 </div>
             </div>
 
-            {/* Mobs Grid */}
-            <div className="glass-panel scroll-container" style={{ flex: 1, padding: isMobile ? '10px' : '20px', background: 'rgba(10, 10, 15, 0.4)', overflowY: 'auto' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px', paddingBottom: '40px' }}>
+            {/* Mobs List */}
+            <div className="glass-panel scroll-container" style={{ flex: 1, padding: isMobile ? '10px' : '15px', background: 'rgba(10, 10, 15, 0.4)', overflowY: 'auto' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingBottom: '40px' }}>
                     {(MONSTERS[activeTier] || []).map(mob => {
                         const playerDmg = stats.damage;
                         const roundsToKill = Math.ceil(mob.health / playerDmg);
-                        const ttk = roundsToKill * 3; // 3s per tick
+                        const ttk = roundsToKill * 3;
                         const risk = roundsToKill * mob.damage;
                         const killsPerHour = Math.floor(3600 / ttk);
                         const xpHour = killsPerHour * mob.xp;
@@ -590,105 +651,94 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
                         const isLocked = ((activeTier === 1 ? 1 : (activeTier - 1) * 10) > (gameState?.state?.skills?.COMBAT?.level || 1));
 
                         return (
-                            <div key={mob.id} className="monster-card" style={{
-                                padding: '15px',
+                            <div key={mob.id} style={{
                                 display: 'flex',
-                                flexDirection: 'column',
-                                background: 'rgba(20, 20, 25, 0.6)',
-                                border: `1px solid rgba(255, 255, 255, 0.05)`,
-                                borderLeft: `4px solid ${isLocked ? '#444' : 'rgba(255, 68, 68, 0.3)'}`,
+                                flexDirection: isMobile ? 'column' : 'row',
+                                background: isLocked ? 'rgba(20, 20, 25, 0.4)' : 'rgba(255, 255, 255, 0.02)',
+                                border: `1px solid ${isLocked ? 'rgba(255,255,255,0.03)' : 'rgba(255, 255, 255, 0.05)'}`,
                                 borderRadius: '8px',
+                                padding: '12px 16px',
+                                gap: '15px',
+                                alignItems: isMobile ? 'stretch' : 'center',
                                 transition: '0.2s',
-                                opacity: isLocked ? 0.7 : 1
+                                opacity: isLocked ? 0.6 : 1,
+                                position: 'relative',
+                                borderLeft: `3px solid ${isLocked ? '#444' : '#ff4444'}`
                             }}>
-                                {/* Header */}
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                                    <span style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#fff' }}>{mob.name}</span>
-                                    <span style={{ color: 'var(--text-dim)', fontSize: '0.8rem' }}>XP: {mob.xp}</span>
-                                </div>
-
-                                {/* Stats Grid */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
-                                    <div style={{ background: 'rgba(0, 0, 0, 0.2)', padding: '8px', borderRadius: '4px' }}>
-                                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Estatísticas Base</div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '4px' }}>
-                                            <span style={{ color: 'rgb(255, 77, 77)', fontSize: '0.8rem', fontWeight: 'bold' }}>HP: {mob.health}</span>
-                                            <span style={{ color: 'rgb(255, 165, 0)', fontSize: '0.8rem', fontWeight: 'bold' }}>Dano: {mob.damage}</span>
-                                        </div>
+                                {/* Mob Basic Info */}
+                                <div style={{ flex: '1.2', display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                    <div style={{
+                                        width: '40px', height: '40px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)'
+                                    }}>
+                                        <Skull size={20} color={isLocked ? '#555' : '#ff4444'} />
                                     </div>
-                                    <div style={{ background: 'rgba(0, 0, 0, 0.2)', padding: '8px', borderRadius: '4px' }}>
-                                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Eficiência de Combate</div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '4px' }}>
-                                            <span style={{ color: 'var(--accent)', fontSize: '0.8rem', fontWeight: 'bold' }}>TTK: {ttk}s</span>
-                                            <span style={{ color: 'rgb(255, 68, 68)', fontSize: '0.8rem', fontWeight: 'bold' }}>Risco: {risk} HP/abate</span>
+                                    <div>
+                                        <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '1rem' }}>{mob.name}</div>
+                                        <div style={{ color: 'var(--text-dim)', fontSize: '0.7rem', display: 'flex', gap: '8px' }}>
+                                            <span style={{ color: '#ff4444' }}>HP: {mob.health}</span>
+                                            <span style={{ color: '#ff9800' }}>DMG: {mob.damage}</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Projection Banner */}
-                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px', background: 'rgba(255, 255, 255, 0.03)', padding: '8px', borderRadius: '4px' }}>
-                                    <div style={{ flex: '1 1 0%', textAlign: 'center' }}>
-                                        <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#fff' }}>{killsPerHour.toLocaleString('pt-BR')} abates/h</div>
+                                {/* Efficiency Stats */}
+                                {!isMobile && (
+                                    <div style={{ flex: '2', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', borderLeft: '1px solid rgba(255,255,255,0.05)', borderRight: '1px solid rgba(255,255,255,0.05)', padding: '0 15px' }}>
+                                        <div style={{ textAlign: 'center' }}>
+                                            <div style={{ fontSize: '0.6rem', color: '#888' }}>XP/H</div>
+                                            <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4caf50' }}>{xpHour.toLocaleString()}</div>
+                                        </div>
+                                        <div style={{ textAlign: 'center' }}>
+                                            <div style={{ fontSize: '0.6rem', color: '#888' }}>SILVER/H</div>
+                                            <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#d4af37' }}>{silverHour.toLocaleString()}</div>
+                                        </div>
+                                        <div style={{ textAlign: 'center' }}>
+                                            <div style={{ fontSize: '0.6rem', color: '#888' }}>TTK / RISK</div>
+                                            <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#fff' }}>{ttk}s / {risk}HP</div>
+                                        </div>
                                     </div>
-                                    <div style={{ flex: '1 1 0%', textAlign: 'center', borderLeft: '1px solid rgba(255, 255, 255, 0.05)', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                                        <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)' }}>XP/h</div>
-                                        <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'rgb(76, 175, 80)' }}>{xpHour.toLocaleString('pt-BR')}</div>
-                                    </div>
-                                    <div style={{ flex: '1 1 0%', textAlign: 'center' }}>
-                                        <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)' }}>Prata/h</div>
-                                        <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--accent)' }}>{silverHour.toLocaleString('pt-BR')}</div>
-                                    </div>
-                                </div>
+                                )}
 
-                                {/* Drops Section */}
-                                <div style={{ marginTop: '5px', fontSize: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: '5px' }}>
-                                    <span style={{ color: 'var(--text-dim)', fontWeight: 'bold' }}>DROPS POSSÍVEIS</span>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '4px' }}>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(212, 175, 55, 0.1)', padding: '2px 6px', borderRadius: '4px', color: 'var(--accent)', fontWeight: 'bold' }}>
-                                            <Coins size={10} /> {mob.silver[0]} - {mob.silver[1]}
+                                {/* Drops (Compact) */}
+                                <div style={{ flex: '1.5', display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(212, 175, 55, 0.1)', padding: '2px 6px', borderRadius: '4px', color: '#d4af37', fontSize: '0.7rem' }}>
+                                        <Coins size={10} /> {mob.silver[0]}-{mob.silver[1]}
+                                    </span>
+                                    {Object.entries(mob.loot).map(([id, chance]) => (
+                                        <span key={id} style={{
+                                            background: chance <= 0.05 ? 'rgba(174, 0, 255, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                                            padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', color: chance <= 0.05 ? '#ae00ff' : '#aaa',
+                                            border: '1px solid rgba(255,255,255,0.03)'
+                                        }}>
+                                            {id.replace(/_/g, ' ')} ({Math.round(chance * 100)}%)
                                         </span>
-                                        {Object.entries(mob.loot).map(([id, chance]) => {
-                                            const isRare = chance <= 0.05;
-                                            return (
-                                                <span key={id} style={{
-                                                    background: isRare ? 'rgba(174, 0, 255, 0.1)' : 'rgba(255, 255, 255, 0.05)',
-                                                    padding: '2px 6px',
-                                                    borderRadius: '4px',
-                                                    color: isRare ? 'rgb(212, 175, 55)' : 'var(--accent)',
-                                                    border: isRare ? '1px solid rgba(174, 0, 255, 0.2)' : '1px solid rgba(255, 255, 255, 0.05)',
-                                                    fontWeight: isRare ? 'bold' : 'normal'
-                                                }}>
-                                                    {id} ({Math.round(chance * 100)}%)
-                                                </span>
-                                            );
-                                        })}
-                                    </div>
+                                    ))}
                                 </div>
 
                                 {/* Action Button */}
-                                <button
-                                    onClick={() => !isLocked && handleFight(mob)}
-                                    disabled={isLocked}
-                                    style={{
-                                        width: '100%',
-                                        marginTop: '12px',
-                                        padding: '10px',
-                                        background: isLocked ? '#222' : 'rgb(255, 68, 68)',
-                                        color: '#fff',
-                                        border: 'none',
-                                        borderRadius: '4px',
-                                        cursor: isLocked ? 'not-allowed' : 'pointer',
-                                        fontWeight: 'bold',
-                                        textTransform: 'uppercase',
-                                        letterSpacing: '1px',
-                                        transition: '0.2s',
-                                        opacity: isLocked ? 0.5 : 1
-                                    }}
-                                    onMouseEnter={(e) => { if (!isLocked) e.currentTarget.style.filter = 'brightness(1.1)'; }}
-                                    onMouseLeave={(e) => { if (!isLocked) e.currentTarget.style.filter = 'none'; }}
-                                >
-                                    {isLocked ? `bloqueado (lv ${(activeTier - 1) * 10})` : 'Iniciar Batalha'}
-                                </button>
+                                <div style={{ flex: '0.8', display: 'flex', justifyContent: 'flex-end' }}>
+                                    <button
+                                        onClick={() => !isLocked && handleFight(mob)}
+                                        disabled={isLocked}
+                                        style={{
+                                            padding: '8px 16px',
+                                            background: isLocked ? '#222' : 'rgba(255, 68, 68, 0.1)',
+                                            border: isLocked ? '1px solid #333' : '1px solid #ff4444',
+                                            color: isLocked ? '#555' : '#ff4444',
+                                            borderRadius: '6px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 'bold',
+                                            cursor: isLocked ? 'not-allowed' : 'pointer',
+                                            transition: '0.2s',
+                                            width: isMobile ? '100%' : 'auto'
+                                        }}
+                                        onMouseEnter={(e) => { if (!isLocked) e.currentTarget.style.background = 'rgba(255, 68, 68, 0.2)'; }}
+                                        onMouseLeave={(e) => { if (!isLocked) e.currentTarget.style.background = 'rgba(255, 68, 68, 0.1)'; }}
+                                    >
+                                        {isLocked ? 'LOCKED' : 'FIGHT'}
+                                    </button>
+                                </div>
                             </div>
                         );
                     })}

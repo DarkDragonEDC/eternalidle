@@ -1,0 +1,222 @@
+import { calculateItemSellPrice } from '../../shared/items.js';
+
+export class MarketManager {
+    constructor(gameManager) {
+        this.gameManager = gameManager;
+    }
+
+    async getMarketListings(filters = {}) {
+        let query = this.gameManager.supabase
+            .from('market_listings')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (filters.tier) query = query.eq('item_data->>tier', filters.tier.toString());
+        if (filters.type) query = query.eq('item_data->>type', filters.type.toUpperCase());
+        if (filters.search) query = query.ilike('item_id', `%${filters.search}%`);
+
+        const { data, error } = await query;
+        if (error) throw error;
+        return data || [];
+    }
+
+    async sellItem(userId, itemId, quantity) {
+        if (!quantity || quantity <= 0) throw new Error("Invalid quantity");
+
+        const char = await this.gameManager.getCharacter(userId);
+        if (!char) throw new Error("Character not found");
+
+        const inventory = char.state.inventory;
+        if (!inventory[itemId] || inventory[itemId] < quantity) {
+            throw new Error("Insufficient quantity in inventory");
+        }
+
+        const itemData = this.gameManager.inventoryManager.resolveItem(itemId);
+        if (!itemData) throw new Error("Invalid item");
+
+        const pricePerUnit = calculateItemSellPrice(itemData, itemId);
+        const totalSilver = pricePerUnit * quantity;
+
+        inventory[itemId] -= quantity;
+        if (inventory[itemId] <= 0) delete inventory[itemId];
+
+        char.state.silver = (char.state.silver || 0) + totalSilver;
+
+        await this.gameManager.saveState(userId, char.state);
+        return { success: true, message: `Sold ${quantity}x ${itemData.name} for ${totalSilver} Silver`, unitPrice: pricePerUnit, total: totalSilver };
+    }
+
+    async listMarketItem(userId, itemId, amount, price) {
+        if (!amount || amount <= 0) throw new Error("Invalid amount");
+        if (!price || price <= 0) throw new Error("Invalid price");
+
+        const char = await this.gameManager.getCharacter(userId);
+        if (!char) throw new Error("Character not found");
+
+        const inventory = char.state.inventory;
+        if (!inventory[itemId] || inventory[itemId] < amount) {
+            throw new Error("Insufficient quantity in inventory");
+        }
+
+        const itemData = this.gameManager.inventoryManager.resolveItem(itemId);
+        if (!itemData) throw new Error("Invalid item");
+
+        inventory[itemId] -= amount;
+        if (inventory[itemId] <= 0) delete inventory[itemId];
+
+        const { error: insertError } = await this.gameManager.supabase
+            .from('market_listings')
+            .insert({
+                seller_id: userId,
+                seller_name: char.name,
+                item_id: itemId,
+                item_data: itemData,
+                amount: amount,
+                price: price
+            });
+
+        if (insertError) {
+            inventory[itemId] = (inventory[itemId] || 0) + amount;
+            throw insertError;
+        }
+
+        await this.gameManager.saveState(userId, char.state);
+        return { success: true, message: `Item listed successfully!` };
+    }
+
+    async buyMarketItem(buyerId, listingId, quantity = 1) {
+        if (!quantity || quantity <= 0) throw new Error("Invalid quantity");
+
+        const buyer = await this.gameManager.getCharacter(buyerId);
+        if (!buyer) throw new Error("Buyer character not found");
+
+        const { data: listing, error: fetchError } = await this.gameManager.supabase
+            .from('market_listings')
+            .select('*')
+            .eq('id', listingId)
+            .single();
+
+        if (fetchError || !listing) throw new Error("Listing not found or expired");
+        if (listing.seller_id === buyerId) throw new Error("You cannot buy your own item");
+        if (quantity > listing.amount) throw new Error(`Only ${listing.amount} items available`);
+
+        const unitPrice = listing.price / listing.amount;
+        const totalCost = Math.floor(unitPrice * quantity);
+
+        if ((buyer.state.silver || 0) < totalCost) throw new Error("Insufficient silver");
+
+        // Deduct Silver from Buyer
+        buyer.state.silver -= totalCost;
+
+        // Add Item Claim to Buyer
+        this.addClaim(buyer, {
+            type: 'BOUGHT_ITEM',
+            itemId: listing.item_id,
+            amount: quantity,
+            name: listing.item_data.name,
+            timestamp: Date.now(),
+            cost: totalCost
+        });
+        await this.gameManager.saveState(buyerId, buyer.state);
+
+        // Process Seller side
+        let seller = await this.gameManager.getCharacter(listing.seller_id);
+        if (seller) {
+            const tax = Math.floor(totalCost * 0.06);
+            const sellerProfit = totalCost - tax;
+
+            this.addClaim(seller, {
+                type: 'SOLD_ITEM',
+                silver: sellerProfit,
+                item: listing.item_data.name,
+                amount: quantity,
+                timestamp: Date.now()
+            });
+            await this.gameManager.saveState(listing.seller_id, seller.state);
+        }
+
+        // Update or Delete Listing
+        if (quantity >= listing.amount) {
+            // Full Buy - Delete Listing
+            const { error: deleteError } = await this.gameManager.supabase
+                .from('market_listings')
+                .delete()
+                .eq('id', listingId);
+            if (deleteError) throw deleteError;
+        } else {
+            // Partial Buy - Update Listing
+            const remainingAmount = listing.amount - quantity;
+            const remainingPrice = listing.price - totalCost;
+
+            const { error: updateError } = await this.gameManager.supabase
+                .from('market_listings')
+                .update({
+                    amount: remainingAmount,
+                    price: remainingPrice
+                })
+                .eq('id', listingId);
+            if (updateError) throw updateError;
+        }
+
+        return { success: true, message: `Bought ${quantity}x ${listing.item_data.name} for ${totalCost} Silver` };
+    }
+
+    async cancelMarketListing(userId, listingId) {
+        const { data: listing, error: fetchError } = await this.gameManager.supabase
+            .from('market_listings')
+            .select('*')
+            .eq('id', listingId)
+            .single();
+
+        if (fetchError || !listing) throw new Error("Listing not found");
+        if (listing.seller_id !== userId) throw new Error("Permission denied");
+
+        const { error: deleteError } = await this.gameManager.supabase
+            .from('market_listings')
+            .delete()
+            .eq('id', listingId);
+
+        if (deleteError) throw deleteError;
+
+        const char = await this.gameManager.getCharacter(userId);
+        this.addClaim(char, {
+            type: 'CANCELLED_LISTING',
+            itemId: listing.item_id,
+            amount: listing.amount,
+            name: listing.item_data.name,
+            timestamp: Date.now()
+        });
+
+        await this.gameManager.saveState(userId, char.state);
+        return { success: true, message: "Listing cancelled. Item sent to Claim tab." };
+    }
+
+    addClaim(char, claimData) {
+        if (!char.state.claims) char.state.claims = [];
+        char.state.claims.push({
+            id: Date.now().toString() + Math.random().toString().slice(2, 8),
+            ...claimData
+        });
+    }
+
+    async claimMarketItem(userId, claimId) {
+        const char = await this.gameManager.getCharacter(userId);
+        if (!char.state.claims) return { success: false, message: "No items to claim." };
+
+        const claimIndex = char.state.claims.findIndex(c => c.id === claimId);
+        if (claimIndex === -1) return { success: false, message: "Claim not found." };
+
+        const claim = char.state.claims[claimIndex];
+
+        if (claim.silver) {
+            char.state.silver = (char.state.silver || 0) + claim.silver;
+        }
+        if (claim.itemId) {
+            this.gameManager.inventoryManager.addItemToInventory(char, claim.itemId, claim.amount);
+        }
+
+        char.state.claims.splice(claimIndex, 1);
+        await this.gameManager.saveState(userId, char.state);
+        return { success: true, message: "Claimed successfully!" };
+    }
+}

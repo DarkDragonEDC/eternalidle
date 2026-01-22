@@ -17,6 +17,16 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
     }, [messages, isOpen]);
 
     useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' && isOpen) {
+                setIsOpen(false);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen]);
+
+    useEffect(() => {
         if (socket) {
             socket.emit('get_chat_history');
 
@@ -55,8 +65,8 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
                 }}
                 style={{
                     position: 'fixed',
-                    bottom: '170px',
-                    right: '30px',
+                    bottom: '30px',
+                    left: isMobile ? '20px' : '30px',
                     width: '56px',
                     height: '56px',
                     borderRadius: '50%',
@@ -107,9 +117,10 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
             />
             <div style={{
                 position: 'fixed',
-                bottom: '20px',
-                right: isMobile ? '50%' : '90px',
-                transform: isMobile ? 'translateX(50%)' : 'none',
+                bottom: isMobile ? '0' : '100px',
+                left: isMobile ? '50%' : '30px',
+                right: 'auto',
+                transform: isMobile ? 'translateX(-50%)' : 'none',
                 width: isMobile ? '90vw' : '320px',
                 height: '400px',
                 background: '#1a1a2e',
@@ -154,7 +165,7 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
                 }}>
                     {messages.length === 0 && (
                         <div style={{ textAlign: 'center', color: '#555', fontSize: '0.85rem', marginTop: '20px' }}>
-                            Nenhuma mensagem ainda...
+                            No messages yet...
                         </div>
                     )}
                     {messages.map((msg) => (
@@ -201,7 +212,7 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
                         type="text"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
-                        placeholder="Digite sua mensagem..."
+                        placeholder="Type your message..."
                         maxLength={200}
                         style={{
                             flex: 1,

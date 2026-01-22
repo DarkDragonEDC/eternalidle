@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Shield, Coins, Tag, Trash2, ArrowRight } from 'lucide-react';
-import { getTierColor } from '../data/items';
+import { getTierColor, calculateItemSellPrice } from '@shared/items';
 
 const ItemActionModal = ({ item, onClose, onEquip, onSell, onList }) => {
     if (!item) return null;
@@ -141,7 +141,7 @@ const ItemActionModal = ({ item, onClose, onEquip, onSell, onList }) => {
                                 cursor: 'pointer'
                             }}
                         >
-                            <Coins size={18} /> SELL QUICKLY ({item.value || 0})
+                            <Coins size={18} /> SELL QUICKLY ({calculateItemSellPrice(item, item.id)})
                         </button>
                     </div>
 

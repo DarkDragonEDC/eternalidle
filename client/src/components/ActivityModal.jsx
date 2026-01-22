@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Clock, Zap, Target, Star, ChevronRight, Package, Box } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { resolveItem, formatItemId } from '@shared/items';
 
 const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavigate }) => {
     const [quantity, setQuantity] = useState(1);
@@ -13,13 +14,43 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
 
     // Cálculos
     const qtyNum = Number(quantity) || 0;
-    const efficiency = (charStats.int * 3.5).toFixed(1); // 3.5% por ponto de INT (Exemplo)
+
+    // Determine Efficiency Key based on Item Type/ID
+    const getEfficiencyKey = (itemId, type) => {
+        if (!itemId) return 'GLOBAL';
+        if (type === 'GATHERING') {
+            if (itemId.includes('WOOD')) return 'WOOD';
+            if (itemId.includes('ORE')) return 'ORE';
+            if (itemId.includes('HIDE')) return 'HIDE';
+            if (itemId.includes('FIBER')) return 'FIBER';
+            if (itemId.includes('FISH')) return 'FISH';
+        } else if (type === 'REFINING') {
+            if (itemId.includes('PLANK')) return 'PLANK';
+            if (itemId.includes('BAR')) return 'METAL';
+            if (itemId.includes('LEATHER')) return 'LEATHER';
+            if (itemId.includes('CLOTH')) return 'CLOTH';
+        } else if (type === 'CRAFTING') {
+            if (itemId.includes('SWORD') || itemId.includes('PLATE') || itemId.includes('PICKAXE') || itemId.includes('SHIELD')) return 'WARRIOR';
+            if (itemId.includes('BOW') || itemId.includes('LEATHER') || itemId.includes('AXE') || itemId.includes('TORCH')) return 'HUNTER';
+            if (itemId.includes('STAFF') || itemId.includes('CLOTH') || itemId.includes('SICKLE') || itemId.includes('TOME')) return 'MAGE';
+            if (itemId.includes('FOOD')) return 'COOKING';
+            if (itemId.includes('CAPE')) return 'WARRIOR';
+        }
+        return 'GLOBAL';
+    };
+
+    const effKey = getEfficiencyKey(item.id, type);
+    const efficiency = (gameState?.calculatedStats?.efficiency?.[effKey] || 0).toFixed(1);
+
+    // XP
     const xpPerAction = item.xp || 5;
     const totalXP = (xpPerAction * qtyNum).toLocaleString();
 
-    // Tempo base
-    const baseTime = type === 'GATHERING' ? 3 : 1.5;
-    const finalTime = baseTime; // Sem redução por AGI
+    // Tempo base & Redução
+    const baseTime = type === 'GATHERING' ? 3 : (type === 'REFINING' ? 1.5 : (type === 'CRAFTING' ? 4.0 : 3.0));
+    // Efficiency reduces time: 10% eff = time * 0.9
+    const reductionFactor = Math.max(0.1, 1 - (parseFloat(efficiency) / 100));
+    const finalTime = Math.max(0.5, baseTime * reductionFactor);
 
     // Máximo 12h
     // Máximo 12h ou limitado por materiais
@@ -171,17 +202,22 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                                     {Object.entries(reqs).map(([reqId, reqQty]) => {
                                         const userQty = (gameState?.state?.inventory?.[reqId] || 0);
-                                        const hasEnough = userQty >= (reqQty * qtyNum);
+                                        const totalReq = reqQty * qtyNum; // Fixed logic to show total required
+                                        const hasEnough = userQty >= totalReq;
+                                        // Resolver nome
+                                        const resolvedFn = resolveItem(reqId);
+                                        const displayName = resolvedFn ? `T${resolvedFn.tier} ${resolvedFn.name}` : formatItemId(reqId);
+
                                         return (
                                             <div onClick={() => onNavigate && onNavigate(reqId)} key={reqId} style={{ flex: '1 1 calc(50% - 3px)', minWidth: '120px', background: 'rgba(255, 255, 255, 0.03)', padding: '8px', borderRadius: '4px', border: `1px solid ${hasEnough ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255, 68, 68, 0.3)'}`, cursor: 'pointer', position: 'relative' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                    <div style={{ fontSize: '0.7rem', color: '#d4af37', marginBottom: '2px', fontWeight: '600' }}>{reqId}</div>
+                                                    <div style={{ fontSize: '0.7rem', color: '#d4af37', marginBottom: '2px', fontWeight: '600' }}>{displayName}</div>
                                                     <button title="Search in Market" style={{ background: 'rgba(212, 175, 55, 0.1)', border: '1px solid rgba(212, 175, 55, 0.3)', borderRadius: '4px', padding: '2px', cursor: 'pointer', color: '#d4af37', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                         <Package size={10} />
                                                     </button>
                                                 </div>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                    <span style={{ fontSize: '0.6rem', color: 'rgb(136, 136, 136)' }}>x{reqQty * qtyNum}</span>
+                                                    <span style={{ fontSize: '0.6rem', color: 'rgb(136, 136, 136)' }}>x{totalReq}</span>
                                                     <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: hasEnough ? '#4caf50' : '#ff4444' }}>{userQty}</span>
                                                 </div>
                                             </div>
@@ -369,10 +405,14 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                         const userQty = (gameState?.state?.inventory?.[reqId] || 0);
                                         const totalReq = reqQty * qtyNum;
                                         const hasEnough = userQty >= totalReq;
+                                        // Resolver nome
+                                        const resolvedFn = resolveItem(reqId);
+                                        const displayName = resolvedFn ? `T${resolvedFn.tier} ${resolvedFn.name}` : formatItemId(reqId);
+
                                         return (
                                             <div onClick={() => onNavigate && onNavigate(reqId)} key={reqId} style={{ flex: '1 1 calc(50% - 3px)', minWidth: '120px', background: 'rgba(255, 255, 255, 0.03)', padding: '8px', borderRadius: '4px', border: `1px solid ${hasEnough ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255, 68, 68, 0.3)'}`, cursor: 'pointer', position: 'relative' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                    <div style={{ fontSize: '0.7rem', color: '#d4af37', marginBottom: '2px', fontWeight: '600' }}>{reqId}</div>
+                                                    <div style={{ fontSize: '0.7rem', color: '#d4af37', marginBottom: '2px', fontWeight: '600' }}>{displayName}</div>
                                                     <button title="Search in Market" style={{ background: 'rgba(212, 175, 55, 0.1)', border: '1px solid rgba(212, 175, 55, 0.3)', borderRadius: '4px', padding: '2px', cursor: 'pointer', color: '#d4af37', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                         <Package size={10} />
                                                     </button>
@@ -391,6 +431,10 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '4px' }}>
                                     <span style={{ color: 'rgb(136, 136, 136)' }}>Accuracy</span>
                                     <span style={{ color: '#4caf50' }}>+{efficiency}%</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '4px' }}>
+                                    <span style={{ color: 'rgb(136, 136, 136)' }}>Time per action</span>
+                                    <span style={{ color: '#fff' }}>{finalTime.toFixed(1)}s <span style={{ fontSize: '0.6rem', color: '#666', textDecoration: 'line-through' }}>{baseTime}s</span></span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '4px' }}>
                                     <span style={{ color: 'rgb(136, 136, 136)' }}>XP per action</span>
@@ -580,6 +624,10 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                     <span style={{ color: '#d4af37' }}>+{efficiency}%</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '4px' }}>
+                                    <span style={{ color: 'rgb(136, 136, 136)' }}>Time per action</span>
+                                    <span style={{ color: '#fff' }}>{finalTime.toFixed(1)}s <span style={{ fontSize: '0.6rem', color: '#666', textDecoration: 'line-through' }}>{baseTime}s</span></span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '4px' }}>
                                     <span style={{ color: 'rgb(136, 136, 136)' }}>XP per action</span>
                                     <span style={{ color: '#d4af37' }}>{xpPerAction}</span>
                                 </div>
@@ -682,7 +730,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                     </h2>
                                     <div style={{ fontSize: '0.75rem', color: '#888', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                         <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#4caf50' }}></div>
-                                        ATIVIDADE DE {type === 'GATHERING' ? 'COLETA' : 'REFINO'}
+                                        {type === 'GATHERING' ? 'GATHERING' : 'REFINING'} ACTIVITY
                                     </div>
                                 </div>
                             </div>
@@ -715,7 +763,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                         }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                                 <label style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '1px' }}>
-                                    QUANTIDADE
+                                    QUANTITY
                                 </label>
                                 <span style={{ fontSize: '0.7rem', color: '#555', fontWeight: 'bold' }}>MAX: {maxQuantity.toLocaleString()}</span>
                             </div>

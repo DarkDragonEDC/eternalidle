@@ -4,7 +4,7 @@ import {
     Coins, ArrowRight, User, Info, Trash2,
     Shield, Zap, Apple, Box, Clock, Check, AlertTriangle, X
 } from 'lucide-react';
-import { resolveItem, getTierColor } from '../data/items';
+import { resolveItem, getTierColor, formatItemId } from '@shared/items';
 
 const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket, isMobile }) => {
     const [activeTab, setActiveTab] = useState('BUY'); // BUY, SELL, LISTINGS, CLAIM
@@ -13,11 +13,10 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
     const [searchQuery, setSearchQuery] = useState('');
     const [categoryOpen, setCategoryOpen] = useState(false);
     const [selectedListing, setSelectedListing] = useState(null); // For buying
+    const [buyModal, setBuyModal] = useState(null);
     const [confirmModal, setConfirmModal] = useState(null);
     const [marketListings, setMarketListings] = useState([]);
-    const [notification, setNotification] = useState(null); // Kept notification state as its useEffect is present
-
-
+    const [notification, setNotification] = useState(null);
 
     // Auto-dismiss notification
     useEffect(() => {
@@ -40,6 +39,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
             setNotification({ type: 'success', message: result.message || 'Action completed successfully!' });
             socket.emit('get_market_listings');
             setConfirmModal(null);
+            setBuyModal(null);
         };
 
         const handleError = (err) => {
@@ -57,15 +57,26 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
         };
     }, [socket]);
 
-    const handleBuy = (listingId) => {
-        setConfirmModal({
-            message: 'Are you sure you want to buy this item?',
-            subtext: 'Silver will be deducted immediately.',
-            onConfirm: () => {
-                socket.emit('buy_market_item', { listingId });
-                setConfirmModal(null);
-            }
-        });
+    const handleBuy = (listing) => {
+        if (listing.amount === 1) {
+            // Direct buying for single items
+            setConfirmModal({
+                message: 'Are you sure you want to buy this item?',
+                subtext: 'Silver will be deducted immediately.',
+                onConfirm: () => {
+                    socket.emit('buy_market_item', { listingId: listing.id, quantity: 1 });
+                    setConfirmModal(null);
+                }
+            });
+        } else {
+            // Open partial buy modal
+            setBuyModal({
+                listing: listing,
+                quantity: 1,
+                max: listing.amount,
+                pricePerUnit: listing.price / listing.amount
+            });
+        }
     };
 
     const handleCancel = (listingId) => {
@@ -100,7 +111,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
     const activeBuyListings = activeListingsForValues.filter(l => {
         if (l.seller_id === gameState.user_id) return false; // Don't show own listings in buy
 
-        const itemName = l.item_data?.name || l.item_id;
+        const itemName = l.item_data?.name || formatItemId(l.item_id);
         const matchesSearch = itemName.toLowerCase().includes(searchQuery.toLowerCase());
 
         let matchesCategory = true;
@@ -352,22 +363,22 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
                                             <div style={{ marginLeft: '10px' }}>
                                                 <button
-                                                    onClick={() => handleBuy(l.id)}
-                                                    disabled={silver < l.price}
+                                                    onClick={() => handleBuy(l)}
+                                                    disabled={silver < (l.price / l.amount)}
                                                     style={{
                                                         padding: '8px 16px',
                                                         borderRadius: '6px',
                                                         border: 'none',
-                                                        cursor: silver < l.price ? 'not-allowed' : 'pointer',
-                                                        background: silver < l.price ? 'rgba(255, 255, 255, 0.05)' : 'rgba(76, 175, 80, 0.15)',
-                                                        color: silver < l.price ? 'var(--text-dim)' : '#4caf50',
+                                                        cursor: silver < (l.price / l.amount) ? 'not-allowed' : 'pointer',
+                                                        background: silver < (l.price / l.amount) ? 'rgba(255, 255, 255, 0.05)' : 'rgba(76, 175, 80, 0.15)',
+                                                        color: silver < (l.price / l.amount) ? 'var(--text-dim)' : '#4caf50',
                                                         fontWeight: 'bold',
                                                         fontSize: '0.8rem',
                                                         minWidth: '100px',
-                                                        border: `1px solid ${silver < l.price ? 'transparent' : 'rgba(76, 175, 80, 0.3)'}`
+                                                        border: `1px solid ${silver < (l.price / l.amount) ? 'transparent' : 'rgba(76, 175, 80, 0.3)'}`
                                                     }}
                                                 >
-                                                    {silver < l.price ? 'No Funds' : 'BUY'}
+                                                    {silver < (l.price / l.amount) ? 'No Funds' : 'BUY'}
                                                 </button>
                                             </div>
                                         </div>
@@ -662,7 +673,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                     )
                 }
 
-                {/* CONFIRM MODAL */}
+                {/* CONFIRM MODAL (Simple) */}
                 {
                     confirmModal && (
                         <div style={{
@@ -720,6 +731,153 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                         }}
                                     >
                                         Confirm
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                }
+
+                {/* BUY MODAL (Partial Quantity) */}
+                {
+                    buyModal && (
+                        <div style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            background: 'rgba(0,0,0,0.8)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 200,
+                            backdropFilter: 'blur(2px)'
+                        }} onClick={(e) => {
+                            if (e.target === e.currentTarget) setBuyModal(null);
+                        }}>
+                            <div style={{
+                                background: '#1a1a1a',
+                                border: '1px solid var(--border)',
+                                borderRadius: '12px',
+                                padding: '24px',
+                                width: '90%',
+                                maxWidth: '450px',
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.5)'
+                            }}>
+                                <h3 style={{ margin: '0 0 4px 0', fontSize: '1.2rem', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span>Buy {buyModal.listing.item_data.name}</span>
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 'normal' }}>
+                                        {buyModal.max} available
+                                    </span>
+                                </h3>
+                                <p style={{ margin: '0 0 20px 0', color: 'var(--text-dim)', fontSize: '0.9rem' }}>
+                                    Price per unit: <span style={{ color: 'var(--accent)' }}>{Math.floor(buyModal.pricePerUnit).toLocaleString()} silver</span>
+                                </p>
+
+                                {/* Quantity Selector */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                                    <button
+                                        onClick={() => setBuyModal(prev => ({ ...prev, quantity: Math.max(1, prev.quantity - 1) }))}
+                                        style={{
+                                            width: '40px', height: '40px', borderRadius: '8px', border: '1px solid var(--border)',
+                                            background: 'rgba(255,255,255,0.05)', color: '#fff', cursor: 'pointer', fontSize: '1.2rem'
+                                        }}
+                                    >-</button>
+
+                                    <div style={{ flex: 1, position: 'relative' }}>
+                                        <input
+                                            type="number"
+                                            value={buyModal.quantity}
+                                            onChange={(e) => {
+                                                const val = Math.max(1, Math.min(buyModal.max, parseInt(e.target.value) || 1));
+                                                setBuyModal(prev => ({ ...prev, quantity: val }));
+                                            }}
+                                            style={{
+                                                width: '100%',
+                                                textAlign: 'center',
+                                                background: 'rgba(0,0,0,0.3)',
+                                                border: '1px solid var(--border)',
+                                                borderRadius: '8px',
+                                                padding: '10px',
+                                                color: '#fff',
+                                                fontSize: '1.1rem',
+                                                fontWeight: 'bold'
+                                            }}
+                                        />
+                                    </div>
+
+                                    <button
+                                        onClick={() => setBuyModal(prev => ({ ...prev, quantity: Math.min(prev.max, prev.quantity + 1) }))}
+                                        style={{
+                                            width: '40px', height: '40px', borderRadius: '8px', border: '1px solid var(--border)',
+                                            background: 'rgba(255,255,255,0.05)', color: '#fff', cursor: 'pointer', fontSize: '1.2rem'
+                                        }}
+                                    >+</button>
+                                </div>
+
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                                    <button
+                                        onClick={() => setBuyModal(prev => ({ ...prev, quantity: 1 }))}
+                                        style={{ fontSize: '0.8rem', padding: '4px 8px', background: 'transparent', border: '1px solid var(--border)', borderRadius: '4px', color: 'var(--text-dim)', cursor: 'pointer' }}
+                                    >MIN (1)</button>
+                                    <button
+                                        onClick={() => setBuyModal(prev => ({ ...prev, quantity: prev.max }))}
+                                        style={{ fontSize: '0.8rem', padding: '4px 8px', background: 'transparent', border: '1px solid var(--border)', borderRadius: '4px', color: 'var(--text-dim)', cursor: 'pointer' }}
+                                    >MAX ({buyModal.max})</button>
+                                </div>
+
+                                {/* Financial Summary */}
+                                <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '8px', padding: '15px', marginBottom: '20px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-dim)' }}>
+                                        <span>Current Silver:</span>
+                                        <span style={{ color: '#fff' }}>{silver ? silver.toLocaleString() : 0}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-dim)' }}>
+                                        <span>Total Cost:</span>
+                                        <span style={{ color: '#ff4444' }}>- {(Math.floor(buyModal.pricePerUnit * buyModal.quantity)).toLocaleString()}</span>
+                                    </div>
+                                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: '8px', paddingTop: '8px', display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
+                                        <span>Remaining:</span>
+                                        <span style={{ color: (silver - Math.floor(buyModal.pricePerUnit * buyModal.quantity)) < 0 ? '#ff4444' : '#4caf50' }}>
+                                            {(silver - Math.floor(buyModal.pricePerUnit * buyModal.quantity)).toLocaleString()}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                                    <button
+                                        onClick={() => setBuyModal(null)}
+                                        style={{
+                                            padding: '12px 24px',
+                                            borderRadius: '8px',
+                                            border: '1px solid var(--border)',
+                                            background: 'transparent',
+                                            color: 'var(--text-dim)',
+                                            cursor: 'pointer',
+                                            fontWeight: 'bold'
+                                        }}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            if (silver >= Math.floor(buyModal.pricePerUnit * buyModal.quantity)) {
+                                                socket.emit('buy_market_item', { listingId: buyModal.listing.id, quantity: buyModal.quantity });
+                                            }
+                                        }}
+                                        disabled={silver < Math.floor(buyModal.pricePerUnit * buyModal.quantity)}
+                                        style={{
+                                            padding: '12px 24px',
+                                            borderRadius: '8px',
+                                            border: 'none',
+                                            background: silver < Math.floor(buyModal.pricePerUnit * buyModal.quantity) ? 'rgba(255,255,255,0.1)' : 'var(--accent)',
+                                            color: silver < Math.floor(buyModal.pricePerUnit * buyModal.quantity) ? 'var(--text-dim)' : '#000',
+                                            cursor: silver < Math.floor(buyModal.pricePerUnit * buyModal.quantity) ? 'not-allowed' : 'pointer',
+                                            fontWeight: 'bold'
+                                        }}
+                                    >
+                                        Confirm Buy
                                     </button>
                                 </div>
                             </div>

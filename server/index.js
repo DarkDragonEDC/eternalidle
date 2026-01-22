@@ -34,6 +34,9 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+const isServiceRole = SUPABASE_KEY?.includes('NlcnZpY2Vfcm9sZ');
+console.log('[SERVER] Supabase Key Role:', isServiceRole ? 'SERVICE_ROLE' : 'ANON');
+
 import { GameManager } from './GameManager.js';
 const gameManager = new GameManager(supabase);
 
@@ -80,10 +83,12 @@ io.on('connection', (socket) => {
 
     socket.on('get_status', async () => {
         try {
-            const status = await gameManager.getStatus(socket.user.id, true);
-            socket.emit('status_update', status);
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const status = await gameManager.getStatus(socket.user.id, true);
+                socket.emit('status_update', status);
+            });
         } catch (err) {
-            console.error(`[SERVER] Error in get_status:`, err);
+            console.error(`[SERVER] Error in get_status: `, err);
             socket.emit('error', { message: err.message });
         }
     });
@@ -98,20 +103,25 @@ io.on('connection', (socket) => {
     });
 
     socket.on('create_character', async ({ name }) => {
+        console.log(`[SERVER] Received create_character request: "${name}" from user ${socket.user.email} `);
         try {
             const char = await gameManager.createCharacter(socket.user.id, name);
+            console.log(`[SERVER] Character created successfully: "${name}"`);
             socket.emit('character_created', char);
             socket.emit('status_update', await gameManager.getStatus(socket.user.id));
         } catch (err) {
+            console.error(`[SERVER] Error creating character "${name}": `, err.message);
             socket.emit('error', { message: err.message });
         }
     });
 
     socket.on('start_activity', async ({ actionType, itemId, quantity }) => {
         try {
-            const result = await gameManager.startActivity(socket.user.id, actionType, itemId, quantity);
-            socket.emit('activity_started', result);
-            socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.startActivity(socket.user.id, actionType, itemId, quantity);
+                socket.emit('activity_started', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            });
         } catch (err) {
             console.error('Error starting activity:', err);
             socket.emit('error', { message: err.message });
@@ -120,9 +130,11 @@ io.on('connection', (socket) => {
 
     socket.on('claim_reward', async () => {
         try {
-            const result = await gameManager.claimReward(socket.user.id);
-            socket.emit('reward_claimed', result);
-            socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.claimReward(socket.user.id);
+                socket.emit('reward_claimed', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            });
         } catch (err) {
             console.error('Error claiming reward:', err);
             socket.emit('error', { message: err.message });
@@ -131,9 +143,11 @@ io.on('connection', (socket) => {
 
     socket.on('start_dungeon', async ({ tier }) => {
         try {
-            const result = await gameManager.startDungeon(socket.user.id, tier);
-            socket.emit('dungeon_started', result);
-            socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.startDungeon(socket.user.id, tier);
+                socket.emit('dungeon_started', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            });
         } catch (err) {
             console.error('Error starting dungeon:', err);
             socket.emit('error', { message: err.message });
@@ -142,9 +156,11 @@ io.on('connection', (socket) => {
 
     socket.on('start_combat', async ({ tier, mobId }) => {
         try {
-            const result = await gameManager.startCombat(socket.user.id, mobId, tier);
-            socket.emit('combat_started', result);
-            socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.startCombat(socket.user.id, mobId, tier);
+                socket.emit('combat_started', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            });
         } catch (err) {
             console.error('Error starting combat:', err);
             socket.emit('error', { message: err.message });
@@ -153,19 +169,26 @@ io.on('connection', (socket) => {
 
     socket.on('stop_combat', async () => {
         try {
-            const result = await gameManager.stopCombat(socket.user.id);
-            socket.emit('combat_stopped', result);
-            socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const userId = socket.user.id;
+                const result = await gameManager.stopCombat(userId);
+                socket.emit('action_result', result);
+                const status = await gameManager.getStatus(userId);
+                socket.emit('status_update', status);
+            });
         } catch (err) {
-            socket.emit('error', { message: err.message });
+            socket.emit('error', err.message);
         }
     });
 
+
     socket.on('equip_item', async ({ itemId }) => {
         try {
-            const result = await gameManager.equipItem(socket.user.id, itemId);
-            socket.emit('item_equipped', result);
-            socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.equipItem(socket.user.id, itemId);
+                socket.emit('item_equipped', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            });
         } catch (err) {
             socket.emit('error', { message: err.message });
         }
@@ -173,9 +196,11 @@ io.on('connection', (socket) => {
 
     socket.on('unequip_item', async ({ slot }) => {
         try {
-            const result = await gameManager.unequipItem(socket.user.id, slot);
-            socket.emit('item_unequipped', result);
-            socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.unequipItem(socket.user.id, slot);
+                socket.emit('item_unequipped', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            });
         } catch (err) {
             console.error('Error unequipping item:', err);
             socket.emit('error', { message: err.message });
@@ -228,35 +253,42 @@ io.on('connection', (socket) => {
 
     socket.on('list_market_item', async ({ itemId, amount, price }) => {
         try {
-            const result = await gameManager.listMarketItem(socket.user.id, itemId, amount, price);
-            socket.emit('market_action_success', result);
-            socket.emit('status_update', await gameManager.getStatus(socket.user.id));
-            const listings = await gameManager.getMarketListings();
-            io.emit('market_listings_update', listings);
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.listMarketItem(socket.user.id, itemId, amount, price);
+                socket.emit('market_action_success', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+                const listings = await gameManager.getMarketListings();
+                io.emit('market_listings_update', listings);
+            });
         } catch (err) {
             socket.emit('error', { message: err.message });
         }
     });
 
-    socket.on('buy_market_item', async ({ listingId }) => {
+    socket.on('buy_market_item', async ({ listingId, quantity }) => {
         try {
-            const result = await gameManager.buyMarketItem(socket.user.id, listingId);
-            socket.emit('market_action_success', result);
-            socket.emit('status_update', await gameManager.getStatus(socket.user.id));
-            const listings = await gameManager.getMarketListings();
-            io.emit('market_listings_update', listings);
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.buyMarketItem(socket.user.id, listingId, quantity);
+                socket.emit('market_action_success', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+                const listings = await gameManager.getMarketListings();
+                io.emit('market_listings_update', listings);
+            });
         } catch (err) {
+            console.error('Error buying item:', err);
             socket.emit('error', { message: err.message });
         }
     });
 
     socket.on('cancel_listing', async ({ listingId }) => {
         try {
-            const result = await gameManager.cancelMarketListing(socket.user.id, listingId);
-            socket.emit('market_action_success', result);
-            socket.emit('status_update', await gameManager.getStatus(socket.user.id));
-            const listings = await gameManager.getMarketListings();
-            io.emit('market_listings_update', listings);
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.cancelMarketListing(socket.user.id, listingId);
+                socket.emit('market_action_success', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+                const listings = await gameManager.getMarketListings();
+                io.emit('market_listings_update', listings);
+            });
         } catch (err) {
             socket.emit('error', { message: err.message });
         }
@@ -264,9 +296,11 @@ io.on('connection', (socket) => {
 
     socket.on('claim_market_item', async ({ claimId }) => {
         try {
-            const result = await gameManager.claimMarketItem(socket.user.id, claimId);
-            socket.emit('market_action_success', result);
-            socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.claimMarketItem(socket.user.id, claimId);
+                socket.emit('market_action_success', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            });
         } catch (err) {
             socket.emit('error', { message: err.message });
         }
@@ -274,9 +308,11 @@ io.on('connection', (socket) => {
 
     socket.on('sell_item', async ({ itemId, quantity }) => {
         try {
-            const result = await gameManager.sellItem(socket.user.id, itemId, quantity);
-            socket.emit('item_sold', result);
-            socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.sellItem(socket.user.id, itemId, quantity);
+                socket.emit('item_sold', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            });
         } catch (err) {
             socket.emit('error', { message: err.message });
         }
@@ -284,9 +320,11 @@ io.on('connection', (socket) => {
 
     socket.on('stop_activity', async () => {
         try {
-            await gameManager.stopActivity(socket.user.id);
-            socket.emit('activity_stopped');
-            socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            await gameManager.executeLocked(socket.user.id, async () => {
+                await gameManager.stopActivity(socket.user.id);
+                socket.emit('activity_stopped');
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            });
         } catch (err) {
             socket.emit('error', { message: err.message });
         }
@@ -309,33 +347,39 @@ setInterval(async () => {
 
         const activeUsersCount = Object.keys(userGroups).length;
         if (activeUsersCount > 0) {
-            // console.log(`[TICKER] Processing ${activeUsersCount} users...`);
+            // console.log(`[TICKER] Processing ${ activeUsersCount } users...`);
         }
 
         await Promise.all(Object.values(userGroups).map(async ({ user, sockets }) => {
             try {
-                const result = await gameManager.processTick(user.id);
-                if (result) {
-                    console.log(`[TICKER] Emitting update for ${user.email} (Status change: ${!!result.status})`);
-                    sockets.forEach(s => {
-                        if (result.message) {
-                            s.emit('action_result', {
-                                success: result.success,
-                                message: result.message,
-                                leveledUp: result.leveledUp,
-                                combatUpdate: result.combatUpdate
-                            });
-                        }
-                        if (result.status) {
-                            s.emit('status_update', result.status);
-                        }
-                        if (result.leveledUp) {
-                            s.emit('skill_level_up', { message: `Sua skill subiu de nível!` });
-                        }
-                    });
-                }
+                await gameManager.executeLocked(user.id, async () => {
+                    const result = await gameManager.processTick(user.id);
+                    if (result) {
+                        console.log(`[TICKER] Emitting update for ${user.email} (Status change: ${!!result.status})`);
+                        sockets.forEach(s => {
+                            if (result.message) {
+                                s.emit('action_result', {
+                                    success: result.success,
+                                    message: result.message,
+                                    leveledUp: result.leveledUp,
+                                    combatUpdate: result.combatUpdate
+                                });
+                            }
+                            if (result.status) {
+                                s.emit('status_update', result.status);
+                            }
+                            if (result.leveledUp) {
+                                const { skill, level } = result.leveledUp;
+                                const skillName = skill.replace(/_/g, ' ');
+                                s.emit('skill_level_up', {
+                                    message: `Sua skill de ${skillName} subiu para o nível ${level}!`
+                                });
+                            }
+                        });
+                    }
+                });
             } catch (err) {
-                console.error(`[TICKER] Error for character ${user.id}:`, err);
+                console.error(`[TICKER] Error for character ${user.id}: `, err);
             }
         }));
     } catch (err) {
@@ -344,5 +388,5 @@ setInterval(async () => {
 }, 1000);
 
 httpServer.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT} `);
 });

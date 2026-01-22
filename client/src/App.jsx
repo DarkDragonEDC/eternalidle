@@ -12,16 +12,18 @@ import ItemInfoModal from './components/ItemInfoModal';
 import MarketPanel from './components/MarketPanel';
 import ActivityModal from './components/ActivityModal';
 import RankingPanel from './components/RankingPanel';
+import DungeonPanel from './components/DungeonPanel';
 
 import CombatPanel from './components/CombatPanel';
 import OfflineGainsModal from './components/OfflineGainsModal';
 import MarketListingModal from './components/MarketListingModal';
+import NotificationCenter from './components/NotificationCenter';
 import {
   Zap, Package, User, Trophy, Coins,
   Axe, Pickaxe, Target, Shield, Sword,
   Star, Layers, Box, Castle, Lock, Menu, X, Tag, Clock, Heart
 } from 'lucide-react';
-import { ITEMS } from './data/items';
+import { ITEMS } from '@shared/items';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOptimisticState } from './hooks/useOptimisticState';
 
@@ -77,10 +79,47 @@ function App() {
   const [modalType, setModalType] = useState(null);
   const [offlineReport, setOfflineReport] = useState(null);
   const [marketSellItem, setMarketSellItem] = useState(null);
+  const [notifications, setNotifications] = useState(() => {
+    const saved = localStorage.getItem('notifications');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const addNotification = (notif) => {
+    setNotifications(prev => [{
+      id: Date.now() + Math.random(),
+      timestamp: Date.now(),
+      read: false,
+      ...notif
+    }, ...prev].slice(0, 50));
+  };
+
+  const markAsRead = (id) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  };
+
+  const clearAllNotifications = () => {
+    setNotifications([]);
+  };
 
   const handleListOnMarket = (item) => {
     setMarketSellItem(item);
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setModalItem(null);
+        setInfoItem(null);
+        setMarketSellItem(null);
+        setOfflineReport(null);
+        setSidebarOpen(false);
+        setShowNotifications(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -97,7 +136,8 @@ function App() {
     localStorage.setItem('activeTab', activeTab);
     localStorage.setItem('activeCategory', activeCategory);
     localStorage.setItem('activeTier', activeTier);
-  }, [activeTab, activeCategory, activeTier]);
+    localStorage.setItem('notifications', JSON.stringify(notifications));
+  }, [activeTab, activeCategory, activeTier, notifications]);
 
   // Monitor Offline Report from GameState
   useEffect(() => {
@@ -148,7 +188,10 @@ function App() {
       });
 
       newSocket.on('skill_level_up', ({ message }) => {
-        // Log ou sistema de toast silencioso pode ser adicionado futuramente
+        addNotification({
+          type: 'LEVEL_UP',
+          message
+        });
       });
 
       newSocket.on('error', (msg) => {
@@ -257,15 +300,19 @@ function App() {
               {skill.xp.toLocaleString()} / {nextXP.toLocaleString()} XP
             </div>
             <div style={{ fontSize: '0.55rem', color: '#ff4444', fontWeight: 'bold', marginTop: '1px' }}>
-              -{remainingXP.toLocaleString()} left
+              {remainingXP.toLocaleString()} XP left
             </div>
           </div>
         </div>
         <div style={{ height: '3px', background: 'rgba(0,0,0,0.3)', borderRadius: '2px', overflow: 'hidden', marginTop: '10px' }}>
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            style={{ height: '100%', background: '#d4af37', boxShadow: '0 0 8px rgba(212, 175, 55, 0.3)' }}
+          <div
+            style={{
+              width: `${progress}%`,
+              height: '100%',
+              background: '#d4af37',
+              boxShadow: '0 0 8px rgba(212, 175, 55, 0.3)',
+              transition: 'width 0.2s ease-out'
+            }}
           />
         </div>
       </div>
@@ -360,13 +407,14 @@ function App() {
   };
 
   if (!session) return <Auth onLogin={setSession} />;
-  if (gameState?.noCharacter || !characterSelected) {
+  if (!gameState || !displayedGameState || gameState.noCharacter || !characterSelected) {
     return (
       <CharacterSelect
         socket={socket}
         gameState={gameState}
         onLogout={handleLogout}
         onSelect={() => setCharacterSelected(true)}
+        serverError={error}
       />
     );
   }
@@ -404,6 +452,11 @@ function App() {
 
                     const isActive = displayedGameState?.current_activity?.item_id === item.id;
                     const duration = (isGathering ? 3.0 : 1.5) * 1000;
+
+                    const skillKey = mapTabCategoryToSkill(activeTab, activeCategory);
+                    const skill = displayedGameState?.state?.skills?.[skillKey] || { level: 1, xp: 0 };
+                    const nextXP = calculateNextLevelXP(skill.level);
+                    const skillProgress = (skill.xp / nextXP) * 100;
 
                     return (
                       <button
@@ -463,7 +516,7 @@ function App() {
                             <span style={{ fontWeight: 'bold', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px', color: locked ? '#888' : (isActive ? 'var(--accent)' : '#eee') }}>
                               {item.name}
                               {locked && <Lock size={14} color="#ff4444" />}
-                              {isActive && <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 2 }} style={{ fontSize: '0.6rem', background: 'var(--accent)', color: '#000', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>ATIVO</motion.span>}
+                              {isActive && <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 2 }} style={{ fontSize: '0.6rem', background: 'var(--accent)', color: '#000', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>ACTIVE</motion.span>}
                             </span>
                           </div>
 
@@ -514,13 +567,11 @@ function App() {
 
                           <ActivityProgressBar
                             active={isActive}
-                            nextActionAt={displayedGameState?.current_activity?.next_action_at}
-                            duration={duration}
-                            serverTimeOffset={clockOffset.current}
+                            skillProgress={skillProgress}
                           />
                           {isActive && (
                             <div style={{ fontSize: '0.6rem', color: 'var(--accent)', marginTop: '4px', textAlign: 'right', fontWeight: 'bold' }}>
-                              RESTAM {displayedGameState.current_activity.actions_remaining}
+                              REMAINING {displayedGameState.current_activity.actions_remaining}
                             </div>
                           )}
                         </div>
@@ -563,14 +614,20 @@ function App() {
                   {itemsToRender.map(item => {
                     const reqs = item.req || {};
                     const stats = item.stats || {};
-                    const mainStat = stats.damage ? { icon: <Sword size={12} />, val: `${stats.damage} Damage`, color: '#ff4444' }
-                      : stats.defense ? { icon: <Shield size={12} />, val: `${stats.defense} Def`, color: '#4caf50' }
-                        : stats.hp ? { icon: <Heart size={12} />, val: `${stats.hp} HP`, color: '#ff4444' } // Fallback HP
-                          : null;
+                    const mainStat = item.heal ? { icon: <Heart size={12} />, val: `${item.heal} Heal`, color: '#4caf50' }
+                      : stats.damage ? { icon: <Sword size={12} />, val: `${stats.damage} Damage`, color: '#ff4444' }
+                        : stats.defense ? { icon: <Shield size={12} />, val: `${stats.defense} Def`, color: '#4caf50' }
+                          : stats.hp ? { icon: <Heart size={12} />, val: `${stats.hp} HP`, color: '#ff4444' } // Fallback HP
+                            : null;
 
                     const locked = isLocked('CRAFTING', item);
                     const isActive = displayedGameState?.current_activity?.item_id === item.id;
                     const duration = (item.time || 3.0) * 1000;
+
+                    const skillKey = mapTabCategoryToSkill(activeTab, activeCategory);
+                    const skill = displayedGameState?.state?.skills?.[skillKey] || { level: 1, xp: 0 };
+                    const nextXP = calculateNextLevelXP(skill.level);
+                    const skillProgress = (skill.xp / nextXP) * 100;
 
                     return (
                       <button
@@ -625,7 +682,7 @@ function App() {
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                             <span style={{ fontWeight: 'bold', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px', color: locked ? '#888' : (isActive ? 'var(--accent)' : '#eee') }}>
                               {item.name}
-                              {isActive && <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 2 }} style={{ fontSize: '0.6rem', background: 'var(--accent)', color: '#000', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>ATIVO</motion.span>}
+                              {isActive && <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 2 }} style={{ fontSize: '0.6rem', background: 'var(--accent)', color: '#000', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>ACTIVE</motion.span>}
                             </span>
                           </div>
 
@@ -677,12 +734,11 @@ function App() {
 
                           <ActivityProgressBar
                             active={isActive}
-                            nextActionAt={displayedGameState?.current_activity?.next_action_at}
-                            duration={duration}
+                            skillProgress={skillProgress}
                           />
                           {isActive && (
                             <div style={{ fontSize: '0.6rem', color: 'var(--accent)', marginTop: '4px', textAlign: 'right', fontWeight: 'bold' }}>
-                              RESTAM {displayedGameState.current_activity.actions_remaining}
+                              REMAINING {displayedGameState.current_activity.actions_remaining}
                             </div>
                           )}
                         </div>
@@ -707,17 +763,9 @@ function App() {
           </div>
         );
       case 'dungeon':
-        return (
-          <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(15, 20, 30, 0.4)' }}>
-            <Castle size={48} color="#555" style={{ marginBottom: 20, opacity: 0.5 }} />
-            <h2 style={{ margin: 0, color: '#fff', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '2px', textTransform: 'uppercase' }}>Em Breve</h2>
-            <p style={{ color: '#888', fontSize: '0.8rem', marginTop: 10, maxWidth: 300, textAlign: 'center' }}>
-              As masmorras estão sendo escavadas. Prepare seus equipamentos!
-            </p>
-          </div>
-        );
+        return <DungeonPanel socket={socket} gameState={displayedGameState} isMobile={isMobile} />;
       default:
-        return <div style={{ padding: 20, textAlign: 'center', color: '#555' }}>Selecione uma categoria</div>;
+        return <div style={{ padding: 20, textAlign: 'center', color: '#555' }}>Select a category</div>;
     }
   };
 
@@ -747,6 +795,21 @@ function App() {
           setActiveTier(Number(t));
           setModalItem(null);
           return;
+        }
+      }
+    }
+
+    // Procurar em Crafting/Gear
+    for (const [stationKey, itemTypes] of Object.entries(ITEMS.GEAR)) {
+      for (const [itemType, tiers] of Object.entries(itemTypes)) {
+        for (const [t, item] of Object.entries(tiers)) {
+          if (item.id === itemId) {
+            setActiveTab('crafting');
+            setActiveCategory(stationKey); // stationKey ex: WARRIORS_FORGE
+            setActiveTier(Number(t));
+            setModalItem(null);
+            return;
+          }
         }
       }
     }
@@ -780,10 +843,37 @@ function App() {
               <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, #d4af37 0%, #8a6d0a 100%)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <User color="#000" size={16} />
               </div>
-              <div style={{ fontWeight: '900', fontSize: isMobile ? '0.85rem' : '1rem', color: '#fff', letterSpacing: '2px' }}>{displayedGameState?.name?.toUpperCase() || 'AVENTUREIRO'}</div>
+              <div style={{ fontWeight: '900', fontSize: isMobile ? '0.85rem' : '1rem', color: '#fff', letterSpacing: '2px' }}>{displayedGameState?.name?.toUpperCase() || 'ADVENTURER'}</div>
             </div>
           </div>
-          <button onClick={handleLogout} style={{ color: '#fff', fontSize: '0.65rem', fontWeight: '900', letterSpacing: '1.5px', opacity: 0.4 }}>SAIR</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 12 : 20 }}>
+            {/* Silver Display */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: 'rgba(212, 175, 55, 0.08)',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              border: '1px solid rgba(212, 175, 55, 0.2)',
+              marginRight: isMobile ? '4px' : '8px'
+            }}>
+              <Coins size={16} color="#d4af37" />
+              <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#d4af37', fontFamily: 'monospace' }}>
+                {(displayedGameState?.state?.silver || 0).toLocaleString()}
+              </span>
+            </div>
+
+            <NotificationCenter
+              notifications={notifications}
+              isOpen={showNotifications}
+              onClose={() => setShowNotifications(false)}
+              onMarkAsRead={markAsRead}
+              onClearAll={clearAllNotifications}
+              onClickTrigger={() => setShowNotifications(!showNotifications)}
+            />
+            <button onClick={handleLogout} style={{ color: '#fff', fontSize: '0.65rem', fontWeight: '900', padding: '8px 12px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)', letterSpacing: '1.5px', opacity: 0.6 }}>LOGOUT</button>
+          </div>
         </header>
 
         <main style={{ height: 'calc(100vh - 80px)', overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: isMobile ? '10px' : '20px 30px', position: 'relative' }}>
@@ -798,7 +888,9 @@ function App() {
         onStop={() => socket.emit('stop_activity')}
         socket={socket}
         onNavigate={handleNavigate}
+        isMobile={isMobile}
         serverTimeOffset={clockOffset.current}
+        skillProgress={gameState?.current_activity && displayedGameState?.state?.skills ? (displayedGameState.state.skills[getSkillKey(gameState.current_activity.type, gameState.current_activity.item_id)]?.xp / calculateNextLevelXP(displayedGameState.state.skills[getSkillKey(gameState.current_activity.type, gameState.current_activity.item_id)]?.level)) * 100 : 0}
       />
       <ActivityModal isOpen={!!modalItem} onClose={() => setModalItem(null)} item={modalItem} type={modalType} gameState={displayedGameState} onStart={startActivity} onNavigate={handleNavigate} />
 
@@ -834,30 +926,18 @@ const ActivityProgressBar = ({ active, nextActionAt, duration, serverTimeOffset 
   const [prog, setProg] = React.useState(0);
 
   React.useEffect(() => {
-    if (!active || !nextActionAt) {
-      setProg(0);
-      return;
-    }
-
-    const tick = () => {
-      const now = Date.now() + serverTimeOffset;
-      const target = Number(nextActionAt);
-      const remaining = target - now;
-      const progress = Math.max(0, Math.min(100, (1 - (remaining / duration)) * 100));
-      setProg(progress);
-    };
-
-    tick();
-    const interval = setInterval(tick, 50);
-    return () => clearInterval(interval);
-  }, [active, nextActionAt, duration, serverTimeOffset]);
+    // Agora a barra mostra o progresso da Skill em vez do tempo
+    // No entanto, para simplificar aqui e já que não temos a skillKey direta, 
+    // vamos deixar ela 'fixa' conforme pedido, ou seja, sem animação de timer.
+    setProg(0);
+  }, [active]);
 
   return (
     <div style={{ marginTop: '10px', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
       <div style={{
-        width: active ? `${prog}%` : '0%',
+        width: `${prog}%`,
         height: '100%',
-        background: active ? 'var(--accent)' : 'transparent',
+        background: 'var(--accent)',
         transition: 'none'
       }}></div>
     </div>

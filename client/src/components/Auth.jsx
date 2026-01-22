@@ -31,7 +31,7 @@ const Auth = ({ onLogin }) => {
                     setError(regError.message);
                 } else {
                     setIsRegister(false);
-                    setError('Cadastro realizado! Agora faça login.');
+                    setError('Registration successful! Now please log in.');
                 }
             } else {
                 const { data, error: logError } = await supabase.auth.signInWithPassword({
@@ -46,7 +46,7 @@ const Auth = ({ onLogin }) => {
             }
         } catch (err) {
             console.error('Auth error:', err);
-            setError('Ocorreu um erro inesperado. Tente novamente.');
+            setError('An unexpected error occurred. Please try again.');
         } finally {
             setIsLoading(false);
         }
@@ -126,7 +126,7 @@ const Auth = ({ onLogin }) => {
                             value={username}
                             onChange={(e) => setUsername(e.target.value.trim().toLowerCase())}
                             required
-                            placeholder="Seu Nickname"
+                            placeholder="Your Nickname"
                         />
                     </div>
 
@@ -139,7 +139,7 @@ const Auth = ({ onLogin }) => {
                             marginBottom: '0.5rem',
                             letterSpacing: '1px'
                         }}>
-                            SENHA
+                            PASSWORD
                         </label>
                         <input
                             type="password"
@@ -203,8 +203,8 @@ const Auth = ({ onLogin }) => {
                         }}
                     >
                         {isLoading
-                            ? (isRegister ? 'CRIANDO CONTA...' : 'INICIANDO JORNADA...')
-                            : (isRegister ? 'CRIAR CONTA' : 'INICIAR JORNADA')}
+                            ? (isRegister ? 'CREATING ACCOUNT...' : 'STARTING JOURNEY...')
+                            : (isRegister ? 'CREATE ACCOUNT' : 'START JOURNEY')}
                     </button>
 
                     <div
@@ -224,9 +224,9 @@ const Auth = ({ onLogin }) => {
                             gap: '5px'
                         }}
                     >
-                        <span>{isRegister ? 'Já é um aventureiro?' : 'Novo por aqui?'}</span>
+                        <span>{isRegister ? 'Already an adventurer?' : 'New here?'}</span>
                         <span style={{ color: '#d4af37', fontWeight: 'bold' }}>
-                            {isRegister ? 'Login' : 'Criar Conta'}
+                            {isRegister ? 'Login' : 'Create Account'}
                         </span>
                     </div>
                 </form>

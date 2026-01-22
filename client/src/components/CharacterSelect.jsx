@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, User, LogOut } from 'lucide-react';
 
-const CharacterSelect = ({ socket, user, gameState, onLogout, onSelect }) => {
+const CharacterSelect = ({ socket, user, gameState, onLogout, onSelect, serverError }) => {
 
     const [showNewChar, setShowNewChar] = useState(false);
     const [newName, setNewName] = useState('');
@@ -18,8 +18,8 @@ const CharacterSelect = ({ socket, user, gameState, onLogout, onSelect }) => {
         return (
             <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0f', color: '#fff' }}>
                 <div style={{ textAlign: 'center' }}>
-                    <div className="loading-spinner" style={{ marginBottom: '20px' }}>Carregando personagem...</div>
-                    <div style={{ opacity: 0.5, fontSize: '0.8rem' }}>Conectando à Forged Lands...</div>
+                    <div className="loading-spinner" style={{ marginBottom: '20px' }}>Loading character...</div>
+                    <div style={{ opacity: 0.5, fontSize: '0.8rem' }}>Connecting to Forged Lands...</div>
                 </div>
             </div>
         );
@@ -27,7 +27,7 @@ const CharacterSelect = ({ socket, user, gameState, onLogout, onSelect }) => {
 
     // O gameState.noCharacter indica que o usuário não tem personagem
     const hasCharacter = gameState && !gameState.noCharacter;
-    const charName = gameState?.name || 'Seu Personagem';
+    const charName = gameState?.name || 'Your Character';
 
     return (
         <div style={{
@@ -49,11 +49,11 @@ const CharacterSelect = ({ socket, user, gameState, onLogout, onSelect }) => {
                 boxShadow: '0 0 40px rgba(0,0,0,0.6)',
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                    <h2 style={{ color: '#d4af37', margin: 0, fontSize: '1.2rem', letterSpacing: '1px' }}>MEU PERSONAGEM</h2>
+                    <h2 style={{ color: '#d4af37', margin: 0, fontSize: '1.2rem', letterSpacing: '1px' }}>MY CHARACTER</h2>
                     <button
                         onClick={onLogout}
                         style={{ background: 'transparent', border: 'none', color: '#ff4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem' }}>
-                        <LogOut size={14} /> SAIR
+                        <LogOut size={14} /> LOGOUT
                     </button>
                 </div>
 
@@ -76,8 +76,8 @@ const CharacterSelect = ({ socket, user, gameState, onLogout, onSelect }) => {
 
                         >
                             <User size={48} color="#d4af37" style={{ margin: '0 auto 15px' }} />
-                            <div style={{ fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '5px' }}>{gameState.name || 'Aventureiro'}</div>
-                            <div style={{ color: '#4caf50', fontSize: '0.8rem' }}>Ativo</div>
+                            <div style={{ fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '5px' }}>{gameState.name || 'Adventurer'}</div>
+                            <div style={{ color: '#4caf50', fontSize: '0.8rem' }}>Active</div>
                         </div>
                     ) : (
                         <div
@@ -102,7 +102,7 @@ const CharacterSelect = ({ socket, user, gameState, onLogout, onSelect }) => {
                             }}
                         >
                             <Plus size={48} color="#d4af37" style={{ margin: '0 auto 15px' }} />
-                            <div style={{ fontWeight: 'bold', fontSize: '1rem' }}>CRIAR PERSONAGEM</div>
+                            <div style={{ fontWeight: 'bold', fontSize: '1rem' }}>CREATE CHARACTER</div>
                         </div>
                     )}
                 </div>
@@ -124,7 +124,7 @@ const CharacterSelect = ({ socket, user, gameState, onLogout, onSelect }) => {
                             border: '1px solid #d4af37',
                             width: '320px'
                         }}>
-                            <h3 style={{ marginBottom: '1.5rem', textAlign: 'center', color: '#d4af37' }}>Novo Aventureiro</h3>
+                            <h3 style={{ marginBottom: '1.5rem', textAlign: 'center', color: '#d4af37' }}>New Adventurer</h3>
                             <form onSubmit={handleCreate}>
                                 <input
                                     autoFocus
@@ -138,11 +138,25 @@ const CharacterSelect = ({ socket, user, gameState, onLogout, onSelect }) => {
                                         marginBottom: '1.5rem',
                                         outline: 'none'
                                     }}
-                                    placeholder="Nome do Personagem"
+                                    placeholder="Character Name"
                                     value={newName}
                                     onChange={(e) => setNewName(e.target.value)}
                                     required
                                 />
+                                {serverError && (
+                                    <div style={{
+                                        color: '#ff4444',
+                                        fontSize: '0.75rem',
+                                        background: 'rgba(255, 68, 68, 0.1)',
+                                        padding: '10px',
+                                        borderRadius: '6px',
+                                        marginBottom: '1.5rem',
+                                        border: '1px solid rgba(255, 68, 68, 0.2)',
+                                        textAlign: 'center'
+                                    }}>
+                                        {serverError}
+                                    </div>
+                                )}
                                 <div style={{ display: 'flex', gap: '10px' }}>
                                     <button
                                         type="button"
@@ -152,7 +166,7 @@ const CharacterSelect = ({ socket, user, gameState, onLogout, onSelect }) => {
                                             borderRadius: '6px', color: '#fff', cursor: 'pointer'
                                         }}
                                     >
-                                        Cancelar
+                                        Cancel
                                     </button>
                                     <button
                                         type="submit"
@@ -161,7 +175,7 @@ const CharacterSelect = ({ socket, user, gameState, onLogout, onSelect }) => {
                                             borderRadius: '6px', color: '#000', fontWeight: 'bold', cursor: 'pointer'
                                         }}
                                     >
-                                        Criar
+                                        Create
                                     </button>
                                 </div>
                             </form>
@@ -176,7 +190,7 @@ const CharacterSelect = ({ socket, user, gameState, onLogout, onSelect }) => {
                 color: 'rgba(255,255,255,0.1)',
                 fontSize: '0.7rem'
             }}>
-                FORGED LANDS v2.0.0 • SELEÇÃO DE PERSONAGEM
+                FORGED LANDS v2.0.0 • CHARACTER SELECTION
             </div>
         </div>
     );

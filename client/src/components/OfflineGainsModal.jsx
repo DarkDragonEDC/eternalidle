@@ -68,7 +68,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                             textTransform: 'uppercase',
                             textShadow: '0 2px 4px rgba(0,0,0,0.5)'
                         }}>
-                            Progresso Offline
+                            Offline Progress
                         </h2>
                         <div style={{
                             display: 'flex',
@@ -80,7 +80,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                             fontSize: '0.9rem'
                         }}>
                             <Clock size={16} color="#d4af37" />
-                            <span>Você esteve fora por <strong style={{ color: '#eee' }}>{formatTime(totalTime || 0)}</strong></span>
+                            <span>You were away for <strong style={{ color: '#eee' }}>{formatTime(totalTime || 0)}</strong></span>
                         </div>
                     </div>
 
@@ -91,7 +91,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                         {xpGained && Object.keys(xpGained).length > 0 && (
                             <div>
                                 <h3 style={{ margin: '0 0 15px 0', fontSize: '1rem', color: '#aaa', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <Star size={16} color="#4caf50" /> Experiência Coletada
+                                    <Star size={16} color="#4caf50" /> Experience Collected
                                 </h3>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     {Object.entries(xpGained).map(([skill, amount]) => (
@@ -116,7 +116,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                         {itemsGained && Object.keys(itemsGained).length > 0 ? (
                             <div>
                                 <h3 style={{ margin: '0 0 15px 0', fontSize: '1rem', color: '#aaa', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <Package size={16} color="#d4af37" /> Itens Coletados
+                                    <Package size={16} color="#d4af37" /> Items Collected
                                 </h3>
                                 <div style={{
                                     display: 'grid',
@@ -170,7 +170,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                         ) : (
                             (!xpGained || Object.keys(xpGained).length === 0) && (
                                 <div style={{ textAlign: 'center', color: '#888', padding: '20px', fontStyle: 'italic' }}>
-                                    Nenhum progresso realizado durante este período.
+                                    No progress made during this period.
                                 </div>
                             )
                         )}
@@ -196,7 +196,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                 letterSpacing: '1px'
                             }}
                         >
-                            Confirmar
+                            Confirm
                         </button>
                     </div>
 

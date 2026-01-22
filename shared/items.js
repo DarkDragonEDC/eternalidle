@@ -537,12 +537,58 @@ indexItems(ITEMS);
 export const resolveItem = (itemId) => {
     if (!itemId) return null;
     if (ITEM_LOOKUP[itemId]) return ITEM_LOOKUP[itemId];
-    // Handle quality suffix
-    if (typeof itemId === 'string' && itemId.includes('_Q')) {
-        const baseId = itemId.split('_Q')[0];
-        return ITEM_LOOKUP[baseId];
+    if (typeof itemId === 'string') {
+        const upperId = itemId.toUpperCase();
+        if (ITEM_LOOKUP[upperId]) return ITEM_LOOKUP[upperId];
+
+        // Handle quality suffix
+        if (upperId.includes('_Q')) {
+            const parts = upperId.split('_Q');
+            const baseId = parts[0];
+            const qualityStr = parts[1];
+            const qualityId = parseInt(qualityStr);
+
+            const baseItem = ITEM_LOOKUP[baseId];
+
+            if (baseItem && !isNaN(qualityId) && QUALITIES[qualityId]) {
+                const quality = QUALITIES[qualityId];
+                const ipBonus = quality.ipBonus || 0;
+                // Multiplicador de status: +10 IP ≈ +5% stats
+                const statMultiplier = 1 + (ipBonus / 200);
+
+                const newStats = {};
+                if (baseItem.stats) {
+                    for (const key in baseItem.stats) {
+                        if (typeof baseItem.stats[key] === 'number') {
+                            // Usar 1 casa decimal para dar sensação de progresso real
+                            newStats[key] = parseFloat((baseItem.stats[key] * statMultiplier).toFixed(1));
+                        } else {
+                            newStats[key] = baseItem.stats[key];
+                        }
+                    }
+                }
+
+                return {
+                    ...baseItem,
+                    id: upperId, // IMPORTANT: Override ID to include the specific quality suffix
+                    name: baseItem.name,
+                    rarityColor: quality.color,
+                    quality: qualityId,
+                    originalId: baseItem.id,
+                    ip: (baseItem.ip || 0) + ipBonus,
+                    stats: newStats
+                };
+            }
+            // Fallback if quality logic fails but baseId exists
+            if (baseItem) return baseItem;
+        }
     }
     return null;
+};
+
+export const formatItemId = (itemId) => {
+    if (!itemId) return '';
+    return itemId.replace(/_/g, ' '); // Simply replace underscores with spaces as requested
 };
 
 export const getTierColor = (tier) => {
@@ -559,4 +605,25 @@ export const getTierColor = (tier) => {
         10: '#ff4081' // T10 - Pink
     };
     return colors[tier] || '#9e9e9e';
+};
+
+export const calculateItemSellPrice = (item, itemId) => {
+    if (!item) return 0;
+
+    // Check if ID was passed or try to infer
+    const idToCheck = itemId || item.id || '';
+
+    const tierPrices = {
+        1: 5, 2: 15, 3: 40, 4: 100, 5: 250,
+        6: 600, 7: 1500, 8: 4000, 9: 10000, 10: 25000
+    };
+    const basePrice = tierPrices[item.tier] || 5;
+
+    let multiplier = 1;
+    if (idToCheck.includes('_Q1')) multiplier = 1.25;
+    else if (idToCheck.includes('_Q2')) multiplier = 1.75;
+    else if (idToCheck.includes('_Q3')) multiplier = 3.0;
+    else if (idToCheck.includes('_Q4')) multiplier = 10.0;
+
+    return Math.floor(basePrice * multiplier);
 };
