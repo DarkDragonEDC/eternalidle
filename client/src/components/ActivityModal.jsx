@@ -47,7 +47,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
     const totalXP = (xpPerAction * qtyNum).toLocaleString();
 
     // Tempo base & Redução
-    const baseTime = type === 'GATHERING' ? 3 : (type === 'REFINING' ? 1.5 : (type === 'CRAFTING' ? 4.0 : 3.0));
+    const baseTime = item.time || (type === 'GATHERING' ? 3.0 : (type === 'REFINING' ? 1.5 : (type === 'CRAFTING' ? 4.0 : 3.0)));
     // Efficiency reduces time: 10% eff = time * 0.9
     const reductionFactor = Math.max(0.1, 1 - (parseFloat(efficiency) / 100));
     const finalTime = Math.max(0.5, baseTime * reductionFactor);
