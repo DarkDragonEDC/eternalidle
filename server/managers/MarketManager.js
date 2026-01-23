@@ -85,7 +85,8 @@ export class MarketManager {
     }
 
     async buyMarketItem(buyerId, listingId, quantity = 1) {
-        if (!quantity || quantity <= 0) throw new Error("Invalid quantity");
+        const qtyNum = parseInt(quantity) || 1;
+        console.log(`[MarketManager] buyMarketItem: buyerId=${buyerId}, listingId=${listingId}, qtyNum=${qtyNum}`);
 
         const buyer = await this.gameManager.getCharacter(buyerId);
         if (!buyer) throw new Error("Buyer character not found");
@@ -98,25 +99,28 @@ export class MarketManager {
 
         if (fetchError || !listing) throw new Error("Listing not found or expired");
         if (listing.seller_id === buyerId) throw new Error("You cannot buy your own item");
-        if (quantity > listing.amount) throw new Error(`Only ${listing.amount} items available`);
 
-        const unitPrice = listing.price / listing.amount;
-        const totalCost = Math.floor(unitPrice * quantity);
+        const listingAmount = parseInt(listing.amount);
+        if (qtyNum > listingAmount) throw new Error(`Only ${listingAmount} items available`);
+
+        const unitPrice = listing.price / listingAmount;
+        const totalCost = Math.floor(unitPrice * qtyNum);
+
+        console.log(`[MarketManager] Calculated: unitPrice=${unitPrice}, totalCost=${totalCost}`);
 
         if ((buyer.state.silver || 0) < totalCost) throw new Error("Insufficient silver");
 
         // Deduct Silver from Buyer
         buyer.state.silver -= totalCost;
 
-        // Add Item Claim to Buyer
         this.addClaim(buyer, {
             type: 'BOUGHT_ITEM',
             itemId: listing.item_id,
-            amount: quantity,
-            name: listing.item_data.name,
+            amount: qtyNum,
             timestamp: Date.now(),
             cost: totalCost
         });
+        this.gameManager.addNotification(buyer, 'SUCCESS', `Você comprou ${qtyNum}x ${listing.item_data.name} por ${totalCost} Silver.`);
         await this.gameManager.saveState(buyerId, buyer.state);
 
         // Process Seller side
@@ -128,15 +132,17 @@ export class MarketManager {
             this.addClaim(seller, {
                 type: 'SOLD_ITEM',
                 silver: sellerProfit,
-                item: listing.item_data.name,
-                amount: quantity,
+                itemId: listing.item_id, // Added itemId for better claim resolution
+                amount: qtyNum,
                 timestamp: Date.now()
             });
+            this.gameManager.addNotification(seller, 'SUCCESS', `Seu item ${listing.item_data.name} (x${qtyNum}) foi vendido! +${sellerProfit} Silver (após taxas).`);
             await this.gameManager.saveState(listing.seller_id, seller.state);
         }
 
         // Update or Delete Listing
-        if (quantity >= listing.amount) {
+        if (qtyNum >= listingAmount) {
+            console.log(`[MarketManager] Full buy - deleting listing ${listingId}`);
             // Full Buy - Delete Listing
             const { error: deleteError } = await this.gameManager.supabase
                 .from('market_listings')
@@ -144,8 +150,9 @@ export class MarketManager {
                 .eq('id', listingId);
             if (deleteError) throw deleteError;
         } else {
+            console.log(`[MarketManager] Partial buy - updating listing ${listingId}. Remaining: ${listingAmount - qtyNum}`);
             // Partial Buy - Update Listing
-            const remainingAmount = listing.amount - quantity;
+            const remainingAmount = listingAmount - qtyNum;
             const remainingPrice = listing.price - totalCost;
 
             const { error: updateError } = await this.gameManager.supabase
@@ -158,7 +165,7 @@ export class MarketManager {
             if (updateError) throw updateError;
         }
 
-        return { success: true, message: `Bought ${quantity}x ${listing.item_data.name} for ${totalCost} Silver` };
+        return { success: true, message: `Comprado ${qtyNum}x ${listing.item_data.name} por ${totalCost} Silver` };
     }
 
     async cancelMarketListing(userId, listingId) {

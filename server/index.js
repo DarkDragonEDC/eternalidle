@@ -144,10 +144,10 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('start_dungeon', async ({ tier, dungeonId }) => {
+    socket.on('start_dungeon', async ({ tier, dungeonId, repeatCount }) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
-                const result = await gameManager.startDungeon(socket.user.id, dungeonId);
+                const result = await gameManager.startDungeon(socket.user.id, dungeonId, repeatCount);
                 socket.emit('dungeon_started', result);
                 socket.emit('status_update', await gameManager.getStatus(socket.user.id));
             });
@@ -236,6 +236,46 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('get_combat_history', async () => {
+        try {
+            const char = await gameManager.getCharacter(socket.user.id);
+            if (!char) return;
+
+            const { data, error } = await supabase
+                .from('combat_history')
+                .select('*')
+                .eq('character_id', char.id)
+                .order('occurred_at', { ascending: false })
+                .limit(20);
+
+            if (error) throw error;
+            socket.emit('combat_history_update', data);
+        } catch (err) {
+            console.error('Error fetching combat history:', err);
+            socket.emit('error', { message: 'Failed to fetch combat history' });
+        }
+    });
+
+    socket.on('get_dungeon_history', async () => {
+        try {
+            const char = await gameManager.getCharacter(socket.user.id);
+            if (!char) return;
+
+            const { data, error } = await supabase
+                .from('dungeon_history')
+                .select('*')
+                .eq('character_id', char.id)
+                .order('occurred_at', { ascending: false })
+                .limit(20);
+
+            if (error) throw error;
+            socket.emit('dungeon_history_update', data);
+        } catch (err) {
+            console.error('Error fetching dungeon history:', err);
+            socket.emit('error', { message: 'Failed to fetch dungeon history' });
+        }
+    });
+
     socket.on('send_message', async ({ content }) => {
         try {
             const char = await gameManager.getCharacter(socket.user.id);
@@ -281,16 +321,18 @@ io.on('connection', (socket) => {
     });
 
     socket.on('buy_market_item', async ({ listingId, quantity }) => {
+        console.log(`[MARKET] Buy request from ${socket.user.email}: listingId=${listingId}, quantity=${quantity}`);
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
                 const result = await gameManager.buyMarketItem(socket.user.id, listingId, quantity);
+                console.log(`[MARKET] Buy success for ${socket.user.email}:`, result.message);
                 socket.emit('market_action_success', result);
                 socket.emit('status_update', await gameManager.getStatus(socket.user.id));
                 const listings = await gameManager.getMarketListings();
                 io.emit('market_listings_update', listings);
             });
         } catch (err) {
-            console.error('Error buying item:', err);
+            console.error(`[MARKET] Buy error for ${socket.user.email}:`, err.message);
             socket.emit('error', { message: err.message });
         }
     });
@@ -350,6 +392,37 @@ io.on('connection', (socket) => {
             await gameManager.clearOfflineReport(socket.user.id);
         } catch (err) {
             console.error('Error clearing offline report:', err);
+        }
+    });
+
+    socket.on('mark_notification_read', async ({ notificationId }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id);
+                if (char && char.state.notifications) {
+                    const notif = char.state.notifications.find(n => n.id === notificationId);
+                    if (notif) {
+                        notif.read = true;
+                        await gameManager.saveState(socket.user.id, char.state);
+                    }
+                }
+            });
+        } catch (err) {
+            console.error('Error marking notification as read:', err);
+        }
+    });
+
+    socket.on('clear_notifications', async () => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id);
+                if (char && char.state.notifications) {
+                    char.state.notifications = [];
+                    await gameManager.saveState(socket.user.id, char.state);
+                }
+            });
+        } catch (err) {
+            console.error('Error clearing notifications:', err);
         }
     });
 });

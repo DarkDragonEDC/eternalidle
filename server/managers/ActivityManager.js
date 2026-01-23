@@ -31,11 +31,14 @@ export class ActivityManager {
             throw new Error(`Insufficient level! Requires ${skillKey} Lv ${requiredLevel}`);
         }
 
-        let baseTime = 3;
-        if (type === 'GATHERING') baseTime = 3.0;
-        else if (type === 'REFINING') baseTime = 1.5;
-        else if (type === 'CRAFTING') baseTime = 4.0;
-        else if (type === 'COOKING') baseTime = 3.0;
+        let baseTime = item.time || 3.0;
+        // Fallbacks if item.time is missing (for legacy or safety)
+        if (!item.time) {
+            if (type === 'GATHERING') baseTime = 3.0;
+            else if (type === 'REFINING') baseTime = 1.5;
+            else if (type === 'CRAFTING') baseTime = 4.0;
+            else if (type === 'COOKING') baseTime = 3.0;
+        }
 
         // Calculate Stats to get Efficiency
         const stats = this.gameManager.inventoryManager.calculateStats(char);

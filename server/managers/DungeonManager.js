@@ -2,15 +2,16 @@
 import { DUNGEONS } from '../../shared/dungeons.js';
 import { MONSTERS } from '../../shared/monsters.js';
 
+const WAVE_DURATION = 60 * 1000; // 1 minute per wave
+const MAX_DUNGEON_TIME = 12 * 60 * 60 * 1000; // 12 hours safety limit
+
 export class DungeonManager {
     constructor(gameManager) {
         this.gameManager = gameManager;
     }
 
-    async startDungeon(userId, dungeonId) {
+    async startDungeon(userId, dungeonId, repeatCount = 0) {
         const char = await this.gameManager.getCharacter(userId);
-        if (char.state.combat) throw new Error("Cannot enter dungeon while in combat");
-        if (char.current_activity) throw new Error("Cannot enter dungeon while busy (stop activity first)");
         if (char.state.dungeon) throw new Error("Already in a dungeon");
 
         const dungeon = Object.values(DUNGEONS).find(d => d.id === dungeonId);
@@ -33,7 +34,10 @@ export class DungeonManager {
             maxWaves: dungeon.waves,
             active: true,
             started_at: new Date().toISOString(),
-            status: 'PREPARING' // PREPARING -> FIGHTING -> WAITING_NEXT_WAVE -> BOSS -> COMPLETED
+            status: 'PREPARING', // PREPARING -> FIGHTING -> WAITING_NEXT_WAVE -> WALKING -> BOSS -> COMPLETED
+            repeatCount: repeatCount,
+            wave_started_at: Date.now(),
+            lootLog: []
         };
 
         await this.gameManager.saveState(char.id, char.state);
@@ -41,49 +45,109 @@ export class DungeonManager {
     }
 
     async processDungeonTick(char) {
-        if (!char.state.dungeon) return;
-        console.log(`[DUNGEON] Processing tick for ${char.name}. Status: ${char.state.dungeon.status}`);
+        try {
+            if (!char.state.dungeon) return;
+            // console.log(`[DUNGEON] Processing tick for ${char.name}. Status: ${char.state.dungeon.status}`);
 
-        const dungeonState = char.state.dungeon;
-        const dungeonConfig = Object.values(DUNGEONS).find(d => d.id === dungeonState.id);
+            const dungeonState = char.state.dungeon;
+            const dungeonConfig = Object.values(DUNGEONS).find(d => d.id === dungeonState.id);
 
-        if (!dungeonConfig) {
-            console.error(`[DUNGEON] Config not found for ID: ${dungeonState.id}`);
-            return;
-        }
-
-        // If combat is active, do nothing (CombatManager handles the fight)
-        if (char.state.combat) return;
-
-        // If player is dead (no combat, but dungeon is active), FAIL dungeon
-        if (char.state.health <= 0) {
-            console.log(`[DUNGEON] Player ${char.name} died. Failing dungeon.`);
-            delete char.state.dungeon;
-            return { dungeonUpdate: { status: 'FAILED', message: "You died in the dungeon!" } };
-        }
-
-        // Logic for progressing waves
-        if (dungeonState.status === 'PREPARING' || dungeonState.status === 'WAITING_NEXT_WAVE') {
-            console.log(`[DUNGEON] Starting wave ${dungeonState.wave} for ${char.name}`);
-            return this.startNextWave(char, dungeonConfig);
-        }
-
-        // If status is FIGHTING but no combat exists, it means we won the last fight
-        if (dungeonState.status === 'FIGHTING' || dungeonState.status === 'BOSS_FIGHT') {
-            console.log(`[DUNGEON] Wave cleared or boss defeated for ${char.name}. Wave: ${dungeonState.wave}`);
-            if (dungeonState.wave < dungeonState.maxWaves) {
-                dungeonState.wave++;
-                dungeonState.status = 'WAITING_NEXT_WAVE';
-                return this.startNextWave(char, dungeonConfig);
-            } else {
-                return this.completeDungeon(char, dungeonConfig);
+            if (!dungeonConfig) {
+                console.error(`[DUNGEON] Config not found for ID: ${dungeonState.id}`);
+                return;
             }
+
+            const now = Date.now();
+            const totalElapsed = now - new Date(dungeonState.started_at).getTime();
+
+            // 1. Max Time Check (Safety)
+            if (totalElapsed > MAX_DUNGEON_TIME) {
+                console.log(`[DUNGEON] Dungeon timed out for ${char.name}`);
+                delete char.state.dungeon;
+                if (char.state.combat) delete char.state.combat;
+                return { dungeonUpdate: { status: 'FAILED', message: "Dungeon time limit reached!" } };
+            }
+
+            // 2. WALKING Logic
+            if (dungeonState.status === 'WALKING') {
+                const waveElapsed = now - (dungeonState.wave_started_at || now);
+                const timeLeft = Math.ceil((WAVE_DURATION - waveElapsed) / 1000);
+
+                if (waveElapsed >= WAVE_DURATION) {
+                    // Time up, proceed
+                    if (dungeonState.wave < dungeonState.maxWaves) {
+                        dungeonState.wave++;
+                        dungeonState.status = 'WAITING_NEXT_WAVE';
+                        return this.startNextWave(char, dungeonConfig);
+                    } else {
+                        // It was the last wave (Boss), so we finish
+                        return this.completeDungeon(char, dungeonConfig);
+                    }
+                } else {
+                    return {
+                        dungeonUpdate: {
+                            status: 'WALKING',
+                            message: `Walking to next area (${timeLeft}s)...`,
+                            timeLeft: timeLeft
+                        }
+                    };
+                }
+            }
+
+            // 3. Combat/Wave Logic
+            if (char.state.combat) return;
+
+            if (char.state.health <= 0) {
+                console.log(`[DUNGEON] Player ${char.name} died. Failing dungeon.`);
+                await this.saveDungeonLog(char, dungeonConfig, 'FAILED');
+                delete char.state.dungeon;
+                return { dungeonUpdate: { status: 'FAILED', message: "You died in the dungeon!" } };
+            }
+
+            if (dungeonState.status === 'PREPARING' || dungeonState.status === 'WAITING_NEXT_WAVE') {
+                return this.startNextWave(char, dungeonConfig);
+            }
+
+            if (dungeonState.status === 'FIGHTING' || dungeonState.status === 'BOSS_FIGHT') {
+                console.log(`[DUNGEON] Wave cleared or boss defeated for ${char.name}. Wave: ${dungeonState.wave}`);
+
+                // Check Wave Duration
+                const waveElapsed = now - (dungeonState.wave_started_at || now);
+
+                if (waveElapsed < WAVE_DURATION) {
+                    dungeonState.status = 'WALKING';
+                    // wave_started_at remains the same to track total time spent on this "step"
+                    // Effectively we are just pausing progress until WAVE_DURATION is met
+                    const timeLeft = Math.ceil((WAVE_DURATION - waveElapsed) / 1000);
+                    return {
+                        dungeonUpdate: {
+                            status: 'WALKING',
+                            message: `Area cleared! Walking... (${timeLeft}s)`,
+                            timeLeft: timeLeft
+                        }
+                    };
+                }
+
+                // If we are here, duration is met (e.g. taken long enough to kill)
+                if (dungeonState.wave < dungeonState.maxWaves) {
+                    dungeonState.wave++;
+                    dungeonState.status = 'WAITING_NEXT_WAVE';
+                    return this.startNextWave(char, dungeonConfig);
+                } else {
+                    return this.completeDungeon(char, dungeonConfig);
+                }
+            }
+        } catch (error) {
+            console.error(`[DUNGEON] Error in processDungeonTick:`, error);
         }
     }
 
     async startNextWave(char, config) {
         const isBoss = char.state.dungeon.wave === char.state.dungeon.maxWaves;
         let mobId = null;
+
+        // Reset wave start time
+        char.state.dungeon.wave_started_at = Date.now();
 
         if (isBoss) {
             mobId = config.bossId;
@@ -96,7 +160,7 @@ export class DungeonManager {
 
         console.log(`[DUNGEON] Spawning ${mobId} for ${char.name} (Boss: ${isBoss})`);
         try {
-            await this.gameManager.combatManager.startCombat(char.user_id, mobId, config.tier);
+            await this.gameManager.combatManager.startCombat(char.user_id, mobId, config.tier, char);
         } catch (e) {
             console.error(`[DUNGEON] Failed to start combat for ${char.name}:`, e.message);
             // If combat failed (e.g. level too low), we should probably fail the dungeon or inform the user
@@ -124,40 +188,101 @@ export class DungeonManager {
         const loot = [];
 
         // XP
-        this.gameManager.addXP(char, 'COMBAT', rewards.xp);
+        const leveledUpCombat = this.gameManager.addXP(char, 'COMBAT', rewards.xp);
+        const leveledUpDungeon = this.gameManager.addXP(char, 'DUNGEONEERING', rewards.xp);
+        const leveledUp = leveledUpCombat || leveledUpDungeon;
 
         // Silver
         char.state.silver = (char.state.silver || 0) + rewards.silver;
 
-        // Crest (Chance)
-        // Hardcore plan: 20%
-        if (Math.random() <= rewards.crest.chance) {
+        // Crest (Chance) - Boss drop only roughly, but keeping existing logic if any
+        if (rewards.crest && Math.random() <= rewards.crest.chance) {
             this.gameManager.inventoryManager.addItemToInventory(char, rewards.crest.id, 1);
             loot.push(rewards.crest.id);
         }
 
-        // Resource (Guarantee or Chance?) - Plan said 50%
-        if (Math.random() <= rewards.resource.chance) {
+        // Resource
+        if (rewards.resource && Math.random() <= rewards.resource.chance) {
             const qty = Math.floor(Math.random() * (rewards.resource.max - rewards.resource.min + 1)) + rewards.resource.min;
             this.gameManager.inventoryManager.addItemToInventory(char, rewards.resource.id, qty);
             loot.push(`${qty}x ${rewards.resource.id}`);
         }
 
-        delete char.state.dungeon;
-        // Optionally fully heal player on completion?
+        const inventory = char.state.inventory || {};
+        const mapId = config.reqItem;
+
+        // Create Log Entry
+        const logEntry = {
+            id: Date.now(),
+            run: (char.state.dungeon.lootLog?.length || 0) + 1,
+            xp: rewards.xp,
+            silver: rewards.silver,
+            items: loot,
+            timestamp: new Date().toISOString()
+        };
+
+        if (!char.state.dungeon.lootLog) char.state.dungeon.lootLog = [];
+        char.state.dungeon.lootLog.unshift(logEntry);
+        // Keep last 50 entries
+        if (char.state.dungeon.lootLog.length > 50) char.state.dungeon.lootLog.pop();
+
+        // Save to Persistent History (every individual run)
+        await this.saveDungeonLog(char, config, 'COMPLETED', {
+            xp: rewards.xp,
+            silver: rewards.silver,
+            loot: loot
+        });
+
+        // Auto-Repeat Logic
+        if (char.state.dungeon.repeatCount > 0 && inventory[mapId] && inventory[mapId] >= 1) {
+            // Consume Map
+            this.gameManager.inventoryManager.consumeItems(char, { [mapId]: 1 });
+
+            // Decrement Repeat Count
+            char.state.dungeon.repeatCount--;
+
+            // Reset Dungeon State for Next Run
+            char.state.dungeon.wave = 1;
+            char.state.dungeon.status = 'PREPARING';
+            char.state.dungeon.started_at = new Date().toISOString();
+            // Reset wave timer
+            char.state.dungeon.wave_started_at = Date.now();
+
+            console.log(`[DUNGEON] Auto-repeating ${config.name} for ${char.name}. Remaining: ${char.state.dungeon.repeatCount}`);
+
+            return {
+                dungeonUpdate: {
+                    status: 'PREPARING',
+                    message: `Dungeon Cleared! Starting next run...`,
+                    rewards: { xp: rewards.xp, silver: rewards.silver, items: loot },
+                    autoRepeat: true,
+                    lootLog: char.state.dungeon.lootLog
+                },
+                leveledUp
+            };
+        }
+
+        // Normal Completion (No auto-repeat or out of maps/queue)
+        char.state.dungeon.status = 'COMPLETED';
 
         return {
             dungeonUpdate: {
                 status: 'COMPLETED',
                 message: `Dungeon Cleared! Rewards: ${loot.join(', ') || 'No rare drops'}`,
-                rewards: { xp: rewards.xp, silver: rewards.silver, items: loot }
-            }
+                rewards: { xp: rewards.xp, silver: rewards.silver, items: loot },
+                lootLog: char.state.dungeon.lootLog
+            },
+            leveledUp
         };
     }
 
     async stopDungeon(userId) {
         const char = await this.gameManager.getCharacter(userId);
         if (char.state.dungeon) {
+            const dungeonConfig = Object.values(DUNGEONS).find(d => d.id === char.state.dungeon.id);
+            if (char.state.dungeon.status !== 'COMPLETED' && char.state.dungeon.status !== 'FAILED') {
+                await this.saveDungeonLog(char, dungeonConfig, 'ABANDONED');
+            }
             delete char.state.dungeon;
             if (char.state.combat) {
                 delete char.state.combat;
@@ -165,5 +290,47 @@ export class DungeonManager {
             await this.gameManager.saveState(char.id, char.state);
         }
         return { success: true, message: "Left the dungeon" };
+    }
+
+    async saveDungeonLog(char, config, outcome, runLoot = null) {
+        try {
+            const dungeon = char.state.dungeon;
+            if (!dungeon || !config) return;
+
+            const duration = Math.floor((Date.now() - new Date(dungeon.started_at).getTime()) / 1000);
+
+            let totalXp = runLoot ? runLoot.xp : 0;
+            let totalSilver = runLoot ? runLoot.silver : 0;
+            let formattedLoot = runLoot ? runLoot.loot : [];
+
+            // If no explicit runLoot (e.g. death or abandonment), try to sum what was gained in the session
+            if (!runLoot) {
+                (dungeon.lootLog || []).forEach(log => {
+                    totalXp += (log.xp || 0);
+                    totalSilver += (log.silver || 0);
+                    (log.items || []).forEach(item => formattedLoot.push(item));
+                });
+            }
+
+            const { error } = await this.gameManager.supabase.from('dungeon_history').insert({
+                character_id: char.id,
+                dungeon_id: dungeon.id,
+                dungeon_name: config.name,
+                tier: dungeon.tier,
+                wave_reached: dungeon.wave,
+                max_waves: dungeon.maxWaves,
+                outcome: outcome,
+                duration_seconds: duration,
+                xp_gained: totalXp,
+                silver_gained: totalSilver,
+                loot_gained: formattedLoot
+            });
+
+            if (error) {
+                console.error("Failed to save dungeon history:", error.message);
+            }
+        } catch (err) {
+            console.error("Error saving dungeon history log:", err);
+        }
     }
 }

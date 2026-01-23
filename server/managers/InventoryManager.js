@@ -1,4 +1,4 @@
-import { ITEMS, QUALITIES } from '../../shared/items.js';
+import { ITEMS, QUALITIES, resolveItem } from '../../shared/items.js';
 
 const ITEM_LOOKUP = {};
 const flattenItems = (obj) => {
@@ -18,26 +18,7 @@ export class InventoryManager {
     }
 
     resolveItem(id) {
-        if (!id) return null;
-        if (ITEM_LOOKUP[id]) return ITEM_LOOKUP[id];
-
-        const separatorIndex = id.lastIndexOf('_Q');
-        if (separatorIndex === -1) return null;
-
-        const baseId = id.substring(0, separatorIndex);
-        const qualityIndex = parseInt(id.substring(separatorIndex + 2));
-        const baseItem = ITEM_LOOKUP[baseId];
-
-        if (!baseItem || !QUALITIES[qualityIndex]) return null;
-
-        return {
-            ...baseItem,
-            name: `${QUALITIES[qualityIndex].name} ${baseItem.name}`,
-            ip: (baseItem.ip || 0) + QUALITIES[qualityIndex].ipBonus,
-            quality: qualityIndex,
-            rarityColor: QUALITIES[qualityIndex].color,
-            originalId: id
-        };
+        return resolveItem(id);
     }
 
     addItemToInventory(char, itemId, amount) {
@@ -50,7 +31,8 @@ export class InventoryManager {
             }
         }
 
-        inv[itemId] = (inv[itemId] || 0) + amount;
+        const safeAmount = Number(amount) || 0;
+        inv[itemId] = (Number(inv[itemId]) || 0) + safeAmount;
         if (inv[itemId] <= 0) delete inv[itemId];
         return true;
     }

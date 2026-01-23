@@ -10,7 +10,6 @@ export const DUNGEONS = {
         rewards: {
             xp: 500,
             silver: 200,
-            crest: { id: 'T1_CREST', chance: 0.20 },
             resource: { id: 'T1_ORE', chance: 0.50, min: 5, max: 10 }
         }
     },
@@ -25,7 +24,7 @@ export const DUNGEONS = {
         rewards: {
             xp: 1200,
             silver: 500,
-            crest: { id: 'T2_CREST', chance: 0.20 },
+
             resource: { id: 'T2_WOOD', chance: 0.50, min: 5, max: 10 }
         }
     },
@@ -40,7 +39,7 @@ export const DUNGEONS = {
         rewards: {
             xp: 2500,
             silver: 1000,
-            crest: { id: 'T3_CREST', chance: 0.20 },
+
             resource: { id: 'T3_HIDE', chance: 0.50, min: 5, max: 10 }
         }
     },
@@ -55,7 +54,7 @@ export const DUNGEONS = {
         rewards: {
             xp: 6000,
             silver: 2500,
-            crest: { id: 'T4_CREST', chance: 0.20 },
+
             resource: { id: 'T4_BAR', chance: 0.50, min: 3, max: 8 }
         }
     },
@@ -70,7 +69,7 @@ export const DUNGEONS = {
         rewards: {
             xp: 12000,
             silver: 5000,
-            crest: { id: 'T5_CREST', chance: 0.20 },
+
             resource: { id: 'T5_HIDE', chance: 0.50, min: 3, max: 8 }
         }
     },
@@ -85,7 +84,7 @@ export const DUNGEONS = {
         rewards: {
             xp: 25000,
             silver: 10000,
-            crest: { id: 'T6_CREST', chance: 0.20 },
+
             resource: { id: 'T6_ORE', chance: 0.50, min: 3, max: 8 }
         }
     },
@@ -100,7 +99,7 @@ export const DUNGEONS = {
         rewards: {
             xp: 50000,
             silver: 20000,
-            crest: { id: 'T7_CREST', chance: 0.20 },
+
             resource: { id: 'T7_HIDE', chance: 0.50, min: 2, max: 6 }
         }
     },
@@ -115,7 +114,7 @@ export const DUNGEONS = {
         rewards: {
             xp: 100000,
             silver: 40000,
-            crest: { id: 'T8_CREST', chance: 0.20 },
+
             resource: { id: 'T8_ORE', chance: 0.50, min: 2, max: 6 }
         }
     },
@@ -130,7 +129,7 @@ export const DUNGEONS = {
         rewards: {
             xp: 250000,
             silver: 100000,
-            crest: { id: 'T9_CREST', chance: 0.20 },
+
             resource: { id: 'T9_BAR', chance: 0.50, min: 2, max: 5 }
         }
     },
@@ -145,7 +144,7 @@ export const DUNGEONS = {
         rewards: {
             xp: 1000000,
             silver: 500000,
-            crest: { id: 'T10_CREST', chance: 0.20 },
+
             resource: { id: 'T10_BAR', chance: 0.50, min: 2, max: 5 }
         }
     }

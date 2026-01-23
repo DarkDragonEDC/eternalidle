@@ -17,6 +17,7 @@ import DungeonPanel from './components/DungeonPanel';
 import CombatPanel from './components/CombatPanel';
 import OfflineGainsModal from './components/OfflineGainsModal';
 import MarketListingModal from './components/MarketListingModal';
+import CombatHistoryModal from './components/CombatHistoryModal';
 import NotificationCenter from './components/NotificationCenter';
 import {
   Zap, Package, User, Trophy, Coins,
@@ -24,12 +25,11 @@ import {
   Star, Layers, Box, Castle, Lock, Menu, X, Tag, Clock, Heart
 } from 'lucide-react';
 import { ITEMS } from '@shared/items';
+import { calculateNextLevelXP, XP_TABLE } from '@shared/skills';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOptimisticState } from './hooks/useOptimisticState';
 
-const calculateNextLevelXP = (level) => {
-  return Math.floor(100 * Math.pow(1.15, level - 1));
-};
+
 
 const mapTabCategoryToSkill = (tab, category) => {
   const maps = {
@@ -81,11 +81,16 @@ function App() {
   const [modalType, setModalType] = useState(null);
   const [offlineReport, setOfflineReport] = useState(null);
   const [marketSellItem, setMarketSellItem] = useState(null);
-  const [notifications, setNotifications] = useState(() => {
-    const saved = localStorage.getItem('notifications');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [notifications, setNotifications] = useState([]);
+
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showCombatHistory, setShowCombatHistory] = useState(false);
+
+  useEffect(() => {
+    if (gameState?.state?.notifications) {
+      setNotifications(gameState.state.notifications);
+    }
+  }, [gameState]);
 
   const addNotification = (notif) => {
     setNotifications(prev => [{
@@ -97,11 +102,11 @@ function App() {
   };
 
   const markAsRead = (id) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    socket?.emit('mark_notification_read', { notificationId: id });
   };
 
   const clearAllNotifications = () => {
-    setNotifications([]);
+    socket?.emit('clear_notifications');
   };
 
   const handleListOnMarket = (item) => {
@@ -117,6 +122,7 @@ function App() {
         setOfflineReport(null);
         setSidebarOpen(false);
         setShowNotifications(false);
+        setShowCombatHistory(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -138,8 +144,7 @@ function App() {
     localStorage.setItem('activeTab', activeTab);
     localStorage.setItem('activeCategory', activeCategory);
     localStorage.setItem('activeTier', activeTier);
-    localStorage.setItem('notifications', JSON.stringify(notifications));
-  }, [activeTab, activeCategory, activeTier, notifications]);
+  }, [activeTab, activeCategory, activeTier]);
 
   // Monitor Offline Report from GameState
   useEffect(() => {
@@ -331,10 +336,7 @@ function App() {
               Lv {skill.level} <span style={{ fontSize: '0.65rem', color: '#888', fontWeight: 'normal' }}>({Math.floor(progress)}%)</span>
             </div>
             <div style={{ fontSize: '0.55rem', color: '#555', fontWeight: 'bold' }}>
-              {skill.xp.toLocaleString()} / {nextXP.toLocaleString()} XP
-            </div>
-            <div style={{ fontSize: '0.55rem', color: '#ff4444', fontWeight: 'bold', marginTop: '1px' }}>
-              {remainingXP.toLocaleString()} XP left
+              {(XP_TABLE[skill.level - 1] + skill.xp).toLocaleString()} / {XP_TABLE[skill.level].toLocaleString()} XP
             </div>
           </div>
         </div>
@@ -516,7 +518,7 @@ function App() {
                     const reqs = item.req || {}; // For refining
 
                     const isActive = displayedGameState?.current_activity?.item_id === item.id;
-                    const duration = (isGathering ? 3.0 : 1.5) * 1000;
+                    const duration = (item.time || (isGathering ? 3.0 : 1.5)) * 1000;
 
                     const skillKey = mapTabCategoryToSkill(activeTab, activeCategory);
                     const skill = displayedGameState?.state?.skills?.[skillKey] || { level: 1, xp: 0 };
@@ -594,7 +596,7 @@ function App() {
                             {/* Time Badge */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(0, 0, 0, 0.3)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: '#888', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
                               <Clock size={12} />
-                              <span>{isGathering ? '3.0s' : '1.5s'}</span>
+                              <span>{item.time || (isGathering ? '3.0' : '1.5')}s</span>
                             </div>
 
                             {/* XP Badge */}
@@ -630,10 +632,12 @@ function App() {
                             })}
                           </div>
 
-                          <ActivityProgressBar
-                            active={isActive}
-                            skillProgress={skillProgress}
-                          />
+                          {isActive && (
+                            <ActivityProgressBar
+                              active={isActive}
+                              progress={Math.min(100, ((displayedGameState.current_activity.initial_quantity - displayedGameState.current_activity.actions_remaining) / (displayedGameState.current_activity.initial_quantity || 1)) * 100)}
+                            />
+                          )}
                           {isActive && (
                             <div style={{ fontSize: '0.6rem', color: 'var(--accent)', marginTop: '4px', textAlign: 'right', fontWeight: 'bold' }}>
                               REMAINING {displayedGameState.current_activity.actions_remaining}
@@ -760,7 +764,7 @@ function App() {
                             {/* Time Badge */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(0, 0, 0, 0.3)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: '#888', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
                               <Clock size={12} />
-                              <span>3.0s</span>
+                              <span>{item.time || 3.0}s</span>
                             </div>
 
                             {/* XP Badge */}
@@ -797,10 +801,12 @@ function App() {
                             })}
                           </div>
 
-                          <ActivityProgressBar
-                            active={isActive}
-                            skillProgress={skillProgress}
-                          />
+                          {isActive && (
+                            <ActivityProgressBar
+                              active={isActive}
+                              progress={Math.min(100, ((displayedGameState.current_activity.initial_quantity - displayedGameState.current_activity.actions_remaining) / (displayedGameState.current_activity.initial_quantity || 1)) * 100)}
+                            />
+                          )}
                           {isActive && (
                             <div style={{ fontSize: '0.6rem', color: 'var(--accent)', marginTop: '4px', textAlign: 'right', fontWeight: 'bold' }}>
                               REMAINING {displayedGameState.current_activity.actions_remaining}
@@ -824,7 +830,7 @@ function App() {
         return (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <SkillProgressHeader tab="combat" category="COMBAT" />
-            <CombatPanel socket={socket} gameState={displayedGameState} isMobile={isMobile} />
+            <CombatPanel socket={socket} gameState={displayedGameState} isMobile={isMobile} onShowHistory={() => setShowCombatHistory(true)} />
           </div>
         );
       case 'dungeon':
@@ -837,6 +843,10 @@ function App() {
   const handleNavigate = (itemId) => {
     if (itemId === 'combat') {
       setActiveTab('combat');
+      return;
+    }
+    if (itemId === 'dungeon') {
+      setActiveTab('dungeon');
       return;
     }
     // Procurar em Gathering
@@ -977,6 +987,11 @@ function App() {
           }
         }}
       />
+      <CombatHistoryModal
+        isOpen={showCombatHistory}
+        onClose={() => setShowCombatHistory(false)}
+        socket={socket}
+      />
     </div >
   );
 }
@@ -996,23 +1011,15 @@ const actionBtnStyle = {
   gap: '6px'
 };
 
-const ActivityProgressBar = ({ active, nextActionAt, duration, serverTimeOffset = 0 }) => {
-  const [prog, setProg] = React.useState(0);
-
-  React.useEffect(() => {
-    // Agora a barra mostra o progresso da Skill em vez do tempo
-    // No entanto, para simplificar aqui e já que não temos a skillKey direta, 
-    // vamos deixar ela 'fixa' conforme pedido, ou seja, sem animação de timer.
-    setProg(0);
-  }, [active]);
-
+const ActivityProgressBar = ({ active, progress = 0 }) => {
   return (
-    <div style={{ marginTop: '10px', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+    <div style={{ marginTop: '10px', height: '6px', background: 'rgba(0,0,0,0.3)', borderRadius: '3px', overflow: 'hidden' }}>
       <div style={{
-        width: `${prog}%`,
+        width: `${progress}%`,
         height: '100%',
-        background: 'var(--accent)',
-        transition: 'none'
+        background: 'linear-gradient(90deg, #d4af37, #f2d06b)',
+        transition: 'width 0.3s ease-out',
+        boxShadow: '0 0 8px rgba(212, 175, 55, 0.3)'
       }}></div>
     </div>
   );

@@ -3,7 +3,7 @@ import { Sword, Shield, Skull, Coins, Zap, Clock, Trophy, ChevronRight, User, Te
 import { motion, AnimatePresence } from 'framer-motion';
 import { MONSTERS } from '@shared/monsters';
 
-const CombatPanel = ({ socket, gameState, isMobile }) => {
+const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
     const [activeTier, setActiveTier] = useState(1);
     const [battleLogs, setBattleLogs] = useState([]);
     const [sessionLoot, setSessionLoot] = useState({});
@@ -613,7 +613,7 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
                         <Sword size={18} color="#ff4444" />
                         <h2 style={{ margin: 0, color: '#fff', fontSize: '0.9rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase' }}>Hunting Grounds</h2>
                     </div>
-                    <button style={{ background: 'none', border: '1px solid var(--border)', padding: '3px 8px', borderRadius: '4px', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '0.65rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <button onClick={onShowHistory} style={{ background: 'none', border: '1px solid var(--border)', padding: '3px 8px', borderRadius: '4px', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '0.65rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <Clock size={12} /> History
                     </button>
                 </div>
@@ -644,7 +644,7 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
             {/* Mobs List */}
             <div className="glass-panel scroll-container" style={{ flex: 1, padding: isMobile ? '10px' : '15px', background: 'rgba(10, 10, 15, 0.4)', overflowY: 'auto' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingBottom: '40px' }}>
-                    {(MONSTERS[activeTier] || []).map(mob => {
+                    {(MONSTERS[activeTier] || []).filter(m => !m.id.startsWith('BOSS_')).map(mob => {
                         const playerDmg = stats.damage;
                         const roundsToKill = Math.ceil(mob.health / playerDmg);
                         const ttk = roundsToKill * 3;

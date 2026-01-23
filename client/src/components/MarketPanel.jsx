@@ -72,7 +72,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
             // Open partial buy modal
             setBuyModal({
                 listing: listing,
-                quantity: 1,
+                quantity: listing.amount, // Default to MAX
                 max: listing.amount,
                 pricePerUnit: listing.price / listing.amount
             });
@@ -339,7 +339,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
                                             <div style={{ flex: '2 1 0%', minWidth: '150px' }}>
                                                 <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: l.item_data.rarityColor || 'rgb(255, 255, 255)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                                    <span>{l.item_data.name}</span>
+                                                    <span>{l.item_data.qualityName && l.item_data.qualityName !== 'Normal' ? `${l.item_data.qualityName} ` : ''}{l.item_data.name}</span>
                                                     <button onClick={() => onShowInfo(l.item_data)} style={{ background: 'none', border: 'none', padding: '0', color: 'var(--text-dim)', cursor: 'pointer', display: 'flex' }}>
                                                         <Info size={14} />
                                                     </button>
@@ -485,7 +485,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
                                             <div style={{ flex: '2 1 0%', minWidth: '150px' }}>
                                                 <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: l.item_data.rarityColor || 'rgb(255, 255, 255)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                                    <span>{l.item_data.name}</span>
+                                                    <span>{l.item_data.qualityName && l.item_data.qualityName !== 'Normal' ? `${l.item_data.qualityName} ` : ''}{l.item_data.name}</span>
                                                 </div>
                                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '2px', display: 'flex', gap: '15px' }}>
                                                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -542,17 +542,27 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                             ) : (
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
                                     {gameState.state.claims.map(c => {
+                                        let isItem = c.type === 'BOUGHT_ITEM' || c.type === 'CANCELLED_LISTING' || c.type === 'SOLD_ITEM';
+                                        let name = c.name || 'Item';
                                         let icon = <Coins size={24} color="var(--accent)" />;
                                         let tierColor = '#fff';
-                                        let isItem = c.type === 'BOUGHT_ITEM' || c.type === 'CANCELLED_LISTING';
-                                        let name = c.name || 'Item';
 
-                                        if (c.type === 'SOLD_ITEM') name = `Sold: ${c.item}`;
-
-                                        if (isItem) {
+                                        if (isItem && c.itemId) {
                                             const data = resolveItem(c.itemId);
-                                            tierColor = getTierColor(data.tier);
-                                            icon = <Package size={24} color={tierColor} />;
+                                            if (data) {
+                                                tierColor = getTierColor(data.tier);
+                                                const qualityPrefix = data.qualityName && data.qualityName !== 'Normal' ? `${data.qualityName} ` : '';
+
+                                                if (c.type === 'SOLD_ITEM') {
+                                                    name = `Sold: ${qualityPrefix}${data.name}`;
+                                                } else {
+                                                    name = `${qualityPrefix}${data.name}`;
+                                                }
+
+                                                if (c.type !== 'SOLD_ITEM') {
+                                                    icon = <Package size={24} color={tierColor} />;
+                                                }
+                                            }
                                         }
 
                                         return (
@@ -766,13 +776,15 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                 boxShadow: '0 8px 32px rgba(0,0,0,0.5)'
                             }}>
                                 <h3 style={{ margin: '0 0 4px 0', fontSize: '1.2rem', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span>Buy {buyModal.listing.item_data.name}</span>
+                                    <span>Buy {buyModal.listing.item_data.qualityName && buyModal.listing.item_data.qualityName !== 'Normal' ? `${buyModal.listing.item_data.qualityName} ` : ''}{buyModal.listing.item_data.name}</span>
                                     <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 'normal' }}>
                                         {buyModal.max} available
                                     </span>
                                 </h3>
                                 <p style={{ margin: '0 0 20px 0', color: 'var(--text-dim)', fontSize: '0.9rem' }}>
-                                    Price per unit: <span style={{ color: 'var(--accent)' }}>{Math.floor(buyModal.pricePerUnit).toLocaleString()} silver</span>
+                                    Price per unit: <span style={{ color: 'var(--accent)' }}>
+                                        {buyModal.pricePerUnit < 1 ? buyModal.pricePerUnit.toFixed(2) : Math.floor(buyModal.pricePerUnit).toLocaleString()} silver
+                                    </span>
                                 </p>
 
                                 {/* Quantity Selector */}
@@ -862,18 +874,19 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                     </button>
                                     <button
                                         onClick={() => {
-                                            if (silver >= Math.floor(buyModal.pricePerUnit * buyModal.quantity)) {
-                                                socket.emit('buy_market_item', { listingId: buyModal.listing.id, quantity: buyModal.quantity });
+                                            const qtyToSend = Number(buyModal.quantity) || 1;
+                                            if (silver >= Math.floor(buyModal.pricePerUnit * qtyToSend)) {
+                                                socket.emit('buy_market_item', { listingId: buyModal.listing.id, quantity: qtyToSend });
                                             }
                                         }}
-                                        disabled={silver < Math.floor(buyModal.pricePerUnit * buyModal.quantity)}
+                                        disabled={silver < Math.floor(buyModal.pricePerUnit * (Number(buyModal.quantity) || 1))}
                                         style={{
                                             padding: '12px 24px',
                                             borderRadius: '8px',
                                             border: 'none',
-                                            background: silver < Math.floor(buyModal.pricePerUnit * buyModal.quantity) ? 'rgba(255,255,255,0.1)' : 'var(--accent)',
-                                            color: silver < Math.floor(buyModal.pricePerUnit * buyModal.quantity) ? 'var(--text-dim)' : '#000',
-                                            cursor: silver < Math.floor(buyModal.pricePerUnit * buyModal.quantity) ? 'not-allowed' : 'pointer',
+                                            background: silver < Math.floor(buyModal.pricePerUnit * (Number(buyModal.quantity) || 1)) ? 'rgba(255,255,255,0.1)' : 'var(--accent)',
+                                            color: silver < Math.floor(buyModal.pricePerUnit * (Number(buyModal.quantity) || 1)) ? 'var(--text-dim)' : '#000',
+                                            cursor: silver < Math.floor(buyModal.pricePerUnit * (Number(buyModal.quantity) || 1)) ? 'not-allowed' : 'pointer',
                                             fontWeight: 'bold'
                                         }}
                                     >

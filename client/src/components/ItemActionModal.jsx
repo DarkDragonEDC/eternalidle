@@ -1,13 +1,20 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Shield, Coins, Tag, Trash2, ArrowRight } from 'lucide-react';
-import { getTierColor, calculateItemSellPrice } from '@shared/items';
+import { getTierColor, calculateItemSellPrice, resolveItem } from '@shared/items';
 
-const ItemActionModal = ({ item, onClose, onEquip, onSell, onList }) => {
-    if (!item) return null;
+const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList }) => {
+    if (!rawItem) return null;
+
+    // Robust resolution: ensure we have full details including qualityName
+    const resolved = resolveItem(rawItem.id);
+    const item = { ...rawItem, ...resolved };
 
     const tierColor = getTierColor(item.tier);
     const borderColor = item.rarityColor || tierColor;
+
+    // Clean name: remove T{tier} from the name if we are going to append it manually
+    const cleanBaseName = (item.name || '').replace(new RegExp(` T${item.tier}$`), '');
 
     return (
         <AnimatePresence>
@@ -66,7 +73,7 @@ const ItemActionModal = ({ item, onClose, onEquip, onSell, onList }) => {
                             color: item.rarityColor || '#fff',
                             marginBottom: '4px'
                         }}>
-                            {item.name}
+                            {item.qualityName && item.qualityName !== 'Normal' ? `${item.qualityName} ` : ''}{cleanBaseName}
                         </div>
                         <div style={{
                             fontSize: '0.8rem',

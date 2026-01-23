@@ -1,9 +1,20 @@
 import React from 'react';
 import { X, Sword, Shield, Heart, Star } from 'lucide-react';
-import { QUALITIES } from '@shared/items';
+import { QUALITIES, resolveItem } from '@shared/items';
 
-const ItemInfoModal = ({ item, onClose }) => {
-    if (!item) return null;
+const ItemInfoModal = ({ item: rawItem, onClose }) => {
+    if (!rawItem) return null;
+
+    // Robust resolution: ensure we have full details including qualityName
+    // We merge resolved stats UNDER rawItem to keep server variations, 
+    // but we ensure qualityName and rarityColor come from the authoritative resolveItem
+    const resolved = resolveItem(rawItem.id || rawItem.item_id);
+    const item = {
+        ...rawItem,
+        ...resolved,
+        // Se o rawItem tinha stats customizados (ex: do servidor), mantém os stats do rawItem
+        stats: { ...resolved?.stats, ...rawItem.stats }
+    };
 
     const handleBackdropClick = (e) => {
         if (e.target === e.currentTarget) {
@@ -28,6 +39,9 @@ const ItemInfoModal = ({ item, onClose }) => {
             calculatedStats
         };
     });
+
+    // Clean name: remove T{tier} from the name if we are going to append it manually
+    const cleanBaseName = (item.name || '').replace(new RegExp(` T${item.tier}$`), '');
 
     return (
         <div style={{
@@ -77,7 +91,7 @@ const ItemInfoModal = ({ item, onClose }) => {
                         borderRadius: '12px 12px 0 0'
                     }}></div>
                     <h3 style={{ margin: 0, color: item.rarityColor || '#d4af37', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                        {item.qualityName ? `${item.qualityName} ` : ''}{item.name} T{item.tier}
+                        {item.qualityName && item.qualityName !== 'Normal' ? `${item.qualityName} ` : ''}{cleanBaseName} T{item.tier}
                     </h3>
                     <button
                         onClick={onClose}
@@ -103,7 +117,7 @@ const ItemInfoModal = ({ item, onClose }) => {
                     <div><span style={{ color: '#888' }}>Tier:</span> T{item.tier}</div>
                     <div><span style={{ color: '#888' }}>Type:</span> {item.type}</div>
                     <div><span style={{ color: '#888' }}>IP:</span> {item.ip || 0}</div>
-                    <div><span style={{ color: '#888' }}>Rarity:</span> <span style={{ color: item.rarityColor || '#fff', fontWeight: 'bold' }}>{item.qualityName || 'Normal'}</span></div>
+                    <div><span style={{ color: '#888' }}>Rarity:</span> <span style={{ color: item.rarityColor || '#fff', fontWeight: 'bold' }}>{item.qualityName}</span></div>
 
                     {/* Stats List */}
                     <div style={{ gridColumn: '1 / -1', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>

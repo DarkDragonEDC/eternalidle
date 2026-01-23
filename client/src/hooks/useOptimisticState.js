@@ -1,8 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-
-const calculateNextLevelXP = (level) => {
-    return Math.floor(100 * Math.pow(1.15, level - 1));
-};
+import { calculateNextLevelXP } from '@shared/skills';
 
 const getSkillKey = (type, itemId) => {
     if (type === 'GATHERING') {

@@ -5,8 +5,8 @@ export class CombatManager {
         this.gameManager = gameManager;
     }
 
-    async startCombat(userId, mobId, tier) {
-        const char = await this.gameManager.getCharacter(userId);
+    async startCombat(userId, mobId, tier, existingChar = null) {
+        const char = existingChar || await this.gameManager.getCharacter(userId);
 
         let mobData = null;
         if (MONSTERS[tier]) {
@@ -31,6 +31,11 @@ export class CombatManager {
             playerHealth: char.state.health || 100,
             auto: true,
             kills: 0,
+            totalPlayerDmg: 0,
+            totalMobDmg: 0,
+            sessionXp: 0,
+            sessionSilver: 0,
+            sessionLoot: {},
             started_at: new Date().toISOString()
         };
 
@@ -41,6 +46,9 @@ export class CombatManager {
     async stopCombat(userId) {
         const char = await this.gameManager.getCharacter(userId);
         if (char.state.combat) {
+            // Save Session History
+            await this.saveCombatLog(char, 'FLEE'); // Or 'STOPPED'
+
             delete char.state.combat;
             await this.gameManager.saveState(char.id, char.state);
         }
@@ -50,6 +58,13 @@ export class CombatManager {
     async processCombatRound(char) {
         const combat = char.state.combat;
         if (!combat) return null;
+
+        // Legacy/Safety Init
+        if (!combat.sessionLoot) combat.sessionLoot = {};
+        if (typeof combat.sessionXp === 'undefined') combat.sessionXp = 0;
+        if (typeof combat.sessionSilver === 'undefined') combat.sessionSilver = 0;
+        if (typeof combat.totalPlayerDmg === 'undefined') combat.totalPlayerDmg = 0;
+        if (typeof combat.totalMobDmg === 'undefined') combat.totalMobDmg = 0;
 
         const playerStats = this.gameManager.inventoryManager.calculateStats(char);
         const playerDmg = playerStats.damage;
@@ -69,6 +84,9 @@ export class CombatManager {
 
         combat.mobHealth -= mitigatedPlayerDmg;
         combat.playerHealth -= mitigatedMobDmg;
+
+        combat.totalPlayerDmg = (combat.totalPlayerDmg || 0) + mitigatedPlayerDmg;
+        combat.totalMobDmg = (combat.totalMobDmg || 0) + mitigatedMobDmg;
 
         char.state.health = Math.max(0, combat.playerHealth);
 
@@ -90,33 +108,47 @@ export class CombatManager {
             roundDetails.victory = true;
             message = `Defeated ${combat.mobName}!`;
 
-            const baseXp = mobData ? mobData.xp : 10;
-            const xpBonus = playerStats.globals?.xpYield || 0;
-            const finalXp = Math.floor(baseXp * (1 + xpBonus / 100)); // +1% per point
-            leveledUp = this.gameManager.addXP(char, 'COMBAT', finalXp);
-            roundDetails.xpGained = finalXp;
+            try {
+                const baseXp = mobData ? mobData.xp : 10;
+                const xpBonus = playerStats.globals?.xpYield || 0;
+                const finalXp = Math.floor(baseXp * (1 + xpBonus / 100)); // +1% per point
+                leveledUp = this.gameManager.addXP(char, 'COMBAT', finalXp);
+                roundDetails.xpGained = finalXp;
 
-            if (mobData && mobData.silver) {
-                const sMin = mobData.silver[0] || 0;
-                const sMax = mobData.silver[1] || 10;
-                const baseSilver = Math.floor(Math.random() * (sMax - sMin + 1)) + sMin;
+                let finalSilver = 0;
+                if (mobData && mobData.silver) {
+                    const sMin = mobData.silver[0] || 0;
+                    const sMax = mobData.silver[1] || 10;
+                    const baseSilver = Math.floor(Math.random() * (sMax - sMin + 1)) + sMin;
 
-                const silverBonus = playerStats.globals?.silverYield || 0;
-                const finalSilver = Math.floor(baseSilver * (1 + silverBonus / 100));
+                    const silverBonus = playerStats.globals?.silverYield || 0;
+                    finalSilver = Math.floor(baseSilver * (1 + silverBonus / 100));
 
-                char.state.silver = (char.state.silver || 0) + finalSilver;
-                roundDetails.silverGained = finalSilver;
-                message += ` [${finalSilver} Silver]`;
-            }
+                    char.state.silver = (char.state.silver || 0) + finalSilver;
+                    roundDetails.silverGained = finalSilver;
+                    message += ` [${finalSilver} Silver]`;
+                }
 
-            if (mobData && mobData.loot) {
-                for (const [lootId, chance] of Object.entries(mobData.loot)) {
-                    if (Math.random() <= chance) {
-                        this.gameManager.inventoryManager.addItemToInventory(char, lootId, 1);
-                        roundDetails.lootGained.push(lootId);
-                        message += ` [Item: ${lootId}]`;
+                if (mobData && mobData.loot) {
+                    for (const [lootId, chance] of Object.entries(mobData.loot)) {
+                        if (Math.random() <= chance) {
+                            this.gameManager.inventoryManager.addItemToInventory(char, lootId, 1);
+                            roundDetails.lootGained.push(lootId);
+                            message += ` [Item: ${lootId}]`;
+
+                            // Accumulate Session Loot
+                            if (!combat.sessionLoot) combat.sessionLoot = {};
+                            combat.sessionLoot[lootId] = (combat.sessionLoot[lootId] || 0) + 1;
+                        }
                     }
                 }
+
+                // Accumulate Session Stats
+                combat.sessionXp = (combat.sessionXp || 0) + finalXp;
+                combat.sessionSilver = (combat.sessionSilver || 0) + (finalSilver || 0);
+
+            } catch (err) {
+                console.error("[COMBAT] Error processing kill rewards:", err);
             }
 
             if (combat.isDungeon) {
@@ -130,9 +162,48 @@ export class CombatManager {
         if (combat.playerHealth <= 0) {
             roundDetails.defeat = true;
             message = "You died!";
+
+            // Save History (Session end)
+            await this.saveCombatLog(char, 'DEFEAT');
+
             delete char.state.combat;
         }
 
         return { message, leveledUp, details: roundDetails };
+    }
+
+    async saveCombatLog(char, outcome) {
+        try {
+            const combat = char.state.combat;
+            if (!combat) return;
+
+            const duration = Math.floor((Date.now() - new Date(combat.started_at).getTime()) / 1000);
+
+            // Format loot for storage
+            const formattedLoot = [];
+            for (const [itemId, qty] of Object.entries(combat.sessionLoot || {})) {
+                formattedLoot.push(`${qty}x ${itemId}`);
+            }
+
+            const { error } = await this.gameManager.supabase.from('combat_history').insert({
+                character_id: char.id,
+                mob_id: combat.mobId,
+                mob_name: combat.mobName,
+                outcome: outcome,
+                duration_seconds: duration,
+                xp_gained: combat.sessionXp || 0,
+                silver_gained: combat.sessionSilver || 0,
+                loot_gained: formattedLoot,
+                damage_dealt: combat.totalPlayerDmg || 0,
+                damage_taken: combat.totalMobDmg || 0,
+                kills: combat.kills || 0
+            });
+
+            if (error) {
+                console.error("Failed to save combat history:", error.message);
+            }
+        } catch (err) {
+            console.error("Error saving combat history log:", err);
+        }
     }
 }

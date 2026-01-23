@@ -6,18 +6,17 @@ import { resolveItem, getTierColor } from '@shared/items';
 const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, inventory, onShowInfo }) => {
 
     // Filter candidates from inventory based on slot
-    const candidates = React.useMemo(() => {
+    const { candidates, bestCandidate } = React.useMemo(() => {
         const list = [];
         Object.entries(inventory).forEach(([itemId, qty]) => {
             if (qty <= 0) return;
-            const item = resolveItem(itemId); // Usage of resolveItem
+            const item = resolveItem(itemId);
             if (!item) return;
 
             let matches = false;
             switch (slot) {
                 case 'cape': matches = item.type === 'CAPE'; break;
                 case 'helmet': case 'head': matches = item.type === 'HELMET'; break;
-                // case 'tool': matches = item.type === 'TOOL'; break; // Deprecated
                 case 'tool_axe': matches = item.type === 'TOOL_AXE'; break;
                 case 'tool_pickaxe': matches = item.type === 'TOOL_PICKAXE'; break;
                 case 'tool_knife': matches = item.type === 'TOOL_KNIFE'; break;
@@ -36,8 +35,41 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                 list.push({ ...item, qty });
             }
         });
-        return list.sort((a, b) => b.tier - a.tier); // Sort by tier desc
+
+        // Sort by IP desc, then quality desc
+        list.sort((a, b) => {
+            if ((b.ip || 0) !== (a.ip || 0)) return (b.ip || 0) - (a.ip || 0);
+            if ((b.quality || 0) !== (a.quality || 0)) return (b.quality || 0) - (a.quality || 0);
+            return b.tier - a.tier;
+        });
+
+        const best = list.length > 0 ? list[0] : null;
+
+        return { candidates: list, bestCandidate: best };
     }, [slot, inventory]);
+
+    // Resolve current item for comparison
+    const resolvedCurrent = React.useMemo(() => {
+        if (!currentItem) return null;
+        return { ...resolveItem(currentItem.id), ...currentItem };
+    }, [currentItem]);
+
+    // Check if the best candidate is actually better than current
+    const isRecommended = React.useCallback((candidate) => {
+        if (!candidate) return false;
+        if (!resolvedCurrent) return true;
+
+        const cVal = candidate.ip || candidate.tier || 0;
+        const curVal = resolvedCurrent.ip || resolvedCurrent.tier || 0;
+
+        if (cVal > curVal) return true;
+        // If IP is equal, check quality
+        if (cVal === curVal && (candidate.quality || 0) > (resolvedCurrent.quality || 0)) return true;
+
+        return false;
+    }, [resolvedCurrent]);
+
+    const showRecommendation = bestCandidate && isRecommended(bestCandidate);
 
     const handleBackdropClick = (e) => {
         if (e.target === e.currentTarget) {
@@ -79,7 +111,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     background: 'rgba(0,0,0,0.2)',
-                    flexShrink: 0 // Prevent header from shrinking
+                    flexShrink: 0
                 }}>
                     <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', textTransform: 'uppercase', letterSpacing: '1px' }}>
                         Select {slot}
@@ -91,13 +123,73 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                 <div style={{
                     flex: 1,
                     padding: '20px',
-                    paddingBottom: '0px', // Reset padding bottom
+                    paddingBottom: '20px',
                     overflowY: 'auto',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '20px',
                     minHeight: 0
                 }}>
+
+                    {/* Recommendation Section */}
+                    {showRecommendation && (
+                        <div>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                fontSize: '0.75rem',
+                                color: 'var(--accent)',
+                                textTransform: 'uppercase',
+                                marginBottom: '10px',
+                                fontWeight: '900',
+                                letterSpacing: '1px'
+                            }}>
+                                <Zap size={14} fill="var(--accent)" /> Recommended Item
+                            </div>
+                            <div
+                                onClick={() => { onEquip(bestCandidate.id); onClose(); }}
+                                style={{
+                                    background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(0, 0, 0, 0.4) 100%)',
+                                    border: '1px solid var(--accent)',
+                                    borderRadius: '12px',
+                                    padding: '15px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 0 20px rgba(212, 175, 55, 0.1)'
+                                }}
+                            >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                    <div style={{
+                                        width: '48px',
+                                        height: '48px',
+                                        background: 'rgba(0,0,0,0.4)',
+                                        borderRadius: '8px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        border: `1px solid ${bestCandidate.quality > 0 ? bestCandidate.rarityColor : 'var(--accent)'}`,
+                                        boxShadow: bestCandidate.quality > 0 ? `0 0 10px ${bestCandidate.rarityColor}55` : 'none'
+                                    }}>
+                                        <Star size={24} color={bestCandidate.quality > 0 ? bestCandidate.rarityColor : 'var(--accent)'} />
+                                    </div>
+                                    <div>
+                                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>
+                                            {bestCandidate.qualityName && bestCandidate.qualityName !== 'Normal' ? `${bestCandidate.qualityName} ` : ''}{bestCandidate.name}
+                                        </div>
+                                        <div style={{ fontSize: '0.8rem', color: 'var(--accent)' }}>
+                                            IP {bestCandidate.ip || 0} • Tier {bestCandidate.tier}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style={{ background: 'var(--accent)', color: '#000', padding: '6px 12px', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.75rem' }}>
+                                    EQUIP BEST
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Current Item Section */}
                     {currentItem && (
@@ -106,8 +198,8 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                 Currently Equipped
                             </div>
                             <div style={{
-                                background: 'rgba(76, 175, 80, 0.1)',
-                                border: '1px solid rgba(76, 175, 80, 0.3)',
+                                background: 'rgba(76, 175, 80, 0.05)',
+                                border: '1px solid rgba(76, 175, 80, 0.2)',
                                 borderRadius: '12px',
                                 padding: '15px',
                                 display: 'flex',
@@ -125,12 +217,11 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                         justifyContent: 'center',
                                         border: '1px solid rgba(255,255,255,0.1)'
                                     }}>
-                                        {/* Find icon based on type (simplified for now) */}
                                         <Star size={24} color={getTierColor(currentItem.tier)} />
                                     </div>
                                     <div>
-                                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: getTierColor(currentItem.tier), display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            {currentItem.name || currentItem.id}
+                                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: getTierColor(resolvedCurrent?.tier || currentItem.tier), display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            {resolvedCurrent?.qualityName && resolvedCurrent.qualityName !== 'Normal' ? `${resolvedCurrent.qualityName} ` : ''}{resolvedCurrent?.name || currentItem.name || currentItem.id}
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); onShowInfo(currentItem); }}
                                                 style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.5 }}
@@ -164,7 +255,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                     {/* Inventory List */}
                     <div>
                         <div style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', marginBottom: '10px', fontWeight: 'bold' }}>
-                            Available in Inventory
+                            All Inventory
                         </div>
                         {candidates.length === 0 ? (
                             <div style={{
@@ -179,72 +270,78 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                             </div>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                {candidates.map((item, idx) => (
-                                    <div
-                                        key={`${item.id}-${idx}`}
-                                        onClick={() => { onEquip(item.id); onClose(); }}
-                                        style={{
-                                            background: 'rgba(255,255,255,0.03)',
-                                            border: `1px solid ${item.quality > 0 ? item.rarityColor : 'rgba(255,255,255,0.05)'}`,
-                                            borderRadius: '12px',
-                                            padding: '12px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'space-between',
-                                            cursor: 'pointer',
-                                            textAlign: 'left',
-                                            transition: '0.2s',
-                                            boxShadow: item.quality > 0 ? `0 0 10px ${item.rarityColor}10` : 'none'
-                                        }}
-                                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
-                                        onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
-                                    >
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                            <div style={{
-                                                width: '42px',
-                                                height: '42px',
-                                                background: 'rgba(0,0,0,0.3)',
-                                                borderRadius: '8px',
+                                {candidates.map((item, idx) => {
+                                    const isItemRecommended = isRecommended(item);
+                                    return (
+                                        <div
+                                            key={`${item.id}-${idx}`}
+                                            onClick={() => { onEquip(item.id); onClose(); }}
+                                            style={{
+                                                background: 'rgba(255,255,255,0.03)',
+                                                border: `1px solid ${isItemRecommended ? 'rgba(212, 175, 55, 0.3)' : (item.quality > 0 ? item.rarityColor : 'rgba(255,255,255,0.05)')}`,
+                                                borderRadius: '12px',
+                                                padding: '12px',
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                justifyContent: 'center',
-                                                color: '#aaa',
-                                                position: 'relative',
-                                                border: item.quality > 0 ? `1px solid ${item.rarityColor}55` : 'none'
-                                            }}>
-                                                <Star size={20} color={item.quality > 0 ? item.rarityColor : '#aaa'} />
+                                                justifyContent: 'space-between',
+                                                cursor: 'pointer',
+                                                textAlign: 'left',
+                                                transition: '0.2s',
+                                                boxShadow: isItemRecommended ? '0 0 10px rgba(212, 175, 55, 0.05)' : (item.quality > 0 ? `0 0 10px ${item.rarityColor}10` : 'none')
+                                            }}
+                                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
+                                            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                                        >
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                                                 <div style={{
-                                                    position: 'absolute',
-                                                    bottom: -5,
-                                                    right: -5,
-                                                    background: '#333',
-                                                    borderRadius: '50%',
-                                                    width: '18px',
-                                                    height: '18px',
-                                                    fontSize: '0.6rem',
+                                                    width: '42px',
+                                                    height: '42px',
+                                                    background: 'rgba(0,0,0,0.3)',
+                                                    borderRadius: '8px',
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
-                                                    border: '1px solid #555',
-                                                    color: '#fff'
-                                                }}>{item.qty}</div>
-                                            </div>
-                                            <div>
-                                                <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: item.quality > 0 ? item.rarityColor : '#eee', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                    {item.qualityName ? `[${item.qualityName}] ` : ''}{item.name}
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); onShowInfo(item); }}
-                                                        style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.5 }}
-                                                    >
-                                                        <Info size={14} color="#fff" />
-                                                    </button>
+                                                    color: '#aaa',
+                                                    position: 'relative',
+                                                    border: item.quality > 0 ? `1px solid ${item.rarityColor}55` : 'none'
+                                                }}>
+                                                    <Star size={20} color={item.quality > 0 ? item.rarityColor : '#aaa'} />
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        bottom: -5,
+                                                        right: -5,
+                                                        background: '#333',
+                                                        borderRadius: '50%',
+                                                        width: '18px',
+                                                        height: '18px',
+                                                        fontSize: '0.6rem',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        border: '1px solid #555',
+                                                        color: '#fff'
+                                                    }}>{item.qty}</div>
                                                 </div>
-                                                <div style={{ fontSize: '0.75rem', color: '#888' }}>Tier {item.tier} {item.ip ? `• IP ${item.ip}` : ''}</div>
+                                                <div>
+                                                    <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: item.quality > 0 ? item.rarityColor : '#eee', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        {item.qualityName && item.qualityName !== 'Normal' ? `${item.qualityName} ` : ''}{item.name}
+                                                        {isItemRecommended && (
+                                                            <span style={{ fontSize: '0.6rem', background: 'var(--accent)', color: '#000', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>BEST</span>
+                                                        )}
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); onShowInfo(item); }}
+                                                            style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.5 }}
+                                                        >
+                                                            <Info size={14} color="#fff" />
+                                                        </button>
+                                                    </div>
+                                                    <div style={{ fontSize: '0.75rem', color: '#888' }}>Tier {item.tier} {item.ip ? `• IP ${item.ip}` : ''}</div>
+                                                </div>
                                             </div>
+                                            <div style={{ color: isItemRecommended ? 'var(--accent)' : '#4caf50', fontSize: '0.8rem', fontWeight: 'bold' }}>EQUIP</div>
                                         </div>
-                                        <div style={{ color: '#4caf50', fontSize: '0.8rem', fontWeight: 'bold' }}>EQUIP</div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                     </div>

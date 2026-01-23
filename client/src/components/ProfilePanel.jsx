@@ -137,7 +137,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
 
     const EquipmentSlot = ({ slot, icon, label, item: rawItem, onClick, onShowInfo }) => {
         // Resolve item to ensure we have latest stats and rarity color (even for Normal items if logic changes, but mostly for _Q items)
-        const item = rawItem ? { ...resolveItem(rawItem.id), ...rawItem } : null;
+        const item = rawItem ? { ...rawItem, ...resolveItem(rawItem.id || rawItem.item_id) } : null;
 
         const tierColor = item ? getTierColor(item.tier) : 'rgba(255,255,255,0.05)';
 

@@ -26,7 +26,20 @@ export const QUALITIES = {
 const DMG_CURVE = [10, 25, 60, 150, 400, 1000, 2500, 6000, 14000, 30000]; // Weapon Dmg
 const DEF_CURVE = [5, 15, 35, 80, 200, 500, 1200, 3000, 7000, 15000];   // Armor Def
 const HP_CURVE = [50, 120, 300, 800, 2000, 5000, 12000, 30000, 80000, 200000]; // Armor HP
-const XP_MAT_CURVE = [5, 10, 25, 60, 150, 400, 1000, 2500, 6500, 15000]; // Material XP
+
+// USER PROVIDED DATA FOR XP AND TIME
+const GATHER_DATA = {
+    xp: [1, 2, 4, 7, 11, 16, 22, 29, 37, 46],
+    time: [15, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+};
+const REFINE_DATA = {
+    xp: [1, 2, 4, 7, 11, 16, 22, 29, 37, 46],
+    time: [15, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+};
+const CRAFT_DATA = {
+    xp: [18, 36, 72, 126, 198, 288, 396, 522, 667, 829],
+    time: [240, 320, 480, 640, 800, 960, 1120, 1280, 1440, 1520]
+};
 
 export const ITEMS = {
     RAW: {
@@ -41,7 +54,8 @@ export const ITEMS = {
     GEAR: {
         WARRIORS_FORGE: { SWORD: {}, SHIELD: {}, PLATE_ARMOR: {}, PLATE_HELMET: {}, PLATE_BOOTS: {}, PLATE_GLOVES: {}, PLATE_CAPE: {}, PICKAXE: {} },
         HUNTERS_LODGE: { BOW: {}, TORCH: {}, LEATHER_ARMOR: {}, LEATHER_HELMET: {}, LEATHER_BOOTS: {}, LEATHER_GLOVES: {}, LEATHER_CAPE: {}, AXE: {}, SKINNING_KNIFE: {} },
-        MAGES_TOWER: { FIRE_STAFF: {}, TOME: {}, CLOTH_ARMOR: {}, CLOTH_HELMET: {}, CLOTH_BOOTS: {}, CLOTH_GLOVES: {}, CAPE: {}, SICKLE: {}, FISHING_ROD: {} }
+        MAGES_TOWER: { FIRE_STAFF: {}, TOME: {}, CLOTH_ARMOR: {}, CLOTH_HELMET: {}, CLOTH_BOOTS: {}, CLOTH_GLOVES: {}, CAPE: {}, SICKLE: {}, FISHING_ROD: {} },
+        COOKING_STATION: { FOOD: {} }
     },
     MAPS: {},
     SPECIAL: { CREST: {} }
@@ -54,7 +68,8 @@ const genRaw = (type, idPrefix) => {
             id: `T${t}_${idPrefix}`,
             name: `${type.charAt(0) + type.slice(1).toLowerCase()}`,
             tier: t,
-            xp: XP_MAT_CURVE[t - 1]
+            xp: GATHER_DATA.xp[t - 1],
+            time: GATHER_DATA.time[t - 1]
         };
     }
 };
@@ -62,15 +77,15 @@ const genRaw = (type, idPrefix) => {
 const genRefined = (type, idPrefix, rawId) => {
     for (const t of TIERS) {
         const req = {};
-        req[`T${t}_${rawId}`] = 2 + Math.floor(t / 2); // Increasing raw cost
-        if (t > 1) req[`T${t - 1}_${idPrefix}`] = 1;
+        req[`T${t}_${rawId}`] = 2; // Flat cost of 2 raw materials for any tier
 
         ITEMS.REFINED[type][t] = {
             id: `T${t}_${idPrefix}`,
             name: type.charAt(0) + type.slice(1).toLowerCase(),
             tier: t,
             req,
-            xp: XP_MAT_CURVE[t - 1] * 2
+            xp: REFINE_DATA.xp[t - 1],
+            time: REFINE_DATA.time[t - 1]
         };
     }
 };
@@ -87,12 +102,15 @@ genRefined('CLOTH', 'CLOTH', 'FIBER');
 
 // Generate Food
 for (const t of TIERS) {
-    ITEMS.CONSUMABLE.FOOD[t] = {
+    const foodItem = {
         id: `T${t}_FOOD`, name: 'Food', tier: t, type: 'FOOD',
         heal: HP_CURVE[t - 1], // Heals roughly 1 full HP bar of that tier
-        req: { [`T${t}_FISH`]: 1 },
-        xp: XP_MAT_CURVE[t - 1] * 3
+        req: { [`T${t}_FISH`]: 2 },
+        xp: REFINE_DATA.xp[t - 1], // Use refining curve for food
+        time: REFINE_DATA.time[t - 1]
     };
+    ITEMS.CONSUMABLE.FOOD[t] = foodItem;
+    ITEMS.GEAR.COOKING_STATION.FOOD[t] = foodItem;
 }
 
 // Generate Maps
@@ -114,10 +132,8 @@ const genGear = (category, slot, type, idSuffix, matType, statMultipliers = {}) 
         let req = {};
         let mainMatCount = 0;
 
-        // Cost Scaling
-        if (slot === 'WEAPON') mainMatCount = 12 + t * 2;
-        else if (slot === 'ARMOR') mainMatCount = 16 + t * 2;
-        else mainMatCount = 8 + t;
+        // Cost Scaling - FIXED to 20 for all tiers/slots as requested
+        mainMatCount = 20;
 
         req[matId] = mainMatCount;
         // Capes need crests
@@ -137,7 +153,8 @@ const genGear = (category, slot, type, idSuffix, matType, statMultipliers = {}) 
             name: idSuffix.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase()),
             tier: t,
             req,
-            xp: XP_MAT_CURVE[t - 1] * 10,
+            xp: CRAFT_DATA.xp[t - 1],
+            time: CRAFT_DATA.time[t - 1],
             ip: getBaseIP(t),
             type: type,
             stats
@@ -198,53 +215,82 @@ indexItems(ITEMS);
 
 export const resolveItem = (itemId) => {
     if (!itemId) return null;
-    if (ITEM_LOOKUP[itemId]) return ITEM_LOOKUP[itemId];
-    if (typeof itemId === 'string') {
-        const upperId = itemId.toUpperCase();
-        if (ITEM_LOOKUP[upperId]) return ITEM_LOOKUP[upperId];
 
-        // Handle quality
-        if (upperId.includes('_Q')) {
-            const parts = upperId.split('_Q');
-            const baseId = parts[0];
-            const qualityStr = parts[1];
-            const qualityId = parseInt(qualityStr);
-            const baseItem = ITEM_LOOKUP[baseId];
+    // Normalize ID
+    const rawId = String(itemId).trim();
+    const upperId = rawId.toUpperCase();
 
-            if (baseItem && !isNaN(qualityId) && QUALITIES[qualityId]) {
-                const quality = QUALITIES[qualityId];
-                const ipBonus = quality.ipBonus || 0;
-                // Quality Stats Multiplier: Q1(20ip)=+10%, Q2(50ip)=+25%...
-                const statMultiplier = 1 + (ipBonus / 200);
+    // 1. Precise Lookup
+    if (ITEM_LOOKUP[upperId]) {
+        return {
+            ...ITEM_LOOKUP[upperId],
+            quality: 0,
+            qualityName: QUALITIES[0].name,
+            rarityColor: QUALITIES[0].color,
+            name: ITEM_LOOKUP[upperId].name // Normal items don't need prefix
+        };
+    }
 
-                const newStats = {};
-                if (baseItem.stats) {
-                    for (const key in baseItem.stats) {
-                        if (typeof baseItem.stats[key] === 'number') {
-                            // Attack Speed does NOT get multiplied by quality, other stats do
-                            if (key === 'attackSpeed') newStats[key] = baseItem.stats[key];
-                            else newStats[key] = parseFloat((baseItem.stats[key] * statMultiplier).toFixed(1));
-                        } else {
-                            newStats[key] = baseItem.stats[key];
-                        }
-                    }
-                }
+    let qualityId = 0;
+    let baseId = upperId;
+    let baseItem = null;
 
-                return {
-                    ...baseItem,
-                    id: upperId,
-                    name: baseItem.name,
-                    rarityColor: quality.color,
-                    quality: qualityId,
-                    originalId: baseItem.id,
-                    ip: (baseItem.ip || 0) + ipBonus,
-                    stats: newStats
-                };
-            }
-            if (baseItem) return baseItem;
+    // 2. Quality Detection (Legacy Split Method - Safer)
+    if (upperId.includes('_Q')) {
+        const parts = upperId.split('_Q');
+        // Handle cases where ID might have multiple _Q (unlikely but safe) by taking the last part?
+        // Actually, the standard structure is ID_SUFFIX_QX.
+        // If split has > 2 parts, it might be tricky.
+        // Let's assume the LAST part is the quality if it's a number.
+        const lastPart = parts[parts.length - 1];
+        const possibleQ = parseInt(lastPart);
+
+        if (!isNaN(possibleQ)) {
+            qualityId = possibleQ;
+            // The base ID is everything before the last _Q
+            baseId = parts.slice(0, parts.length - 1).join('_Q');
+            baseItem = ITEM_LOOKUP[baseId];
         }
     }
-    return null;
+
+    // 3. Fallback/Direct Lookup if 2 failed
+    if (!baseItem) {
+        baseItem = ITEM_LOOKUP[baseId];
+    }
+
+    if (!baseItem) return null;
+
+    // 4. Build return object
+    const quality = QUALITIES[qualityId] || QUALITIES[0];
+    const ipBonus = quality.ipBonus || 0;
+    const statMultiplier = 1 + (ipBonus / 200);
+
+    const newStats = {};
+    if (baseItem.stats) {
+        for (const key in baseItem.stats) {
+            if (typeof baseItem.stats[key] === 'number') {
+                if (key === 'attackSpeed') newStats[key] = baseItem.stats[key];
+                else newStats[key] = parseFloat((baseItem.stats[key] * statMultiplier).toFixed(1));
+            } else {
+                newStats[key] = baseItem.stats[key];
+            }
+        }
+    }
+
+    // Determine Rarity Name prefix
+    const qualityPrefix = (quality.name && quality.name !== 'Normal') ? `${quality.name} ` : '';
+
+    return {
+        ...baseItem,
+        id: rawId,
+        name: `${qualityPrefix}${baseItem.name}`,
+        rarityColor: quality.color,
+        quality: qualityId,
+        qualityName: quality.name,
+        originalId: baseId,
+        ip: (baseItem.ip || 0) + ipBonus,
+        stats: newStats
+    };
 };
 
 export const formatItemId = (itemId) => itemId ? itemId.replace(/_/g, ' ') : '';

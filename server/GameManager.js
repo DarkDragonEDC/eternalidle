@@ -83,6 +83,11 @@ export class GameManager {
                 updated = true;
             }
 
+            if (!data.state.notifications) {
+                data.state.notifications = [];
+                updated = true;
+            }
+
             if (catchup && data.current_activity && data.activity_started_at) {
                 const now = new Date();
                 const lastSaved = data.last_saved ? new Date(data.last_saved).getTime() : new Date(data.activity_started_at).getTime();
@@ -182,7 +187,8 @@ export class GameManager {
                     stats: { str: 0, agi: 0, int: 0 },
                     silver: 0,
                     health: 100,
-                    maxHealth: 100
+                    maxHealth: 100,
+                    notifications: []
                 }
             })
             .select()
@@ -229,7 +235,7 @@ export class GameManager {
 
         let foodUsed = this.processFood(char);
 
-        if (!char.current_activity && !char.state.combat && !foodUsed) return null;
+        if (!char.current_activity && !char.state.combat && !foodUsed && !char.state.dungeon) return null;
 
         const now = Date.now();
         let leveledUp = null;
@@ -282,6 +288,11 @@ export class GameManager {
             }
         }
 
+        if (leveledUp) {
+            const skillName = leveledUp.skill.replace(/_/g, ' ');
+            this.addNotification(char, 'LEVEL_UP', `Sua skill de ${skillName} subiu para o nível ${leveledUp.level}!`);
+        }
+
         let stateChanged = false;
 
         if (char.state.combat) {
@@ -295,6 +306,9 @@ export class GameManager {
                 console.log(`[COMBAT_DEBUG] Executing round for ${char.name}`);
                 try {
                     combatResult = await this.combatManager.processCombatRound(char);
+                    if (combatResult?.leveledUp) {
+                        leveledUp = combatResult.leveledUp;
+                    }
                 } catch (e) {
                     console.error(`[COMBAT_ERROR] Error in processCombatRound:`, e);
                 }
@@ -313,6 +327,13 @@ export class GameManager {
                 dungeonResult = await this.dungeonManager.processDungeonTick(char);
                 if (dungeonResult) {
                     stateChanged = true;
+                    // Merge update into state so it's visible in getStatus
+                    if (dungeonResult.dungeonUpdate) {
+                        Object.assign(char.state.dungeon, dungeonResult.dungeonUpdate);
+                    }
+                    if (dungeonResult.leveledUp) {
+                        leveledUp = dungeonResult.leveledUp;
+                    }
                 }
             } catch (e) {
                 console.error("Dungeon Error:", e);
@@ -360,6 +381,7 @@ export class GameManager {
         skill.xp += amount;
         let leveledUp = false;
         let nextLevelXP = calculateNextLevelXP(skill.level);
+        // Loop while we have enough XP and haven't hit the cap
         while (skill.xp >= nextLevelXP && skill.level < 100) {
             skill.level++;
             skill.xp -= nextLevelXP;
@@ -375,6 +397,21 @@ export class GameManager {
             .update({ state })
             .eq('id', charId);
         if (error) throw error;
+    }
+
+    addNotification(char, type, message) {
+        if (!char.state.notifications) char.state.notifications = [];
+        char.state.notifications.unshift({
+            id: Date.now() + Math.random(),
+            type,
+            message,
+            timestamp: Date.now(),
+            read: false
+        });
+        // Keep only last 50
+        if (char.state.notifications.length > 50) {
+            char.state.notifications = char.state.notifications.slice(0, 50);
+        }
     }
 
     processFood(char) {
@@ -426,18 +463,11 @@ export class GameManager {
 
     // Delegation Methods
     async startActivity(u, t, i, q) {
-        const char = await this.getCharacter(u);
-        if (char.state.combat) throw new Error("Cannot start activity while in combat");
-        if (char.state.dungeon) throw new Error("Cannot start activity inside a dungeon");
         return this.activityManager.startActivity(u, t, i, q);
     }
     async stopActivity(u) { return this.activityManager.stopActivity(u); }
 
     async startCombat(u, m, t) {
-        const char = await this.getCharacter(u);
-        if (char.current_activity) {
-            await this.activityManager.stopActivity(u);
-        }
         return this.combatManager.startCombat(u, m, t);
     }
     async stopCombat(u) { return this.combatManager.stopCombat(u); }
@@ -446,9 +476,9 @@ export class GameManager {
     async getMarketListings(f) { return this.marketManager.getMarketListings(f); }
     async sellItem(u, i, q) { return this.marketManager.sellItem(u, i, q); }
     async listMarketItem(u, i, a, p) { return this.marketManager.listMarketItem(u, i, a, p); }
-    async buyMarketItem(b, l) { return this.marketManager.buyMarketItem(b, l); }
+    async buyMarketItem(b, l, q) { return this.marketManager.buyMarketItem(b, l, q); }
     async cancelMarketListing(u, l) { return this.marketManager.cancelMarketListing(u, l); }
     async claimMarketItem(u, c) { return this.marketManager.claimMarketItem(u, c); }
-    async startDungeon(u, d) { return this.dungeonManager.startDungeon(u, d); }
+    async startDungeon(u, d, r) { return this.dungeonManager.startDungeon(u, d, r); }
     async stopDungeon(u) { return this.dungeonManager.stopDungeon(u); }
 }

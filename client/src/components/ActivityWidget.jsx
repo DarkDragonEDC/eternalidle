@@ -7,10 +7,12 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
     const [isOpen, setIsOpen] = useState(false);
     const [elapsed, setElapsed] = useState(0);
     const [combatElapsed, setCombatElapsed] = useState(0);
+    const [dungeonElapsed, setDungeonElapsed] = useState(0);
     const [syncedElapsed, setSyncedElapsed] = useState(0);
 
     const activity = gameState?.current_activity;
     const combat = gameState?.state?.combat;
+    const dungeonState = gameState?.dungeon_state || gameState?.state?.dungeon;
 
     // Derived stats
     const initialQty = activity?.initial_quantity || activity?.actions_remaining || 1;
@@ -30,14 +32,33 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
     }, [activity, gameState?.activity_started_at, serverTimeOffset]);
 
     // Timer para Combate
+
+    // Timer para Combate
     useEffect(() => {
         if (!combat) return;
         const startTime = combat.started_at ? new Date(combat.started_at).getTime() : Date.now();
+
+        // Update immediately to avoid delay
+        setCombatElapsed(Math.floor((Date.now() - startTime) / 1000));
+
         const interval = setInterval(() => {
             setCombatElapsed(Math.floor((Date.now() - startTime) / 1000));
         }, 1000);
         return () => clearInterval(interval);
-    }, [combat, combat?.started_at]);
+    }, [combat?.started_at, !!combat]); // Only restart if started_at changes or combat toggles
+
+    // Timer para Dungeon
+    useEffect(() => {
+        if (!dungeonState || !dungeonState.active) return;
+        const startTime = dungeonState.started_at ? new Date(dungeonState.started_at).getTime() : Date.now();
+
+        setDungeonElapsed(Math.floor((Date.now() - startTime) / 1000));
+
+        const interval = setInterval(() => {
+            setDungeonElapsed(Math.floor((Date.now() - startTime) / 1000));
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [dungeonState?.started_at, !!dungeonState]);
 
     // Accurate Time Calculation using next_action_at
     useEffect(() => {
@@ -79,7 +100,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
     }, [isOpen]);
 
     // Se não há nada ativo, não renderiza
-    if (!activity && !combat) return null;
+    if (!activity && !combat && (!dungeonState || !dungeonState.active)) return null;
 
     const isGathering = activity?.type === 'GATHERING';
     const isRefining = activity?.type === 'REFINING';
@@ -128,8 +149,8 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                     width: '64px',
                     height: '64px',
                     borderRadius: '16px',
-                    background: combat ? 'rgba(50, 10, 10, 0.95)' : 'rgba(15, 20, 30, 0.95)',
-                    border: combat ? '1px solid #ff4444' : '1px solid #d4af37',
+                    background: (combat || (dungeonState?.active)) ? 'rgba(50, 10, 10, 0.95)' : 'rgba(15, 20, 30, 0.95)',
+                    border: (combat || (dungeonState?.active)) ? '1px solid #ff4444' : '1px solid #d4af37',
                     color: '#fff',
                     cursor: 'pointer',
                     display: 'flex',
@@ -153,17 +174,17 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                             </div>
                         </>
                     ) : (
-                        combat ? <Sword size={24} color="#ff4444" /> : getActivityIcon()
+                        (combat || (dungeonState?.active)) ? <Skull size={24} color="#ff4444" /> : getActivityIcon()
                     )}
                     <motion.div
                         animate={{ opacity: [0.5, 1, 0.5], scale: [1, 1.1, 1] }}
-                        transition={{ repeat: Infinity, duration: combat ? 0.8 : 2 }} // Pulsa mais rápido em combate
+                        transition={{ repeat: Infinity, duration: (combat || (dungeonState?.active)) ? 0.8 : 2 }} // Pulsa mais rápido em combate/dungeon
                         style={{
                             position: 'absolute',
                             width: '100%',
                             height: '100%',
                             borderRadius: '50%',
-                            boxShadow: combat ? '0 0 20px rgba(255, 68, 68, 0.4)' : '0 0 15px rgba(212, 175, 55, 0.3)'
+                            boxShadow: (combat || (dungeonState?.active)) ? '0 0 20px rgba(255, 68, 68, 0.4)' : '0 0 15px rgba(212, 175, 55, 0.3)'
                         }}
                     />
 
@@ -271,7 +292,10 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                             <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.8rem' }}>
                                                 {(() => {
                                                     const item = resolveItem(activity.item_id);
-                                                    if (item) return `T${item.tier} ${item.name}`;
+                                                    if (item) {
+                                                        const qualityPrefix = item.qualityName && item.qualityName !== 'Normal' ? `${item.qualityName} ` : '';
+                                                        return `${qualityPrefix}T${item.tier} ${item.name}`;
+                                                    }
 
                                                     // Fallback: try to extract tier from ID (e.g. T2_FISH)
                                                     const match = activity.item_id?.match(/^T(\d+)_/);
@@ -284,21 +308,15 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                             <span style={{ color: '#d4af37', fontWeight: 'bold', fontSize: '0.8rem' }}>{doneQty} <span style={{ fontSize: '0.6rem', color: '#666' }}>/ {initialQty}</span></span>
                                         </div>
 
-                                        {/* Barra de Progresso do Item Atual */}
-                                        <div style={{ height: '6px', background: 'rgba(0,0,0,0.5)', borderRadius: '3px', overflow: 'hidden', position: 'relative', marginBottom: '4px' }}>
-                                            <div
-                                                style={{
-                                                    width: `${skillProgressCapped}%`,
-                                                    height: '100%',
-                                                    background: '#d4af37',
-                                                    transition: 'width 0.3s ease-out'
-                                                }}
-                                            />
-                                        </div>
-
-                                        {/* Barra de Progresso Total */}
-                                        <div style={{ height: '2px', background: 'rgba(255,255,255,0.05)', borderRadius: '1px', overflow: 'hidden', position: 'relative' }}>
-                                            <div style={{ width: `${totalProgress}% `, height: '100%', background: 'rgba(212, 175, 55, 0.4)', transition: 'width 0.3s' }} />
+                                        {/* Barra de Progresso Total (Única Barra) */}
+                                        <div style={{ height: '8px', background: 'rgba(0,0,0,0.5)', borderRadius: '4px', overflow: 'hidden', position: 'relative', marginBottom: '4px' }}>
+                                            <div style={{
+                                                width: `${totalProgress}%`,
+                                                height: '100%',
+                                                background: 'linear-gradient(90deg, #d4af37, #f2d06b)',
+                                                transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                                boxShadow: '0 0 10px rgba(212, 175, 55, 0.3)'
+                                            }} />
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '0.55rem', color: '#666' }}>
                                             <span>{doneQty} completed</span>
@@ -473,10 +491,120 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                 </motion.div>
                             )}
 
+                            {/* --- CARD DE DUNGEON (Se houver) --- */}
+                            {(dungeonState && dungeonState.active) && (
+                                <motion.div
+                                    initial={{ opacity: 0, x: 20, scale: 0.95 }}
+                                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                                    exit={{ opacity: 0, x: 20, scale: 0.95 }}
+                                    onClick={() => {
+                                        if (onNavigate) {
+                                            onNavigate('dungeon');
+                                            setIsOpen(false);
+                                        }
+                                    }}
+                                    style={{
+                                        width: '280px',
+                                        maxWidth: 'calc(100vw - 60px)',
+                                        background: 'rgba(20, 10, 30, 0.95)',
+                                        backdropFilter: 'blur(20px)',
+                                        border: '1px solid rgba(174, 0, 255, 0.3)',
+                                        borderRadius: '12px',
+                                        padding: '12px',
+                                        boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
+                                        overflow: 'hidden',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    {/* Header Dungeon */}
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <div style={{
+                                                width: '32px', height: '32px', borderRadius: '8px',
+                                                background: 'rgba(174, 0, 255, 0.1)',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                border: '1px solid rgba(174, 0, 255, 0.3)',
+                                            }}>
+                                                <Skull size={18} color="#ae00ff" />
+                                            </div>
+                                            <div>
+                                                <div style={{ fontSize: '0.55rem', color: '#ae00ff', fontWeight: '900', letterSpacing: '0.5px' }}>ACTIVE DUNGEON</div>
+                                                <div style={{ fontSize: '0.8rem', color: '#fff', fontWeight: '900' }}>Tier {dungeonState.tier}</div>
+                                            </div>
+                                        </div>
+                                        <div style={{ textAlign: 'right', display: 'flex', gap: '15px' }}>
+                                            <div>
+                                                <div style={{ fontSize: '0.55rem', color: '#aaa', fontWeight: 'bold' }}>DURATION</div>
+                                                <div style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: '#fff', fontWeight: 'bold' }}>
+                                                    {formatTime(dungeonElapsed)}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div style={{ fontSize: '0.55rem', color: '#aaa', fontWeight: 'bold' }}>WAVE</div>
+                                                <div style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: '#fff', fontWeight: 'bold' }}>
+                                                    {dungeonState.wave}/{dungeonState.maxWaves}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Info Dungeon */}
+                                    <div style={{
+                                        background: 'rgba(0,0,0,0.3)',
+                                        borderRadius: '6px',
+                                        padding: '8px',
+                                        marginBottom: '10px',
+                                        border: '1px solid rgba(174, 0, 255, 0.1)'
+                                    }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span style={{ fontSize: '0.8rem', color: '#ae00ff', fontWeight: 'bold' }}>
+                                                {dungeonState.status === 'WALKING' ? "Walking..." :
+                                                    dungeonState.status === 'FIGHTING' ? "Fighting..." :
+                                                        dungeonState.status === 'BOSS_FIGHT' ? "BOSS FIGHT" :
+                                                            dungeonState.status}
+                                            </span>
+                                            {dungeonState.repeatCount > 0 && (
+                                                <span style={{ fontSize: '0.7rem', color: '#aaa' }}>
+                                                    Queue: {dungeonState.repeatCount}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (socket) socket.emit('stop_dungeon');
+                                            setIsOpen(false);
+                                        }}
+                                        style={{
+                                            width: '100%',
+                                            background: 'rgba(255, 59, 48, 0.1)',
+                                            border: '1px solid rgba(255, 59, 48, 0.5)',
+                                            color: '#ff3b30',
+                                            padding: '8px',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            fontWeight: '900',
+                                            fontSize: '0.7rem',
+                                            letterSpacing: '1px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '6px',
+                                            transition: '0.2s'
+                                        }}
+                                    >
+                                        <Skull size={14} />
+                                        ABANDON
+                                    </button>
+                                </motion.div>
+                            )}
+
                         </div>
                     </>
                 )}
-            </AnimatePresence>
+            </AnimatePresence >
         </>
     );
 };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Clock, Zap, Target, Star, ChevronRight, Package, Box } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { resolveItem, formatItemId } from '@shared/items';
+import { resolveItem, formatItemId, QUALITIES } from '@shared/items';
 
 const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavigate }) => {
     const [quantity, setQuantity] = useState(1);
@@ -289,14 +289,13 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
         // Toggle para accordion
 
 
-        // Qualidades Hardcoded para visualização (baseado no snippet)
-        const CRAFT_QUALITIES = [
-            { name: 'Normal', chance: '53.6%', color: '#888', bonuxMultiplier: 1.0 },
-            { name: 'Good', chance: '27.6%', color: '#4caf50', bonuxMultiplier: 1.1 },
-            { name: 'Outstanding', chance: '11.9%', color: '#4a90e2', bonuxMultiplier: 1.2 },
-            { name: 'Excellent', chance: '5.3%', color: '#9013fe', bonuxMultiplier: 1.3 },
-            { name: 'Masterpiece', chance: '1.6%', color: '#f5a623', bonuxMultiplier: 1.4 },
-        ];
+        // Qualidades baseadas no QUALITIES real do shared/items.js
+        const CRAFT_QUALITIES = Object.values(QUALITIES).map(q => ({
+            name: q.name,
+            chance: (q.chance * 100).toFixed(1) + '%',
+            color: q.color,
+            bonuxMultiplier: 1 + (q.ipBonus / 200) // Mesma lógica do resolveItem
+        }));
 
         // Determinar stat principal para mostrar (Damage ou Armor)
         const mainStatKey = item.stats?.damage ? 'Damage' : item.stats?.armor ? 'Armor' : 'Power';
