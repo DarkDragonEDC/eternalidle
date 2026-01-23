@@ -1,11 +1,7 @@
 export const TIERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 export const RESOURCE_TYPES = {
-    WOOD: 'Wood',
-    ORE: 'Ore',
-    HIDE: 'Hide',
-    FIBER: 'Fiber',
-    FISH: 'Fish'
+    WOOD: 'Wood', ORE: 'Ore', HIDE: 'Hide', FIBER: 'Fiber', FISH: 'Fish'
 };
 
 export const CRAFTING_STATIONS = {
@@ -15,511 +11,178 @@ export const CRAFTING_STATIONS = {
     COOKING_STATION: 'Cooking Station'
 };
 
-// Funções auxiliares para IP e Stats
 const getBaseIP = (tier) => tier * 100;
 
 export const QUALITIES = {
     0: { id: 0, name: 'Normal', suffix: '', chance: 0.699, ipBonus: 0, color: '#fff' },
-    1: { id: 1, name: 'Good', suffix: '_Q1', chance: 0.20, ipBonus: 10, color: '#4caf50' },
-    2: { id: 2, name: 'Outstanding', suffix: '_Q2', chance: 0.09, ipBonus: 20, color: '#4a90e2' },
-    3: { id: 3, name: 'Excellent', suffix: '_Q3', chance: 0.01, ipBonus: 50, color: '#9013fe' },
-    4: { id: 4, name: 'Masterpiece', suffix: '_Q4', chance: 0.001, ipBonus: 100, color: '#f5a623' }
+    1: { id: 1, name: 'Good', suffix: '_Q1', chance: 0.20, ipBonus: 20, color: '#4caf50' },
+    2: { id: 2, name: 'Outstanding', suffix: '_Q2', chance: 0.09, ipBonus: 50, color: '#4a90e2' },
+    3: { id: 3, name: 'Excellent', suffix: '_Q3', chance: 0.01, ipBonus: 100, color: '#9013fe' },
+    4: { id: 4, name: 'Masterpiece', suffix: '_Q4', chance: 0.001, ipBonus: 200, color: '#f5a623' }
 };
 
+// --- SCALING CONSTANTS ---
+// Exponential Growth Factor for Tiers
+const DMG_CURVE = [10, 25, 60, 150, 400, 1000, 2500, 6000, 14000, 30000]; // Weapon Dmg
+const DEF_CURVE = [5, 15, 35, 80, 200, 500, 1200, 3000, 7000, 15000];   // Armor Def
+const HP_CURVE = [50, 120, 300, 800, 2000, 5000, 12000, 30000, 80000, 200000]; // Armor HP
+const XP_MAT_CURVE = [5, 10, 25, 60, 150, 400, 1000, 2500, 6500, 15000]; // Material XP
+
 export const ITEMS = {
-    // Materiais Brutos
     RAW: {
-        WOOD: {
-            1: { id: 'T1_WOOD', name: 'Wood', tier: 1, xp: 5 },
-            2: { id: 'T2_WOOD', name: 'Wood', tier: 2, xp: 12 },
-            3: { id: 'T3_WOOD', name: 'Wood', tier: 3, xp: 30 },
-            4: { id: 'T4_WOOD', name: 'Wood', tier: 4, xp: 75 },
-            5: { id: 'T5_WOOD', name: 'Wood', tier: 5, xp: 180 },
-            6: { id: 'T6_WOOD', name: 'Wood', tier: 6, xp: 450 },
-            7: { id: 'T7_WOOD', name: 'Wood', tier: 7, xp: 1100 },
-            8: { id: 'T8_WOOD', name: 'Wood', tier: 8, xp: 2700 },
-            9: { id: 'T9_WOOD', name: 'Wood', tier: 9, xp: 6500 },
-            10: { id: 'T10_WOOD', name: 'Wood', tier: 10, xp: 15000 },
-        },
-        ORE: {
-            1: { id: 'T1_ORE', name: 'Ore', tier: 1, xp: 5 },
-            2: { id: 'T2_ORE', name: 'Ore', tier: 2, xp: 12 },
-            3: { id: 'T3_ORE', name: 'Ore', tier: 3, xp: 30 },
-            4: { id: 'T4_ORE', name: 'Ore', tier: 4, xp: 75 },
-            5: { id: 'T5_ORE', name: 'Ore', tier: 5, xp: 180 },
-            6: { id: 'T6_ORE', name: 'Ore', tier: 6, xp: 450 },
-            7: { id: 'T7_ORE', name: 'Ore', tier: 7, xp: 1100 },
-            8: { id: 'T8_ORE', name: 'Ore', tier: 8, xp: 2700 },
-            9: { id: 'T9_ORE', name: 'Ore', tier: 9, xp: 6500 },
-            10: { id: 'T10_ORE', name: 'Ore', tier: 10, xp: 15000 },
-        },
-        HIDE: {
-            1: { id: 'T1_HIDE', name: 'Hide', tier: 1, xp: 5 },
-            2: { id: 'T2_HIDE', name: 'Hide', tier: 2, xp: 12 },
-            3: { id: 'T3_HIDE', name: 'Hide', tier: 3, xp: 30 },
-            4: { id: 'T4_HIDE', name: 'Hide', tier: 4, xp: 75 },
-            5: { id: 'T5_HIDE', name: 'Hide', tier: 5, xp: 180 },
-            6: { id: 'T6_HIDE', name: 'Hide', tier: 6, xp: 450 },
-            7: { id: 'T7_HIDE', name: 'Hide', tier: 7, xp: 1100 },
-            8: { id: 'T8_HIDE', name: 'Hide', tier: 8, xp: 2700 },
-            9: { id: 'T9_HIDE', name: 'Hide', tier: 9, xp: 6500 },
-            10: { id: 'T10_HIDE', name: 'Hide', tier: 10, xp: 15000 },
-        },
-        FIBER: {
-            1: { id: 'T1_FIBER', name: 'Fiber', tier: 1, xp: 5 },
-            2: { id: 'T2_FIBER', name: 'Fiber', tier: 2, xp: 12 },
-            3: { id: 'T3_FIBER', name: 'Fiber', tier: 3, xp: 30 },
-            4: { id: 'T4_FIBER', name: 'Fiber', tier: 4, xp: 75 },
-            5: { id: 'T5_FIBER', name: 'Fiber', tier: 5, xp: 180 },
-            6: { id: 'T6_FIBER', name: 'Fiber', tier: 6, xp: 450 },
-            7: { id: 'T7_FIBER', name: 'Fiber', tier: 7, xp: 1100 },
-            8: { id: 'T8_FIBER', name: 'Fiber', tier: 8, xp: 2700 },
-            9: { id: 'T9_FIBER', name: 'Fiber', tier: 9, xp: 6500 },
-            10: { id: 'T10_FIBER', name: 'Fiber', tier: 10, xp: 15000 },
-        },
-        FISH: {
-            1: { id: 'T1_FISH', name: 'Fish', tier: 1, xp: 10 },
-            2: { id: 'T2_FISH', name: 'Fish', tier: 2, xp: 25 },
-            3: { id: 'T3_FISH', name: 'Fish', tier: 3, xp: 60 },
-            4: { id: 'T4_FISH', name: 'Fish', tier: 4, xp: 150 },
-            5: { id: 'T5_FISH', name: 'Fish', tier: 5, xp: 360 },
-            6: { id: 'T6_FISH', name: 'Fish', tier: 6, xp: 900 },
-            7: { id: 'T7_FISH', name: 'Fish', tier: 7, xp: 2200 },
-            8: { id: 'T8_FISH', name: 'Fish', tier: 8, xp: 5400 },
-            9: { id: 'T9_FISH', name: 'Fish', tier: 9, xp: 13000 },
-            10: { id: 'T10_FISH', name: 'Fish', tier: 10, xp: 30000 },
-        }
+        WOOD: {}, ORE: {}, HIDE: {}, FIBER: {}, FISH: {}
     },
-    // Materiais Refinados
     REFINED: {
-        PLANK: {
-            1: { id: 'T1_PLANK', name: 'Plank', tier: 1, req: { 'T1_WOOD': 2 }, xp: 8 },
-            2: { id: 'T2_PLANK', name: 'Plank', tier: 2, req: { 'T2_WOOD': 3, 'T1_PLANK': 1 }, xp: 20 },
-            3: { id: 'T3_PLANK', name: 'Plank', tier: 3, req: { 'T3_WOOD': 4, 'T2_PLANK': 1 }, xp: 50 },
-            4: { id: 'T4_PLANK', name: 'Plank', tier: 4, req: { 'T4_WOOD': 5, 'T3_PLANK': 2 }, xp: 125 },
-            5: { id: 'T5_PLANK', name: 'Plank', tier: 5, req: { 'T5_WOOD': 6, 'T4_PLANK': 2 }, xp: 300 },
-            6: { id: 'T6_PLANK', name: 'Plank', tier: 6, req: { 'T6_WOOD': 8, 'T5_PLANK': 3 }, xp: 750 },
-            7: { id: 'T7_PLANK', name: 'Plank', tier: 7, req: { 'T7_WOOD': 10, 'T6_PLANK': 3 }, xp: 1800 },
-            8: { id: 'T8_PLANK', name: 'Plank', tier: 8, req: { 'T8_WOOD': 12, 'T7_PLANK': 4 }, xp: 4500 },
-            9: { id: 'T9_PLANK', name: 'Plank', tier: 9, req: { 'T9_WOOD': 15, 'T8_PLANK': 5 }, xp: 11000 },
-            10: { id: 'T10_PLANK', name: 'Plank', tier: 10, req: { 'T10_WOOD': 20, 'T9_PLANK': 6 }, xp: 25000 },
-        },
-        BAR: {
-            1: { id: 'T1_BAR', name: 'Bar', tier: 1, req: { 'T1_ORE': 2 }, xp: 8 },
-            2: { id: 'T2_BAR', name: 'Bar', tier: 2, req: { 'T2_ORE': 3, 'T1_BAR': 1 }, xp: 20 },
-            3: { id: 'T3_BAR', name: 'Bar', tier: 3, req: { 'T3_ORE': 4, 'T2_BAR': 1 }, xp: 50 },
-            4: { id: 'T4_BAR', name: 'Bar', tier: 4, req: { 'T4_ORE': 5, 'T3_BAR': 2 }, xp: 125 },
-            5: { id: 'T5_BAR', name: 'Bar', tier: 5, req: { 'T5_ORE': 6, 'T4_BAR': 2 }, xp: 300 },
-            6: { id: 'T6_BAR', name: 'Bar', tier: 6, req: { 'T6_ORE': 8, 'T5_BAR': 3 }, xp: 750 },
-            7: { id: 'T7_BAR', name: 'Bar', tier: 7, req: { 'T7_ORE': 10, 'T6_BAR': 3 }, xp: 1800 },
-            8: { id: 'T8_BAR', name: 'Bar', tier: 8, req: { 'T8_ORE': 12, 'T7_BAR': 4 }, xp: 4500 },
-            9: { id: 'T9_BAR', name: 'Bar', tier: 9, req: { 'T9_ORE': 15, 'T8_BAR': 5 }, xp: 11000 },
-            10: { id: 'T10_BAR', name: 'Bar', tier: 10, req: { 'T10_ORE': 20, 'T9_BAR': 6 }, xp: 25000 },
-        },
-        LEATHER: {
-            1: { id: 'T1_LEATHER', name: 'Leather', tier: 1, req: { 'T1_HIDE': 2 }, xp: 8 },
-            2: { id: 'T2_LEATHER', name: 'Leather', tier: 2, req: { 'T2_HIDE': 3, 'T1_LEATHER': 1 }, xp: 20 },
-            3: { id: 'T3_LEATHER', name: 'Leather', tier: 3, req: { 'T3_HIDE': 4, 'T2_LEATHER': 1 }, xp: 50 },
-            4: { id: 'T4_LEATHER', name: 'Leather', tier: 4, req: { 'T4_HIDE': 5, 'T3_LEATHER': 2 }, xp: 125 },
-            5: { id: 'T5_LEATHER', name: 'Leather', tier: 5, req: { 'T5_HIDE': 6, 'T4_LEATHER': 2 }, xp: 300 },
-            6: { id: 'T6_LEATHER', name: 'Leather', tier: 6, req: { 'T6_HIDE': 8, 'T5_LEATHER': 3 }, xp: 750 },
-            7: { id: 'T7_LEATHER', name: 'Leather', tier: 7, req: { 'T7_HIDE': 10, 'T6_LEATHER': 3 }, xp: 1800 },
-            8: { id: 'T8_LEATHER', name: 'Leather', tier: 8, req: { 'T8_HIDE': 12, 'T7_LEATHER': 4 }, xp: 4500 },
-            9: { id: 'T9_LEATHER', name: 'Leather', tier: 9, req: { 'T9_HIDE': 15, 'T8_LEATHER': 5 }, xp: 11000 },
-            10: { id: 'T10_LEATHER', name: 'Leather', tier: 10, req: { 'T10_HIDE': 20, 'T9_LEATHER': 6 }, xp: 25000 },
-        },
-        CLOTH: {
-            1: { id: 'T1_CLOTH', name: 'Cloth', tier: 1, req: { 'T1_FIBER': 2 }, xp: 8 },
-            2: { id: 'T2_CLOTH', name: 'Cloth', tier: 2, req: { 'T2_FIBER': 3, 'T1_CLOTH': 1 }, xp: 20 },
-            3: { id: 'T3_CLOTH', name: 'Cloth', tier: 3, req: { 'T3_FIBER': 4, 'T2_CLOTH': 1 }, xp: 50 },
-            4: { id: 'T4_CLOTH', name: 'Cloth', tier: 4, req: { 'T4_FIBER': 5, 'T3_CLOTH': 2 }, xp: 125 },
-            5: { id: 'T5_CLOTH', name: 'Cloth', tier: 5, req: { 'T5_FIBER': 6, 'T4_CLOTH': 2 }, xp: 300 },
-            6: { id: 'T6_CLOTH', name: 'Cloth', tier: 6, req: { 'T6_FIBER': 8, 'T5_CLOTH': 3 }, xp: 750 },
-            7: { id: 'T7_CLOTH', name: 'Cloth', tier: 7, req: { 'T7_FIBER': 10, 'T6_CLOTH': 3 }, xp: 1800 },
-            8: { id: 'T8_CLOTH', name: 'Cloth', tier: 8, req: { 'T8_FIBER': 12, 'T7_CLOTH': 4 }, xp: 4500 },
-            9: { id: 'T9_CLOTH', name: 'Cloth', tier: 9, req: { 'T9_FIBER': 15, 'T8_CLOTH': 5 }, xp: 11000 },
-            10: { id: 'T10_CLOTH', name: 'Cloth', tier: 10, req: { 'T10_FIBER': 20, 'T9_CLOTH': 6 }, xp: 25000 },
-        }
+        PLANK: {}, BAR: {}, LEATHER: {}, CLOTH: {}
     },
     CONSUMABLE: {
-        FOOD: {
-            1: { id: 'T1_FOOD', name: 'Carrot Soup', tier: 1, type: 'FOOD', heal: 50, req: { 'T1_WOOD': 2 }, xp: 15 },
-            2: { id: 'T2_FOOD', name: 'Bean Salad', tier: 2, type: 'FOOD', heal: 100, req: { 'T2_WOOD': 2, 'T1_FOOD': 1 }, xp: 40 },
-            3: { id: 'T3_FOOD', name: 'Wheat Bread', tier: 3, type: 'FOOD', heal: 200, req: { 'T3_WOOD': 2, 'T2_FOOD': 1 }, xp: 100 },
-            4: { id: 'T4_FOOD', name: 'Turnip Salad', tier: 4, type: 'FOOD', heal: 400, req: { 'T4_WOOD': 2, 'T3_FOOD': 1 }, xp: 250 },
-            5: { id: 'T5_FOOD', name: 'Cabbage Soup', tier: 5, type: 'FOOD', heal: 800, req: { 'T5_WOOD': 2, 'T4_FOOD': 1 }, xp: 600 },
-            6: { id: 'T6_FOOD', name: 'Potato Salad', tier: 6, type: 'FOOD', heal: 1600, req: { 'T6_WOOD': 2, 'T5_FOOD': 1 }, xp: 1500 },
-            7: { id: 'T7_FOOD', name: 'Omelette', tier: 7, type: 'FOOD', heal: 3200, req: { 'T7_WOOD': 2, 'T6_FOOD': 1 }, xp: 3600 },
-            8: { id: 'T8_FOOD', name: 'Beef Stew', tier: 8, type: 'FOOD', heal: 6400, req: { 'T8_WOOD': 2, 'T7_FOOD': 1 }, xp: 9000 },
-            9: { id: 'T9_FOOD', name: 'Pork Pie', tier: 9, type: 'FOOD', heal: 12800, req: { 'T9_WOOD': 2, 'T8_FOOD': 1 }, xp: 22000 },
-            10: { id: 'T10_FOOD', name: 'Deadly Stew', tier: 10, type: 'FOOD', heal: 25600, req: { 'T10_WOOD': 2, 'T9_FOOD': 1 }, xp: 50000 },
-        },
+        FOOD: {}
     },
-    // Equipamentos
     GEAR: {
-        WARRIORS_FORGE: {
-            SWORD: {
-                1: { id: 'T1_SWORD', name: 'Sword', tier: 1, req: { 'T1_BAR': 4, 'T1_LEATHER': 2 }, xp: 50, ip: getBaseIP(1), stats: { damage: 12, attackSpeed: 1000 }, type: 'WEAPON' },
-                2: { id: 'T2_SWORD', name: 'Sword', tier: 2, req: { 'T2_BAR': 6, 'T2_LEATHER': 3 }, xp: 120, ip: getBaseIP(2), stats: { damage: 25, attackSpeed: 1000 }, type: 'WEAPON' },
-                3: { id: 'T3_SWORD', name: 'Sword', tier: 3, req: { 'T3_BAR': 10, 'T3_LEATHER': 4 }, xp: 300, ip: getBaseIP(3), stats: { damage: 60, attackSpeed: 1000 }, type: 'WEAPON' },
-                4: { id: 'T4_SWORD', name: 'Sword', tier: 4, req: { 'T4_BAR': 15, 'T4_LEATHER': 5 }, xp: 800, ip: getBaseIP(4), stats: { damage: 150, attackSpeed: 1000 }, type: 'WEAPON' },
-                5: { id: 'T5_SWORD', name: 'Sword', tier: 5, req: { 'T5_BAR': 18, 'T5_LEATHER': 6 }, xp: 2000, ip: getBaseIP(5), stats: { damage: 350, attackSpeed: 1000 }, type: 'WEAPON' },
-                6: { id: 'T6_SWORD', name: 'Sword', tier: 6, req: { 'T6_BAR': 22, 'T6_LEATHER': 7 }, xp: 5000, ip: getBaseIP(6), stats: { damage: 800, attackSpeed: 1000 }, type: 'WEAPON' },
-                7: { id: 'T7_SWORD', name: 'Sword', tier: 7, req: { 'T7_BAR': 26, 'T7_LEATHER': 8 }, xp: 12000, ip: getBaseIP(7), stats: { damage: 1800, attackSpeed: 1000 }, type: 'WEAPON' },
-                8: { id: 'T8_SWORD', name: 'Sword', tier: 8, req: { 'T8_BAR': 30, 'T8_LEATHER': 9 }, xp: 30000, ip: getBaseIP(8), stats: { damage: 4000, attackSpeed: 1000 }, type: 'WEAPON' },
-                9: { id: 'T9_SWORD', name: 'Sword', tier: 9, req: { 'T9_BAR': 35, 'T9_LEATHER': 10 }, xp: 80000, ip: getBaseIP(9), stats: { damage: 9000, attackSpeed: 1000 }, type: 'WEAPON' },
-                10: { id: 'T10_SWORD', name: 'Sword', tier: 10, req: { 'T10_BAR': 40, 'T10_LEATHER': 12 }, xp: 200000, ip: getBaseIP(10), stats: { damage: 20000, attackSpeed: 1000 }, type: 'WEAPON' },
-            },
-            SHIELD: {
-                1: { id: 'T1_SHIELD', name: 'Shield', tier: 1, req: { 'T1_PLANK': 2, 'T1_BAR': 2 }, xp: 50, ip: getBaseIP(1), stats: { hp: 40, damage: 1, defense: 5 }, type: 'OFF_HAND' },
-                2: { id: 'T2_SHIELD', name: 'Shield', tier: 2, req: { 'T2_PLANK': 2, 'T2_BAR': 2 }, xp: 120, ip: getBaseIP(2), stats: { hp: 75, damage: 2, defense: 10 }, type: 'OFF_HAND' },
-                3: { id: 'T3_SHIELD', name: 'Shield', tier: 3, req: { 'T3_PLANK': 3, 'T3_BAR': 3 }, xp: 300, ip: getBaseIP(3), stats: { hp: 150, damage: 3, defense: 15 }, type: 'OFF_HAND' },
-                4: { id: 'T4_SHIELD', name: 'Shield', tier: 4, req: { 'T4_PLANK': 4, 'T4_BAR': 4 }, xp: 800, ip: getBaseIP(4), stats: { hp: 300, damage: 5, defense: 25 }, type: 'OFF_HAND' },
-                5: { id: 'T5_SHIELD', name: 'Shield', tier: 5, req: { 'T5_PLANK': 5, 'T5_BAR': 5 }, xp: 2000, ip: getBaseIP(5), stats: { hp: 600, damage: 10, defense: 50 }, type: 'OFF_HAND' },
-                6: { id: 'T6_SHIELD', name: 'Shield', tier: 6, req: { 'T6_PLANK': 6, 'T6_BAR': 6 }, xp: 5000, ip: getBaseIP(6), stats: { hp: 1200, damage: 20, defense: 100 }, type: 'OFF_HAND' },
-                7: { id: 'T7_SHIELD', name: 'Shield', tier: 7, req: { 'T7_PLANK': 8, 'T7_BAR': 8 }, xp: 12000, ip: getBaseIP(7), stats: { hp: 2400, damage: 40, defense: 200 }, type: 'OFF_HAND' },
-                8: { id: 'T8_SHIELD', name: 'Shield', tier: 8, req: { 'T8_PLANK': 10, 'T8_BAR': 10 }, xp: 30000, ip: getBaseIP(8), stats: { hp: 4800, damage: 80, defense: 400 }, type: 'OFF_HAND' },
-                9: { id: 'T9_SHIELD', name: 'Shield', tier: 9, req: { 'T9_PLANK': 12, 'T9_BAR': 12 }, xp: 80000, ip: getBaseIP(9), stats: { hp: 9600, damage: 160, defense: 800 }, type: 'OFF_HAND' },
-                10: { id: 'T10_SHIELD', name: 'Shield', tier: 10, req: { 'T10_PLANK': 15, 'T10_BAR': 15 }, xp: 200000, ip: getBaseIP(10), stats: { hp: 19200, damage: 320, defense: 1600 }, type: 'OFF_HAND' },
-            },
-            PLATE_ARMOR: {
-                1: { id: 'T1_PLATE_ARMOR', name: 'Plate Armor', tier: 1, req: { 'T1_BAR': 4 }, xp: 50, ip: getBaseIP(1), stats: { hp: 120, defense: 15 }, type: 'ARMOR' },
-                2: { id: 'T2_PLATE_ARMOR', name: 'Plate Armor', tier: 2, req: { 'T2_BAR': 6 }, xp: 120, ip: getBaseIP(2), stats: { hp: 250, defense: 30 }, type: 'ARMOR' },
-                3: { id: 'T3_PLATE_ARMOR', name: 'Plate Armor', tier: 3, req: { 'T3_BAR': 10 }, xp: 300, ip: getBaseIP(3), stats: { hp: 600, defense: 50 }, type: 'ARMOR' },
-                4: { id: 'T4_PLATE_ARMOR', name: 'Plate Armor', tier: 4, req: { 'T4_BAR': 15 }, xp: 800, ip: getBaseIP(4), stats: { hp: 1500, defense: 100 }, type: 'ARMOR' },
-                5: { id: 'T5_PLATE_ARMOR', name: 'Plate Armor', tier: 5, req: { 'T5_BAR': 18 }, xp: 2000, ip: getBaseIP(5), stats: { hp: 3500, defense: 200 }, type: 'ARMOR' },
-                6: { id: 'T6_PLATE_ARMOR', name: 'Plate Armor', tier: 6, req: { 'T6_BAR': 22 }, xp: 5000, ip: getBaseIP(6), stats: { hp: 8000, defense: 450 }, type: 'ARMOR' },
-                7: { id: 'T7_PLATE_ARMOR', name: 'Plate Armor', tier: 7, req: { 'T7_BAR': 26 }, xp: 12000, ip: getBaseIP(7), stats: { hp: 18000, defense: 1000 }, type: 'ARMOR' },
-                8: { id: 'T8_PLATE_ARMOR', name: 'Plate Armor', tier: 8, req: { 'T8_BAR': 30 }, xp: 30000, ip: getBaseIP(8), stats: { hp: 40000, defense: 2500 }, type: 'ARMOR' },
-                9: { id: 'T9_PLATE_ARMOR', name: 'Plate Armor', tier: 9, req: { 'T9_BAR': 35 }, xp: 80000, ip: getBaseIP(9), stats: { hp: 100000, defense: 6000 }, type: 'ARMOR' },
-                10: { id: 'T10_PLATE_ARMOR', name: 'Plate Armor', tier: 10, req: { 'T10_BAR': 40 }, xp: 200000, ip: getBaseIP(10), stats: { hp: 250000, defense: 15000 }, type: 'ARMOR' },
-            },
-            PLATE_HELMET: {
-                1: { id: 'T1_PLATE_HELMET', name: 'Helmet', tier: 1, req: { 'T1_BAR': 2 }, xp: 50, ip: getBaseIP(1), stats: { hp: 25, damage: 1, defense: 5 }, type: 'HELMET' },
-                2: { id: 'T2_PLATE_HELMET', name: 'Helmet', tier: 2, req: { 'T2_BAR': 3 }, xp: 120, ip: getBaseIP(2), stats: { hp: 50, damage: 2, defense: 10 }, type: 'HELMET' },
-                3: { id: 'T3_PLATE_HELMET', name: 'Helmet', tier: 3, req: { 'T3_BAR': 5 }, xp: 300, ip: getBaseIP(3), stats: { hp: 100, damage: 5, defense: 15 }, type: 'HELMET' },
-                4: { id: 'T4_PLATE_HELMET', name: 'Helmet', tier: 4, req: { 'T4_BAR': 8 }, xp: 800, ip: getBaseIP(4), stats: { hp: 200, damage: 10, defense: 25 }, type: 'HELMET' },
-                5: { id: 'T5_PLATE_HELMET', name: 'Helmet', tier: 5, req: { 'T5_BAR': 10 }, xp: 2000, ip: getBaseIP(5), stats: { hp: 400, damage: 20, defense: 50 }, type: 'HELMET' },
-                6: { id: 'T6_PLATE_HELMET', name: 'Helmet', tier: 6, req: { 'T6_BAR': 12 }, xp: 5000, ip: getBaseIP(6), stats: { hp: 800, damage: 40, defense: 100 }, type: 'HELMET' },
-                7: { id: 'T7_PLATE_HELMET', name: 'Helmet', tier: 7, req: { 'T7_BAR': 14 }, xp: 12000, ip: getBaseIP(7), stats: { hp: 1600, damage: 80, defense: 200 }, type: 'HELMET' },
-                8: { id: 'T8_PLATE_HELMET', name: 'Helmet', tier: 8, req: { 'T8_BAR': 16 }, xp: 30000, ip: getBaseIP(8), stats: { hp: 3200, damage: 160, defense: 400 }, type: 'HELMET' },
-                9: { id: 'T9_PLATE_HELMET', name: 'Helmet', tier: 9, req: { 'T9_BAR': 18 }, xp: 80000, ip: getBaseIP(9), stats: { hp: 6400, damage: 320, defense: 800 }, type: 'HELMET' },
-                10: { id: 'T10_PLATE_HELMET', name: 'Helmet', tier: 10, req: { 'T10_BAR': 22 }, xp: 200000, ip: getBaseIP(10), stats: { hp: 12800, damage: 640, defense: 1600 }, type: 'HELMET' },
-            },
-            PLATE_BOOTS: {
-                1: { id: 'T1_PLATE_BOOTS', name: 'Boots', tier: 1, req: { 'T1_BAR': 2 }, xp: 50, ip: getBaseIP(1), stats: { hp: 25, damage: 1, defense: 3 }, type: 'BOOTS' },
-                2: { id: 'T2_PLATE_BOOTS', name: 'Boots', tier: 2, req: { 'T2_BAR': 3 }, xp: 120, ip: getBaseIP(2), stats: { hp: 50, damage: 2, defense: 6 }, type: 'BOOTS' },
-                3: { id: 'T3_PLATE_BOOTS', name: 'Boots', tier: 3, req: { 'T3_BAR': 5 }, xp: 300, ip: getBaseIP(3), stats: { hp: 100, damage: 5, defense: 9 }, type: 'BOOTS' },
-                4: { id: 'T4_PLATE_BOOTS', name: 'Boots', tier: 4, req: { 'T4_BAR': 8 }, xp: 800, ip: getBaseIP(4), stats: { hp: 200, damage: 10, defense: 15 }, type: 'BOOTS' },
-                5: { id: 'T5_PLATE_BOOTS', name: 'Boots', tier: 5, req: { 'T5_BAR': 10 }, xp: 2000, ip: getBaseIP(5), stats: { hp: 400, damage: 20, defense: 30 }, type: 'BOOTS' },
-                6: { id: 'T6_PLATE_BOOTS', name: 'Boots', tier: 6, req: { 'T6_BAR': 12 }, xp: 5000, ip: getBaseIP(6), stats: { hp: 800, damage: 40, defense: 60 }, type: 'BOOTS' },
-                7: { id: 'T7_PLATE_BOOTS', name: 'Boots', tier: 7, req: { 'T7_BAR': 14 }, xp: 12000, ip: getBaseIP(7), stats: { hp: 1600, damage: 80, defense: 120 }, type: 'BOOTS' },
-                8: { id: 'T8_PLATE_BOOTS', name: 'Boots', tier: 8, req: { 'T8_BAR': 16 }, xp: 30000, ip: getBaseIP(8), stats: { hp: 3200, damage: 160, defense: 240 }, type: 'BOOTS' },
-                9: { id: 'T9_PLATE_BOOTS', name: 'Boots', tier: 9, req: { 'T9_BAR': 18 }, xp: 80000, ip: getBaseIP(9), stats: { hp: 6400, damage: 320, defense: 480 }, type: 'BOOTS' },
-                10: { id: 'T10_PLATE_BOOTS', name: 'Boots', tier: 10, req: { 'T10_BAR': 22 }, xp: 200000, ip: getBaseIP(10), stats: { hp: 12800, damage: 640, defense: 960 }, type: 'BOOTS' },
-            },
-            PLATE_GLOVES: {
-                1: { id: 'T1_PLATE_GLOVES', name: 'Gloves', tier: 1, req: { 'T1_BAR': 1 }, xp: 50, ip: getBaseIP(1), stats: { damage: 2, defense: 2 }, type: 'GLOVES' },
-                2: { id: 'T2_PLATE_GLOVES', name: 'Gloves', tier: 2, req: { 'T2_BAR': 2 }, xp: 120, ip: getBaseIP(2), stats: { damage: 4, defense: 4 }, type: 'GLOVES' },
-                3: { id: 'T3_PLATE_GLOVES', name: 'Gloves', tier: 3, req: { 'T3_BAR': 3 }, xp: 300, ip: getBaseIP(3), stats: { damage: 8, defense: 6 }, type: 'GLOVES' },
-                4: { id: 'T4_PLATE_GLOVES', name: 'Gloves', tier: 4, req: { 'T4_BAR': 4 }, xp: 800, ip: getBaseIP(4), stats: { damage: 15, defense: 10 }, type: 'GLOVES' },
-                5: { id: 'T5_PLATE_GLOVES', name: 'Gloves', tier: 5, req: { 'T5_BAR': 5 }, xp: 2000, ip: getBaseIP(5), stats: { damage: 30, defense: 20 }, type: 'GLOVES' },
-                6: { id: 'T6_PLATE_GLOVES', name: 'Gloves', tier: 6, req: { 'T6_BAR': 6 }, xp: 5000, ip: getBaseIP(6), stats: { damage: 60, defense: 40 }, type: 'GLOVES' },
-                7: { id: 'T7_PLATE_GLOVES', name: 'Gloves', tier: 7, req: { 'T7_BAR': 7 }, xp: 12000, ip: getBaseIP(7), stats: { damage: 120, defense: 80 }, type: 'GLOVES' },
-                8: { id: 'T8_PLATE_GLOVES', name: 'Gloves', tier: 8, req: { 'T8_BAR': 8 }, xp: 30000, ip: getBaseIP(8), stats: { damage: 240, defense: 160 }, type: 'GLOVES' },
-                9: { id: 'T9_PLATE_GLOVES', name: 'Gloves', tier: 9, req: { 'T9_BAR': 10 }, xp: 80000, ip: getBaseIP(9), stats: { damage: 480, defense: 320 }, type: 'GLOVES' },
-                10: { id: 'T10_PLATE_GLOVES', name: 'Gloves', tier: 10, req: { 'T10_BAR': 12 }, xp: 200000, ip: getBaseIP(10), stats: { damage: 960, defense: 640 }, type: 'GLOVES' },
-            },
-            PLATE_CAPE: {
-                1: { id: 'T1_PLATE_CAPE', name: 'Warrior\'s Cape', tier: 1, req: { 'T1_BAR': 4, 'T1_CREST': 1 }, xp: 50, ip: getBaseIP(1), stats: { hp: 50, efficiency: { GLOBAL: 2 } }, type: 'CAPE' },
-                2: { id: 'T2_PLATE_CAPE', name: 'Warrior\'s Cape', tier: 2, req: { 'T2_BAR': 6, 'T2_CREST': 1 }, xp: 120, ip: getBaseIP(2), stats: { hp: 100, efficiency: { GLOBAL: 4 } }, type: 'CAPE' },
-                3: { id: 'T3_PLATE_CAPE', name: 'Warrior\'s Cape', tier: 3, req: { 'T3_BAR': 8, 'T3_CREST': 1 }, xp: 300, ip: getBaseIP(3), stats: { hp: 200, efficiency: { GLOBAL: 6 } }, type: 'CAPE' },
-                4: { id: 'T4_PLATE_CAPE', name: 'Warrior\'s Cape', tier: 4, req: { 'T4_BAR': 12, 'T4_CREST': 1 }, xp: 800, ip: getBaseIP(4), stats: { hp: 400, efficiency: { GLOBAL: 8 } }, type: 'CAPE' },
-                5: { id: 'T5_PLATE_CAPE', name: 'Warrior\'s Cape', tier: 5, req: { 'T5_BAR': 16, 'T5_CREST': 1 }, xp: 2000, ip: getBaseIP(5), stats: { hp: 800, efficiency: { GLOBAL: 10 } }, type: 'CAPE' },
-                6: { id: 'T6_PLATE_CAPE', name: 'Warrior\'s Cape', tier: 6, req: { 'T6_BAR': 20, 'T6_CREST': 1 }, xp: 5000, ip: getBaseIP(6), stats: { hp: 1600, efficiency: { GLOBAL: 12 } }, type: 'CAPE' },
-                7: { id: 'T7_PLATE_CAPE', name: 'Warrior\'s Cape', tier: 7, req: { 'T7_BAR': 24, 'T7_CREST': 1 }, xp: 12000, ip: getBaseIP(7), stats: { hp: 3200, efficiency: { GLOBAL: 14 } }, type: 'CAPE' },
-                8: { id: 'T8_PLATE_CAPE', name: 'Warrior\'s Cape', tier: 8, req: { 'T8_BAR': 28, 'T8_CREST': 1 }, xp: 30000, ip: getBaseIP(8), stats: { hp: 6400, efficiency: { GLOBAL: 16 } }, type: 'CAPE' },
-                9: { id: 'T9_PLATE_CAPE', name: 'Warrior\'s Cape', tier: 9, req: { 'T9_BAR': 32, 'T9_CREST': 1 }, xp: 80000, ip: getBaseIP(9), stats: { hp: 12800, efficiency: { GLOBAL: 18 } }, type: 'CAPE' },
-                10: { id: 'T10_PLATE_CAPE', name: 'Warrior\'s Cape', tier: 10, req: { 'T10_BAR': 40, 'T10_CREST': 1 }, xp: 200000, ip: getBaseIP(10), stats: { hp: 25600, efficiency: { GLOBAL: 20 } }, type: 'CAPE' },
-            },
-            PICKAXE: {
-                1: { id: 'T1_PICKAXE', name: 'Pickaxe', tier: 1, req: { 'T1_BAR': 1 }, xp: 50, stats: { efficiency: 5 }, type: 'TOOL_PICKAXE' },
-                2: { id: 'T2_PICKAXE', name: 'Pickaxe', tier: 2, req: { 'T2_BAR': 2 }, xp: 120, stats: { efficiency: 10 }, type: 'TOOL_PICKAXE' },
-                3: { id: 'T3_PICKAXE', name: 'Pickaxe', tier: 3, req: { 'T3_BAR': 4, 'T2_BAR': 2 }, xp: 300, stats: { efficiency: 15 }, type: 'TOOL_PICKAXE' },
-                4: { id: 'T4_PICKAXE', name: 'Pickaxe', tier: 4, req: { 'T4_BAR': 8, 'T3_BAR': 4 }, xp: 800, stats: { efficiency: 20 }, type: 'TOOL_PICKAXE' },
-                5: { id: 'T5_PICKAXE', name: 'Pickaxe', tier: 5, req: { 'T5_BAR': 12, 'T4_BAR': 6 }, xp: 2000, stats: { efficiency: 25 }, type: 'TOOL_PICKAXE' },
-                6: { id: 'T6_PICKAXE', name: 'Pickaxe', tier: 6, req: { 'T6_BAR': 16, 'T5_BAR': 8 }, xp: 5000, stats: { efficiency: 30 }, type: 'TOOL_PICKAXE' },
-                7: { id: 'T7_PICKAXE', name: 'Pickaxe', tier: 7, req: { 'T7_BAR': 20, 'T6_BAR': 10 }, xp: 12000, stats: { efficiency: 35 }, type: 'TOOL_PICKAXE' },
-                8: { id: 'T8_PICKAXE', name: 'Pickaxe', tier: 8, req: { 'T8_BAR': 24, 'T7_BAR': 12 }, xp: 30000, stats: { efficiency: 40 }, type: 'TOOL_PICKAXE' },
-                9: { id: 'T9_PICKAXE', name: 'Pickaxe', tier: 9, req: { 'T9_BAR': 28, 'T8_BAR': 14 }, xp: 80000, stats: { efficiency: 45 }, type: 'TOOL_PICKAXE' },
-                10: { id: 'T10_PICKAXE', name: 'Pickaxe', tier: 10, req: { 'T10_BAR': 32, 'T9_BAR': 16 }, xp: 200000, stats: { efficiency: 50 }, type: 'TOOL_PICKAXE' },
-            }
-        },
-        HUNTERS_LODGE: {
-            BOW: {
-                1: { id: 'T1_BOW', name: 'Bow', tier: 1, req: { 'T1_PLANK': 8 }, xp: 50, ip: getBaseIP(1), stats: { damage: 8, attackSpeed: 700 }, type: 'WEAPON' },
-                2: { id: 'T2_BOW', name: 'Bow', tier: 2, req: { 'T2_PLANK': 12 }, xp: 120, ip: getBaseIP(2), stats: { damage: 18, attackSpeed: 700 }, type: 'WEAPON' },
-                3: { id: 'T3_BOW', name: 'Bow', tier: 3, req: { 'T3_PLANK': 20 }, xp: 300, ip: getBaseIP(3), stats: { damage: 45, attackSpeed: 700 }, type: 'WEAPON' },
-                4: { id: 'T4_BOW', name: 'Bow', tier: 4, req: { 'T4_PLANK': 30 }, xp: 800, ip: getBaseIP(4), stats: { damage: 110, attackSpeed: 700 }, type: 'WEAPON' },
-                5: { id: 'T5_BOW', name: 'Bow', tier: 5, req: { 'T5_PLANK': 35 }, xp: 2000, ip: getBaseIP(5), stats: { damage: 250, attackSpeed: 700 }, type: 'WEAPON' },
-                6: { id: 'T6_BOW', name: 'Bow', tier: 6, req: { 'T6_PLANK': 40 }, xp: 5000, ip: getBaseIP(6), stats: { damage: 550, attackSpeed: 700 }, type: 'WEAPON' },
-                7: { id: 'T7_BOW', name: 'Bow', tier: 7, req: { 'T7_PLANK': 45 }, xp: 12000, ip: getBaseIP(7), stats: { damage: 1300, attackSpeed: 700 }, type: 'WEAPON' },
-                8: { id: 'T8_BOW', name: 'Bow', tier: 8, req: { 'T8_PLANK': 50 }, xp: 30000, ip: getBaseIP(8), stats: { damage: 3000, attackSpeed: 700 }, type: 'WEAPON' },
-                9: { id: 'T9_BOW', name: 'Bow', tier: 9, req: { 'T9_PLANK': 60 }, xp: 80000, ip: getBaseIP(9), stats: { damage: 7000, attackSpeed: 700 }, type: 'WEAPON' },
-                10: { id: 'T10_BOW', name: 'Bow', tier: 10, req: { 'T10_PLANK': 70 }, xp: 200000, ip: getBaseIP(10), stats: { damage: 16000, attackSpeed: 700 }, type: 'WEAPON' },
-            },
-            TORCH: {
-                1: { id: 'T1_TORCH', name: 'Torch', tier: 1, req: { 'T1_PLANK': 2, 'T1_LEATHER': 2 }, xp: 50, ip: getBaseIP(1), stats: { hp: 10, damage: 3 }, type: 'OFF_HAND' },
-                2: { id: 'T2_TORCH', name: 'Torch', tier: 2, req: { 'T2_PLANK': 2, 'T2_LEATHER': 2 }, xp: 120, ip: getBaseIP(2), stats: { hp: 15, damage: 6 }, type: 'OFF_HAND' },
-                3: { id: 'T3_TORCH', name: 'Torch', tier: 3, req: { 'T3_PLANK': 3, 'T3_LEATHER': 3 }, xp: 300, ip: getBaseIP(3), stats: { hp: 25, damage: 12 }, type: 'OFF_HAND' },
-                4: { id: 'T4_TORCH', name: 'Torch', tier: 4, req: { 'T4_PLANK': 4, 'T4_LEATHER': 4 }, xp: 800, ip: getBaseIP(4), stats: { hp: 50, damage: 25 }, type: 'OFF_HAND' },
-                5: { id: 'T5_TORCH', name: 'Torch', tier: 5, req: { 'T5_PLANK': 5, 'T5_LEATHER': 5 }, xp: 2000, ip: getBaseIP(5), stats: { hp: 100, damage: 50 }, type: 'OFF_HAND' },
-                6: { id: 'T6_TORCH', name: 'Torch', tier: 6, req: { 'T6_PLANK': 6, 'T6_LEATHER': 6 }, xp: 5000, ip: getBaseIP(6), stats: { hp: 200, damage: 100 }, type: 'OFF_HAND' },
-                7: { id: 'T7_TORCH', name: 'Torch', tier: 7, req: { 'T7_PLANK': 8, 'T7_LEATHER': 8 }, xp: 12000, ip: getBaseIP(7), stats: { hp: 400, damage: 200 }, type: 'OFF_HAND' },
-                8: { id: 'T8_TORCH', name: 'Torch', tier: 8, req: { 'T8_PLANK': 10, 'T8_LEATHER': 10 }, xp: 30000, ip: getBaseIP(8), stats: { hp: 800, damage: 400 }, type: 'OFF_HAND' },
-                9: { id: 'T9_TORCH', name: 'Torch', tier: 9, req: { 'T9_PLANK': 12, 'T9_LEATHER': 12 }, xp: 80000, ip: getBaseIP(9), stats: { hp: 1600, damage: 800 }, type: 'OFF_HAND' },
-                10: { id: 'T10_TORCH', name: 'Torch', tier: 10, req: { 'T10_PLANK': 15, 'T10_LEATHER': 15 }, xp: 200000, ip: getBaseIP(10), stats: { hp: 3200, damage: 1600 }, type: 'OFF_HAND' },
-            },
-            LEATHER_ARMOR: {
-                1: { id: 'T1_LEATHER_ARMOR', name: 'Leather Armor', tier: 1, req: { 'T1_LEATHER': 4 }, xp: 50, ip: getBaseIP(1), stats: { hp: 60, damage: 3, defense: 8, dmgBonus: 0.1 }, type: 'ARMOR' },
-                2: { id: 'T2_LEATHER_ARMOR', name: 'Leather Armor', tier: 2, req: { 'T2_LEATHER': 6 }, xp: 120, ip: getBaseIP(2), stats: { hp: 120, damage: 6, defense: 15, dmgBonus: 0.1 }, type: 'ARMOR' },
-                3: { id: 'T3_LEATHER_ARMOR', name: 'Leather Armor', tier: 3, req: { 'T3_LEATHER': 10 }, xp: 300, ip: getBaseIP(3), stats: { hp: 300, damage: 12, defense: 25, dmgBonus: 0.1 }, type: 'ARMOR' },
-                4: { id: 'T4_LEATHER_ARMOR', name: 'Leather Armor', tier: 4, req: { 'T4_LEATHER': 15 }, xp: 800, ip: getBaseIP(4), stats: { hp: 800, damage: 25, defense: 45, dmgBonus: 0.1 }, type: 'ARMOR' },
-                5: { id: 'T5_LEATHER_ARMOR', name: 'Leather Armor', tier: 5, req: { 'T5_LEATHER': 18 }, xp: 2000, ip: getBaseIP(5), stats: { hp: 1800, damage: 50, defense: 80, dmgBonus: 0.1 }, type: 'ARMOR' },
-                6: { id: 'T6_LEATHER_ARMOR', name: 'Leather Armor', tier: 6, req: { 'T6_LEATHER': 22 }, xp: 5000, ip: getBaseIP(6), stats: { hp: 4000, damage: 100, defense: 150, dmgBonus: 0.1 }, type: 'ARMOR' },
-                7: { id: 'T7_LEATHER_ARMOR', name: 'Leather Armor', tier: 7, req: { 'T7_LEATHER': 26 }, xp: 12000, ip: getBaseIP(7), stats: { hp: 10000, damage: 200, defense: 350, dmgBonus: 0.1 }, type: 'ARMOR' },
-                8: { id: 'T8_LEATHER_ARMOR', name: 'Leather Armor', tier: 8, req: { 'T8_LEATHER': 30 }, xp: 30000, ip: getBaseIP(8), stats: { hp: 22000, damage: 400, defense: 800, dmgBonus: 0.1 }, type: 'ARMOR' },
-                9: { id: 'T9_LEATHER_ARMOR', name: 'Leather Armor', tier: 9, req: { 'T9_LEATHER': 35 }, xp: 80000, ip: getBaseIP(9), stats: { hp: 55000, damage: 800, defense: 2000, dmgBonus: 0.1 }, type: 'ARMOR' },
-                10: { id: 'T10_LEATHER_ARMOR', name: 'Leather Armor', tier: 10, req: { 'T10_LEATHER': 40 }, xp: 200000, ip: getBaseIP(10), stats: { hp: 130000, damage: 1600, defense: 5000, dmgBonus: 0.1 }, type: 'ARMOR' },
-            },
-            LEATHER_HELMET: {
-                1: { id: 'T1_LEATHER_HELMET', name: 'Helmet', tier: 1, req: { 'T1_LEATHER': 2 }, xp: 50, ip: getBaseIP(1), stats: { hp: 15, damage: 2, defense: 3 }, type: 'HELMET' },
-                2: { id: 'T2_LEATHER_HELMET', name: 'Helmet', tier: 2, req: { 'T2_LEATHER': 3 }, xp: 120, ip: getBaseIP(2), stats: { hp: 30, damage: 5, defense: 6 }, type: 'HELMET' },
-                3: { id: 'T3_LEATHER_HELMET', name: 'Helmet', tier: 3, req: { 'T3_LEATHER': 5 }, xp: 300, ip: getBaseIP(3), stats: { hp: 60, damage: 10, defense: 9 }, type: 'HELMET' },
-                4: { id: 'T4_LEATHER_HELMET', name: 'Helmet', tier: 4, req: { 'T4_LEATHER': 8 }, xp: 800, ip: getBaseIP(4), stats: { hp: 125, damage: 20, defense: 15 }, type: 'HELMET' },
-                5: { id: 'T5_LEATHER_HELMET', name: 'Helmet', tier: 5, req: { 'T5_LEATHER': 10 }, xp: 2000, ip: getBaseIP(5), stats: { hp: 250, damage: 40, defense: 30 }, type: 'HELMET' },
-                6: { id: 'T6_LEATHER_HELMET', name: 'Helmet', tier: 6, req: { 'T6_LEATHER': 12 }, xp: 5000, ip: getBaseIP(6), stats: { hp: 500, damage: 80, defense: 60 }, type: 'HELMET' },
-                7: { id: 'T7_LEATHER_HELMET', name: 'Helmet', tier: 7, req: { 'T7_LEATHER': 14 }, xp: 12000, ip: getBaseIP(7), stats: { hp: 1000, damage: 160, defense: 120 }, type: 'HELMET' },
-                8: { id: 'T8_LEATHER_HELMET', name: 'Helmet', tier: 8, req: { 'T8_LEATHER': 16 }, xp: 30000, ip: getBaseIP(8), stats: { hp: 2000, damage: 320, defense: 240 }, type: 'HELMET' },
-                9: { id: 'T9_LEATHER_HELMET', name: 'Helmet', tier: 9, req: { 'T9_LEATHER': 18 }, xp: 80000, ip: getBaseIP(9), stats: { hp: 4000, damage: 640, defense: 480 }, type: 'HELMET' },
-                10: { id: 'T10_LEATHER_HELMET', name: 'Helmet', tier: 10, req: { 'T10_LEATHER': 22 }, xp: 200000, ip: getBaseIP(10), stats: { hp: 8000, damage: 1280, defense: 960 }, type: 'HELMET' },
-            },
-            LEATHER_BOOTS: {
-                1: { id: 'T1_LEATHER_BOOTS', name: 'Boots', tier: 1, req: { 'T1_LEATHER': 2 }, xp: 50, ip: getBaseIP(1), stats: { hp: 15, damage: 2, defense: 2 }, type: 'BOOTS' },
-                2: { id: 'T2_LEATHER_BOOTS', name: 'Boots', tier: 2, req: { 'T2_LEATHER': 3 }, xp: 120, ip: getBaseIP(2), stats: { hp: 30, damage: 5, defense: 4 }, type: 'BOOTS' },
-                3: { id: 'T3_LEATHER_BOOTS', name: 'Boots', tier: 3, req: { 'T3_LEATHER': 5 }, xp: 300, ip: getBaseIP(3), stats: { hp: 60, damage: 10, defense: 6 }, type: 'BOOTS' },
-                4: { id: 'T4_LEATHER_BOOTS', name: 'Boots', tier: 4, req: { 'T4_LEATHER': 8 }, xp: 800, ip: getBaseIP(4), stats: { hp: 125, damage: 20, defense: 10 }, type: 'BOOTS' },
-                5: { id: 'T5_LEATHER_BOOTS', name: 'Boots', tier: 5, req: { 'T5_LEATHER': 10 }, xp: 2000, ip: getBaseIP(5), stats: { hp: 250, damage: 40, defense: 20 }, type: 'BOOTS' },
-                6: { id: 'T6_LEATHER_BOOTS', name: 'Boots', tier: 6, req: { 'T6_LEATHER': 12 }, xp: 5000, ip: getBaseIP(6), stats: { hp: 500, damage: 80, defense: 40 }, type: 'BOOTS' },
-                7: { id: 'T7_LEATHER_BOOTS', name: 'Boots', tier: 7, req: { 'T7_LEATHER': 14 }, xp: 12000, ip: getBaseIP(7), stats: { hp: 1000, damage: 160, defense: 80 }, type: 'BOOTS' },
-                8: { id: 'T8_LEATHER_BOOTS', name: 'Boots', tier: 8, req: { 'T8_LEATHER': 16 }, xp: 30000, ip: getBaseIP(8), stats: { hp: 2000, damage: 320, defense: 160 }, type: 'BOOTS' },
-                9: { id: 'T9_LEATHER_BOOTS', name: 'Boots', tier: 9, req: { 'T9_LEATHER': 18 }, xp: 80000, ip: getBaseIP(9), stats: { hp: 4000, damage: 640, defense: 320 }, type: 'BOOTS' },
-                10: { id: 'T10_LEATHER_BOOTS', name: 'Boots', tier: 10, req: { 'T10_LEATHER': 22 }, xp: 200000, ip: getBaseIP(10), stats: { hp: 8000, damage: 1280, defense: 640 }, type: 'BOOTS' },
-            },
-            LEATHER_GLOVES: {
-                1: { id: 'T1_LEATHER_GLOVES', name: 'Gloves', tier: 1, req: { 'T1_LEATHER': 1 }, xp: 50, ip: getBaseIP(1), stats: { damage: 3, defense: 1 }, type: 'GLOVES' },
-                2: { id: 'T2_LEATHER_GLOVES', name: 'Gloves', tier: 2, req: { 'T2_LEATHER': 2 }, xp: 120, ip: getBaseIP(2), stats: { damage: 6, defense: 2 }, type: 'GLOVES' },
-                3: { id: 'T3_LEATHER_GLOVES', name: 'Gloves', tier: 3, req: { 'T3_LEATHER': 3 }, xp: 300, ip: getBaseIP(3), stats: { damage: 12, defense: 4 }, type: 'GLOVES' },
-                4: { id: 'T4_LEATHER_GLOVES', name: 'Gloves', tier: 4, req: { 'T4_LEATHER': 4 }, xp: 800, ip: getBaseIP(4), stats: { damage: 25, defense: 7 }, type: 'GLOVES' },
-                5: { id: 'T5_LEATHER_GLOVES', name: 'Gloves', tier: 5, req: { 'T5_LEATHER': 5 }, xp: 2000, ip: getBaseIP(5), stats: { damage: 50, defense: 15 }, type: 'GLOVES' },
-                6: { id: 'T6_LEATHER_GLOVES', name: 'Gloves', tier: 6, req: { 'T6_LEATHER': 6 }, xp: 5000, ip: getBaseIP(6), stats: { damage: 100, defense: 30 }, type: 'GLOVES' },
-                7: { id: 'T7_LEATHER_GLOVES', name: 'Gloves', tier: 7, req: { 'T7_LEATHER': 7 }, xp: 12000, ip: getBaseIP(7), stats: { damage: 200, defense: 60 }, type: 'GLOVES' },
-                8: { id: 'T8_LEATHER_GLOVES', name: 'Gloves', tier: 8, req: { 'T8_LEATHER': 8 }, xp: 30000, ip: getBaseIP(8), stats: { damage: 400, defense: 120 }, type: 'GLOVES' },
-                9: { id: 'T9_LEATHER_GLOVES', name: 'Gloves', tier: 9, req: { 'T9_LEATHER': 10 }, xp: 80000, ip: getBaseIP(9), stats: { damage: 800, defense: 240 }, type: 'GLOVES' },
-                10: { id: 'T10_LEATHER_GLOVES', name: 'Gloves', tier: 10, req: { 'T10_LEATHER': 12 }, xp: 200000, ip: getBaseIP(10), stats: { damage: 1600, defense: 480 }, type: 'GLOVES' },
-            },
-            LEATHER_CAPE: {
-                1: { id: 'T1_LEATHER_CAPE', name: 'Hunter\'s Cape', tier: 1, req: { 'T1_LEATHER': 4, 'T1_CREST': 1 }, xp: 50, ip: getBaseIP(1), stats: { hp: 50, efficiency: { GLOBAL: 2 } }, type: 'CAPE' },
-                2: { id: 'T2_LEATHER_CAPE', name: 'Hunter\'s Cape', tier: 2, req: { 'T2_LEATHER': 6, 'T2_CREST': 1 }, xp: 120, ip: getBaseIP(2), stats: { hp: 100, efficiency: { GLOBAL: 4 } }, type: 'CAPE' },
-                3: { id: 'T3_LEATHER_CAPE', name: 'Hunter\'s Cape', tier: 3, req: { 'T3_LEATHER': 8, 'T3_CREST': 1 }, xp: 300, ip: getBaseIP(3), stats: { hp: 200, efficiency: { GLOBAL: 6 } }, type: 'CAPE' },
-                4: { id: 'T4_LEATHER_CAPE', name: 'Hunter\'s Cape', tier: 4, req: { 'T4_LEATHER': 12, 'T4_CREST': 1 }, xp: 800, ip: getBaseIP(4), stats: { hp: 400, efficiency: { GLOBAL: 8 } }, type: 'CAPE' },
-                5: { id: 'T5_LEATHER_CAPE', name: 'Hunter\'s Cape', tier: 5, req: { 'T5_LEATHER': 16, 'T5_CREST': 1 }, xp: 2000, ip: getBaseIP(5), stats: { hp: 800, efficiency: { GLOBAL: 10 } }, type: 'CAPE' },
-                6: { id: 'T6_LEATHER_CAPE', name: 'Hunter\'s Cape', tier: 6, req: { 'T6_LEATHER': 20, 'T6_CREST': 1 }, xp: 5000, ip: getBaseIP(6), stats: { hp: 1600, efficiency: { GLOBAL: 12 } }, type: 'CAPE' },
-                7: { id: 'T7_LEATHER_CAPE', name: 'Hunter\'s Cape', tier: 7, req: { 'T7_LEATHER': 24, 'T7_CREST': 1 }, xp: 12000, ip: getBaseIP(7), stats: { hp: 3200, efficiency: { GLOBAL: 14 } }, type: 'CAPE' },
-                8: { id: 'T8_LEATHER_CAPE', name: 'Hunter\'s Cape', tier: 8, req: { 'T8_LEATHER': 28, 'T8_CREST': 1 }, xp: 30000, ip: getBaseIP(8), stats: { hp: 6400, efficiency: { GLOBAL: 16 } }, type: 'CAPE' },
-                9: { id: 'T9_LEATHER_CAPE', name: 'Hunter\'s Cape', tier: 9, req: { 'T9_LEATHER': 32, 'T9_CREST': 1 }, xp: 80000, ip: getBaseIP(9), stats: { hp: 12800, efficiency: { GLOBAL: 18 } }, type: 'CAPE' },
-                10: { id: 'T10_LEATHER_CAPE', name: 'Hunter\'s Cape', tier: 10, req: { 'T10_LEATHER': 40, 'T10_CREST': 1 }, xp: 200000, ip: getBaseIP(10), stats: { hp: 25600, efficiency: { GLOBAL: 20 } }, type: 'CAPE' },
-            },
-            AXE: {
-                1: { id: 'T1_AXE', name: 'Axe', tier: 1, req: { 'T1_PLANK': 1 }, xp: 50, stats: { efficiency: 5 }, type: 'TOOL_AXE' },
-                2: { id: 'T2_AXE', name: 'Axe', tier: 2, req: { 'T2_PLANK': 2 }, xp: 120, stats: { efficiency: 10 }, type: 'TOOL_AXE' },
-                3: { id: 'T3_AXE', name: 'Axe', tier: 3, req: { 'T3_PLANK': 4, 'T2_PLANK': 2 }, xp: 300, stats: { efficiency: 15 }, type: 'TOOL_AXE' },
-                4: { id: 'T4_AXE', name: 'Axe', tier: 4, req: { 'T4_PLANK': 8, 'T3_PLANK': 4 }, xp: 800, stats: { efficiency: 20 }, type: 'TOOL_AXE' },
-                5: { id: 'T5_AXE', name: 'Axe', tier: 5, req: { 'T5_PLANK': 12, 'T4_PLANK': 6 }, xp: 2000, stats: { efficiency: 25 }, type: 'TOOL_AXE' },
-                6: { id: 'T6_AXE', name: 'Axe', tier: 6, req: { 'T6_PLANK': 16, 'T5_PLANK': 8 }, xp: 5000, stats: { efficiency: 30 }, type: 'TOOL_AXE' },
-                7: { id: 'T7_AXE', name: 'Axe', tier: 7, req: { 'T7_PLANK': 20, 'T6_PLANK': 10 }, xp: 12000, stats: { efficiency: 35 }, type: 'TOOL_AXE' },
-                8: { id: 'T8_AXE', name: 'Axe', tier: 8, req: { 'T8_PLANK': 24, 'T7_PLANK': 12 }, xp: 30000, stats: { efficiency: 40 }, type: 'TOOL_AXE' },
-                9: { id: 'T9_AXE', name: 'Axe', tier: 9, req: { 'T9_PLANK': 28, 'T8_PLANK': 14 }, xp: 80000, stats: { efficiency: 45 }, type: 'TOOL_AXE' },
-                10: { id: 'T10_AXE', name: 'Axe', tier: 10, req: { 'T10_PLANK': 32, 'T9_PLANK': 16 }, xp: 200000, stats: { efficiency: 50 }, type: 'TOOL_AXE' },
-            },
-            SKINNING_KNIFE: {
-                1: { id: 'T1_SKINNING_KNIFE', name: 'Skinning Knife', tier: 1, req: { 'T1_LEATHER': 1 }, xp: 50, stats: { efficiency: 5 }, type: 'TOOL_KNIFE' },
-                2: { id: 'T2_SKINNING_KNIFE', name: 'Skinning Knife', tier: 2, req: { 'T2_LEATHER': 2 }, xp: 120, stats: { efficiency: 10 }, type: 'TOOL_KNIFE' },
-                3: { id: 'T3_SKINNING_KNIFE', name: 'Skinning Knife', tier: 3, req: { 'T3_LEATHER': 4, 'T2_LEATHER': 2 }, xp: 300, stats: { efficiency: 15 }, type: 'TOOL_KNIFE' },
-                4: { id: 'T4_SKINNING_KNIFE', name: 'Skinning Knife', tier: 4, req: { 'T4_LEATHER': 8, 'T3_LEATHER': 4 }, xp: 800, stats: { efficiency: 20 }, type: 'TOOL_KNIFE' },
-                5: { id: 'T5_SKINNING_KNIFE', name: 'Skinning Knife', tier: 5, req: { 'T5_LEATHER': 12, 'T4_LEATHER': 6 }, xp: 2000, stats: { efficiency: 25 }, type: 'TOOL_KNIFE' },
-                6: { id: 'T6_SKINNING_KNIFE', name: 'Skinning Knife', tier: 6, req: { 'T6_LEATHER': 16, 'T5_LEATHER': 8 }, xp: 5000, stats: { efficiency: 30 }, type: 'TOOL_KNIFE' },
-                7: { id: 'T7_SKINNING_KNIFE', name: 'Skinning Knife', tier: 7, req: { 'T7_LEATHER': 20, 'T6_LEATHER': 10 }, xp: 12000, stats: { efficiency: 35 }, type: 'TOOL_KNIFE' },
-                8: { id: 'T8_SKINNING_KNIFE', name: 'Skinning Knife', tier: 8, req: { 'T8_LEATHER': 24, 'T7_LEATHER': 12 }, xp: 30000, stats: { efficiency: 40 }, type: 'TOOL_KNIFE' },
-                9: { id: 'T9_SKINNING_KNIFE', name: 'Skinning Knife', tier: 9, req: { 'T9_LEATHER': 28, 'T8_LEATHER': 14 }, xp: 80000, stats: { efficiency: 45 }, type: 'TOOL_KNIFE' },
-                10: { id: 'T10_SKINNING_KNIFE', name: 'Skinning Knife', tier: 10, req: { 'T10_LEATHER': 32, 'T9_LEATHER': 16 }, xp: 200000, stats: { efficiency: 50 }, type: 'TOOL_KNIFE' },
-            }
-        },
-        MAGES_TOWER: {
-            FIRE_STAFF: {
-                1: { id: 'T1_FIRE_STAFF', name: 'Fire Staff', tier: 1, req: { 'T1_PLANK': 4, 'T1_BAR': 2 }, xp: 50, ip: getBaseIP(1), stats: { damage: 20, attackSpeed: 1500 }, type: 'WEAPON' },
-                2: { id: 'T2_FIRE_STAFF', name: 'Fire Staff', tier: 2, req: { 'T2_PLANK': 6, 'T2_BAR': 3 }, xp: 120, ip: getBaseIP(2), stats: { damage: 45, attackSpeed: 1500 }, type: 'WEAPON' },
-                3: { id: 'T3_FIRE_STAFF', name: 'Fire Staff', tier: 3, req: { 'T3_PLANK': 10, 'T3_BAR': 4 }, xp: 300, ip: getBaseIP(3), stats: { damage: 100, attackSpeed: 1500 }, type: 'WEAPON' },
-                4: { id: 'T4_FIRE_STAFF', name: 'Fire Staff', tier: 4, req: { 'T4_PLANK': 15, 'T4_BAR': 5 }, xp: 800, ip: getBaseIP(4), stats: { damage: 250, attackSpeed: 1500 }, type: 'WEAPON' },
-                5: { id: 'T5_FIRE_STAFF', name: 'Fire Staff', tier: 5, req: { 'T5_PLANK': 18, 'T5_BAR': 6 }, xp: 2000, ip: getBaseIP(5), stats: { damage: 600, attackSpeed: 1500 }, type: 'WEAPON' },
-                6: { id: 'T6_FIRE_STAFF', name: 'Fire Staff', tier: 6, req: { 'T6_PLANK': 22, 'T6_BAR': 7 }, xp: 5000, ip: getBaseIP(6), stats: { damage: 1400, attackSpeed: 1500 }, type: 'WEAPON' },
-                7: { id: 'T7_FIRE_STAFF', name: 'Fire Staff', tier: 7, req: { 'T7_PLANK': 26, 'T7_BAR': 8 }, xp: 12000, ip: getBaseIP(7), stats: { damage: 3200, attackSpeed: 1500 }, type: 'WEAPON' },
-                8: { id: 'T8_FIRE_STAFF', name: 'Fire Staff', tier: 8, req: { 'T8_PLANK': 30, 'T8_BAR': 9 }, xp: 30000, ip: getBaseIP(8), stats: { damage: 8000, attackSpeed: 1500 }, type: 'WEAPON' },
-                9: { id: 'T9_FIRE_STAFF', name: 'Fire Staff', tier: 9, req: { 'T9_PLANK': 35, 'T9_BAR': 10 }, xp: 80000, ip: getBaseIP(9), stats: { damage: 18000, attackSpeed: 1500 }, type: 'WEAPON' },
-                10: { id: 'T10_FIRE_STAFF', name: 'Fire Staff', tier: 10, req: { 'T10_PLANK': 40, 'T10_BAR': 12 }, xp: 200000, ip: getBaseIP(10), stats: { damage: 45000, attackSpeed: 1500 }, type: 'WEAPON' },
-            },
-            TOME: {
-                1: { id: 'T1_TOME', name: 'Tome', tier: 1, req: { 'T1_CLOTH': 2, 'T1_LEATHER': 2 }, xp: 50, ip: getBaseIP(1), stats: { damage: 4 }, type: 'OFF_HAND' },
-                2: { id: 'T2_TOME', name: 'Tome', tier: 2, req: { 'T2_CLOTH': 2, 'T2_LEATHER': 2 }, xp: 120, ip: getBaseIP(2), stats: { damage: 9 }, type: 'OFF_HAND' },
-                3: { id: 'T3_TOME', name: 'Tome', tier: 3, req: { 'T3_CLOTH': 3, 'T3_LEATHER': 3 }, xp: 300, ip: getBaseIP(3), stats: { damage: 18 }, type: 'OFF_HAND' },
-                4: { id: 'T4_TOME', name: 'Tome', tier: 4, req: { 'T4_CLOTH': 4, 'T4_LEATHER': 4 }, xp: 800, ip: getBaseIP(4), stats: { damage: 35 }, type: 'OFF_HAND' },
-                5: { id: 'T5_TOME', name: 'Tome', tier: 5, req: { 'T5_CLOTH': 5, 'T5_LEATHER': 5 }, xp: 2000, ip: getBaseIP(5), stats: { damage: 70 }, type: 'OFF_HAND' },
-                6: { id: 'T6_TOME', name: 'Tome', tier: 6, req: { 'T6_CLOTH': 6, 'T6_LEATHER': 6 }, xp: 5000, ip: getBaseIP(6), stats: { damage: 140 }, type: 'OFF_HAND' },
-                7: { id: 'T7_TOME', name: 'Tome', tier: 7, req: { 'T7_CLOTH': 8, 'T7_LEATHER': 8 }, xp: 12000, ip: getBaseIP(7), stats: { damage: 280 }, type: 'OFF_HAND' },
-                8: { id: 'T8_TOME', name: 'Tome', tier: 8, req: { 'T8_CLOTH': 10, 'T8_LEATHER': 10 }, xp: 30000, ip: getBaseIP(8), stats: { damage: 560 }, type: 'OFF_HAND' },
-                9: { id: 'T9_TOME', name: 'Tome', tier: 9, req: { 'T9_CLOTH': 12, 'T9_LEATHER': 12 }, xp: 80000, ip: getBaseIP(9), stats: { damage: 1120 }, type: 'OFF_HAND' },
-                10: { id: 'T10_TOME', name: 'Tome', tier: 10, req: { 'T10_CLOTH': 15, 'T10_LEATHER': 15 }, xp: 200000, ip: getBaseIP(10), stats: { damage: 2240 }, type: 'OFF_HAND' },
-            },
-            CLOTH_ARMOR: {
-                1: { id: 'T1_CLOTH_ARMOR', name: 'Cloth Armor', tier: 1, req: { 'T1_CLOTH': 4 }, xp: 50, ip: getBaseIP(1), stats: { damage: 6, defense: 4, dmgBonus: 0.25 }, type: 'ARMOR' },
-                2: { id: 'T2_CLOTH_ARMOR', name: 'Cloth Armor', tier: 2, req: { 'T2_CLOTH': 6 }, xp: 120, ip: getBaseIP(2), stats: { damage: 12, defense: 8, dmgBonus: 0.25 }, type: 'ARMOR' },
-                3: { id: 'T3_CLOTH_ARMOR', name: 'Cloth Armor', tier: 3, req: { 'T3_CLOTH': 10 }, xp: 300, ip: getBaseIP(3), stats: { damage: 25, defense: 12, dmgBonus: 0.25 }, type: 'ARMOR' },
-                4: { id: 'T4_CLOTH_ARMOR', name: 'Cloth Armor', tier: 4, req: { 'T4_CLOTH': 15 }, xp: 800, ip: getBaseIP(4), stats: { damage: 50, defense: 20, dmgBonus: 0.25 }, type: 'ARMOR' },
-                5: { id: 'T5_CLOTH_ARMOR', name: 'Cloth Armor', tier: 5, req: { 'T5_CLOTH': 18 }, xp: 2000, ip: getBaseIP(5), stats: { damage: 100, defense: 40, dmgBonus: 0.25 }, type: 'ARMOR' },
-                6: { id: 'T6_CLOTH_ARMOR', name: 'Cloth Armor', tier: 6, req: { 'T6_CLOTH': 22 }, xp: 5000, ip: getBaseIP(6), stats: { damage: 200, defense: 80, dmgBonus: 0.25 }, type: 'ARMOR' },
-                7: { id: 'T7_CLOTH_ARMOR', name: 'Cloth Armor', tier: 7, req: { 'T7_CLOTH': 26 }, xp: 12000, ip: getBaseIP(7), stats: { damage: 400, defense: 160, dmgBonus: 0.25 }, type: 'ARMOR' },
-                8: { id: 'T8_CLOTH_ARMOR', name: 'Cloth Armor', tier: 8, req: { 'T8_CLOTH': 30 }, xp: 30000, ip: getBaseIP(8), stats: { damage: 800, defense: 320, dmgBonus: 0.25 }, type: 'ARMOR' },
-                9: { id: 'T9_CLOTH_ARMOR', name: 'Cloth Armor', tier: 9, req: { 'T9_CLOTH': 35 }, xp: 80000, ip: getBaseIP(9), stats: { damage: 1600, defense: 640, dmgBonus: 0.25 }, type: 'ARMOR' },
-                10: { id: 'T10_CLOTH_ARMOR', name: 'Cloth Armor', tier: 10, req: { 'T10_CLOTH': 40 }, xp: 200000, ip: getBaseIP(10), stats: { damage: 3200, defense: 1280, dmgBonus: 0.25 }, type: 'ARMOR' },
-            },
-            CLOTH_HELMET: {
-                1: { id: 'T1_CLOTH_HELMET', name: 'Helmet', tier: 1, req: { 'T1_CLOTH': 2 }, xp: 50, ip: getBaseIP(1), stats: { damage: 4, defense: 1 }, type: 'HELMET' },
-                2: { id: 'T2_CLOTH_HELMET', name: 'Helmet', tier: 2, req: { 'T2_CLOTH': 3 }, xp: 120, ip: getBaseIP(2), stats: { damage: 9, defense: 2 }, type: 'HELMET' },
-                3: { id: 'T3_CLOTH_HELMET', name: 'Helmet', tier: 3, req: { 'T3_CLOTH': 5 }, xp: 300, ip: getBaseIP(3), stats: { damage: 18, defense: 4 }, type: 'HELMET' },
-                4: { id: 'T4_CLOTH_HELMET', name: 'Helmet', tier: 4, req: { 'T4_CLOTH': 8 }, xp: 800, ip: getBaseIP(4), stats: { damage: 35, defense: 7 }, type: 'HELMET' },
-                5: { id: 'T5_CLOTH_HELMET', name: 'Helmet', tier: 5, req: { 'T5_CLOTH': 10 }, xp: 2000, ip: getBaseIP(5), stats: { damage: 70, defense: 15 }, type: 'HELMET' },
-                6: { id: 'T6_CLOTH_HELMET', name: 'Helmet', tier: 6, req: { 'T6_CLOTH': 12 }, xp: 5000, ip: getBaseIP(6), stats: { damage: 140, defense: 30 }, type: 'HELMET' },
-                7: { id: 'T7_CLOTH_HELMET', name: 'Helmet', tier: 7, req: { 'T7_CLOTH': 14 }, xp: 12000, ip: getBaseIP(7), stats: { damage: 280, defense: 60 }, type: 'HELMET' },
-                8: { id: 'T8_CLOTH_HELMET', name: 'Helmet', tier: 8, req: { 'T8_CLOTH': 16 }, xp: 30000, ip: getBaseIP(8), stats: { damage: 560, defense: 120 }, type: 'HELMET' },
-                9: { id: 'T9_CLOTH_HELMET', name: 'Helmet', tier: 9, req: { 'T9_CLOTH': 18 }, xp: 80000, ip: getBaseIP(9), stats: { damage: 1120, defense: 240 }, type: 'HELMET' },
-                10: { id: 'T10_CLOTH_HELMET', name: 'Helmet', tier: 10, req: { 'T10_CLOTH': 22 }, xp: 200000, ip: getBaseIP(10), stats: { damage: 2240, defense: 480 }, type: 'HELMET' },
-            },
-            CLOTH_BOOTS: {
-                1: { id: 'T1_CLOTH_BOOTS', name: 'Boots', tier: 1, req: { 'T1_CLOTH': 2 }, xp: 50, ip: getBaseIP(1), stats: { damage: 4, defense: 1 }, type: 'BOOTS' },
-                2: { id: 'T2_CLOTH_BOOTS', name: 'Boots', tier: 2, req: { 'T2_CLOTH': 3 }, xp: 120, ip: getBaseIP(2), stats: { damage: 9, defense: 2 }, type: 'BOOTS' },
-                3: { id: 'T3_CLOTH_BOOTS', name: 'Boots', tier: 3, req: { 'T3_CLOTH': 5 }, xp: 300, ip: getBaseIP(3), stats: { damage: 18, defense: 4 }, type: 'BOOTS' },
-                4: { id: 'T4_CLOTH_BOOTS', name: 'Boots', tier: 4, req: { 'T4_CLOTH': 8 }, xp: 800, ip: getBaseIP(4), stats: { damage: 35, defense: 7 }, type: 'BOOTS' },
-                5: { id: 'T5_CLOTH_BOOTS', name: 'Boots', tier: 5, req: { 'T5_CLOTH': 10 }, xp: 2000, ip: getBaseIP(5), stats: { damage: 70, defense: 15 }, type: 'BOOTS' },
-                6: { id: 'T6_CLOTH_BOOTS', name: 'Boots', tier: 6, req: { 'T6_CLOTH': 12 }, xp: 5000, ip: getBaseIP(6), stats: { damage: 140, defense: 30 }, type: 'BOOTS' },
-                7: { id: 'T7_CLOTH_BOOTS', name: 'Boots', tier: 7, req: { 'T7_CLOTH': 14 }, xp: 12000, ip: getBaseIP(7), stats: { damage: 280, defense: 60 }, type: 'BOOTS' },
-                8: { id: 'T8_CLOTH_BOOTS', name: 'Boots', tier: 8, req: { 'T8_CLOTH': 16 }, xp: 30000, ip: getBaseIP(8), stats: { damage: 560, defense: 120 }, type: 'BOOTS' },
-                9: { id: 'T9_CLOTH_BOOTS', name: 'Boots', tier: 9, req: { 'T9_CLOTH': 18 }, xp: 80000, ip: getBaseIP(9), stats: { damage: 1120, defense: 240 }, type: 'BOOTS' },
-                10: { id: 'T10_CLOTH_BOOTS', name: 'Boots', tier: 10, req: { 'T10_CLOTH': 22 }, xp: 200000, ip: getBaseIP(10), stats: { damage: 2240, defense: 480 }, type: 'BOOTS' },
-            },
-            CLOTH_GLOVES: {
-                1: { id: 'T1_CLOTH_GLOVES', name: 'Gloves', tier: 1, req: { 'T1_CLOTH': 1 }, xp: 50, ip: getBaseIP(1), stats: { damage: 5, defense: 1 }, type: 'GLOVES' },
-                2: { id: 'T2_CLOTH_GLOVES', name: 'Gloves', tier: 2, req: { 'T2_CLOTH': 2 }, xp: 120, ip: getBaseIP(2), stats: { damage: 10, defense: 2 }, type: 'GLOVES' },
-                3: { id: 'T3_CLOTH_GLOVES', name: 'Gloves', tier: 3, req: { 'T3_CLOTH': 3 }, xp: 300, ip: getBaseIP(3), stats: { damage: 20, defense: 4 }, type: 'GLOVES' },
-                4: { id: 'T4_CLOTH_GLOVES', name: 'Gloves', tier: 4, req: { 'T4_CLOTH': 4 }, xp: 800, ip: getBaseIP(4), stats: { damage: 40, defense: 7 }, type: 'GLOVES' },
-                5: { id: 'T5_CLOTH_GLOVES', name: 'Gloves', tier: 5, req: { 'T5_CLOTH': 5 }, xp: 2000, ip: getBaseIP(5), stats: { damage: 80, defense: 15 }, type: 'GLOVES' },
-                6: { id: 'T6_CLOTH_GLOVES', name: 'Gloves', tier: 6, req: { 'T6_CLOTH': 6 }, xp: 5000, ip: getBaseIP(6), stats: { damage: 160, defense: 30 }, type: 'GLOVES' },
-                7: { id: 'T7_CLOTH_GLOVES', name: 'Gloves', tier: 7, req: { 'T7_CLOTH': 7 }, xp: 12000, ip: getBaseIP(7), stats: { damage: 320, defense: 60 }, type: 'GLOVES' },
-                8: { id: 'T8_CLOTH_GLOVES', name: 'Gloves', tier: 8, req: { 'T8_CLOTH': 8 }, xp: 30000, ip: getBaseIP(8), stats: { damage: 640, defense: 120 }, type: 'GLOVES' },
-                9: { id: 'T9_CLOTH_GLOVES', name: 'Gloves', tier: 9, req: { 'T9_CLOTH': 10 }, xp: 80000, ip: getBaseIP(9), stats: { damage: 1280, defense: 240 }, type: 'GLOVES' },
-                10: { id: 'T10_CLOTH_GLOVES', name: 'Gloves', tier: 10, req: { 'T10_CLOTH': 12 }, xp: 200000, ip: getBaseIP(10), stats: { damage: 2560, defense: 480 }, type: 'GLOVES' },
-            },
-            CAPE: {
-                1: { id: 'T1_CAPE', name: 'Mage\'s Cape', tier: 1, req: { 'T1_CLOTH': 4, 'T1_CREST': 1 }, xp: 50, ip: getBaseIP(1), stats: { hp: 50, efficiency: { GLOBAL: 2 } }, type: 'CAPE' },
-                2: { id: 'T2_CAPE', name: 'Mage\'s Cape', tier: 2, req: { 'T2_CLOTH': 6, 'T2_CREST': 1 }, xp: 120, ip: getBaseIP(2), stats: { hp: 100, efficiency: { GLOBAL: 4 } }, type: 'CAPE' },
-                3: { id: 'T3_CAPE', name: 'Mage\'s Cape', tier: 3, req: { 'T3_CLOTH': 8, 'T3_CREST': 1 }, xp: 300, ip: getBaseIP(3), stats: { hp: 200, efficiency: { GLOBAL: 6 } }, type: 'CAPE' },
-                4: { id: 'T4_CAPE', name: 'Mage\'s Cape', tier: 4, req: { 'T4_CLOTH': 12, 'T4_CREST': 1 }, xp: 800, ip: getBaseIP(4), stats: { hp: 400, efficiency: { GLOBAL: 8 } }, type: 'CAPE' },
-                5: { id: 'T5_CAPE', name: 'Mage\'s Cape', tier: 5, req: { 'T5_CLOTH': 16, 'T5_CREST': 1 }, xp: 2000, ip: getBaseIP(5), stats: { hp: 800, efficiency: { GLOBAL: 10 } }, type: 'CAPE' },
-                6: { id: 'T6_CAPE', name: 'Mage\'s Cape', tier: 6, req: { 'T6_CLOTH': 20, 'T6_CREST': 1 }, xp: 5000, ip: getBaseIP(6), stats: { hp: 1600, efficiency: { GLOBAL: 12 } }, type: 'CAPE' },
-                7: { id: 'T7_CAPE', name: 'Mage\'s Cape', tier: 7, req: { 'T7_CLOTH': 24, 'T7_CREST': 1 }, xp: 12000, ip: getBaseIP(7), stats: { hp: 3200, efficiency: { GLOBAL: 14 } }, type: 'CAPE' },
-                8: { id: 'T8_CAPE', name: 'Mage\'s Cape', tier: 8, req: { 'T8_CLOTH': 28, 'T8_CREST': 1 }, xp: 30000, ip: getBaseIP(8), stats: { hp: 6400, efficiency: { GLOBAL: 16 } }, type: 'CAPE' },
-                9: { id: 'T9_CAPE', name: 'Mage\'s Cape', tier: 9, req: { 'T9_CLOTH': 32, 'T9_CREST': 1 }, xp: 80000, ip: getBaseIP(9), stats: { hp: 12800, efficiency: { GLOBAL: 18 } }, type: 'CAPE' },
-                10: { id: 'T10_CAPE', name: 'Mage\'s Cape', tier: 10, req: { 'T10_CLOTH': 40, 'T10_CREST': 1 }, xp: 200000, ip: getBaseIP(10), stats: { hp: 25600, efficiency: { GLOBAL: 20 } }, type: 'CAPE' },
-            },
-            SICKLE: {
-                1: { id: 'T1_SICKLE', name: 'Sickle', tier: 1, req: { 'T1_CLOTH': 1 }, xp: 50, stats: { efficiency: 5 }, type: 'TOOL_SICKLE' },
-                2: { id: 'T2_SICKLE', name: 'Sickle', tier: 2, req: { 'T2_CLOTH': 2 }, xp: 120, stats: { efficiency: 10 }, type: 'TOOL_SICKLE' },
-                3: { id: 'T3_SICKLE', name: 'Sickle', tier: 3, req: { 'T3_CLOTH': 4, 'T2_CLOTH': 2 }, xp: 300, stats: { efficiency: 15 }, type: 'TOOL_SICKLE' },
-                4: { id: 'T4_SICKLE', name: 'Sickle', tier: 4, req: { 'T4_CLOTH': 8, 'T3_CLOTH': 4 }, xp: 800, stats: { efficiency: 20 }, type: 'TOOL_SICKLE' },
-                5: { id: 'T5_SICKLE', name: 'Sickle', tier: 5, req: { 'T5_CLOTH': 12, 'T4_CLOTH': 6 }, xp: 2000, stats: { efficiency: 25 }, type: 'TOOL_SICKLE' },
-                6: { id: 'T6_SICKLE', name: 'Sickle', tier: 6, req: { 'T6_CLOTH': 16, 'T5_CLOTH': 8 }, xp: 5000, stats: { efficiency: 30 }, type: 'TOOL_SICKLE' },
-                7: { id: 'T7_SICKLE', name: 'Sickle', tier: 7, req: { 'T7_CLOTH': 20, 'T6_CLOTH': 10 }, xp: 12000, stats: { efficiency: 35 }, type: 'TOOL_SICKLE' },
-                8: { id: 'T8_SICKLE', name: 'Sickle', tier: 8, req: { 'T8_CLOTH': 24, 'T7_CLOTH': 12 }, xp: 30000, stats: { efficiency: 40 }, type: 'TOOL_SICKLE' },
-                9: { id: 'T9_SICKLE', name: 'Sickle', tier: 9, req: { 'T9_CLOTH': 28, 'T8_CLOTH': 14 }, xp: 80000, stats: { efficiency: 45 }, type: 'TOOL_SICKLE' },
-                10: { id: 'T10_SICKLE', name: 'Sickle', tier: 10, req: { 'T10_CLOTH': 32, 'T9_CLOTH': 16 }, xp: 200000, stats: { efficiency: 50 }, type: 'TOOL_SICKLE' },
-            },
-            FISHING_ROD: {
-                1: { id: 'T1_FISHING_ROD', name: 'Fishing Rod', tier: 1, req: { 'T1_PLANK': 1 }, xp: 50, stats: { efficiency: 5 }, type: 'TOOL_ROD' },
-                2: { id: 'T2_FISHING_ROD', name: 'Fishing Rod', tier: 2, req: { 'T2_PLANK': 2 }, xp: 120, stats: { efficiency: 10 }, type: 'TOOL_ROD' },
-                3: { id: 'T3_FISHING_ROD', name: 'Fishing Rod', tier: 3, req: { 'T3_PLANK': 4, 'T2_PLANK': 2 }, xp: 300, stats: { efficiency: 15 }, type: 'TOOL_ROD' },
-                4: { id: 'T4_FISHING_ROD', name: 'Fishing Rod', tier: 4, req: { 'T4_PLANK': 8, 'T3_PLANK': 4 }, xp: 800, stats: { efficiency: 20 }, type: 'TOOL_ROD' },
-                5: { id: 'T5_FISHING_ROD', name: 'Fishing Rod', tier: 5, req: { 'T5_PLANK': 12, 'T4_PLANK': 6 }, xp: 2000, stats: { efficiency: 25 }, type: 'TOOL_ROD' },
-                6: { id: 'T6_FISHING_ROD', name: 'Fishing Rod', tier: 6, req: { 'T6_PLANK': 16, 'T5_PLANK': 8 }, xp: 5000, stats: { efficiency: 30 }, type: 'TOOL_ROD' },
-                7: { id: 'T7_FISHING_ROD', name: 'Fishing Rod', tier: 7, req: { 'T7_PLANK': 20, 'T6_PLANK': 10 }, xp: 12000, stats: { efficiency: 35 }, type: 'TOOL_ROD' },
-                8: { id: 'T8_FISHING_ROD', name: 'Fishing Rod', tier: 8, req: { 'T8_PLANK': 24, 'T7_PLANK': 12 }, xp: 30000, stats: { efficiency: 40 }, type: 'TOOL_ROD' },
-                9: { id: 'T9_FISHING_ROD', name: 'Fishing Rod', tier: 9, req: { 'T9_PLANK': 28, 'T8_PLANK': 14 }, xp: 80000, stats: { efficiency: 45 }, type: 'TOOL_ROD' },
-                10: { id: 'T10_FISHING_ROD', name: 'Fishing Rod', tier: 10, req: { 'T10_PLANK': 32, 'T9_PLANK': 16 }, xp: 200000, stats: { efficiency: 50 }, type: 'TOOL_ROD' },
-            }
-        },
-        COOKING_STATION: {
-            MEALS: {
-                1: { id: 'T1_FOOD', name: 'Food', tier: 1, req: { 'T1_FISH': 1 }, xp: 20, heal: 50, type: 'FOOD' },
-                2: { id: 'T2_FOOD', name: 'Food', tier: 2, req: { 'T2_FISH': 1 }, xp: 40, heal: 100, type: 'FOOD' },
-                3: { id: 'T3_FOOD', name: 'Food', tier: 3, req: { 'T3_FISH': 1 }, xp: 80, heal: 250, type: 'FOOD' },
-                4: { id: 'T4_FOOD', name: 'Food', tier: 4, req: { 'T4_FISH': 1 }, xp: 160, heal: 500, type: 'FOOD' },
-                5: { id: 'T5_FOOD', name: 'Food', tier: 5, req: { 'T5_FISH': 1 }, xp: 320, heal: 1000, type: 'FOOD' },
-                6: { id: 'T6_FOOD', name: 'Food', tier: 6, req: { 'T6_FISH': 1 }, xp: 640, heal: 2000, type: 'FOOD' },
-                7: { id: 'T7_FOOD', name: 'Food', tier: 7, req: { 'T7_FISH': 1 }, xp: 1280, heal: 4000, type: 'FOOD' },
-                8: { id: 'T8_FOOD', name: 'Food', tier: 8, req: { 'T8_FISH': 1 }, xp: 2560, heal: 8000, type: 'FOOD' },
-                9: { id: 'T9_FOOD', name: 'Food', tier: 9, req: { 'T9_FISH': 1 }, xp: 5120, heal: 16000, type: 'FOOD' },
-                10: { id: 'T10_FOOD', name: 'Food', tier: 10, req: { 'T10_FISH': 1 }, xp: 10240, heal: 32000, type: 'FOOD' },
-            }
-        }
+        WARRIORS_FORGE: { SWORD: {}, SHIELD: {}, PLATE_ARMOR: {}, PLATE_HELMET: {}, PLATE_BOOTS: {}, PLATE_GLOVES: {}, PLATE_CAPE: {}, PICKAXE: {} },
+        HUNTERS_LODGE: { BOW: {}, TORCH: {}, LEATHER_ARMOR: {}, LEATHER_HELMET: {}, LEATHER_BOOTS: {}, LEATHER_GLOVES: {}, LEATHER_CAPE: {}, AXE: {}, SKINNING_KNIFE: {} },
+        MAGES_TOWER: { FIRE_STAFF: {}, TOME: {}, CLOTH_ARMOR: {}, CLOTH_HELMET: {}, CLOTH_BOOTS: {}, CLOTH_GLOVES: {}, CAPE: {}, SICKLE: {}, FISHING_ROD: {} }
     },
-    MAPS: {
-        1: { id: 'T1_DUNGEON_MAP', name: 'Dungeon Map', tier: 1, type: 'MAP' },
-        2: { id: 'T2_DUNGEON_MAP', name: 'Dungeon Map', tier: 2, type: 'MAP' },
-        3: { id: 'T3_DUNGEON_MAP', name: 'Dungeon Map', tier: 3, type: 'MAP' },
-        4: { id: 'T4_DUNGEON_MAP', name: 'Dungeon Map', tier: 4, type: 'MAP' },
-        5: { id: 'T5_DUNGEON_MAP', name: 'Dungeon Map', tier: 5, type: 'MAP' },
-        6: { id: 'T6_DUNGEON_MAP', name: 'Dungeon Map', tier: 6, type: 'MAP' },
-        7: { id: 'T7_DUNGEON_MAP', name: 'Dungeon Map', tier: 7, type: 'MAP' },
-        8: { id: 'T8_DUNGEON_MAP', name: 'Dungeon Map', tier: 8, type: 'MAP' },
-        9: { id: 'T9_DUNGEON_MAP', name: 'Dungeon Map', tier: 9, type: 'MAP' },
-        10: { id: 'T10_DUNGEON_MAP', name: 'Dungeon Map', tier: 10, type: 'MAP' },
-    },
-    SPECIAL: {
-        CREST: {
-            1: { id: 'T1_CREST', name: 'Dungeon Boss Crest', tier: 1, type: 'CRAFTING_MATERIAL' },
-            2: { id: 'T2_CREST', name: 'Dungeon Boss Crest', tier: 2, type: 'CRAFTING_MATERIAL' },
-            3: { id: 'T3_CREST', name: 'Dungeon Boss Crest', tier: 3, type: 'CRAFTING_MATERIAL' },
-            4: { id: 'T4_CREST', name: 'Dungeon Boss Crest', tier: 4, type: 'CRAFTING_MATERIAL' },
-            5: { id: 'T5_CREST', name: 'Dungeon Boss Crest', tier: 5, type: 'CRAFTING_MATERIAL' },
-            6: { id: 'T6_CREST', name: 'Dungeon Boss Crest', tier: 6, type: 'CRAFTING_MATERIAL' },
-            7: { id: 'T7_CREST', name: 'Dungeon Boss Crest', tier: 7, type: 'CRAFTING_MATERIAL' },
-            8: { id: 'T8_CREST', name: 'Dungeon Boss Crest', tier: 8, type: 'CRAFTING_MATERIAL' },
-            9: { id: 'T9_CREST', name: 'Dungeon Boss Crest', tier: 9, type: 'CRAFTING_MATERIAL' },
-            10: { id: 'T10_CREST', name: 'Dungeon Boss Crest', tier: 10, type: 'CRAFTING_MATERIAL' },
-        }
+    MAPS: {},
+    SPECIAL: { CREST: {} }
+};
+
+// --- GENERATOR FUNCTIONS ---
+const genRaw = (type, idPrefix) => {
+    for (const t of TIERS) {
+        ITEMS.RAW[type][t] = {
+            id: `T${t}_${idPrefix}`,
+            name: `${type.charAt(0) + type.slice(1).toLowerCase()}`,
+            tier: t,
+            xp: XP_MAT_CURVE[t - 1]
+        };
     }
 };
 
-export const ITEM_LOOKUP = {};
+const genRefined = (type, idPrefix, rawId) => {
+    for (const t of TIERS) {
+        const req = {};
+        req[`T${t}_${rawId}`] = 2 + Math.floor(t / 2); // Increasing raw cost
+        if (t > 1) req[`T${t - 1}_${idPrefix}`] = 1;
 
+        ITEMS.REFINED[type][t] = {
+            id: `T${t}_${idPrefix}`,
+            name: type.charAt(0) + type.slice(1).toLowerCase(),
+            tier: t,
+            req,
+            xp: XP_MAT_CURVE[t - 1] * 2
+        };
+    }
+};
+
+// Generate Materials
+genRaw('WOOD', 'WOOD'); genRaw('ORE', 'ORE'); genRaw('HIDE', 'HIDE'); genRaw('FIBER', 'FIBER');
+genRaw('FISH', 'FISH'); // Fish is special, but for now standard
+
+// Generate Refined
+genRefined('PLANK', 'PLANK', 'WOOD');
+genRefined('BAR', 'BAR', 'ORE');
+genRefined('LEATHER', 'LEATHER', 'HIDE');
+genRefined('CLOTH', 'CLOTH', 'FIBER');
+
+// Generate Food
+for (const t of TIERS) {
+    ITEMS.CONSUMABLE.FOOD[t] = {
+        id: `T${t}_FOOD`, name: 'Food', tier: t, type: 'FOOD',
+        heal: HP_CURVE[t - 1], // Heals roughly 1 full HP bar of that tier
+        req: { [`T${t}_FISH`]: 1 },
+        xp: XP_MAT_CURVE[t - 1] * 3
+    };
+}
+
+// Generate Maps
+for (const t of TIERS) {
+    ITEMS.MAPS[t] = { id: `T${t}_DUNGEON_MAP`, name: 'Dungeon Map', tier: t, type: 'MAP' };
+}
+
+// Generate Crests
+for (const t of TIERS) {
+    ITEMS.SPECIAL.CREST[t] = { id: `T${t}_CREST`, name: 'Boss Crest', tier: t, type: 'CRAFTING_MATERIAL' };
+}
+
+// Helper for Gear Generation
+const genGear = (category, slot, type, idSuffix, matType, statMultipliers = {}) => {
+    for (const t of TIERS) {
+        const matId = `T${t}_${matType}`;
+        const prevId = t > 1 ? `T${t - 1}_${idSuffix}` : null;
+
+        let req = {};
+        let mainMatCount = 0;
+
+        // Cost Scaling
+        if (slot === 'WEAPON') mainMatCount = 12 + t * 2;
+        else if (slot === 'ARMOR') mainMatCount = 16 + t * 2;
+        else mainMatCount = 8 + t;
+
+        req[matId] = mainMatCount;
+        // Capes need crests
+        if (type === 'CAPE') req[`T${t}_CREST`] = 1;
+
+        const stats = {};
+        if (statMultipliers.dmg) stats.damage = Math.floor(DMG_CURVE[t - 1] * statMultipliers.dmg);
+        if (statMultipliers.def) stats.defense = Math.floor(DEF_CURVE[t - 1] * statMultipliers.def);
+        if (statMultipliers.hp) stats.hp = Math.floor(HP_CURVE[t - 1] * statMultipliers.hp);
+        if (statMultipliers.speed) stats.speed = Math.floor(t * statMultipliers.speed); // 1-10 speed?
+        if (statMultipliers.eff) stats.efficiency = t * 5; // 5% to 50%
+        if (statMultipliers.globalEff) stats.efficiency = { GLOBAL: t * 2 }; // 2% to 20%
+        if (statMultipliers.atkSpeed) stats.attackSpeed = statMultipliers.atkSpeed; // Fixed base speed
+
+        const gear = {
+            id: `T${t}_${idSuffix}`,
+            name: idSuffix.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase()),
+            tier: t,
+            req,
+            xp: XP_MAT_CURVE[t - 1] * 10,
+            ip: getBaseIP(t),
+            type: type,
+            stats
+        };
+
+        // Assign to ITEMS structure
+        if (!ITEMS.GEAR[category][slot]) ITEMS.GEAR[category][slot] = {};
+        ITEMS.GEAR[category][slot][t] = gear;
+    }
+};
+
+// --- WARRIOR GEAR ---
+genGear('WARRIORS_FORGE', 'SWORD', 'WEAPON', 'SWORD', 'BAR', { dmg: 1.0, atkSpeed: 1000 });
+genGear('WARRIORS_FORGE', 'SHIELD', 'OFF_HAND', 'SHIELD', 'BAR', { def: 0.5, hp: 0.5, dmg: 0.1 });
+genGear('WARRIORS_FORGE', 'PLATE_ARMOR', 'ARMOR', 'PLATE_ARMOR', 'BAR', { hp: 1.0, def: 1.0 });
+genGear('WARRIORS_FORGE', 'PLATE_HELMET', 'HELMET', 'PLATE_HELMET', 'BAR', { hp: 0.25, def: 0.25 });
+genGear('WARRIORS_FORGE', 'PLATE_BOOTS', 'BOOTS', 'PLATE_BOOTS', 'BAR', { hp: 0.25, def: 0.25 });
+genGear('WARRIORS_FORGE', 'PLATE_GLOVES', 'GLOVES', 'PLATE_GLOVES', 'BAR', { hp: 0.15, def: 0.15, dmg: 0.05 });
+genGear('WARRIORS_FORGE', 'PLATE_CAPE', 'CAPE', 'PLATE_CAPE', 'BAR', { hp: 0.2, globalEff: 1 });
+genGear('WARRIORS_FORGE', 'PICKAXE', 'TOOL_PICKAXE', 'PICKAXE', 'BAR', { eff: 1 });
+
+// --- HUNTER GEAR ---
+genGear('HUNTERS_LODGE', 'BOW', 'WEAPON', 'BOW', 'PLANK', { dmg: 0.8, atkSpeed: 700 }); // Fast but lower dmg per hit
+genGear('HUNTERS_LODGE', 'TORCH', 'OFF_HAND', 'TORCH', 'PLANK', { speed: 2, hp: 0.2 }); // Speed bonus
+genGear('HUNTERS_LODGE', 'LEATHER_ARMOR', 'ARMOR', 'LEATHER_ARMOR', 'LEATHER', { hp: 0.7, def: 0.7, speed: 2 });
+genGear('HUNTERS_LODGE', 'LEATHER_HELMET', 'HELMET', 'LEATHER_HELMET', 'LEATHER', { hp: 0.2, def: 0.2, speed: 1 });
+genGear('HUNTERS_LODGE', 'LEATHER_BOOTS', 'BOOTS', 'LEATHER_BOOTS', 'LEATHER', { hp: 0.2, def: 0.2, speed: 1 });
+genGear('HUNTERS_LODGE', 'LEATHER_GLOVES', 'GLOVES', 'LEATHER_GLOVES', 'LEATHER', { hp: 0.1, def: 0.1, dmg: 0.1 });
+genGear('HUNTERS_LODGE', 'LEATHER_CAPE', 'CAPE', 'LEATHER_CAPE', 'LEATHER', { hp: 0.2, globalEff: 1 });
+genGear('HUNTERS_LODGE', 'AXE', 'TOOL_AXE', 'AXE', 'PLANK', { eff: 1 });
+genGear('HUNTERS_LODGE', 'SKINNING_KNIFE', 'TOOL_KNIFE', 'SKINNING_KNIFE', 'LEATHER', { eff: 1 });
+
+// --- MAGE GEAR ---
+genGear('MAGES_TOWER', 'FIRE_STAFF', 'WEAPON', 'FIRE_STAFF', 'PLANK', { dmg: 1.2, atkSpeed: 1500 }); // Slow but huge dmg
+genGear('MAGES_TOWER', 'TOME', 'OFF_HAND', 'TOME', 'CLOTH', { dmg: 0.3 }); // Pure Dmg bonus
+genGear('MAGES_TOWER', 'CLOTH_ARMOR', 'ARMOR', 'CLOTH_ARMOR', 'CLOTH', { hp: 0.5, def: 0.4, dmg: 0.2 });
+genGear('MAGES_TOWER', 'CLOTH_HELMET', 'HELMET', 'CLOTH_HELMET', 'CLOTH', { hp: 0.15, def: 0.1, dmg: 0.05 });
+genGear('MAGES_TOWER', 'CLOTH_BOOTS', 'BOOTS', 'CLOTH_BOOTS', 'CLOTH', { hp: 0.15, def: 0.1, dmg: 0.05 });
+genGear('MAGES_TOWER', 'CLOTH_GLOVES', 'GLOVES', 'CLOTH_GLOVES', 'CLOTH', { hp: 0.1, def: 0.1, dmg: 0.1 });
+genGear('MAGES_TOWER', 'CAPE', 'CAPE', 'MAGE_CAPE', 'CLOTH', { hp: 0.2, globalEff: 1 });
+genGear('MAGES_TOWER', 'SICKLE', 'TOOL_SICKLE', 'SICKLE', 'CLOTH', { eff: 1 });
+genGear('MAGES_TOWER', 'FISHING_ROD', 'TOOL_ROD', 'FISHING_ROD', 'PLANK', { eff: 1 });
+
+
+export const ITEM_LOOKUP = {};
 const indexItems = (obj) => {
     Object.values(obj).forEach(val => {
         if (val && typeof val === 'object') {
@@ -531,7 +194,6 @@ const indexItems = (obj) => {
         }
     });
 };
-
 indexItems(ITEMS);
 
 export const resolveItem = (itemId) => {
@@ -541,27 +203,27 @@ export const resolveItem = (itemId) => {
         const upperId = itemId.toUpperCase();
         if (ITEM_LOOKUP[upperId]) return ITEM_LOOKUP[upperId];
 
-        // Handle quality suffix
+        // Handle quality
         if (upperId.includes('_Q')) {
             const parts = upperId.split('_Q');
             const baseId = parts[0];
             const qualityStr = parts[1];
             const qualityId = parseInt(qualityStr);
-
             const baseItem = ITEM_LOOKUP[baseId];
 
             if (baseItem && !isNaN(qualityId) && QUALITIES[qualityId]) {
                 const quality = QUALITIES[qualityId];
                 const ipBonus = quality.ipBonus || 0;
-                // Multiplicador de status: +10 IP ≈ +5% stats
+                // Quality Stats Multiplier: Q1(20ip)=+10%, Q2(50ip)=+25%...
                 const statMultiplier = 1 + (ipBonus / 200);
 
                 const newStats = {};
                 if (baseItem.stats) {
                     for (const key in baseItem.stats) {
                         if (typeof baseItem.stats[key] === 'number') {
-                            // Usar 1 casa decimal para dar sensação de progresso real
-                            newStats[key] = parseFloat((baseItem.stats[key] * statMultiplier).toFixed(1));
+                            // Attack Speed does NOT get multiplied by quality, other stats do
+                            if (key === 'attackSpeed') newStats[key] = baseItem.stats[key];
+                            else newStats[key] = parseFloat((baseItem.stats[key] * statMultiplier).toFixed(1));
                         } else {
                             newStats[key] = baseItem.stats[key];
                         }
@@ -570,7 +232,7 @@ export const resolveItem = (itemId) => {
 
                 return {
                     ...baseItem,
-                    id: upperId, // IMPORTANT: Override ID to include the specific quality suffix
+                    id: upperId,
                     name: baseItem.name,
                     rarityColor: quality.color,
                     quality: qualityId,
@@ -579,51 +241,22 @@ export const resolveItem = (itemId) => {
                     stats: newStats
                 };
             }
-            // Fallback if quality logic fails but baseId exists
             if (baseItem) return baseItem;
         }
     }
     return null;
 };
 
-export const formatItemId = (itemId) => {
-    if (!itemId) return '';
-    return itemId.replace(/_/g, ' '); // Simply replace underscores with spaces as requested
-};
-
+export const formatItemId = (itemId) => itemId ? itemId.replace(/_/g, ' ') : '';
 export const getTierColor = (tier) => {
     const colors = {
-        1: '#9e9e9e', // T1 - Grey
-        2: '#ffffff', // T2 - White
-        3: '#4caf50', // T3 - Green
-        4: '#42a5f5', // T4 - Blue
-        5: '#ab47bc', // T5 - Purple
-        6: '#ff9800', // T6 - Orange
-        7: '#f44336', // T7 - Red (Legendary)
-        8: '#ffd700', // T8 - Gold
-        9: '#00e5ff', // T9 - Cyan
-        10: '#ff4081' // T10 - Pink
+        1: '#9e9e9e', 2: '#ffffff', 3: '#4caf50', 4: '#42a5f5', 5: '#ab47bc',
+        6: '#ff9800', 7: '#f44336', 8: '#ffd700', 9: '#00e5ff', 10: '#ff4081'
     };
     return colors[tier] || '#9e9e9e';
 };
-
 export const calculateItemSellPrice = (item, itemId) => {
     if (!item) return 0;
-
-    // Check if ID was passed or try to infer
-    const idToCheck = itemId || item.id || '';
-
-    const tierPrices = {
-        1: 5, 2: 15, 3: 40, 4: 100, 5: 250,
-        6: 600, 7: 1500, 8: 4000, 9: 10000, 10: 25000
-    };
-    const basePrice = tierPrices[item.tier] || 5;
-
-    let multiplier = 1;
-    if (idToCheck.includes('_Q1')) multiplier = 1.25;
-    else if (idToCheck.includes('_Q2')) multiplier = 1.75;
-    else if (idToCheck.includes('_Q3')) multiplier = 3.0;
-    else if (idToCheck.includes('_Q4')) multiplier = 10.0;
-
-    return Math.floor(basePrice * multiplier);
+    const tierPrices = { 1: 5, 2: 15, 3: 40, 4: 100, 5: 250, 6: 600, 7: 1500, 8: 4000, 9: 10000, 10: 25000 };
+    return tierPrices[item.tier] || 5;
 };

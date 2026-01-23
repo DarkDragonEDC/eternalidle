@@ -180,7 +180,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 {candidates.map((item, idx) => (
-                                    <button
+                                    <div
                                         key={`${item.id}-${idx}`}
                                         onClick={() => { onEquip(item.id); onClose(); }}
                                         style={{
@@ -243,7 +243,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                             </div>
                                         </div>
                                         <div style={{ color: '#4caf50', fontSize: '0.8rem', fontWeight: 'bold' }}>EQUIP</div>
-                                    </button>
+                                    </div>
                                 ))}
                             </div>
                         )}

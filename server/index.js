@@ -11,8 +11,9 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
     cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
+        origin: "*", // Or explicitly set your Netlify URL here
+        methods: ["GET", "POST"],
+        credentials: true
     }
 });
 
@@ -54,6 +55,7 @@ io.use(async (socket, next) => {
     const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.split(' ')[1];
 
     if (!token) {
+        console.warn(`[SOCKET AUTH] No token provided for socket: ${socket.id}`);
         return next(new Error("Authentication error: No token provided"));
     }
 
@@ -61,6 +63,7 @@ io.use(async (socket, next) => {
         const { data: { user }, error } = await supabase.auth.getUser(token);
 
         if (error || !user) {
+            console.error(`[SOCKET AUTH] Invalid token for socket: ${socket.id}`, error?.message);
             return next(new Error("Authentication error: Invalid token"));
         }
 
@@ -73,11 +76,11 @@ io.use(async (socket, next) => {
 });
 
 io.on('connection', (socket) => {
-    console.log('User connected:', socket.user.email, '(' + socket.id + ')');
+    console.log(`[SOCKET] User connected: ${socket.user?.email || 'Unknown'} (Socket: ${socket.id})`);
     connectedSockets.set(socket.id, socket);
 
-    socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.id);
+    socket.on('disconnect', (reason) => {
+        console.log(`[SOCKET] User disconnected: ${socket.id}. Reason: ${reason}`);
         connectedSockets.delete(socket.id);
     });
 
@@ -141,15 +144,27 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('start_dungeon', async ({ tier }) => {
+    socket.on('start_dungeon', async ({ tier, dungeonId }) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
-                const result = await gameManager.startDungeon(socket.user.id, tier);
+                const result = await gameManager.startDungeon(socket.user.id, dungeonId);
                 socket.emit('dungeon_started', result);
                 socket.emit('status_update', await gameManager.getStatus(socket.user.id));
             });
         } catch (err) {
             console.error('Error starting dungeon:', err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('stop_dungeon', async () => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.stopDungeon(socket.user.id);
+                socket.emit('dungeon_stopped', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            });
+        } catch (err) {
             socket.emit('error', { message: err.message });
         }
     });

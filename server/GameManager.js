@@ -95,7 +95,11 @@ export class GameManager {
 
                     if (actionsToProcess > 0) {
                         const offlineReport = await this.processBatchActions(data, actionsToProcess);
-                        data.offlineReport = offlineReport;
+                        // Only show offline report if significantly offline (e.g. > 30 seconds)
+                        // This prevents the modal from popping up during normal heartbeat/lag spikes
+                        if (offlineReport.totalTime > 30) {
+                            data.offlineReport = offlineReport;
+                        }
                         updated = true;
                         data.last_saved = now.toISOString();
                     }
@@ -142,7 +146,10 @@ export class GameManager {
                     itemsGained[result.itemGained] = (itemsGained[result.itemGained] || 0) + (result.amountGained || 1);
                 }
                 if (result.xpGained) {
-                    xpGained[result.skillKey] = (xpGained[result.skillKey] || 0) + result.xpGained;
+                    const stats = this.inventoryManager.calculateStats(char);
+                    const xpBonus = stats.globals?.xpYield || 0;
+                    const finalXp = Math.floor(result.xpGained * (1 + xpBonus / 100));
+                    xpGained[result.skillKey] = (xpGained[result.skillKey] || 0) + finalXp;
                 }
             } else {
                 break;
@@ -275,29 +282,44 @@ export class GameManager {
             }
         }
 
+        let stateChanged = false;
+
         if (char.state.combat) {
+            // console.log(`[COMBAT_DEBUG] Processing combat for ${char.name}. Next attack: ${char.state.combat.next_attack_at}, Now: ${now}`);
             if (!char.state.combat.next_attack_at) {
+                console.log(`[COMBAT_DEBUG] Initializing next_attack_at for ${char.name}`);
                 char.state.combat.next_attack_at = now + 1000;
+                stateChanged = true;
             }
             if (now >= char.state.combat.next_attack_at) {
-                combatResult = await this.combatManager.processCombatRound(char);
-                char.state.combat.next_attack_at = now + (stats.attackSpeed || 1500);
-                if (combatResult && combatResult.leveledUp) leveledUp = combatResult.leveledUp;
+                console.log(`[COMBAT_DEBUG] Executing round for ${char.name}`);
+                try {
+                    combatResult = await this.combatManager.processCombatRound(char);
+                } catch (e) {
+                    console.error(`[COMBAT_ERROR] Error in processCombatRound:`, e);
+                }
 
-                // Dungeon Progression Logic
-                if (combatResult?.details?.victory && char.state.dungeon) {
-                    const dungeonResult = await this.dungeonManager.processDungeonVictory(char);
-                    if (dungeonResult) {
-                        combatResult.message = dungeonResult.message;
-                        if (dungeonResult.finished) {
-                            activityFinished = true; // Forçar save
-                        }
-                    }
+                // Only update timer if combat is still active (player didn't die or kill mob in a way that ends combat state)
+                if (char.state.combat) {
+                    const stats = this.inventoryManager.calculateStats(char);
+                    char.state.combat.next_attack_at = now + (stats.attackSpeed || 1000); // Reset timer
                 }
             }
         }
 
-        if (itemsGained > 0 || combatResult || foodUsed || activityFinished) {
+        let dungeonResult = null;
+        if (char.state.dungeon) {
+            try {
+                dungeonResult = await this.dungeonManager.processDungeonTick(char);
+                if (dungeonResult) {
+                    stateChanged = true;
+                }
+            } catch (e) {
+                console.error("Dungeon Error:", e);
+            }
+        }
+
+        if (itemsGained > 0 || combatResult || foodUsed || activityFinished || stateChanged || dungeonResult) {
             await this.supabase
                 .from('characters')
                 .update({
@@ -309,13 +331,14 @@ export class GameManager {
                 .eq('id', char.id);
         }
 
-        if (char.current_activity || char.state.combat || itemsGained > 0 || combatResult) {
+        if (char.current_activity || char.state.combat || itemsGained > 0 || combatResult || dungeonResult) {
             return {
                 success: true,
-                message: lastActivityResult?.message || combatResult?.message || (foodUsed ? "Food consumed" : ""),
+                message: lastActivityResult?.message || combatResult?.message || dungeonResult?.dungeonUpdate?.message || (foodUsed ? "Food consumed" : ""),
                 leveledUp,
                 activityFinished,
                 combatUpdate: combatResult,
+                dungeonUpdate: dungeonResult?.dungeonUpdate,
                 status: {
                     user_id: char.user_id,
                     name: char.name,
@@ -323,7 +346,7 @@ export class GameManager {
                     calculatedStats: this.inventoryManager.calculateStats(char),
                     current_activity: char.current_activity,
                     activity_started_at: char.activity_started_at,
-                    dungeon_state: char.dungeon_state,
+                    dungeon_state: char.state.dungeon,
                     serverTime: Date.now()
                 }
             };
@@ -361,21 +384,35 @@ export class GameManager {
 
         const stats = this.inventoryManager.calculateStats(char);
         const maxHp = stats.maxHP;
-        const currentHp = char.state.health || 0;
-        const missing = maxHp - currentHp;
+        let currentHp = char.state.health || 0;
+        let eatenCount = 0;
+        const MAX_EATS_PER_TICK = 50; // Allow eating many times to catch up damage instantly
 
-        if (missing > food.heal) {
-            char.state.health = Math.min(maxHp, currentHp + food.heal);
-            if (char.state.combat) {
-                char.state.combat.playerHealth = char.state.health;
+        // Eat while HP is missing and we haven't hit the massive limit
+        // STRICT RULE: Only eat if the heal fits entirely (No Waste)
+        while (food.amount > 0 && eatenCount < MAX_EATS_PER_TICK) {
+            const missing = maxHp - currentHp;
+
+            if (missing >= food.heal) {
+                currentHp = currentHp + food.heal; // We know it fits exactly or with space remaining
+                food.amount--;
+                eatenCount++;
+
+                // Update instantly to recalculate 'missing' for next loop iteration
+                char.state.health = currentHp;
+                if (char.state.combat) {
+                    char.state.combat.playerHealth = currentHp;
+                }
+            } else {
+                break; // Not enough space for a full food heal without wasting, stop.
             }
-            food.amount--;
-            if (food.amount <= 0) {
-                delete char.state.equipment.food;
-            }
-            return true;
         }
-        return false;
+
+        if (food.amount <= 0) {
+            delete char.state.equipment.food;
+        }
+
+        return eatenCount > 0;
     }
 
     async getLeaderboard() {
@@ -388,9 +425,21 @@ export class GameManager {
     }
 
     // Delegation Methods
-    async startActivity(u, t, i, q) { return this.activityManager.startActivity(u, t, i, q); }
+    async startActivity(u, t, i, q) {
+        const char = await this.getCharacter(u);
+        if (char.state.combat) throw new Error("Cannot start activity while in combat");
+        if (char.state.dungeon) throw new Error("Cannot start activity inside a dungeon");
+        return this.activityManager.startActivity(u, t, i, q);
+    }
     async stopActivity(u) { return this.activityManager.stopActivity(u); }
-    async startCombat(u, m, t) { return this.combatManager.startCombat(u, m, t); }
+
+    async startCombat(u, m, t) {
+        const char = await this.getCharacter(u);
+        if (char.current_activity) {
+            await this.activityManager.stopActivity(u);
+        }
+        return this.combatManager.startCombat(u, m, t);
+    }
     async stopCombat(u) { return this.combatManager.stopCombat(u); }
     async equipItem(u, i) { return this.inventoryManager.equipItem(u, i); }
     async unequipItem(u, s) { return this.inventoryManager.unequipItem(u, s); }
@@ -401,4 +450,5 @@ export class GameManager {
     async cancelMarketListing(u, l) { return this.marketManager.cancelMarketListing(u, l); }
     async claimMarketItem(u, c) { return this.marketManager.claimMarketItem(u, c); }
     async startDungeon(u, d) { return this.dungeonManager.startDungeon(u, d); }
+    async stopDungeon(u) { return this.dungeonManager.stopDungeon(u); }
 }

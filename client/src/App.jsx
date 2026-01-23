@@ -63,6 +63,8 @@ function App() {
   const [session, setSession] = useState(null);
   const [socket, setSocket] = useState(null);
   const [gameState, setGameState] = useState(null);
+  const [connectionError, setConnectionError] = useState(null);
+  const [isConnecting, setIsConnecting] = useState(false);
   const clockOffset = useRef(0);
   const displayedGameState = useOptimisticState(gameState);
   const [error, setError] = useState('');
@@ -167,14 +169,46 @@ function App() {
       });
 
       setSocket(newSocket);
+      setIsConnecting(true);
+      setConnectionError(null);
+
+      // Connection Timeout (15s)
+      const connectTimeout = setTimeout(() => {
+        if (!gameState) {
+          setConnectionError("Connection timeout. The server might be offline or blocked by your browser.");
+          setIsConnecting(false);
+        }
+      }, 15000);
 
       newSocket.on('connect', () => {
         console.log('Connected to server');
+        setConnectionError(null);
         newSocket.emit('get_status');
+      });
+
+      newSocket.on('connect_error', (err) => {
+        console.error('Socket connection error:', err);
+        setIsConnecting(false);
+
+        let errorMsg = err.message;
+        const isClientHttps = window.location.protocol === 'https:';
+        const serverUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+        const isServerHttp = serverUrl.startsWith('http:');
+
+        if (isClientHttps && isServerHttp && !serverUrl.includes('localhost')) {
+          errorMsg = "Browser blocked connection (Mixed Content). Your browser blocks non-secure (HTTP) connections from HTTPS sites. Please use an HTTPS server URL or allow 'Insecure Content' in site settings.";
+        } else if (err.message === 'xhr poll error') {
+          errorMsg = "Cannot reach server. Ensure VITE_API_URL is correct and the server is running.";
+        }
+
+        setConnectionError(errorMsg);
       });
 
       newSocket.on('status_update', (status) => {
         console.log('[REALTIME] Status update received:', status);
+        clearTimeout(connectTimeout);
+        setIsConnecting(false);
+        setConnectionError(null);
         if (status.serverTime) {
           clockOffset.current = status.serverTime - Date.now();
         }
@@ -407,7 +441,38 @@ function App() {
   };
 
   if (!session) return <Auth onLogin={setSession} />;
-  if (!gameState || !displayedGameState || gameState.noCharacter || !characterSelected) {
+
+  // Loading / Connection Error Screen
+  if (!gameState || !displayedGameState || (gameState.noCharacter && !characterSelected) || !characterSelected) {
+    if (connectionError || !gameState) {
+      return (
+        <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0f', color: '#fff', padding: '20px' }}>
+          <div style={{ textAlign: 'center', maxWidth: '400px' }}>
+            {connectionError ? (
+              <>
+                <div style={{ color: '#ff4444', marginBottom: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>Connection Error</div>
+                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '8px', border: '1px solid rgba(255,68,68,0.2)', marginBottom: '20px', fontSize: '0.9rem', lineHeight: '1.4' }}>
+                  {connectionError}
+                </div>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="glass-button"
+                  style={{ padding: '10px 20px', background: '#d4af37', color: '#000', fontWeight: 'bold' }}
+                >
+                  RETRY CONNECTION
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="loading-spinner" style={{ marginBottom: '20px', fontSize: '1.5rem' }}>Loading Forged Lands...</div>
+                <div style={{ opacity: 0.5, fontSize: '0.9rem' }}>Fetching character data...</div>
+              </>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <CharacterSelect
         socket={socket}

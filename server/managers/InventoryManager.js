@@ -175,27 +175,18 @@ export class InventoryManager {
         str += getLvl('ORE_MINER');
         str += getLvl('METAL_BAR_REFINER');
         str += getLvl('WARRIOR_CRAFTER');
-        str += getLvl('COMBAT');
-        str += getLvl('SWORD_MASTERY');
-        str += getLvl('DUNGEONEERING');
+        str += getLvl('COOKING');
+        str += getLvl('FISHING');
 
         agi += getLvl('ANIMAL_SKINNER');
         agi += getLvl('LEATHER_REFINER');
         agi += getLvl('HUNTER_CRAFTER');
-        agi += getLvl('COMBAT');
-        agi += getLvl('BOW_MASTERY');
-        agi += getLvl('DUNGEONEERING');
+        agi += getLvl('LUMBERJACK');
+        agi += getLvl('PLANK_REFINER');
 
         int += getLvl('FIBER_HARVESTER');
-        int += getLvl('LUMBERJACK');
         int += getLvl('CLOTH_REFINER');
-        int += getLvl('PLANK_REFINER');
         int += getLvl('MAGE_CRAFTER');
-        int += getLvl('COOKING');
-        int += getLvl('FISHING');
-        int += getLvl('COMBAT');
-        int += getLvl('FIRE_STAFF_MASTERY');
-        int += getLvl('DUNGEONEERING');
 
         let gearHP = 0;
         let gearDamage = 0;
@@ -220,7 +211,7 @@ export class InventoryManager {
 
         const weapon = equipment.mainHand;
         const ipBonus = weapon ? (weapon.ip || 0) / 10 : 0;
-        const baseAttackSpeed = weapon?.stats?.attackSpeed || 1500;
+        const baseAttackSpeed = weapon?.stats?.attackSpeed || 1000;
 
         const efficiency = {
             WOOD: 0, ORE: 0, HIDE: 0, FIBER: 0, FISH: 0,
@@ -262,10 +253,20 @@ export class InventoryManager {
         efficiency.MAGE += getLvl('MAGE_CRAFTER') * 1;
         efficiency.COOKING += getLvl('COOKING') * 1;
 
-        // 4. Intelligence Bonus to Global Efficiency (1% per INT, cap at 50%)
-        efficiency.GLOBAL += Math.min(50, int * 1);
+        // 4. Intelligence Bonus to Global Yields
+        // Global XP: 1% per INT
+        // Silver: 1% per INT
+        // Efficiency: 0% from INT (removed)
 
-        // Apply Global to all specific categories
+        const globals = {
+            xpYield: int * 1, // 1% per INT
+            silverYield: int * 1, // 1% per INT
+            efficiency: 0,
+            globalEfficiency: 0 // Legacy/Unused
+        };
+
+        // Apply Global to all specific categories (if we had any global efficiency sources, they would go here)
+        // Currently efficiency.GLOBAL is 0 from INT.
         const keys = Object.keys(efficiency).filter(k => k !== 'GLOBAL');
         keys.forEach(k => efficiency[k] += efficiency.GLOBAL);
 
@@ -275,11 +276,12 @@ export class InventoryManager {
         return {
             str, agi, int,
             maxHP: parseFloat((100 + (str * 10) + gearHP).toFixed(1)),
-            damage: parseFloat(((5 + (str * 1) + gearDamage + ipBonus) * (1 + gearDmgBonus)).toFixed(1)),
+            damage: parseFloat(((5 + (str * 1) + (agi * 1) + (int * 1) + gearDamage + ipBonus) * (1 + gearDmgBonus)).toFixed(1)),
             defense: parseFloat(gearDefense.toFixed(1)),
             attackSpeed: finalAttackSpeed,
             dmgBonus: gearDmgBonus,
-            efficiency
+            efficiency,
+            globals // Return globals so we can use them in GameManager/CombatManager
         };
     }
 }

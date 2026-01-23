@@ -130,6 +130,12 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
         prevCombatRef.current = combat;
     }, [combat, gameState?.name]);
 
+    const logIdRef = useRef(0);
+    const generateLogId = () => {
+        logIdRef.current += 1;
+        return `${Date.now()}-${logIdRef.current}`;
+    };
+
     // Listen for real-time battle events
     useEffect(() => {
         if (!socket) return;
@@ -162,13 +168,13 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
 
                     const newLogs = [];
                     newLogs.push({
-                        id: Date.now() + Math.random(),
+                        id: generateLogId(),
                         type: 'combat',
                         content: `You dealt ${details.playerDmg} damage.`,
                         color: '#4a90e2'
                     });
                     newLogs.push({
-                        id: Date.now() + Math.random(),
+                        id: generateLogId(),
                         type: 'combat',
                         content: `${update.details?.mobName || 'Enemy'} dealt ${details.mobDmg} damage.`,
                         color: '#ff4444'
@@ -176,7 +182,7 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
 
                     if (details.silverGained > 0) {
                         newLogs.push({
-                            id: Date.now() + Math.random(),
+                            id: generateLogId(),
                             type: 'reward',
                             content: `+${details.silverGained} Silver collected!`,
                             color: '#d4af37'
@@ -193,7 +199,7 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
                         });
                         details.lootGained.forEach(item => {
                             newLogs.push({
-                                id: Date.now() + Math.random(),
+                                id: generateLogId(),
                                 type: 'loot',
                                 content: `Item found: ${item}!`,
                                 color: '#ae00ff'
@@ -203,7 +209,7 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
 
                     if (details.victory) {
                         newLogs.push({
-                            id: Date.now() + Math.random(),
+                            id: generateLogId(),
                             type: 'victory',
                             content: `Victory! ${update.details?.mobName || 'Enemy'} defeated.`,
                             color: '#4caf50'
@@ -212,7 +218,7 @@ const CombatPanel = ({ socket, gameState, isMobile }) => {
 
                     if (details.defeat) {
                         newLogs.push({
-                            id: Date.now() + Math.random(),
+                            id: generateLogId(),
                             type: 'defeat',
                             content: `You were defeated! Returning to town...`,
                             color: '#ff4444'

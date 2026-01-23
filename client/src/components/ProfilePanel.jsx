@@ -93,7 +93,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
         return {
             hp: health,
             maxHp: 100 + (calculatedStats.str * 10),
-            damage: 10 + (calculatedStats.str * 1) + (calculatedStats.agi * 1) + (calculatedStats.int * 2),
+            damage: 5 + (calculatedStats.str * 1) + (calculatedStats.agi * 1) + (calculatedStats.int * 1),
             defense: 5 + (calculatedStats.str * 1),
             attackSpeed: 1000 - (calculatedStats.agi * 5),
             str: calculatedStats.str,
@@ -225,6 +225,34 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
         return <Star size={size} />;
     };
 
+    // Helper para pegar nível de forma segura (duplicado do useMemo acima, mas ok para render)
+    const getLvl = (key) => (skills[key]?.level || 1);
+
+    const agiBreakdown = `Sources:
+• Animal Skinner: ${getLvl('ANIMAL_SKINNER')}
+• Leather Refiner: ${getLvl('LEATHER_REFINER')}
+• Hunter Crafter: ${getLvl('HUNTER_CRAFTER')}
+• Lumberjack: ${getLvl('LUMBERJACK')}
+• Plank Refiner: ${getLvl('PLANK_REFINER')}
+
+Each point grants: +5 Attack Speed and +1 Base Damage`;
+
+    const strBreakdown = `Sources:
+• Ore Miner: ${getLvl('ORE_MINER')}
+• Metal Bar Refiner: ${getLvl('METAL_BAR_REFINER')}
+• Warrior Crafter: ${getLvl('WARRIOR_CRAFTER')}
+• Cooking: ${getLvl('COOKING')}
+• Fishing: ${getLvl('FISHING')}
+
+Each point grants: +10 HP and +1 Base Damage`;
+
+    const intBreakdown = `Sources:
+• Fiber Harvester: ${getLvl('FIBER_HARVESTER')}
+• Cloth Refiner: ${getLvl('CLOTH_REFINER')}
+• Mage Crafter: ${getLvl('MAGE_CRAFTER')}
+
+Each point grants: +1% Global XP, +1% Gold Gain and +1 Base Damage`;
+
     return (
         <div className="glass-panel" style={{
             height: '100%',
@@ -349,9 +377,9 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
                     border: '1px solid var(--border)'
                 }}>
                     {[
-                        { label: 'STR', value: stats.str, color: '#ff4444', desc: 'Each point grants: +10 HP and +1 Base Damage' },
-                        { label: 'AGI', value: stats.agi, color: '#4caf50', desc: 'Each point grants: +5 Attack Speed and +1 Base Damage' },
-                        { label: 'INT', value: stats.int, color: '#2196f3', desc: 'Each point grants: +1% Global XP (Efficiency), +2% Silver and +2 Base Damage' }
+                        { label: 'STR', value: stats.str, color: '#ff4444', desc: strBreakdown },
+                        { label: 'AGI', value: stats.agi, color: '#4caf50', desc: agiBreakdown },
+                        { label: 'INT', value: stats.int, color: '#2196f3', desc: intBreakdown }
                     ].map(stat => (
                         <div key={stat.label} style={{ textAlign: 'center' }}>
                             <div
@@ -395,7 +423,9 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
                         <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
                             <Zap size={10} color="#2196f3" /> SPEED
                         </div>
-                        <div style={{ fontSize: '1rem', fontWeight: '900', color: '#fff' }}>{Math.floor(stats.attackSpeed)}</div>
+                        <div style={{ fontSize: '1rem', fontWeight: '900', color: '#fff' }}>
+                            {(1000 / stats.attackSpeed).toFixed(1)} h/s
+                        </div>
                     </div>
                     <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'EFFICIENCY', value: { total: `+${stats.efficiency.GLOBAL}%`, id: 'GLOBAL' } })}>
                         <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
@@ -465,7 +495,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
                         boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
                     }} onClick={e => e.stopPropagation()}>
                         <h3 style={{ color: 'var(--accent)', marginTop: 0 }}>{infoModal.title}</h3>
-                        <p style={{ color: '#ccc', fontSize: '0.9rem' }}>{infoModal.desc}</p>
+                        <p style={{ color: '#ccc', fontSize: '0.9rem', whiteSpace: 'pre-line' }}>{infoModal.desc}</p>
                         <button
                             onClick={() => setInfoModal(null)}
                             style={{

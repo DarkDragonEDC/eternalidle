@@ -1,0 +1,100 @@
+﻿
+> server@1.0.0 dev
+> node --watch index.js
+
+node.exe : 
+(node:25992) [MODULE_T
+YPELESS_PACKAGE_JSON] 
+Warning: Module type 
+of file:///C:/Users/Ad
+ministrator/Desktop/Jo
+go/jogo%20github/vairo
+daraqui/shared/items.j
+s is not specified 
+and it doesn't parse 
+as CommonJS.
+No C:\Program Files\no
+dejs\npm.ps1:29 
+caractere:3
++   & $NODE_EXE 
+$NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: ((node:2599   
+ 2) [M...se as Com    
+monJS.:String) []    
+, RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+Reparsing as ES 
+module because module 
+syntax was detected. 
+This incurs a 
+performance overhead.
+To eliminate this 
+warning, add "type": 
+"module" to C:\Users\A
+dministrator\package.j
+son.
+(Use `node 
+--trace-warnings ...` 
+to show where the 
+warning was created)
+[dotenv@17.2.3] injecting env (3) from .env -- tip: ΓÜÖ∩╕Å  enable debug logging with { debug: true }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+[SERVER] Supabase Key Role: SERVICE_ROLE
+node:events:496
+      throw er; // 
+Unhandled 'error' 
+event
+      ^
+
+Error: listen 
+EADDRINUSE: address 
+already in use :::3000
+    at Server.setupLis
+tenHandle [as 
+_listen2] 
+(node:net:1939:16)
+    at 
+listenInCluster 
+(node:net:1996:12)
+    at Server.listen 
+(node:net:2101:7)
+    at file:///C:/User
+s/Administrator/Deskto
+p/Jogo/jogo%20github/v
+airodaraqui/server/ind
+ex.js:398:12
+    at ModuleJob.run (
+node:internal/modules/
+esm/module_job:274:25)
+    at async onImport.
+tracePromise.__proto__
+ (node:internal/module
+s/esm/loader:644:26)
+    at async asyncRunE
+ntryPointWithESMLoader
+ (node:internal/module
+s/run_main:116:5)
+Emitted 'error' event 
+on Server instance at:
+    at emitErrorNT 
+(node:net:1975:8)
+    at process.process
+TicksAndRejections (no
+de:internal/process/ta
+sk_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 3000
+}
+
+Node.js v22.15.0
+Failed running 'index.js'

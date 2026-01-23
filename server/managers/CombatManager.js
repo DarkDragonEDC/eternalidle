@@ -60,9 +60,14 @@ export class CombatManager {
         }
         let mobDmg = mobData ? mobData.damage : 5;
 
-        const mitigatedMobDmg = Math.max(1, mobDmg - Math.floor(playerStats.defense / 2));
+        const playerMitigation = playerStats.defense / (playerStats.defense + 2000);
+        const mitigatedMobDmg = Math.max(1, Math.floor(mobDmg * (1 - playerMitigation)));
 
-        combat.mobHealth -= playerDmg;
+        const mobDef = mobData ? (mobData.defense || 0) : 0;
+        const mobMitigation = mobDef / (mobDef + 2000);
+        const mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
+
+        combat.mobHealth -= mitigatedPlayerDmg;
         combat.playerHealth -= mitigatedMobDmg;
 
         char.state.health = Math.max(0, combat.playerHealth);
@@ -85,17 +90,23 @@ export class CombatManager {
             roundDetails.victory = true;
             message = `Defeated ${combat.mobName}!`;
 
-            const xp = mobData ? mobData.xp : 10;
-            leveledUp = this.gameManager.addXP(char, 'COMBAT', xp);
-            roundDetails.xpGained = xp;
+            const baseXp = mobData ? mobData.xp : 10;
+            const xpBonus = playerStats.globals?.xpYield || 0;
+            const finalXp = Math.floor(baseXp * (1 + xpBonus / 100)); // +1% per point
+            leveledUp = this.gameManager.addXP(char, 'COMBAT', finalXp);
+            roundDetails.xpGained = finalXp;
 
             if (mobData && mobData.silver) {
                 const sMin = mobData.silver[0] || 0;
                 const sMax = mobData.silver[1] || 10;
-                const sGain = Math.floor(Math.random() * (sMax - sMin + 1)) + sMin;
-                char.state.silver = (char.state.silver || 0) + sGain;
-                roundDetails.silverGained = sGain;
-                message += ` [${sGain} Silver]`;
+                const baseSilver = Math.floor(Math.random() * (sMax - sMin + 1)) + sMin;
+
+                const silverBonus = playerStats.globals?.silverYield || 0;
+                const finalSilver = Math.floor(baseSilver * (1 + silverBonus / 100));
+
+                char.state.silver = (char.state.silver || 0) + finalSilver;
+                roundDetails.silverGained = finalSilver;
+                message += ` [${finalSilver} Silver]`;
             }
 
             if (mobData && mobData.loot) {
@@ -108,8 +119,12 @@ export class CombatManager {
                 }
             }
 
-            combat.kills = (combat.kills || 0) + 1;
-            combat.mobHealth = combat.mobMaxHealth;
+            if (combat.isDungeon) {
+                delete char.state.combat;
+            } else {
+                combat.kills = (combat.kills || 0) + 1;
+                combat.mobHealth = combat.mobMaxHealth;
+            }
         }
 
         if (combat.playerHealth <= 0) {
