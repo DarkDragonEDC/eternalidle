@@ -66,26 +66,32 @@ button:active {
 }
 
 /* Custom Scrollbar - Sophisticated Hub Style */
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 175, 55, 0.5) rgba(0, 0, 0, 0.2);
+}
+
+/* Chrome, Edge, Safari */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.3);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(212, 175, 55, 0.2);
+  background: rgba(212, 175, 55, 0.6); /* More visible gold */
   border-radius: 4px;
-  border: 2px solid transparent;
+  border: 1px solid transparent;
   background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(212, 175, 55, 0.5);
-  background-clip: content-box;
+  background: rgba(212, 175, 55, 1); /* Solid gold on hover */
 }
 
 /* Typography Utilities */
