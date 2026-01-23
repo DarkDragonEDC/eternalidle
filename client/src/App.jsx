@@ -22,7 +22,7 @@ import NotificationCenter from './components/NotificationCenter';
 import {
   Zap, Package, User, Trophy, Coins,
   Axe, Pickaxe, Target, Shield, Sword,
-  Star, Layers, Box, Castle, Lock, Menu, X, Tag, Clock, Heart
+  Star, Layers, Box, Castle, Lock, Menu, X, Tag, Clock, Heart, LogOut
 } from 'lucide-react';
 import { ITEMS } from '@shared/items';
 import { calculateNextLevelXP, XP_TABLE } from '@shared/skills';
@@ -918,7 +918,7 @@ function App() {
               <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, #d4af37 0%, #8a6d0a 100%)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <User color="#000" size={16} />
               </div>
-              <div style={{ fontWeight: '900', fontSize: isMobile ? '0.85rem' : '1rem', color: '#fff', letterSpacing: '2px' }}>{displayedGameState?.name?.toUpperCase() || 'ADVENTURER'}</div>
+              <div style={{ fontWeight: '900', fontSize: isMobile ? '0.85rem' : '1rem', color: '#fff', letterSpacing: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: isMobile ? '120px' : 'auto' }}>{displayedGameState?.name?.toUpperCase() || 'ADVENTURER'}</div>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 12 : 20 }}>
@@ -947,11 +947,13 @@ function App() {
               onClearAll={clearAllNotifications}
               onClickTrigger={() => setShowNotifications(!showNotifications)}
             />
-            <button onClick={handleLogout} style={{ color: '#fff', fontSize: '0.65rem', fontWeight: '900', padding: '8px 12px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)', letterSpacing: '1.5px', opacity: 0.6 }}>LOGOUT</button>
+            <button onClick={handleLogout} style={{ color: '#fff', fontSize: '0.65rem', fontWeight: '900', padding: isMobile ? '8px' : '8px 12px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)', letterSpacing: '1.5px', opacity: 0.6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {isMobile ? <LogOut size={16} /> : 'LOGOUT'}
+            </button>
           </div>
         </header>
 
-        <main style={{ height: 'calc(100vh - 80px)', overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: isMobile ? '10px' : '20px 30px', position: 'relative' }}>
+        <main style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: isMobile ? '10px' : '20px 30px', position: 'relative' }}>
           {error && <div style={{ background: 'rgba(255, 68, 68, 0.05)', color: '#ff4444', padding: '12px 20px', marginBottom: 25, borderRadius: 8, border: '1px solid rgba(255, 68, 68, 0.1)', fontSize: '0.8rem' }}>{error}</div>}
           {renderContent()}
         </main>
