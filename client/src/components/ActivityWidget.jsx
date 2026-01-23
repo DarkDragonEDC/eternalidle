@@ -64,42 +64,36 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
     useEffect(() => {
         if (!activity) return;
 
-        const range = (ms) => Math.max(0, Math.min(ms, timePerAction * 1000));
-
         const updateTimer = () => {
             const now = Date.now() + serverTimeOffset;
+            const initialQty = activity.initial_quantity || activity.actions_remaining || 1;
+            const remainingQty = activity.actions_remaining;
+            const doneQty = Math.max(0, initialQty - remainingQty);
+            const timePerAction = activity.time_per_action || 3;
+
             let currentItemProgressMs = 0;
 
             if (activity.next_action_at) {
                 const endTime = new Date(activity.next_action_at).getTime();
                 const timeRemaining = endTime - now;
-                currentItemProgressMs = range((timePerAction * 1000) - timeRemaining);
-            } else if (gameState?.activity_started_at) {
-                const startTime = new Date(gameState.activity_started_at).getTime();
-                currentItemProgressMs = range(now - startTime);
+
+                // Invert logic: 0 remaining = full progress on this item
+                // Max progress = timePerAction * 1000
+                currentItemProgressMs = Math.max(0, Math.min(timePerAction * 1000, (timePerAction * 1000) - timeRemaining));
             }
 
             const totalMs = (doneQty * timePerAction * 1000) + currentItemProgressMs;
             setSyncedElapsed(totalMs / 1000);
         };
 
-        const interval = setInterval(updateTimer, 50);
+        const interval = setInterval(updateTimer, 50); // 20fps
         updateTimer();
 
         return () => clearInterval(interval);
-    }, [activity, gameState?.activity_started_at, doneQty, timePerAction, serverTimeOffset]);
+    }, [activity, serverTimeOffset]);
 
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (e.key === 'Escape' && isOpen) {
-                setIsOpen(false);
-            }
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen]);
+    // ... keydown handler ...
 
-    // Se não há nada ativo, não renderiza
     if (!activity && !combat && (!dungeonState || !dungeonState.active)) return null;
 
     const isGathering = activity?.type === 'GATHERING';
@@ -109,7 +103,14 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
     const totalDuration = initialQty * timePerAction;
     const totalProgress = Math.min(100, (syncedElapsed / totalDuration) * 100);
     const remainingSeconds = Math.max(0, totalDuration - syncedElapsed);
-    const skillProgressCapped = Math.min(100, ((syncedElapsed % timePerAction) / timePerAction) * 100);
+
+    // Skill Badge Progress (Capped 0-100)
+    // Calculate based on the fraction of the current action completed
+    const currentActionProgressPercent = activity?.next_action_at
+        ? Math.max(0, Math.min(100, ((timePerAction * 1000) - (new Date(activity.next_action_at).getTime() - (Date.now() + serverTimeOffset))) / (timePerAction * 10)))
+        : 0;
+
+    const skillProgressCapped = currentActionProgressPercent;
     // Formatar Tempo (HH:MM:SS)
     const formatTime = (secs) => {
         const h = Math.floor(secs / 3600);

@@ -615,7 +615,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                 </div>
 
                 {/* Tier Selector - Compact Horizontal */}
-                <div style={{ display: 'flex', gap: '4px', overflowX: 'auto', paddingBottom: '4px', className: 'hide-scrollbar' }}>
+                <div style={{ display: 'flex', gap: '4px', overflowX: 'auto', paddingBottom: '4px' }}>
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(tier => (
                         <button key={tier}
                             onClick={() => setActiveTier(tier)}
