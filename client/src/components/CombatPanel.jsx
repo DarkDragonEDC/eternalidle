@@ -7,14 +7,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
     const [activeTier, setActiveTier] = useState(1);
     const [battleLogs, setBattleLogs] = useState([]);
     const [sessionLoot, setSessionLoot] = useState({});
-    const [battleStats, setBattleStats] = useState({
-        totalDmgDealt: 0,
-        totalDmgTaken: 0,
-        silverGained: 0,
-        xpGained: 0,
-        kills: 0,
-        startTime: Date.now()
-    });
+
     const logsEndRef = useRef(null);
     const scrollContainerRef = useRef(null);
     const [showScrollButton, setShowScrollButton] = useState(false);
@@ -23,15 +16,8 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
     const [currentTime, setCurrentTime] = useState(Date.now());
     const [isPlayerHit, setIsPlayerHit] = useState(false);
     const [isMobHit, setIsMobHit] = useState(false);
-    const [floatingTexts, setFloatingTexts] = useState([]);
+    // Removed floatingTexts state and logic as requested
 
-    const spawnFloatingText = (content, type, x, y) => {
-        const id = Date.now() + Math.random();
-        setFloatingTexts(prev => [...prev, { id, content, type, x, y }]);
-        setTimeout(() => {
-            setFloatingTexts(prev => prev.filter(t => t.id !== id));
-        }, 1000);
-    };
 
     // Cálculo de Stats (Replicado do ProfilePanel para consistência)
     const stats = useMemo(() => {
@@ -76,59 +62,64 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
 
         const storageKey = `combat_${gameState.name}`;
         const saved = localStorage.getItem(storageKey);
+        let loadedLogs = [];
+        let loadedSessionId = null;
 
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
-                // Session Persistence: Always restore if we have saved data and remain in combat
-                setBattleStats(parsed.stats);
+                loadedLogs = parsed.logs || [];
+                loadedSessionId = parsed.startedAt;
                 setSessionLoot(parsed.loot);
-                setBattleLogs(parsed.logs || []);
-                setIsRestored(true);
-                return;
             } catch (e) {
                 console.error("Erro ao carregar sessão de combate:", e);
             }
         }
 
-        // Se chegamos aqui, é um combate novo ou monstro diferente: Reset total
-        setSessionLoot({});
-        setBattleStats({
-            totalDmgDealt: 0,
-            totalDmgTaken: 0,
-            silverGained: 0,
-            xpGained: 0,
-            kills: 0,
-            startTime: Date.now()
-        });
-        setBattleLogs(prev => {
-            const newLog = { id: generateLogId(), type: 'start-info', content: `Starting combat against ${combat.mobName}...` };
-            const newLogs = [...prev, newLog];
+        // Se a sessão salva é a MESMA que a atual (ex: F5), apenas restaura
+        if (loadedSessionId === combat.started_at) {
+            // Restore but respect limit
+            setBattleLogs(loadedLogs.length > 30 ? loadedLogs.slice(loadedLogs.length - 30) : loadedLogs);
+            setIsRestored(true);
+            return;
+        }
 
-            // Pruning: Keep only last 5 'start' markers (User requested 5 mobs history)
-            const startMarkers = newLogs.filter(l => l.type === 'start-info');
-            if (startMarkers.length > 5) {
-                const cutoffIndex = newLogs.findIndex(l => l === startMarkers[startMarkers.length - 5]);
-                return newLogs.slice(cutoffIndex);
-            }
-            return newLogs;
-        });
+        // Se é uma sessão nova (loadedSessionId != started_at), adiciona marcador e faz prune
+        // Mantemos o sessionLoot antigo como histórico? Não, sessionLoot deve resetar por mob.
+        // O log deve manter histórico.
+
+        if (loadedSessionId !== combat.started_at) {
+            setSessionLoot({}); // New session = New loot counter
+        }
+
+        const newLog = { id: generateLogId(), type: 'start-info', content: `Starting combat against ${combat.mobName}...` };
+        const combinedLogs = [...loadedLogs, newLog];
+
+        // Pruning: Keep only last 5 'start' markers
+        const startMarkers = combinedLogs.filter(l => l.type === 'start-info');
+        if (startMarkers.length > 5) {
+            const cutoffIndex = combinedLogs.findIndex(l => l === startMarkers[startMarkers.length - 5]);
+            setBattleLogs(combinedLogs.slice(cutoffIndex));
+        } else {
+            setBattleLogs(combinedLogs);
+        }
+
         setIsRestored(true);
-    }, [combat?.mobId, gameState?.name]);
+    }, [combat?.started_at, combat?.mobId, gameState?.name]);
 
-    // Salvar progresso no localStorage sempre que mudar (APENAS APÓS RESTAURAÇÃO)
+    // Salvar progresso no localStorage sempre que mudar
     useEffect(() => {
         if (!combat || !gameState?.name || !isRestored) return;
 
         const storageKey = `combat_${gameState.name}`;
         const data = {
             mobId: combat.mobId,
-            stats: battleStats,
+            startedAt: combat.started_at, // Save ID to separate sessions
             loot: sessionLoot,
             logs: battleLogs
         };
         localStorage.setItem(storageKey, JSON.stringify(data));
-    }, [battleStats, sessionLoot, battleLogs, combat?.mobId, gameState?.name, isRestored]);
+    }, [sessionLoot, battleLogs, combat?.mobId, combat?.started_at, gameState?.name, isRestored]);
 
     // Limpar storage quando o combate acaba explicitamente (não apenas no mount)
     useEffect(() => {
@@ -151,8 +142,15 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
         if (!socket) return;
 
         const handleActionResult = (result) => {
+            const newLogs = [];
+
             if (result.healingUpdate && result.healingUpdate.amount > 0) {
-                spawnFloatingText(`+${result.healingUpdate.amount}`, 'heal', 50, 40);
+                newLogs.push({
+                    id: generateLogId(),
+                    type: 'heal',
+                    content: `You healed for ${result.healingUpdate.amount} HP.`,
+                    color: '#4caf50'
+                });
             }
 
             if (result.combatUpdate) {
@@ -164,38 +162,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                     if (details.playerDmg > 0) {
                         setIsMobHit(true);
                         setTimeout(() => setIsMobHit(false), 200);
-                        spawnFloatingText(`-${details.playerDmg}`, 'damage-deal', 75, 50);
-                    }
 
-                    // Mob Damage Visuals
-                    if (details.mobDmg > 0) {
-                        setIsPlayerHit(true);
-                        setTimeout(() => setIsPlayerHit(false), 200);
-                        spawnFloatingText(`-${details.mobDmg}`, 'damage-take', 25, 50);
-                    }
-
-                    // Healing Visuals
-                    if (result.healingUpdate && result.healingUpdate.amount > 0) {
-                        spawnFloatingText(`+${result.healingUpdate.amount}`, 'heal', 50, 40);
-                    }
-
-                    // Update Battle Stats
-                    setBattleStats(prev => {
-                        const newStats = {
-                            ...prev,
-                            totalDmgDealt: prev.totalDmgDealt + (details.playerDmg || 0),
-                            totalDmgTaken: prev.totalDmgTaken + (details.mobDmg || 0),
-                            silverGained: prev.silverGained + (details.silverGained || 0),
-                            xpGained: prev.xpGained + (details.xpGained || 0),
-                            kills: prev.kills + (details.victory ? 1 : 0)
-                        };
-                        // console.log('[COMBAT_PANEL] Stats updated:', newStats);
-                        return newStats;
-                    });
-
-                    const newLogs = [];
-
-                    if (details.playerDmg > 0) {
                         newLogs.push({
                             id: generateLogId(),
                             type: 'combat',
@@ -204,7 +171,11 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                         });
                     }
 
+                    // Mob Damage Visuals
                     if (details.mobDmg > 0) {
+                        setIsPlayerHit(true);
+                        setTimeout(() => setIsPlayerHit(false), 200);
+
                         newLogs.push({
                             id: generateLogId(),
                             type: 'combat',
@@ -212,6 +183,12 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                             color: '#ff4444'
                         });
                     }
+
+                    // Healing Visuals
+
+
+                    // Removed verbose damage logging as requested
+
 
                     if (details.silverGained > 0) {
                         newLogs.push({
@@ -257,11 +234,17 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                             color: '#ff4444'
                         });
                     }
-
-                    if (newLogs.length > 0) {
-                        setBattleLogs(prev => [...prev, ...newLogs]);
-                    }
                 }
+            }
+
+            if (newLogs.length > 0) {
+                setBattleLogs(prev => {
+                    const updated = [...prev, ...newLogs];
+                    if (updated.length > 30) {
+                        return updated.slice(updated.length - 30);
+                    }
+                    return updated;
+                });
             }
         };
 
@@ -323,10 +306,17 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
     // Active Combat View
     if (combat) {
         // Preferencialmente usar o startTime do servidor para consistência absoluta
-        const actualStartTime = combat.started_at ? new Date(combat.started_at).getTime() : battleStats.startTime;
-        const duration = Math.floor((currentTime - actualStartTime) / 1000);
-        const dps = battleStats.totalDmgDealt / (duration || 1);
-        const xph = (battleStats.xpGained / (duration || 1)) * 3600;
+        const actualStartTime = combat.started_at ? new Date(combat.started_at).getTime() : Date.now();
+        const duration = Math.max(1, Math.floor((currentTime - actualStartTime) / 1000));
+
+        // Use Server Stats
+        const totalDmgDealt = combat.totalPlayerDmg || 0;
+        const xpGained = combat.sessionXp || 0;
+        const silverGained = combat.sessionSilver || 0;
+        const kills = combat.kills || 0;
+
+        const dps = totalDmgDealt / duration;
+        const xph = (xpGained / duration) * 3600;
 
         return (
             <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: isMobile ? '8px' : '10px', padding: isMobile ? '8px' : '10px', overflowY: 'hidden' }}>
@@ -501,32 +491,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 <div style={{ fontSize: isMobile ? '0.9rem' : '1.3rem', fontWeight: '900', color: '#ff4444', marginTop: '2px' }}>{Math.round(combat.mobHealth)} HP</div>
                             </div>
 
-                            {/* Floating Texts Container */}
-                            <AnimatePresence>
-                                {floatingTexts.map(text => (
-                                    <motion.div
-                                        key={text.id}
-                                        initial={{ opacity: 1, y: 0, scale: 0.5 }}
-                                        animate={{ opacity: 0, y: -100, scale: 1.5 }}
-                                        exit={{ opacity: 0 }}
-                                        transition={{ duration: 0.8 }}
-                                        style={{
-                                            position: 'absolute',
-                                            left: `${text.x}%`,
-                                            top: `${text.y}%`,
-                                            transform: 'translate(-50%, -50%)',
-                                            color: text.type === 'damage-take' ? '#ff4d4d' : text.type === 'heal' ? '#4caf50' : '#4a90e2',
-                                            fontWeight: 'bold',
-                                            fontSize: '1.5rem',
-                                            textShadow: '0 0 10px rgba(0,0,0,0.8)',
-                                            pointerEvents: 'none',
-                                            zIndex: 10
-                                        }}
-                                    >
-                                        {text.content}
-                                    </motion.div>
-                                ))}
-                            </AnimatePresence>
+
                         </div>
 
                         {/* Health Bars Overlay */}
@@ -568,25 +533,25 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Trophy size={10} /> KILLS
                                 </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4caf50' }}>{battleStats.kills}</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4caf50' }}>{kills}</div>
                             </div>
                             <div style={{ background: 'rgba(0,0,0,0.2)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.03)' }}>
                                 <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <TrendingUp size={10} /> DAMAGE
                                 </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>{battleStats.totalDmgDealt.toLocaleString()}</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>{totalDmgDealt.toLocaleString()}</div>
                             </div>
                             <div style={{ background: 'rgba(212, 175, 55, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(212, 175, 55, 0.2)' }}>
                                 <div style={{ fontSize: '0.55rem', color: '#d4af37', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Coins size={10} /> SILVER
                                 </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#d4af37' }}>{battleStats.silverGained.toLocaleString()}</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#d4af37' }}>{silverGained.toLocaleString()}</div>
                             </div>
                             <div style={{ background: 'rgba(76, 175, 80, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(76, 175, 80, 0.2)' }}>
                                 <div style={{ fontSize: '0.55rem', color: '#4caf50', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Star size={10} /> TOTAL XP
                                 </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>{battleStats.xpGained.toLocaleString()}</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>{xpGained.toLocaleString()}</div>
                             </div>
                             <div style={{ background: 'rgba(76, 175, 80, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(76, 175, 80, 0.2)' }}>
                                 <div style={{ fontSize: '0.55rem', color: '#4caf50', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -747,8 +712,8 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
             </div>
 
             {/* Mobs List */}
-            <div className="glass-panel scroll-container" style={{ flex: 1, padding: isMobile ? '10px' : '15px', background: 'rgba(10, 10, 15, 0.4)', overflowY: 'auto' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingBottom: '40px' }}>
+            <div className="glass-panel scroll-container" style={{ flex: 1, padding: isMobile ? '5px' : '15px', background: 'rgba(10, 10, 15, 0.4)', overflowY: 'auto', overflowX: 'hidden' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '6px' : '8px', paddingBottom: '40px' }}>
                     {(MONSTERS[activeTier] || []).filter(m => !m.id.startsWith('BOSS_') && !m.dungeonOnly).map(mob => {
                         const playerDmg = stats.damage;
                         const roundsToKill = Math.ceil(mob.health / playerDmg);
@@ -764,141 +729,146 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                         return (
                             <div key={mob.id} style={{
                                 display: 'flex',
-                                flexDirection: isMobile ? 'column' : 'row',
+                                flexDirection: 'row',
+                                flexWrap: isMobile ? 'wrap' : 'nowrap', // Wrap on mobile
                                 background: isLocked ? 'rgba(20, 20, 25, 0.4)' : 'rgba(255, 255, 255, 0.02)',
                                 border: `1px solid ${isLocked ? 'rgba(255,255,255,0.03)' : 'rgba(255, 255, 255, 0.05)'}`,
                                 borderRadius: '8px',
-                                padding: '12px 16px',
-                                gap: '15px',
-                                alignItems: isMobile ? 'stretch' : 'center',
+                                padding: isMobile ? '8px' : '12px 16px', // Less padding mobile
+                                gap: isMobile ? '8px' : '15px',
+                                alignItems: 'center',
                                 transition: '0.2s',
                                 opacity: isLocked ? 0.6 : 1,
                                 position: 'relative',
                                 borderLeft: `3px solid ${isLocked ? '#444' : '#ff4444'}`
                             }}>
                                 {/* Mob Basic Info */}
-                                <div style={{ flex: '1.2', display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                <div style={{ flex: isMobile ? '1 1 auto' : '1.2', display: 'flex', gap: '8px', alignItems: 'center', minWidth: isMobile ? '50%' : 'auto' }}>
                                     <div style={{
-                                        width: '40px', height: '40px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)'
+                                        width: isMobile ? '32px' : '40px', height: isMobile ? '32px' : '40px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0
                                     }}>
-                                        <Skull size={20} color={isLocked ? '#555' : '#ff4444'} />
+                                        <Skull size={isMobile ? 16 : 20} color={isLocked ? '#555' : '#ff4444'} />
                                     </div>
                                     <div>
-                                        <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '1rem' }}>{mob.name}</div>
-                                        <div style={{ color: 'var(--text-dim)', fontSize: '0.7rem', display: 'flex', gap: '8px' }}>
-                                            <span style={{ color: '#ff4444' }}>HP: {mob.health}</span>
-                                            <span style={{ color: '#ff9800' }}>DMG: {mob.damage}</span>
-                                            <span style={{ color: '#4caf50' }}>XP: {mob.xp}</span>
+                                        <div style={{ color: '#fff', fontWeight: 'bold', fontSize: isMobile ? '0.85rem' : '1rem' }}>{mob.name}</div>
+                                        <div style={{ color: 'var(--text-dim)', fontSize: isMobile ? '0.6rem' : '0.7rem', display: 'flex', gap: '6px' }}>
+                                            <span style={{ color: '#ff4444' }}>HP:{mob.health}</span>
+                                            <span style={{ color: '#ff9800' }}>D:{mob.damage}</span>
+                                            <span style={{ color: '#4caf50' }}>XP:{mob.xp}</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Efficiency Stats */}
-                                {!isMobile && (
-                                    <div style={{ flex: '2', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', borderLeft: '1px solid rgba(255,255,255,0.05)', borderRight: '1px solid rgba(255,255,255,0.05)', padding: '0 15px' }}>
-                                        <div style={{ textAlign: 'center' }}>
-                                            <div style={{ fontSize: '0.6rem', color: '#888' }}>XP/H</div>
-                                            <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4caf50' }}>{xpHour.toLocaleString()}</div>
-                                        </div>
-                                        <div style={{ textAlign: 'center' }}>
-                                            <div style={{ fontSize: '0.6rem', color: '#888' }}>SILVER/H</div>
-                                            <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#d4af37' }}>{silverHour.toLocaleString()}</div>
-                                        </div>
-
-                                        <div style={{ textAlign: 'center' }}>
-                                            <div style={{ fontSize: '0.6rem', color: '#888' }}>SURVIVAL</div>
-                                            {(() => {
-                                                const defense = gameState?.calculatedStats?.defense || 0;
-                                                const mitigation = defense / (defense + 2000);
-                                                const mobDmg = Math.max(1, Math.floor(mob.damage * (1 - mitigation)));
-
-                                                // Food Logic
-                                                const food = gameState?.state?.equipment?.food;
-                                                const foodTotalHeal = (food && food.amount > 0) ? (food.amount * (food.heal || 0)) : 0;
-
-                                                const playerHp = gameState?.state?.health || 1;
-                                                const totalEffectiveHp = playerHp + foodTotalHeal;
-                                                const atkSpeed = gameState?.calculatedStats?.attackSpeed || 1000;
-
-                                                let survivalText = "∞";
-                                                let survivalColor = "#4caf50";
-
-                                                if (mobDmg > 0) {
-                                                    const roundsToDie = totalEffectiveHp / mobDmg;
-                                                    const secondsToDie = roundsToDie * (atkSpeed / 1000);
-
-                                                    // Threshold: 12 Hours
-                                                    if (secondsToDie > 43200) {
-                                                        survivalText = "∞";
-                                                        survivalColor = "#4caf50";
-                                                    } else {
-                                                        const hrs = Math.floor(secondsToDie / 3600);
-                                                        const mins = Math.floor((secondsToDie % 3600) / 60);
-                                                        const secs = Math.floor(secondsToDie % 60);
-
-                                                        if (hrs > 0) {
-                                                            survivalText = `${hrs}h ${mins}m ${secs}s`;
-                                                            survivalColor = "#ff9800";
-                                                        } else if (mins > 0) {
-                                                            survivalText = `${mins}m ${secs}s`;
-                                                            survivalColor = "#ff9800";
-                                                        } else {
-                                                            survivalText = `${secs}s`;
-                                                            survivalColor = "#ff4444";
-                                                        }
-                                                    }
-                                                }
-
-                                                return (
-                                                    <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: survivalColor }}>
-                                                        {survivalText}
-                                                    </div>
-                                                );
-                                            })()}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Drops (Compact) */}
-                                <div style={{ flex: '1.5', display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(212, 175, 55, 0.1)', padding: '2px 6px', borderRadius: '4px', color: '#d4af37', fontSize: '0.7rem' }}>
-                                        <Coins size={10} /> {mob.silver[0]}-{mob.silver[1]}
-                                    </span>
-                                    {Object.entries(mob.loot).map(([id, chance]) => (
-                                        <span key={id} style={{
-                                            background: chance <= 0.05 ? 'rgba(174, 0, 255, 0.1)' : 'rgba(255, 255, 255, 0.05)',
-                                            padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', color: chance <= 0.05 ? '#ae00ff' : '#aaa',
-                                            border: '1px solid rgba(255,255,255,0.03)'
-                                        }}>
-                                            {id.replace(/_/g, ' ')} ({Math.round(chance * 100)}%)
-                                        </span>
-                                    ))}
-                                </div>
-
-                                {/* Action Button */}
-                                <div style={{ flex: '0.8', display: 'flex', justifyContent: 'flex-end' }}>
+                                {/* Action Button (Mobile: Right align on first row) */}
+                                <div style={{ flex: isMobile ? '0 0 auto' : '0.8', display: 'flex', justifyContent: 'flex-end', order: isMobile ? 2 : 10 }}>
                                     <button
                                         onClick={() => !isLocked && handleFight(mob)}
                                         disabled={isLocked}
                                         style={{
-                                            padding: '8px 16px',
+                                            padding: isMobile ? '6px 12px' : '8px 16px',
                                             background: isLocked ? '#222' : 'rgba(255, 68, 68, 0.1)',
                                             border: isLocked ? '1px solid #333' : '1px solid #ff4444',
                                             color: isLocked ? '#555' : '#ff4444',
                                             borderRadius: '6px',
-                                            fontSize: '0.75rem',
+                                            fontSize: '0.7rem',
                                             fontWeight: 'bold',
                                             cursor: isLocked ? 'not-allowed' : 'pointer',
                                             transition: '0.2s',
-                                            width: isMobile ? '100%' : 'auto'
                                         }}
-                                        onMouseEnter={(e) => { if (!isLocked) e.currentTarget.style.background = 'rgba(255, 68, 68, 0.2)'; }}
-                                        onMouseLeave={(e) => { if (!isLocked) e.currentTarget.style.background = 'rgba(255, 68, 68, 0.1)'; }}
                                     >
-                                        {isLocked ? 'LOCKED' : 'FIGHT'}
+                                        {isLocked ? 'LCK' : 'FIGHT'}
                                     </button>
                                 </div>
+
+                                {/* Efficiency Stats (Mobile: New Line, Full Width) */}
+                                <div style={{
+                                    flex: isMobile ? '1 1 100%' : '2',
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(3, 1fr)',
+                                    gap: '5px',
+                                    borderLeft: isMobile ? 'none' : '1px solid rgba(255,255,255,0.05)',
+                                    borderRight: isMobile ? 'none' : '1px solid rgba(255,255,255,0.05)',
+                                    padding: isMobile ? '6px 0' : '0 15px',
+                                    order: 3,
+                                    borderTop: isMobile ? '1px solid rgba(255,255,255,0.03)' : 'none',
+                                    marginTop: isMobile ? '4px' : '0'
+                                }}>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '0.55rem', color: '#888' }}>XP/H</div>
+                                        <div style={{ fontSize: isMobile ? '0.75rem' : '0.85rem', fontWeight: 'bold', color: '#4caf50' }}>
+                                            {isMobile && xpHour > 1000 ? `${(xpHour / 1000).toFixed(1)}k` : xpHour.toLocaleString()}
+                                        </div>
+                                    </div>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '0.55rem', color: '#888' }}>SILVER/H</div>
+                                        <div style={{ fontSize: isMobile ? '0.75rem' : '0.85rem', fontWeight: 'bold', color: '#d4af37' }}>
+                                            {isMobile && silverHour > 1000 ? `${(silverHour / 1000).toFixed(1)}k` : silverHour.toLocaleString()}
+                                        </div>
+                                    </div>
+
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: '0.55rem', color: '#888' }}>SURVIVAL</div>
+                                        {(() => {
+                                            const defense = gameState?.calculatedStats?.defense || 0;
+                                            const mitigation = defense / (defense + 2000);
+                                            const mobDmg = Math.max(1, Math.floor(mob.damage * (1 - mitigation)));
+
+                                            // Food Logic
+                                            const food = gameState?.state?.equipment?.food;
+                                            const foodTotalHeal = (food && food.amount > 0) ? (food.amount * (food.heal || 0)) : 0;
+
+                                            const playerHp = gameState?.state?.health || 1;
+                                            const totalEffectiveHp = playerHp + foodTotalHeal;
+                                            const atkSpeed = gameState?.calculatedStats?.attackSpeed || 1000;
+
+                                            let survivalText = "∞";
+                                            let survivalColor = "#4caf50";
+
+                                            if (mobDmg > 0) {
+                                                const roundsToDie = totalEffectiveHp / mobDmg;
+                                                const secondsToDie = roundsToDie * (atkSpeed / 1000);
+
+                                                if (secondsToDie > 43200) {
+                                                    survivalText = "∞";
+                                                } else {
+                                                    const hrs = Math.floor(secondsToDie / 3600);
+                                                    const mins = Math.floor((secondsToDie % 3600) / 60);
+                                                    if (hrs > 0) survivalText = `${hrs}h${mins}m`;
+                                                    else survivalText = `${mins}m`;
+                                                    survivalColor = "#ff9800";
+                                                    if (hrs === 0 && mins === 0) {
+                                                        survivalText = `${Math.floor(secondsToDie % 60)}s`;
+                                                        survivalColor = "#ff4444";
+                                                    }
+                                                }
+                                            }
+
+                                            return (
+                                                <div style={{ fontSize: isMobile ? '0.75rem' : '0.85rem', fontWeight: 'bold', color: survivalColor }}>
+                                                    {survivalText}
+                                                </div>
+                                            );
+                                        })()}
+                                    </div>
+                                </div>
+
+                                {/* Drops (Compact) */}
+                                <div style={{ flex: isMobile ? '1 1 100%' : '1.5', display: 'flex', flexWrap: 'wrap', gap: '4px', order: 4 }}>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(212, 175, 55, 0.1)', padding: '2px 6px', borderRadius: '4px', color: '#d4af37', fontSize: '0.65rem' }}>
+                                        <Coins size={10} /> {isMobile ? `${mob.silver[0]}-${mob.silver[1]}` : `${mob.silver[0]}-${mob.silver[1]} Silver`}
+                                    </span>
+                                    {Object.entries(mob.loot).map(([id, chance]) => (
+                                        <span key={id} style={{
+                                            background: chance <= 0.05 ? 'rgba(174, 0, 255, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                                            padding: '2px 6px', borderRadius: '4px', fontSize: '0.65rem', color: chance <= 0.05 ? '#ae00ff' : '#aaa',
+                                            border: '1px solid rgba(255,255,255,0.03)'
+                                        }}>
+                                            {id.replace(/_/g, ' ')} {isMobile ? '' : `(${Math.round(chance * 100)}%)`}
+                                        </span>
+                                    ))}
+                                </div>
+
                             </div>
                         );
                     })}

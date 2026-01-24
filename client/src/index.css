@@ -116,5 +116,5 @@ button:active {
 .scroll-container {
   overflow-y: auto;
   flex: 1;
-  scrollbar-gutter: stable;
-}
+
+  /* Floating Combat Text Animations REMOVED */

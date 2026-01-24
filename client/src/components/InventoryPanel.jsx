@@ -97,13 +97,14 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <div style={{
                 display: 'flex',
+                flexDirection: 'column',
                 gap: '10px',
                 padding: '10px 0',
-                alignItems: 'center',
                 borderBottom: '1px solid var(--border)',
                 marginBottom: '10px'
             }}>
-                <div style={{ display: 'flex', gap: '8px', flex: 1, overflowX: 'auto' }}>
+                {/* Row 1: Categories */}
+                <div style={{ display: 'flex', gap: '8px', overflowX: 'auto' }}>
                     {['ALL', 'EQUIPMENT', 'RESOURCE', 'CONSUMABLE'].map(f => (
                         <button
                             key={f}
@@ -126,111 +127,114 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                     ))}
                 </div>
 
-                <div style={{ position: 'relative', width: isMobile ? '100px' : '140px', flexShrink: 0 }}>
-                    <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-dim)', opacity: 0.6 }} />
-                    <input
-                        type="text"
-                        placeholder="Search..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{
-                            width: '100%',
-                            background: 'rgba(255,255,255,0.05)',
-                            border: '1px solid var(--border)',
-                            borderRadius: '8px',
-                            padding: '6px 10px 6px 30px',
-                            color: '#fff',
-                            fontSize: '0.75rem',
-                            outline: 'none',
-                            transition: '0.2s'
-                        }}
-                    />
-                </div>
-
-                {/* Sort Dropdown */}
-                <div style={{ position: 'relative', width: isMobile ? '100px' : '140px', flexShrink: 0 }}>
-                    <button
-                        onClick={() => setIsSortMenuOpen(!isSortMenuOpen)}
-                        style={{
-                            width: '100%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            background: 'rgba(255,255,255,0.05)',
-                            border: '1px solid var(--border)',
-                            borderRadius: '8px',
-                            padding: '6px 10px',
-                            color: '#fff',
-                            fontSize: '0.75rem',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        <span style={{ color: 'var(--text-dim)', marginRight: '4px' }}>By:</span>
-                        <span style={{ fontWeight: 'bold' }}>{sortBy.charAt(0) + sortBy.slice(1).toLowerCase()}</span>
-                        <ChevronDown size={12} style={{ marginLeft: 'auto', opacity: 0.6, transform: isSortMenuOpen ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
-                    </button>
-
-                    {isSortMenuOpen && (
-                        <>
-                            <div
-                                onClick={() => setIsSortMenuOpen(false)}
-                                style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100 }}
-                            />
-                            <div style={{
-                                position: 'absolute',
-                                top: 'calc(100% + 5px)',
-                                right: 0,
-                                width: '120px',
-                                background: '#1a1a2e',
+                {/* Row 2: Search & Sort */}
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <div style={{ position: 'relative', flex: 1 }}>
+                        <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-dim)', opacity: 0.6 }} />
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            style={{
+                                width: '100%',
+                                background: 'rgba(255,255,255,0.05)',
                                 border: '1px solid var(--border)',
                                 borderRadius: '8px',
-                                padding: '5px',
-                                zIndex: 101,
-                                boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
-                            }}>
-                                {['DATE', 'QUALITY', 'QUANTITY', 'TYPE', 'VALUE', 'NAME'].map(opt => (
-                                    <button
-                                        key={opt}
-                                        onClick={() => { setSortBy(opt); setIsSortMenuOpen(false); }}
-                                        style={{
-                                            width: '100%',
-                                            padding: '8px 12px',
-                                            textAlign: 'left',
-                                            background: sortBy === opt ? 'rgba(255,255,255,0.05)' : 'transparent',
-                                            border: 'none',
-                                            color: sortBy === opt ? 'var(--accent)' : '#fff',
-                                            fontSize: '0.75rem',
-                                            cursor: 'pointer',
-                                            borderRadius: '4px'
-                                        }}
-                                    >
-                                        {opt.charAt(0) + opt.slice(1).toLowerCase()}
-                                    </button>
-                                ))}
-                            </div>
-                        </>
-                    )}
-                </div>
+                                padding: '8px 10px 8px 32px',
+                                color: '#fff',
+                                fontSize: '0.8rem',
+                                outline: 'none',
+                                transition: '0.2s'
+                            }}
+                        />
+                    </div>
 
-                {/* Sort Direction Toggle */}
-                <button
-                    onClick={() => setSortDir(sortDir === 'asc' ? 'desc' : 'asc')}
-                    style={{
-                        padding: '6px',
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '8px',
-                        color: 'var(--accent)',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0
-                    }}
-                    title={sortDir === 'asc' ? 'Ascending' : 'Descending'}
-                >
-                    {sortDir === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                </button>
+                    {/* Sort Dropdown */}
+                    <div style={{ position: 'relative', width: isMobile ? '100px' : '120px', flexShrink: 0 }}>
+                        <button
+                            onClick={() => setIsSortMenuOpen(!isSortMenuOpen)}
+                            style={{
+                                width: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                background: 'rgba(255,255,255,0.05)',
+                                border: '1px solid var(--border)',
+                                borderRadius: '8px',
+                                padding: '8px 10px',
+                                color: '#fff',
+                                fontSize: '0.75rem',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <span style={{ color: 'var(--text-dim)', marginRight: '4px' }}>By:</span>
+                            <span style={{ fontWeight: 'bold' }}>{sortBy.charAt(0) + sortBy.slice(1).toLowerCase()}</span>
+                            <ChevronDown size={12} style={{ marginLeft: 'auto', opacity: 0.6, transform: isSortMenuOpen ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
+                        </button>
+
+                        {isSortMenuOpen && (
+                            <>
+                                <div
+                                    onClick={() => setIsSortMenuOpen(false)}
+                                    style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100 }}
+                                />
+                                <div style={{
+                                    position: 'absolute',
+                                    top: 'calc(100% + 5px)',
+                                    right: 0,
+                                    width: '120px',
+                                    background: '#1a1a2e',
+                                    border: '1px solid var(--border)',
+                                    borderRadius: '8px',
+                                    padding: '5px',
+                                    zIndex: 101,
+                                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+                                }}>
+                                    {['DATE', 'QUALITY', 'QUANTITY', 'TYPE', 'VALUE', 'NAME'].map(opt => (
+                                        <button
+                                            key={opt}
+                                            onClick={() => { setSortBy(opt); setIsSortMenuOpen(false); }}
+                                            style={{
+                                                width: '100%',
+                                                padding: '8px 12px',
+                                                textAlign: 'left',
+                                                background: sortBy === opt ? 'rgba(255,255,255,0.05)' : 'transparent',
+                                                border: 'none',
+                                                color: sortBy === opt ? 'var(--accent)' : '#fff',
+                                                fontSize: '0.75rem',
+                                                cursor: 'pointer',
+                                                borderRadius: '4px'
+                                            }}
+                                        >
+                                            {opt.charAt(0) + opt.slice(1).toLowerCase()}
+                                        </button>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Sort Direction Toggle */}
+                    <button
+                        onClick={() => setSortDir(sortDir === 'asc' ? 'desc' : 'asc')}
+                        style={{
+                            padding: '8px',
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid var(--border)',
+                            borderRadius: '8px',
+                            color: 'var(--accent)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                        }}
+                        title={sortDir === 'asc' ? 'Ascending' : 'Descending'}
+                    >
+                        {sortDir === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </button>
+                </div>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', fontSize: '0.75rem', color: 'var(--text-dim)', padding: '0 5px' }}>
