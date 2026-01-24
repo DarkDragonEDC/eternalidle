@@ -1,9 +1,36 @@
 import React, { useState } from 'react';
-import { Package, Star, Clock, X, AlertCircle, Sword, Coins, Zap, Shield, Heart, Axe, Pickaxe, Scissors, Anchor, Apple, Box, Trophy } from 'lucide-react';
+import { Package, Star, Clock, X, AlertCircle, Sword, Coins, Zap, Shield, Heart, Axe, Pickaxe, Scissors, Anchor, Apple, Box, Trophy, Hammer, Utensils, Anvil } from 'lucide-react';
 import { resolveItem, getTierColor } from '@shared/items';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const OfflineGainsModal = ({ isOpen, data, onClose }) => {
+
+    const SKILL_ICONS = {
+        WOODCUTTING: <Axe size={16} />,
+        MINING: <Pickaxe size={16} />,
+        HARVESTING: <Scissors size={16} />,
+        FISHING: <Anchor size={16} />,
+        ALCHEMY: <Zap size={16} />,
+        BLACKSMITHING: <Hammer size={16} />,
+        COOKING: <Utensils size={16} />,
+        GEAR_CRAFTING: <Anvil size={16} />,
+        COMBAT: <Sword size={16} />,
+        DUNGEONEERING: <Shield size={16} />
+    };
+
+    const SKILL_NAMES = {
+        WOODCUTTING: 'Woodcutting',
+        MINING: 'Mining',
+        HARVESTING: 'Harvesting',
+        FISHING: 'Fishing',
+        ALCHEMY: 'Alchemy',
+        BLACKSMITHING: 'Blacksmithing',
+        COOKING: 'Cooking',
+        GEAR_CRAFTING: 'Gear Crafting',
+        COMBAT: 'Combat',
+        DUNGEONEERING: 'Dungeoneering'
+    };
+
     const [showFullNumbers, setShowFullNumbers] = useState(false);
     if (!isOpen || !data) return null;
 

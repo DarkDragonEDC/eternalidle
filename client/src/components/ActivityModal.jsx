@@ -318,7 +318,11 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
 
         // Determinar stat principal para mostrar (Damage, Armor ou Efficiency)
         const mainStatKey = item.stats?.damage ? 'Damage' : item.stats?.armor ? 'Armor' : item.stats?.efficiency ? 'Efficiency' : 'Power';
-        const mainStatVal = item.stats?.damage || item.stats?.armor || item.stats?.efficiency || 0;
+
+        let rawEff = item.stats?.efficiency;
+        if (typeof rawEff === 'object') rawEff = rawEff.GLOBAL || 0;
+
+        const mainStatVal = item.stats?.damage || item.stats?.armor || rawEff || 0;
 
         return (
             <AnimatePresence>

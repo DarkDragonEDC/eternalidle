@@ -177,17 +177,24 @@ export class InventoryManager {
         let gearSpeedBonus = 0;
 
         Object.values(equipment).forEach(item => {
-            if (item && item.stats) {
-                if (item.stats.hp) gearHP += item.stats.hp;
-                if (item.stats.damage) gearDamage += item.stats.damage;
-                if (item.stats.defense) gearDefense += item.stats.defense;
-                if (item.stats.dmgBonus) gearDmgBonus += item.stats.dmgBonus;
-                if (item.stats.speed) gearSpeedBonus += item.stats.speed;
+            if (item) {
+                // HOTFIX: Re-resolve item stats to ensure balance changes apply retroactively
+                // This prevents "snapshot" stats from persisting after code updates
+                const freshItem = this.resolveItem(item.id);
+                const statsToUse = freshItem ? freshItem.stats : item.stats;
 
-                // Allow gear to add directly to stats
-                if (item.stats.str) str += item.stats.str;
-                if (item.stats.agi) agi += item.stats.agi;
-                if (item.stats.int) int += item.stats.int;
+                if (statsToUse) {
+                    if (statsToUse.hp) gearHP += statsToUse.hp;
+                    if (statsToUse.damage) gearDamage += statsToUse.damage;
+                    if (statsToUse.defense) gearDefense += statsToUse.defense;
+                    if (statsToUse.dmgBonus) gearDmgBonus += statsToUse.dmgBonus;
+                    if (statsToUse.speed) gearSpeedBonus += statsToUse.speed;
+
+                    // Allow gear to add directly to stats
+                    if (statsToUse.str) str += statsToUse.str;
+                    if (statsToUse.agi) agi += statsToUse.agi;
+                    if (statsToUse.int) int += statsToUse.int;
+                }
             }
         });
 
@@ -210,30 +217,36 @@ export class InventoryManager {
         if (equipment.tool_rod?.stats?.efficiency) efficiency.FISH += equipment.tool_rod.stats.efficiency;
 
         // 2. Global/Other Item Bonuses (e.g., Capes)
+        // 2. Global/Other Item Bonuses (e.g., Capes)
         Object.values(equipment).forEach(item => {
-            if (item?.stats?.efficiency && typeof item.stats.efficiency === 'object') {
-                Object.entries(item.stats.efficiency).forEach(([key, val]) => {
-                    if (efficiency[key] !== undefined) efficiency[key] += val;
-                });
+            if (item) {
+                const freshItem = this.resolveItem(item.id);
+                const statsToUse = freshItem ? freshItem.stats : item.stats;
+
+                if (statsToUse?.efficiency && typeof statsToUse.efficiency === 'object') {
+                    Object.entries(statsToUse.efficiency).forEach(([key, val]) => {
+                        if (efficiency[key] !== undefined) efficiency[key] += val;
+                    });
+                }
             }
         });
 
-        // 3. Skill Bonuses (Level * 1 per level)
-        efficiency.WOOD += getLvl('LUMBERJACK') * 1;
-        efficiency.ORE += getLvl('ORE_MINER') * 1;
-        efficiency.HIDE += getLvl('ANIMAL_SKINNER') * 1;
-        efficiency.FIBER += getLvl('FIBER_HARVESTER') * 1;
-        efficiency.FISH += getLvl('FISHING') * 1;
+        // 3. Skill Bonuses (Level * 0.3 per level => Max 30% at Lvl 100)
+        efficiency.WOOD += getLvl('LUMBERJACK') * 0.3;
+        efficiency.ORE += getLvl('ORE_MINER') * 0.3;
+        efficiency.HIDE += getLvl('ANIMAL_SKINNER') * 0.3;
+        efficiency.FIBER += getLvl('FIBER_HARVESTER') * 0.3;
+        efficiency.FISH += getLvl('FISHING') * 0.3;
 
-        efficiency.PLANK += getLvl('PLANK_REFINER') * 1;
-        efficiency.METAL += getLvl('METAL_BAR_REFINER') * 1;
-        efficiency.LEATHER += getLvl('LEATHER_REFINER') * 1;
-        efficiency.CLOTH += getLvl('CLOTH_REFINER') * 1;
+        efficiency.PLANK += getLvl('PLANK_REFINER') * 0.3;
+        efficiency.METAL += getLvl('METAL_BAR_REFINER') * 0.3;
+        efficiency.LEATHER += getLvl('LEATHER_REFINER') * 0.3;
+        efficiency.CLOTH += getLvl('CLOTH_REFINER') * 0.3;
 
-        efficiency.WARRIOR += getLvl('WARRIOR_CRAFTER') * 1;
-        efficiency.HUNTER += getLvl('HUNTER_CRAFTER') * 1;
-        efficiency.MAGE += getLvl('MAGE_CRAFTER') * 1;
-        efficiency.COOKING += getLvl('COOKING') * 1;
+        efficiency.WARRIOR += getLvl('WARRIOR_CRAFTER') * 0.3;
+        efficiency.HUNTER += getLvl('HUNTER_CRAFTER') * 0.3;
+        efficiency.MAGE += getLvl('MAGE_CRAFTER') * 0.3;
+        efficiency.COOKING += getLvl('COOKING') * 0.3;
 
         // 4. Intelligence Bonus to Global Yields
         // Global XP: 1% per INT

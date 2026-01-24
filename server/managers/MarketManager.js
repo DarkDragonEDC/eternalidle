@@ -113,6 +113,8 @@ export class MarketManager {
         // Deduct Silver from Buyer
         buyer.state.silver -= totalCost;
 
+        console.log(`[MarketManager] Adding claim for buyer ${buyerId}:`, { itemId: listing.item_id, amount: qtyNum });
+
         this.addClaim(buyer, {
             type: 'BOUGHT_ITEM',
             itemId: listing.item_id,
@@ -120,7 +122,7 @@ export class MarketManager {
             timestamp: Date.now(),
             cost: totalCost
         });
-        this.gameManager.addNotification(buyer, 'SUCCESS', `Você comprou ${qtyNum}x ${listing.item_data.name} por ${totalCost} Silver.`);
+        this.gameManager.addNotification(buyer, 'SUCCESS', `You bought ${qtyNum}x ${listing.item_data.name} for ${totalCost} Silver.`);
         await this.gameManager.saveState(buyerId, buyer.state);
 
         // Process Seller side
@@ -136,7 +138,7 @@ export class MarketManager {
                 amount: qtyNum,
                 timestamp: Date.now()
             });
-            this.gameManager.addNotification(seller, 'SUCCESS', `Seu item ${listing.item_data.name} (x${qtyNum}) foi vendido! +${sellerProfit} Silver (após taxas).`);
+            this.gameManager.addNotification(seller, 'SUCCESS', `Your item ${listing.item_data.name} (x${qtyNum}) was sold! +${sellerProfit} Silver (after tax).`);
             await this.gameManager.saveState(listing.seller_id, seller.state);
         }
 
@@ -165,7 +167,7 @@ export class MarketManager {
             if (updateError) throw updateError;
         }
 
-        return { success: true, message: `Comprado ${qtyNum}x ${listing.item_data.name} por ${totalCost} Silver` };
+        return { success: true, message: `Bought ${qtyNum}x ${listing.item_data.name} for ${totalCost} Silver` };
     }
 
     async cancelMarketListing(userId, listingId) {

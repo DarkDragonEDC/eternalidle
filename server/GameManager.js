@@ -88,6 +88,11 @@ export class GameManager {
                 updated = true;
             }
 
+            if (!data.state.claims) {
+                data.state.claims = [];
+                updated = true;
+            }
+
             if (catchup && (data.current_activity || data.state.combat) && data.last_saved) {
                 const now = new Date();
                 const lastSaved = new Date(data.last_saved).getTime();
@@ -400,7 +405,7 @@ export class GameManager {
 
         if (leveledUp) {
             const skillName = leveledUp.skill.replace(/_/g, ' ');
-            this.addNotification(char, 'LEVEL_UP', `Sua skill de ${skillName} subiu para o nível ${leveledUp.level}!`);
+            this.addNotification(char, 'LEVEL_UP', `Your ${skillName} skill raised to level ${leveledUp.level}!`);
         }
 
         let stateChanged = false;

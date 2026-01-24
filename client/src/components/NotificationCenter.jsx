@@ -3,6 +3,7 @@ import { Bell, X, Star, Info, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onClearAll, onClickTrigger }) => {
+    const [activeTab, setActiveTab] = React.useState('LEVEL_UP');
     const unreadCount = notifications.filter(n => !n.read).length;
 
     const getIcon = (type) => {
@@ -107,43 +108,82 @@ const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onCl
                                 </div>
                             </div>
 
-                            <div className="scroll-container" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                                {notifications.length === 0 ? (
-                                    <div style={{ padding: '30px', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>
-                                        No new notifications
-                                    </div>
-                                ) : (
-                                    notifications.map(notif => (
-                                        <div
-                                            key={notif.id}
-                                            onClick={() => onMarkAsRead(notif.id)}
+                            <div>
+                                <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                    {['LEVEL_UP', 'MARKET', 'SYSTEM'].map(tab => (
+                                        <button
+                                            key={tab}
+                                            onClick={() => setActiveTab(tab)}
                                             style={{
-                                                padding: '12px 15px',
-                                                borderBottom: '1px solid rgba(255,255,255,0.03)',
-                                                background: notif.read ? 'transparent' : 'rgba(255, 215, 0, 0.03)',
-                                                display: 'flex',
-                                                gap: '12px',
+                                                flex: 1,
+                                                padding: '10px 0',
+                                                background: 'transparent',
+                                                border: 'none',
+                                                borderBottom: activeTab === tab ? '2px solid var(--accent)' : '2px solid transparent',
+                                                color: activeTab === tab ? '#fff' : 'rgba(255,255,255,0.4)',
+                                                fontSize: '0.7rem',
+                                                fontWeight: 'bold',
                                                 cursor: 'pointer',
                                                 transition: '0.2s'
                                             }}
                                         >
-                                            <div style={{ marginTop: '2px' }}>
-                                                {getIcon(notif.type)}
-                                            </div>
-                                            <div style={{ flex: 1 }}>
-                                                <div style={{ fontSize: '0.85rem', color: '#fff', lineHeight: '1.4' }}>
-                                                    {notif.message}
-                                                </div>
-                                                <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', marginTop: '4px' }}>
-                                                    {new Date(notif.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </div>
-                                            </div>
-                                            {!notif.read && (
-                                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ffd700', marginTop: '6px' }} />
-                                            )}
+                                            {tab.replace('_', ' ')}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="scroll-container" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                    {notifications
+                                        .filter(n => {
+                                            if (activeTab === 'LEVEL_UP') return n.type === 'LEVEL_UP';
+                                            if (activeTab === 'MARKET') return n.type === 'SUCCESS';
+                                            if (activeTab === 'SYSTEM') return n.type !== 'LEVEL_UP' && n.type !== 'SUCCESS';
+                                            return true;
+                                        })
+                                        .length === 0 ? (
+                                        <div style={{ padding: '30px', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>
+                                            No {activeTab.toLowerCase().replace('_', ' ')} notifications
                                         </div>
-                                    ))
-                                )}
+                                    ) : (
+                                        notifications
+                                            .filter(n => {
+                                                if (activeTab === 'LEVEL_UP') return n.type === 'LEVEL_UP';
+                                                if (activeTab === 'MARKET') return n.type === 'SUCCESS';
+                                                if (activeTab === 'SYSTEM') return n.type !== 'LEVEL_UP' && n.type !== 'SUCCESS';
+                                                return true;
+                                            })
+                                            .map(notif => (
+                                                <div
+                                                    key={notif.id}
+                                                    onClick={() => onMarkAsRead(notif.id)}
+                                                    style={{
+                                                        padding: '12px 15px',
+                                                        borderBottom: '1px solid rgba(255,255,255,0.03)',
+                                                        background: notif.read ? 'transparent' : 'rgba(255, 215, 0, 0.03)',
+                                                        display: 'flex',
+                                                        gap: '12px',
+                                                        cursor: 'pointer',
+                                                        transition: '0.2s'
+                                                    }}
+                                                >
+                                                    <div style={{ marginTop: '2px' }}>
+                                                        {getIcon(notif.type)}
+                                                    </div>
+                                                    <div style={{ flex: 1 }}>
+                                                        <div style={{ fontSize: '0.85rem', color: '#fff', lineHeight: '1.4' }}>
+                                                            {notif.message}
+                                                        </div>
+                                                        <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', marginTop: '4px' }}>
+                                                            {new Date(notif.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </div>
+                                                    </div>
+                                                    {!notif.read && (
+                                                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ffd700', marginTop: '6px' }} />
+                                                    )}
+                                                </div>
+                                            ))
+                                    )}
+                                </div>
                             </div>
                         </motion.div>
                     </>

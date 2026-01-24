@@ -77,8 +77,9 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    justifyContent: 'center',
                     boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
-                    zIndex: 1000,
+                    zIndex: 10000,
                     transition: 'transform 0.2s'
                 }}
                 onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
@@ -112,7 +113,7 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
     return (
         <>
             <div
-                style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 999 }}
+                style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9999 }}
                 onClick={() => setIsOpen(false)}
             />
             <div style={{
@@ -129,7 +130,7 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
                 display: 'flex',
                 flexDirection: 'column',
                 boxShadow: '0 10px 30px rgba(0,0,0,0.8)',
-                zIndex: 1000,
+                zIndex: 10000,
                 overflow: 'hidden'
             }}>
                 {/* Header */}
@@ -213,7 +214,7 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         placeholder="Type your message..."
-                        maxLength={200}
+                        maxLength={100}
                         style={{
                             flex: 1,
                             background: 'rgba(255,255,255,0.05)',

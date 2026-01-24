@@ -158,8 +158,9 @@ const genGear = (category, slot, type, idSuffix, matType, statMultipliers = {}) 
         if (statMultipliers.def) stats.defense = Math.floor(DEF_CURVE[t - 1] * statMultipliers.def);
         if (statMultipliers.hp) stats.hp = Math.floor(HP_CURVE[t - 1] * statMultipliers.hp);
         if (statMultipliers.speed) stats.speed = Math.floor(t * statMultipliers.speed); // 1-10 speed?
-        if (statMultipliers.eff) stats.efficiency = t * 5; // 5% to 50%
-        if (statMultipliers.globalEff) stats.efficiency = { GLOBAL: t * 2 }; // 2% to 20%
+        if (statMultipliers.speed) stats.speed = Math.floor(t * statMultipliers.speed); // 1-10 speed?
+        if (statMultipliers.eff) stats.efficiency = t * 1.5; // T10 = 15% Base (Maskerpiece = 45%)
+        if (statMultipliers.globalEff) stats.efficiency = { GLOBAL: t * 0.5 }; // T10 = 5% Base (Maskerpiece = 15%)
         if (statMultipliers.atkSpeed) stats.attackSpeed = statMultipliers.atkSpeed; // Fixed base speed
 
         const gear = {
@@ -295,6 +296,12 @@ export const resolveItem = (itemId) => {
             if (typeof baseItem.stats[key] === 'number') {
                 if (key === 'attackSpeed') newStats[key] = baseItem.stats[key];
                 else newStats[key] = parseFloat((baseItem.stats[key] * statMultiplier).toFixed(1));
+            } else if (key === 'efficiency' && typeof baseItem.stats[key] === 'object') {
+                // Handle Efficiency Object specifically
+                newStats[key] = {};
+                for (const subKey in baseItem.stats[key]) {
+                    newStats[key][subKey] = parseFloat((baseItem.stats[key][subKey] * statMultiplier).toFixed(1));
+                }
             } else {
                 newStats[key] = baseItem.stats[key];
             }

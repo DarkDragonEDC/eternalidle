@@ -280,6 +280,12 @@ io.on('connection', (socket) => {
         try {
             const char = await gameManager.getCharacter(socket.user.id);
             if (!char) return;
+
+            // Enforce character limit
+            if (content.length > 100) {
+                content = content.substring(0, 100);
+            }
+
             const { data, error } = await supabase
                 .from('messages')
                 .insert({
@@ -293,7 +299,7 @@ io.on('connection', (socket) => {
             io.emit('new_message', data);
         } catch (err) {
             console.error('Error sending message:', err);
-            socket.emit('error', { message: 'Erro ao enviar mensagem' });
+            socket.emit('error', { message: 'Error sending message' });
         }
     });
 
@@ -473,7 +479,7 @@ setInterval(async () => {
                                 const { skill, level } = result.leveledUp;
                                 const skillName = skill.replace(/_/g, ' ');
                                 s.emit('skill_level_up', {
-                                    message: `Sua skill de ${skillName} subiu para o nível ${level}!`
+                                    message: `Your ${skillName} skill raised to level ${level}!`
                                 });
                             }
                         });

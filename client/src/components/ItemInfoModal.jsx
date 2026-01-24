@@ -26,8 +26,8 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
     const baseItemResult = resolveItem(item.originalId || item.id);
     const comparisonBaseStats = baseItemResult?.stats || {};
     const comparisonStatKeys = Object.keys(comparisonBaseStats).filter(k =>
-        typeof comparisonBaseStats[k] === 'number' &&
-        ['damage', 'defense', 'hp', 'str', 'agi', 'int'].includes(k)
+        (typeof comparisonBaseStats[k] === 'number' || typeof comparisonBaseStats[k] === 'object') &&
+        ['damage', 'defense', 'hp', 'str', 'agi', 'int', 'efficiency'].includes(k)
     );
 
     const calculateStat = (baseValue, ipBonus) => {
@@ -37,7 +37,16 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
     const rarityComparison = Object.values(QUALITIES).map(q => {
         const calculatedStats = {};
         comparisonStatKeys.forEach(key => {
-            calculatedStats[key] = calculateStat(comparisonBaseStats[key], q.ipBonus);
+            const val = comparisonBaseStats[key];
+            if (key === 'efficiency') {
+                if (typeof val === 'number') {
+                    calculatedStats[key] = calculateStat(val, q.ipBonus);
+                } else if (typeof val === 'object' && val.GLOBAL) {
+                    calculatedStats.globalEff = calculateStat(val.GLOBAL, q.ipBonus);
+                }
+            } else if (typeof val === 'number') {
+                calculatedStats[key] = calculateStat(val, q.ipBonus);
+            }
         });
         return {
             ...q,
@@ -188,11 +197,18 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                         )}
                                     </div>
                                     <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: q.id === (item.quality || 0) ? '#fff' : '#aaa', display: 'flex', gap: '8px' }}>
-                                        {Object.entries(q.calculatedStats).map(([key, val]) => (
-                                            <span key={key}>
-                                                {key === 'damage' ? 'Dmg' : (key === 'defense' ? 'Def' : key.toUpperCase())}: {val}
-                                            </span>
-                                        ))}
+                                        {Object.entries(q.calculatedStats).map(([key, val]) => {
+                                            let label = key.toUpperCase();
+                                            if (key === 'damage') label = 'Dmg';
+                                            if (key === 'defense') label = 'Def';
+                                            if (key === 'globalEff') label = 'Global Eff';
+                                            if (key === 'efficiency') label = 'Eff';
+                                            return (
+                                                <span key={key}>
+                                                    {label}: {key === 'globalEff' || key === 'efficiency' ? '+' : ''}{val}{key === 'globalEff' || key === 'efficiency' ? '%' : ''}
+                                                </span>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             ))}

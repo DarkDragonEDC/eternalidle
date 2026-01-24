@@ -99,7 +99,7 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, onClose
                     const skillName = skillsMap[effId];
                     if (skillName) {
                         const skillLvl = stats.skills?.[skillName]?.level || 1;
-                        breakdown.push({ label: 'Skill Level Bonus', value: `+${skillLvl}%`, sub: `(1% per ${skillName} Lv)` });
+                        breakdown.push({ label: 'Skill Level Bonus', value: `+${(skillLvl * 0.3).toFixed(1)}%`, sub: `(0.3% per ${skillName} Lv)` });
                     }
 
                     // Tools
