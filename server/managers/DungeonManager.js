@@ -18,10 +18,16 @@ export class DungeonManager {
         const dungeon = Object.values(DUNGEONS).find(d => d.id === dungeonId);
         if (!dungeon) throw new Error("Dungeon not found");
 
-        const mapId = dungeon.reqItem;
         const inventory = char.state.inventory || {};
+        const mapId = dungeon.reqItem;
         if (!inventory[mapId] || inventory[mapId] < 1) {
             throw new Error(`Missing required item: ${mapId}`);
+        }
+
+        // Level Requirement Check
+        const combatLevel = char.state.skills?.COMBAT?.level || 1;
+        if (combatLevel < (dungeon.reqLevel || 1)) {
+            throw new Error(`Combat level ${dungeon.reqLevel} required to enter this dungeon`);
         }
 
         // Consume Map
@@ -144,27 +150,45 @@ export class DungeonManager {
     }
 
     async startNextWave(char, config) {
-        const isBoss = char.state.dungeon.wave === char.state.dungeon.maxWaves;
+        const wave = char.state.dungeon.wave;
+        const isBoss = wave === char.state.dungeon.maxWaves;
         let mobId = null;
 
         // Reset wave start time
         char.state.dungeon.wave_started_at = Date.now();
+
+        // Wave Scaling Multiplier (Always getting stronger)
+        // Wave 1: 1.0x, Wave 2: 1.1x, Wave 3: 1.2x, Wave 4: 1.3x, Boss: 1.5x (relative to base)
+        const scalingFactor = isBoss ? 1.5 : (1 + (wave - 1) * 0.1);
 
         if (isBoss) {
             mobId = config.bossId;
             char.state.dungeon.status = 'BOSS_FIGHT';
         } else {
             const mobs = config.trashMobs;
-            mobId = mobs[Math.floor(Math.random() * mobs.length)];
+            // Sequential selection
+            mobId = mobs[wave - 1] || mobs[mobs.length - 1];
             char.state.dungeon.status = 'FIGHTING';
         }
 
-        console.log(`[DUNGEON] Spawning ${mobId} for ${char.name} (Boss: ${isBoss})`);
+        const baseMob = MONSTERS[config.tier].find(m => m.id === mobId);
+        if (!baseMob) {
+            console.error(`[DUNGEON] Mob ${mobId} not found in tier ${config.tier}`);
+            char.state.dungeon.status = 'ERROR';
+            return { dungeonUpdate: { status: 'ERROR', message: `Mob ${mobId} not found` } };
+        }
+
+        const scaledStats = {
+            health: Math.floor(baseMob.health * scalingFactor),
+            damage: Math.floor(baseMob.damage * scalingFactor),
+            defense: Math.floor(baseMob.defense * scalingFactor)
+        };
+
+        console.log(`[DUNGEON] Spawning ${mobId} for ${char.name} (Wave ${wave}, Scaling: ${scalingFactor.toFixed(1)}x)`);
         try {
-            await this.gameManager.combatManager.startCombat(char.user_id, mobId, config.tier, char, true);
+            await this.gameManager.combatManager.startCombat(char.user_id, mobId, config.tier, char, true, scaledStats);
         } catch (e) {
             console.error(`[DUNGEON] Failed to start combat for ${char.name}:`, e.message);
-            // If combat failed (e.g. level too low), we should probably fail the dungeon or inform the user
             char.state.dungeon.status = 'ERROR';
             return { dungeonUpdate: { status: 'ERROR', message: e.message } };
         }

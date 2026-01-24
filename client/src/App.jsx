@@ -834,7 +834,7 @@ function App() {
           </div>
         );
       case 'dungeon':
-        return <DungeonPanel socket={socket} gameState={displayedGameState} isMobile={isMobile} />;
+        return <DungeonPanel socket={socket} gameState={displayedGameState} isMobile={isMobile} serverTimeOffset={clockOffset.current} />;
       default:
         return <div style={{ padding: 20, textAlign: 'center', color: '#555' }}>Select a category</div>;
     }

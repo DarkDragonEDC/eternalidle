@@ -129,26 +129,30 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                             className="modal-content"
                             style={{
                                 width: '100%',
-                                maxWidth: '380px',
-                                padding: '1rem',
+                                maxWidth: '400px',
+                                padding: '2rem',
                                 background: '#1a1f2e',
-                                borderRadius: '8px',
-                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                                border: '1px solid rgba(255,255,255,0.1)'
+                                borderRadius: '16px',
+                                boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                textAlign: 'center'
                             }}
                         >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                <h3 style={{ color: '#d4af37', margin: '0px', fontSize: '1.1rem', fontWeight: 'bold' }}>{item.name}</h3>
+                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '1.5rem', width: '100%', position: 'relative' }}>
+                                <h3 style={{ color: '#d4af37', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
                                 <button
                                     onClick={onClose}
-                                    style={{ background: 'transparent', border: 'none', color: 'rgb(136, 136, 136)', cursor: 'pointer', padding: '4px' }}
+                                    style={{ background: 'transparent', border: 'none', color: 'rgb(136, 136, 136)', cursor: 'pointer', padding: '4px', position: 'absolute', right: '-10px', top: '-10px' }}
                                 >
-                                    <X size={18} />
+                                    <X size={20} />
                                 </button>
                             </div>
 
-                            <div style={{ marginBottom: '0.75rem' }}>
-                                <div style={{ fontSize: '0.65rem', color: 'rgb(136, 136, 136)', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.5px' }}>Quantity</div>
+                            <div style={{ marginBottom: '1.25rem', width: '100%' }}>
+                                <div style={{ fontSize: '0.7rem', color: 'rgb(136, 136, 136)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '1px', fontWeight: 'bold' }}>Quantity</div>
                                 <div style={{ display: 'flex', gap: '6px' }}>
                                     <input
                                         min="1"
@@ -197,9 +201,9 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 <div style={{ fontSize: '0.6rem', color: 'rgb(102, 102, 102)', marginTop: '3px' }}>Max: {maxQuantity.toLocaleString()}</div>
                             </div>
 
-                            <div style={{ marginBottom: '0.75rem' }}>
-                                <div style={{ fontSize: '0.65rem', color: 'rgb(136, 136, 136)', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>Required Materials</div>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                            <div style={{ marginBottom: '1.25rem', width: '100%' }}>
+                                <div style={{ fontSize: '0.7rem', color: 'rgb(136, 136, 136)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '1px', fontWeight: 'bold' }}>Required Materials</div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
                                     {Object.entries(reqs).map(([reqId, reqQty]) => {
                                         const userQty = (gameState?.state?.inventory?.[reqId] || 0);
                                         const totalReq = reqQty * qtyNum; // Fixed logic to show total required
@@ -209,16 +213,14 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                         const displayName = resolvedFn ? `T${resolvedFn.tier} ${resolvedFn.name}` : formatItemId(reqId);
 
                                         return (
-                                            <div onClick={() => onNavigate && onNavigate(reqId)} key={reqId} style={{ flex: '1 1 calc(50% - 3px)', minWidth: '120px', background: 'rgba(255, 255, 255, 0.03)', padding: '8px', borderRadius: '4px', border: `1px solid ${hasEnough ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255, 68, 68, 0.3)'}`, cursor: 'pointer', position: 'relative' }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                    <div style={{ fontSize: '0.7rem', color: '#d4af37', marginBottom: '2px', fontWeight: '600' }}>{displayName}</div>
-                                                    <button title="Search in Market" style={{ background: 'rgba(212, 175, 55, 0.1)', border: '1px solid rgba(212, 175, 55, 0.3)', borderRadius: '4px', padding: '2px', cursor: 'pointer', color: '#d4af37', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                        <Package size={10} />
-                                                    </button>
+                                            <div onClick={() => onNavigate && onNavigate(reqId)} key={reqId} style={{ flex: '1 1 calc(50% - 4px)', maxWidth: '160px', background: 'rgba(255, 255, 255, 0.03)', padding: '10px', borderRadius: '8px', border: `1px solid ${hasEnough ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255, 68, 68, 0.3)'}`, cursor: 'pointer' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+                                                    <div style={{ fontSize: '0.7rem', color: '#d4af37', fontWeight: '700' }}>{displayName}</div>
+                                                    <Package size={12} color="#d4af37" />
                                                 </div>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                    <span style={{ fontSize: '0.6rem', color: 'rgb(136, 136, 136)' }}>x{totalReq}</span>
-                                                    <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: hasEnough ? '#4caf50' : '#ff4444' }}>{userQty}</span>
+                                                    <span style={{ fontSize: '0.65rem', color: 'rgb(136, 136, 136)' }}>x{totalReq}</span>
+                                                    <span style={{ fontSize: '1rem', fontWeight: '900', color: hasEnough ? '#4caf50' : '#ff4444' }}>{userQty}</span>
                                                 </div>
                                             </div>
                                         );
@@ -327,28 +329,32 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                             className="modal-content"
                             style={{
                                 width: '100%',
-                                maxWidth: '380px',
-                                padding: '1rem',
+                                maxWidth: '400px',
+                                padding: '2rem',
                                 background: '#1a1f2e',
-                                borderRadius: '8px',
-                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                                borderRadius: '16px',
+                                boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
                                 border: '1px solid rgba(255,255,255,0.1)',
                                 maxHeight: '90vh',
-                                overflowY: 'auto'
+                                overflowY: 'auto',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                textAlign: 'center'
                             }}
                         >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                <h3 style={{ color: '#d4af37', margin: '0px', fontSize: '1.1rem', fontWeight: 'bold' }}>{item.name}</h3>
+                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '1.5rem', width: '100%', position: 'relative' }}>
+                                <h3 style={{ color: '#d4af37', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
                                 <button
                                     onClick={onClose}
-                                    style={{ background: 'transparent', border: 'none', color: 'rgb(136, 136, 136)', cursor: 'pointer', padding: '4px' }}
+                                    style={{ background: 'transparent', border: 'none', color: 'rgb(136, 136, 136)', cursor: 'pointer', padding: '4px', position: 'absolute', right: '-10px', top: '-10px' }}
                                 >
-                                    <X size={18} />
+                                    <X size={20} />
                                 </button>
                             </div>
 
-                            <div style={{ marginBottom: '0.75rem' }}>
-                                <div style={{ fontSize: '0.65rem', color: 'rgb(136, 136, 136)', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.5px' }}>Quantity</div>
+                            <div style={{ marginBottom: '1.25rem', width: '100%' }}>
+                                <div style={{ fontSize: '0.7rem', color: 'rgb(136, 136, 136)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '1px', fontWeight: 'bold' }}>Quantity</div>
                                 <div style={{ display: 'flex', gap: '6px' }}>
                                     <input
                                         min="1"
@@ -548,26 +554,30 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                             className="modal-content"
                             style={{
                                 width: '100%',
-                                maxWidth: '380px',
-                                padding: '1rem',
-                                background: '#1a1f2e', // Dark background implied
-                                borderRadius: '8px',
-                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                                border: '1px solid rgba(255,255,255,0.1)'
+                                maxWidth: '400px',
+                                padding: '2rem',
+                                background: '#1a1f2e',
+                                borderRadius: '16px',
+                                boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                textAlign: 'center'
                             }}
                         >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                <h3 style={{ color: '#d4af37', margin: '0px', fontSize: '1.1rem', fontWeight: 'bold' }}>{item.name}</h3>
+                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '1.5rem', width: '100%', position: 'relative' }}>
+                                <h3 style={{ color: '#d4af37', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
                                 <button
                                     onClick={onClose}
-                                    style={{ background: 'transparent', border: 'none', color: 'rgb(136, 136, 136)', cursor: 'pointer', padding: '4px' }}
+                                    style={{ background: 'transparent', border: 'none', color: 'rgb(136, 136, 136)', cursor: 'pointer', padding: '4px', position: 'absolute', right: '-10px', top: '-10px' }}
                                 >
-                                    <X size={18} />
+                                    <X size={20} />
                                 </button>
                             </div>
 
-                            <div style={{ marginBottom: '0.75rem' }}>
-                                <div style={{ fontSize: '0.65rem', color: 'rgb(136, 136, 136)', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.5px' }}>Quantity</div>
+                            <div style={{ marginBottom: '1.25rem', width: '100%' }}>
+                                <div style={{ fontSize: '0.7rem', color: 'rgb(136, 136, 136)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '1px', fontWeight: 'bold' }}>Quantity</div>
                                 <div style={{ display: 'flex', gap: '6px' }}>
                                     <input
                                         min="1"

@@ -6,7 +6,8 @@ export const DUNGEONS = {
         reqItem: 'T1_DUNGEON_MAP',
         waves: 5,
         bossId: 'BOSS_GOBLIN_KING',
-        trashMobs: ['RABBIT', 'ROCK_ELEMENTAL_T1'],
+        trashMobs: ['RABBIT', 'GOBLIN_SCOUT', 'ROCK_ELEMENTAL_T1', 'GIANT_SPIDER_T1'],
+        reqLevel: 1,
         rewards: {
             xp: 500,
             silver: 200,
@@ -20,11 +21,11 @@ export const DUNGEONS = {
         reqItem: 'T2_DUNGEON_MAP',
         waves: 5,
         bossId: 'BOSS_WOLF_ALPHA',
-        trashMobs: ['WOLF', 'FOREST_SPIRIT'],
+        trashMobs: ['WOLF', 'DIRE_RAT', 'FOREST_SPIRIT', 'BANDIT_SCOUT'],
+        reqLevel: 10,
         rewards: {
             xp: 1200,
             silver: 500,
-
             resource: { id: 'T2_WOOD', chance: 0.50, min: 5, max: 10 }
         }
     },
@@ -35,11 +36,11 @@ export const DUNGEONS = {
         reqItem: 'T3_DUNGEON_MAP',
         waves: 5,
         bossId: 'BOSS_BEAR_ANCIENT',
-        trashMobs: ['BEAR', 'SKELETON'],
+        trashMobs: ['BEAR', 'MOUNTAIN_GOBLIN', 'SKELETON', 'SKELETON_WARRIOR'],
+        reqLevel: 20,
         rewards: {
             xp: 2500,
             silver: 1000,
-
             resource: { id: 'T3_HIDE', chance: 0.50, min: 5, max: 10 }
         }
     },
@@ -50,11 +51,11 @@ export const DUNGEONS = {
         reqItem: 'T4_DUNGEON_MAP',
         waves: 5,
         bossId: 'BOSS_SKELETON_KING',
-        trashMobs: ['DIRE_WOLF', 'UNDEAD_SOLDIER'],
+        trashMobs: ['DIRE_WOLF', 'GHOST_KNIGHT', 'UNDEAD_SOLDIER', 'CRYPT_WARDEN'],
+        reqLevel: 30,
         rewards: {
             xp: 6000,
             silver: 2500,
-
             resource: { id: 'T4_BAR', chance: 0.50, min: 3, max: 8 }
         }
     },
@@ -65,11 +66,11 @@ export const DUNGEONS = {
         reqItem: 'T5_DUNGEON_MAP',
         waves: 5,
         bossId: 'BOSS_OGRE_CHIEFTAIN',
-        trashMobs: ['OGRE', 'LICH'],
+        trashMobs: ['OGRE', 'WAR_OGRE', 'LICH', 'LICH_LORD'],
+        reqLevel: 40,
         rewards: {
             xp: 12000,
             silver: 5000,
-
             resource: { id: 'T5_HIDE', chance: 0.50, min: 3, max: 8 }
         }
     },
@@ -80,11 +81,11 @@ export const DUNGEONS = {
         reqItem: 'T6_DUNGEON_MAP',
         waves: 5,
         bossId: 'BOSS_TROLL_ELDER',
-        trashMobs: ['TROLL', 'FIRE_ELEMENTAL'],
+        trashMobs: ['TROLL', 'ARMORED_TROLL', 'FIRE_ELEMENTAL', 'INFERNAL_ELEMENTAL'],
+        reqLevel: 50,
         rewards: {
             xp: 25000,
             silver: 10000,
-
             resource: { id: 'T6_ORE', chance: 0.50, min: 3, max: 8 }
         }
     },
@@ -95,11 +96,11 @@ export const DUNGEONS = {
         reqItem: 'T7_DUNGEON_MAP',
         waves: 5,
         bossId: 'BOSS_DRAGON_MOTHER',
-        trashMobs: ['DRAGON_WHELP', 'DARK_KNIGHT'],
+        trashMobs: ['DRAGON_WHELP', 'FIRE_DRAKE', 'DARK_KNIGHT', 'DEATH_KNIGHT'],
+        reqLevel: 60,
         rewards: {
             xp: 50000,
             silver: 20000,
-
             resource: { id: 'T7_HIDE', chance: 0.50, min: 2, max: 6 }
         }
     },
@@ -110,11 +111,11 @@ export const DUNGEONS = {
         reqItem: 'T8_DUNGEON_MAP',
         waves: 5,
         bossId: 'BOSS_GOLEM_PRIMORDIAL',
-        trashMobs: ['ANCIENT_GOLEM', 'DEMON'],
+        trashMobs: ['ANCIENT_GOLEM', 'OBSIDIAN_GOLEM', 'DEMON', 'DEMON_WARRIOR'],
+        reqLevel: 70,
         rewards: {
             xp: 100000,
             silver: 40000,
-
             resource: { id: 'T8_ORE', chance: 0.50, min: 2, max: 6 }
         }
     },
@@ -125,11 +126,11 @@ export const DUNGEONS = {
         reqItem: 'T9_DUNGEON_MAP',
         waves: 5,
         bossId: 'BOSS_DEMON_PRINCE',
-        trashMobs: ['ELDER_DRAGON', 'ARCHDEMON'],
+        trashMobs: ['ELDER_DRAGON', 'VOID_DRAGON', 'ARCHDEMON', 'ABYSSAL_FIEND'],
+        reqLevel: 80,
         rewards: {
             xp: 250000,
             silver: 100000,
-
             resource: { id: 'T9_BAR', chance: 0.50, min: 2, max: 5 }
         }
     },
@@ -140,11 +141,11 @@ export const DUNGEONS = {
         reqItem: 'T10_DUNGEON_MAP',
         waves: 5,
         bossId: 'BOSS_VOID_ENTITY',
-        trashMobs: ['ANCIENT_DRAGON', 'DEMON_LORD'],
+        trashMobs: ['ANCIENT_DRAGON', 'VOID_DRAGON_LORD', 'DEMON_LORD', 'VOID_EXECUTIONER'],
+        reqLevel: 90,
         rewards: {
             xp: 1000000,
             silver: 500000,
-
             resource: { id: 'T10_BAR', chance: 0.50, min: 2, max: 5 }
         }
     }

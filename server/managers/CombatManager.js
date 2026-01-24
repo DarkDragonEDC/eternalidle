@@ -5,7 +5,7 @@ export class CombatManager {
         this.gameManager = gameManager;
     }
 
-    async startCombat(userId, mobId, tier, existingChar = null, isDungeon = false) {
+    async startCombat(userId, mobId, tier, existingChar = null, isDungeon = false, customStats = null) {
         const char = existingChar || await this.gameManager.getCharacter(userId);
 
         if (char.state.dungeon && !isDungeon) {
@@ -26,12 +26,16 @@ export class CombatManager {
             throw new Error(`Insufficient level! Requires Combat Lv ${requiredLevel}`);
         }
 
+        const mobMaxHP = customStats?.health || mobData.health;
+
         char.state.combat = {
             mobId: mobData.id,
             tier: tier,
             mobName: mobData.name,
-            mobMaxHealth: mobData.health,
-            mobHealth: mobData.health,
+            mobMaxHealth: mobMaxHP,
+            mobHealth: mobMaxHP,
+            mobDamage: customStats?.damage || mobData.damage,
+            mobDefense: customStats?.defense || mobData.defense,
             playerHealth: char.state.health || 100,
             auto: true,
             kills: 0,
@@ -73,16 +77,26 @@ export class CombatManager {
         const playerStats = this.gameManager.inventoryManager.calculateStats(char);
         const playerDmg = playerStats.damage;
 
-        let mobData = null;
-        if (MONSTERS[combat.tier]) {
-            mobData = MONSTERS[combat.tier].find(m => m.id === combat.mobId);
+        let mobDmg = combat.mobDamage;
+        if (typeof mobDmg === 'undefined') {
+            let mobData = null;
+            if (MONSTERS[combat.tier]) {
+                mobData = MONSTERS[combat.tier].find(m => m.id === combat.mobId);
+            }
+            mobDmg = mobData ? mobData.damage : 5;
         }
-        let mobDmg = mobData ? mobData.damage : 5;
 
         const playerMitigation = playerStats.defense / (playerStats.defense + 2000);
         const mitigatedMobDmg = Math.max(1, Math.floor(mobDmg * (1 - playerMitigation)));
 
-        const mobDef = mobData ? (mobData.defense || 0) : 0;
+        let mobDef = combat.mobDefense;
+        if (typeof mobDef === 'undefined') {
+            let mobData = null;
+            if (MONSTERS[combat.tier]) {
+                mobData = MONSTERS[combat.tier].find(m => m.id === combat.mobId);
+            }
+            mobDef = mobData ? (mobData.defense || 0) : 0;
+        }
         const mobMitigation = mobDef / (mobDef + 2000);
         const mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
 
