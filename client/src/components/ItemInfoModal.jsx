@@ -96,7 +96,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                         borderRadius: '12px 12px 0 0'
                     }}></div>
                     <h3 style={{ margin: 0, color: item.rarityColor || '#d4af37', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                        {item.qualityName && item.qualityName !== 'Normal' ? `${item.qualityName} ` : ''}{cleanBaseName} T{item.tier}
+                        {cleanBaseName} T{item.tier}
                     </h3>
                     <button
                         onClick={onClose}
@@ -135,6 +135,8 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                             {baseStats.agi && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#4caf50' }}>AGI +{item.stats.agi}</div>}
                             {baseStats.int && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#2196f3' }}>INT +{item.stats.int}</div>}
                             {item.heal && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#4caf50' }}><Heart size={14} /> Heals {item.heal}</div>}
+                            {baseStats.efficiency && typeof baseStats.efficiency === 'number' && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#d4af37' }}><Star size={14} /> Efficiency +{item.stats.efficiency}%</div>}
+                            {baseStats.efficiency && typeof baseStats.efficiency === 'object' && baseStats.efficiency.GLOBAL && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#d4af37' }}><Star size={14} /> Global Eff +{item.stats.efficiency.GLOBAL}%</div>}
                         </div>
                     </div>
                 </div>

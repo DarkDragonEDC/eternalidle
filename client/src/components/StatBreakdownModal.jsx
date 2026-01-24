@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, Sword, Shield, Zap, Heart } from 'lucide-react';
 
-const StatBreakdownModal = ({ statType, value, stats, equipment, onClose }) => {
+const StatBreakdownModal = ({ statType, statId, value, stats, equipment, onClose }) => {
     // Calculate breakdowns based on known formulas
     const getBreakdown = () => {
         const breakdown = [];
@@ -77,7 +77,7 @@ const StatBreakdownModal = ({ statType, value, stats, equipment, onClose }) => {
             breakdown.push({ label: 'Strength Bonus', value: str * 10, sub: '(10 per STR)' });
             breakdown.push({ label: 'Gear HP', value: gearHP });
         } else if (statType === 'EFFICIENCY') {
-            const effId = value?.id; // Skill context
+            const effId = statId; // Skill context
             const globalEff = stats.efficiency?.GLOBAL || 0;
             const int = stats.int || 0;
 

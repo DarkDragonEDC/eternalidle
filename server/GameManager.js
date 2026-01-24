@@ -233,7 +233,8 @@ export class GameManager {
         const char = await this.getCharacter(userId);
         if (!char) return null;
 
-        let foodUsed = this.processFood(char);
+        const foodResult = this.processFood(char);
+        const foodUsed = foodResult.used;
 
         if (!char.current_activity && !char.state.combat && !foodUsed && !char.state.dungeon) return null;
 
@@ -296,27 +297,36 @@ export class GameManager {
         let stateChanged = false;
 
         if (char.state.combat) {
-            // console.log(`[COMBAT_DEBUG] Processing combat for ${char.name}. Next attack: ${char.state.combat.next_attack_at}, Now: ${now}`);
-            if (!char.state.combat.next_attack_at) {
-                console.log(`[COMBAT_DEBUG] Initializing next_attack_at for ${char.name}`);
-                char.state.combat.next_attack_at = now + 1000;
+            const combat = char.state.combat;
+            const nextAttack = Number(combat.next_attack_at) || 0;
+
+            if (!nextAttack || nextAttack === 0) {
+                console.log(`[COMBAT] Initializing timer for ${char.name}`);
+                combat.next_attack_at = now + 1000;
                 stateChanged = true;
-            }
-            if (now >= char.state.combat.next_attack_at) {
-                console.log(`[COMBAT_DEBUG] Executing round for ${char.name}`);
+            } else if (now >= nextAttack) {
+                // ... combat logic ...
                 try {
                     combatResult = await this.combatManager.processCombatRound(char);
                     if (combatResult?.leveledUp) {
                         leveledUp = combatResult.leveledUp;
                     }
                 } catch (e) {
-                    console.error(`[COMBAT_ERROR] Error in processCombatRound:`, e);
+                    console.error(`[COMBAT_ERROR] Error in processCombatRound for ${char.name}:`, e);
                 }
 
-                // Only update timer if combat is still active (player didn't die or kill mob in a way that ends combat state)
                 if (char.state.combat) {
                     const stats = this.inventoryManager.calculateStats(char);
-                    char.state.combat.next_attack_at = now + (stats.attackSpeed || 1000); // Reset timer
+                    const atkSpeed = Number(stats.attackSpeed) || 1000;
+                    char.state.combat.next_attack_at = now + atkSpeed;
+                    stateChanged = true;
+                }
+            } else {
+                // Check for stuck timer (if next attack is too far in future > 5s)
+                if (nextAttack > now + 5000) {
+                    console.log(`[COMBAT_FIX] Timer stuck in future for ${char.name}. Resetting. (Now: ${now}, Next: ${nextAttack})`);
+                    combat.next_attack_at = now;
+                    stateChanged = true;
                 }
             }
         }
@@ -360,6 +370,7 @@ export class GameManager {
                 activityFinished,
                 combatUpdate: combatResult,
                 dungeonUpdate: dungeonResult?.dungeonUpdate,
+                healingUpdate: foodUsed ? { amount: foodResult.amount, source: 'FOOD' } : null,
                 status: {
                     user_id: char.user_id,
                     name: char.name,
@@ -415,15 +426,16 @@ export class GameManager {
     }
 
     processFood(char) {
-        if (!char.state.equipment || !char.state.equipment.food) return false;
+        if (!char.state.equipment || !char.state.equipment.food) return { used: false, amount: 0 };
         const food = char.state.equipment.food;
-        if (!food.heal || !food.amount) return false;
+        if (!food.heal || !food.amount) return { used: false, amount: 0 };
 
         const stats = this.inventoryManager.calculateStats(char);
         const maxHp = stats.maxHP;
         let currentHp = char.state.health || 0;
         let eatenCount = 0;
-        const MAX_EATS_PER_TICK = 50; // Allow eating many times to catch up damage instantly
+        let totalHealed = 0;
+        const MAX_EATS_PER_TICK = 50;
 
         // Eat while HP is missing and we haven't hit the massive limit
         // STRICT RULE: Only eat if the heal fits entirely (No Waste)
@@ -431,9 +443,10 @@ export class GameManager {
             const missing = maxHp - currentHp;
 
             if (missing >= food.heal) {
-                currentHp = currentHp + food.heal; // We know it fits exactly or with space remaining
+                currentHp = currentHp + food.heal;
                 food.amount--;
                 eatenCount++;
+                totalHealed += food.heal;
 
                 // Update instantly to recalculate 'missing' for next loop iteration
                 char.state.health = currentHp;
@@ -441,7 +454,7 @@ export class GameManager {
                     char.state.combat.playerHealth = currentHp;
                 }
             } else {
-                break; // Not enough space for a full food heal without wasting, stop.
+                break;
             }
         }
 
@@ -449,7 +462,7 @@ export class GameManager {
             delete char.state.equipment.food;
         }
 
-        return eatenCount > 0;
+        return { used: eatenCount > 0, amount: totalHealed };
     }
 
     async getLeaderboard() {

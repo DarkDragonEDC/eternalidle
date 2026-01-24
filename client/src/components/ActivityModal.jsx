@@ -228,26 +228,31 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 </div>
                             </div>
 
-                            <div style={{ marginBottom: '0.75rem', background: 'rgba(0, 0, 0, 0.2)', padding: '8px', borderRadius: '4px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '4px' }}>
-                                    <span style={{ color: 'rgb(136, 136, 136)' }}>Efficiency</span>
-                                    <span style={{ color: '#4caf50' }}>+{efficiency}%</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '4px' }}>
-                                    <span style={{ color: 'rgb(136, 136, 136)' }}>XP per action</span>
-                                    <span style={{ color: '#d4af37' }}>{xpPerAction}</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '4px' }}>
-                                    <span style={{ color: 'rgb(136, 136, 136)' }}>Total Cost <span style={{ fontSize: '0.6rem', color: 'rgb(102, 102, 102)' }}>(Have: {userSilver.toLocaleString()})</span></span>
-                                    <span style={{ color: '#d4af37', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                        {/* Simple Circle Icon for Coin */}
-                                        <div style={{ width: 12, height: 12, borderRadius: '50%', border: '2px solid currentColor' }}></div>
-                                        {totalCost}
-                                    </span>
-                                </div>
-                                <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.1)', paddingTop: '6px', marginTop: '6px', display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                                    <span style={{ fontWeight: 'bold', color: 'rgb(255, 255, 255)' }}>TOTAL XP</span>
-                                    <span style={{ color: '#4caf50', fontWeight: 'bold' }}>{totalXP}</span>
+                            <div style={{ marginBottom: '1.25rem', padding: '16px', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)', width: '100%' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                                        <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>Efficiency</span>
+                                        <span style={{ color: '#4caf50', fontWeight: '800' }}>+{efficiency}%</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                                        <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>Time per action</span>
+                                        <span style={{ color: '#fff', fontWeight: '800' }}>{finalTime.toFixed(1)}s</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                                        <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>XP per action</span>
+                                        <span style={{ color: '#d4af37', fontWeight: '800' }}>{xpPerAction}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                                        <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>Total Cost</span>
+                                        <span style={{ color: '#d4af37', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <div style={{ width: 10, height: 10, borderRadius: '50%', border: '2px solid currentColor' }}></div>
+                                            {totalCost}
+                                        </span>
+                                    </div>
+                                    <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ color: '#fff', fontWeight: '900', fontSize: '0.85rem' }}>TOTAL XP</span>
+                                        <span style={{ color: '#4caf50', fontWeight: '900', fontSize: '1rem' }}>{totalXP}</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -432,29 +437,31 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 </div>
                             </div>
 
-                            <div style={{ marginBottom: '0.75rem', background: 'rgba(0, 0, 0, 0.2)', padding: '8px', borderRadius: '4px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '4px' }}>
-                                    <span style={{ color: 'rgb(136, 136, 136)' }}>Accuracy</span>
-                                    <span style={{ color: '#4caf50' }}>+{efficiency}%</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '4px' }}>
-                                    <span style={{ color: 'rgb(136, 136, 136)' }}>Time per action</span>
-                                    <span style={{ color: '#fff' }}>{finalTime.toFixed(1)}s <span style={{ fontSize: '0.6rem', color: '#666', textDecoration: 'line-through' }}>{baseTime}s</span></span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '4px' }}>
-                                    <span style={{ color: 'rgb(136, 136, 136)' }}>XP per action</span>
-                                    <span style={{ color: '#d4af37' }}>{xpPerAction}</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '4px' }}>
-                                    <span style={{ color: 'rgb(136, 136, 136)' }}>Total Cost <span style={{ fontSize: '0.6rem', color: 'rgb(102, 102, 102)' }}>(Have: {userSilver.toLocaleString()})</span></span>
-                                    <span style={{ color: '#d4af37', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                        <div style={{ width: 12, height: 12, borderRadius: '50%', border: '2px solid currentColor' }}></div>
-                                        {totalCost}
-                                    </span>
-                                </div>
-                                <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.1)', paddingTop: '6px', marginTop: '6px', display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                                    <span style={{ fontWeight: 'bold', color: 'rgb(255, 255, 255)' }}>TOTAL XP</span>
-                                    <span style={{ color: '#4caf50', fontWeight: 'bold' }}>{totalXP}</span>
+                            <div style={{ marginBottom: '1.25rem', padding: '16px', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)', width: '100%' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                                        <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>Efficiency</span>
+                                        <span style={{ color: '#4caf50', fontWeight: '800' }}>+{efficiency}%</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                                        <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>Time per action</span>
+                                        <span style={{ color: '#fff', fontWeight: '800' }}>{finalTime.toFixed(1)}s</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                                        <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>XP per action</span>
+                                        <span style={{ color: '#d4af37', fontWeight: '800' }}>{xpPerAction}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                                        <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>Total Cost</span>
+                                        <span style={{ color: '#d4af37', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <div style={{ width: 10, height: 10, borderRadius: '50%', border: '2px solid currentColor' }}></div>
+                                            {totalCost}
+                                        </span>
+                                    </div>
+                                    <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ color: '#fff', fontWeight: '900', fontSize: '0.85rem' }}>TOTAL XP</span>
+                                        <span style={{ color: '#4caf50', fontWeight: '900', fontSize: '1rem' }}>{totalXP}</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -620,29 +627,30 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                             whiteSpace: 'nowrap'
                                         }}
                                     >
-                                        MAX (11h 59m)
+                                        MAX ({formatDuration(maxQuantity * finalTime)})
                                     </button>
                                 </div>
                                 <div style={{ fontSize: '0.6rem', color: 'rgb(102, 102, 102)', marginTop: '3px' }}>Max: {maxQuantity.toLocaleString()}</div>
                             </div>
 
-                            <div style={{ marginBottom: '0.75rem', background: 'rgba(0, 0, 0, 0.2)', padding: '8px', borderRadius: '4px' }}>
-
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '4px' }}>
-                                    <span style={{ color: 'rgb(136, 136, 136)' }}>Efficiency</span>
-                                    <span style={{ color: '#d4af37' }}>+{efficiency}%</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '4px' }}>
-                                    <span style={{ color: 'rgb(136, 136, 136)' }}>Time per action</span>
-                                    <span style={{ color: '#fff' }}>{finalTime.toFixed(1)}s <span style={{ fontSize: '0.6rem', color: '#666', textDecoration: 'line-through' }}>{baseTime}s</span></span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '4px' }}>
-                                    <span style={{ color: 'rgb(136, 136, 136)' }}>XP per action</span>
-                                    <span style={{ color: '#d4af37' }}>{xpPerAction}</span>
-                                </div>
-                                <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.1)', paddingTop: '6px', marginTop: '6px', display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                                    <span style={{ fontWeight: 'bold', color: 'rgb(255, 255, 255)' }}>TOTAL XP</span>
-                                    <span style={{ color: '#4caf50', fontWeight: 'bold' }}>{totalXP}</span>
+                            <div style={{ marginBottom: '1.25rem', padding: '16px', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)', width: '100%' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                                        <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>Efficiency</span>
+                                        <span style={{ color: '#d4af37', fontWeight: '800' }}>+{efficiency}%</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                                        <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>Time per action</span>
+                                        <span style={{ color: '#fff', fontWeight: '800' }}>{finalTime.toFixed(1)}s <span style={{ fontSize: '0.6rem', color: '#666', textDecoration: 'line-through' }}>{baseTime}s</span></span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                                        <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>XP per action</span>
+                                        <span style={{ color: '#d4af37', fontWeight: '800' }}>{xpPerAction}</span>
+                                    </div>
+                                    <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ color: '#fff', fontWeight: '900', fontSize: '0.85rem' }}>TOTAL XP</span>
+                                        <span style={{ color: '#4caf50', fontWeight: '900', fontSize: '1rem' }}>{totalXP}</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -827,19 +835,16 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                         </div>
 
                         {/* Stats Info */}
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: '1fr 1fr',
-                            gap: '15px',
-                            marginBottom: '25px'
-                        }}>
-                            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '15px', borderRadius: '12px', textAlign: 'center' }}>
-                                <div style={{ fontSize: '0.65rem', color: '#888', textTransform: 'uppercase', fontWeight: 'bold' }}>EFFICIENCY</div>
-                                <div style={{ fontSize: '1.1rem', color: '#4caf50', fontWeight: '800', marginTop: '4px' }}>+{efficiency}%</div>
-                            </div>
-                            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '15px', borderRadius: '12px', textAlign: 'center' }}>
-                                <div style={{ fontSize: '0.65rem', color: '#888', textTransform: 'uppercase', fontWeight: 'bold' }}>TOTAL XP</div>
-                                <div style={{ fontSize: '1.1rem', color: '#d4af37', fontWeight: '800', marginTop: '4px' }}>{totalXP}</div>
+                        <div style={{ marginBottom: '1.25rem', padding: '16px', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)', width: '100%' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                                    <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>EFFICIENCY</span>
+                                    <span style={{ color: '#4caf50', fontWeight: '800' }}>+{efficiency}%</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                                    <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>TOTAL XP</span>
+                                    <span style={{ color: '#d4af37', fontWeight: '800' }}>{totalXP}</span>
+                                </div>
                             </div>
                         </div>
 

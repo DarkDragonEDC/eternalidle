@@ -12,12 +12,12 @@ async function check() {
     }
 
     data.forEach(char => {
-        console.log('--- CHARACTER START ---');
-        console.log(`NAME: ${char.name}`);
-        console.log(`ACTIVITY: ${JSON.stringify(char.current_activity, null, 2)}`);
-        console.log(`INVENTORY: ${JSON.stringify(char.state.inventory, null, 2)}`);
-        console.log(`SKILLS: ${JSON.stringify(char.state.skills, null, 2)}`);
-        console.log('--- CHARACTER END ---');
+        if (char.name.toLowerCase().includes('admin')) {
+            console.log('--- CHARACTER START ---');
+            console.log(`NAME: ${char.name}`);
+            console.log(`COMBAT: ${JSON.stringify(char.state.combat, null, 2)}`);
+            console.log('--- CHARACTER END ---');
+        }
     });
 }
 

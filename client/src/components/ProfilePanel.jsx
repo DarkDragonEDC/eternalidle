@@ -468,6 +468,7 @@ Each point grants: +1% Global XP, +1% Gold Gain and +1 Base Damage`;
                 <StatBreakdownModal
                     statType={breakdownModal.type}
                     value={typeof breakdownModal.value === 'object' ? breakdownModal.value.total : breakdownModal.value}
+                    statId={typeof breakdownModal.value === 'object' ? breakdownModal.value.id : null}
                     stats={{ ...stats, skills }} // Pass skills for efficiency breakdown
                     equipment={equipment}
                     onClose={() => setBreakdownModal(null)}

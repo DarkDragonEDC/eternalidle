@@ -68,6 +68,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
     }, [gameState]);
 
     const combat = gameState?.state?.combat;
+    const activeMobName = combat ? combat.mobName : null;
 
     // Reset ou Restauração de stats quando o combate muda/inicia
     useEffect(() => {
@@ -102,7 +103,18 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
             kills: 0,
             startTime: Date.now()
         });
-        setBattleLogs([{ id: 'start', type: 'info', content: `Starting combat against ${combat.mobName}...` }]);
+        setBattleLogs(prev => {
+            const newLog = { id: generateLogId(), type: 'start-info', content: `Starting combat against ${combat.mobName}...` };
+            const newLogs = [...prev, newLog];
+
+            // Pruning: Keep only last 10 'start' markers
+            const startMarkers = newLogs.filter(l => l.type === 'start-info');
+            if (startMarkers.length > 10) {
+                const cutoffIndex = newLogs.findIndex(l => l === startMarkers[startMarkers.length - 10]);
+                return newLogs.slice(cutoffIndex);
+            }
+            return newLogs;
+        });
         setIsRestored(true);
     }, [combat?.mobId, gameState?.name]);
 
@@ -141,44 +153,67 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
         if (!socket) return;
 
         const handleActionResult = (result) => {
+            if (result.healingUpdate && result.healingUpdate.amount > 0) {
+                spawnFloatingText(`+${result.healingUpdate.amount}`, 'heal', 50, 40);
+            }
+
             if (result.combatUpdate) {
                 const update = result.combatUpdate;
                 const details = update.details;
 
                 if (details) {
+                    // Player Damage Visuals
                     if (details.playerDmg > 0) {
                         setIsMobHit(true);
                         setTimeout(() => setIsMobHit(false), 200);
                         spawnFloatingText(`-${details.playerDmg}`, 'damage-deal', 75, 50);
                     }
+
+                    // Mob Damage Visuals
                     if (details.mobDmg > 0) {
                         setIsPlayerHit(true);
                         setTimeout(() => setIsPlayerHit(false), 200);
                         spawnFloatingText(`-${details.mobDmg}`, 'damage-take', 25, 50);
                     }
 
-                    setBattleStats(prev => ({
-                        ...prev,
-                        totalDmgDealt: prev.totalDmgDealt + details.playerDmg,
-                        totalDmgTaken: prev.totalDmgTaken + details.mobDmg,
-                        silverGained: prev.silverGained + (details.silverGained || 0),
-                        xpGained: prev.xpGained + (details.xpGained || 0),
-                        kills: prev.kills + (details.victory ? 1 : 0)
-                    }));
+                    // Healing Visuals
+                    if (result.healingUpdate && result.healingUpdate.amount > 0) {
+                        spawnFloatingText(`+${result.healingUpdate.amount}`, 'heal', 50, 40);
+                    }
+
+                    // Update Battle Stats
+                    setBattleStats(prev => {
+                        const newStats = {
+                            ...prev,
+                            totalDmgDealt: prev.totalDmgDealt + (details.playerDmg || 0),
+                            totalDmgTaken: prev.totalDmgTaken + (details.mobDmg || 0),
+                            silverGained: prev.silverGained + (details.silverGained || 0),
+                            xpGained: prev.xpGained + (details.xpGained || 0),
+                            kills: prev.kills + (details.victory ? 1 : 0)
+                        };
+                        // console.log('[COMBAT_PANEL] Stats updated:', newStats);
+                        return newStats;
+                    });
 
                     const newLogs = [];
-                    newLogs.push({
-                        id: generateLogId(),
-                        type: 'combat',
-                        content: `You dealt ${details.playerDmg} damage.`,
-                        color: '#4a90e2'
-                    });
-                    newLogs.push({
-                        id: generateLogId(),
-                        type: 'combat',
-                        content: `${update.details?.mobName || 'Enemy'} dealt ${details.mobDmg} damage.`,
-                        color: '#ff4444'
-                    });
+
+                    if (details.playerDmg > 0) {
+                        newLogs.push({
+                            id: generateLogId(),
+                            type: 'combat',
+                            content: `You dealt ${details.playerDmg} damage.`,
+                            color: '#4a90e2'
+                        });
+                    }
+
+                    if (details.mobDmg > 0) {
+                        newLogs.push({
+                            id: generateLogId(),
+                            type: 'combat',
+                            content: `${update.details?.mobName || 'Enemy'} dealt ${details.mobDmg} damage.`,
+                            color: '#ff4444'
+                        });
+                    }
 
                     if (details.silverGained > 0) {
                         newLogs.push({
@@ -225,14 +260,16 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                         });
                     }
 
-                    setBattleLogs(prev => [...prev, ...newLogs].slice(-50));
+                    if (newLogs.length > 0) {
+                        setBattleLogs(prev => [...prev, ...newLogs]);
+                    }
                 }
             }
         };
 
         socket.on('action_result', handleActionResult);
         return () => socket.off('action_result', handleActionResult);
-    }, [socket, combat?.mobName]);
+    }, [socket]);
 
     // Auto-scroll logs (só se estiver perto do fundo)
     useEffect(() => {
@@ -251,16 +288,16 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
         }
     }, [battleLogs]);
 
-    // Timer de 1s para o cronômetro de interface ser "em tempo real"
+    // Timer para o cronômetro de interface (200ms para fluidez)
     useEffect(() => {
         if (!combat) return;
 
         const timer = setInterval(() => {
             setCurrentTime(Date.now());
-        }, 1000);
+        }, 200);
 
         return () => clearInterval(timer);
-    }, [combat]);
+    }, [!!combat]);
 
     const scrollToBottom = () => {
         const container = scrollContainerRef.current;
@@ -294,7 +331,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
         const xph = (battleStats.xpGained / (duration || 1)) * 3600;
 
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: isMobile ? '8px' : '10px', padding: isMobile ? '8px' : '10px', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: isMobile ? '8px' : '10px', padding: isMobile ? '8px' : '10px', overflowY: 'hidden' }}>
                 {/* Battle Header */}
                 <div className="glass-panel" style={{
                     padding: '8px 15px',
@@ -304,7 +341,8 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                     alignItems: 'center',
                     background: 'rgba(255, 68, 68, 0.08)',
                     border: '1px solid rgba(255, 68, 68, 0.2)',
-                    borderRadius: '8px'
+                    borderRadius: '8px',
+                    flexShrink: 0
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{ background: '#ff4444', padding: '6px', borderRadius: '6px', display: 'flex' }}>
@@ -406,7 +444,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                             left: `${text.x}%`,
                                             top: `${text.y}%`,
                                             transform: 'translate(-50%, -50%)',
-                                            color: text.type === 'damage-take' ? '#ff4d4d' : '#4a90e2',
+                                            color: text.type === 'damage-take' ? '#ff4d4d' : text.type === 'heal' ? '#4caf50' : '#4a90e2',
                                             fontWeight: 'bold',
                                             fontSize: '1.5rem',
                                             textShadow: '0 0 10px rgba(0,0,0,0.8)',
@@ -440,13 +478,14 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                     </div>
 
                     {/* Combat Console & Stats */}
-                    <div style={{ flex: isMobile ? 'none' : 1.5, display: 'flex', flexDirection: 'column', gap: '8px', minHeight: 'auto' }}>
+                    <div style={{ flex: isMobile ? 'none' : 1.5, display: 'flex', flexDirection: 'column', gap: '8px', minHeight: 0, overflow: 'hidden' }}>
                         {/* Stats Dashboard */}
                         <div className="glass-panel" style={{
                             padding: '8px',
                             display: 'grid',
                             gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(2, 1fr)',
-                            gap: '5px'
+                            gap: '5px',
+                            flexShrink: 0
                         }}>
                             <div style={{ background: 'rgba(0,0,0,0.2)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.03)' }}>
                                 <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -487,7 +526,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                         </div>
 
                         {/* Session Loot */}
-                        <div className="glass-panel" style={{ padding: '8px', background: 'rgba(174, 0, 255, 0.05)', border: '1px solid rgba(174, 0, 255, 0.2)' }}>
+                        <div className="glass-panel" style={{ padding: '8px', background: 'rgba(174, 0, 255, 0.05)', border: '1px solid rgba(174, 0, 255, 0.2)', flexShrink: 0 }}>
                             <div style={{ fontSize: '0.65rem', fontWeight: '900', color: '#ae00ff', letterSpacing: '1px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '5px' }}>
                                 <Zap size={12} /> SESSION LOOT_
                             </div>
@@ -515,24 +554,23 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
 
                         {/* Battle Console */}
                         <div className="glass-panel" style={{
-                            flex: 2,
+                            flex: 'none',
                             display: 'flex',
                             flexDirection: 'column',
-                            overflow: 'hidden',
+                            overflowY: 'hidden',
                             background: '#0a0a0f',
                             border: '1px solid rgba(212, 175, 55, 0.2)',
-                            minHeight: isMobile ? '120px' : '120px',
-                            maxHeight: isMobile ? '200px' : 'none',
+                            height: isMobile ? '200px' : '300px',
                             position: 'relative'
                         }}>
-                            <div style={{ padding: '6px 12px', background: 'rgba(212, 175, 55, 0.1)', borderBottom: '1px solid rgba(212, 175, 55, 0.2)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ padding: '6px 12px', background: 'rgba(212, 175, 55, 0.1)', borderBottom: '1px solid rgba(212, 175, 55, 0.2)', display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                                 <Terminal size={10} color="#d4af37" />
                                 <span style={{ fontSize: '0.55rem', fontWeight: '900', color: '#d4af37', letterSpacing: '1px' }}>LOG_</span>
                             </div>
                             <div
                                 className="scroll-container"
                                 ref={scrollContainerRef}
-                                style={{ flex: 1, padding: '10px', fontFamily: 'monospace', fontSize: isMobile ? '0.7rem' : '0.85rem', color: '#ccc', overflowY: 'auto' }}
+                                style={{ flex: 1, height: '100%', padding: '10px', fontFamily: 'monospace', fontSize: isMobile ? '0.7rem' : '0.85rem', color: '#ccc', overflowY: 'scroll' }}
                             >
                                 {battleLogs.map(log => (
                                     <div key={log.id} style={{ marginBottom: '3px', borderLeft: `2px solid ${log.color || '#333'}`, paddingLeft: '6px' }}>
@@ -640,7 +678,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
             {/* Mobs List */}
             <div className="glass-panel scroll-container" style={{ flex: 1, padding: isMobile ? '10px' : '15px', background: 'rgba(10, 10, 15, 0.4)', overflowY: 'auto' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingBottom: '40px' }}>
-                    {(MONSTERS[activeTier] || []).filter(m => !m.id.startsWith('BOSS_')).map(mob => {
+                    {(MONSTERS[activeTier] || []).filter(m => !m.id.startsWith('BOSS_') && !m.dungeonOnly).slice(0, 2).map(mob => {
                         const playerDmg = stats.damage;
                         const roundsToKill = Math.ceil(mob.health / playerDmg);
                         const ttk = roundsToKill * 3;

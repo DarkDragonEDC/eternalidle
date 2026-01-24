@@ -454,13 +454,16 @@ setInterval(async () => {
                         console.log(`[TICKER] Emitting update for ${user.email} (Status change: ${!!result.status})`);
                         sockets.forEach(s => {
                             // Fix: Emit if message OR combatUpdate OR dungeonUpdate exists
-                            if (result.message || result.combatUpdate || (result.dungeonUpdate && result.dungeonUpdate.message)) {
+                            const shouldEmit = result.message || result.combatUpdate || (result.dungeonUpdate && result.dungeonUpdate.message) || result.healingUpdate;
+
+                            if (shouldEmit) {
                                 s.emit('action_result', {
                                     success: result.success,
                                     message: result.message || (result.combatUpdate?.details?.message) || (result.dungeonUpdate?.message),
                                     leveledUp: result.leveledUp,
                                     combatUpdate: result.combatUpdate,
-                                    dungeonUpdate: result.dungeonUpdate
+                                    dungeonUpdate: result.dungeonUpdate,
+                                    healingUpdate: result.healingUpdate
                                 });
                             }
                             if (result.status) {

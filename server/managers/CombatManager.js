@@ -12,9 +12,10 @@ export class CombatManager {
             throw new Error("Cannot start combat while in a dungeon");
         }
 
+        const tierNum = Number(tier);
         let mobData = null;
-        if (MONSTERS[tier]) {
-            mobData = MONSTERS[tier].find(m => m.id === mobId);
+        if (MONSTERS[tierNum]) {
+            mobData = MONSTERS[tierNum].find(m => m.id === mobId);
         }
 
         if (!mobData) throw new Error("Monster not found");
@@ -30,7 +31,7 @@ export class CombatManager {
 
         char.state.combat = {
             mobId: mobData.id,
-            tier: tier,
+            tier: tierNum,
             mobName: mobData.name,
             mobMaxHealth: mobMaxHP,
             mobHealth: mobMaxHP,
@@ -77,12 +78,15 @@ export class CombatManager {
         const playerStats = this.gameManager.inventoryManager.calculateStats(char);
         const playerDmg = playerStats.damage;
 
+        let mobData = null;
+        const currentTier = Number(combat.tier);
+        if (MONSTERS[currentTier]) {
+            mobData = MONSTERS[currentTier].find(m => m.id === combat.mobId);
+        }
+        combat.tier = currentTier; // Sanitização em tempo de execução
+
         let mobDmg = combat.mobDamage;
         if (typeof mobDmg === 'undefined') {
-            let mobData = null;
-            if (MONSTERS[combat.tier]) {
-                mobData = MONSTERS[combat.tier].find(m => m.id === combat.mobId);
-            }
             mobDmg = mobData ? mobData.damage : 5;
         }
 
@@ -91,10 +95,6 @@ export class CombatManager {
 
         let mobDef = combat.mobDefense;
         if (typeof mobDef === 'undefined') {
-            let mobData = null;
-            if (MONSTERS[combat.tier]) {
-                mobData = MONSTERS[combat.tier].find(m => m.id === combat.mobId);
-            }
             mobDef = mobData ? (mobData.defense || 0) : 0;
         }
         const mobMitigation = mobDef / (mobDef + 2000);
