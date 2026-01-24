@@ -141,8 +141,11 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 textAlign: 'center'
                             }}
                         >
-                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '1.5rem', width: '100%', position: 'relative' }}>
-                                <h3 style={{ color: '#d4af37', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem', width: '100%', position: 'relative' }}>
+                                {item.icon && <img src={item.icon} style={{ width: 64, height: 64, objectFit: 'contain', marginBottom: '10px', filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.3))' }} alt={item.name} />}
+                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+                                    <h3 style={{ color: '#d4af37', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
+                                </div>
                                 <button
                                     onClick={onClose}
                                     style={{ background: 'transparent', border: 'none', color: 'rgb(136, 136, 136)', cursor: 'pointer', padding: '4px', position: 'absolute', right: '-10px', top: '-10px' }}
@@ -357,8 +360,11 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 textAlign: 'center'
                             }}
                         >
-                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '1.5rem', width: '100%', position: 'relative' }}>
-                                <h3 style={{ color: '#d4af37', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem', width: '100%', position: 'relative' }}>
+                                {item.icon && <img src={item.icon} style={{ width: 64, height: 64, objectFit: 'contain', marginBottom: '10px', filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.3))' }} alt={item.name} />}
+                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+                                    <h3 style={{ color: '#d4af37', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
+                                </div>
                                 <button
                                     onClick={onClose}
                                     style={{ background: 'transparent', border: 'none', color: 'rgb(136, 136, 136)', cursor: 'pointer', padding: '4px', position: 'absolute', right: '-10px', top: '-10px' }}
@@ -582,8 +588,11 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 textAlign: 'center'
                             }}
                         >
-                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '1.5rem', width: '100%', position: 'relative' }}>
-                                <h3 style={{ color: '#d4af37', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem', width: '100%', position: 'relative' }}>
+                                {item.icon && <img src={item.icon} style={{ width: 64, height: 64, objectFit: 'contain', marginBottom: '10px', filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.3))' }} alt={item.name} />}
+                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+                                    <h3 style={{ color: '#d4af37', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
+                                </div>
                                 <button
                                     onClick={onClose}
                                     style={{ background: 'transparent', border: 'none', color: 'rgb(136, 136, 136)', cursor: 'pointer', padding: '4px', position: 'absolute', right: '-10px', top: '-10px' }}
@@ -748,7 +757,11 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                     border: '1px solid rgba(212, 175, 55, 0.2)',
                                     color: '#d4af37'
                                 }}>
-                                    {type === 'GATHERING' || type === 'REFINING' ? <Box size={24} /> : <Target size={24} />}
+                                    {item.icon ? (
+                                        <img src={item.icon} style={{ width: '130%', height: '130%', objectFit: 'contain' }} alt="" />
+                                    ) : (
+                                        type === 'GATHERING' || type === 'REFINING' ? <Box size={24} /> : <Target size={24} />
+                                    )}
                                 </div>
                                 <div>
                                     <h2 style={{ margin: 0, color: '#fff', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>

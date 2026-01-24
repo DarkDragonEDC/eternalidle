@@ -58,6 +58,13 @@ const RankingPanel = ({ socket, isMobile }) => {
     const [mainCategory, setMainCategory] = useState('GENERAL');
     const [subCategory, setSubCategory] = useState('LEVEL');
 
+    const formatSilver = (num) => {
+        if (num >= 1000000000) return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+        if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+        return num.toLocaleString();
+    };
+
     useEffect(() => {
         if (!socket) return;
 
@@ -250,7 +257,7 @@ const RankingPanel = ({ socket, isMobile }) => {
                                     {/* Valor */}
                                     <div style={{ textAlign: 'right' }}>
                                         <div style={{ fontSize: '1.1rem', fontWeight: '900', color: index === 0 ? '#d4af37' : '#fff' }}>
-                                            {subCategory === 'SILVER' ? char.value.toLocaleString() : char.value}
+                                            {subCategory === 'SILVER' ? formatSilver(char.value) : char.value}
                                         </div>
                                         <div style={{ fontSize: '0.55rem', color: '#555', fontWeight: 'bold' }}>
                                             {char.label}

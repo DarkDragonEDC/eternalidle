@@ -217,10 +217,10 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                         justifyContent: 'center',
                                         border: '1px solid rgba(255,255,255,0.1)'
                                     }}>
-                                        <Star size={24} color={getTierColor(currentItem.tier)} />
+                                        <Star size={24} color="#666" />
                                     </div>
                                     <div>
-                                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: getTierColor(resolvedCurrent?.tier || currentItem.tier), display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                             {resolvedCurrent?.qualityName && resolvedCurrent.qualityName !== 'Normal' ? `${resolvedCurrent.qualityName} ` : ''}{resolvedCurrent?.name || currentItem.name || currentItem.id}
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); onShowInfo(currentItem); }}
@@ -229,7 +229,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                                 <Info size={14} color="#fff" />
                                             </button>
                                         </div>
-                                        <div style={{ fontSize: '0.8rem', color: getTierColor(currentItem.tier) }}>Tier {currentItem.tier} • IP {currentItem.ip || 0}</div>
+                                        <div style={{ fontSize: '0.8rem', color: '#888' }}>Tier {currentItem.tier} • IP {currentItem.ip || 0}</div>
                                     </div>
                                 </div>
                                 <button
@@ -305,7 +305,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                                     position: 'relative',
                                                     border: item.quality > 0 ? `1px solid ${item.rarityColor}55` : 'none'
                                                 }}>
-                                                    <Star size={20} color={item.quality > 0 ? item.rarityColor : '#aaa'} />
+                                                    <Star size={20} color="#aaa" />
                                                     <div style={{
                                                         position: 'absolute',
                                                         bottom: -5,
@@ -323,7 +323,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                                     }}>{item.qty}</div>
                                                 </div>
                                                 <div>
-                                                    <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: item.quality > 0 ? item.rarityColor : '#eee', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                         {item.qualityName && item.qualityName !== 'Normal' ? `${item.qualityName} ` : ''}{item.name}
                                                         {isItemRecommended && (
                                                             <span style={{ fontSize: '0.6rem', background: 'var(--accent)', color: '#000', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>BEST</span>

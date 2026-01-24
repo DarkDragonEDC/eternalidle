@@ -248,8 +248,8 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
             <div className="scroll-container" style={{ flex: 1, paddingRight: '5px', overflowY: 'auto' }}>
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(80px, 1fr))' : 'repeat(4, minmax(0, 1fr))',
-                    gap: '8px',
+                    gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(80px, 1fr))' : 'repeat(5, 1fr)',
+                    gap: isMobile ? '8px' : '12px',
                     paddingBottom: '80px'
                 }}>
                     {itemsToRender.map((item, index) => {
@@ -273,56 +273,33 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                 key={item.id}
                                 onClick={() => handleItemClick(item)}
                                 style={{
-                                    aspectRatio: '1/1',
-                                    background: 'rgba(0,0,0,0.3)',
-                                    borderRadius: '12px',
-                                    border: borderColor !== 'transparent' ? `1px solid ${borderColor}` : '1px solid rgba(255,255,255,0.05)',
-                                    position: 'relative',
-                                    cursor: 'pointer',
+                                    background: 'rgba(0,0,0,0.2)',
+                                    border: '1px solid var(--border)',
+                                    borderRadius: '10px',
+                                    padding: '10px',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
-                                    justifyContent: 'center',
+                                    justifyContent: 'space-between',
+                                    aspectRatio: '1/1',
+                                    cursor: 'pointer',
+                                    position: 'relative',
                                     transition: '0.2s',
-                                    minHeight: '80px',
-                                    boxShadow: borderColor !== 'transparent' ? `0 0 10px ${borderColor}33` : 'none'
+                                    minHeight: '80px'
                                 }}
                             >
-                                <div style={{ position: 'absolute', top: 4, left: 4, fontSize: '0.6rem', fontWeight: 'bold', color: tierColor }}>
-                                    T{item.tier}
-                                </div>
-                                <div style={{ position: 'absolute', top: 4, right: 4, fontSize: '0.65rem', fontWeight: 'bold', color: '#fff' }}>
-                                    x{item.qty}
-                                </div>
-                                <div
-                                    style={{
-                                        position: 'absolute',
-                                        bottom: 2,
-                                        right: 4,
-                                        opacity: 0.6,
-                                        cursor: 'help',
-                                        zIndex: 10
-                                    }}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onShowInfo(item);
-                                    }}
-                                >
-                                    <Info size={12} color="#fff" />
+                                <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: '#fff', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>T{item.tier}</div>
+                                <div style={{ position: 'absolute', top: 6, right: 6, fontSize: '0.7rem', color: '#fff', fontWeight: 'bold' }}>x{item.qty}</div>
+
+                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', overflow: 'hidden' }}>
+                                    {item.icon ? (
+                                        <img src={item.icon} alt={item.name} style={{ width: '130%', height: '130%', objectFit: 'contain' }} />
+                                    ) : (
+                                        <Package size={32} color="#666" style={{ opacity: 0.8 }} />
+                                    )}
                                 </div>
 
-                                <Package size={28} color={tierColor} />
-
-                                <div style={{
-                                    marginTop: '4px',
-                                    fontSize: '0.65rem',
-                                    textAlign: 'center',
-                                    color: '#ccc',
-                                    width: '90%',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis'
-                                }}>
+                                <div style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'bold', textAlign: 'center', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                     {item.name}
                                 </div>
                             </div>

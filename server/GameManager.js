@@ -88,26 +88,78 @@ export class GameManager {
                 updated = true;
             }
 
-            if (catchup && data.current_activity && data.activity_started_at) {
+            if (catchup && (data.current_activity || data.state.combat) && data.last_saved) {
                 const now = new Date();
-                const lastSaved = data.last_saved ? new Date(data.last_saved).getTime() : new Date(data.activity_started_at).getTime();
+                const lastSaved = new Date(data.last_saved).getTime();
                 const elapsedSeconds = (now.getTime() - lastSaved) / 1000;
-                const timePerAction = data.current_activity.time_per_action || 3;
 
-                if (elapsedSeconds >= timePerAction) {
-                    const actionsPossible = Math.floor(elapsedSeconds / timePerAction);
-                    const actionsToProcess = Math.min(actionsPossible, data.current_activity.actions_remaining);
+                // Unified report structure
+                let finalReport = {
+                    totalTime: 0,
+                    itemsGained: {},
+                    xpGained: {},
+                    combat: null
+                };
 
-                    if (actionsToProcess > 0) {
-                        const offlineReport = await this.processBatchActions(data, actionsToProcess);
-                        // Only show offline report if significantly offline (e.g. > 30 seconds)
-                        // This prevents the modal from popping up during normal heartbeat/lag spikes
-                        if (offlineReport.totalTime > 30) {
-                            data.offlineReport = offlineReport;
+                if (data.current_activity && data.activity_started_at) {
+                    const timePerAction = data.current_activity.time_per_action || 3;
+                    if (elapsedSeconds >= timePerAction) {
+                        const actionsPossible = Math.floor(elapsedSeconds / timePerAction);
+                        const actionsToProcess = Math.min(actionsPossible, data.current_activity.actions_remaining);
+
+                        if (actionsToProcess > 0) {
+                            const activityReport = await this.processBatchActions(data, actionsToProcess);
+                            if (activityReport.totalTime > 30) {
+                                finalReport.totalTime += activityReport.totalTime;
+                                // Merge items
+                                for (const [id, qty] of Object.entries(activityReport.itemsGained)) {
+                                    finalReport.itemsGained[id] = (finalReport.itemsGained[id] || 0) + qty;
+                                }
+                                // Merge XP
+                                for (const [skill, qty] of Object.entries(activityReport.xpGained)) {
+                                    finalReport.xpGained[skill] = (finalReport.xpGained[skill] || 0) + qty;
+                                }
+                                updated = true;
+                            }
                         }
-                        updated = true;
-                        data.last_saved = now.toISOString();
                     }
+                }
+
+                if (data.state.combat) {
+                    const stats = this.inventoryManager.calculateStats(data);
+                    const atkSpeed = Number(stats.attackSpeed) || 1000;
+                    const secondsPerRound = atkSpeed / 1000;
+
+                    if (elapsedSeconds >= secondsPerRound) {
+                        const roundsToProcess = Math.floor(elapsedSeconds / secondsPerRound);
+                        const maxRounds = Math.min(roundsToProcess, 43200);
+
+                        if (maxRounds > 0) {
+                            const combatReport = await this.processBatchCombat(data, maxRounds);
+                            if (combatReport.totalTime > 30) {
+                                finalReport.totalTime += combatReport.totalTime;
+                                finalReport.combat = {
+                                    ...combatReport,
+                                    monsterName: combatReport.monsterName
+                                };
+
+                                // Merge items
+                                for (const [id, qty] of Object.entries(combatReport.itemsGained)) {
+                                    finalReport.itemsGained[id] = (finalReport.itemsGained[id] || 0) + qty;
+                                }
+                                // Merge XP
+                                for (const [skill, qty] of Object.entries(combatReport.xpGained)) {
+                                    finalReport.xpGained[skill] = (finalReport.xpGained[skill] || 0) + qty;
+                                }
+                                updated = true;
+                            }
+                        }
+                    }
+                }
+
+                if (updated) {
+                    data.offlineReport = finalReport;
+                    data.last_saved = now.toISOString();
                 }
             }
 
@@ -169,6 +221,56 @@ export class GameManager {
             }
         }
         return { processed, leveledUp, itemsGained, xpGained, totalTime: processed * (char.current_activity?.time_per_action || 3) };
+    }
+
+    async processBatchCombat(char, rounds) {
+        let kills = 0;
+        let combatXp = 0;
+        let silverGained = 0;
+        const itemsGained = {};
+        let died = false;
+        let foodConsumed = 0;
+
+        const stats = this.inventoryManager.calculateStats(char);
+        const atkSpeed = Number(stats.attackSpeed) || 1000;
+        const monsterName = char.state.combat?.mobName || "Unknown Monster";
+
+        for (let i = 0; i < rounds; i++) {
+            // Check food before each round
+            const foodResult = this.processFood(char);
+            if (foodResult.used) foodConsumed += foodResult.amount;
+
+            const result = await this.combatManager.processCombatRound(char);
+            if (!result || !char.state.combat) {
+                if (!char.state.combat && char.state.health <= 0) died = true;
+                break;
+            }
+
+            if (result.details) {
+                if (result.details.victory) {
+                    kills++;
+                    combatXp += result.details.xpGained || 0;
+                    silverGained += result.details.silverGained || 0;
+                    if (result.details.lootGained) {
+                        result.details.lootGained.forEach(itemId => {
+                            itemsGained[itemId] = (itemsGained[itemId] || 0) + 1;
+                        });
+                    }
+                }
+            }
+        }
+
+        return {
+            processedRounds: rounds,
+            kills,
+            xpGained: { COMBAT: combatXp },
+            silverGained,
+            itemsGained,
+            died,
+            foodConsumed,
+            totalTime: (rounds * atkSpeed) / 1000,
+            monsterName
+        };
     }
 
     async createCharacter(userId, name) {

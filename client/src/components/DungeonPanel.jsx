@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Skull, Map as MapIcon, Shield, Lock, ChevronRight, AlertTriangle, Star, Coins, History, Heart, Sword, Package, Layers, Clock, Sparkles } from 'lucide-react';
-import { ITEMS } from '@shared/items';
+import { ITEMS, resolveItem } from '@shared/items';
 import { MONSTERS } from '@shared/monsters';
 import { DUNGEONS } from '@shared/dungeons';
 import DungeonHistoryModal from './DungeonHistoryModal';
@@ -264,7 +264,22 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                     fontWeight: '900',
                     zIndex: 1
                 }}>
-                    {dungeonState.repeatCount > 0 ? `REMAINING: ${dungeonState.repeatCount}` : "FINAL RUN"}
+                    {(() => {
+                        let total, current;
+                        if (dungeonState.initialRepeats !== undefined) {
+                            // New logic (Server-driven)
+                            total = dungeonState.initialRepeats + 1;
+                            current = total - dungeonState.repeatCount;
+                        } else {
+                            // Fallback logic for existing active sessions
+                            // inferredTotal = completed (lootLog) + current (1) + remaining (repeatCount)
+                            const completed = (dungeonState.lootLog || []).length;
+                            const remaining = dungeonState.repeatCount || 0;
+                            total = completed + 1 + remaining;
+                            current = completed + 1;
+                        }
+                        return `RUN: ${current} / ${total}`;
+                    })()}
                 </div>
 
                 {/* Real-time Loot Summary (Aggregated) */}
@@ -524,7 +539,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                                     {mapQty}/1
                                                 </div>
                                                 <div style={{ fontSize: '1.2rem', opacity: 0.8 }}>
-                                                    <MapIcon size={28} color="#ae00ff" />
+                                                    <MapIcon size={28} color="#666" />
                                                 </div>
                                             </div>
 
@@ -571,13 +586,20 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                     <div>
                                         <h4 style={{ fontSize: '0.75rem', fontWeight: '600', color: '#8B8D91', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Possible Loot</h4>
                                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                                            {lootItems.map((loot, idx) => (
-                                                <div key={`${loot.id}-${idx}`} title={`${loot.id.replace(/_/g, ' ')} (${(loot.chance * 100).toFixed(1)}%)`} style={{ width: '36px', height: '36px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #3D4255', background: '#2A3041', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    <div style={{ width: '100%', height: '100%', background: '#1E2330', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                        {loot.id.includes('CREST') ? <Star size={16} color="#ff4444" /> : <Package size={16} color="#ae00ff" />}
+                                            {lootItems.map((loot, idx) => {
+                                                const item = resolveItem(loot.id);
+                                                return (
+                                                    <div key={`${loot.id}-${idx}`} title={`${loot.id.replace(/_/g, ' ')} (${(loot.chance * 100).toFixed(1)}%)`} style={{ width: '36px', height: '36px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #3D4255', background: '#2A3041', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        <div style={{ width: '100%', height: '100%', background: '#1E2330', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                                                            {item?.icon ? (
+                                                                <img src={item.icon} alt={item.name} style={{ width: '130%', height: '130%', objectFit: 'contain' }} />
+                                                            ) : (
+                                                                loot.id.includes('CREST') ? <Star size={16} color="#666" /> : <Package size={16} color="#666" />
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 </div>

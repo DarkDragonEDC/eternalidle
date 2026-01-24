@@ -24,7 +24,7 @@ import {
   Axe, Pickaxe, Target, Shield, Sword,
   Star, Layers, Box, Castle, Lock, Menu, X, Tag, Clock, Heart, LogOut
 } from 'lucide-react';
-import { ITEMS } from '@shared/items';
+import { ITEMS, resolveItem } from '@shared/items';
 import { calculateNextLevelXP, XP_TABLE } from '@shared/skills';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOptimisticState } from './hooks/useOptimisticState';
@@ -59,6 +59,13 @@ const mapTabCategoryToSkill = (tab, category) => {
   return maps[tab.toLowerCase()]?.[category.toUpperCase()];
 };
 
+const formatSilver = (num) => {
+  if (num >= 1000000000) return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+  if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+  return num.toLocaleString();
+};
+
 function App() {
   const [session, setSession] = useState(null);
   const [socket, setSocket] = useState(null);
@@ -85,6 +92,7 @@ function App() {
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCombatHistory, setShowCombatHistory] = useState(false);
+  const [showFullNumbers, setShowFullNumbers] = useState(false);
 
   useEffect(() => {
     if (gameState?.state?.notifications) {
@@ -568,12 +576,26 @@ function App() {
                           alignItems: 'center',
                           justifyContent: 'center',
                           border: '1px solid rgba(255, 255, 255, 0.1)',
-                          flexShrink: 0
+                          flexShrink: 0,
+                          overflow: 'hidden'
                         }}>
-                          {isGathering ? (
-                            <Pickaxe size={24} style={{ opacity: 0.7 }} color={locked ? '#555' : 'var(--accent)'} />
+                          {item.icon ? (
+                            <img
+                              src={item.icon}
+                              alt={item.name}
+                              style={{
+                                width: '130%',
+                                height: '130%',
+                                objectFit: 'contain',
+                                filter: locked ? 'grayscale(100%) opacity(0.5)' : 'none'
+                              }}
+                            />
                           ) : (
-                            <Box size={24} style={{ opacity: 0.7 }} color={locked ? '#555' : 'var(--accent)'} />
+                            isGathering ? (
+                              <Pickaxe size={24} style={{ opacity: 0.7 }} color={locked ? '#555' : 'var(--accent)'} />
+                            ) : (
+                              <Box size={24} style={{ opacity: 0.7 }} color={locked ? '#555' : 'var(--accent)'} />
+                            )
                           )}
                         </div>
 
@@ -741,9 +763,23 @@ function App() {
                           alignItems: 'center',
                           justifyContent: 'center',
                           border: '1px solid rgba(255, 255, 255, 0.1)',
-                          flexShrink: 0
+                          flexShrink: 0,
+                          overflow: 'hidden'
                         }}>
-                          {locked ? <Lock size={20} color="#555" /> : <Layers size={20} style={{ opacity: 0.7 }} color="var(--accent)" />}
+                          {item.icon ? (
+                            <img
+                              src={item.icon}
+                              alt={item.name}
+                              style={{
+                                width: '130%',
+                                height: '130%',
+                                objectFit: 'contain',
+                                filter: locked ? 'grayscale(100%) opacity(0.5)' : 'none'
+                              }}
+                            />
+                          ) : (
+                            locked ? <Lock size={20} color="#555" /> : <Layers size={20} style={{ opacity: 0.7 }} color="var(--accent)" />
+                          )}
                         </div>
 
                         {/* Content */}
@@ -922,22 +958,30 @@ function App() {
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 12 : 20 }}>
-            {/* Silver Display */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              background: 'rgba(212, 175, 55, 0.08)',
-              padding: '6px 12px',
-              borderRadius: '8px',
-              border: '1px solid rgba(212, 175, 55, 0.2)',
-              marginRight: isMobile ? '4px' : '8px'
-            }}>
+            <button
+              onClick={() => setShowFullNumbers(!showFullNumbers)}
+              style={{
+                background: 'rgba(212, 175, 55, 0.08)',
+                border: '1px solid rgba(212, 175, 55, 0.2)',
+                borderRadius: '8px',
+                padding: '6px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                marginRight: isMobile ? '4px' : '8px',
+                transition: '0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(212, 175, 55, 0.15)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(212, 175, 55, 0.08)'}
+            >
               <Coins size={16} color="#d4af37" />
               <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#d4af37', fontFamily: 'monospace' }}>
-                {(displayedGameState?.state?.silver || 0).toLocaleString()}
+                {showFullNumbers
+                  ? (displayedGameState?.state?.silver || 0).toLocaleString()
+                  : formatSilver(displayedGameState?.state?.silver || 0)}
               </span>
-            </div>
+            </button>
 
             <NotificationCenter
               notifications={notifications}

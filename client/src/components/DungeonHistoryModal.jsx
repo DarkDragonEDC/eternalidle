@@ -118,18 +118,36 @@ const DungeonHistoryModal = ({ isOpen, onClose, history }) => {
 
                                         {run.loot_gained && run.loot_gained.length > 0 && (
                                             <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                                                {run.loot_gained.map((lootStr, idx) => (
-                                                    <span key={idx} style={{
-                                                        fontSize: '0.65rem',
-                                                        background: 'rgba(174, 0, 255, 0.1)',
-                                                        color: '#ae00ff',
-                                                        padding: '2px 6px',
-                                                        borderRadius: '4px',
-                                                        border: '1px solid rgba(174, 0, 255, 0.2)'
-                                                    }}>
-                                                        {lootStr}
-                                                    </span>
-                                                ))}
+                                                {run.loot_gained.map((lootStr, idx) => {
+                                                    const match = lootStr.match(/^(\d+)x\s+(.+)$/);
+                                                    let displayStr = lootStr;
+                                                    let itemId = lootStr;
+
+                                                    if (match) {
+                                                        itemId = match[2];
+                                                    }
+
+                                                    const item = resolveItem(itemId);
+
+                                                    return (
+                                                        <span key={idx} style={{
+                                                            fontSize: '0.65rem',
+                                                            background: 'rgba(255, 255, 255, 0.1)',
+                                                            color: '#aaa',
+                                                            padding: '2px 6px',
+                                                            borderRadius: '4px',
+                                                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '4px'
+                                                        }}>
+                                                            {item?.icon && (
+                                                                <img src={item.icon} alt="" style={{ width: '1.2em', height: '1.2em', objectFit: 'contain' }} />
+                                                            )}
+                                                            {displayStr}
+                                                        </span>
+                                                    );
+                                                })}
                                             </div>
                                         )}
                                     </div>

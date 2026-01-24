@@ -139,7 +139,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
         // Resolve item to ensure we have latest stats and rarity color (even for Normal items if logic changes, but mostly for _Q items)
         const item = rawItem ? { ...rawItem, ...resolveItem(rawItem.id || rawItem.item_id) } : null;
 
-        const tierColor = item ? getTierColor(item.tier) : 'rgba(255,255,255,0.05)';
+        const tierColor = item ? '#666' : 'rgba(255,255,255,0.05)';
 
         // Logic: STRICTLY use rarity color. Tier color does NOT affect border.
         // Normal items (Quality 0) will use their defined rarity color (usually White/#fff).

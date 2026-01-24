@@ -171,12 +171,22 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                             <div style={{ position: 'absolute', top: -4, left: -4, transform: 'rotate(-10deg)' }}>
                                 <Sword size={20} color="#ff4444" />
                             </div>
-                            <div style={{ position: 'absolute', bottom: -4, right: -4, transform: 'rotate(10deg)' }}>
-                                {React.cloneElement(getActivityIcon(), { size: 20 })}
+                            <div style={{ position: 'absolute', bottom: -4, right: -4, transform: 'rotate(10deg)', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                {(() => {
+                                    const item = resolveItem(activity?.item_id);
+                                    if (item?.icon) return <img src={item.icon} style={{ width: '130%', height: '130%', objectFit: 'contain' }} alt="" />;
+                                    return React.cloneElement(getActivityIcon(), { size: 20 });
+                                })()}
                             </div>
                         </>
                     ) : (
-                        (combat || (dungeonState?.active)) ? <Skull size={24} color="#ff4444" /> : getActivityIcon()
+                        (combat || (dungeonState?.active)) ? <Skull size={24} color="#ff4444" /> : (
+                            (() => {
+                                const item = resolveItem(activity?.item_id);
+                                if (item?.icon) return <img src={item.icon} style={{ width: '130%', height: '130%', objectFit: 'contain' }} alt="" />;
+                                return getActivityIcon();
+                            })()
+                        )
                     )}
                     <motion.div
                         animate={{ opacity: [0.5, 1, 0.5], scale: [1, 1.1, 1] }}
@@ -266,7 +276,11 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                                     animate={{ rotate: isRefining || isCrafting ? 360 : 0, y: isGathering ? [0, -2, 0] : 0 }}
                                                     transition={{ repeat: Infinity, duration: isGathering ? 0.5 : 2, ease: "linear" }}
                                                 >
-                                                    {React.cloneElement(getActivityIcon(), { size: 18 })}
+                                                    {(() => {
+                                                        const item = resolveItem(activity?.item_id);
+                                                        if (item?.icon) return <img src={item.icon} style={{ width: '130%', height: '130%', objectFit: 'contain' }} alt="" />;
+                                                        return React.cloneElement(getActivityIcon(), { size: 18 });
+                                                    })()}
                                                 </motion.div>
                                             </div>
                                             <div>
@@ -649,7 +663,20 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                             </span>
                                             {dungeonState.repeatCount > 0 && (
                                                 <span style={{ fontSize: '0.7rem', color: '#aaa' }}>
-                                                    Queue: {dungeonState.repeatCount}
+                                                    {(() => {
+                                                        let total, current;
+                                                        if (dungeonState.initialRepeats !== undefined) {
+                                                            total = dungeonState.initialRepeats + 1;
+                                                            current = total - dungeonState.repeatCount;
+                                                        } else {
+                                                            // Fallback
+                                                            const completed = (dungeonState.lootLog || []).length;
+                                                            const remaining = dungeonState.repeatCount || 0;
+                                                            total = completed + 1 + remaining;
+                                                            current = completed + 1;
+                                                        }
+                                                        return `RUN: ${current}/${total}`;
+                                                    })()}
                                                 </span>
                                             )}
                                         </div>

@@ -18,6 +18,13 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
     const [marketListings, setMarketListings] = useState([]);
     const [notification, setNotification] = useState(null);
 
+    const formatSilver = (num) => {
+        if (num >= 1000000000) return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+        if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+        return num.toLocaleString();
+    };
+
     // Auto-dismiss notification
     useEffect(() => {
         if (notification) {
@@ -336,13 +343,22 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
                                                 border: `1px solid ${l.item_data.rarityColor || 'rgba(255, 255, 255, 0.1)'}`,
-                                                flexShrink: 0
+                                                flexShrink: 0,
+                                                position: 'relative',
+                                                overflow: 'hidden'
                                             }}>
-                                                <span style={{ fontSize: '1rem', fontWeight: 'bold', color: getTierColor(l.item_data.tier) }}>T{l.item_data.tier}</span>
+                                                {l.item_data.icon ? (
+                                                    <img src={l.item_data.icon} alt={l.item_data.name} style={{ width: '130%', height: '130%', objectFit: 'contain', opacity: 1.0 }} />
+                                                ) : (
+                                                    <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{l.item_data.tier}</span>
+                                                )}
+                                                <div style={{ position: 'absolute', top: 2, left: 2, fontSize: '0.6rem', fontWeight: '900', color: '#fff', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>
+                                                    T{l.item_data.tier}
+                                                </div>
                                             </div>
 
                                             <div style={{ flex: '2 1 0%', minWidth: '150px' }}>
-                                                <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: l.item_data.rarityColor || 'rgb(255, 255, 255)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                                <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                                     <span>{l.item_data.qualityName && l.item_data.qualityName !== 'Normal' ? `${l.item_data.qualityName} ` : ''}{l.item_data.name}</span>
                                                     <button onClick={() => onShowInfo(l.item_data)} style={{ background: 'none', border: 'none', padding: '0', color: 'var(--text-dim)', cursor: 'pointer', display: 'flex' }}>
                                                         <Info size={14} />
@@ -361,7 +377,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                             <div style={{ flex: '1 1 0%', textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '120px' }}>
                                                 <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '2px' }}>{l.amount}x units</div>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--accent)' }}>
-                                                    <Coins size={16} /> {l.price.toLocaleString()}
+                                                    <Coins size={16} /> {formatSilver(l.price)}
                                                 </div>
                                             </div>
 
@@ -430,14 +446,18 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                 transition: '0.2s'
                                             }}
                                         >
-                                            <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: tierColor, fontWeight: 'bold' }}>T{data.tier}</div>
+                                            <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: '#fff', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>T{data.tier}</div>
                                             <div style={{ position: 'absolute', top: 6, right: 6, fontSize: '0.7rem', color: '#fff', fontWeight: 'bold' }}>x{qty}</div>
 
-                                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                <Package size={32} color={tierColor} />
+                                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', overflow: 'hidden' }}>
+                                                {data.icon ? (
+                                                    <img src={data.icon} alt={data.name} style={{ width: '130%', height: '130%', objectFit: 'contain' }} />
+                                                ) : (
+                                                    <Package size={32} color="#666" style={{ opacity: 0.8 }} />
+                                                )}
                                             </div>
 
-                                            <div style={{ fontSize: '0.7rem', color: '#fff', fontWeight: 'bold', textAlign: 'center', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            <div style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'bold', textAlign: 'center', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                 {data.name}
                                             </div>
                                         </button>
@@ -482,13 +502,22 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
                                                 border: `1px solid ${l.item_data.rarityColor || 'rgba(255, 255, 255, 0.1)'}`,
-                                                flexShrink: 0
+                                                flexShrink: 0,
+                                                position: 'relative',
+                                                overflow: 'hidden'
                                             }}>
-                                                <span style={{ fontSize: '1rem', fontWeight: 'bold', color: getTierColor(l.item_data.tier) }}>T{l.item_data.tier}</span>
+                                                {l.item_data.icon ? (
+                                                    <img src={l.item_data.icon} alt={l.item_data.name} style={{ width: '130%', height: '130%', objectFit: 'contain', opacity: 1.0 }} />
+                                                ) : (
+                                                    <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{l.item_data.tier}</span>
+                                                )}
+                                                <div style={{ position: 'absolute', top: 2, left: 2, fontSize: '0.6rem', fontWeight: '900', color: '#fff', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>
+                                                    T{l.item_data.tier}
+                                                </div>
                                             </div>
 
                                             <div style={{ flex: '2 1 0%', minWidth: '150px' }}>
-                                                <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: l.item_data.rarityColor || 'rgb(255, 255, 255)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                                <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                                     <span>{l.item_data.qualityName && l.item_data.qualityName !== 'Normal' ? `${l.item_data.qualityName} ` : ''}{l.item_data.name}</span>
                                                 </div>
                                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '2px', display: 'flex', gap: '15px' }}>
@@ -501,7 +530,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                             <div style={{ flex: '1 1 0%', textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '120px' }}>
                                                 <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '2px' }}>{l.amount}x units</div>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--accent)' }}>
-                                                    <Coins size={16} /> {l.price.toLocaleString()}
+                                                    <Coins size={16} /> {formatSilver(l.price)}
                                                 </div>
                                             </div>
 
@@ -564,7 +593,11 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                 }
 
                                                 if (c.type !== 'SOLD_ITEM') {
-                                                    icon = <Package size={24} color={tierColor} />;
+                                                    if (data.icon) {
+                                                        icon = <img src={data.icon} alt={data.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />;
+                                                    } else {
+                                                        icon = <Package size={24} color="#666" style={{ opacity: 0.8 }} />;
+                                                    }
                                                 }
                                             }
                                         }
@@ -593,9 +626,10 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
                                                     border: isItem ? `1px solid ${tierColor}` : '1px solid var(--accent)',
-                                                    flexShrink: 0
+                                                    flexShrink: 0,
+                                                    overflow: 'hidden'
                                                 }}>
-                                                    {icon}
+                                                    {isItem && icon.props?.style ? React.cloneElement(icon, { style: { ...icon.props.style, width: '130%', height: '130%', objectFit: 'contain' } }) : icon}
                                                 </div>
                                                 <div style={{ flex: '2 1 0%', minWidth: '150px' }}>
                                                     <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -616,7 +650,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                     </div>
                                                     {c.silver ? (
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--accent)' }}>
-                                                            <Coins size={16} /> +{c.silver.toLocaleString()}
+                                                            <Coins size={16} /> +{formatSilver(c.silver)}
                                                         </div>
                                                     ) : (
                                                         <div style={{ height: '24px' }}></div>

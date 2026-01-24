@@ -96,6 +96,18 @@ const genRefined = (type, idPrefix, rawId) => {
 genRaw('WOOD', 'WOOD'); genRaw('ORE', 'ORE'); genRaw('HIDE', 'HIDE'); genRaw('FIBER', 'FIBER');
 genRaw('FISH', 'FISH'); // Fish is special, but for now standard
 
+// Override Icon for T1 Wood (Test)
+if (ITEMS.RAW.WOOD[1]) ITEMS.RAW.WOOD[1].icon = '/items/T1_WOOD.png';
+ITEMS.RAW.WOOD[2].icon = '/items/T2_WOOD.png';
+ITEMS.RAW.WOOD[3].icon = '/items/T3_WOOD.png';
+ITEMS.RAW.WOOD[4].icon = '/items/T4_WOOD.png';
+ITEMS.RAW.WOOD[5].icon = '/items/T5_WOOD.png';
+ITEMS.RAW.WOOD[6].icon = '/items/T6_WOOD.png';
+ITEMS.RAW.WOOD[7].icon = '/items/T7_WOOD.png';
+ITEMS.RAW.WOOD[8].icon = '/items/T8_WOOD.png';
+ITEMS.RAW.WOOD[9].icon = '/items/T9_WOOD.png';
+ITEMS.RAW.WOOD[10].icon = '/items/T10_WOOD.png';
+
 // Generate Refined
 genRefined('PLANK', 'PLANK', 'WOOD');
 genRefined('BAR', 'BAR', 'ORE');

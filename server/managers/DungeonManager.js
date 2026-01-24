@@ -51,6 +51,7 @@ export class DungeonManager {
             started_at: new Date().toISOString(),
             status: 'PREPARING', // PREPARING -> FIGHTING -> WAITING_NEXT_WAVE -> WALKING -> BOSS -> COMPLETED
             repeatCount: repeatCount,
+            initialRepeats: repeatCount,
             wave_started_at: Date.now(),
             lootLog: []
         };
