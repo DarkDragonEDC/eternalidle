@@ -162,6 +162,27 @@ export class GameManager {
                     }
                 }
 
+                if (data.state.dungeon && !data.state.combat) {
+                    // Dungeons take at least 1 min per wave (WAVE_DURATION)
+                    if (elapsedSeconds >= 60) {
+                        const dungeonReport = await this.processBatchDungeon(data, elapsedSeconds);
+                        if (dungeonReport && dungeonReport.totalTime > 0) {
+                            finalReport.totalTime += dungeonReport.totalTime;
+                            finalReport.dungeon = dungeonReport;
+
+                            // Merge items
+                            for (const [id, qty] of Object.entries(dungeonReport.itemsGained)) {
+                                finalReport.itemsGained[id] = (finalReport.itemsGained[id] || 0) + qty;
+                            }
+                            // Merge XP
+                            for (const [skill, qty] of Object.entries(dungeonReport.xpGained)) {
+                                finalReport.xpGained[skill] = (finalReport.xpGained[skill] || 0) + qty;
+                            }
+                            updated = true;
+                        }
+                    }
+                }
+
                 if (updated) {
                     data.offlineReport = finalReport;
                     data.last_saved = now.toISOString();
@@ -273,8 +294,99 @@ export class GameManager {
             itemsGained,
             died,
             foodConsumed,
-            totalTime: (rounds * atkSpeed) / 1000,
+            totalTime: (i * atkSpeed) / 1000,
             monsterName
+        };
+    }
+
+    async processBatchDungeon(char, seconds) {
+        let remainingSeconds = seconds;
+        const itemsGained = {};
+        const xpGained = {};
+        let wavesCleared = 0;
+        let dungeonsTotalCleared = 0;
+        let died = false;
+
+        console.log(`[DUNGEON-BATCH] Starting batch for ${char.name}, ${seconds}s available.`);
+
+        while (remainingSeconds >= 5 && char.state.dungeon && !died) {
+            const dungeonState = char.state.dungeon;
+            // 60 seconds per wave (WAVE_DURATION)
+            if (remainingSeconds < 1) break;
+
+            const result = await this.dungeonManager.processDungeonTick(char);
+
+            if (!result) {
+                // No immediate change, check if we are in combat
+                if (char.state.combat) {
+                    // Process combat batch for this wave
+                    const combatReport = await this.processBatchCombat(char, 1000); // 1000 rounds should be plenty for one mob
+                    remainingSeconds -= combatReport.totalTime;
+
+                    // Merge gains
+                    for (const [id, qty] of Object.entries(combatReport.itemsGained)) {
+                        itemsGained[id] = (itemsGained[id] || 0) + qty;
+                    }
+                    for (const [skill, qty] of Object.entries(combatReport.xpGained)) {
+                        xpGained[skill] = (xpGained[skill] || 0) + qty;
+                    }
+
+                    if (combatReport.died) {
+                        died = true;
+                        break;
+                    }
+                } else {
+                    // Stuck or waiting? Skip a bit of time
+                    remainingSeconds -= 5;
+                }
+            } else {
+                // Tick produced a result (e.g. wave cleared, next wave started, completed)
+                if (result.dungeonUpdate) {
+                    const status = result.dungeonUpdate.status;
+                    if (status === 'COMPLETED') {
+                        dungeonsTotalCleared++;
+                        // Add completion rewards
+                        const rewards = result.dungeonUpdate.rewards;
+                        if (rewards) {
+                            xpGained['DUNGEONEERING'] = (xpGained['DUNGEONEERING'] || 0) + (rewards.xp || 0);
+                            xpGained['COMBAT'] = (xpGained['COMBAT'] || 0) + (rewards.xp || 0);
+                            if (rewards.items) {
+                                rewards.items.forEach(itemStr => {
+                                    const match = itemStr.match(/^(\d+)x (.+)$/);
+                                    if (match) {
+                                        const qty = parseInt(match[1]);
+                                        const id = match[2];
+                                        itemsGained[id] = (itemsGained[id] || 0) + qty;
+                                    } else {
+                                        itemsGained[itemStr] = (itemsGained[itemStr] || 0) + 1;
+                                    }
+                                });
+                            }
+                        }
+                    } else if (status === 'FAILED') {
+                        died = true;
+                    } else if (status === 'WALKING') {
+                        // Consume walking time
+                        const walkTime = result.dungeonUpdate.timeLeft || 60;
+                        remainingSeconds -= Math.min(remainingSeconds, walkTime);
+                        // Force complete the walking step if we have time
+                        if (remainingSeconds > 0) {
+                            char.state.dungeon.wave_started_at = Date.now() - (60 * 1000); // Hack to make next tick advance
+                        }
+                    }
+                }
+
+                // If tick didn't consume time explicitly, consumer a small bit to avoid infinite loop
+                remainingSeconds -= 1;
+            }
+        }
+
+        return {
+            totalTime: seconds - remainingSeconds,
+            itemsGained,
+            xpGained,
+            dungeonsTotalCleared,
+            died
         };
     }
 
