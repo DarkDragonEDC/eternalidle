@@ -108,6 +108,18 @@ ITEMS.RAW.WOOD[8].icon = '/items/T8_WOOD.png';
 ITEMS.RAW.WOOD[9].icon = '/items/T9_WOOD.png';
 ITEMS.RAW.WOOD[10].icon = '/items/T10_WOOD.png';
 
+// Override Icon for T1 Ore
+if (ITEMS.RAW.ORE[1]) ITEMS.RAW.ORE[1].icon = '/items/T1_ORE.png';
+if (ITEMS.RAW.ORE[2]) ITEMS.RAW.ORE[2].icon = '/items/T2_ORE.png';
+if (ITEMS.RAW.ORE[3]) ITEMS.RAW.ORE[3].icon = '/items/T3_ORE.png';
+if (ITEMS.RAW.ORE[4]) ITEMS.RAW.ORE[4].icon = '/items/T4_ORE.png';
+if (ITEMS.RAW.ORE[5]) ITEMS.RAW.ORE[5].icon = '/items/T5_ORE.png';
+if (ITEMS.RAW.ORE[6]) ITEMS.RAW.ORE[6].icon = '/items/T6_ORE.png';
+if (ITEMS.RAW.ORE[7]) { ITEMS.RAW.ORE[7].icon = '/items/T7_ORE.png'; ITEMS.RAW.ORE[7].scale = '170%'; }
+if (ITEMS.RAW.ORE[8]) ITEMS.RAW.ORE[8].icon = '/items/T8_ORE.png';
+if (ITEMS.RAW.ORE[9]) ITEMS.RAW.ORE[9].icon = '/items/T9_ORE.png';
+if (ITEMS.RAW.ORE[10]) ITEMS.RAW.ORE[10].icon = '/items/T10_ORE.png';
+
 // Generate Refined
 genRefined('PLANK', 'PLANK', 'WOOD');
 genRefined('BAR', 'BAR', 'ORE');
@@ -126,6 +138,18 @@ for (const t of TIERS) {
     ITEMS.CONSUMABLE.FOOD[t] = foodItem;
     ITEMS.GEAR.COOKING_STATION.FOOD[t] = foodItem;
 }
+
+// Override Icons for Refined Items
+if (ITEMS.REFINED.BAR[1]) { ITEMS.REFINED.BAR[1].icon = '/items/T1_BAR.png'; ITEMS.REFINED.BAR[1].scale = '200%'; }
+if (ITEMS.REFINED.BAR[2]) { ITEMS.REFINED.BAR[2].icon = '/items/T2_BAR.png'; ITEMS.REFINED.BAR[2].scale = '200%'; }
+if (ITEMS.REFINED.BAR[3]) { ITEMS.REFINED.BAR[3].icon = '/items/T3_BAR.png'; ITEMS.REFINED.BAR[3].scale = '200%'; }
+if (ITEMS.REFINED.BAR[4]) { ITEMS.REFINED.BAR[4].icon = '/items/T4_BAR.png'; ITEMS.REFINED.BAR[4].scale = '200%'; }
+if (ITEMS.REFINED.BAR[5]) { ITEMS.REFINED.BAR[5].icon = '/items/T5_BAR.png'; ITEMS.REFINED.BAR[5].scale = '200%'; }
+if (ITEMS.REFINED.BAR[6]) { ITEMS.REFINED.BAR[6].icon = '/items/T6_BAR.png'; ITEMS.REFINED.BAR[6].scale = '200%'; }
+if (ITEMS.REFINED.BAR[7]) { ITEMS.REFINED.BAR[7].icon = '/items/T7_BAR.png'; ITEMS.REFINED.BAR[7].scale = '200%'; }
+if (ITEMS.REFINED.BAR[8]) { ITEMS.REFINED.BAR[8].icon = '/items/T8_BAR.png'; ITEMS.REFINED.BAR[8].scale = '200%'; }
+if (ITEMS.REFINED.BAR[9]) { ITEMS.REFINED.BAR[9].icon = '/items/T9_BAR.png'; ITEMS.REFINED.BAR[9].scale = '200%'; }
+if (ITEMS.REFINED.BAR[10]) { ITEMS.REFINED.BAR[10].icon = '/items/T10_BAR.png'; ITEMS.REFINED.BAR[10].scale = '200%'; }
 
 // Generate Maps
 for (const t of TIERS) {
@@ -160,7 +184,14 @@ const genGear = (category, slot, type, idSuffix, matType, statMultipliers = {}) 
         if (statMultipliers.speed) stats.speed = Math.floor(t * statMultipliers.speed); // 1-10 speed?
         if (statMultipliers.speed) stats.speed = Math.floor(t * statMultipliers.speed); // 1-10 speed?
         if (statMultipliers.eff) stats.efficiency = t * 1.5; // T10 = 15% Base (Maskerpiece = 45%)
-        if (statMultipliers.globalEff) stats.efficiency = { GLOBAL: t * 0.5 }; // T10 = 5% Base (Maskerpiece = 15%)
+        if (statMultipliers.globalEff) {
+            // New Curve: T1 (~1%) to T10 (~5% Base -> 15% Max)
+            // Formula: (Tier * 0.45) + 0.55
+            // T10 Base: 5.05. T10 MP: 15.15%
+            // T1 Base: 1.00. T1 Normal: 1.00%
+            const baseVal = parseFloat(((t * 0.45) + 0.55).toFixed(2));
+            stats.efficiency = { GLOBAL: baseVal };
+        }
         if (statMultipliers.atkSpeed) stats.attackSpeed = statMultipliers.atkSpeed; // Fixed base speed
 
         const gear = {
