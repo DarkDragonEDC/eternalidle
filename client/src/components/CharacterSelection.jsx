@@ -75,7 +75,7 @@ const CharacterSelection = ({ onSelectCharacter }) => {
     };
 
     const getEquipmentIcons = (char) => {
-        if (!char.state || !char.state.equipment) return null;
+        if (!char || !char.state || !char.state.equipment) return null;
         const equip = char.state.equipment;
         // Simple visual indicators of progression
         const icons = [];
@@ -98,8 +98,8 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                     <div key={char.id} className="char-card" onClick={() => onSelectCharacter(char.id)}>
                         <h3 className="char-name">{char.name}</h3>
                         <div className="char-info">
-                            <p>Total Level: {formatNumber(Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.level || 0), 0))}</p>
-                            <p>Silver: {formatNumber(char.state.silver || 0)}</p>
+                            <p>Total Level: {char.state && char.state.skills ? formatNumber(Object.values(char.state.skills).reduce((acc, s) => acc + (s.level || 0), 0)) : 0}</p>
+                            <p>Silver: {char.state ? formatNumber(char.state.silver || 0) : 0}</p>
                             <p className="char-icons">{getEquipmentIcons(char)}</p>
                         </div>
                         <button className="play-btn">Play</button>

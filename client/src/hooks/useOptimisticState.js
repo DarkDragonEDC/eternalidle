@@ -26,6 +26,7 @@ const getSkillKey = (type, itemId) => {
 };
 
 const addItemToInventory = (state, itemId, amount) => {
+    if (!state || !state.state) return; // Guard clause
     if (!state.state.inventory) state.state.inventory = {};
     const inv = state.state.inventory;
     inv[itemId] = (inv[itemId] || 0) + amount;
@@ -33,7 +34,7 @@ const addItemToInventory = (state, itemId, amount) => {
 };
 
 const consumeItems = (state, req) => {
-    if (!req) return;
+    if (!req || !state || !state.state || !state.state.inventory) return; // Guard clause
     const inv = state.state.inventory;
     Object.entries(req).forEach(([id, amount]) => {
         if (inv[id]) {
@@ -44,6 +45,7 @@ const consumeItems = (state, req) => {
 };
 
 const addXP = (state, skillKey, amount) => {
+    if (!state || !state.state || !state.state.skills) return; // Guard clause
     if (!skillKey || !state.state.skills[skillKey]) return;
     const skill = state.state.skills[skillKey];
     skill.xp += amount;

@@ -586,8 +586,8 @@ function App() {
                               src={item.icon}
                               alt={item.name}
                               style={{
-                                width: '130%',
-                                height: '130%',
+                                width: '100%',
+                                height: '100%',
                                 objectFit: 'contain',
                                 filter: locked ? 'grayscale(100%) opacity(0.5)' : 'none'
                               }}
