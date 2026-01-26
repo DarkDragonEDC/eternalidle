@@ -174,7 +174,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                             <div style={{ position: 'absolute', bottom: -4, right: -4, transform: 'rotate(10deg)', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 {(() => {
                                     const item = resolveItem(activity?.item_id);
-                                    if (item?.icon) return <img src={item.icon} style={{ width: '130%', height: '130%', objectFit: 'contain' }} alt="" />;
+                                    if (item?.icon) return <img src={item.icon} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="" />;
                                     return React.cloneElement(getActivityIcon(), { size: 20 });
                                 })()}
                             </div>
@@ -183,7 +183,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                         (combat || (dungeonState?.active)) ? <Skull size={24} color="#ff4444" /> : (
                             (() => {
                                 const item = resolveItem(activity?.item_id);
-                                if (item?.icon) return <img src={item.icon} style={{ width: '130%', height: '130%', objectFit: 'contain' }} alt="" />;
+                                if (item?.icon) return <img src={item.icon} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="" />;
                                 return getActivityIcon();
                             })()
                         )
@@ -275,10 +275,11 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                                 <motion.div
                                                     animate={{ rotate: isRefining || isCrafting ? 360 : 0, y: isGathering ? [0, -2, 0] : 0 }}
                                                     transition={{ repeat: Infinity, duration: isGathering ? 0.5 : 2, ease: "linear" }}
+                                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}
                                                 >
                                                     {(() => {
                                                         const item = resolveItem(activity?.item_id);
-                                                        if (item?.icon) return <img src={item.icon} style={{ width: '130%', height: '130%', objectFit: 'contain' }} alt="" />;
+                                                        if (item?.icon) return <img src={item.icon} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="" />;
                                                         return React.cloneElement(getActivityIcon(), { size: 18 });
                                                     })()}
                                                 </motion.div>

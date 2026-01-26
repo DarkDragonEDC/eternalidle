@@ -202,7 +202,13 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
                             >
                                 <Info size={12} color="#fff" />
                             </div>
-                            <PackageIcon type={item.type} size={24} />
+                            <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                {item.icon ? (
+                                    <img src={item.icon} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="" />
+                                ) : (
+                                    <PackageIcon type={item.type} size={24} />
+                                )}
+                            </div>
                         </div>
                     ) : (
                         <div style={{ opacity: 0.3, color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

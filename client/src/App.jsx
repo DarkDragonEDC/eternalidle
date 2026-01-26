@@ -230,8 +230,21 @@ function App() {
       setIsConnecting(true);
     });
 
-    newSocket.on('connect_error', (err) => {
+    newSocket.on('connect_error', async (err) => {
       console.error('Connection error:', err);
+
+      // If it's an auth error, try to refresh the session
+      if (err.message?.includes('Authentication error') || err.message?.includes('Invalid token')) {
+        console.log('Detected auth error, refreshing session...');
+        const { data: { session: refreshedSession } } = await supabase.auth.getSession();
+        if (refreshedSession) {
+          setSession(refreshedSession);
+          newSocket.auth.token = refreshedSession.access_token;
+          newSocket.connect(); // Immediate retry with new token
+          return; // Skip the 5s timeout
+        }
+      }
+
       setConnectionError('Connection failed. Retrying in 5s...');
       setIsConnecting(true);
       setTimeout(() => {
