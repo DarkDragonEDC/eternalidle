@@ -6,10 +6,18 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
     if (!rawItem) return null;
 
     const resolved = resolveItem(rawItem.id || rawItem.item_id);
+
+    // For tools/gear, we want to prioritize the resolved (authentic) stats over stale stored stats
+    const mergedStats = { ...resolved?.stats };
+    // If it's not a tool, we can allow some merging if needed, but for tools specifically 
+    // we must ensure efficiency comes from the formula.
     const item = {
-        ...rawItem,
         ...resolved,
-        stats: { ...resolved?.stats, ...rawItem.stats }
+        ...rawItem,
+        stats: {
+            ...rawItem.stats,
+            ...mergedStats
+        }
     };
 
     const handleBackdropClick = (e) => {
@@ -30,24 +38,20 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
         ['damage', 'defense', 'hp', 'str', 'agi', 'int', 'efficiency'].includes(k)
     );
 
-    const calculateStat = (baseValue, ipBonus) => {
-        return parseFloat((baseValue * (1 + ipBonus / 100)).toFixed(1));
-    };
-
     const rarityComparison = Object.values(QUALITIES).map(q => {
+        const qResolved = resolveItem(item.originalId || item.id, q.id);
+        const qStats = qResolved?.stats || {};
+
         const calculatedStats = {};
         comparisonStatKeys.forEach(key => {
-            const val = comparisonBaseStats[key];
             if (key === 'efficiency') {
-                if (typeof val === 'number') {
-                    calculatedStats[key] = calculateStat(val, q.ipBonus);
-                } else if (typeof val === 'object' && val.GLOBAL) {
-                    calculatedStats.globalEff = calculateStat(val.GLOBAL, q.ipBonus);
-                }
-            } else if (typeof val === 'number') {
-                calculatedStats[key] = calculateStat(val, q.ipBonus);
+                if (typeof qStats[key] === 'number') calculatedStats.efficiency = qStats[key];
+                else if (typeof qStats[key] === 'object' && qStats[key].GLOBAL) calculatedStats.globalEff = qStats[key].GLOBAL;
+            } else {
+                calculatedStats[key] = qStats[key];
             }
         });
+
         return {
             ...q,
             calculatedStats

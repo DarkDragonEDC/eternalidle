@@ -364,15 +364,6 @@ export const resolveItem = (itemId) => {
     const upperId = rawId.toUpperCase();
 
     // 1. Precise Lookup
-    if (ITEM_LOOKUP[upperId]) {
-        return {
-            ...ITEM_LOOKUP[upperId],
-            quality: 0,
-            qualityName: QUALITIES[0].name,
-            rarityColor: QUALITIES[0].color,
-            name: ITEM_LOOKUP[upperId].name // Normal items don't need prefix
-        };
-    }
 
     let qualityId = 0;
     let baseId = upperId;
@@ -408,7 +399,10 @@ export const resolveItem = (itemId) => {
 
     // RESTRICTION: Only Equipment types can have quality bonuses.
     // Materials (WOOD, ORE, etc), Refined (PLANK, BAR, etc), and Consumables (FOOD) are always Normal.
-    const equipmentTypes = ['WEAPON', 'OFF_HAND', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE'];
+    const equipmentTypes = [
+        'WEAPON', 'OFF_HAND', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE',
+        'TOOL', 'TOOL_AXE', 'TOOL_PICKAXE', 'TOOL_KNIFE', 'TOOL_SICKLE', 'TOOL_ROD'
+    ];
     const canHaveQuality = equipmentTypes.includes(baseItem.type);
 
     // If it can't have quality but we have a quality suffix, we treat it as Normal (Id stays original)
