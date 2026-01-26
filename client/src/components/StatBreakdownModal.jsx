@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Sword, Shield, Zap, Heart } from 'lucide-react';
+import { resolveItem } from '@shared/items';
 
 const StatBreakdownModal = ({ statType, statId, value, stats, equipment, onClose }) => {
     // Calculate breakdowns based on known formulas
@@ -106,13 +107,27 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, onClose
                     const toolMap = { WOOD: 'tool_axe', ORE: 'tool_pickaxe', HIDE: 'tool_knife', FIBER: 'tool_sickle', FISH: 'tool_rod' };
                     const toolKey = toolMap[effId];
                     if (toolKey && equipment[toolKey]) {
-                        const toolEff = equipment[toolKey].stats?.efficiency || 0;
+                        const freshTool = resolveItem(equipment[toolKey].id || equipment[toolKey].item_id);
+                        const toolEff = freshTool?.stats?.efficiency || 0;
                         breakdown.push({ label: 'Tool Bonus', value: `+${toolEff}%` });
                     }
                 }
 
                 if (globalEff > 0) {
-                    breakdown.push({ label: 'Global Bonus (Cape)', value: `+${globalEff}%` });
+                    // Find which item provides global efficiency (usually the cape)
+                    const globalSource = Object.values(equipment).find(item => {
+                        if (!item) return false;
+                        const fresh = resolveItem(item.id || item.item_id);
+                        return fresh?.stats?.efficiency?.GLOBAL > 0;
+                    });
+
+                    if (globalSource) {
+                        const freshGlobal = resolveItem(globalSource.id || globalSource.item_id);
+                        const actualGlobalEff = freshGlobal?.stats?.efficiency?.GLOBAL || 0;
+                        breakdown.push({ label: `Global Bonus (${freshGlobal.name.split(' ').pop()})`, value: `+${actualGlobalEff}%` });
+                    } else {
+                        breakdown.push({ label: 'Global Bonus', value: `+${globalEff}%` });
+                    }
                 }
             }
 

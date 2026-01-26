@@ -27,7 +27,10 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
     };
 
     const baseStats = item.stats || {};
-    const statKeys = Object.keys(baseStats).filter(k => typeof baseStats[k] === 'number' && ['damage', 'defense', 'hp', 'str', 'agi', 'int'].includes(k));
+    const statKeys = Object.keys(baseStats).filter(k =>
+        (typeof baseStats[k] === 'number' && ['damage', 'defense', 'hp', 'str', 'agi', 'int'].includes(k)) ||
+        (k === 'efficiency')
+    );
 
     // For comparison, we need the AUTHENTIC base stats of the item (Quality 0)
     // otherwise we are scaling a scaled value.
@@ -251,7 +254,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                                 </span>
                                             )}
                                         </div>
-                                        <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: q.id === (item.quality || 0) ? '#fff' : '#aaa', display: 'flex', gap: '8px' }}>
+                                        <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: q.id === (item.quality || 0) ? '#fff' : '#aaa', display: 'flex', gap: '8px', textAlign: 'right' }}>
                                             {Object.entries(q.calculatedStats).map(([key, val]) => {
                                                 let label = key.toUpperCase();
                                                 if (key === 'damage') label = 'Dmg';

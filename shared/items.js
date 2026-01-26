@@ -211,7 +211,38 @@ for (const t of TIERS) {
     ITEMS.GEAR.COOKING_STATION.FOOD[t] = foodItem;
 }
 
+// Override Icon for T1 Food
+if (ITEMS.CONSUMABLE.FOOD[1]) { ITEMS.CONSUMABLE.FOOD[1].icon = '/items/T1_FOOD.png'; ITEMS.CONSUMABLE.FOOD[1].scale = '200%'; }
+// Override Icon for T2 Food
+if (ITEMS.CONSUMABLE.FOOD[2]) { ITEMS.CONSUMABLE.FOOD[2].icon = '/items/T2_FOOD.png'; ITEMS.CONSUMABLE.FOOD[2].scale = '200%'; }
+// Override Icon for T3 Food
+if (ITEMS.CONSUMABLE.FOOD[3]) { ITEMS.CONSUMABLE.FOOD[3].icon = '/items/T3_FOOD_v2.png'; ITEMS.CONSUMABLE.FOOD[3].scale = '200%'; }
+// Override Icon for T4 Food
+if (ITEMS.CONSUMABLE.FOOD[4]) { ITEMS.CONSUMABLE.FOOD[4].icon = '/items/T4_FOOD_v2.png'; ITEMS.CONSUMABLE.FOOD[4].scale = '200%'; }
+// Override Icon for T5 Food
+if (ITEMS.CONSUMABLE.FOOD[5]) { ITEMS.CONSUMABLE.FOOD[5].icon = '/items/T5_FOOD.png'; ITEMS.CONSUMABLE.FOOD[5].scale = '200%'; }
+// Override Icon for T6 Food
+if (ITEMS.CONSUMABLE.FOOD[6]) { ITEMS.CONSUMABLE.FOOD[6].icon = '/items/T6_FOOD.png'; ITEMS.CONSUMABLE.FOOD[6].scale = '200%'; }
+// Override Icon for T7 Food
+if (ITEMS.CONSUMABLE.FOOD[7]) { ITEMS.CONSUMABLE.FOOD[7].icon = '/items/T7_FOOD.png'; ITEMS.CONSUMABLE.FOOD[7].scale = '200%'; }
+// Override Icon for T8 Food
+if (ITEMS.CONSUMABLE.FOOD[8]) { ITEMS.CONSUMABLE.FOOD[8].icon = '/items/T8_FOOD.png'; ITEMS.CONSUMABLE.FOOD[8].scale = '200%'; }
+// Override Icon for T9 Food
+if (ITEMS.CONSUMABLE.FOOD[9]) { ITEMS.CONSUMABLE.FOOD[9].icon = '/items/T9_FOOD.png'; ITEMS.CONSUMABLE.FOOD[9].scale = '200%'; }
+// Override Icon for T10 Food
+if (ITEMS.CONSUMABLE.FOOD[10]) { ITEMS.CONSUMABLE.FOOD[10].icon = '/items/T10_FOOD.png'; ITEMS.CONSUMABLE.FOOD[10].scale = '90%'; }
+
 // Override Icons for Refined Items
+if (ITEMS.REFINED.PLANK[1]) { ITEMS.REFINED.PLANK[1].icon = '/items/T1_PLANK.png'; }
+if (ITEMS.REFINED.PLANK[2]) { ITEMS.REFINED.PLANK[2].icon = '/items/T2_PLANK.png'; }
+if (ITEMS.REFINED.PLANK[3]) { ITEMS.REFINED.PLANK[3].icon = '/items/T3_PLANK.png'; }
+if (ITEMS.REFINED.PLANK[4]) { ITEMS.REFINED.PLANK[4].icon = '/items/T4_PLANK.png'; }
+if (ITEMS.REFINED.PLANK[5]) { ITEMS.REFINED.PLANK[5].icon = '/items/T5_PLANK.png'; }
+if (ITEMS.REFINED.PLANK[6]) { ITEMS.REFINED.PLANK[6].icon = '/items/T6_PLANK.png'; }
+if (ITEMS.REFINED.PLANK[7]) { ITEMS.REFINED.PLANK[7].icon = '/items/T7_PLANK.png'; }
+if (ITEMS.REFINED.PLANK[8]) { ITEMS.REFINED.PLANK[8].icon = '/items/T8_PLANK.png'; }
+if (ITEMS.REFINED.PLANK[9]) { ITEMS.REFINED.PLANK[9].icon = '/items/T9_PLANK.png'; }
+if (ITEMS.REFINED.PLANK[10]) { ITEMS.REFINED.PLANK[10].icon = '/items/T10_PLANK.png'; }
 if (ITEMS.REFINED.BAR[1]) { ITEMS.REFINED.BAR[1].icon = '/items/T1_BAR.png'; ITEMS.REFINED.BAR[1].scale = '200%'; }
 if (ITEMS.REFINED.BAR[2]) { ITEMS.REFINED.BAR[2].icon = '/items/T2_BAR.png'; ITEMS.REFINED.BAR[2].scale = '200%'; }
 if (ITEMS.REFINED.BAR[3]) { ITEMS.REFINED.BAR[3].icon = '/items/T3_BAR.png'; ITEMS.REFINED.BAR[3].scale = '200%'; }
@@ -356,7 +387,7 @@ const indexItems = (obj) => {
 };
 indexItems(ITEMS);
 
-export const resolveItem = (itemId) => {
+export const resolveItem = (itemId, overrideQuality = null) => {
     if (!itemId) return null;
 
     // Normalize ID
@@ -390,6 +421,10 @@ export const resolveItem = (itemId) => {
     // 3. Fallback/Direct Lookup if 2 failed
     if (!baseItem) {
         baseItem = ITEM_LOOKUP[baseId];
+    }
+
+    if (overrideQuality !== null) {
+        qualityId = overrideQuality;
     }
 
     if (!baseItem) return null;
@@ -431,7 +466,17 @@ export const resolveItem = (itemId) => {
                 // Handle Efficiency Object specifically
                 newStats[key] = {};
                 for (const subKey in baseItem.stats[key]) {
-                    newStats[key][subKey] = parseFloat((baseItem.stats[key][subKey] * statMultiplier).toFixed(1));
+                    if (subKey === 'GLOBAL') {
+                        // 50-step linear progression: 10 Tiers * 5 Qualities
+                        // Index: 0 (T1 Normal) to 49 (T10 Masterpiece)
+                        const index = (baseItem.tier - 1) * 5 + effectiveQualityId;
+                        // Formula: 1.0 + (Index * (14 / 49))
+                        // Explicitly rounding to 1 decimal place to ensure 15.0
+                        const calculated = 1.0 + (index * (14 / 49));
+                        newStats[key][subKey] = Math.round(calculated * 10) / 10;
+                    } else {
+                        newStats[key][subKey] = parseFloat((baseItem.stats[key][subKey] * statMultiplier).toFixed(1));
+                    }
                 }
             } else {
                 newStats[key] = baseItem.stats[key];

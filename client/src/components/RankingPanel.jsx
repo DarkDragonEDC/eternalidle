@@ -53,16 +53,14 @@ const CATEGORIES = {
     }
 };
 
-const RankingPanel = ({ gameState, isMobile }) => {
+const RankingPanel = ({ gameState, isMobile, socket }) => {
     const [characters, setCharacters] = useState([]);
     const [loading, setLoading] = useState(true);
     const [mainCategory, setMainCategory] = useState('GENERAL');
     const [subCategory, setSubCategory] = useState('LEVEL');
 
     useEffect(() => {
-        if (!gameState || !gameState.socket) return;
-
-        const socket = gameState.socket;
+        if (!socket) return;
 
         // Determine which server-side leaderboard type to fetch
         let type = 'COMBAT';
