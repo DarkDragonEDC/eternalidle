@@ -290,6 +290,25 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                             >
                                 <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: '#fff', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>T{item.tier}</div>
                                 <div style={{ position: 'absolute', top: 6, right: 6, fontSize: '0.7rem', color: '#fff', fontWeight: 'bold' }}>x{item.qty}</div>
+                                <div
+                                    onClick={(e) => { e.stopPropagation(); onShowInfo(item); }}
+                                    style={{
+                                        position: 'absolute',
+                                        bottom: 22,
+                                        right: 6,
+                                        color: 'rgba(255,255,255,0.7)',
+                                        cursor: 'pointer',
+                                        background: 'rgba(0,0,0,0.5)',
+                                        borderRadius: '50%',
+                                        padding: '2px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}
+                                    title="Info"
+                                >
+                                    <Info size={12} />
+                                </div>
 
                                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', overflow: 'hidden' }}>
                                     {item.icon ? (

@@ -180,6 +180,18 @@ if (ITEMS.RAW.ORE[8]) ITEMS.RAW.ORE[8].icon = '/items/T8_ORE.png';
 if (ITEMS.RAW.ORE[9]) ITEMS.RAW.ORE[9].icon = '/items/T9_ORE.png';
 if (ITEMS.RAW.ORE[10]) ITEMS.RAW.ORE[10].icon = '/items/T10_ORE.png';
 
+// Override Icons for Fiber
+if (ITEMS.RAW.FIBER[1]) ITEMS.RAW.FIBER[1].icon = '/items/T1_FIBER.png';
+if (ITEMS.RAW.FIBER[2]) ITEMS.RAW.FIBER[2].icon = '/items/T2_FIBER.png';
+if (ITEMS.RAW.FIBER[3]) ITEMS.RAW.FIBER[3].icon = '/items/T3_FIBER.png';
+if (ITEMS.RAW.FIBER[4]) ITEMS.RAW.FIBER[4].icon = '/items/T4_FIBER.png';
+if (ITEMS.RAW.FIBER[5]) ITEMS.RAW.FIBER[5].icon = '/items/T5_FIBER.png';
+if (ITEMS.RAW.FIBER[6]) ITEMS.RAW.FIBER[6].icon = '/items/T6_FIBER.png';
+if (ITEMS.RAW.FIBER[7]) ITEMS.RAW.FIBER[7].icon = '/items/T7_FIBER.png';
+if (ITEMS.RAW.FIBER[8]) ITEMS.RAW.FIBER[8].icon = '/items/T8_FIBER.png';
+if (ITEMS.RAW.FIBER[9]) ITEMS.RAW.FIBER[9].icon = '/items/T9_FIBER.png';
+if (ITEMS.RAW.FIBER[10]) ITEMS.RAW.FIBER[10].icon = '/items/T10_FIBER.png';
+
 // Generate Refined
 genRefined('PLANK', 'PLANK', 'WOOD');
 genRefined('BAR', 'BAR', 'ORE');
@@ -210,6 +222,30 @@ if (ITEMS.REFINED.BAR[7]) { ITEMS.REFINED.BAR[7].icon = '/items/T7_BAR.png'; ITE
 if (ITEMS.REFINED.BAR[8]) { ITEMS.REFINED.BAR[8].icon = '/items/T8_BAR.png'; ITEMS.REFINED.BAR[8].scale = '200%'; }
 if (ITEMS.REFINED.BAR[9]) { ITEMS.REFINED.BAR[9].icon = '/items/T9_BAR.png'; ITEMS.REFINED.BAR[9].scale = '200%'; }
 if (ITEMS.REFINED.BAR[10]) { ITEMS.REFINED.BAR[10].icon = '/items/T10_BAR.png'; ITEMS.REFINED.BAR[10].scale = '200%'; }
+
+// Override Icons for Leather
+if (ITEMS.REFINED.LEATHER[1]) ITEMS.REFINED.LEATHER[1].icon = '/items/T1_LEATHER.png';
+if (ITEMS.REFINED.LEATHER[2]) ITEMS.REFINED.LEATHER[2].icon = '/items/T2_LEATHER.png';
+if (ITEMS.REFINED.LEATHER[3]) ITEMS.REFINED.LEATHER[3].icon = '/items/T3_LEATHER.png';
+if (ITEMS.REFINED.LEATHER[4]) ITEMS.REFINED.LEATHER[4].icon = '/items/T4_LEATHER.png';
+if (ITEMS.REFINED.LEATHER[5]) ITEMS.REFINED.LEATHER[5].icon = '/items/T5_LEATHER.png';
+if (ITEMS.REFINED.LEATHER[6]) ITEMS.REFINED.LEATHER[6].icon = '/items/T6_LEATHER.png';
+if (ITEMS.REFINED.LEATHER[7]) ITEMS.REFINED.LEATHER[7].icon = '/items/T7_LEATHER.png';
+if (ITEMS.REFINED.LEATHER[8]) ITEMS.REFINED.LEATHER[8].icon = '/items/T8_LEATHER.png';
+if (ITEMS.REFINED.LEATHER[9]) ITEMS.REFINED.LEATHER[9].icon = '/items/T9_LEATHER.png';
+if (ITEMS.REFINED.LEATHER[10]) ITEMS.REFINED.LEATHER[10].icon = '/items/T10_LEATHER.png';
+
+// Override Icons for Cloth
+if (ITEMS.REFINED.CLOTH[1]) ITEMS.REFINED.CLOTH[1].icon = '/items/T1_CLOTH.png';
+if (ITEMS.REFINED.CLOTH[2]) ITEMS.REFINED.CLOTH[2].icon = '/items/T2_CLOTH.png';
+if (ITEMS.REFINED.CLOTH[3]) ITEMS.REFINED.CLOTH[3].icon = '/items/T3_CLOTH.png';
+if (ITEMS.REFINED.CLOTH[4]) ITEMS.REFINED.CLOTH[4].icon = '/items/T4_CLOTH.png';
+if (ITEMS.REFINED.CLOTH[5]) ITEMS.REFINED.CLOTH[5].icon = '/items/T5_CLOTH.png';
+if (ITEMS.REFINED.CLOTH[6]) ITEMS.REFINED.CLOTH[6].icon = '/items/T6_CLOTH.png';
+if (ITEMS.REFINED.CLOTH[7]) ITEMS.REFINED.CLOTH[7].icon = '/items/T7_CLOTH.png';
+if (ITEMS.REFINED.CLOTH[8]) ITEMS.REFINED.CLOTH[8].icon = '/items/T8_CLOTH.png';
+if (ITEMS.REFINED.CLOTH[9]) ITEMS.REFINED.CLOTH[9].icon = '/items/T9_CLOTH.png';
+if (ITEMS.REFINED.CLOTH[10]) ITEMS.REFINED.CLOTH[10].icon = '/items/T10_CLOTH.png';
 
 // Generate Maps
 for (const t of TIERS) {
