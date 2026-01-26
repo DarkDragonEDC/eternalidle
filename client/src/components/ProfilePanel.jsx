@@ -147,68 +147,86 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
         const hasQuality = item && item.quality > 0;
 
         return (
-            <div style={{
-                width: '64px',
-                height: '64px',
-                background: 'rgba(0,0,0,0.3)',
-                border: `2px solid ${borderColor}`,
-                borderRadius: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative',
-                cursor: 'pointer',
-                transition: '0.2s',
-                boxShadow: hasQuality ? `0 0 10px ${borderColor}66` : 'none' // Glow only for Rare items to reduce visual noise
-            }}
-                onClick={onClick}
-            >
-                {item ? (
-                    <div style={{ color: tierColor, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.6rem', fontWeight: 'bold', position: 'absolute', top: 2, left: 4 }}>T{item.tier}</span>
-                        {/* Quantidade (especialmente para food) */}
-                        {item.amount > 1 && (
-                            <span style={{
-                                position: 'absolute',
-                                bottom: 2,
-                                left: 4,
-                                fontSize: '0.7rem',
-                                color: '#fff',
-                                fontWeight: '900',
-                                textShadow: '0 1px 3px rgba(0,0,0,1)'
-                            }}>
-                                {item.amount}
-                            </span>
-                        )}
-                        {/* Se tiver qualidade, mostrar um pequeno indicador (estrela ou ponto) */}
-                        {hasQuality && (
-                            <div style={{ position: 'absolute', top: 2, right: 2 }}>
-                                <Star size={10} color={borderColor} fill={borderColor} />
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                <div style={{
+                    width: '64px',
+                    height: '64px',
+                    background: 'rgba(0,0,0,0.3)',
+                    border: `2px solid ${borderColor}`,
+                    borderRadius: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    cursor: 'pointer',
+                    transition: '0.2s',
+                    boxShadow: hasQuality ? `0 0 10px ${borderColor}66` : 'none'
+                }}
+                    onClick={onClick}
+                >
+                    {item ? (
+                        <div style={{ color: tierColor, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <span style={{ fontSize: '0.6rem', fontWeight: 'bold', position: 'absolute', top: 2, left: 4 }}>T{item.tier}</span>
+                            {/* Quantidade (especialmente para food) */}
+                            {item.amount > 1 && (
+                                <span style={{
+                                    position: 'absolute',
+                                    bottom: 2,
+                                    left: 4,
+                                    fontSize: '0.7rem',
+                                    color: '#fff',
+                                    fontWeight: '900',
+                                    textShadow: '0 1px 3px rgba(0,0,0,1)'
+                                }}>
+                                    {item.amount}
+                                </span>
+                            )}
+                            {/* Se tiver qualidade, mostrar um pequeno indicador (estrela ou ponto) */}
+                            {hasQuality && (
+                                <div style={{ position: 'absolute', top: 2, right: 2 }}>
+                                    <Star size={10} color={borderColor} fill={borderColor} />
+                                </div>
+                            )}
+                            {/* Botão de Info (i) */}
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    bottom: 2,
+                                    right: 4,
+                                    opacity: 0.6,
+                                    cursor: 'help'
+                                }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onShowInfo(item);
+                                }}
+                            >
+                                <Info size={12} color="#fff" />
                             </div>
-                        )}
-                        {/* Botão de Info (i) */}
-                        <div
-                            style={{
-                                position: 'absolute',
-                                bottom: 2,
-                                right: 4,
-                                opacity: 0.6,
-                                cursor: 'help'
-                            }}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onShowInfo(item);
-                            }}
-                        >
-                            <Info size={12} color="#fff" />
+                            <PackageIcon type={item.type} size={24} />
                         </div>
-                        <PackageIcon type={item.type} size={24} />
-                    </div>
-                ) : (
-                    <div style={{ opacity: 0.3, color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        {icon}
-                        <span style={{ fontSize: '0.5rem', fontWeight: 'bold', marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</span>
-                    </div>
+                    ) : (
+                        <div style={{ opacity: 0.3, color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            {icon}
+                            <span style={{ fontSize: '0.5rem', fontWeight: 'bold', marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</span>
+                        </div>
+                    )}
+                </div>
+                {item && (
+                    <span style={{
+                        fontSize: '0.55rem',
+                        color: '#bbb',
+                        textAlign: 'center',
+                        maxWidth: '80px',
+                        lineHeight: '1.1',
+                        minHeight: '2em', // Reserve space for 2 lines
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden'
+                    }}>
+                        {item.name}
+                    </span>
                 )}
             </div>
         );

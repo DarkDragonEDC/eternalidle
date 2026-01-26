@@ -98,7 +98,8 @@ export class InventoryManager {
                 if (currentEquip.id === itemId) {
                     currentEquip.amount = (currentEquip.amount || 0) + amount;
                 } else {
-                    const oldId = currentEquip.originalId || currentEquip.id;
+                    // Fix: Use full ID to preserve quality
+                    const oldId = currentEquip.id;
                     const oldAmount = currentEquip.amount || 1;
                     state.inventory[oldId] = (state.inventory[oldId] || 0) + oldAmount;
                     state.equipment.food = { ...item, amount: amount };
@@ -112,7 +113,8 @@ export class InventoryManager {
 
             const currentEquip = state.equipment[slotName];
             if (currentEquip && currentEquip.id) {
-                const oldId = currentEquip.originalId || currentEquip.id;
+                // Fix: Use full ID to preserve quality
+                const oldId = currentEquip.id;
                 state.inventory[oldId] = (state.inventory[oldId] || 0) + 1;
             }
 
@@ -134,7 +136,8 @@ export class InventoryManager {
 
         const item = state.equipment[slotName];
         const amount = item.amount || 1;
-        const returnId = item.originalId || item.id;
+        // Fix: Use full ID to preserve quality
+        const returnId = item.id;
         state.inventory[returnId] = (state.inventory[returnId] || 0) + amount;
 
         delete state.equipment[slotName];
