@@ -235,13 +235,30 @@ function App() {
 
       // If it's an auth error, try to refresh the session
       if (err.message?.includes('Authentication error') || err.message?.includes('Invalid token')) {
-        console.log('Detected auth error, refreshing session...');
-        const { data: { session: refreshedSession } } = await supabase.auth.getSession();
-        if (refreshedSession) {
-          setSession(refreshedSession);
-          newSocket.auth.token = refreshedSession.access_token;
-          newSocket.connect(); // Immediate retry with new token
-          return; // Skip the 5s timeout
+        // Prevent infinite fast loops by checking if we just tried this
+        const lastAttempt = newSocket._lastAuthRetry || 0;
+        const now = Date.now();
+        if (now - lastAttempt < 2000) {
+          console.warn('Auth retry too fast, waiting for standard timeout...');
+        } else {
+          console.log('Detected auth error, refreshing session...');
+          newSocket._lastAuthRetry = now;
+
+          // Force a session refresh
+          const { data: { session: refreshedSession }, error } = await supabase.auth.refreshSession();
+
+          if (refreshedSession && !error) {
+            console.log('Session refreshed successfully');
+            setSession(refreshedSession);
+            newSocket.auth.token = refreshedSession.access_token;
+            newSocket.connect();
+            return;
+          } else {
+            console.error('Failed to auto-refresh session:', error);
+            // If refresh failed, the user might need to log in again
+            // Only sign out if the error is clearly "invalid refresh token" 
+            // but for now let's just let it fall through to the 5s timeout
+          }
         }
       }
 
