@@ -5,8 +5,8 @@ export class CombatManager {
         this.gameManager = gameManager;
     }
 
-    async startCombat(userId, mobId, tier, existingChar = null, isDungeon = false, customStats = null) {
-        const char = existingChar || await this.gameManager.getCharacter(userId);
+    async startCombat(userId, characterId, mobId, tier, existingChar = null, isDungeon = false, customStats = null) {
+        const char = existingChar || await this.gameManager.getCharacter(userId, characterId);
 
         if (char.state.dungeon && !isDungeon) {
             throw new Error("Cannot start combat while in a dungeon");
@@ -56,8 +56,8 @@ export class CombatManager {
         return { success: true, message: `Combat started against ${mobData.name}` };
     }
 
-    async stopCombat(userId) {
-        const char = await this.gameManager.getCharacter(userId);
+    async stopCombat(userId, characterId) {
+        const char = await this.gameManager.getCharacter(userId, characterId);
         if (char.state.combat) {
             // Save Session History
             await this.saveCombatLog(char, 'FLEE'); // Or 'STOPPED'

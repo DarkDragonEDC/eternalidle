@@ -20,10 +20,10 @@ export class MarketManager {
         return data || [];
     }
 
-    async sellItem(userId, itemId, quantity) {
+    async sellItem(userId, characterId, itemId, quantity) {
         if (!quantity || quantity <= 0) throw new Error("Invalid quantity");
 
-        const char = await this.gameManager.getCharacter(userId);
+        const char = await this.gameManager.getCharacter(userId, characterId);
         if (!char) throw new Error("Character not found");
 
         const inventory = char.state.inventory;
@@ -42,15 +42,15 @@ export class MarketManager {
 
         char.state.silver = (char.state.silver || 0) + totalSilver;
 
-        await this.gameManager.saveState(userId, char.state);
+        await this.gameManager.saveState(char.id, char.state);
         return { success: true, message: `Sold ${quantity}x ${itemData.name} for ${totalSilver} Silver`, unitPrice: pricePerUnit, total: totalSilver };
     }
 
-    async listMarketItem(userId, itemId, amount, price) {
+    async listMarketItem(userId, characterId, itemId, amount, price) {
         if (!amount || amount <= 0) throw new Error("Invalid amount");
         if (!price || price <= 0) throw new Error("Invalid price");
 
-        const char = await this.gameManager.getCharacter(userId);
+        const char = await this.gameManager.getCharacter(userId, characterId);
         if (!char) throw new Error("Character not found");
 
         const inventory = char.state.inventory;
@@ -68,6 +68,7 @@ export class MarketManager {
             .from('market_listings')
             .insert({
                 seller_id: userId,
+                seller_character_id: char.id,
                 seller_name: char.name,
                 item_id: itemId,
                 item_data: itemData,
@@ -80,15 +81,15 @@ export class MarketManager {
             throw insertError;
         }
 
-        await this.gameManager.saveState(userId, char.state);
+        await this.gameManager.saveState(char.id, char.state);
         return { success: true, message: `Item listed successfully!` };
     }
 
-    async buyMarketItem(buyerId, listingId, quantity = 1) {
+    async buyMarketItem(buyerId, characterId, listingId, quantity = 1) {
         const qtyNum = parseInt(quantity) || 1;
         console.log(`[MarketManager] buyMarketItem: buyerId=${buyerId}, listingId=${listingId}, qtyNum=${qtyNum}`);
 
-        const buyer = await this.gameManager.getCharacter(buyerId);
+        const buyer = await this.gameManager.getCharacter(buyerId, characterId);
         if (!buyer) throw new Error("Buyer character not found");
 
         const { data: listing, error: fetchError } = await this.gameManager.supabase
@@ -123,10 +124,15 @@ export class MarketManager {
             cost: totalCost
         });
         this.gameManager.addNotification(buyer, 'SUCCESS', `You bought ${qtyNum}x ${listing.item_data.name} for ${totalCost} Silver.`);
-        await this.gameManager.saveState(buyerId, buyer.state);
+        await this.gameManager.saveState(buyer.id, buyer.state);
 
         // Process Seller side
-        let seller = await this.gameManager.getCharacter(listing.seller_id);
+        // Note: Seller might be offline or playing another character.
+        // We just fetch their first character OR we need to know which char sold it?
+        // Current Market Logic: Listings are by USER (seller_id), but notifications/silver go to... which char?
+        // Simpler for now: Claims go to the User's "Active" character or just stored on the User?
+        // Fetch the specific character that listed the item
+        let seller = await this.gameManager.getCharacter(listing.seller_id, listing.seller_character_id || null);
         if (seller) {
             const tax = Math.floor(totalCost * 0.06);
             const sellerProfit = totalCost - tax;
@@ -139,7 +145,7 @@ export class MarketManager {
                 timestamp: Date.now()
             });
             this.gameManager.addNotification(seller, 'SUCCESS', `Your item ${listing.item_data.name} (x${qtyNum}) was sold! +${sellerProfit} Silver (after tax).`);
-            await this.gameManager.saveState(listing.seller_id, seller.state);
+            await this.gameManager.saveState(seller.id, seller.state);
         }
 
         // Update or Delete Listing
@@ -170,7 +176,7 @@ export class MarketManager {
         return { success: true, message: `Bought ${qtyNum}x ${listing.item_data.name} for ${totalCost} Silver` };
     }
 
-    async cancelMarketListing(userId, listingId) {
+    async cancelMarketListing(userId, characterId, listingId) {
         const { data: listing, error: fetchError } = await this.gameManager.supabase
             .from('market_listings')
             .select('*')
@@ -187,7 +193,7 @@ export class MarketManager {
 
         if (deleteError) throw deleteError;
 
-        const char = await this.gameManager.getCharacter(userId);
+        const char = await this.gameManager.getCharacter(userId, characterId);
         this.addClaim(char, {
             type: 'CANCELLED_LISTING',
             itemId: listing.item_id,
@@ -196,7 +202,7 @@ export class MarketManager {
             timestamp: Date.now()
         });
 
-        await this.gameManager.saveState(userId, char.state);
+        await this.gameManager.saveState(char.id, char.state);
         return { success: true, message: "Listing cancelled. Item sent to Claim tab." };
     }
 
@@ -208,8 +214,8 @@ export class MarketManager {
         });
     }
 
-    async claimMarketItem(userId, claimId) {
-        const char = await this.gameManager.getCharacter(userId);
+    async claimMarketItem(userId, characterId, claimId) {
+        const char = await this.gameManager.getCharacter(userId, characterId);
         if (!char.state.claims) return { success: false, message: "No items to claim." };
 
         const claimIndex = char.state.claims.findIndex(c => c.id === claimId);
@@ -225,7 +231,7 @@ export class MarketManager {
         }
 
         char.state.claims.splice(claimIndex, 1);
-        await this.gameManager.saveState(userId, char.state);
+        await this.gameManager.saveState(char.id, char.state);
         return { success: true, message: "Claimed successfully!" };
     }
 }

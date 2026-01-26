@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatNumber, formatSilver } from '@utils/format';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Users, Star, Coins, Crown, ChevronDown } from 'lucide-react';
 
@@ -52,21 +53,16 @@ const CATEGORIES = {
     }
 };
 
-const RankingPanel = ({ socket, isMobile }) => {
+const RankingPanel = ({ gameState, isMobile }) => {
     const [characters, setCharacters] = useState([]);
     const [loading, setLoading] = useState(true);
     const [mainCategory, setMainCategory] = useState('GENERAL');
     const [subCategory, setSubCategory] = useState('LEVEL');
 
-    const formatSilver = (num) => {
-        if (num >= 1000000000) return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
-        if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-        if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-        return num.toLocaleString();
-    };
-
     useEffect(() => {
-        if (!socket) return;
+        if (!gameState || !gameState.socket) return;
+
+        const socket = gameState.socket;
 
         // Determine which server-side leaderboard type to fetch
         let type = 'COMBAT';
@@ -257,7 +253,7 @@ const RankingPanel = ({ socket, isMobile }) => {
                                     {/* Valor */}
                                     <div style={{ textAlign: 'right' }}>
                                         <div style={{ fontSize: '1.1rem', fontWeight: '900', color: index === 0 ? '#d4af37' : '#fff' }}>
-                                            {subCategory === 'SILVER' ? formatSilver(char.value) : char.value}
+                                            {subCategory === 'SILVER' ? formatSilver(char.value) : formatNumber(char.value)}
                                         </div>
                                         <div style={{ fontSize: '0.55rem', color: '#555', fontWeight: 'bold' }}>
                                             {char.label}

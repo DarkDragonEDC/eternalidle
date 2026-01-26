@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatNumber, formatSilver } from '@utils/format';
 import {
     Tag, ShoppingBag, Package, Search,
     Coins, ArrowRight, User, Info, Trash2,
@@ -18,12 +19,6 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
     const [marketListings, setMarketListings] = useState([]);
     const [notification, setNotification] = useState(null);
 
-    const formatSilver = (num) => {
-        if (num >= 1000000000) return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
-        if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-        if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-        return num.toLocaleString();
-    };
 
     // Auto-dismiss notification
     useEffect(() => {
@@ -102,7 +97,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
     };
 
     // Derived State
-    const myOrders = marketListings.filter(l => l.seller_id === gameState.user_id && l.status !== 'SOLD' && l.status !== 'EXPIRED');
+    const myOrders = marketListings.filter(l => l.seller_character_id === gameState.user_id && l.status !== 'SOLD' && l.status !== 'EXPIRED');
     // Assuming active are those not sold/expired. If server sends only active in updates, this filter might need adjustment.
     // However, usually market listings update implies active listings. 
     // Claims are usually separate. But let's check if the previous code logic implies separation.
@@ -116,7 +111,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
     // Filter Logic for BUY tab
     const activeBuyListings = activeListingsForValues.filter(l => {
-        if (l.seller_id === gameState.user_id) return false; // Don't show own listings in buy
+        if (l.seller_character_id === gameState.user_id) return false; // Don't show own listings in buy
 
         const itemName = l.item_data?.name || formatItemId(l.item_id);
         const matchesSearch = itemName.toLowerCase().includes(searchQuery.toLowerCase());
@@ -137,7 +132,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
         return matchesSearch && matchesCategory;
     });
 
-    const myActiveListings = activeListingsForValues.filter(l => l.seller_id === gameState.user_id);
+    const myActiveListings = activeListingsForValues.filter(l => l.seller_character_id === gameState.user_id);
 
 
     return (
@@ -821,7 +816,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                 </h3>
                                 <p style={{ margin: '0 0 20px 0', color: 'var(--text-dim)', fontSize: '0.9rem' }}>
                                     Price per unit: <span style={{ color: 'var(--accent)' }}>
-                                        {buyModal.pricePerUnit < 1 ? buyModal.pricePerUnit.toFixed(2) : Math.floor(buyModal.pricePerUnit).toLocaleString()} silver
+                                        {buyModal.pricePerUnit < 1 ? buyModal.pricePerUnit.toFixed(2) : formatNumber(Math.floor(buyModal.pricePerUnit))} silver
                                     </span>
                                 </p>
 
@@ -881,16 +876,16 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                 <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '8px', padding: '15px', marginBottom: '20px' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-dim)' }}>
                                         <span>Current Silver:</span>
-                                        <span style={{ color: '#fff' }}>{silver ? silver.toLocaleString() : 0}</span>
+                                        <span style={{ color: '#fff' }}>{silver ? formatNumber(silver) : 0}</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-dim)' }}>
                                         <span>Total Cost:</span>
-                                        <span style={{ color: '#ff4444' }}>- {(Math.floor(buyModal.pricePerUnit * buyModal.quantity)).toLocaleString()}</span>
+                                        <span style={{ color: '#ff4444' }}>- {formatNumber(Math.floor(buyModal.pricePerUnit * buyModal.quantity))}</span>
                                     </div>
                                     <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: '8px', paddingTop: '8px', display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
                                         <span>Remaining:</span>
                                         <span style={{ color: (silver - Math.floor(buyModal.pricePerUnit * buyModal.quantity)) < 0 ? '#ff4444' : '#4caf50' }}>
-                                            {(silver - Math.floor(buyModal.pricePerUnit * buyModal.quantity)).toLocaleString()}
+                                            {formatNumber(silver - Math.floor(buyModal.pricePerUnit * buyModal.quantity))}
                                         </span>
                                     </div>
                                 </div>

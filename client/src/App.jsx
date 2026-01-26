@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { supabase } from './supabase';
 import Auth from './components/Auth';
-import CharacterSelect from './components/CharacterSelect';
+import CharacterSelection from './components/CharacterSelection';
 import ChatWidget from './components/ChatWidget';
 import Sidebar from './components/Sidebar';
 import InventoryPanel from './components/InventoryPanel';
@@ -59,12 +59,7 @@ const mapTabCategoryToSkill = (tab, category) => {
   return maps[tab.toLowerCase()]?.[category.toUpperCase()];
 };
 
-const formatSilver = (num) => {
-  if (num >= 1000000000) return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
-  if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-  if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-  return num.toLocaleString();
-};
+import { formatNumber, formatSilver } from '@utils/format';
 
 function App() {
   const [session, setSession] = useState(null);
@@ -75,7 +70,7 @@ function App() {
   const clockOffset = useRef(0);
   const displayedGameState = useOptimisticState(gameState);
   const [error, setError] = useState('');
-  const [characterSelected, setCharacterSelected] = useState(false);
+  // characterSelected is no longer needed, we use selectedCharacter (charId) as the source of truth
 
   // Navigation State
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('activeTab') || 'inventory');
@@ -182,6 +177,18 @@ function App() {
     return () => window.removeEventListener('beforeunload', handleUnload);
   }, [session]);
 
+  const [selectedCharacter, setSelectedCharacter] = useState(() => localStorage.getItem('selectedCharacterId'));
+
+  // Auto-connect if session and character already exist
+  useEffect(() => {
+    if (session?.access_token && selectedCharacter && !socket) {
+      console.log("Restoring character session:", selectedCharacter);
+      setIsConnecting(true);
+      connectSocket(session.access_token, selectedCharacter);
+    }
+  }, [session, selectedCharacter, socket]);
+
+  // Auth Handling
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -189,101 +196,89 @@ function App() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (!session) {
+        if (socket) socket.disconnect();
+        setGameState(null);
+        setSelectedCharacter(null);
+        localStorage.removeItem('selectedCharacterId');
+        setSocket(null);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (session) {
-      const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:3000', {
-        auth: { token: session.access_token },
-        transports: ['websocket', 'polling']
-      });
+  // Socket Connection Function
+  const connectSocket = (token, characterId) => {
+    if (socket?.connected) return;
 
-      setSocket(newSocket);
-      setIsConnecting(true);
+    const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:3000', {
+      auth: { token },
+      transports: ['websocket']
+    });
+
+    newSocket.on('connect', () => {
+      console.log('Connected to server');
       setConnectionError(null);
+      setIsConnecting(false);
+      // Join Character Room
+      newSocket.emit('join_character', { characterId });
+    });
 
-      // Connection Timeout (15s)
-      const connectTimeout = setTimeout(() => {
-        if (!gameState) {
-          setConnectionError("Connection timeout. The server might be offline or blocked by your browser.");
-          setIsConnecting(false);
-        }
-      }, 15000);
+    newSocket.on('disconnect', () => {
+      console.log('Disconnected');
+      setIsConnecting(true);
+    });
 
-      newSocket.on('connect', () => {
-        console.log('Connected to server');
-        setConnectionError(null);
-        newSocket.emit('get_status');
-      });
+    newSocket.on('connect_error', (err) => {
+      console.error('Connection error:', err);
+      setConnectionError('Connection failed. Retrying in 5s...');
+      setIsConnecting(true);
+      setTimeout(() => {
+        if (newSocket.disconnected) newSocket.connect();
+      }, 5000);
+    });
 
-      newSocket.on('connect_error', (err) => {
-        console.error('Socket connection error:', err);
-        setIsConnecting(false);
+    newSocket.on('status_update', (status) => {
+      const now = Date.now();
+      const serverTime = new Date(status.serverTime || now).getTime();
+      clockOffset.current = now - serverTime;
 
-        let errorMsg = err.message;
-        const isClientHttps = window.location.protocol === 'https:';
-        const serverUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-        const isServerHttp = serverUrl.startsWith('http:');
+      if (status.offlineReport) {
+        setOfflineReport(status.offlineReport);
+      }
 
-        if (isClientHttps && isServerHttp && !serverUrl.includes('localhost')) {
-          errorMsg = "Browser blocked connection (Mixed Content). Your browser blocks non-secure (HTTP) connections from HTTPS sites. Please use an HTTPS server URL or allow 'Insecure Content' in site settings.";
-        } else if (err.message === 'xhr poll error') {
-          errorMsg = "Cannot reach server. Ensure VITE_API_URL is correct and the server is running.";
-        }
+      setGameState(status);
+      setIsConnecting(false);
+    });
 
-        setConnectionError(errorMsg);
-      });
+    // Attach other listeners if needed here or rely on the main socket instance updating
+    setSocket(newSocket);
+  };
 
-      newSocket.on('status_update', (status) => {
-        console.log('[REALTIME] Status update received:', status);
-        clearTimeout(connectTimeout);
-        setIsConnecting(false);
-        setConnectionError(null);
-        if (status.serverTime) {
-          clockOffset.current = status.serverTime - Date.now();
-        }
-        setGameState(status);
-        if (status.name) setCharacterSelected(true);
-      });
-
-      newSocket.on('action_result', (result) => {
-        console.log('Action result:', result);
-        // Aqui podemos disparar uma notificação ou animação personalizada no futuro
-      });
-
-      newSocket.on('skill_level_up', ({ message }) => {
-        addNotification({
-          type: 'LEVEL_UP',
-          message
-        });
-      });
-
-      newSocket.on('error', (msg) => {
-        setError(typeof msg === 'string' ? msg : msg.message);
-      });
-
-      // Heartbeat: Sincronização forçada a cada 15 segundos para evitar o "F5"
-      const heartbeat = setInterval(() => {
-        if (newSocket.connected) {
-          newSocket.emit('get_status');
-        }
-      }, 15000);
-
-      return () => {
-        clearInterval(heartbeat);
-        newSocket.close();
-      };
+  // Cleanup Socket on Unmount
+  useEffect(() => {
+    return () => {
+      if (socket) socket.disconnect();
     }
-  }, [session]);
+  }, [socket]);
+
+  const handleCharacterSelect = (charId) => {
+    setSelectedCharacter(charId);
+    localStorage.setItem('selectedCharacterId', charId);
+    if (session?.access_token) {
+      setIsConnecting(true); // Show loading
+      connectSocket(session.access_token, charId);
+    }
+  };
+
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    localStorage.removeItem('selectedCharacterId');
     setSession(null);
     setGameState(null);
-    setCharacterSelected(false);
+    setSelectedCharacter(null);
   };
 
   const handleEquip = (itemId) => {
@@ -363,7 +358,7 @@ function App() {
               Lv {skill.level} <span style={{ fontSize: '0.65rem', color: '#888', fontWeight: 'normal' }}>({Math.floor(progress)}%)</span>
             </div>
             <div style={{ fontSize: '0.55rem', color: '#555', fontWeight: 'bold' }}>
-              {((XP_TABLE[skill.level - 1] || 0) + skill.xp).toLocaleString()} / {XP_TABLE[skill.level] ? XP_TABLE[skill.level].toLocaleString() : 'MAX'} XP
+              {formatNumber((XP_TABLE[skill.level - 1] || 0) + skill.xp)} / {XP_TABLE[skill.level] ? formatNumber(XP_TABLE[skill.level]) : 'MAX'} XP
             </div>
           </div>
         </div>
@@ -469,49 +464,7 @@ function App() {
     );
   };
 
-  if (!session) return <Auth onLogin={setSession} />;
 
-  // Loading / Connection Error Screen
-  if (!gameState || !displayedGameState || (gameState.noCharacter && !characterSelected) || !characterSelected) {
-    if (connectionError || !gameState) {
-      return (
-        <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0f', color: '#fff', padding: '20px' }}>
-          <div style={{ textAlign: 'center', maxWidth: '400px' }}>
-            {connectionError ? (
-              <>
-                <div style={{ color: '#ff4444', marginBottom: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>Connection Error</div>
-                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '8px', border: '1px solid rgba(255,68,68,0.2)', marginBottom: '20px', fontSize: '0.9rem', lineHeight: '1.4' }}>
-                  {connectionError}
-                </div>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="glass-button"
-                  style={{ padding: '10px 20px', background: '#d4af37', color: '#000', fontWeight: 'bold' }}
-                >
-                  RETRY CONNECTION
-                </button>
-              </>
-            ) : (
-              <>
-                <div className="loading-spinner" style={{ marginBottom: '20px', fontSize: '1.5rem' }}>Loading Forged Lands...</div>
-                <div style={{ opacity: 0.5, fontSize: '0.9rem' }}>Fetching character data...</div>
-              </>
-            )}
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <CharacterSelect
-        socket={socket}
-        gameState={gameState}
-        onLogout={handleLogout}
-        onSelect={() => setCharacterSelected(true)}
-        serverError={error}
-      />
-    );
-  }
 
   const renderContent = () => {
     switch (activeTab) {
@@ -681,7 +634,7 @@ function App() {
                           )}
                           {isActive && (
                             <div style={{ fontSize: '0.6rem', color: 'var(--accent)', marginTop: '4px', textAlign: 'right', fontWeight: 'bold' }}>
-                              REMAINING {displayedGameState.current_activity.actions_remaining}
+                              {displayedGameState.current_activity.initial_quantity - displayedGameState.current_activity.actions_remaining}/{displayedGameState.current_activity.initial_quantity}
                             </div>
                           )}
                         </div>
@@ -864,7 +817,7 @@ function App() {
                           )}
                           {isActive && (
                             <div style={{ fontSize: '0.6rem', color: 'var(--accent)', marginTop: '4px', textAlign: 'right', fontWeight: 'bold' }}>
-                              REMAINING {displayedGameState.current_activity.actions_remaining}
+                              {displayedGameState.current_activity.initial_quantity - displayedGameState.current_activity.actions_remaining}/{displayedGameState.current_activity.initial_quantity}
                             </div>
                           )}
                         </div>
@@ -945,6 +898,26 @@ function App() {
     }
   };
 
+
+
+  if (!session) {
+    return <Auth onLogin={setSession} />;
+  }
+
+  if (!selectedCharacter) {
+    return <CharacterSelection onSelectCharacter={handleCharacterSelect} />;
+  }
+
+  // Loading state while connecting
+  if (!gameState && isConnecting) {
+    return <div className="loading-screen"><div className="spinner"></div>Connecting to World...</div>;
+  }
+
+  // Guard: if invalid state
+  if (!gameState || !gameState.state) {
+    return <div className="loading-screen"><div className="spinner"></div>Loading Game State...</div>;
+  }
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#0a0a0f', color: '#fff', fontFamily: "'Inter', sans-serif", position: 'relative' }}>
       <Sidebar
@@ -956,7 +929,13 @@ function App() {
         isMobile={isMobile}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
-        onSwitchCharacter={() => setCharacterSelected(false)}
+        onSwitchCharacter={() => {
+          if (socket) socket.disconnect();
+          setSelectedCharacter(null);
+          localStorage.removeItem('selectedCharacterId');
+          setGameState(null);
+          setSocket(null);
+        }}
       />
 
       {
@@ -997,7 +976,7 @@ function App() {
               <Coins size={16} color="#d4af37" />
               <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#d4af37', fontFamily: 'monospace' }}>
                 {showFullNumbers
-                  ? (displayedGameState?.state?.silver || 0).toLocaleString()
+                  ? formatNumber(displayedGameState?.state?.silver || 0)
                   : formatSilver(displayedGameState?.state?.silver || 0)}
               </span>
             </button>

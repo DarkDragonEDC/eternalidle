@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatNumber, formatSilver } from '@utils/format';
 import { Skull, Map as MapIcon, Shield, Lock, ChevronRight, AlertTriangle, Star, Coins, History, Heart, Sword, Package, Layers, Clock, Sparkles } from 'lucide-react';
 import { ITEMS, resolveItem } from '@shared/items';
 import { MONSTERS } from '@shared/monsters';
@@ -320,11 +321,11 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                                         <div style={{ background: 'rgba(76, 175, 80, 0.05)', padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(76, 175, 80, 0.1)' }}>
                                             <div style={{ color: 'rgba(76, 175, 80, 0.6)', fontSize: '0.55rem', fontWeight: '900' }}>XP</div>
-                                            <div style={{ color: '#4caf50', fontWeight: '900', fontSize: '1rem' }}>+{totals.xp.toLocaleString()}</div>
+                                            <div style={{ color: '#4caf50', fontWeight: '900', fontSize: '1rem' }}>+{formatNumber(totals.xp)}</div>
                                         </div>
                                         <div style={{ background: 'rgba(255, 215, 0, 0.05)', padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(255, 215, 0, 0.1)' }}>
                                             <div style={{ color: 'rgba(255, 215, 0, 0.6)', fontSize: '0.55rem', fontWeight: '900' }}>SILVER</div>
-                                            <div style={{ color: '#ffd700', fontWeight: '900', fontSize: '1rem' }}>+{totals.silver.toLocaleString()}</div>
+                                            <div style={{ color: '#ffd700', fontWeight: '900', fontSize: '1rem' }}>+{formatNumber(totals.silver)}</div>
                                         </div>
                                     </div>
 
@@ -499,7 +500,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', color: '#8B8D91', fontSize: '0.8rem' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                     <Sparkles size={14} color="#ffd700" />
-                                                    <span>{dungeon.rewards.xp.toLocaleString()} XP</span>
+                                                    <span>{formatNumber(dungeon.rewards.xp)} XP</span>
                                                 </div>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                     <Clock size={14} color="#8B8D91" />
@@ -546,7 +547,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                             {/* Silver Cost (if any, showing reward silver for now) */}
                                             <div style={{ position: 'relative', width: '52px', height: '52px', background: '#2A3041', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
                                                 <div style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#1E2330', fontSize: '0.6rem', padding: '2px 6px', borderRadius: '4px', border: '1px solid #2A3041', color: '#ffd700', fontWeight: 'bold', zIndex: 2 }}>
-                                                    {dungeon.rewards.silver.toLocaleString()}
+                                                    {formatNumber(dungeon.rewards.silver)}
                                                 </div>
                                                 <div style={{ fontSize: '1.2rem', opacity: 0.8 }}>
                                                     <Coins size={28} color="#ffd700" />

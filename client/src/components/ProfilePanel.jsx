@@ -21,12 +21,11 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
     const handleUnequip = (slot) => {
         socket.emit('unequip_item', { slot });
     };
-    if (!gameState) return <div style={{ padding: 20, textAlign: 'center', opacity: 0.5 }}>Loading data...</div>;
 
-    const { name = 'Explorer', state } = gameState;
-    const { skills = {}, silver = 0, health = 100, maxHealth = 100, equipment = {} } = state || {};
-
-    const charStats = state?.stats || { str: 0, agi: 0, int: 0 };
+    const name = gameState?.name || 'Explorer';
+    const state = gameState?.state || {};
+    const { skills = {}, silver = 0, health = 100, maxHealth = 100, equipment = {} } = state;
+    const charStats = state.stats || { str: 0, agi: 0, int: 0 };
 
     const calculatedStats = useMemo(() => {
         // Base stats iniciam em 0
@@ -64,7 +63,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
 
     const stats = useMemo(() => {
         // Se o servidor enviou os stats calculados, use-os como fonte da verdade absoluta
-        if (gameState.calculatedStats) {
+        if (gameState?.calculatedStats) {
             return {
                 ...gameState.calculatedStats,
                 hp: health, // HP atual vem do state
@@ -117,7 +116,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
             },
             silverMultiplier: 1.0 + (calculatedStats.int * 0.02)
         };
-    }, [gameState.calculatedStats, calculatedStats, health, skills]);
+    }, [gameState?.calculatedStats, calculatedStats, health, skills]);
 
     const avgIP = useMemo(() => {
         const combatSlots = ['head', 'chest', 'shoes', 'gloves', 'cape', 'mainHand', 'offHand'];
@@ -270,6 +269,8 @@ Each point grants: +10 HP and +1 Base Damage`;
 • Mage Crafter: ${getLvl('MAGE_CRAFTER')}
 
 Each point grants: +1% Global XP, +1% Gold Gain and +1 Base Damage`;
+
+    if (!gameState) return <div style={{ padding: 20, textAlign: 'center', opacity: 0.5 }}>Loading data...</div>;
 
     return (
         <>
@@ -543,10 +544,10 @@ const EfficiencyCard = ({ title, items, stats, onShowBreakdown }) => (
         {items.map(item => (
             <div key={item.id}
                 style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', marginBottom: '5px', opacity: 0.8, cursor: 'pointer' }}
-                onClick={() => onShowBreakdown && onShowBreakdown(item.id, `+${stats.efficiency[item.id] || 0}%`)}
+                onClick={() => onShowBreakdown && onShowBreakdown(item.id, `+${(stats.efficiency[item.id] || 0).toFixed(1)}%`)}
             >
                 <span style={{ color: '#888' }}>{item.label}</span>
-                <span style={{ color: '#fff', fontWeight: 'bold' }}>+{stats.efficiency[item.id] || 0}% <Info size={10} color="#555" /></span>
+                <span style={{ color: '#fff', fontWeight: 'bold' }}>+{(stats.efficiency[item.id] || 0).toFixed(1)}% <Info size={10} color="#555" /></span>
             </div>
         ))}
     </div>

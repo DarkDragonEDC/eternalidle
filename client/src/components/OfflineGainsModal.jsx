@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatNumber, formatSilver } from '@utils/format';
 import { Package, Star, Clock, X, AlertCircle, Sword, Coins, Zap, Shield, Heart, Axe, Pickaxe, Scissors, Anchor, Apple, Box, Trophy, Hammer, Utensils, Anvil } from 'lucide-react';
 import { resolveItem, getTierColor } from '@shared/items';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -44,14 +45,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
         return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     };
 
-    const formatValue = (num) => {
-        if (num >= 1000000000) return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
-        if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-        if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-        return num.toLocaleString();
-    };
-
-    const formatSilver = formatValue;
+    const formatValue = formatSilver;
 
     return (
         <AnimatePresence>
@@ -194,7 +188,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                     >
                                         <span style={{ fontSize: '0.5rem', color: '#666', textTransform: 'uppercase', fontWeight: '800' }}>Kills</span>
                                         <span style={{ fontSize: '0.9rem', fontWeight: '900', color: '#fff' }}>
-                                            {showFullNumbers ? (combat.kills || 0).toLocaleString() : formatValue(combat.kills || 0)}
+                                            {showFullNumbers ? formatNumber(combat.kills || 0) : formatValue(combat.kills || 0)}
                                         </span>
                                     </div>
                                     <div style={{ width: '1px', background: 'rgba(255,255,255,0.05)', height: '15px', alignSelf: 'center' }}></div>
@@ -204,7 +198,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                     >
                                         <span style={{ fontSize: '0.5rem', color: '#666', textTransform: 'uppercase', fontWeight: '800' }}>Silver</span>
                                         <span style={{ fontSize: '0.9rem', fontWeight: '900', color: '#ffca28' }}>
-                                            {showFullNumbers ? (combat.silverGained || 0).toLocaleString() : formatValue(combat.silverGained || 0)}
+                                            {showFullNumbers ? formatNumber(combat.silverGained || 0) : formatValue(combat.silverGained || 0)}
                                         </span>
                                     </div>
                                     <div style={{ width: '1px', background: 'rgba(255,255,255,0.05)', height: '15px', alignSelf: 'center' }}></div>
@@ -214,7 +208,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                     >
                                         <span style={{ fontSize: '0.5rem', color: '#666', textTransform: 'uppercase', fontWeight: '800' }}>Healing</span>
                                         <span style={{ fontSize: '0.9rem', fontWeight: '900', color: '#49cc90' }}>
-                                            {showFullNumbers ? (combat.foodConsumed || 0).toLocaleString() : formatValue(combat.foodConsumed || 0)}
+                                            {showFullNumbers ? formatNumber(combat.foodConsumed || 0) : formatValue(combat.foodConsumed || 0)}
                                         </span>
                                     </div>
                                 </div>
@@ -282,7 +276,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                                 </span>
                                             </div>
                                             <span style={{ color: '#4caf50', fontWeight: '900', fontSize: '0.85rem' }}>
-                                                +{showFullNumbers ? amount.toLocaleString() : formatValue(amount)} <span style={{ fontSize: '0.55rem', opacity: 0.5 }}>XP</span>
+                                                +{showFullNumbers ? formatNumber(amount) : formatValue(amount)} <span style={{ fontSize: '0.55rem', opacity: 0.5 }}>XP</span>
                                             </span>
                                         </div>
                                     ))}

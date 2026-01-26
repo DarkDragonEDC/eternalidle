@@ -41,6 +41,9 @@ console.log('[SERVER] Supabase Key Role:', isServiceRole ? 'SERVICE_ROLE' : 'ANO
 import { GameManager } from './GameManager.js';
 const gameManager = new GameManager(supabase);
 
+import { characterRoutes } from './routes/characters.js';
+app.use('/api/characters', authMiddleware, characterRoutes(gameManager));
+
 // Public route
 app.get('/', (req, res) => {
     res.send('Jogo 2.0 Server is running');
@@ -116,10 +119,28 @@ io.on('connection', (socket) => {
         connectedSockets.delete(socket.id);
     });
 
-    socket.on('get_status', async () => {
+    socket.on('join_character', async ({ characterId }) => {
+        if (!characterId) return;
+        console.log(`[SOCKET] User ${socket.user.email} joined character ${characterId}`);
+        socket.data.characterId = characterId;
+
+        // Immediately send status for this character
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
-                const status = await gameManager.getStatus(socket.user.id, true);
+                const status = await gameManager.getStatus(socket.user.id, true, characterId);
+                socket.emit('status_update', status);
+            });
+        } catch (err) {
+            console.error(`[SOCKET] Error joining character ${characterId}:`, err);
+            socket.emit('error', { message: "Failed to load character data." });
+        }
+    });
+
+    socket.on('get_status', async () => {
+        try {
+            const charId = socket.data.characterId;
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const status = await gameManager.getStatus(socket.user.id, true, charId);
                 socket.emit('status_update', status);
             });
         } catch (err) {
@@ -143,7 +164,7 @@ io.on('connection', (socket) => {
             const char = await gameManager.createCharacter(socket.user.id, name);
             console.log(`[SERVER] Character created successfully: "${name}"`);
             socket.emit('character_created', char);
-            socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+            socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, char.id));
         } catch (err) {
             console.error(`[SERVER] Error creating character "${name}": `, err.message);
             socket.emit('error', { message: err.message });
@@ -153,9 +174,9 @@ io.on('connection', (socket) => {
     socket.on('start_activity', async ({ actionType, itemId, quantity }) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
-                const result = await gameManager.startActivity(socket.user.id, actionType, itemId, quantity);
+                const result = await gameManager.startActivity(socket.user.id, socket.data.characterId, actionType, itemId, quantity);
                 socket.emit('activity_started', result);
-                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
             });
         } catch (err) {
             console.error('Error starting activity:', err);
@@ -166,9 +187,9 @@ io.on('connection', (socket) => {
     socket.on('claim_reward', async () => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
-                const result = await gameManager.claimReward(socket.user.id);
+                const result = await gameManager.claimReward(socket.user.id, socket.data.characterId);
                 socket.emit('reward_claimed', result);
-                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
             });
         } catch (err) {
             console.error('Error claiming reward:', err);
@@ -179,9 +200,9 @@ io.on('connection', (socket) => {
     socket.on('start_dungeon', async ({ tier, dungeonId, repeatCount }) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
-                const result = await gameManager.startDungeon(socket.user.id, dungeonId, repeatCount);
+                const result = await gameManager.startDungeon(socket.user.id, socket.data.characterId, dungeonId, repeatCount);
                 socket.emit('dungeon_started', result);
-                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
             });
         } catch (err) {
             console.error('Error starting dungeon:', err);
@@ -192,9 +213,9 @@ io.on('connection', (socket) => {
     socket.on('stop_dungeon', async () => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
-                const result = await gameManager.stopDungeon(socket.user.id);
+                const result = await gameManager.stopDungeon(socket.user.id, socket.data.characterId);
                 socket.emit('dungeon_stopped', result);
-                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
             });
         } catch (err) {
             socket.emit('error', { message: err.message });
@@ -204,9 +225,9 @@ io.on('connection', (socket) => {
     socket.on('start_combat', async ({ tier, mobId }) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
-                const result = await gameManager.startCombat(socket.user.id, mobId, tier);
+                const result = await gameManager.startCombat(socket.user.id, socket.data.characterId, mobId, tier);
                 socket.emit('combat_started', result);
-                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
             });
         } catch (err) {
             console.error('Error starting combat:', err);
@@ -218,9 +239,9 @@ io.on('connection', (socket) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
                 const userId = socket.user.id;
-                const result = await gameManager.stopCombat(userId);
+                const result = await gameManager.stopCombat(userId, socket.data.characterId);
                 socket.emit('action_result', result);
-                const status = await gameManager.getStatus(userId);
+                const status = await gameManager.getStatus(userId, true, socket.data.characterId);
                 socket.emit('status_update', status);
             });
         } catch (err) {
@@ -232,9 +253,9 @@ io.on('connection', (socket) => {
     socket.on('equip_item', async ({ itemId }) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
-                const result = await gameManager.equipItem(socket.user.id, itemId);
+                const result = await gameManager.equipItem(socket.user.id, socket.data.characterId, itemId);
                 socket.emit('item_equipped', result);
-                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
             });
         } catch (err) {
             socket.emit('error', { message: err.message });
@@ -244,12 +265,73 @@ io.on('connection', (socket) => {
     socket.on('unequip_item', async ({ slot }) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
-                const result = await gameManager.unequipItem(socket.user.id, slot);
+                const result = await gameManager.unequipItem(socket.user.id, socket.data.characterId, slot);
                 socket.emit('item_unequipped', result);
-                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
             });
         } catch (err) {
             console.error('Error unequipping item:', err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('sell_item', async ({ itemId, quantity }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.sellItem(socket.user.id, socket.data.characterId, itemId, quantity);
+                socket.emit('item_sold', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('list_market_item', async ({ itemId, amount, price }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.listMarketItem(socket.user.id, socket.data.characterId, itemId, amount, price);
+                socket.emit('market_listed', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('buy_market_item', async ({ listingId, quantity }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.buyMarketItem(socket.user.id, socket.data.characterId, listingId, quantity);
+                socket.emit('market_bought', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            });
+        } catch (err) {
+            console.error("Buy Error:", err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('cancel_market_listing', async ({ listingId }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.cancelMarketListing(socket.user.id, socket.data.characterId, listingId);
+                socket.emit('market_cancelled', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('claim_market_item', async ({ claimId }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.claimMarketItem(socket.user.id, socket.data.characterId, claimId);
+                socket.emit('market_claimed', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            });
+        } catch (err) {
             socket.emit('error', { message: err.message });
         }
     });
@@ -270,13 +352,14 @@ io.on('connection', (socket) => {
 
     socket.on('get_combat_history', async () => {
         try {
-            const char = await gameManager.getCharacter(socket.user.id);
-            if (!char) return;
+            // Fix: Fetch history for the SELECTED character
+            const charId = socket.data.characterId;
+            if (!charId) return;
 
             const { data, error } = await supabase
                 .from('combat_history')
                 .select('*')
-                .eq('character_id', char.id)
+                .eq('character_id', charId)
                 .order('occurred_at', { ascending: false })
                 .limit(20);
 
@@ -290,14 +373,15 @@ io.on('connection', (socket) => {
 
     socket.on('get_dungeon_history', async () => {
         try {
-            const char = await gameManager.getCharacter(socket.user.id);
-            if (!char) return;
+            // Fix: Fetch history for the SELECTED character
+            const charId = socket.data.characterId;
+            if (!charId) return;
 
             const { data, error } = await supabase
                 .from('dungeon_history')
                 .select('*')
-                .eq('character_id', char.id)
-                .order('occurred_at', { ascending: false })
+                .eq('character_id', charId)
+                .order('started_at', { ascending: false })
                 .limit(20);
 
             if (error) throw error;
@@ -308,9 +392,10 @@ io.on('connection', (socket) => {
         }
     });
 
+
     socket.on('send_message', async ({ content }) => {
         try {
-            const char = await gameManager.getCharacter(socket.user.id);
+            const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
             if (!char) return;
 
             // Enforce character limit
@@ -321,7 +406,7 @@ io.on('connection', (socket) => {
             const { data, error } = await supabase
                 .from('messages')
                 .insert({
-                    user_id: socket.user.id,
+                    user_id: char.id, // Changed from socket.user.id to char.id
                     sender_name: char.name,
                     content: content
                 })
@@ -427,7 +512,7 @@ io.on('connection', (socket) => {
 
     socket.on('acknowledge_offline_report', async () => {
         try {
-            await gameManager.clearOfflineReport(socket.user.id);
+            await gameManager.clearOfflineReport(socket.user.id, socket.data.characterId);
         } catch (err) {
             console.error('Error clearing offline report:', err);
         }
@@ -436,12 +521,12 @@ io.on('connection', (socket) => {
     socket.on('mark_notification_read', async ({ notificationId }) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
-                const char = await gameManager.getCharacter(socket.user.id);
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
                 if (char && char.state.notifications) {
                     const notif = char.state.notifications.find(n => n.id === notificationId);
                     if (notif) {
                         notif.read = true;
-                        await gameManager.saveState(socket.user.id, char.state);
+                        await gameManager.saveState(char.id, char.state);
                     }
                 }
             });
@@ -453,10 +538,10 @@ io.on('connection', (socket) => {
     socket.on('clear_notifications', async () => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
-                const char = await gameManager.getCharacter(socket.user.id);
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
                 if (char && char.state.notifications) {
                     char.state.notifications = [];
-                    await gameManager.saveState(socket.user.id, char.state);
+                    await gameManager.saveState(char.id, char.state);
                 }
             });
         } catch (err) {
@@ -469,25 +554,27 @@ io.on('connection', (socket) => {
 setInterval(async () => {
     try {
         const localSockets = Array.from(connectedSockets.values());
-        const userGroups = {};
+        const charGroups = {};
 
         localSockets.forEach(s => {
             const user = s.user || s.data?.user;
-            if (user && user.id) {
-                if (!userGroups[user.id]) userGroups[user.id] = { user, sockets: [] };
-                userGroups[user.id].sockets.push(s);
+            const charId = s.data?.characterId;
+            if (user && user.id && charId) {
+                const key = `${user.id}:${charId}`;
+                if (!charGroups[key]) charGroups[key] = { user, charId, sockets: [] };
+                charGroups[key].sockets.push(s);
             }
         });
 
-        const activeUsersCount = Object.keys(userGroups).length;
-        if (activeUsersCount > 0) {
-            // console.log(`[TICKER] Processing ${ activeUsersCount } users...`);
+        const activeCharsCount = Object.keys(charGroups).length;
+        if (activeCharsCount > 0) {
+            // console.log(`[TICKER] Processing ${activeCharsCount} characters...`);
         }
 
-        await Promise.all(Object.values(userGroups).map(async ({ user, sockets }) => {
+        await Promise.all(Object.values(charGroups).map(async ({ user, charId, sockets }) => {
             try {
                 await gameManager.executeLocked(user.id, async () => {
-                    const result = await gameManager.processTick(user.id);
+                    const result = await gameManager.processTick(user.id, charId);
                     if (result) {
                         console.log(`[TICKER] Emitting update for ${user.email} (Status change: ${!!result.status})`);
                         sockets.forEach(s => {

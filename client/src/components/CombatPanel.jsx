@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { formatNumber, formatSilver } from '@utils/format';
 import { Sword, Shield, Skull, Coins, Zap, Clock, Trophy, ChevronRight, User, Terminal, Activity, TrendingUp, Star, Apple } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MONSTERS } from '@shared/monsters';
@@ -539,25 +540,25 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <TrendingUp size={10} /> DAMAGE
                                 </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>{totalDmgDealt.toLocaleString()}</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>{formatNumber(totalDmgDealt)}</div>
                             </div>
                             <div style={{ background: 'rgba(212, 175, 55, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(212, 175, 55, 0.2)' }}>
                                 <div style={{ fontSize: '0.55rem', color: '#d4af37', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Coins size={10} /> SILVER
                                 </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#d4af37' }}>{silverGained.toLocaleString()}</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#d4af37' }}>{formatNumber(silverGained)}</div>
                             </div>
                             <div style={{ background: 'rgba(76, 175, 80, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(76, 175, 80, 0.2)' }}>
                                 <div style={{ fontSize: '0.55rem', color: '#4caf50', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Star size={10} /> TOTAL XP
                                 </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>{xpGained.toLocaleString()}</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>{formatNumber(xpGained)}</div>
                             </div>
                             <div style={{ background: 'rgba(76, 175, 80, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(76, 175, 80, 0.2)' }}>
                                 <div style={{ fontSize: '0.55rem', color: '#4caf50', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Activity size={10} /> XP/H
                                 </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4caf50' }}>{Math.floor(xph).toLocaleString()}</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4caf50' }}>{formatNumber(Math.floor(xph))}</div>
                             </div>
                         </div>
 
@@ -797,13 +798,13 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '0.55rem', color: '#888' }}>XP/H</div>
                                         <div style={{ fontSize: isMobile ? '0.75rem' : '0.85rem', fontWeight: 'bold', color: '#4caf50' }}>
-                                            {isMobile && xpHour > 1000 ? `${(xpHour / 1000).toFixed(1)}k` : xpHour.toLocaleString()}
+                                            {isMobile && xpHour > 1000 ? `${(xpHour / 1000).toFixed(1)}k` : formatNumber(xpHour)}
                                         </div>
                                     </div>
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '0.55rem', color: '#888' }}>SILVER/H</div>
                                         <div style={{ fontSize: isMobile ? '0.75rem' : '0.85rem', fontWeight: 'bold', color: '#d4af37' }}>
-                                            {isMobile && silverHour > 1000 ? `${(silverHour / 1000).toFixed(1)}k` : silverHour.toLocaleString()}
+                                            {isMobile && silverHour > 1000 ? `${(silverHour / 1000).toFixed(1)}k` : formatNumber(silverHour)}
                                         </div>
                                     </div>
 

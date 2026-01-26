@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatNumber, formatSilver } from '@utils/format';
 import { X, Clock, Zap, Target, Star, ChevronRight, Package, Box } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { resolveItem, formatItemId, QUALITIES } from '@shared/items';
@@ -44,7 +45,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
 
     // XP
     const xpPerAction = item.xp || 5;
-    const totalXP = (xpPerAction * qtyNum).toLocaleString();
+    const totalXP = formatNumber(xpPerAction * qtyNum);
 
     // Tempo base & Redução
     const baseTime = item.time || (type === 'GATHERING' ? 3.0 : (type === 'REFINING' ? 1.5 : (type === 'CRAFTING' ? 4.0 : 3.0)));
@@ -105,7 +106,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
     if (type === 'REFINING') {
         const reqs = item.req || {};
         const costPerAction = item.cost || 0; // Se houver custo em silver
-        const totalCost = (costPerAction * qtyNum).toLocaleString();
+        const totalCost = formatNumber(costPerAction * qtyNum);
         const userSilver = gameState?.state?.silver || 0;
 
         return (
@@ -206,7 +207,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                         MAX ({formatDuration(maxQuantity * finalTime)})
                                     </button>
                                 </div>
-                                <div style={{ fontSize: '0.6rem', color: 'rgb(102, 102, 102)', marginTop: '3px' }}>Max: {maxQuantity.toLocaleString()}</div>
+                                <div style={{ fontSize: '0.6rem', color: 'rgb(102, 102, 102)', marginTop: '3px' }}>Max: {formatNumber(maxQuantity)}</div>
                             </div>
 
                             <div style={{ marginBottom: '1.25rem', width: '100%' }}>
@@ -300,7 +301,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
     if (type === 'CRAFTING') {
         const reqs = item.req || {};
         const costPerAction = item.cost || 0;
-        const totalCost = (costPerAction * qtyNum).toLocaleString();
+        const totalCost = formatNumber(costPerAction * qtyNum);
         const userSilver = gameState?.state?.silver || 0;
 
         // Verificar se tem materiais suficientes para a quantidade atual
@@ -315,6 +316,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
 
         // Qualidades baseadas no QUALITIES real do shared/items.js
         const CRAFT_QUALITIES = Object.values(QUALITIES).map(q => ({
+            id: q.id,
             name: q.name,
             chance: (q.chance * 100).toFixed(1) + '%',
             color: q.color,
@@ -429,7 +431,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                         MAX ({formatDuration(maxQuantity * finalTime)})
                                     </button>
                                 </div>
-                                <div style={{ fontSize: '0.6rem', color: 'rgb(102, 102, 102)', marginTop: '3px' }}>Max: {maxQuantity.toLocaleString()}</div>
+                                <div style={{ fontSize: '0.6rem', color: 'rgb(102, 102, 102)', marginTop: '3px' }}>Max: {formatNumber(maxQuantity)}</div>
                             </div>
 
                             <div style={{ marginBottom: '0.75rem', width: '100%' }}>
@@ -523,9 +525,14 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                                                     <Target size={11} />
                                                                     <span style={{ fontWeight: '600' }}>
                                                                         {(() => {
-                                                                            const multiplier = 1 + (q.ipBonus / 100);
-                                                                            let val = parseFloat((mainStatVal * multiplier).toFixed(1));
-                                                                            // Prevent small floats from looking like ints if they are huge? No, fixed(1) is good.
+                                                                            let val;
+                                                                            if (item.isTool && mainStatKey === 'Efficiency') {
+                                                                                const index = (item.tier - 1) * 5 + q.id;
+                                                                                val = parseFloat((1.0 + (index * (44 / 49))).toFixed(1));
+                                                                            } else {
+                                                                                const multiplier = 1 + (q.ipBonus / 100);
+                                                                                val = parseFloat((mainStatVal * multiplier).toFixed(1));
+                                                                            }
                                                                             return `${val}${mainStatKey === 'Efficiency' ? '%' : ''} ${mainStatKey}`;
                                                                         })()}
                                                                     </span>
@@ -664,7 +671,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                         MAX ({formatDuration(maxQuantity * finalTime)})
                                     </button>
                                 </div>
-                                <div style={{ fontSize: '0.6rem', color: 'rgb(102, 102, 102)', marginTop: '3px' }}>Max: {maxQuantity.toLocaleString()}</div>
+                                <div style={{ fontSize: '0.6rem', color: 'rgb(102, 102, 102)', marginTop: '3px' }}>Max: {formatNumber(maxQuantity)}</div>
                             </div>
 
                             <div style={{ marginBottom: '1.25rem', padding: '16px', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)', width: '100%' }}>
@@ -820,7 +827,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 <label style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '1px' }}>
                                     QUANTITY
                                 </label>
-                                <span style={{ fontSize: '0.7rem', color: '#555', fontWeight: 'bold' }}>MAX: {maxQuantity.toLocaleString()}</span>
+                                <span style={{ fontSize: '0.7rem', color: '#555', fontWeight: 'bold' }}>MAX: {formatNumber(maxQuantity)}</span>
                             </div>
 
                             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>

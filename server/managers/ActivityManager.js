@@ -17,9 +17,9 @@ export class ActivityManager {
         this.gameManager = gameManager;
     }
 
-    async startActivity(userId, actionType, itemId, quantity = 1) {
+    async startActivity(userId, characterId, actionType, itemId, quantity = 1) {
         const type = actionType.toUpperCase();
-        const char = await this.gameManager.getCharacter(userId);
+        const char = await this.gameManager.getCharacter(userId, characterId);
         const item = ITEM_LOOKUP[itemId];
         if (!item) throw new Error("Item not found");
 
@@ -91,14 +91,18 @@ export class ActivityManager {
         return { success: true, actionType, itemId, quantity, timePerAction };
     }
 
-    async stopActivity(userId) {
+    async stopActivity(userId, characterId) {
+        const char = await this.gameManager.getCharacter(userId, characterId);
+        // We need to fetch character first to get ID, or we could blindly update by characterId + userId.
+        // But getCharacter handles correct resolution.
+
         const { error } = await this.gameManager.supabase
             .from('characters')
             .update({
                 current_activity: null,
                 activity_started_at: null
             })
-            .eq('user_id', userId);
+            .eq('id', char.id); // Use char.id not userId, because now multiple chars exist
 
         if (error) throw error;
         return { success: true, message: "Activity stopped" };

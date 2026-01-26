@@ -279,7 +279,7 @@ const genGear = (category, slot, type, idSuffix, matType, statMultipliers = {}) 
         if (statMultipliers.hp) stats.hp = Math.floor(HP_CURVE[t - 1] * statMultipliers.hp);
         if (statMultipliers.speed) stats.speed = Math.floor(t * statMultipliers.speed); // 1-10 speed?
         if (statMultipliers.speed) stats.speed = Math.floor(t * statMultipliers.speed); // 1-10 speed?
-        if (statMultipliers.eff) stats.efficiency = t * 1.5; // T10 = 15% Base (Maskerpiece = 45%)
+        if (statMultipliers.eff) stats.efficiency = 1; // Base value, logic moved to resolveItem
         if (statMultipliers.globalEff) {
             // New Curve: T1 (~1%) to T10 (~5% Base -> 15% Max)
             // Formula: (Tier * 0.45) + 0.55
@@ -299,6 +299,7 @@ const genGear = (category, slot, type, idSuffix, matType, statMultipliers = {}) 
             time: CRAFT_DATA.time[t - 1],
             ip: getBaseIP(t),
             type: type,
+            isTool: !!statMultipliers.eff,
             stats
         };
 
@@ -421,8 +422,17 @@ export const resolveItem = (itemId) => {
     if (baseItem.stats) {
         for (const key in baseItem.stats) {
             if (typeof baseItem.stats[key] === 'number') {
-                if (key === 'attackSpeed') newStats[key] = baseItem.stats[key];
-                else newStats[key] = parseFloat((baseItem.stats[key] * statMultiplier).toFixed(1));
+                if (key === 'efficiency' && baseItem.isTool) {
+                    // 50-step linear progression: 10 Tiers * 5 Qualities
+                    // Index: 0 (T1 Normal) to 49 (T10 Masterpiece)
+                    const index = (baseItem.tier - 1) * 5 + effectiveQualityId;
+                    // Formula: 1.0 + (Index * (44 / 49))
+                    newStats[key] = parseFloat((1.0 + (index * (44 / 49))).toFixed(1));
+                } else if (key === 'attackSpeed') {
+                    newStats[key] = baseItem.stats[key];
+                } else {
+                    newStats[key] = parseFloat((baseItem.stats[key] * statMultiplier).toFixed(1));
+                }
             } else if (key === 'efficiency' && typeof baseItem.stats[key] === 'object') {
                 // Handle Efficiency Object specifically
                 newStats[key] = {};

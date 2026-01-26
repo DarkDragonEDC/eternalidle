@@ -10,8 +10,8 @@ export class DungeonManager {
         this.gameManager = gameManager;
     }
 
-    async startDungeon(userId, dungeonId, repeatCount = 0) {
-        const char = await this.gameManager.getCharacter(userId);
+    async startDungeon(userId, characterId, dungeonId, repeatCount = 0) {
+        const char = await this.gameManager.getCharacter(userId, characterId);
         if (char.state.dungeon) throw new Error("Already in a dungeon");
         if (char.state.combat) throw new Error("Cannot enter dungeon while in combat");
 
@@ -196,7 +196,7 @@ export class DungeonManager {
 
         console.log(`[DUNGEON] Spawning ${mobId} for ${char.name} (Wave ${wave}, Scaling: ${scalingFactor.toFixed(1)}x)`);
         try {
-            await this.gameManager.combatManager.startCombat(char.user_id, mobId, config.tier, char, true, scaledStats);
+            await this.gameManager.combatManager.startCombat(char.user_id, char.id, mobId, config.tier, char, true, scaledStats);
         } catch (e) {
             console.error(`[DUNGEON] Failed to start combat for ${char.name}:`, e.message);
             char.state.dungeon.status = 'ERROR';
@@ -315,8 +315,8 @@ export class DungeonManager {
         };
     }
 
-    async stopDungeon(userId) {
-        const char = await this.gameManager.getCharacter(userId);
+    async stopDungeon(userId, characterId) {
+        const char = await this.gameManager.getCharacter(userId, characterId);
         if (char.state.dungeon) {
             const dungeonConfig = Object.values(DUNGEONS).find(d => d.id === char.state.dungeon.id);
             if (char.state.dungeon.status !== 'COMPLETED' && char.state.dungeon.status !== 'FAILED') {

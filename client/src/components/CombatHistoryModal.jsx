@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { formatNumber, formatSilver } from '@utils/format';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sword, Skull, Shield, Coins, Star } from 'lucide-react';
 import { resolveItem } from '@shared/items';
@@ -128,8 +129,8 @@ const CombatHistoryModal = ({ isOpen, onClose, socket }) => {
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', background: 'rgba(255,255,255,0.05)' }}>
                                             <StatBox label="KILLS" value={log.kills || 0} color="#fff" />
                                             <StatBox label="DPS" value={dps.toFixed(1)} color="#ff4444" />
-                                            <StatBox label="XP/H" value={Math.floor(xph).toLocaleString()} color="#4caf50" />
-                                            <StatBox label="SILVER/H" value={Math.floor(silverh).toLocaleString()} color="#d4af37" />
+                                            <StatBox label="XP/H" value={formatNumber(Math.floor(xph))} color="#4caf50" />
+                                            <StatBox label="SILVER/H" value={formatNumber(Math.floor(silverh))} color="#d4af37" />
                                         </div>
 
                                         {/* Rewards Footer */}
@@ -138,10 +139,10 @@ const CombatHistoryModal = ({ isOpen, onClose, socket }) => {
                                                 <div style={{ fontSize: '0.7rem', color: '#888', marginBottom: '8px', fontWeight: 'bold', textTransform: 'uppercase' }}>Session Rewards</div>
                                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                                                     {log.xp_gained > 0 && (
-                                                        <RewardBadge icon={<Star size={12} />} text={`${log.xp_gained.toLocaleString()} XP`} color="#ffeb3b" />
+                                                        <RewardBadge icon={<Star size={12} />} text={`${formatNumber(log.xp_gained)} XP`} color="#ffeb3b" />
                                                     )}
                                                     {log.silver_gained > 0 && (
-                                                        <RewardBadge icon={<Coins size={12} />} text={`${log.silver_gained.toLocaleString()} Silver`} color="#00bcd4" />
+                                                        <RewardBadge icon={<Coins size={12} />} text={`${formatNumber(log.silver_gained)} Silver`} color="#00bcd4" />
                                                     )}
                                                     {log.loot_gained && log.loot_gained.map((item, idx) => (
                                                         <RewardBadge key={idx} text={item} color="#ae00ff" bg="rgba(174, 0, 255, 0.1)" />

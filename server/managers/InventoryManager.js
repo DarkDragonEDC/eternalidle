@@ -53,8 +53,8 @@ export class InventoryManager {
         });
     }
 
-    async equipItem(userId, itemId) {
-        const char = await this.gameManager.getCharacter(userId);
+    async equipItem(userId, characterId, itemId) {
+        const char = await this.gameManager.getCharacter(userId, characterId);
         const item = this.resolveItem(itemId);
         if (!item) throw new Error("Item not found");
 
@@ -125,8 +125,8 @@ export class InventoryManager {
         return { success: true, message: `${item.name} equipped!` };
     }
 
-    async unequipItem(userId, slotName) {
-        const char = await this.gameManager.getCharacter(userId);
+    async unequipItem(userId, characterId, slotName) {
+        const char = await this.gameManager.getCharacter(userId, characterId);
         if (!char) throw new Error("Character not found");
 
         const state = char.state;
@@ -266,7 +266,11 @@ export class InventoryManager {
         // Apply Global to all specific categories (if we had any global efficiency sources, they would go here)
         // Currently efficiency.GLOBAL is 0 from INT.
         const keys = Object.keys(efficiency).filter(k => k !== 'GLOBAL');
-        keys.forEach(k => efficiency[k] += efficiency.GLOBAL);
+        keys.forEach(k => {
+            efficiency[k] += efficiency.GLOBAL;
+            efficiency[k] = parseFloat(efficiency[k].toFixed(2));
+        });
+        efficiency.GLOBAL = parseFloat(efficiency.GLOBAL.toFixed(2));
 
         // Final Delay Calculation: Weapon Base - (AGI * 5) - (GearSpeed * 5)
         const finalAttackSpeed = Math.max(200, baseAttackSpeed - (agi * 5) - (gearSpeedBonus * 5));

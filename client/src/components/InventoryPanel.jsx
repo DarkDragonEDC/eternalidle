@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatNumber, formatSilver } from '@utils/format';
 import { resolveItem, getTierColor, calculateItemSellPrice } from '@shared/items';
 import { Package, Shield, Coins, Tag, Trash2, Info, ChevronDown, ChevronUp, ArrowUpAZ, ArrowDownZA, Search } from 'lucide-react';
 import ItemActionModal from './ItemActionModal';
@@ -41,8 +42,8 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
         // Category Filter
         if (filter !== 'ALL') {
             const isGear = ['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'OFF_HAND', 'CAPE'].includes(item.type) || item.type.startsWith('TOOL');
-            const isRaw = ['RESOURCE', 'RAW'].includes(item.type) || item.id.includes('_ORE') || item.id.includes('_WOOD');
-            const isConsumable = ['FOOD', 'POTION'].includes(item.type);
+            const isRaw = ['RESOURCE', 'RAW', 'CRAFTING_MATERIAL'].includes(item.type) || item.id.includes('_ORE') || item.id.includes('_WOOD');
+            const isConsumable = ['FOOD', 'POTION', 'MAP'].includes(item.type);
 
             if (filter === 'EQUIPMENT' && !isGear) return false;
             if (filter === 'RESOURCE' && !isRaw) return false;
@@ -452,7 +453,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                 <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px' }}>Total Profit</div>
                                 <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#ffd700' }}>
                                     <Coins size={18} style={{ verticalAlign: 'middle', marginRight: '6px' }} />
-                                    {(sellModal.unitPrice * sellModal.quantity).toLocaleString()}
+                                    {formatNumber(sellModal.unitPrice * sellModal.quantity)}
                                 </div>
                             </div>
 

@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { ITEMS } from '../shared/items.js';
 import { INITIAL_SKILLS, calculateNextLevelXP } from '../shared/skills.js';
 import { InventoryManager } from './managers/InventoryManager.js';
@@ -54,14 +55,21 @@ export class GameManager {
         return nextLock;
     }
 
-    async getCharacter(userId, catchup = false) {
-        const { data, error } = await this.supabase
+    async getCharacter(userId, characterId = null, catchup = false) {
+        let query = this.supabase
             .from('characters')
-            .select('*')
-            .eq('user_id', userId)
-            .single();
+            .select('*');
 
+        if (characterId) {
+            query = query.eq('id', characterId).eq('user_id', userId).single();
+        } else {
+            // Fallback for legacy calls or first load: get the first character
+            query = query.eq('user_id', userId).limit(1).maybeSingle();
+        }
+
+        const { data, error } = await query;
         if (error && error.code !== 'PGRST116') throw error;
+
 
         if (data && data.state) {
             let updated = false;
@@ -394,8 +402,13 @@ export class GameManager {
     }
 
     async createCharacter(userId, name) {
-        const existing = await this.getCharacter(userId);
-        if (existing) throw new Error("You already have a character");
+        // Check character limit
+        const { data: chars, error: countError } = await this.supabase
+            .from('characters')
+            .select('id')
+            .eq('user_id', userId);
+
+        if (chars && chars.length >= 2) throw new Error("Character limit reached (max 2)");
 
         const initialState = {
             inventory: {},
@@ -415,9 +428,9 @@ export class GameManager {
         const { data, error } = await this.supabase
             .from('characters')
             .insert({
-                id: userId,
+                id: crypto.randomUUID(),
                 user_id: userId,
-                name: name,
+                name: name.trim(),
                 state: initialState
             })
             .select()
@@ -427,8 +440,8 @@ export class GameManager {
         return data;
     }
 
-    async getStatus(userId, catchup = false) {
-        const char = await this.getCharacter(userId, catchup);
+    async getStatus(userId, catchup = false, characterId = null) {
+        const char = await this.getCharacter(userId, characterId, catchup);
         if (!char) return { noCharacter: true };
 
         const stats = this.inventoryManager.calculateStats(char);
@@ -451,15 +464,19 @@ export class GameManager {
         return status;
     }
 
-    async clearOfflineReport(userId) {
-        const char = await this.getCharacter(userId);
+    async clearOfflineReport(userId, characterId) {
+        const char = await this.getCharacter(userId, characterId);
         if (char) {
             char.offlineReport = null;
+            // Note: If offlineReport is in its own column, we might need a direct update.
+            // But if it's transient (not in state), then the server will just clear it from memory.
+            // However, the user says it "opens with a farm that is not mine".
+            // If it's stored in the 'state', we MUST clear it there.
         }
     }
 
-    async processTick(userId) {
-        const char = await this.getCharacter(userId);
+    async processTick(userId, characterId) {
+        const char = await this.getCharacter(userId, characterId);
         if (!char) return null;
 
         const foodResult = this.processFood(char);
@@ -601,7 +618,7 @@ export class GameManager {
                 dungeonUpdate: dungeonResult?.dungeonUpdate,
                 healingUpdate: foodUsed ? { amount: foodResult.amount, source: 'FOOD' } : null,
                 status: {
-                    user_id: char.user_id,
+                    user_id: char.id,
                     name: char.name,
                     state: char.state,
                     calculatedStats: this.inventoryManager.calculateStats(char),
@@ -743,23 +760,24 @@ export class GameManager {
     }
 
     // Delegation Methods
-    async startActivity(u, t, i, q) {
-        return this.activityManager.startActivity(u, t, i, q);
+    // Delegation Methods - Updated for Multi-Character
+    async startActivity(u, c, t, i, q) {
+        return this.activityManager.startActivity(u, c, t, i, q);
     }
-    async stopActivity(u) { return this.activityManager.stopActivity(u); }
+    async stopActivity(u, c) { return this.activityManager.stopActivity(u, c); }
 
-    async startCombat(u, m, t) {
-        return this.combatManager.startCombat(u, m, t);
+    async startCombat(u, c, m, t) {
+        return this.combatManager.startCombat(u, c, m, t);
     }
-    async stopCombat(u) { return this.combatManager.stopCombat(u); }
-    async equipItem(u, i) { return this.inventoryManager.equipItem(u, i); }
-    async unequipItem(u, s) { return this.inventoryManager.unequipItem(u, s); }
-    async getMarketListings(f) { return this.marketManager.getMarketListings(f); }
-    async sellItem(u, i, q) { return this.marketManager.sellItem(u, i, q); }
-    async listMarketItem(u, i, a, p) { return this.marketManager.listMarketItem(u, i, a, p); }
-    async buyMarketItem(b, l, q) { return this.marketManager.buyMarketItem(b, l, q); }
-    async cancelMarketListing(u, l) { return this.marketManager.cancelMarketListing(u, l); }
-    async claimMarketItem(u, c) { return this.marketManager.claimMarketItem(u, c); }
-    async startDungeon(u, d, r) { return this.dungeonManager.startDungeon(u, d, r); }
-    async stopDungeon(u) { return this.dungeonManager.stopDungeon(u); }
+    async stopCombat(u, c) { return this.combatManager.stopCombat(u, c); }
+    async equipItem(u, c, i) { return this.inventoryManager.equipItem(u, c, i); }
+    async unequipItem(u, c, s) { return this.inventoryManager.unequipItem(u, c, s); }
+    async getMarketListings(f) { return this.marketManager.getMarketListings(f); } // Global
+    async sellItem(u, c, i, q) { return this.marketManager.sellItem(u, c, i, q); }
+    async listMarketItem(u, c, i, a, p) { return this.marketManager.listMarketItem(u, c, i, a, p); }
+    async buyMarketItem(b, c, l, q) { return this.marketManager.buyMarketItem(b, c, l, q); }
+    async cancelMarketListing(u, c, l) { return this.marketManager.cancelMarketListing(u, c, l); }
+    async claimMarketItem(u, c, cl) { return this.marketManager.claimMarketItem(u, c, cl); }
+    async startDungeon(u, c, d, r) { return this.dungeonManager.startDungeon(u, c, d, r); }
+    async stopDungeon(u, c) { return this.dungeonManager.stopDungeon(u, c); }
 }

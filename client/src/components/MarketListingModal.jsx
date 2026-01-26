@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatNumber, formatSilver } from '@utils/format';
 import { Package, X } from 'lucide-react';
 import { resolveItem, getTierColor, formatItemId } from '@shared/items';
 
@@ -169,18 +170,18 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                     <div style={{ background: 'rgba(0, 0, 0, 0.2)', padding: '12px', borderRadius: '8px', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                             <span style={{ color: 'var(--text-dim)' }}>Total Price:</span>
-                            <span style={{ color: '#fff', fontWeight: 'bold' }}>{totalPrice.toLocaleString()} Silver</span>
+                            <span style={{ color: '#fff', fontWeight: 'bold' }}>{formatNumber(totalPrice)} Silver</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                             <span style={{ color: 'var(--text-dim)' }}>Market Tax (5%):</span>
                             <span style={{ color: 'rgb(255, 68, 68)' }}>
-                                - {fee.toLocaleString()}
+                                - {formatNumber(fee)}
                             </span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', borderTop: '1px solid rgba(255, 255, 255, 0.1)', paddingTop: '6px' }}>
                             <span style={{ color: '#fff' }}>You receive:</span>
                             <span style={{ color: 'rgb(68, 255, 68)' }}>
-                                {receive.toLocaleString()}
+                                {formatNumber(receive)}
                             </span>
                         </div>
                     </div>

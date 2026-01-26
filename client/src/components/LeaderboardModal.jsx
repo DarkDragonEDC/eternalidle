@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatNumber, formatSilver } from '@utils/format';
 import { Trophy, Sword, Skull, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -168,7 +169,7 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile }) => {
                                                     color: activeTab === 'COMBAT' ? '#ff4444' : '#ae00ff',
                                                     fontFamily: 'monospace'
                                                 }}>
-                                                    {score.toLocaleString()}
+                                                    {formatNumber(score)}
                                                 </div>
                                             </div>
                                         );
