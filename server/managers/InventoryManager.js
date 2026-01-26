@@ -212,12 +212,18 @@ export class InventoryManager {
             GLOBAL: 0
         };
 
-        // 1. Tool Bonuses
-        if (equipment.tool_axe?.stats?.efficiency) efficiency.WOOD += equipment.tool_axe.stats.efficiency;
-        if (equipment.tool_pickaxe?.stats?.efficiency) efficiency.ORE += equipment.tool_pickaxe.stats.efficiency;
-        if (equipment.tool_knife?.stats?.efficiency) efficiency.HIDE += equipment.tool_knife.stats.efficiency;
-        if (equipment.tool_sickle?.stats?.efficiency) efficiency.FIBER += equipment.tool_sickle.stats.efficiency;
-        if (equipment.tool_rod?.stats?.efficiency) efficiency.FISH += equipment.tool_rod.stats.efficiency;
+        // 1. Tool Bonuses (Re-resolve to ensure new formula applies)
+        const resolveToolEff = (tool) => {
+            if (!tool) return 0;
+            const fresh = this.resolveItem(tool.id);
+            return fresh?.stats?.efficiency || 0;
+        };
+
+        efficiency.WOOD += resolveToolEff(equipment.tool_axe);
+        efficiency.ORE += resolveToolEff(equipment.tool_pickaxe);
+        efficiency.HIDE += resolveToolEff(equipment.tool_knife);
+        efficiency.FIBER += resolveToolEff(equipment.tool_sickle);
+        efficiency.FISH += resolveToolEff(equipment.tool_rod);
 
         // 2. Global/Other Item Bonuses (e.g., Capes)
         // 2. Global/Other Item Bonuses (e.g., Capes)
