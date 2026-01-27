@@ -1,30 +1,42 @@
--- SECURITY HARDENING SCRIPT
--- RUN THIS IN SUPABASE QUERY EDITOR
+-- SECURITY HARDENING: THE NUCLEAR OPTION
+-- RUN THIS IN SUPABASE SQL EDITOR
 
--- 1. Enable Row Level Security on the strict table
-ALTER TABLE characters ENABLE ROW LEVEL SECURITY;
+-- 1. Force Enable RLS (Just in case)
+ALTER TABLE "public"."characters" ENABLE ROW LEVEL SECURITY;
 
--- 2. Drop existing policies to start fresh (avoids conflicts)
-DROP POLICY IF EXISTS "Users can read own characters" ON characters;
-DROP POLICY IF EXISTS "Users can insert own characters" ON characters;
-DROP POLICY IF EXISTS "Users can update own characters" ON characters;
-DROP POLICY IF EXISTS "Users can delete own characters" ON characters;
-DROP POLICY IF EXISTS "Enable read access for users based on user_id" ON characters;
-DROP POLICY IF EXISTS "Enable insert for users based on user_id" ON characters;
-DROP POLICY IF EXISTS "Enable update for users based on user_id" ON characters;
+-- 2. NUCLEAR REVOKE: Strip ALL permissions from the 'authenticated' (player) role
+-- This overrides any specific policies that might try to grant access if the base permission is missing.
+REVOKE INSERT, UPDATE, DELETE ON "public"."characters" FROM authenticated;
+REVOKE INSERT, UPDATE, DELETE ON "public"."characters" FROM anon;
 
--- 3. Create READ-ONLY policy for authenticated users
--- Users can only SEE their own characters.
--- They CANNOT INSERT, UPDATE, or DELETE directly using the Client API.
-CREATE POLICY "Enable read access for users based on user_id" ON "public"."characters"
-AS PERMISSIVE FOR SELECT
+-- 3. GRANT READ-ONLY Access
+-- Players can ONLY 'SELECT' (Read) data.
+GRANT SELECT ON "public"."characters" TO authenticated;
+
+-- 4. Clean Slate Policies
+-- Remove ALL existing policies on this table to ensure no "allow-all" mistake remains.
+DROP POLICY IF EXISTS "Users can read own characters" ON "public"."characters";
+DROP POLICY IF EXISTS "Users can insert own characters" ON "public"."characters";
+DROP POLICY IF EXISTS "Users can update own characters" ON "public"."characters";
+DROP POLICY IF EXISTS "Users can delete own characters" ON "public"."characters";
+DROP POLICY IF EXISTS "Enable read access for users based on user_id" ON "public"."characters";
+DROP POLICY IF EXISTS "Enable insert for users based on user_id" ON "public"."characters";
+DROP POLICY IF EXISTS "Enable update for users based on user_id" ON "public"."characters";
+DROP POLICY IF EXISTS "Enable read access for all users" ON "public"."characters";
+DROP POLICY IF EXISTS "Enable insert for all users" ON "public"."characters";
+DROP POLICY IF EXISTS "Enable update for all users" ON "public"."characters";
+
+-- 5. Create the ONLY Valid Policy: Read Your Own Data
+CREATE POLICY "Users can only see their own characters"
+ON "public"."characters"
+FOR SELECT
 TO authenticated
 USING (auth.uid() = user_id);
 
--- 4. Repeat for other strict tables if they exist
--- (e.g. if you have a separate inventory table, otherwise if it's JSON in characters, point 1covers it)
-
--- OPTIONAL: Secure 'messages' table if you want Chat to be server-only too
--- ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
--- CREATE POLICY "Read messages" ON messages FOR SELECT USING (true);
--- (We assume server handles inserts for messages via socket, so users don't need INSERT permission directly)
+-- 6. Verification Message
+-- Only runs if using a client that supports returning messages, otherwise just completes.
+DO $$
+BEGIN
+  RAISE NOTICE 'Security Hardening Complete: Clients are now READ-ONLY.';
+END
+$$;
