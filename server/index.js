@@ -4,6 +4,7 @@ import { Server } from 'socket.io';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import fs from 'fs';
 
 dotenv.config();
 
@@ -83,6 +84,34 @@ app.get('/api/last_active', authMiddleware, async (req, res) => {
     } catch (err) {
         console.error('Error getting last_active:', err);
         res.status(500).json({ error: err.message });
+    }
+});
+
+// Public route for active players count (characters with actions)
+app.get('/api/active_players', async (req, res) => {
+    // Log em arquivo para depuração persistente
+    const logMsg = `[${new Date().toISOString()}] Contador acessado. Origin: ${req.headers.origin}\n`;
+    fs.appendFileSync('access.log', logMsg);
+
+    // Forçar cabeçalhos CORS para evitar bloqueio do navegador local
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
+    try {
+        const { count, error } = await supabase
+            .from('characters')
+            .select('*', { count: 'exact', head: true })
+            .or('current_activity.not.is.null,state->combat.not.is.null,state->dungeon.not.is.null');
+
+        if (error) {
+            console.error('[SERVER] Supabase error:', error.message);
+            throw error;
+        }
+
+        res.json({ count: count || 0 });
+    } catch (err) {
+        console.error('[SERVER] Error:', err);
+        res.status(500).json({ count: 0, error: err.message });
     }
 });
 
@@ -287,15 +316,42 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('list_market_item', async ({ itemId, amount, price }) => {
+    socket.on('stop_activity', async () => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
-                const result = await gameManager.listMarketItem(socket.user.id, socket.data.characterId, itemId, amount, price);
-                socket.emit('market_listed', result);
+                await gameManager.stopActivity(socket.user.id, socket.data.characterId);
+                socket.emit('activity_stopped');
                 socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
             });
         } catch (err) {
             socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('get_market_listings', async (filters) => {
+        try {
+            const listings = await gameManager.getMarketListings(filters);
+            socket.emit('market_listings_update', listings);
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('list_market_item', async ({ itemId, amount, price }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.listMarketItem(socket.user.id, socket.data.characterId, itemId, amount, price);
+                socket.emit('market_action_success', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+                // Broadcast update to all
+                const listings = await gameManager.getMarketListings();
+                io.emit('market_listings_update', listings);
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+            try {
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            } catch (e) { }
         }
     });
 
@@ -303,24 +359,36 @@ io.on('connection', (socket) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
                 const result = await gameManager.buyMarketItem(socket.user.id, socket.data.characterId, listingId, quantity);
-                socket.emit('market_bought', result);
+                socket.emit('market_action_success', result);
                 socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+                // Broadcast update to all
+                const listings = await gameManager.getMarketListings();
+                io.emit('market_listings_update', listings);
             });
         } catch (err) {
             console.error("Buy Error:", err);
             socket.emit('error', { message: err.message });
+            try {
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            } catch (e) { }
         }
     });
 
-    socket.on('cancel_market_listing', async ({ listingId }) => {
+    socket.on('cancel_listing', async ({ listingId }) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
                 const result = await gameManager.cancelMarketListing(socket.user.id, socket.data.characterId, listingId);
-                socket.emit('market_cancelled', result);
+                socket.emit('market_action_success', result);
                 socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+                // Broadcast update to all
+                const listings = await gameManager.getMarketListings();
+                io.emit('market_listings_update', listings);
             });
         } catch (err) {
             socket.emit('error', { message: err.message });
+            try {
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            } catch (e) { }
         }
     });
 
@@ -328,11 +396,14 @@ io.on('connection', (socket) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
                 const result = await gameManager.claimMarketItem(socket.user.id, socket.data.characterId, claimId);
-                socket.emit('market_claimed', result);
+                socket.emit('market_action_success', result);
                 socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
             });
         } catch (err) {
             socket.emit('error', { message: err.message });
+            try {
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            } catch (e) { }
         }
     });
 
@@ -420,95 +491,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('get_market_listings', async (filters) => {
-        try {
-            const listings = await gameManager.getMarketListings(filters);
-            socket.emit('market_listings_update', listings);
-        } catch (err) {
-            socket.emit('error', { message: err.message });
-        }
-    });
 
-    socket.on('list_market_item', async ({ itemId, amount, price }) => {
-        try {
-            await gameManager.executeLocked(socket.user.id, async () => {
-                const result = await gameManager.listMarketItem(socket.user.id, itemId, amount, price);
-                socket.emit('market_action_success', result);
-                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
-                const listings = await gameManager.getMarketListings();
-                io.emit('market_listings_update', listings);
-            });
-        } catch (err) {
-            socket.emit('error', { message: err.message });
-        }
-    });
-
-    socket.on('buy_market_item', async ({ listingId, quantity }) => {
-        console.log(`[MARKET] Buy request from ${socket.user.email}: listingId=${listingId}, quantity=${quantity}`);
-        try {
-            await gameManager.executeLocked(socket.user.id, async () => {
-                const result = await gameManager.buyMarketItem(socket.user.id, listingId, quantity);
-                console.log(`[MARKET] Buy success for ${socket.user.email}:`, result.message);
-                socket.emit('market_action_success', result);
-                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
-                const listings = await gameManager.getMarketListings();
-                io.emit('market_listings_update', listings);
-            });
-        } catch (err) {
-            console.error(`[MARKET] Buy error for ${socket.user.email}:`, err.message);
-            socket.emit('error', { message: err.message });
-        }
-    });
-
-    socket.on('cancel_listing', async ({ listingId }) => {
-        try {
-            await gameManager.executeLocked(socket.user.id, async () => {
-                const result = await gameManager.cancelMarketListing(socket.user.id, listingId);
-                socket.emit('market_action_success', result);
-                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
-                const listings = await gameManager.getMarketListings();
-                io.emit('market_listings_update', listings);
-            });
-        } catch (err) {
-            socket.emit('error', { message: err.message });
-        }
-    });
-
-    socket.on('claim_market_item', async ({ claimId }) => {
-        try {
-            await gameManager.executeLocked(socket.user.id, async () => {
-                const result = await gameManager.claimMarketItem(socket.user.id, claimId);
-                socket.emit('market_action_success', result);
-                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
-            });
-        } catch (err) {
-            socket.emit('error', { message: err.message });
-        }
-    });
-
-    socket.on('sell_item', async ({ itemId, quantity }) => {
-        try {
-            await gameManager.executeLocked(socket.user.id, async () => {
-                const result = await gameManager.sellItem(socket.user.id, itemId, quantity);
-                socket.emit('item_sold', result);
-                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
-            });
-        } catch (err) {
-            socket.emit('error', { message: err.message });
-        }
-    });
-
-    socket.on('stop_activity', async () => {
-        try {
-            await gameManager.executeLocked(socket.user.id, async () => {
-                await gameManager.stopActivity(socket.user.id);
-                socket.emit('activity_stopped');
-                socket.emit('status_update', await gameManager.getStatus(socket.user.id));
-            });
-        } catch (err) {
-            socket.emit('error', { message: err.message });
-        }
-    });
 
     socket.on('acknowledge_offline_report', async () => {
         try {

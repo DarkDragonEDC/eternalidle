@@ -96,8 +96,22 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
         socket.emit('claim_market_item', { claimId });
     };
 
+    // Helper to check if a listing belongs to the current character
+    const isOwnListing = (l) => {
+        if (!gameState) return false;
+        // Check by Character ID (New listings)
+        if (l.seller_character_id && gameState.character_id) {
+            if (String(l.seller_character_id) === String(gameState.character_id)) return true;
+        }
+        // Fallback: Check by Name AND User ID (Legacy listings or missing char ID)
+        if (l.seller_name && gameState.name && l.seller_id && gameState.user_id) {
+            if (l.seller_name === gameState.name && l.seller_id === gameState.user_id) return true;
+        }
+        return false;
+    };
+
     // Derived State
-    const myOrders = marketListings.filter(l => l.seller_character_id === gameState.user_id && l.status !== 'SOLD' && l.status !== 'EXPIRED');
+    const myOrders = marketListings.filter(l => isOwnListing(l) && l.status !== 'SOLD' && l.status !== 'EXPIRED');
     // Assuming active are those not sold/expired. If server sends only active in updates, this filter might need adjustment.
     // However, usually market listings update implies active listings. 
     // Claims are usually separate. But let's check if the previous code logic implies separation.
@@ -109,9 +123,10 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
     const activeListingsForValues = marketListings;
 
+
     // Filter Logic for BUY tab
     const activeBuyListings = activeListingsForValues.filter(l => {
-        if (l.seller_character_id === gameState.user_id) return false; // Don't show own listings in buy
+        if (isOwnListing(l)) return false; // Hide current character's listings
 
         const itemName = l.item_data?.name || formatItemId(l.item_id);
         const matchesSearch = itemName.toLowerCase().includes(searchQuery.toLowerCase());
@@ -132,7 +147,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
         return matchesSearch && matchesCategory;
     });
 
-    const myActiveListings = activeListingsForValues.filter(l => l.seller_character_id === gameState.user_id);
+    const myActiveListings = activeListingsForValues.filter(l => isOwnListing(l));
 
 
     return (
@@ -223,7 +238,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                 position: 'relative'
                             }}>
                             Claim
-                            {gameState.state?.claims?.length > 0 && (
+                            {gameState?.state?.claims?.length > 0 && (
                                 <span style={{
                                     position: 'absolute',
                                     top: '-2px',
@@ -237,7 +252,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center'
-                                }}>{gameState.state.claims.length}</span>
+                                }}>{gameState?.state?.claims?.length}</span>
                             )}
                         </button>
                     </div>
@@ -412,7 +427,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                 gap: isMobile ? '8px' : '12px',
                                 paddingBottom: '100px'
                             }}>
-                                {Object.entries(gameState.state?.inventory || {}).filter(([id, qty]) => {
+                                {Object.entries(gameState?.state?.inventory || {}).filter(([id, qty]) => {
                                     const data = resolveItem(id);
                                     if (!data) return false;
                                     // Exclude Quest items or explicit non-tradable items if any
@@ -562,14 +577,14 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                     {/* View: CLAIM */}
                     {activeTab === 'CLAIM' && (
                         <>
-                            {(!gameState.state?.claims || gameState.state.claims.length === 0) ? (
+                            {(!gameState?.state?.claims || gameState.state.claims.length === 0) ? (
                                 <div style={{ textAlign: 'center', padding: '100px', color: 'var(--text-dim)' }}>
                                     <ShoppingBag size={48} style={{ marginBottom: '15px', opacity: 0.3, margin: '0 auto' }} />
                                     <p>Nothing to claim.</p>
                                 </div>
                             ) : (
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
-                                    {gameState.state.claims.map(c => {
+                                    {gameState?.state?.claims?.map(c => {
                                         let isItem = c.type === 'BOUGHT_ITEM' || c.type === 'CANCELLED_LISTING' || c.type === 'SOLD_ITEM';
                                         let name = c.name || 'Item';
                                         let icon = <Coins size={24} color="var(--accent)" />;

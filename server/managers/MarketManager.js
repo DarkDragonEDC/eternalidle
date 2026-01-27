@@ -17,7 +17,12 @@ export class MarketManager {
 
         const { data, error } = await query;
         if (error) throw error;
-        return data || [];
+
+        // Map data to ensure seller_character_id is available even if column is missing
+        return (data || []).map(l => ({
+            ...l,
+            seller_character_id: l.seller_character_id || l.item_data?.seller_character_id
+        }));
     }
 
     async sellItem(userId, characterId, itemId, quantity) {
@@ -47,8 +52,12 @@ export class MarketManager {
     }
 
     async listMarketItem(userId, characterId, itemId, amount, price) {
-        if (!amount || amount <= 0) throw new Error("Invalid amount");
-        if (!price || price <= 0) throw new Error("Invalid price");
+        // Robust numeric parsing for both arguments
+        const parsedAmount = Math.floor(Number(amount));
+        const parsedPrice = Math.floor(Number(price));
+
+        if (!parsedAmount || parsedAmount <= 0) throw new Error("Invalid amount");
+        if (!parsedPrice || parsedPrice <= 0) throw new Error("Invalid price");
 
         const char = await this.gameManager.getCharacter(userId, characterId);
         if (!char) throw new Error("Character not found");
@@ -68,10 +77,11 @@ export class MarketManager {
             .from('market_listings')
             .insert({
                 seller_id: userId,
-                seller_character_id: char.id,
+                // Workaround: seller_character_id column is missing in DB
+                // seller_character_id: char.id, 
                 seller_name: char.name,
                 item_id: itemId,
-                item_data: itemData,
+                item_data: { ...itemData, seller_character_id: char.id },
                 amount: amount,
                 price: price
             });
@@ -99,7 +109,8 @@ export class MarketManager {
             .single();
 
         if (fetchError || !listing) throw new Error("Listing not found or expired");
-        if (listing.seller_id === buyerId) throw new Error("You cannot buy your own item");
+        const sellerCharId = listing.seller_character_id || listing.item_data?.seller_character_id;
+        if (sellerCharId === buyer.id) throw new Error("Current character cannot buy its own item");
 
         const listingAmount = parseInt(listing.amount);
         if (qtyNum > listingAmount) throw new Error(`Only ${listingAmount} items available`);
@@ -128,11 +139,7 @@ export class MarketManager {
 
         // Process Seller side
         // Note: Seller might be offline or playing another character.
-        // We just fetch their first character OR we need to know which char sold it?
-        // Current Market Logic: Listings are by USER (seller_id), but notifications/silver go to... which char?
-        // Simpler for now: Claims go to the User's "Active" character or just stored on the User?
-        // Fetch the specific character that listed the item
-        let seller = await this.gameManager.getCharacter(listing.seller_id, listing.seller_character_id || null);
+        let seller = await this.gameManager.getCharacter(listing.seller_id, sellerCharId || null);
         if (seller) {
             const tax = Math.floor(totalCost * 0.06);
             const sellerProfit = totalCost - tax;

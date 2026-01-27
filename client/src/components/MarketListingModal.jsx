@@ -20,13 +20,19 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
     const tierColor = getTierColor(itemData?.tier || 1);
 
     const handleConfirm = () => {
-        if (!unitPrice || !amount) return;
+        const parsedAmount = parseInt(amount);
+        const parsedPrice = parseFloat(unitPrice.toString().replace(',', '.'));
 
-        const total = Math.floor(parseInt(amount) * parseInt(unitPrice));
+        if (isNaN(parsedAmount) || parsedAmount <= 0) return;
+        if (isNaN(parsedPrice) || parsedPrice <= 0) return;
+
+        const total = Math.floor(parsedAmount * parsedPrice);
+
+        if (total <= 0) return;
 
         socket.emit('list_market_item', {
             itemId: listingItem.itemId,
-            amount: parseInt(amount),
+            amount: parsedAmount,
             price: total
         });
 
@@ -34,9 +40,9 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
     };
 
     const parsedAmount = parseInt(amount) || 0;
-    const parsedUnitPrice = parseInt(unitPrice) || 0;
-    const totalPrice = parsedAmount * parsedUnitPrice;
-    const fee = Math.floor(totalPrice * 0.05);
+    const parsedPrice = parseFloat(unitPrice.toString().replace(',', '.')) || 0;
+    const totalPrice = Math.floor(parsedAmount * parsedPrice);
+    const fee = Math.floor(totalPrice * 0.06); // Sync with server: 6% tax
     const receive = totalPrice - fee;
 
     return (
@@ -147,10 +153,14 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                     <div>
                         <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '8px' }}>Price per Unit (Silver):</label>
                         <input
-                            min="1"
-                            type="number"
+                            type="text"
+                            inputMode="numeric"
                             value={unitPrice}
-                            onChange={(e) => setUnitPrice(e.target.value)}
+                            onChange={(e) => {
+                                // Allow only digits
+                                const val = e.target.value.replace(/\D/g, '');
+                                setUnitPrice(val);
+                            }}
                             placeholder="0"
                             style={{
                                 width: '100%',

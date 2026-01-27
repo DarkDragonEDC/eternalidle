@@ -501,7 +501,7 @@ function App() {
       case 'profile':
         return <ProfilePanel gameState={displayedGameState} session={session} socket={socket} onShowInfo={setInfoItem} isMobile={isMobile} />;
       case 'market':
-        return <MarketPanel socket={socket} gameState={displayedGameState} silver={displayedGameState.state?.silver || 0} onShowInfo={setInfoItem} onListOnMarket={handleListOnMarket} isMobile={isMobile} />;
+        return <MarketPanel socket={socket} gameState={displayedGameState} silver={displayedGameState?.state?.silver || 0} onShowInfo={setInfoItem} onListOnMarket={handleListOnMarket} isMobile={isMobile} />;
       case 'gathering':
       case 'refining': {
         const isGathering = activeTab === 'gathering';
@@ -1050,7 +1050,7 @@ function App() {
         onNavigate={handleNavigate}
         isMobile={isMobile}
         serverTimeOffset={clockOffset.current}
-        skillProgress={gameState?.current_activity && displayedGameState?.state?.skills ? (displayedGameState.state.skills[getSkillKey(gameState.current_activity.type, gameState.current_activity.item_id)]?.xp / calculateNextLevelXP(displayedGameState.state.skills[getSkillKey(gameState.current_activity.type, gameState.current_activity.item_id)]?.level)) * 100 : 0}
+        skillProgress={gameState?.current_activity && displayedGameState?.state?.skills ? (displayedGameState.state.skills[getSkillKey(gameState.current_activity.type, gameState.current_activity.item_id)]?.xp / calculateNextLevelXP(displayedGameState.state.skills[getSkillKey(gameState.current_activity.type, gameState.current_activity.item_id)]?.level || 1)) * 100 : 0}
       />
       {modalItem && <ActivityModal isOpen={!!modalItem} onClose={() => setModalItem(null)} item={modalItem} type={modalType} gameState={displayedGameState} onStart={startActivity} onNavigate={handleNavigate} />}
 

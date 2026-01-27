@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 
 const Auth = ({ onLogin }) => {
@@ -7,6 +7,27 @@ const Auth = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [activePlayers, setActivePlayers] = useState(0);
+
+    useEffect(() => {
+        const fetchActivePlayers = async () => {
+            try {
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+                const res = await fetch(`${apiUrl}/api/active_players`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setActivePlayers(data.count || 0);
+                }
+            } catch (err) {
+                // Silently fallback if needed, but logging helps debug
+                console.warn('Could not fetch active players count');
+            }
+        };
+
+        fetchActivePlayers();
+        const interval = setInterval(fetchActivePlayers, 15000); // 15s is enough
+        return () => clearInterval(interval);
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -60,8 +81,43 @@ const Auth = ({ onLogin }) => {
             justifyContent: 'center',
             background: 'radial-gradient(circle at center, #2a2a2a 0%, #0d0d0d 100%)',
             fontFamily: 'system-ui, sans-serif',
-            color: '#fff'
+            color: '#fff',
+            position: 'relative'
         }}>
+            {/* Active Players at Top */}
+            <div style={{
+                position: 'absolute',
+                top: '40px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '8px',
+                color: 'rgba(255,255,255,0.4)',
+                fontSize: '0.8rem',
+                textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+                zIndex: 10
+            }}>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: 'rgba(212, 175, 55, 0.1)',
+                    padding: '6px 16px',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(212, 175, 55, 0.2)',
+                    color: '#d4af37'
+                }}>
+                    <span style={{
+                        width: '8px',
+                        height: '8px',
+                        background: '#44ff44',
+                        borderRadius: '50%',
+                        boxShadow: '0 0 10px #44ff44'
+                    }}></span>
+                    <span style={{ fontWeight: 'bold' }}>{activePlayers}</span>
+                    <span style={{ fontSize: '0.7rem', letterSpacing: '1px' }}>ACTIVE PLAYERS</span>
+                </div>
+            </div>
             <div style={{
                 width: '380px',
                 padding: '2rem',
@@ -231,6 +287,7 @@ const Auth = ({ onLogin }) => {
                     </div>
                 </form>
             </div>
+
 
             <div style={{
                 position: 'absolute',

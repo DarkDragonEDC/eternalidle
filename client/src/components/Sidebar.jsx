@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Package, User, Pickaxe, Hammer, Sword,
     ChevronDown, ChevronRight, Coins, Castle,
-    Trophy, Tag, Zap, Box, Axe, Shield, Users
+    Trophy, Tag, Zap, Box, Axe, Shield, Users, MessageSquare
 } from 'lucide-react';
 
 const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActiveCategory, isMobile, isOpen, onClose, onSwitchCharacter }) => {
@@ -12,6 +12,26 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
         crafting: false,
         combat: false
     });
+    const [activePlayers, setActivePlayers] = useState(0);
+
+    useEffect(() => {
+        const fetchActivePlayers = async () => {
+            try {
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+                const res = await fetch(`${apiUrl}/api/active_players`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setActivePlayers(data.count || 0);
+                }
+            } catch (err) {
+                console.warn('Could not fetch active players count in sidebar');
+            }
+        };
+
+        fetchActivePlayers();
+        const interval = setInterval(fetchActivePlayers, 15000);
+        return () => clearInterval(interval);
+    }, []);
 
     const toggleExpand = (id) => {
         setExpanded(prev => ({
@@ -138,6 +158,68 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                     <ChevronRight size={20} />
                 </button>
             )}
+
+            {/* Active Players at Sidebar Top */}
+            <div style={{ padding: '20px 15px 0 15px', display: 'flex', gap: '8px' }}>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    background: 'rgba(212, 175, 55, 0.05)',
+                    padding: '8px 12px',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(212, 175, 55, 0.1)',
+                    color: '#d4af37',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                    flex: 1
+                }}>
+                    <span style={{
+                        width: '8px',
+                        height: '8px',
+                        background: '#44ff44',
+                        borderRadius: '50%',
+                        boxShadow: '0 0 8px #44ff44',
+                        flexShrink: 0
+                    }}></span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: '900', letterSpacing: '0.5px', color: '#d4af37' }}>{activePlayers}</span>
+                        <span style={{ fontSize: '0.6rem', fontWeight: 'bold', opacity: 0.8, letterSpacing: '1px' }}>ACTIVE PLAYERS</span>
+                    </div>
+                </div>
+
+                {/* Discord Button */}
+                <a
+                    href="https://discord.gg/fER4d7jkFa"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '40px',
+                        background: '#5865F2',
+                        borderRadius: '12px',
+                        color: '#fff',
+                        transition: '0.2s',
+                        border: 'none',
+                        cursor: 'pointer',
+                        textDecoration: 'none',
+                        boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+                    }}
+                    title="Join our Discord"
+                    onMouseEnter={(e) => { e.currentTarget.style.background = '#4752C4'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = '#5865F2'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                >
+                    <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 127.14 96.36"
+                        fill="currentColor"
+                    >
+                        <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.71,32.65-1.82,56.6.4,80.21a105.73,105.73,0,0,0,32.17,16.15,77.7,77.7,0,0,0,6.89-11.11,68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c3.39-28.32-5.42-52.09-23.75-72.13ZM42.45,65.69C36.18,65.69,31,60,31,53s5.07-12.72,11.41-12.72S54,46,53.86,53,48.81,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.72,11.44-12.72S96.11,46,96,53,91,65.69,84.69,65.69Z" />
+                    </svg>
+                </a>
+            </div>
 
             <div style={{ padding: '20px 15px 10px 15px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>

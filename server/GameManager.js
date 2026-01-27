@@ -447,7 +447,8 @@ export class GameManager {
         const stats = this.inventoryManager.calculateStats(char);
 
         const status = {
-            user_id: char.id,
+            character_id: char.id,
+            user_id: char.user_id,
             name: char.name,
             state: char.state,
             calculatedStats: stats,
