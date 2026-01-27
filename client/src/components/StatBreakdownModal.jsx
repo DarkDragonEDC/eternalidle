@@ -45,30 +45,63 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, onClose
             const reductionPercent = (mitigation * 100).toFixed(1);
             breakdown.push({ label: 'Est. Dmg Reduction', value: `${reductionPercent}%`, sub: 'Based on Def / (Def + 800)', isTotal: true });
         } else if (statType === 'SPEED') {
-            // Formula: BaseWeaponSpeed - (AGI * 5) - (GearSpeed * 5)
-            // Lower is faster (attack interval).
+            // Formula: GlobalBase(2000) - WeaponSpeed - (AGI * 0.4) - GearSpeed
+            // Everything converted to seconds for display (2 decimal places)
             const agi = stats.agi || 0;
-            const gearSpeed = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.speed || 0), 0);
+            const gearSpeed = Object.entries(equipment).reduce((acc, [slot, item]) => {
+                if (!item || slot === 'mainHand') return acc;
+                const fresh = resolveItem(item.id || item.item_id);
+                return acc + (fresh?.stats?.speed || 0);
+            }, 0);
 
-            // Get Weapon Base Speed (Default 1000 if no weapon or weapon has no speed)
+            // Get Weapon Speed (Default 1000 if no weapon)
             const weapon = equipment.mainHand;
-            const baseSpeed = weapon?.stats?.attackSpeed || 1000;
+            const freshWeapon = weapon ? resolveItem(weapon.id || weapon.item_id) : null;
+            const weaponSpeed = freshWeapon?.stats?.speed || 1000;
 
-            breakdown.push({ label: 'Base Interval', value: `${baseSpeed}ms`, sub: weapon ? `(${weapon.name} Base)` : '(Default)' });
+            breakdown.push({ label: 'Global Base', value: '2.00s', sub: '(Attack Cycle Start)' });
 
-            if (agi > 0) breakdown.push({ label: 'Agility Bonus', value: `-${agi * 5}ms`, sub: '(5ms per AGI)' });
-            if (gearSpeed > 0) breakdown.push({ label: 'Gear Bonus', value: `-${gearSpeed * 5}ms`, sub: '(5ms per Speed)' });
+            breakdown.push({
+                label: 'Weapon Speed',
+                value: `-${(weaponSpeed / 1000).toFixed(2)}s`,
+                sub: freshWeapon ? `${freshWeapon.name} Speed` : '(Default Punch Speed)'
+            });
 
-            const calculatedRaw = baseSpeed - (agi * 5) - (gearSpeed * 5);
+            if (agi > 0) {
+                breakdown.push({
+                    label: 'Agility Bonus',
+                    value: `-${(agi * 0.4 / 1000).toFixed(2)}s`,
+                    sub: '(0.4ms per AGI)'
+                });
+            }
+
+            if (gearSpeed > 0) {
+                breakdown.push({
+                    label: 'Gear Bonus',
+                    value: `-${(gearSpeed / 1000).toFixed(2)}s`,
+                    sub: '(1ms per Speed)'
+                });
+            }
+
+            const totalReduction = weaponSpeed + gearSpeed + (agi * 0.4);
+            const calculatedRaw = 2000 - totalReduction;
             const finalInterval = Math.max(200, calculatedRaw);
 
             if (calculatedRaw < 200) {
-                breakdown.push({ label: 'Cap Correction', value: `+${200 - calculatedRaw}ms`, sub: '(Min 200ms limit)' });
+                breakdown.push({
+                    label: 'Cap Correction',
+                    value: `+${((200 - calculatedRaw) / 1000).toFixed(2)}s`,
+                    sub: '(Min 0.20s limit)'
+                });
             }
 
-            breakdown.push({ label: 'Final Interval', value: `${finalInterval}ms`, isTotal: false });
+            breakdown.push({
+                label: 'Final Interval',
+                value: `${(finalInterval / 1000).toFixed(2)}s`,
+                isTotal: true
+            });
 
-            // Override the "Total" display at the bottom to show h/s
+            // Override the "Total" display at the bottom to show hits/second
             value = `${(1000 / finalInterval).toFixed(1)} h/s`;
         } else if (statType === 'HP') {
             // Formula: 100 + (STR * 10) + GearHP

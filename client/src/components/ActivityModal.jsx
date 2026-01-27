@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { formatNumber, formatSilver } from '@utils/format';
-import { X, Clock, Zap, Target, Star, ChevronRight, Package, Box } from 'lucide-react';
+import { X, Clock, Zap, Target, Star, ChevronRight, Package, Box, Sword, Shield, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { resolveItem, formatItemId, QUALITIES } from '@shared/items';
 
@@ -299,8 +299,12 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
     }
 
     if (type === 'CRAFTING') {
-        const reqs = item.req || {};
-        const costPerAction = item.cost || 0;
+        // Resolve item to ensure we have stats (Damage/Armor/etc)
+        // We use the ID to get the full static definition including stats
+        const resolvedItem = resolveItem(item.id) || item;
+
+        const reqs = resolvedItem.req || {};
+        const costPerAction = resolvedItem.cost || 0;
         const totalCost = formatNumber(costPerAction * qtyNum);
         const userSilver = gameState?.state?.silver || 0;
 
@@ -324,12 +328,20 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
         }));
 
         // Determinar stat principal para mostrar (Damage, Armor ou Efficiency)
-        const mainStatKey = item.stats?.damage ? 'Damage' : item.stats?.armor ? 'Armor' : item.stats?.efficiency ? 'Efficiency' : 'Power';
+        const mainStatKey = resolvedItem.stats?.damage ? 'Damage' :
+            resolvedItem.stats?.defense ? 'Defense' :
+                resolvedItem.stats?.hp ? 'Health' :
+                    resolvedItem.stats?.speed ? 'Speed' :
+                        resolvedItem.stats?.efficiency ? 'Efficiency' : 'Power';
 
-        let rawEff = item.stats?.efficiency;
+        let rawEff = resolvedItem.stats?.efficiency;
         if (typeof rawEff === 'object') rawEff = rawEff.GLOBAL || 0;
 
-        const mainStatVal = item.stats?.damage || item.stats?.armor || rawEff || 0;
+        const mainStatVal = resolvedItem.stats?.damage ||
+            resolvedItem.stats?.defense ||
+            resolvedItem.stats?.hp ||
+            resolvedItem.stats?.speed ||
+            rawEff || 0;
 
         return (
             <AnimatePresence>
@@ -514,32 +526,46 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                         >
                                             <div style={{ marginTop: '8px', background: 'rgba(0, 0, 0, 0.15)', padding: '4px', borderRadius: '6px' }}>
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                    {CRAFT_QUALITIES.map((q, idx) => (
-                                                        <div key={idx} style={{ fontSize: '0.7rem', padding: '8px 10px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '6px', display: 'flex', flexDirection: 'column', gap: '6px', borderLeft: `3px solid ${q.color}`, borderTop: '1px solid rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.03)', borderRight: '1px solid rgba(255,255,255,0.03)' }}>
-                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                                <span style={{ fontWeight: '600', color: q.color, letterSpacing: '0.5px', textTransform: 'uppercase', fontSize: '0.6rem' }}>{q.name}</span>
-                                                                <span style={{ fontWeight: '700', color: '#fff', fontSize: '0.75rem' }}>{q.chance}</span>
-                                                            </div>
-                                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', opacity: 0.9, borderTop: '1px solid rgba(255, 255, 255, 0.04)', paddingTop: '6px' }}>
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#ff4d4d' }}>
-                                                                    <Target size={11} />
-                                                                    <span style={{ fontWeight: '600' }}>
-                                                                        {(() => {
-                                                                            let val;
-                                                                            if (item.isTool && mainStatKey === 'Efficiency') {
-                                                                                const index = (item.tier - 1) * 5 + q.id;
-                                                                                val = parseFloat((1.0 + (index * (44 / 49))).toFixed(1));
-                                                                            } else {
-                                                                                const multiplier = 1 + (q.ipBonus / 100);
-                                                                                val = parseFloat((mainStatVal * multiplier).toFixed(1));
-                                                                            }
-                                                                            return `${val}${mainStatKey === 'Efficiency' ? '%' : ''} ${mainStatKey}`;
-                                                                        })()}
-                                                                    </span>
+                                                    {CRAFT_QUALITIES.map((q, idx) => {
+                                                        const qItem = resolveItem(resolvedItem.id, q.id);
+                                                        const stats = qItem?.stats || {};
+
+                                                        // Define stats to show
+                                                        const showStats = [];
+                                                        if (stats.damage) showStats.push({ label: 'Dmg', val: stats.damage, icon: <Sword size={11} />, color: '#ff4444' });
+                                                        if (stats.defense) showStats.push({ label: 'Def', val: stats.defense, icon: <Shield size={11} />, color: '#4caf50' });
+                                                        if (stats.hp) showStats.push({ label: 'HP', val: stats.hp, icon: <Heart size={11} />, color: '#ff4d4d' });
+                                                        if (stats.speed) showStats.push({ label: 'Spd', val: '-' + (stats.speed / 1000).toFixed(2) + 's', icon: <Zap size={11} />, color: '#ffd700' });
+                                                        if (stats.attackSpeed) showStats.push({ label: 'Base', val: (stats.attackSpeed / 1000).toFixed(2) + 's', icon: <Zap size={11} />, color: '#ffd700' });
+
+                                                        // Handle Efficiency
+                                                        if (stats.efficiency) {
+                                                            const effVal = typeof stats.efficiency === 'object' ? stats.efficiency.GLOBAL : stats.efficiency;
+                                                            if (effVal) showStats.push({ label: 'Eff', val: effVal + '%', icon: <Star size={11} />, color: '#d4af37' });
+                                                        }
+
+                                                        return (
+                                                            <div key={idx} style={{ fontSize: '0.7rem', padding: '8px 10px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '6px', display: 'flex', flexDirection: 'column', gap: '6px', borderLeft: `3px solid ${q.color}`, borderTop: '1px solid rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.03)', borderRight: '1px solid rgba(255,255,255,0.03)' }}>
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                    <span style={{ fontWeight: '600', color: q.color, letterSpacing: '0.5px', textTransform: 'uppercase', fontSize: '0.6rem' }}>{q.name}</span>
+                                                                    <span style={{ fontWeight: '700', color: '#fff', fontSize: '0.75rem' }}>{q.chance}</span>
+                                                                </div>
+                                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', opacity: 0.9, borderTop: '1px solid rgba(255, 255, 255, 0.04)', paddingTop: '6px' }}>
+                                                                    {showStats.length > 0 ? showStats.map((s, i) => (
+                                                                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '3px', color: s.color }}>
+                                                                            {s.icon}
+                                                                            <span style={{ fontWeight: '600' }}>{s.val} {s.label}</span>
+                                                                        </div>
+                                                                    )) : (
+                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#666' }}>
+                                                                            <Target size={11} />
+                                                                            <span style={{ fontWeight: '600' }}>No Stats</span>
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    ))}
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
                                         </motion.div>

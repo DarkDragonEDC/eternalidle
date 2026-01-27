@@ -59,6 +59,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
         'WARRIORS_FORGE': 'WARRIOR_CRAFTER',
         'HUNTERS_LODGE': 'HUNTER_CRAFTER',
         'MAGES_TOWER': 'MAGE_CRAFTER',
+        'TOOLMAKER': 'TOOL_CRAFTER',
         'COOKING_STATION': 'COOKING'
     };
 
@@ -95,6 +96,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                 { id: 'HIDE', label: 'Skinning', skill: 'ANIMAL_SKINNER' },
                 { id: 'FIBER', label: 'Harvesting', skill: 'FIBER_HARVESTER' },
                 { id: 'FISH', label: 'Fishing', skill: 'FISHING' },
+                { id: 'HERB', label: 'Herbalism', skill: 'HERBALISM' },
             ]
         },
         {
@@ -106,6 +108,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                 { id: 'BAR', label: 'Smelting', skill: 'METAL_BAR_REFINER' },
                 { id: 'LEATHER', label: 'Tannery', skill: 'LEATHER_REFINER' },
                 { id: 'CLOTH', label: 'Loom', skill: 'CLOTH_REFINER' },
+                { id: 'EXTRACT', label: 'Distillation', skill: 'DISTILLATION' },
             ]
         },
         {
@@ -116,7 +119,9 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                 { id: 'WARRIORS_FORGE', label: "Warrior's Forge", skill: 'WARRIOR_CRAFTER' },
                 { id: 'HUNTERS_LODGE', label: "Hunter's Lodge", skill: 'HUNTER_CRAFTER' },
                 { id: 'MAGES_TOWER', label: "Mage's Tower", skill: 'MAGE_CRAFTER' },
+                { id: 'TOOLMAKER', label: 'Toolmaker', skill: 'TOOL_CRAFTER' },
                 { id: 'COOKING_STATION', label: 'Kitchen', skill: 'COOKING' },
+                { id: 'ALCHEMY_LAB', label: 'Alchemy Lab', skill: 'ALCHEMY' },
             ]
         },
         { id: 'combat', label: 'Combat', icon: <Sword size={18} />, skill: 'COMBAT' },

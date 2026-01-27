@@ -41,6 +41,8 @@ export class CombatManager {
             mobHealth: mobMaxHP,
             mobDamage: customStats?.damage || mobData.damage,
             mobDefense: customStats?.defense || mobData.defense,
+            mob_next_attack_at: Date.now() + 1000,
+            mobAtkSpeed: 1000, // Default mob speed
             playerHealth: char.state.health || 100,
             auto: true,
             kills: 0,
@@ -95,7 +97,6 @@ export class CombatManager {
         }
 
         const playerMitigation = playerStats.defense / (playerStats.defense + 2000);
-        const mitigatedMobDmg = Math.max(1, Math.floor(mobDmg * (1 - playerMitigation)));
 
         let mobDef = combat.mobDefense;
         if (typeof mobDef === 'undefined') {
@@ -104,16 +105,24 @@ export class CombatManager {
         const mobMitigation = mobDef / (mobDef + 2000);
         const mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
 
+        // Apply Player Damage
         combat.mobHealth -= mitigatedPlayerDmg;
-        combat.playerHealth -= mitigatedMobDmg;
-
         combat.totalPlayerDmg = (combat.totalPlayerDmg || 0) + mitigatedPlayerDmg;
-        combat.totalMobDmg = (combat.totalMobDmg || 0) + mitigatedMobDmg;
+
+        // Mob Attack Logic
+        let mitigatedMobDmg = 0;
+        const now = Date.now();
+        if (now >= (combat.mob_next_attack_at || 0)) {
+            mitigatedMobDmg = Math.max(1, Math.floor(mobDmg * (1 - playerMitigation)));
+            combat.playerHealth -= mitigatedMobDmg;
+            combat.totalMobDmg = (combat.totalMobDmg || 0) + mitigatedMobDmg;
+            combat.mob_next_attack_at = now + (combat.mobAtkSpeed || 1000);
+        }
 
         char.state.health = Math.max(0, combat.playerHealth);
 
         let roundDetails = {
-            playerDmg,
+            playerDmg: mitigatedPlayerDmg,
             mobDmg: mitigatedMobDmg,
             silverGained: 0,
             lootGained: [],
@@ -123,7 +132,7 @@ export class CombatManager {
             mobName: combat.mobName
         };
 
-        let message = `Dmg: ${playerDmg} | Received: ${mitigatedMobDmg}`;
+        let message = `Dmg: ${mitigatedPlayerDmg} | Recv: ${mitigatedMobDmg}`;
         let leveledUp = false;
 
         if (combat.mobHealth <= 0) {
@@ -156,8 +165,11 @@ export class CombatManager {
                 }
 
                 if (mobData && mobData.loot) {
+                    const dropBonus = playerStats.globals?.dropRate || 0;
+                    const dropMult = 1 + (dropBonus / 100);
+
                     for (const [lootId, chance] of Object.entries(mobData.loot)) {
-                        if (Math.random() <= chance) {
+                        if (Math.random() <= (chance * dropMult)) {
                             this.gameManager.inventoryManager.addItemToInventory(char, lootId, 1);
                             roundDetails.lootGained.push(lootId);
                             message += ` [Item: ${lootId}]`;

@@ -18,8 +18,10 @@ export class ActivityManager {
     }
 
     async startActivity(userId, characterId, actionType, itemId, quantity = 1) {
+        console.log(`[ACTIVITY] Start Request: User=${userId}, Type=${actionType}, Item=${itemId}`);
         const type = actionType.toUpperCase();
         const char = await this.gameManager.getCharacter(userId, characterId);
+        console.log(`[ACTIVITY] Char loaded: ${char?.name}. Skills keys: ${Object.keys(char.state.skills).length}`);
         const item = ITEM_LOOKUP[itemId];
         if (!item) throw new Error("Item not found");
 
@@ -48,13 +50,16 @@ export class ActivityManager {
             'ANIMAL_SKINNER': 'HIDE',
             'FIBER_HARVESTER': 'FIBER',
             'FISHING': 'FISH',
+            'HERBALISM': 'HERB',
             'PLANK_REFINER': 'PLANK',
             'METAL_BAR_REFINER': 'METAL',
             'LEATHER_REFINER': 'LEATHER',
             'CLOTH_REFINER': 'CLOTH',
+            'DISTILLATION': 'EXTRACT',
             'WARRIOR_CRAFTER': 'WARRIOR',
             'HUNTER_CRAFTER': 'HUNTER',
             'MAGE_CRAFTER': 'MAGE',
+            'ALCHEMY': 'POTION',
             'COOKING': 'COOKING'
         };
 
@@ -175,12 +180,49 @@ export class ActivityManager {
         const equippableTypes = ['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFF_HAND', 'TOOL', 'TOOL_PICKAXE', 'TOOL_AXE', 'TOOL_KNIFE', 'TOOL_SICKLE', 'TOOL_ROD'];
 
         if (equippableTypes.includes(item.type)) {
-            const rand = Math.random();
+            const stats = this.gameManager.inventoryManager.calculateStats(char);
+            const qualityBonus = stats.globals?.qualityChance || 0;
+
+            const rand = Math.random() * 100; // 0 to 100
+            // Base Chances: Q4 (0.1%), Q3 (1%), Q2 (10%), Q1 (20%)
+            // With bonus: Increase the thresholds?
+            // Simplest approach: Add bonus to the ROLL? Or reduce threshold?
+            // Let's reduce thresholds.
+            // Default Thresholds (descending check):
+            // > 99.9 -> Q4
+            // > 99.0 -> Q3
+            // > 90.0 -> Q2
+            // > 70.0 -> Q1
+
+            // Bonus is percentage increase to the CHANCE.
+            // e.g. +10% quality chance means 0.1% becomes 0.11%. Hard to model linearly.
+
+            // Alternative: Add flat value to the roll?
+            // If I have +50 Quality, I add 0.5 to the roll?
+
+            // Let's stick to the Potion Plan: "Increases Quality Chance".
+            // Let's map it as a multiplier to the base probabilities.
+            // Q4 Chance = 0.1 * (1 + bonus/100)
+            // Q3 Chance = 1.0 * (1 + bonus/100)
+            // etc.
+
+            const mult = 1 + (qualityBonus / 100);
+            const q4Chance = 0.1 * mult;
+            const q3Chance = 0.9 * mult; // 1.0 - 0.1
+            const q2Chance = 9.0 * mult; // 10.0 - 1.0
+            const q1Chance = 20.0 * mult; // 30.0 - 10.0
+
+            // Normalized Thresholds from Top (100)
+            const t4 = 100 - q4Chance;
+            const t3 = t4 - q3Chance;
+            const t2 = t3 - q2Chance;
+            const t1 = t2 - q1Chance;
+
             let quality = 0;
-            if (rand > 0.999) quality = 4;
-            else if (rand > 0.99) quality = 3;
-            else if (rand > 0.90) quality = 2;
-            else if (rand > 0.70) quality = 1;
+            if (rand > t4) quality = 4;
+            else if (rand > t3) quality = 3;
+            else if (rand > t2) quality = 2;
+            else if (rand > t1) quality = 1;
 
             if (quality > 0) {
                 const { QUALITIES } = await import('../../shared/items.js');
@@ -224,6 +266,10 @@ export class ActivityManager {
         if (itemId.includes('HIDE')) return 'ANIMAL_SKINNER';
         if (itemId.includes('FIBER')) return 'FIBER_HARVESTER';
         if (itemId.includes('FISH')) return 'FISHING';
+        if (itemId.includes('HERB')) {
+            console.log(`[ACTIVITY] Mapping ${itemId} to HERBALISM`);
+            return 'HERBALISM';
+        }
         return null;
     }
 
@@ -232,6 +278,7 @@ export class ActivityManager {
         if (itemId.includes('BAR')) return 'METAL_BAR_REFINER';
         if (itemId.includes('LEATHER')) return 'LEATHER_REFINER';
         if (itemId.includes('CLOTH')) return 'CLOTH_REFINER';
+        if (itemId.includes('EXTRACT')) return 'DISTILLATION';
         return null;
     }
 
@@ -240,6 +287,7 @@ export class ActivityManager {
         if (itemId.includes('BOW') || itemId.includes('LEATHER') || itemId.includes('AXE') || itemId.includes('TORCH') || itemId.includes('KNIFE')) return 'HUNTER_CRAFTER';
         if (itemId.includes('STAFF') || itemId.includes('CLOTH') || itemId.includes('SICKLE') || itemId.includes('TOME') || itemId.includes('ROD') || itemId.includes('MAGE_CAPE')) return 'MAGE_CRAFTER';
         if (itemId.includes('FOOD')) return 'COOKING';
+        if (itemId.includes('POTION')) return 'ALCHEMY';
         if (itemId.includes('CAPE')) return 'WARRIOR_CRAFTER'; // Fallback for Plate Cape or generic
         return null;
     }

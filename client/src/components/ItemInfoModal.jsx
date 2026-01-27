@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Sword, Shield, Heart, Star } from 'lucide-react';
+import { X, Sword, Shield, Heart, Star, Zap } from 'lucide-react';
 import { QUALITIES, resolveItem } from '@shared/items';
 
 const ItemInfoModal = ({ item: rawItem, onClose }) => {
@@ -198,6 +198,8 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                 {baseStats.damage && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#ff4444' }}><Sword size={14} /> {item.stats.damage} Dmg</div>}
                                 {baseStats.hp && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#ff4d4d' }}><Heart size={14} /> {item.stats.hp} HP</div>}
                                 {baseStats.defense && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#4caf50' }}><Shield size={14} /> {item.stats.defense} Def</div>}
+                                {baseStats.attackSpeed && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#ffd700' }}><Zap size={14} /> {(1000 / item.stats.attackSpeed).toFixed(1)}/s Spd</div>}
+                                {baseStats.speed && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#ffd700' }}><Zap size={14} /> {item.stats.speed} Spd</div>}
                                 {baseStats.str && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#ff4444' }}>STR +{item.stats.str}</div>}
                                 {baseStats.agi && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#4caf50' }}>AGI +{item.stats.agi}</div>}
                                 {baseStats.int && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#2196f3' }}>INT +{item.stats.int}</div>}

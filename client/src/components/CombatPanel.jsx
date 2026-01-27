@@ -3,6 +3,7 @@ import { formatNumber, formatSilver } from '@utils/format';
 import { Sword, Shield, Skull, Coins, Zap, Clock, Trophy, ChevronRight, User, Terminal, Activity, TrendingUp, Star, Apple } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MONSTERS } from '@shared/monsters';
+import { resolveItem } from '@shared/items';
 
 const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
     const [activeTier, setActiveTier] = useState(1);
@@ -22,8 +23,9 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
 
     // Cálculo de Stats (Replicado do ProfilePanel para consistência)
     const stats = useMemo(() => {
-        if (!gameState?.state?.skills) return { str: 0, agi: 0, int: 0, hp: 100, damage: 5 };
-        const skills = gameState.state.skills;
+        if (!gameState?.state) return { str: 0, agi: 0, int: 0, hp: 100, damage: 5, attackSpeed: 1000, defense: 0 };
+        const skills = gameState.state.skills || {};
+        const equipment = gameState.state.equipment || {};
 
         let str = 0;
         let agi = 0;
@@ -31,28 +33,65 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
 
         const getLvl = (key) => (skills[key]?.level || 1);
 
+        // STR: Warrior Class + Cooking/Fishing
         str += getLvl('ORE_MINER');
         str += getLvl('METAL_BAR_REFINER');
         str += getLvl('WARRIOR_CRAFTER');
+        str += getLvl('COOKING');
+        str += getLvl('FISHING');
 
+        // AGI: Hunter Class + Woodcutting
         agi += getLvl('ANIMAL_SKINNER');
         agi += getLvl('LEATHER_REFINER');
         agi += getLvl('HUNTER_CRAFTER');
+        agi += getLvl('LUMBERJACK');
+        agi += getLvl('PLANK_REFINER');
 
+        // INT: Mage Class
         int += getLvl('FIBER_HARVESTER');
-        int += getLvl('LUMBERJACK');
         int += getLvl('CLOTH_REFINER');
-        int += getLvl('PLANK_REFINER');
         int += getLvl('MAGE_CRAFTER');
-        int += getLvl('COOKING');
-        int += getLvl('FISHING');
+
+        // Gear Bonuses (STR/AGI/INT)
+        Object.values(equipment).forEach(item => {
+            if (item) {
+                const fresh = resolveItem(item.id || item.item_id);
+                const statsToUse = fresh?.stats || item.stats;
+                if (statsToUse) {
+                    if (statsToUse.str) str += statsToUse.str;
+                    if (statsToUse.agi) agi += statsToUse.agi;
+                    if (statsToUse.int) int += statsToUse.int;
+                }
+            }
+        });
+
+        const gearDamage = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.damage || 0), 0);
+        const gearDefense = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.defense || 0), 0);
+        const gearHP = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.hp || 0), 0);
+
+        // Resolve Weapon Speed
+        const weapon = equipment.mainHand;
+        const freshWeapon = weapon ? resolveItem(weapon.id || weapon.item_id) : null;
+        const weaponSpeed = freshWeapon?.stats?.speed || 1000;
+
+        // Resolve Gear Speed (excluding weapon)
+        const gearSpeedBonus = Object.entries(equipment).reduce((acc, [slot, item]) => {
+            if (!item || slot === 'mainHand') return acc;
+            const fresh = resolveItem(item.id || item.item_id);
+            return acc + (fresh?.stats?.speed || 0);
+        }, 0);
+
+        const totalSpeed = weaponSpeed + gearSpeedBonus + (agi * 0.4);
+        const finalAttackSpeed = Math.max(200, 2000 - totalSpeed);
 
         return {
             str, agi, int,
-            hp: 100 + (str * 10),
-            damage: 5 + (str * 1)
+            hp: 100 + (str * 10) + gearHP,
+            damage: 5 + str + agi + int + gearDamage,
+            defense: gearDefense,
+            attackSpeed: finalAttackSpeed
         };
-    }, [gameState]);
+    }, [gameState?.state]);
 
     const combat = gameState?.state?.combat;
     const activeMobName = combat ? combat.mobName : null;
@@ -156,9 +195,12 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
 
             if (result.combatUpdate) {
                 const update = result.combatUpdate;
-                const details = update.details;
+                const rounds = update.allRounds || [update];
 
-                if (details) {
+                rounds.forEach(round => {
+                    const details = round.details;
+                    if (!details) return;
+
                     // Player Damage Visuals
                     if (details.playerDmg > 0) {
                         setIsMobHit(true);
@@ -180,16 +222,10 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                         newLogs.push({
                             id: generateLogId(),
                             type: 'combat',
-                            content: `${update.details?.mobName || 'Enemy'} dealt ${details.mobDmg} damage.`,
+                            content: `${details?.mobName || 'Enemy'} dealt ${details.mobDmg} damage.`,
                             color: '#ff4444'
                         });
                     }
-
-                    // Healing Visuals
-
-
-                    // Removed verbose damage logging as requested
-
 
                     if (details.silverGained > 0) {
                         newLogs.push({
@@ -222,7 +258,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                         newLogs.push({
                             id: generateLogId(),
                             type: 'victory',
-                            content: `Victory! ${update.details?.mobName || 'Enemy'} defeated.`,
+                            content: `Victory! ${details?.mobName || 'Enemy'} defeated.`,
                             color: '#4caf50'
                         });
                     }
@@ -235,7 +271,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                             color: '#ff4444'
                         });
                     }
-                }
+                });
             }
 
             if (newLogs.length > 0) {
@@ -718,8 +754,8 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                     {(MONSTERS[activeTier] || []).filter(m => !m.id.startsWith('BOSS_') && !m.dungeonOnly).map(mob => {
                         const playerDmg = stats.damage;
                         const roundsToKill = Math.ceil(mob.health / playerDmg);
-                        const ttk = roundsToKill * 3;
-                        const risk = roundsToKill * mob.damage;
+                        const interval = stats.attackSpeed / 1000;
+                        const ttk = roundsToKill * interval;
                         const killsPerHour = Math.floor(3600 / ttk);
                         const xpHour = killsPerHour * mob.xp;
                         const avgSilver = (mob.silver[0] + mob.silver[1]) / 2;

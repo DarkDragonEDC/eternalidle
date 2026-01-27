@@ -18,6 +18,7 @@ import CombatPanel from './components/CombatPanel';
 import OfflineGainsModal from './components/OfflineGainsModal';
 import MarketListingModal from './components/MarketListingModal';
 import CombatHistoryModal from './components/CombatHistoryModal';
+import BuffsDisplay from './components/BuffsDisplay';
 import NotificationCenter from './components/NotificationCenter';
 import {
   Zap, Package, User, Trophy, Coins,
@@ -38,19 +39,22 @@ const mapTabCategoryToSkill = (tab, category) => {
       ORE: 'ORE_MINER',
       HIDE: 'ANIMAL_SKINNER',
       FIBER: 'FIBER_HARVESTER',
-      FISH: 'FISHING'
+      FISH: 'FISHING',
+      HERB: 'HERBALISM'
     },
     refining: {
       PLANK: 'PLANK_REFINER',
       BAR: 'METAL_BAR_REFINER',
       LEATHER: 'LEATHER_REFINER',
-      CLOTH: 'CLOTH_REFINER'
+      CLOTH: 'CLOTH_REFINER',
+      EXTRACT: 'DISTILLATION'
     },
     crafting: {
       WARRIORS_FORGE: 'WARRIOR_CRAFTER',
       HUNTERS_LODGE: 'HUNTER_CRAFTER',
       MAGES_TOWER: 'MAGE_CRAFTER',
-      COOKING_STATION: 'COOKING'
+      COOKING_STATION: 'COOKING',
+      ALCHEMY_LAB: 'ALCHEMY'
     },
     combat: {
       COMBAT: 'COMBAT'
@@ -315,7 +319,21 @@ function App() {
   };
 
   const handleEquip = (itemId) => {
-    socket.emit('equip_item', { itemId });
+    if (socket) {
+      socket.emit('equip_item', { itemId });
+    }
+  };
+
+  const handleUseItem = (itemId) => {
+    if (socket) {
+      socket.emit('use_item', { itemId });
+    }
+  };
+
+  const handleUnequip = (slot) => {
+    if (socket) {
+      socket.emit('unequip_item', { slot });
+    }
   };
 
   const startActivity = (type, itemId, quantity = 1) => {
@@ -511,12 +529,30 @@ function App() {
         const activeCategoryData = isGathering ? ITEMS.RAW[activeCategory] : ITEMS.REFINED[activeCategory];
         const itemsToRender = Object.values(activeCategoryData || {}).filter(item => item.tier === activeTier);
 
+        if (!activeCategoryData || Object.keys(activeCategoryData).length === 0) {
+          return (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              <SkillProgressHeader tab={activeTab} category={activeCategory} />
+              <div className="glass-panel" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '16px', background: 'rgba(15, 20, 30, 0.4)' }}>
+                <div style={{ textAlign: 'center', opacity: 0.5 }}>
+                  <div style={{ fontSize: '3rem', marginBottom: '10px' }}>🧪</div>
+                  <h2 style={{ color: '#d4af37', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '2px' }}>COMING SOON</h2>
+                  <p style={{ color: '#888' }}>Alchemy system in development.</p>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
         return (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <SkillProgressHeader tab={activeTab} category={activeCategory} />
             <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRadius: '16px', background: 'rgba(15, 20, 30, 0.4)' }}>
               <div style={{ padding: isMobile ? '20px' : '30px 40px', borderBottom: '1px solid var(--border)' }}>
-                <h2 style={{ margin: 0, color: '#fff', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '2px' }}>{activeCategory} {isGathering ? 'GATHERING' : 'REFINING'}</h2>
+                <h2 style={{ margin: 0, color: '#fff', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '2px' }}>
+                  {activeCategory} {isGathering ? 'GATHERING' : 'REFINING'}
+                  {(activeCategory.includes('HERB') || activeCategory.includes('EXTRACT')) && <span style={{ fontSize: '0.6rem', color: '#ff4444', marginLeft: '10px', verticalAlign: 'middle', background: 'rgba(255, 68, 68, 0.1)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(255, 68, 68, 0.2)' }}>🚧 EXPERIMENTAL / IN TESTING</span>}
+                </h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', marginTop: '15px' }}>
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(t => (
                     <button key={t} onClick={() => setActiveTier(t)} style={{ padding: '6px', background: activeTier === t ? 'var(--accent-soft)' : 'rgba(255,255,255,0.02)', border: '1px solid', borderColor: activeTier === t ? 'var(--border-active)' : 'rgba(255,255,255,0.05)', borderRadius: '4px', color: activeTier === t ? '#d4af37' : '#555', fontSize: '0.65rem', fontWeight: '900' }}>T{t}</button>
@@ -693,12 +729,30 @@ function App() {
         });
 
         const itemsToRender = allItemsInCategory.filter(i => i.tier === activeTier);
+
+        if (!craftingItems || Object.keys(craftingItems).length === 0) {
+          return (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              <SkillProgressHeader tab={activeTab} category={activeCategory} />
+              <div className="glass-panel" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '16px', background: 'rgba(15, 20, 30, 0.4)' }}>
+                <div style={{ textAlign: 'center', opacity: 0.5 }}>
+                  <div style={{ fontSize: '3rem', marginBottom: '10px' }}>⚗️</div>
+                  <h2 style={{ color: '#d4af37', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '2px' }}>COMING SOON</h2>
+                  <p style={{ color: '#888' }}>Alchemy Lab under construction.</p>
+                </div>
+              </div>
+            </div>
+          );
+        }
         return (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <SkillProgressHeader tab={activeTab} category={activeCategory} />
             <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRadius: '16px', background: 'rgba(15, 20, 30, 0.4)' }}>
               <div style={{ padding: isMobile ? '20px' : '30px 40px', borderBottom: '1px solid var(--border)' }}>
-                <h2 style={{ margin: 0, color: '#fff', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '2px' }}>{activeCategory} CRAFTING</h2>
+                <h2 style={{ margin: 0, color: '#fff', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '2px' }}>
+                  {activeCategory} CRAFTING
+                  {activeCategory.includes('ALCHEMY') && <span style={{ fontSize: '0.6rem', color: '#ff4444', marginLeft: '10px', verticalAlign: 'middle', background: 'rgba(255, 68, 68, 0.1)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(255, 68, 68, 0.2)' }}>🚧 EXPERIMENTAL / IN TESTING</span>}
+                </h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', marginTop: '15px' }}>
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(t => (
                     <button key={t} onClick={() => setActiveTier(t)} style={{ padding: '6px', background: activeTier === t ? 'var(--accent-soft)' : 'rgba(255,255,255,0.02)', border: '1px solid', borderColor: activeTier === t ? 'var(--border-active)' : 'rgba(255,255,255,0.05)', borderRadius: '4px', color: activeTier === t ? '#d4af37' : '#555', fontSize: '0.65rem', fontWeight: '900' }}>T{t}</button>
@@ -864,7 +918,7 @@ function App() {
         );
       }
       case 'inventory':
-        return <InventoryPanel gameState={displayedGameState} socket={socket} onEquip={handleEquip} onShowInfo={setInfoItem} onListOnMarket={handleListOnMarket} isMobile={isMobile} />;
+        return <InventoryPanel gameState={displayedGameState} socket={socket} onEquip={handleEquip} onShowInfo={setInfoItem} onListOnMarket={handleListOnMarket} onUse={handleUseItem} isMobile={isMobile} />;
       case 'ranking':
         return <RankingPanel socket={socket} isMobile={isMobile} />;
       case 'combat':
@@ -1041,6 +1095,7 @@ function App() {
           width: '100%'
         }}>
           {error && <div style={{ background: 'rgba(255, 68, 68, 0.05)', color: '#ff4444', padding: '12px 20px', marginBottom: 25, borderRadius: 8, border: '1px solid rgba(255, 68, 68, 0.1)', fontSize: '0.8rem' }}>{error}</div>}
+          <BuffsDisplay activeBuffs={displayedGameState?.state?.active_buffs} />
           {renderContent()}
         </main>
       </div>

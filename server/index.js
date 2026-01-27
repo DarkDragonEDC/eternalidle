@@ -316,6 +316,18 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('use_item', async ({ itemId }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.consumeItem(socket.user.id, socket.data.characterId, itemId);
+                socket.emit('item_used', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
     socket.on('stop_activity', async () => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {

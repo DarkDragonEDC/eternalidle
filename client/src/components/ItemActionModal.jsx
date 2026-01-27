@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Shield, Coins, Tag, Trash2, ArrowRight } from 'lucide-react';
+import { X, Shield, Coins, Tag, Trash2, ArrowRight, Zap } from 'lucide-react';
 import { getTierColor, calculateItemSellPrice, resolveItem } from '@shared/items';
 
-const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList }) => {
+const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUse }) => {
     if (!rawItem) return null;
 
     // Robust resolution: ensure we have full details including qualityName
@@ -88,7 +88,65 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList }) =>
                         </div>
                     </div>
 
-                    {/* Stats/Desc would go here if available */}
+                    {/* Stats Display */}
+                    {item.stats && (
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1fr',
+                            gap: '10px',
+                            background: 'rgba(255,255,255,0.03)',
+                            padding: '15px',
+                            borderRadius: '10px',
+                            marginBottom: '20px',
+                            border: '1px solid rgba(255,255,255,0.05)'
+                        }}>
+                            {/* Primary Stats */}
+                            {item.stats.damage > 0 && (
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase' }}>Damage</span>
+                                    <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#ff4444' }}>{item.stats.damage}</span>
+                                </div>
+                            )}
+                            {item.stats.defense > 0 && (
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase' }}>Defense</span>
+                                    <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#44ff44' }}>{item.stats.defense}</span>
+                                </div>
+                            )}
+                            {item.stats.hp > 0 && (
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase' }}>Health</span>
+                                    <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#44ff44' }}>+{item.stats.hp}</span>
+                                </div>
+                            )}
+                            {item.stats.attackSpeed > 0 && (
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase' }}>Speed</span>
+                                    <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#ffd700' }}>
+                                        {(1000 / item.stats.attackSpeed).toFixed(1)} <span style={{ fontSize: '0.7rem' }}>/s</span>
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* Attributes */}
+                            {(item.stats.str > 0 || item.stats.agi > 0 || item.stats.int > 0) && (
+                                <div style={{ gridColumn: '1 / -1', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-around' }}>
+                                    {item.stats.str > 0 && <span style={{ color: '#ff8888', fontWeight: 'bold', fontSize: '0.9rem' }}>+{item.stats.str} STR</span>}
+                                    {item.stats.agi > 0 && <span style={{ color: '#88ff88', fontWeight: 'bold', fontSize: '0.9rem' }}>+{item.stats.agi} AGI</span>}
+                                    {item.stats.int > 0 && <span style={{ color: '#8888ff', fontWeight: 'bold', fontSize: '0.9rem' }}>+{item.stats.int} INT</span>}
+                                </div>
+                            )}
+
+                            {/* Efficiency */}
+                            {item.stats.efficiency && (
+                                <div style={{ gridColumn: '1 / -1', marginTop: '5px', textAlign: 'center' }}>
+                                    <span style={{ color: '#d4af37', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                                        Efficiency: {typeof item.stats.efficiency === 'object' ? 'Global Bonus' : item.stats.efficiency}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Actions */}
                     <div style={{ display: 'grid', gap: '10px' }}>
@@ -110,6 +168,27 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList }) =>
                                 }}
                             >
                                 <Shield size={18} /> EQUIP
+                            </button>
+                        )}
+
+                        {(['POTION', 'FOOD'].includes(item.type)) && (
+                            <button
+                                onClick={() => { onUse(item.id); onClose(); }}
+                                style={{
+                                    padding: '12px',
+                                    borderRadius: '8px',
+                                    border: 'none',
+                                    background: 'var(--accent)',
+                                    color: '#000',
+                                    fontWeight: 'bold',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <Zap size={18} /> {item.type === 'FOOD' ? 'EAT' : 'DRINK'}
                             </button>
                         )}
 

@@ -8,6 +8,7 @@ export const CRAFTING_STATIONS = {
     WARRIORS_FORGE: 'Warrior\'s Forge',
     HUNTERS_LODGE: 'Hunter\'s Lodge',
     MAGES_TOWER: 'Mage\'s Tower',
+    TOOLMAKER: 'Toolmaker',
     COOKING_STATION: 'Cooking Station'
 };
 
@@ -43,10 +44,10 @@ const CRAFT_DATA = {
 
 export const ITEMS = {
     RAW: {
-        WOOD: {}, ORE: {}, HIDE: {}, FIBER: {}, FISH: {}
+        WOOD: {}, ORE: {}, HIDE: {}, FIBER: {}, FISH: {}, HERB: {}
     },
     REFINED: {
-        PLANK: {}, BAR: {}, LEATHER: {}, CLOTH: {}
+        PLANK: {}, BAR: {}, LEATHER: {}, CLOTH: {}, EXTRACT: {}
     },
     CONSUMABLE: {
         FOOD: {}
@@ -54,8 +55,10 @@ export const ITEMS = {
     GEAR: {
         WARRIORS_FORGE: { SWORD: {}, SHIELD: {}, PLATE_ARMOR: {}, PLATE_HELMET: {}, PLATE_BOOTS: {}, PLATE_GLOVES: {}, PLATE_CAPE: {}, PICKAXE: {} },
         HUNTERS_LODGE: { BOW: {}, TORCH: {}, LEATHER_ARMOR: {}, LEATHER_HELMET: {}, LEATHER_BOOTS: {}, LEATHER_GLOVES: {}, LEATHER_CAPE: {}, AXE: {}, SKINNING_KNIFE: {} },
-        MAGES_TOWER: { FIRE_STAFF: {}, TOME: {}, CLOTH_ARMOR: {}, CLOTH_HELMET: {}, CLOTH_BOOTS: {}, CLOTH_GLOVES: {}, CAPE: {}, SICKLE: {}, FISHING_ROD: {} },
-        COOKING_STATION: { FOOD: {} }
+        MAGES_TOWER: { FIRE_STAFF: {}, TOME: {}, CLOTH_ARMOR: {}, CLOTH_HELMET: {}, CLOTH_BOOTS: {}, CLOTH_GLOVES: {}, CAPE: {} },
+        TOOLMAKER: { PICKAXE: {}, AXE: {}, SKINNING_KNIFE: {}, SICKLE: {}, FISHING_ROD: {} },
+        COOKING_STATION: { FOOD: {} },
+        ALCHEMY_LAB: { POTION: {} }
     },
     MAPS: {},
     SPECIAL: { CREST: {} }
@@ -95,9 +98,11 @@ const genRefined = (type, idPrefix, rawId) => {
 // Generate Materials
 genRaw('WOOD', 'WOOD'); genRaw('ORE', 'ORE'); genRaw('HIDE', 'HIDE'); genRaw('FIBER', 'FIBER');
 genRaw('FISH', 'FISH'); // Fish is special, but for now standard
+genRaw('HERB', 'HERB');
 
 // Override Icon for T1 Wood (Test)
 if (ITEMS.RAW.WOOD[1]) ITEMS.RAW.WOOD[1].icon = '/items/T1_WOOD.png';
+
 ITEMS.RAW.WOOD[2].icon = '/items/T2_WOOD.png';
 ITEMS.RAW.WOOD[3].icon = '/items/T3_WOOD.png';
 ITEMS.RAW.WOOD[4].icon = '/items/T4_WOOD.png';
@@ -196,7 +201,9 @@ if (ITEMS.RAW.FIBER[10]) ITEMS.RAW.FIBER[10].icon = '/items/T10_FIBER.png';
 genRefined('PLANK', 'PLANK', 'WOOD');
 genRefined('BAR', 'BAR', 'ORE');
 genRefined('LEATHER', 'LEATHER', 'HIDE');
+genRefined('LEATHER', 'LEATHER', 'HIDE');
 genRefined('CLOTH', 'CLOTH', 'FIBER');
+genRefined('EXTRACT', 'EXTRACT', 'HERB');
 
 // Generate Food
 for (const t of TIERS) {
@@ -210,6 +217,75 @@ for (const t of TIERS) {
     ITEMS.CONSUMABLE.FOOD[t] = foodItem;
     ITEMS.GEAR.COOKING_STATION.FOOD[t] = foodItem;
 }
+
+// --- POTION GENERATOR ---
+const POTION_TYPES = {
+    GATHER_XP: { name: 'Gathering Potion', suffix: '_POTION_GATHER', desc: 'Increases Gathering XP', scale: 0.03, base: 0.02 }, // T1: 5%, T10: 32% (Approx) -> Formula TBD
+    REFINE_XP: { name: 'Refining Potion', suffix: '_POTION_REFINE', desc: 'Increases Refining XP', scale: 0.03, base: 0.02 },
+    CRAFT_XP: { name: 'Crafting Potion', suffix: '_POTION_CRAFT', desc: 'Increases Crafting XP', scale: 0.03, base: 0.02 },
+    GOLD: { name: 'Gold Potion', suffix: '_POTION_GOLD', desc: 'Increases Silver gain', scale: 0.02, base: 0.00 }, // T1: 2%, T10: 20%
+    QUALITY: { name: 'Quality Potion', suffix: '_POTION_QUALITY', desc: 'Increases Craft Quality Chance', scale: 0.005, base: 0.005 }, // T1: 1%, T10: 5.5%
+    DROP: { name: 'Luck Potion', suffix: '_POTION_LUCK', desc: 'Increases Drop Rate', scale: 0.02, base: 0.00 },
+    GLOBAL_XP: { name: 'Knowledge Potion', suffix: '_POTION_XP', desc: 'Increases Global XP', scale: 0.02, base: 0.00 }
+};
+
+// Override scaling to match User Request exactly
+const POTION_SCALING = {
+    // Specific XP (5% -> 35%)
+    XP_SPECIFIC: [5, 7, 10, 12, 15, 18, 22, 26, 30, 35],
+    // Global/Gold/Drop (2% -> 20%)
+    GLOBAL: [2, 3, 4, 5, 6, 8, 10, 12, 15, 20],
+    // Quality (1% -> 6%)
+    QUALITY: [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 6]
+};
+
+const genPotions = () => {
+    for (const [key, data] of Object.entries(POTION_TYPES)) {
+        ITEMS.CONSUMABLE[key] = {}; // Init category in CONSUMABLE if needed (or just flat list?)
+        // Let's use specific keys in CONSUMABLE to easier lookup if needed, or just flatten.
+        // ActivityManager checks generic items.
+
+        // We'll put them in ITEMS.GEAR.ALCHEMY_LAB with specific keys so the UI groups them?
+        // Actually UI groups by ITEM ID usually or Category.
+        // Let's put them all in ALCHEMY_LAB.POTION but maybe distinct sub-tabs if we want?
+        // App.jsx logic: `const itemsToRender = Object.values(activeCategoryData || {})`
+        // So if we put them all in `ITEMS.GEAR.ALCHEMY_LAB.POTION`, they show up in Alchemy Lab. Perfect.
+
+        if (!ITEMS.GEAR.ALCHEMY_LAB[key]) ITEMS.GEAR.ALCHEMY_LAB[key] = {};
+
+        for (const t of TIERS) {
+            let val = 0;
+            if (key.includes('XP') && key !== 'GLOBAL_XP') val = POTION_SCALING.XP_SPECIFIC[t - 1];
+            else if (key === 'QUALITY') val = POTION_SCALING.QUALITY[t - 1];
+            else val = POTION_SCALING.GLOBAL[t - 1];
+
+            const id = `T${t}${data.suffix}`;
+
+            const potionItem = {
+                id: id,
+                name: `${data.name}`, // T1 Gathering Potion handled by Tier badge? Or name? "Gathering Potion"
+                tier: t,
+                type: 'POTION',
+                effect: key,
+                value: val,
+                desc: `${data.desc} by ${val}%`,
+                time: 600, // 10 Minutes Duration default? User didn't specify duration. Let's assume 10m?
+                req: {
+                    [`T${t}_EXTRACT`]: 2
+                },
+                xp: CRAFT_DATA.xp[t - 1], // Craft XP
+                time: CRAFT_DATA.time[t - 1] // Craft Time
+            };
+
+            // Register in Consumable (for lookup) and Station (for crafting)
+            if (!ITEMS.CONSUMABLE[key]) ITEMS.CONSUMABLE[key] = {};
+            ITEMS.CONSUMABLE[key][t] = potionItem;
+
+            ITEMS.GEAR.ALCHEMY_LAB[key][t] = potionItem;
+        }
+    }
+};
+genPotions();
 
 // Override Icon for T1 Food
 if (ITEMS.CONSUMABLE.FOOD[1]) { ITEMS.CONSUMABLE.FOOD[1].icon = '/items/T1_FOOD.png'; ITEMS.CONSUMABLE.FOOD[1].scale = '200%'; }
@@ -276,11 +352,28 @@ if (ITEMS.REFINED.CLOTH[6]) ITEMS.REFINED.CLOTH[6].icon = '/items/T6_CLOTH.png';
 if (ITEMS.REFINED.CLOTH[7]) ITEMS.REFINED.CLOTH[7].icon = '/items/T7_CLOTH.png';
 if (ITEMS.REFINED.CLOTH[8]) ITEMS.REFINED.CLOTH[8].icon = '/items/T8_CLOTH.png';
 if (ITEMS.REFINED.CLOTH[9]) ITEMS.REFINED.CLOTH[9].icon = '/items/T9_CLOTH.png';
+// Override Icons for Clause
 if (ITEMS.REFINED.CLOTH[10]) ITEMS.REFINED.CLOTH[10].icon = '/items/T10_CLOTH.png';
 
 // Generate Maps
 for (const t of TIERS) {
     ITEMS.MAPS[t] = { id: `T${t}_DUNGEON_MAP`, name: 'Dungeon Map', tier: t, type: 'MAP' };
+}
+
+// Override Icons for Potions (Reuse generic for now)
+for (const [key, data] of Object.entries(POTION_TYPES)) {
+    if (ITEMS.CONSUMABLE[key]) {
+        for (const t of TIERS) {
+            if (ITEMS.CONSUMABLE[key][t]) {
+                // Use generic potion icon or specific if available. 
+                // T1_POTION_XP.png, T1_POTION_GOLD.png etc would be ideal.
+                // For now, let's try to map to T{t}_POTION.png as a generic base, or specific if user provided.
+                // Given user said "remove broken icons", we'll leave them blank/default OR use a known working one?
+                // User said "remove broken image, leave like others without icons".
+                // So we DO NOT add overrides here. Logic stays clean.
+            }
+        }
+    }
 }
 
 // Generate Crests
@@ -308,8 +401,13 @@ const genGear = (category, slot, type, idSuffix, matType, statMultipliers = {}) 
         if (statMultipliers.dmg) stats.damage = Math.floor(DMG_CURVE[t - 1] * statMultipliers.dmg);
         if (statMultipliers.def) stats.defense = Math.floor(DEF_CURVE[t - 1] * statMultipliers.def);
         if (statMultipliers.hp) stats.hp = Math.floor(HP_CURVE[t - 1] * statMultipliers.hp);
-        if (statMultipliers.speed) stats.speed = Math.floor(t * statMultipliers.speed); // 1-10 speed?
-        if (statMultipliers.speed) stats.speed = Math.floor(t * statMultipliers.speed); // 1-10 speed?
+        if (statMultipliers.speed) {
+            if (type === 'WEAPON') {
+                stats.speed = statMultipliers.speed; // Fixed base for weapons
+            } else {
+                stats.speed = Math.floor(t * statMultipliers.speed); // Multiplier for gear
+            }
+        }
         if (statMultipliers.eff) stats.efficiency = 1; // Base value, logic moved to resolveItem
         if (statMultipliers.globalEff) {
             // New Curve: T1 (~1%) to T10 (~5% Base -> 15% Max)
@@ -341,36 +439,39 @@ const genGear = (category, slot, type, idSuffix, matType, statMultipliers = {}) 
 };
 
 // --- WARRIOR GEAR ---
-genGear('WARRIORS_FORGE', 'SWORD', 'WEAPON', 'SWORD', 'BAR', { dmg: 1.0, atkSpeed: 1000 });
+genGear('WARRIORS_FORGE', 'SWORD', 'WEAPON', 'SWORD', 'BAR', { dmg: 1.0, speed: 1000 });
 genGear('WARRIORS_FORGE', 'SHIELD', 'OFF_HAND', 'SHIELD', 'BAR', { def: 0.467, hp: 0.5 }); // Matches T2 10.5 Def / 90 HP
 genGear('WARRIORS_FORGE', 'PLATE_ARMOR', 'ARMOR', 'PLATE_ARMOR', 'BAR', { hp: 1.0, def: 1.0 });
 genGear('WARRIORS_FORGE', 'PLATE_HELMET', 'HELMET', 'PLATE_HELMET', 'BAR', { hp: 0.25, def: 0.25 });
 genGear('WARRIORS_FORGE', 'PLATE_BOOTS', 'BOOTS', 'PLATE_BOOTS', 'BAR', { hp: 0.25, def: 0.25 });
 genGear('WARRIORS_FORGE', 'PLATE_GLOVES', 'GLOVES', 'PLATE_GLOVES', 'BAR', { hp: 0.15, def: 0.15, dmg: 0.05 });
 genGear('WARRIORS_FORGE', 'PLATE_CAPE', 'CAPE', 'PLATE_CAPE', 'BAR', { hp: 0.2, globalEff: 1 });
-genGear('WARRIORS_FORGE', 'PICKAXE', 'TOOL_PICKAXE', 'PICKAXE', 'BAR', { eff: 1 });
 
 // --- HUNTER GEAR ---
-genGear('HUNTERS_LODGE', 'BOW', 'WEAPON', 'BOW', 'PLANK', { dmg: 0.8, atkSpeed: 700 }); // Fast but lower dmg per hit
-genGear('HUNTERS_LODGE', 'TORCH', 'OFF_HAND', 'TORCH', 'PLANK', { speed: 2, hp: 0.2 }); // Speed bonus
-genGear('HUNTERS_LODGE', 'LEATHER_ARMOR', 'ARMOR', 'LEATHER_ARMOR', 'LEATHER', { hp: 0.7, def: 0.7, speed: 2 });
-genGear('HUNTERS_LODGE', 'LEATHER_HELMET', 'HELMET', 'LEATHER_HELMET', 'LEATHER', { hp: 0.2, def: 0.2, speed: 1 });
-genGear('HUNTERS_LODGE', 'LEATHER_BOOTS', 'BOOTS', 'LEATHER_BOOTS', 'LEATHER', { hp: 0.2, def: 0.2, speed: 1 });
+genGear('HUNTERS_LODGE', 'BOW', 'WEAPON', 'BOW', 'PLANK', { dmg: 0.8, speed: 1253 }); // Fast but lower dmg per hit
+genGear('HUNTERS_LODGE', 'TORCH', 'OFF_HAND', 'TORCH', 'PLANK', { speed: 5, hp: 0.2 }); // Speed bonus
+genGear('HUNTERS_LODGE', 'LEATHER_ARMOR', 'ARMOR', 'LEATHER_ARMOR', 'LEATHER', { hp: 0.7, def: 0.7, speed: 5 });
+genGear('HUNTERS_LODGE', 'LEATHER_HELMET', 'HELMET', 'LEATHER_HELMET', 'LEATHER', { hp: 0.2, def: 0.2, speed: 5 });
+genGear('HUNTERS_LODGE', 'LEATHER_BOOTS', 'BOOTS', 'LEATHER_BOOTS', 'LEATHER', { hp: 0.2, def: 0.2, speed: 5 });
 genGear('HUNTERS_LODGE', 'LEATHER_GLOVES', 'GLOVES', 'LEATHER_GLOVES', 'LEATHER', { hp: 0.1, def: 0.1, dmg: 0.1 });
 genGear('HUNTERS_LODGE', 'LEATHER_CAPE', 'CAPE', 'LEATHER_CAPE', 'LEATHER', { hp: 0.2, globalEff: 1 });
-genGear('HUNTERS_LODGE', 'AXE', 'TOOL_AXE', 'AXE', 'PLANK', { eff: 1 });
-genGear('HUNTERS_LODGE', 'SKINNING_KNIFE', 'TOOL_KNIFE', 'SKINNING_KNIFE', 'LEATHER', { eff: 1 });
+genGear('HUNTERS_LODGE', 'LEATHER_CAPE', 'CAPE', 'LEATHER_CAPE', 'LEATHER', { hp: 0.2, globalEff: 1 });
 
 // --- MAGE GEAR ---
-genGear('MAGES_TOWER', 'FIRE_STAFF', 'WEAPON', 'FIRE_STAFF', 'PLANK', { dmg: 1.2, atkSpeed: 1500 }); // Slow but huge dmg
+genGear('MAGES_TOWER', 'FIRE_STAFF', 'WEAPON', 'FIRE_STAFF', 'PLANK', { dmg: 1.2, speed: 500 }); // Slow but huge dmg
 genGear('MAGES_TOWER', 'TOME', 'OFF_HAND', 'TOME', 'CLOTH', { dmg: 0.3 }); // Pure Dmg bonus
 genGear('MAGES_TOWER', 'CLOTH_ARMOR', 'ARMOR', 'CLOTH_ARMOR', 'CLOTH', { hp: 0.5, def: 0.4, dmg: 0.2 });
 genGear('MAGES_TOWER', 'CLOTH_HELMET', 'HELMET', 'CLOTH_HELMET', 'CLOTH', { hp: 0.15, def: 0.1, dmg: 0.05 });
 genGear('MAGES_TOWER', 'CLOTH_BOOTS', 'BOOTS', 'CLOTH_BOOTS', 'CLOTH', { hp: 0.15, def: 0.1, dmg: 0.05 });
 genGear('MAGES_TOWER', 'CLOTH_GLOVES', 'GLOVES', 'CLOTH_GLOVES', 'CLOTH', { hp: 0.1, def: 0.1, dmg: 0.1 });
 genGear('MAGES_TOWER', 'CAPE', 'CAPE', 'MAGE_CAPE', 'CLOTH', { hp: 0.2, globalEff: 1 });
-genGear('MAGES_TOWER', 'SICKLE', 'TOOL_SICKLE', 'SICKLE', 'CLOTH', { eff: 1 });
-genGear('MAGES_TOWER', 'FISHING_ROD', 'TOOL_ROD', 'FISHING_ROD', 'PLANK', { eff: 1 });
+
+// --- TOOLMAKER ---
+genGear('TOOLMAKER', 'PICKAXE', 'TOOL_PICKAXE', 'PICKAXE', 'BAR', { eff: 1 });
+genGear('TOOLMAKER', 'AXE', 'TOOL_AXE', 'AXE', 'PLANK', { eff: 1 });
+genGear('TOOLMAKER', 'SKINNING_KNIFE', 'TOOL_KNIFE', 'SKINNING_KNIFE', 'LEATHER', { eff: 1 });
+genGear('TOOLMAKER', 'SICKLE', 'TOOL_SICKLE', 'SICKLE', 'CLOTH', { eff: 1 });
+genGear('TOOLMAKER', 'FISHING_ROD', 'TOOL_ROD', 'FISHING_ROD', 'PLANK', { eff: 1 });
 
 
 export const ITEM_LOOKUP = {};
@@ -452,13 +553,24 @@ export const resolveItem = (itemId, overrideQuality = null) => {
         for (const key in baseItem.stats) {
             if (typeof baseItem.stats[key] === 'number') {
                 if (key === 'efficiency' && baseItem.isTool) {
-                    // 50-step linear progression: 10 Tiers * 5 Qualities
-                    // Index: 0 (T1 Normal) to 49 (T10 Masterpiece)
                     const index = (baseItem.tier - 1) * 5 + effectiveQualityId;
                     // Formula: 1.0 + (Index * (44 / 49))
                     newStats[key] = parseFloat((1.0 + (index * (44 / 49))).toFixed(1));
-                } else if (key === 'attackSpeed') {
-                    newStats[key] = baseItem.stats[key];
+                } else if (key === 'speed') {
+                    // Universal Speed Calculation
+                    // For Weapons: Base (e.g. 1300) + Bonus. High = Fast.
+                    // For Gear: Base (e.g. 5) + Bonus. High = Fast.
+
+                    if (baseItem.type === 'WEAPON') {
+                        // Weapon Bonus: ((Tier - 1) * 15) + (QualityId * 3)
+                        // Added to base Speed.
+                        const bonus = ((baseItem.tier - 1) * 15) + (effectiveQualityId * 3);
+                        newStats[key] = baseItem.stats[key] + bonus;
+                    } else {
+                        // Gear Bonus: ((Tier - 1) * 5) + 1 + QualityId
+                        const speedVal = ((baseItem.tier - 1) * 5) + 1 + effectiveQualityId;
+                        newStats[key] = speedVal;
+                    }
                 } else {
                     newStats[key] = parseFloat((baseItem.stats[key] * statMultiplier).toFixed(1));
                 }

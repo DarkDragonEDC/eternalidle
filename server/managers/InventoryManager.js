@@ -191,7 +191,7 @@ export class InventoryManager {
                     if (statsToUse.damage) gearDamage += statsToUse.damage;
                     if (statsToUse.defense) gearDefense += statsToUse.defense;
                     if (statsToUse.dmgBonus) gearDmgBonus += statsToUse.dmgBonus;
-                    if (statsToUse.speed) gearSpeedBonus += statsToUse.speed;
+                    if (statsToUse.speed && item.type !== 'WEAPON') gearSpeedBonus += statsToUse.speed;
 
                     // Allow gear to add directly to stats
                     if (statsToUse.str) str += statsToUse.str;
@@ -262,12 +262,60 @@ export class InventoryManager {
         // Silver: 1% per INT
         // Efficiency: 0% from INT (removed)
 
+        // 4. Intelligence Bonus to Global Yields
+        // Global XP: 1% per INT
+        // Silver: 1% per INT
+        // Efficiency: 0% from INT (removed)
+
         const globals = {
             xpYield: int * 1, // 1% per INT
             silverYield: int * 1, // 1% per INT
             efficiency: 0,
-            globalEfficiency: 0 // Legacy/Unused
+            globalEfficiency: 0, // Legacy/Unused
+            dropRate: 0,
+            qualityChance: 0
         };
+
+        const xpBonus = {
+            GLOBAL: 0,
+            GATHERING: 0,
+            REFINING: 0,
+            CRAFTING: 0
+        };
+
+        // 5. Active Buffs Process
+        if (char.state.active_buffs) {
+            const now = Date.now();
+            Object.entries(char.state.active_buffs).forEach(([type, buff]) => {
+                if (buff.expiresAt > now) {
+                    const valPc = buff.value * 100; // 0.05 -> 5
+
+                    switch (type) {
+                        case 'GLOBAL_XP':
+                            globals.xpYield += valPc;
+                            break;
+                        case 'GOLD':
+                            globals.silverYield += valPc;
+                            break;
+                        case 'DROP':
+                            globals.dropRate += valPc;
+                            break;
+                        case 'QUALITY':
+                            globals.qualityChance += valPc;
+                            break;
+                        case 'GATHER_XP':
+                            xpBonus.GATHERING += valPc;
+                            break;
+                        case 'REFINE_XP':
+                            xpBonus.REFINING += valPc;
+                            break;
+                        case 'CRAFT_XP':
+                            xpBonus.CRAFTING += valPc;
+                            break;
+                    }
+                }
+            });
+        }
 
         // Apply Global to all specific categories (if we had any global efficiency sources, they would go here)
         // Currently efficiency.GLOBAL is 0 from INT.
@@ -278,8 +326,13 @@ export class InventoryManager {
         });
         efficiency.GLOBAL = parseFloat(efficiency.GLOBAL.toFixed(2));
 
-        // Final Delay Calculation: Weapon Base - (AGI * 5) - (GearSpeed * 5)
-        const finalAttackSpeed = Math.max(200, baseAttackSpeed - (agi * 5) - (gearSpeedBonus * 5));
+        // Total Speed = WeaponSpeed + GearSpeed
+        const weaponObj = equipment.mainHand; // Renaming to avoid conflict if I really want a local handle
+        const freshWeapon = weaponObj ? this.resolveItem(weaponObj.id) : null;
+        const weaponSpeed = freshWeapon?.stats?.speed || 1000; // Default punch speed 1000
+        const totalSpeed = weaponSpeed + gearSpeedBonus;
+
+        const finalAttackSpeed = Math.max(200, 2000 - totalSpeed - (agi * 0.4));
 
         return {
             str, agi, int,
@@ -289,7 +342,8 @@ export class InventoryManager {
             attackSpeed: finalAttackSpeed,
             dmgBonus: gearDmgBonus,
             efficiency,
-            globals // Return globals so we can use them in GameManager/CombatManager
+            globals, // Return globals so we can use them in GameManager/CombatManager
+            xpBonus // Return detailed XP bonuses
         };
     }
 }

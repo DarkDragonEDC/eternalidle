@@ -4,7 +4,7 @@ import { resolveItem, getTierColor, calculateItemSellPrice } from '@shared/items
 import { Package, Shield, Coins, Tag, Trash2, Info, ChevronDown, ChevronUp, ArrowUpAZ, ArrowDownZA, Search } from 'lucide-react';
 import ItemActionModal from './ItemActionModal';
 
-const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo, isMobile }) => {
+const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo, onUse, isMobile }) => {
     const [selectedItemForModal, setSelectedItemForModal] = useState(null);
     const [sellModal, setSellModal] = useState(null);
     const [filter, setFilter] = useState('ALL');
@@ -335,6 +335,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                         item={selectedItemForModal}
                         onClose={() => setSelectedItemForModal(null)}
                         onEquip={onEquip}
+                        onUse={(id) => { setSelectedItemForModal(null); onUse(id); }}
                         onSell={(id) => { setSelectedItemForModal(null); handleQuickSell(id); }}
                         onList={(id, item) => { setSelectedItemForModal(null); onListOnMarket({ itemId: id, max: item.qty }); }}
                     />

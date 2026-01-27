@@ -40,83 +40,106 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
         str += getLvl('ORE_MINER');
         str += getLvl('METAL_BAR_REFINER');
         str += getLvl('WARRIOR_CRAFTER');
+        str += getLvl('COOKING');
+        str += getLvl('FISHING');
 
         // AGI: Hunter Class (Skinning, Tanning, Hunter Crafting)
         agi += getLvl('ANIMAL_SKINNER');
         agi += getLvl('LEATHER_REFINER');
         agi += getLvl('HUNTER_CRAFTER');
+        agi += getLvl('LUMBERJACK');
+        agi += getLvl('PLANK_REFINER');
 
         // INT: Mage Class (Harvesting, Woodcutting, Weaving, Woodworking, Mage Crafting)
         int += getLvl('FIBER_HARVESTER');
-        int += getLvl('LUMBERJACK');
         int += getLvl('CLOTH_REFINER');
-        int += getLvl('PLANK_REFINER');
         int += getLvl('MAGE_CRAFTER');
 
-        // Cooking e Fishing podem dar INT ou serem neutros. 
-        // Por padrão em muitos RPGs, Cooking/Alchemy = INT.
-        int += getLvl('COOKING');
-        int += getLvl('FISHING');
+        // Gear Bonuses
+        Object.values(equipment).forEach(item => {
+            if (item) {
+                const fresh = resolveItem(item.id || item.item_id);
+                const statsToUse = fresh?.stats || item.stats;
+                if (statsToUse) {
+                    if (statsToUse.str) str += statsToUse.str;
+                    if (statsToUse.agi) agi += statsToUse.agi;
+                    if (statsToUse.int) int += statsToUse.int;
+                }
+            }
+        });
 
         return { str, agi, int };
-    }, [skills]);
+    }, [skills, equipment]);
 
     const stats = useMemo(() => {
-        // Se o servidor enviou os stats calculados, use-os como fonte da verdade absoluta
-        if (gameState?.calculatedStats) {
-            return {
-                ...gameState.calculatedStats,
-                hp: health, // HP atual vem do state
-                maxHp: gameState.calculatedStats.maxHP, // O servidor chama de maxHP
-                efficiency: gameState.calculatedStats.efficiency || {
-                    WOOD: (skills.LUMBERJACK?.level || 1) * 1,
-                    ORE: (skills.ORE_MINER?.level || 1) * 1,
-                    HIDE: (skills.ANIMAL_SKINNER?.level || 1) * 1,
-                    FIBER: (skills.FIBER_HARVESTER?.level || 1) * 1,
-                    FISH: (skills.FISHING?.level || 1) * 1,
-                    PLANK: (skills.PLANK_REFINER?.level || 1) * 1,
-                    METAL: (skills.METAL_BAR_REFINER?.level || 1) * 1,
-                    LEATHER: (skills.LEATHER_REFINER?.level || 1) * 1,
-                    CLOTH: (skills.CLOTH_REFINER?.level || 1) * 1,
-                    WARRIOR: (skills.WARRIOR_CRAFTER?.level || 1) * 1,
-                    HUNTER: (skills.HUNTER_CRAFTER?.level || 1) * 1,
-                    MAGE: (skills.MAGE_CRAFTER?.level || 1) * 1,
-                    COOKING: (skills.COOKING?.level || 1) * 1,
-                    GLOBAL: 0
-                },
-                silverMultiplier: 1.0 + (gameState.calculatedStats.int * 0.02)
-            };
-        }
-
         // Fallback para cálculo local (útil para updates otimistas antes do servidor responder)
+        const gearDamage = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.damage || 0), 0);
+        const gearDefense = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.defense || 0), 0);
+        const gearHP = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.hp || 0), 0);
+
+        // Resolve Weapon Speed
+        const weapon = equipment.mainHand;
+        const freshWeapon = weapon ? resolveItem(weapon.id || weapon.item_id) : null;
+        const weaponSpeed = freshWeapon?.stats?.speed || 1000;
+
+        // Resolve Gear Speed (excluding weapon)
+        const gearSpeedBonus = Object.entries(equipment).reduce((acc, [slot, item]) => {
+            if (!item || slot === 'mainHand') return acc;
+            const fresh = resolveItem(item.id || item.item_id);
+            return acc + (fresh?.stats?.speed || 0);
+        }, 0);
+
+        const totalSpeed = weaponSpeed + gearSpeedBonus + (calculatedStats.agi * 0.4);
+        const finalAttackSpeed = Math.max(200, 2000 - totalSpeed);
+
+        // Helper para ferramentas
+        const getToolEff = (toolSlot) => {
+            const tool = equipment[toolSlot];
+            if (!tool) return 0;
+            const fresh = resolveItem(tool.id || tool.item_id);
+            return fresh?.stats?.efficiency || 0;
+        };
+
+        const globalEff = Object.values(equipment).reduce((acc, item) => {
+            if (!item) return acc;
+            const fresh = resolveItem(item.id || item.item_id);
+            const statsToUse = fresh?.stats || item.stats;
+            const effVal = typeof statsToUse?.efficiency === 'object' ? (statsToUse.efficiency.GLOBAL || 0) : 0;
+            return acc + effVal;
+        }, 0);
+
         return {
             hp: health,
-            maxHp: 100 + (calculatedStats.str * 10),
-            damage: 5 + (calculatedStats.str * 1) + (calculatedStats.agi * 1) + (calculatedStats.int * 1),
-            defense: 5 + (calculatedStats.str * 1),
-            attackSpeed: 1000 - (calculatedStats.agi * 5),
+            maxHp: 100 + (calculatedStats.str * 10) + gearHP,
+            damage: 5 + (calculatedStats.str * 1) + (calculatedStats.agi * 1) + (calculatedStats.int * 1) + gearDamage,
+            defense: gearDefense,
+            attackSpeed: finalAttackSpeed,
             str: calculatedStats.str,
             agi: calculatedStats.agi,
             int: calculatedStats.int,
             efficiency: {
-                WOOD: (skills.LUMBERJACK?.level || 1) * 1,
-                ORE: (skills.ORE_MINER?.level || 1) * 1,
-                HIDE: (skills.ANIMAL_SKINNER?.level || 1) * 1,
-                FIBER: (skills.FIBER_HARVESTER?.level || 1) * 1,
-                FISH: (skills.FISHING?.level || 1) * 1,
-                PLANK: (skills.PLANK_REFINER?.level || 1) * 1,
-                METAL: (skills.METAL_BAR_REFINER?.level || 1) * 1,
-                LEATHER: (skills.LEATHER_REFINER?.level || 1) * 1,
-                CLOTH: (skills.CLOTH_REFINER?.level || 1) * 1,
-                WARRIOR: (skills.WARRIOR_CRAFTER?.level || 1) * 1,
-                HUNTER: (skills.HUNTER_CRAFTER?.level || 1) * 1,
-                MAGE: (skills.MAGE_CRAFTER?.level || 1) * 1,
-                COOKING: (skills.COOKING?.level || 1) * 1,
-                GLOBAL: 0
+                WOOD: (skills.LUMBERJACK?.level || 1) * 0.3 + getToolEff('tool_axe') + globalEff,
+                ORE: (skills.ORE_MINER?.level || 1) * 0.3 + getToolEff('tool_pickaxe') + globalEff,
+                HIDE: (skills.ANIMAL_SKINNER?.level || 1) * 0.3 + getToolEff('tool_knife') + globalEff,
+                FIBER: (skills.FIBER_HARVESTER?.level || 1) * 0.3 + getToolEff('tool_sickle') + globalEff,
+                HERB: (skills.HERBALISM?.level || 1) * 0.3 + globalEff, // No tool for now? Or maybe sickle?
+                FISH: (skills.FISHING?.level || 1) * 0.3 + getToolEff('tool_rod') + globalEff,
+                PLANK: (skills.PLANK_REFINER?.level || 1) * 0.3 + globalEff,
+                METAL: (skills.METAL_BAR_REFINER?.level || 1) * 0.3 + globalEff,
+                LEATHER: (skills.LEATHER_REFINER?.level || 1) * 0.3 + globalEff,
+                LEATHER: (skills.LEATHER_REFINER?.level || 1) * 0.3 + globalEff,
+                CLOTH: (skills.CLOTH_REFINER?.level || 1) * 0.3 + globalEff,
+                EXTRACT: (skills.DISTILLATION?.level || 1) * 0.3 + globalEff,
+                WARRIOR: (skills.WARRIOR_CRAFTER?.level || 1) * 0.3 + globalEff,
+                HUNTER: (skills.HUNTER_CRAFTER?.level || 1) * 0.3 + globalEff,
+                MAGE: (skills.MAGE_CRAFTER?.level || 1) * 0.3 + globalEff,
+                POTION: (skills.ALCHEMY?.level || 1) * 0.3 + globalEff,
+                COOKING: (skills.COOKING?.level || 1) * 0.3 + globalEff,
+                GLOBAL: globalEff
             },
             silverMultiplier: 1.0 + (calculatedStats.int * 0.02)
         };
-    }, [gameState?.calculatedStats, calculatedStats, health, skills]);
+    }, [gameState?.calculatedStats, calculatedStats, health, skills, equipment]);
 
     const avgIP = useMemo(() => {
         const combatSlots = ['head', 'chest', 'shoes', 'gloves', 'cape', 'mainHand', 'offHand'];
@@ -450,7 +473,7 @@ Each point grants: +1% Global XP, +1% Gold Gain and +1 Base Damage`;
                 </div>
 
                 <div style={{ borderTop: '1px solid var(--border)', paddingTop: '30px' }}>
-                    <h4 style={{ color: '#fff', fontSize: '0.7rem', fontWeight: '900', textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '2px', opacity: 0.8 }}>Skill Efficiency</h4>
+                    <h4 style={{ color: '#fff', fontSize: '0.7rem', fontWeight: '900', textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '2px', opacity: 0.8, textAlign: 'center' }}>Skill Efficiency</h4>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '10px' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '10px' }}>
                             <EfficiencyCard title="Gathering" items={[
