@@ -15,18 +15,16 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, onClose
             const int = stats.int || 0;
             const gearDamage = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.damage || 0), 0);
             const weapon = equipment.mainHand;
-            const ipBonus = weapon ? (weapon.ip || 0) / 10 : 0;
             const gearDmgBonus = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.dmgBonus || 0), 0);
 
             breakdown.push({ label: 'Base', value: 5 });
-            if (str > 0) breakdown.push({ label: 'Strength Bonus', value: str, sub: '(+1 Dmg per STR)' });
-            if (agi > 0) breakdown.push({ label: 'Agility Bonus', value: agi, sub: '(+1 Dmg per AGI)' });
-            if (int > 0) breakdown.push({ label: 'Intelligence Bonus', value: int, sub: '(+1 Dmg per INT)' });
+            if (str > 0) breakdown.push({ label: 'Strength Bonus', value: str, sub: '(Max 100, 0.2 per Skill Lvl)' });
+            if (agi > 0) breakdown.push({ label: 'Agility Bonus', value: agi, sub: '(Max 100, 0.2 per Skill Lvl)' });
+            if (int > 0) breakdown.push({ label: 'Intelligence Bonus', value: int, sub: '(Max 100, ~0.166 per Skill Lvl)' });
 
             breakdown.push({ label: 'Gear Damage', value: gearDamage });
-            if (ipBonus > 0) breakdown.push({ label: 'Weapon IP Bonus', value: ipBonus.toFixed(1), sub: '(IP / 10)' });
 
-            const rawTotal = 5 + str + agi + int + gearDamage + ipBonus;
+            const rawTotal = 5 + str + agi + int + gearDamage;
 
             if (gearDmgBonus > 0) {
                 breakdown.push({ label: 'Raw Total', value: rawTotal.toFixed(1), isTotal: true });
@@ -41,11 +39,11 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, onClose
             // Percentage Reduction display
             // Use Total Defense (stats.defense) not just Gear Defense
             const totalDef = stats.defense || 0;
-            const mitigation = totalDef / (totalDef + 800);
+            const mitigation = Math.min(0.60, totalDef / (totalDef + 2000));
             const reductionPercent = (mitigation * 100).toFixed(1);
-            breakdown.push({ label: 'Est. Dmg Reduction', value: `${reductionPercent}%`, sub: 'Based on Def / (Def + 800)', isTotal: true });
+            breakdown.push({ label: 'Est. Dmg Reduction', value: `${reductionPercent}%`, sub: 'Based on Def / (Def + 2000) (Max 60%)', isTotal: true });
         } else if (statType === 'SPEED') {
-            // Formula: GlobalBase(2000) - WeaponSpeed - (AGI * 0.4) - GearSpeed
+            // Formula: GlobalBase(2000) - WeaponSpeed - (AGI * 2) - GearSpeed
             // Everything converted to seconds for display (2 decimal places)
             const agi = stats.agi || 0;
             const gearSpeed = Object.entries(equipment).reduce((acc, [slot, item]) => {
@@ -70,8 +68,8 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, onClose
             if (agi > 0) {
                 breakdown.push({
                     label: 'Agility Bonus',
-                    value: `-${(agi * 0.4 / 1000).toFixed(2)}s`,
-                    sub: '(0.4ms per AGI)'
+                    value: `-${(agi * 2 / 1000).toFixed(2)}s`,
+                    sub: '(2ms per AGI)'
                 });
             }
 
@@ -83,7 +81,7 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, onClose
                 });
             }
 
-            const totalReduction = weaponSpeed + gearSpeed + (agi * 0.4);
+            const totalReduction = weaponSpeed + gearSpeed + (agi * 2);
             const calculatedRaw = 2000 - totalReduction;
             const finalInterval = Math.max(200, calculatedRaw);
 
@@ -194,16 +192,24 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, onClose
                 color: '#fff'
             }} onClick={e => e.stopPropagation()}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
-                    <h3 style={{ margin: 0, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase' }}>
                         {statType === 'DAMAGE' && <Sword size={18} color="#ff4444" />}
                         {statType === 'DEFENSE' && <Shield size={18} color="#4caf50" />}
                         {statType === 'SPEED' && <Zap size={18} color="#2196f3" />}
                         {statType === 'HP' && <Heart size={18} color="#ff4d4d" />}
-                        {statType} SOURCE
+                        {statType === 'EFFICIENCY' ? (
+                            statId === 'GLOBAL' ? 'GLOBAL EFFICIENCY' : (
+                                {
+                                    WOOD: 'WOODCUTTING', ORE: 'MINING', HIDE: 'SKINNING', FIBER: 'FIBER', FISH: 'FISHING', HERB: 'HERBALISM',
+                                    PLANK: 'PLANKS', METAL: 'BARS', LEATHER: 'LEATHERS', CLOTH: 'CLOTH', EXTRACT: 'DISTILLATION',
+                                    WARRIOR: 'WARRIOR GEAR', HUNTER: 'HUNTER GEAR', MAGE: 'MAGE GEAR', COOKING: 'COOKING',
+                                    ALCHEMY: 'ALCHEMY', TOOLS: 'TOOLS'
+                                }[statId] || statId
+                            )
+                        ) : `${statType} SOURCE`}
                     </h3>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer' }}><X size={20} /></button>
                 </div>
-
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     {rows.map((row, idx) => (
                         <div key={idx} style={{

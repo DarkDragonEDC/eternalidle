@@ -33,6 +33,11 @@ export class ActivityManager {
             throw new Error(`Insufficient level! Requires ${skillKey} Lv ${requiredLevel}`);
         }
 
+        // Pre-emptive Inventory Check
+        if (!this.gameManager.inventoryManager.canAddItem(char, itemId)) {
+            throw new Error("Inventory Full! Please free up space before starting.");
+        }
+
         let baseTime = item.time || 3.0;
         // Fallbacks if item.time is missing (for legacy or safety)
         if (!item.time) {
@@ -59,8 +64,9 @@ export class ActivityManager {
             'WARRIOR_CRAFTER': 'WARRIOR',
             'HUNTER_CRAFTER': 'HUNTER',
             'MAGE_CRAFTER': 'MAGE',
-            'ALCHEMY': 'POTION',
-            'COOKING': 'COOKING'
+            'ALCHEMY': 'ALCHEMY',
+            'COOKING': 'COOKING',
+            'TOOL_CRAFTER': 'TOOLS'
         };
 
         const efficiencyKey = efficiencyMap[skillKey];
@@ -132,10 +138,17 @@ export class ActivityManager {
 
     async processGathering(char, item) {
         const added = this.gameManager.inventoryManager.addItemToInventory(char, item.id, 1);
-        if (!added) return { error: "Inventory Full" };
+        if (!added) return { error: "Inventory Full", success: false, message: "Inventory Full" };
 
         const skillKey = this.getSkillKeyForResource(item.id);
-        const xpAmount = item.xp || 5;
+        const stats = this.gameManager.inventoryManager.calculateStats(char);
+        const baseXp = item.xp || 5;
+
+        // Multipliers
+        const yieldMult = 1 + (stats.globals?.xpYield || 0) / 100;
+        const specificMult = 1 + (stats.xpBonus?.GATHERING || 0) / 100;
+        const xpAmount = Math.floor(baseXp * yieldMult * specificMult);
+
         const leveledUp = this.gameManager.addXP(char, skillKey, xpAmount);
 
         return {
@@ -150,15 +163,22 @@ export class ActivityManager {
     }
 
     async processRefining(char, item) {
-        if (!this.gameManager.inventoryManager.hasItems(char, item.req)) return { error: "Insufficient ingredients" };
+        if (!this.gameManager.inventoryManager.hasItems(char, item.req)) return { error: "Insufficient ingredients", success: false, message: "Insufficient ingredients" };
 
         const added = this.gameManager.inventoryManager.addItemToInventory(char, item.id, 1);
-        if (!added) return { error: "Inventory Full" };
+        if (!added) return { error: "Inventory Full", success: false, message: "Inventory Full" };
 
         this.gameManager.inventoryManager.consumeItems(char, item.req);
 
         const skillKey = this.getSkillKeyForRefining(item.id);
-        const xpAmount = item.xp || 10;
+        const stats = this.gameManager.inventoryManager.calculateStats(char);
+        const baseXp = item.xp || 10;
+
+        // Multipliers
+        const yieldMult = 1 + (stats.globals?.xpYield || 0) / 100;
+        const specificMult = 1 + (stats.xpBonus?.REFINING || 0) / 100;
+        const xpAmount = Math.floor(baseXp * yieldMult * specificMult);
+
         const leveledUp = this.gameManager.addXP(char, skillKey, xpAmount);
 
         return {
@@ -173,7 +193,7 @@ export class ActivityManager {
     }
 
     async processCrafting(char, item) {
-        if (!this.gameManager.inventoryManager.hasItems(char, item.req)) return { error: "Insufficient materials" };
+        if (!this.gameManager.inventoryManager.hasItems(char, item.req)) return { error: "Insufficient materials", success: false, message: "Insufficient materials" };
 
         let finalItemId = item.id;
         let qualityName = '';
@@ -237,7 +257,14 @@ export class ActivityManager {
         this.gameManager.inventoryManager.consumeItems(char, item.req);
 
         const skillKey = this.getSkillKeyForCrafting(item.id);
-        const xpAmount = item.xp || 50;
+        const stats = this.gameManager.inventoryManager.calculateStats(char);
+        const baseXp = item.xp || 50;
+
+        // Multipliers
+        const yieldMult = 1 + (stats.globals?.xpYield || 0) / 100;
+        const specificMult = 1 + (stats.xpBonus?.CRAFTING || 0) / 100;
+        const xpAmount = Math.floor(baseXp * yieldMult * specificMult);
+
         const leveledUp = this.gameManager.addXP(char, skillKey, xpAmount);
 
         return {
@@ -283,9 +310,11 @@ export class ActivityManager {
     }
 
     getSkillKeyForCrafting(itemId) {
-        if (itemId.includes('SWORD') || itemId.includes('PLATE') || itemId.includes('PICKAXE') || itemId.includes('SHIELD')) return 'WARRIOR_CRAFTER';
-        if (itemId.includes('BOW') || itemId.includes('LEATHER') || itemId.includes('AXE') || itemId.includes('TORCH') || itemId.includes('KNIFE')) return 'HUNTER_CRAFTER';
-        if (itemId.includes('STAFF') || itemId.includes('CLOTH') || itemId.includes('SICKLE') || itemId.includes('TOME') || itemId.includes('ROD') || itemId.includes('MAGE_CAPE')) return 'MAGE_CRAFTER';
+        if (itemId.includes('PICKAXE') || itemId.includes('AXE') || itemId.includes('KNIFE') || itemId.includes('SICKLE') || itemId.includes('ROD')) return 'TOOL_CRAFTER';
+
+        if (itemId.includes('SWORD') || itemId.includes('PLATE') || itemId.includes('SHIELD')) return 'WARRIOR_CRAFTER';
+        if (itemId.includes('BOW') || itemId.includes('LEATHER') || itemId.includes('TORCH')) return 'HUNTER_CRAFTER';
+        if (itemId.includes('STAFF') || itemId.includes('CLOTH') || itemId.includes('TOME') || itemId.includes('MAGE_CAPE')) return 'MAGE_CRAFTER';
         if (itemId.includes('FOOD')) return 'COOKING';
         if (itemId.includes('POTION')) return 'ALCHEMY';
         if (itemId.includes('CAPE')) return 'WARRIOR_CRAFTER'; // Fallback for Plate Cape or generic

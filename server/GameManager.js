@@ -525,13 +525,30 @@ export class GameManager {
 
             if (now >= targetTime) {
                 const item = ITEM_LOOKUP[item_id];
-                if (item && actions_remaining > 0) {
+                if (!item) {
+                    console.error(`[ProcessTick] Item not found in LOOKUP: ${item_id}`);
+                    char.current_activity = null;
+                    return { success: false, message: "Item not found" };
+                }
+
+                if (actions_remaining > 0) {
                     let result = null;
-                    const normalizedType = type.toUpperCase();
-                    switch (normalizedType) {
-                        case 'GATHERING': result = await this.activityManager.processGathering(char, item); break;
-                        case 'REFINING': result = await this.activityManager.processRefining(char, item); break;
-                        case 'CRAFTING': result = await this.activityManager.processCrafting(char, item); break;
+                    try {
+                        const normalizedType = type.toUpperCase();
+                        switch (normalizedType) {
+                            case 'GATHERING': result = await this.activityManager.processGathering(char, item); break;
+                            case 'REFINING': result = await this.activityManager.processRefining(char, item); break;
+                            case 'CRAFTING': result = await this.activityManager.processCrafting(char, item); break;
+                        }
+                        if (result && result.error) {
+                            console.log(`[ProcessTick] Activity Failed for ${char.name}: ${result.error}`);
+                        } else if (result) {
+                            console.log(`[ProcessTick] Activity Success for ${char.name}: ${item.name} (${result.skillKey})`);
+                        }
+                    } catch (err) {
+                        console.error(`[ProcessTick] Activity Error for ${char.name} (${type}, ${item_id}):`, err);
+                        char.current_activity = null;
+                        return { success: false, message: "Activity crashed: " + err.message };
                     }
 
                     char.current_activity.next_action_at = targetTime + (time_per_action * 1000);
@@ -612,6 +629,19 @@ export class GameManager {
                 stateChanged = true;
             }
 
+            // Respawn Delay Check
+            if (combat.respawn_at) {
+                if (now < combat.respawn_at) {
+                    // Waiting for respawn...
+                    return null; // Skip processing this tick
+                } else {
+                    // Respawn time reached!
+                    combat.mobHealth = combat.mobMaxHealth;
+                    delete combat.respawn_at;
+                    stateChanged = true;
+                }
+            }
+
             const stats = this.inventoryManager.calculateStats(char);
             const atkSpeed = Math.max(200, Number(stats.attackSpeed) || 1000);
             let roundsThisTick = 0;
@@ -636,6 +666,14 @@ export class GameManager {
                     // If character died or combat stopped, break the loop
                     if (!char.state.combat) break;
 
+                    // If Mob Died (Victory), apply delay and break loop
+                    if (roundResult && roundResult.details && roundResult.details.victory) {
+                        combat.next_attack_at += 1000; // Add 1s delay penalty
+                        combat.respawn_at = now + 1000; // Set visual/logic blocker
+                        stateChanged = true;
+                        break; // Stop multiple kills in one tick
+                    }
+
                 } catch (e) {
                     console.error(`[COMBAT_ERROR] Error in processCombatRound for ${char.name}:`, e);
                     break;
@@ -644,11 +682,19 @@ export class GameManager {
 
             // If we have multiple rounds, we attach them to the result
             if (combatRounds.length > 0) {
-                if (!combatResult) combatResult = combatRounds[0];
-                combatResult.allRounds = combatRounds;
+                // Fix Circular Reference: Create a new object instead of mutating one inside the array
+                const primary = combatResult || combatRounds[0];
+                combatResult = {
+                    ...primary,
+                    allRounds: combatRounds
+                };
+
                 // Sum up totals for the primary result object to keep UI counters happy
-                combatResult.details.totalPlayerDmgThisTick = combatRounds.reduce((acc, r) => acc + (r.details?.playerDmg || 0), 0);
-                combatResult.details.totalMobDmgThisTick = combatRounds.reduce((acc, r) => acc + (r.details?.mobDmg || 0), 0);
+                combatResult.details = {
+                    ...primary.details,
+                    totalPlayerDmgThisTick: combatRounds.reduce((acc, r) => acc + (r.details?.playerDmg || 0), 0),
+                    totalMobDmgThisTick: combatRounds.reduce((acc, r) => acc + (r.details?.mobDmg || 0), 0)
+                };
             }
 
             // Safety: If timer is still in the past after MAX_ROUNDS, jump it forward to now
@@ -696,7 +742,7 @@ export class GameManager {
         }
 
         if (char.current_activity || char.state.combat || itemsGained > 0 || combatResult || dungeonResult) {
-            return {
+            const returnObj = {
                 success: true,
                 message: lastActivityResult?.message || combatResult?.message || dungeonResult?.dungeonUpdate?.message || (foodUsed ? "Food consumed" : ""),
                 leveledUp,
@@ -705,7 +751,8 @@ export class GameManager {
                 dungeonUpdate: dungeonResult?.dungeonUpdate,
                 healingUpdate: foodUsed ? { amount: foodResult.amount, source: 'FOOD' } : null,
                 status: {
-                    user_id: char.id,
+                    character_id: char.id,
+                    user_id: char.user_id,
                     name: char.name,
                     state: char.state,
                     calculatedStats: this.inventoryManager.calculateStats(char),
@@ -715,6 +762,10 @@ export class GameManager {
                     serverTime: Date.now()
                 }
             };
+            if (char.state.combat) {
+                // console.log(`[DEBUG-TICK] Sending Status. Kills: ${char.state.combat.kills}`);
+            }
+            return returnObj;
         }
         return lastActivityResult || combatResult;
     }
@@ -901,36 +952,33 @@ export class GameManager {
     async claimMarketItem(u, c, cl) { return this.marketManager.claimMarketItem(u, c, cl); }
     async startDungeon(u, c, d, r) { return this.dungeonManager.startDungeon(u, c, d, r); }
     async stopDungeon(u, c) { return this.dungeonManager.stopDungeon(u, c); }
-    async consumeItem(userId, characterId, itemId) {
+    async consumeItem(userId, characterId, itemId, quantity = 1) {
         const char = await this.getCharacter(userId, characterId);
-        const itemData = ITEMS.CONSUMABLE?.FOOD?.[itemId]
-            || ITEMS.CONSUMABLE?.GATHER_XP?.[itemId] // We put potions in CONSUMABLE[TYPE][TIER] not flat ID
-            || ITEM_LOOKUP[itemId]; // Flattened lookup is safer
+        const itemData = this.inventoryManager.resolveItem(itemId);
+        const safeQty = Math.max(1, parseInt(quantity) || 1);
+
+        console.log(`[DEBUG-POTION] Consuming: ${safeQty}x ${itemId}. Found data:`, itemData?.id, itemData?.effect);
 
         if (!itemData) throw new Error("Item not found");
 
-        // Simple inventory check
-        const qty = char.state.inventory?.[itemId] || 0;
-        if (qty < 1) throw new Error("You don't have this item");
+        const invQty = char.state.inventory?.[itemId] || 0;
+        if (invQty < safeQty) throw new Error(`You don't have enough ${itemData.name}`);
 
-        this.inventoryManager.removeItemFromInventory(char, itemId, 1);
+        this.inventoryManager.consumeItems(char, { [itemId]: safeQty });
 
-        let message = `Used ${itemData.name}`;
+        let message = `Used ${safeQty}x ${itemData.name}`;
 
         if (itemData.type === 'FOOD') {
-            // Existing Heal Logic
-            const healAmount = itemData.heal || 50;
-            // We don't have HP persistence fully yet (it resets on combat start), 
-            // but maybe for dungeon/combat healing?
-            // For now, let's just say "Recovered HP"
+            const healAmount = (itemData.heal || 50) * safeQty;
             message += ` (Recovered ${healAmount} HP)`;
         } else if (itemData.type === 'POTION') {
-            const effect = itemData.effect; // e.g. 'GATHER_XP'
-            const value = itemData.value;   // e.g. 0.05
-            const duration = itemData.time || 600; // e.g. 600s
+            const effect = itemData.effect;
+            const value = itemData.value;
+            const baseDuration = itemData.duration || itemData.time || 600;
+            const totalDuration = baseDuration * safeQty;
 
-            this.applyBuff(char, effect, value, duration);
-            message += ` (Buff Applied: +${Math.round(value * 100)}% for ${Math.round(duration / 60)}m)`;
+            this.applyBuff(char, effect, value, totalDuration);
+            message += ` (Buff Applied: +${Math.round(value * 100)}% for ${Math.round(totalDuration / 60)}m)`;
         }
 
         await this.saveState(char.id, char.state);
@@ -938,17 +986,42 @@ export class GameManager {
     }
 
     applyBuff(char, type, value, durationSeconds) {
+        if (!type) {
+            console.error("[DEBUG-POTION] ERROR: applyBuff called with NO TYPE!");
+            return;
+        }
         if (!char.state.active_buffs) char.state.active_buffs = {};
 
         const now = Date.now();
-        const expiresAt = now + (durationSeconds * 1000);
+        const existing = char.state.active_buffs[type];
+        const durationMs = durationSeconds * 1000;
 
-        // Logic: Overwrite or Extend?
-        // Standard: Refresh duration, take highest value?
-        // Let's Simple: Overwrite.
-        char.state.active_buffs[type] = {
-            value: value,
-            expiresAt: expiresAt
-        };
+        // Logic: Stacking identical buffs or overwriting with better ones
+        if (existing && existing.expiresAt > now) {
+            // Case 1: Same value (allow small float error) -> ADD time
+            if (Math.abs(existing.value - value) < 0.0001) {
+                existing.expiresAt += durationMs;
+                console.log(`[DEBUG-POTION] Stacking ${type}: Added ${durationSeconds}s. New expiry: ${new Date(existing.expiresAt).toLocaleTimeString()}`);
+            }
+            // Case 2: New value is BETTER -> Overwrite (Reset time to new potion)
+            else if (value > existing.value) {
+                char.state.active_buffs[type] = {
+                    value: value,
+                    expiresAt: now + durationMs
+                };
+                console.log(`[DEBUG-POTION] Upgraded ${type} value from ${existing.value} to ${value}. Resetting time.`);
+            }
+            // Case 3: New value is WORSE -> Ignore (we have a better one active)
+            else {
+                console.log(`[DEBUG-POTION] Ignored weaker potion for ${type} (Active: ${existing.value}, New: ${value})`);
+            }
+        } else {
+            // Case 4: No existing or expired -> Apply fresh
+            char.state.active_buffs[type] = {
+                value: value,
+                expiresAt: now + durationMs
+            };
+            console.log(`[DEBUG-POTION] Applied fresh ${type} buff: ${value} for ${durationSeconds}s`);
+        }
     }
 }

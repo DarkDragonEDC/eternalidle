@@ -201,7 +201,6 @@ if (ITEMS.RAW.FIBER[10]) ITEMS.RAW.FIBER[10].icon = '/items/T10_FIBER.png';
 genRefined('PLANK', 'PLANK', 'WOOD');
 genRefined('BAR', 'BAR', 'ORE');
 genRefined('LEATHER', 'LEATHER', 'HIDE');
-genRefined('LEATHER', 'LEATHER', 'HIDE');
 genRefined('CLOTH', 'CLOTH', 'FIBER');
 genRefined('EXTRACT', 'EXTRACT', 'HERB');
 
@@ -223,7 +222,7 @@ const POTION_TYPES = {
     GATHER_XP: { name: 'Gathering Potion', suffix: '_POTION_GATHER', desc: 'Increases Gathering XP', scale: 0.03, base: 0.02 }, // T1: 5%, T10: 32% (Approx) -> Formula TBD
     REFINE_XP: { name: 'Refining Potion', suffix: '_POTION_REFINE', desc: 'Increases Refining XP', scale: 0.03, base: 0.02 },
     CRAFT_XP: { name: 'Crafting Potion', suffix: '_POTION_CRAFT', desc: 'Increases Crafting XP', scale: 0.03, base: 0.02 },
-    GOLD: { name: 'Gold Potion', suffix: '_POTION_GOLD', desc: 'Increases Silver gain', scale: 0.02, base: 0.00 }, // T1: 2%, T10: 20%
+    GOLD: { name: 'Silver Potion', suffix: '_POTION_GOLD', desc: 'Increases Silver gain', scale: 0.02, base: 0.00 }, // T1: 2%, T10: 20%
     QUALITY: { name: 'Quality Potion', suffix: '_POTION_QUALITY', desc: 'Increases Craft Quality Chance', scale: 0.005, base: 0.005 }, // T1: 1%, T10: 5.5%
     DROP: { name: 'Luck Potion', suffix: '_POTION_LUCK', desc: 'Increases Drop Rate', scale: 0.02, base: 0.00 },
     GLOBAL_XP: { name: 'Knowledge Potion', suffix: '_POTION_XP', desc: 'Increases Global XP', scale: 0.02, base: 0.00 }
@@ -235,8 +234,8 @@ const POTION_SCALING = {
     XP_SPECIFIC: [5, 7, 10, 12, 15, 18, 22, 26, 30, 35],
     // Global/Gold/Drop (2% -> 20%)
     GLOBAL: [2, 3, 4, 5, 6, 8, 10, 12, 15, 20],
-    // Quality (1% -> 6%)
-    QUALITY: [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 6]
+    // Quality (4% -> 40%)
+    QUALITY: [4, 8, 12, 16, 20, 24, 28, 32, 36, 40]
 };
 
 const genPotions = () => {
@@ -255,9 +254,9 @@ const genPotions = () => {
 
         for (const t of TIERS) {
             let val = 0;
-            if (key.includes('XP') && key !== 'GLOBAL_XP') val = POTION_SCALING.XP_SPECIFIC[t - 1];
-            else if (key === 'QUALITY') val = POTION_SCALING.QUALITY[t - 1];
-            else val = POTION_SCALING.GLOBAL[t - 1];
+            if (key.includes('XP') && key !== 'GLOBAL_XP') val = POTION_SCALING.XP_SPECIFIC[t - 1] / 100;
+            else if (key === 'QUALITY') val = POTION_SCALING.QUALITY[t - 1] / 100;
+            else val = POTION_SCALING.GLOBAL[t - 1] / 100;
 
             const id = `T${t}${data.suffix}`;
 
@@ -268,13 +267,13 @@ const genPotions = () => {
                 type: 'POTION',
                 effect: key,
                 value: val,
-                desc: `${data.desc} by ${val}%`,
-                time: 600, // 10 Minutes Duration default? User didn't specify duration. Let's assume 10m?
+                desc: `${data.desc} by ${Math.round(val * 100)}%`,
+                duration: 3600, // 1 Hour Duration
                 req: {
                     [`T${t}_EXTRACT`]: 2
                 },
                 xp: CRAFT_DATA.xp[t - 1], // Craft XP
-                time: CRAFT_DATA.time[t - 1] // Craft Time
+                time: CRAFT_DATA.time[t - 1] // Original Craft Time
             };
 
             // Register in Consumable (for lookup) and Station (for crafting)
@@ -284,6 +283,7 @@ const genPotions = () => {
             ITEMS.GEAR.ALCHEMY_LAB[key][t] = potionItem;
         }
     }
+    console.log(`[DEBUG-ITEMS] Generated ${Object.keys(POTION_TYPES).length} potion types across ${TIERS.length} tiers.`);
 };
 genPotions();
 

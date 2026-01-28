@@ -23,6 +23,7 @@ const connectedSockets = new Map();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 import { authMiddleware } from './authMiddleware.js';
 
@@ -316,10 +317,10 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('use_item', async ({ itemId }) => {
+    socket.on('use_item', async ({ itemId, quantity = 1 }) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
-                const result = await gameManager.consumeItem(socket.user.id, socket.data.characterId, itemId);
+                const result = await gameManager.consumeItem(socket.user.id, socket.data.characterId, itemId, quantity);
                 socket.emit('item_used', result);
                 socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
             });
@@ -489,7 +490,7 @@ io.on('connection', (socket) => {
             const { data, error } = await supabase
                 .from('messages')
                 .insert({
-                    user_id: char.id, // Changed from socket.user.id to char.id
+                    user_id: socket.user.id,
                     sender_name: char.name,
                     content: content
                 })
@@ -577,17 +578,21 @@ setInterval(async () => {
                             const shouldEmit = result.message || result.combatUpdate || (result.dungeonUpdate && result.dungeonUpdate.message) || result.healingUpdate;
 
                             if (shouldEmit) {
-                                s.emit('action_result', {
-                                    success: result.success,
-                                    message: result.message || (result.combatUpdate?.details?.message) || (result.dungeonUpdate?.message),
-                                    leveledUp: result.leveledUp,
-                                    combatUpdate: result.combatUpdate,
-                                    dungeonUpdate: result.dungeonUpdate,
-                                    healingUpdate: result.healingUpdate
-                                });
+                                try {
+                                    s.emit('action_result', {
+                                        success: result.success,
+                                        message: result.message || (result.combatUpdate?.details?.message) || (result.dungeonUpdate?.message),
+                                        leveledUp: result.leveledUp,
+                                        combatUpdate: result.combatUpdate,
+                                        dungeonUpdate: result.dungeonUpdate,
+                                        healingUpdate: result.healingUpdate
+                                    });
+                                } catch (e) { console.error("[EMIT-ERROR] action_result failed:", e); }
                             }
                             if (result.status) {
-                                s.emit('status_update', result.status);
+                                try {
+                                    s.emit('status_update', result.status);
+                                } catch (e) { console.error("[EMIT-ERROR] status_update failed:", e); }
                             }
                             if (result.leveledUp) {
                                 const { skill, level } = result.leveledUp;

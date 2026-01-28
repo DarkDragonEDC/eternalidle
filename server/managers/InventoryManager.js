@@ -37,6 +37,17 @@ export class InventoryManager {
         return true;
     }
 
+    canAddItem(char, itemId) {
+        if (!char.state.inventory) return true;
+        const inv = char.state.inventory;
+        if (!inv[itemId]) {
+            if (Object.keys(inv).length >= 50) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     hasItems(char, req) {
         if (!req) return true;
         const inv = char.state.inventory;
@@ -162,16 +173,22 @@ export class InventoryManager {
         str += getLvl('WARRIOR_CRAFTER');
         str += getLvl('COOKING');
         str += getLvl('FISHING');
+        str = Math.min(100, str * 0.2);
 
         agi += getLvl('ANIMAL_SKINNER');
         agi += getLvl('LEATHER_REFINER');
         agi += getLvl('HUNTER_CRAFTER');
         agi += getLvl('LUMBERJACK');
         agi += getLvl('PLANK_REFINER');
+        agi = Math.min(100, agi * 0.2);
 
         int += getLvl('FIBER_HARVESTER');
         int += getLvl('CLOTH_REFINER');
         int += getLvl('MAGE_CRAFTER');
+        int += getLvl('HERBALISM');
+        int += getLvl('DISTILLATION');
+        int += getLvl('ALCHEMY');
+        int = Math.min(100, int * (1 / 6));
 
         let gearHP = 0;
         let gearDamage = 0;
@@ -206,9 +223,9 @@ export class InventoryManager {
         const baseAttackSpeed = weapon?.stats?.attackSpeed || 1000;
 
         const efficiency = {
-            WOOD: 0, ORE: 0, HIDE: 0, FIBER: 0, FISH: 0,
-            PLANK: 0, METAL: 0, LEATHER: 0, CLOTH: 0,
-            WARRIOR: 0, HUNTER: 0, MAGE: 0, COOKING: 0,
+            WOOD: 0, ORE: 0, HIDE: 0, FIBER: 0, FISH: 0, HERB: 0,
+            PLANK: 0, METAL: 0, LEATHER: 0, CLOTH: 0, EXTRACT: 0,
+            WARRIOR: 0, HUNTER: 0, MAGE: 0, COOKING: 0, ALCHEMY: 0, TOOLS: 0,
             GLOBAL: 0
         };
 
@@ -226,7 +243,6 @@ export class InventoryManager {
         efficiency.FISH += resolveToolEff(equipment.tool_rod);
 
         // 2. Global/Other Item Bonuses (e.g., Capes)
-        // 2. Global/Other Item Bonuses (e.g., Capes)
         Object.values(equipment).forEach(item => {
             if (item) {
                 const freshItem = this.resolveItem(item.id);
@@ -234,7 +250,9 @@ export class InventoryManager {
 
                 if (statsToUse?.efficiency && typeof statsToUse.efficiency === 'object') {
                     Object.entries(statsToUse.efficiency).forEach(([key, val]) => {
-                        if (efficiency[key] !== undefined) efficiency[key] += val;
+                        if (efficiency[key] !== undefined) {
+                            efficiency[key] += val;
+                        }
                     });
                 }
             }
@@ -246,16 +264,20 @@ export class InventoryManager {
         efficiency.HIDE += getLvl('ANIMAL_SKINNER') * 0.3;
         efficiency.FIBER += getLvl('FIBER_HARVESTER') * 0.3;
         efficiency.FISH += getLvl('FISHING') * 0.3;
+        efficiency.HERB += getLvl('HERBALISM') * 0.3;
 
         efficiency.PLANK += getLvl('PLANK_REFINER') * 0.3;
         efficiency.METAL += getLvl('METAL_BAR_REFINER') * 0.3;
         efficiency.LEATHER += getLvl('LEATHER_REFINER') * 0.3;
         efficiency.CLOTH += getLvl('CLOTH_REFINER') * 0.3;
+        efficiency.EXTRACT += getLvl('DISTILLATION') * 0.3;
 
         efficiency.WARRIOR += getLvl('WARRIOR_CRAFTER') * 0.3;
         efficiency.HUNTER += getLvl('HUNTER_CRAFTER') * 0.3;
         efficiency.MAGE += getLvl('MAGE_CRAFTER') * 0.3;
         efficiency.COOKING += getLvl('COOKING') * 0.3;
+        efficiency.ALCHEMY += getLvl('ALCHEMY') * 0.3;
+        efficiency.TOOLS += getLvl('TOOL_CRAFTER') * 0.3;
 
         // 4. Intelligence Bonus to Global Yields
         // Global XP: 1% per INT
@@ -268,8 +290,8 @@ export class InventoryManager {
         // Efficiency: 0% from INT (removed)
 
         const globals = {
-            xpYield: int * 1, // 1% per INT
-            silverYield: int * 1, // 1% per INT
+            xpYield: int * 0.5, // 0.5% per INT
+            silverYield: int * 0.5, // 0.5% per INT
             efficiency: 0,
             globalEfficiency: 0, // Legacy/Unused
             dropRate: 0,
@@ -286,8 +308,13 @@ export class InventoryManager {
         // 5. Active Buffs Process
         if (char.state.active_buffs) {
             const now = Date.now();
+            const activeCount = Object.keys(char.state.active_buffs).length;
+            if (activeCount > 0) console.log(`[DEBUG-BUFFS] Processing ${activeCount} buffs for ${char.name}`);
+
             Object.entries(char.state.active_buffs).forEach(([type, buff]) => {
+                const remaining = (buff.expiresAt - now) / 1000;
                 if (buff.expiresAt > now) {
+                    console.log(`[DEBUG-BUFFS] Active: ${type}, val: ${buff.value}, rem: ${remaining.toFixed(0)}s`);
                     const valPc = buff.value * 100; // 0.05 -> 5
 
                     switch (type) {
@@ -318,7 +345,6 @@ export class InventoryManager {
         }
 
         // Apply Global to all specific categories (if we had any global efficiency sources, they would go here)
-        // Currently efficiency.GLOBAL is 0 from INT.
         const keys = Object.keys(efficiency).filter(k => k !== 'GLOBAL');
         keys.forEach(k => {
             efficiency[k] += efficiency.GLOBAL;
@@ -332,12 +358,12 @@ export class InventoryManager {
         const weaponSpeed = freshWeapon?.stats?.speed || 1000; // Default punch speed 1000
         const totalSpeed = weaponSpeed + gearSpeedBonus;
 
-        const finalAttackSpeed = Math.max(200, 2000 - totalSpeed - (agi * 0.4));
+        const finalAttackSpeed = Math.max(200, 2000 - totalSpeed - (agi * 2));
 
         return {
             str, agi, int,
             maxHP: parseFloat((100 + (str * 10) + gearHP).toFixed(1)),
-            damage: parseFloat(((5 + (str * 1) + (agi * 1) + (int * 1) + gearDamage + ipBonus) * (1 + gearDmgBonus)).toFixed(1)),
+            damage: parseFloat(((5 + (str * 1) + (agi * 1) + (int * 1) + gearDamage) * (1 + gearDmgBonus)).toFixed(1)),
             defense: parseFloat(gearDefense.toFixed(1)),
             attackSpeed: finalAttackSpeed,
             dmgBonus: gearDmgBonus,

@@ -8,11 +8,17 @@ const SUPABASE_KEY = process.env.SUPABASE_KEY;
 export const authMiddleware = async (req, res, next) => {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader) {
-        return res.status(401).json({ error: 'No authorization header provided' });
+    let token = null;
+
+    if (authHeader) {
+        token = authHeader.split(' ')[1];
+    } else if (req.body && req.body.token) {
+        token = req.body.token;
     }
 
-    const token = authHeader.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ error: 'No authorization token provided' });
+    }
 
     // Create a temporary Supabase client with the user's token
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {

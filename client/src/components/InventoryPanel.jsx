@@ -12,6 +12,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
     const [sortDir, setSortDir] = useState('asc');
     const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [usePotionModal, setUsePotionModal] = useState(null);
 
     const handleItemClick = (item) => {
         setSelectedItemForModal(item);
@@ -335,7 +336,20 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                         item={selectedItemForModal}
                         onClose={() => setSelectedItemForModal(null)}
                         onEquip={onEquip}
-                        onUse={(id) => { setSelectedItemForModal(null); onUse(id); }}
+                        onUse={(id) => {
+                            setSelectedItemForModal(null);
+                            const item = resolveItem(id);
+                            if (item?.type === 'POTION') {
+                                setUsePotionModal({
+                                    itemId: id,
+                                    item: item,
+                                    max: inventoryItems.find(i => i.id === id)?.qty || 1,
+                                    quantity: 1
+                                });
+                            } else {
+                                onUse(id);
+                            }
+                        }}
                         onSell={(id) => { setSelectedItemForModal(null); handleQuickSell(id); }}
                         onList={(id, item) => { setSelectedItemForModal(null); onListOnMarket({ itemId: id, max: item.qty }); }}
                     />
@@ -398,11 +412,21 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                         max={sellModal.max}
                                         value={sellModal.quantity}
                                         onChange={(e) => {
-                                            let val = parseInt(e.target.value);
-                                            if (isNaN(val)) val = 1;
+                                            const rawVal = e.target.value;
+                                            if (rawVal === '') {
+                                                setSellModal({ ...sellModal, quantity: '' });
+                                                return;
+                                            }
+                                            let val = parseInt(rawVal);
+                                            if (isNaN(val)) return;
                                             if (val < 1) val = 1;
                                             if (val > sellModal.max) val = sellModal.max;
                                             setSellModal({ ...sellModal, quantity: val });
+                                        }}
+                                        onBlur={() => {
+                                            if (sellModal.quantity === '' || sellModal.quantity < 1) {
+                                                setSellModal({ ...sellModal, quantity: 1 });
+                                            }
                                         }}
                                         style={{
                                             flex: 1,
@@ -467,7 +491,8 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                 </button>
                                 <button
                                     onClick={() => {
-                                        socket.emit('sell_item', { itemId: sellModal.itemId, quantity: sellModal.quantity });
+                                        const qty = parseInt(sellModal.quantity) || 1;
+                                        socket.emit('sell_item', { itemId: sellModal.itemId, quantity: qty });
                                         setSellModal(null);
                                     }}
                                     style={{ flex: 1, padding: '12px', background: 'var(--accent)', border: 'none', color: '#000', borderRadius: '8px', fontWeight: 'bold' }}
@@ -479,7 +504,152 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                     </div>
                 )
             }
-        </div >
+            {/* Potion Use Modal */}
+            {
+                usePotionModal && (
+                    <div style={{
+                        position: 'fixed',
+                        top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(0,0,0,0.85)',
+                        zIndex: 3000,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backdropFilter: 'blur(10px)'
+                    }} onClick={() => setUsePotionModal(null)}>
+                        <div style={{
+                            background: '#1a1d26',
+                            border: '1px solid rgba(212, 175, 55, 0.4)',
+                            borderRadius: '20px',
+                            padding: '24px',
+                            width: '90%',
+                            maxWidth: '340px',
+                            boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+                            position: 'relative',
+                            overflow: 'hidden'
+                        }} onClick={e => e.stopPropagation()}>
+                            {/* Decorative Background */}
+                            <div style={{ position: 'absolute', top: '-10%', right: '-10%', width: '150px', height: '150px', background: 'radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%)', zIndex: 0 }} />
+
+                            <div style={{ textAlign: 'center', marginBottom: '25px', position: 'relative', zIndex: 1 }}>
+                                <div style={{
+                                    width: '64px',
+                                    height: '64px',
+                                    margin: '0 auto 15px',
+                                    background: 'rgba(212, 175, 55, 0.1)',
+                                    borderRadius: '16px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    border: '1px solid rgba(212, 175, 55, 0.2)'
+                                }}>
+                                    {usePotionModal.item.icon ? (
+                                        <img src={usePotionModal.item.icon} alt="" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+                                    ) : (
+                                        <Package size={32} color="#d4af37" />
+                                    )}
+                                </div>
+                                <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: '900', letterSpacing: '1px' }}>Drink {usePotionModal.item.name}</h3>
+                                <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginTop: '4px' }}>
+                                    Available: <span style={{ color: '#d4af37', fontWeight: 'bold' }}>{usePotionModal.max}</span>
+                                </div>
+                            </div>
+
+                            <div style={{ marginBottom: '25px', position: 'relative', zIndex: 1 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                                    <button
+                                        onClick={() => setUsePotionModal({ ...usePotionModal, quantity: 1 })}
+                                        style={{ padding: '8px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#ccc', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem', transition: '0.2s' }}
+                                    >MIN</button>
+
+                                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'rgba(0,0,0,0.3)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', padding: '4px' }}>
+                                        <button
+                                            onClick={() => setUsePotionModal({ ...usePotionModal, quantity: Math.max(1, usePotionModal.quantity - 1) })}
+                                            style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '1.2rem' }}
+                                        >-</button>
+                                        <input
+                                            type="number"
+                                            value={usePotionModal.quantity}
+                                            onChange={(e) => {
+                                                const rawVal = e.target.value;
+                                                if (rawVal === '') {
+                                                    setUsePotionModal({ ...usePotionModal, quantity: '' });
+                                                    return;
+                                                }
+                                                let val = parseInt(rawVal);
+                                                if (isNaN(val)) return;
+                                                if (val < 1) val = 1;
+                                                if (val > usePotionModal.max) val = usePotionModal.max;
+                                                setUsePotionModal({ ...usePotionModal, quantity: val });
+                                            }}
+                                            onBlur={() => {
+                                                if (usePotionModal.quantity === '' || usePotionModal.quantity < 1) {
+                                                    setUsePotionModal({ ...usePotionModal, quantity: 1 });
+                                                }
+                                            }}
+                                            style={{ flex: 1, background: 'transparent', border: 'none', color: '#fff', textAlign: 'center', fontSize: '1.1rem', fontWeight: '900', outline: 'none', width: '40px' }}
+                                        />
+                                        <button
+                                            onClick={() => setUsePotionModal({ ...usePotionModal, quantity: Math.min(usePotionModal.max, usePotionModal.quantity + 1) })}
+                                            style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '1.2rem' }}
+                                        >+</button>
+                                    </div>
+
+                                    <button
+                                        onClick={() => setUsePotionModal({ ...usePotionModal, quantity: usePotionModal.max })}
+                                        style={{ padding: '8px 12px', background: 'rgba(212, 175, 55, 0.1)', border: '1px solid rgba(212, 175, 55, 0.3)', color: '#d4af37', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem', transition: '0.2s' }}
+                                    >MAX</button>
+                                </div>
+
+                                <div style={{
+                                    background: 'rgba(255,255,255,0.03)',
+                                    borderRadius: '12px',
+                                    padding: '15px',
+                                    border: '1px solid rgba(255,255,255,0.05)'
+                                }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                        <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem' }}>Duration per potion:</span>
+                                        <span style={{ color: '#fff', fontSize: '0.75rem', fontWeight: 'bold' }}>{Math.round((usePotionModal.item.duration || 3600) / 60)} min</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem' }}>Total Added Time:</span>
+                                        <span style={{ color: '#4caf50', fontSize: '0.9rem', fontWeight: '900' }}>
+                                            {Math.floor(((usePotionModal.item.duration || 3600) * usePotionModal.quantity) / 3600)}h {Math.round((((usePotionModal.item.duration || 3600) * usePotionModal.quantity) % 3600) / 60)}m
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '12px', position: 'relative', zIndex: 1 }}>
+                                <button
+                                    onClick={() => setUsePotionModal(null)}
+                                    style={{ flex: 1, padding: '14px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#888', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', transition: '0.2s' }}
+                                >CANCEL</button>
+                                <button
+                                    onClick={() => {
+                                        const qty = parseInt(usePotionModal.quantity) || 1;
+                                        onUse(usePotionModal.itemId, qty);
+                                        setUsePotionModal(null);
+                                    }}
+                                    style={{
+                                        flex: 1,
+                                        padding: '14px',
+                                        background: 'linear-gradient(135deg, #d4af37 0%, #b8860b 100%)',
+                                        border: 'none',
+                                        color: '#000',
+                                        borderRadius: '12px',
+                                        fontWeight: '900',
+                                        cursor: 'pointer',
+                                        boxShadow: '0 4px 15px rgba(212, 175, 55, 0.3)',
+                                        transition: '0.2s'
+                                    }}
+                                >CONFIRM</button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+        </div>
     );
 };
 

@@ -683,7 +683,8 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                             fontWeight: 'bold',
                                                             fontSize: '0.8rem',
                                                             minWidth: '100px',
-                                                            border: '1px solid rgba(76, 175, 80, 0.3)',
+                                                            minWidth: '100px',
+                                                            // border: '1px solid rgba(76, 175, 80, 0.3)', // duplicate removed
                                                             display: 'flex',
                                                             alignItems: 'center',
                                                             justifyContent: 'center',

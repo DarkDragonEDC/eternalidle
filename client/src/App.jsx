@@ -18,7 +18,7 @@ import CombatPanel from './components/CombatPanel';
 import OfflineGainsModal from './components/OfflineGainsModal';
 import MarketListingModal from './components/MarketListingModal';
 import CombatHistoryModal from './components/CombatHistoryModal';
-import BuffsDisplay from './components/BuffsDisplay';
+import BuffsDrawer from './components/BuffsDrawer';
 import NotificationCenter from './components/NotificationCenter';
 import {
   Zap, Package, User, Trophy, Coins,
@@ -166,15 +166,22 @@ function App() {
     const handleUnload = () => {
       if (session?.access_token) {
         const url = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/update_last_active`;
-        // Use fetch with keepalive to ensure request completes after unload
-        fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`
-          },
-          keepalive: true
-        }).catch(err => console.error("Failed to update last active:", err));
+
+        // Use sendBeacon for reliable unload requests (no CORS preflight if simple content type)
+        if (navigator.sendBeacon) {
+          const blob = new Blob([new URLSearchParams({ token: session.access_token }).toString()], { type: 'application/x-www-form-urlencoded' });
+          navigator.sendBeacon(url, blob);
+        } else {
+          // Fallback
+          fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session.access_token}`
+            },
+            keepalive: true
+          }).catch(err => console.error("Failed to update last active:", err));
+        }
       }
     };
     window.addEventListener('beforeunload', handleUnload);
@@ -182,6 +189,7 @@ function App() {
   }, [session]);
 
   const [selectedCharacter, setSelectedCharacter] = useState(() => localStorage.getItem('selectedCharacterId'));
+  const [serverError, setServerError] = useState(null);
 
   // Auto-connect if session and character already exist
   useEffect(() => {
@@ -289,6 +297,11 @@ function App() {
       setIsConnecting(false);
     });
 
+    newSocket.on('error', (err) => {
+      console.error('[SERVER-ERROR]', err);
+      setServerError(err.message || 'An error occurred');
+    });
+
     // Attach other listeners if needed here or rely on the main socket instance updating
     setSocket(newSocket);
   };
@@ -324,9 +337,9 @@ function App() {
     }
   };
 
-  const handleUseItem = (itemId) => {
+  const handleUseItem = (itemId, quantity = 1) => {
     if (socket) {
-      socket.emit('use_item', { itemId });
+      socket.emit('use_item', { itemId, quantity });
     }
   };
 
@@ -352,6 +365,7 @@ function App() {
       if (itemId.includes('HIDE')) return 'ANIMAL_SKINNER';
       if (itemId.includes('FIBER')) return 'FIBER_HARVESTER';
       if (itemId.includes('FISH')) return 'FISHING';
+      if (itemId.includes('HERB')) return 'HERBALISM';
     }
     if (type === 'REFINING') {
       if (itemId.includes('PLANK')) return 'PLANK_REFINER';
@@ -876,6 +890,14 @@ function App() {
                               </div>
                             )}
 
+                            {/* Potion Description Badge */}
+                            {item.desc && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(212, 175, 55, 0.1)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: '#d4af37', border: '1px solid rgba(212, 175, 55, 0.2)' }}>
+                                <Zap size={12} />
+                                <span>{item.desc}</span>
+                              </div>
+                            )}
+
                             {/* Requirements Badges */}
                             {Object.entries(reqs).map(([reqId, reqQty]) => {
                               const userQty = (displayedGameState?.state?.inventory?.[reqId] || 0);
@@ -1095,12 +1117,13 @@ function App() {
           width: '100%'
         }}>
           {error && <div style={{ background: 'rgba(255, 68, 68, 0.05)', color: '#ff4444', padding: '12px 20px', marginBottom: 25, borderRadius: 8, border: '1px solid rgba(255, 68, 68, 0.1)', fontSize: '0.8rem' }}>{error}</div>}
-          <BuffsDisplay activeBuffs={displayedGameState?.state?.active_buffs} />
+
           {renderContent()}
         </main>
       </div>
 
       <ChatWidget socket={socket} user={session.user} characterName={displayedGameState?.name} isMobile={isMobile} />
+      <BuffsDrawer gameState={displayedGameState} isMobile={isMobile} />
       <ActivityWidget
         gameState={displayedGameState}
         onStop={() => socket.emit('stop_activity')}
@@ -1135,6 +1158,78 @@ function App() {
         onClose={() => setShowCombatHistory(false)}
         socket={socket}
       />
+
+      <AnimatePresence>
+        {serverError && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 10000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'rgba(0,0,0,0.8)',
+            backdropFilter: 'blur(5px)'
+          }}>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              style={{
+                background: 'rgba(25, 25, 30, 0.95)',
+                border: '1px solid #ff444466',
+                borderRadius: '16px',
+                padding: '30px',
+                width: '90%',
+                maxWidth: '400px',
+                textAlign: 'center',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+                position: 'relative'
+              }}
+            >
+              <div style={{
+                width: '60px',
+                height: '60px',
+                background: 'rgba(255, 68, 68, 0.1)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 20px',
+                border: '1px solid rgba(255, 68, 68, 0.2)'
+              }}>
+                <X color="#ff4444" size={32} />
+              </div>
+              <h2 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '900', marginBottom: '10px' }}>SYSTEM ERROR</h2>
+              <p style={{ color: '#aaa', fontSize: '0.9rem', lineHeight: '1.6', marginBottom: '25px' }}>
+                {serverError}
+              </p>
+              <button
+                onClick={() => setServerError(null)}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  background: '#ff4444',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  transition: '0.2s',
+                  boxShadow: '0 4px 12px rgba(255, 68, 68, 0.3)'
+                }}
+                onMouseOver={(e) => e.target.style.background = '#ff5555'}
+                onMouseOut={(e) => e.target.style.background = '#ff4444'}
+              >
+                CLOSE
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div >
   );
 }

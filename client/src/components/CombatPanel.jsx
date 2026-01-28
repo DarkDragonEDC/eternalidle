@@ -51,6 +51,14 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
         int += getLvl('FIBER_HARVESTER');
         int += getLvl('CLOTH_REFINER');
         int += getLvl('MAGE_CRAFTER');
+        int += getLvl('HERBALISM');
+        int += getLvl('DISTILLATION');
+        int += getLvl('ALCHEMY');
+
+        // Apply Multipliers & Cap
+        str = Math.min(100, str * 0.2);
+        agi = Math.min(100, agi * 0.2);
+        int = Math.min(100, int * (1 / 6));
 
         // Gear Bonuses (STR/AGI/INT)
         Object.values(equipment).forEach(item => {
@@ -68,6 +76,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
         const gearDamage = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.damage || 0), 0);
         const gearDefense = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.defense || 0), 0);
         const gearHP = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.hp || 0), 0);
+        const gearDmgBonus = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.dmgBonus || 0), 0);
 
         // Resolve Weapon Speed
         const weapon = equipment.mainHand;
@@ -81,15 +90,22 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
             return acc + (fresh?.stats?.speed || 0);
         }, 0);
 
-        const totalSpeed = weaponSpeed + gearSpeedBonus + (agi * 0.4);
+        const totalSpeed = weaponSpeed + gearSpeedBonus + (agi * 2);
         const finalAttackSpeed = Math.max(200, 2000 - totalSpeed);
+
+        const baseDmg = 5 + str + agi + int + gearDamage;
+        const finalDmg = baseDmg * (1 + gearDmgBonus);
 
         return {
             str, agi, int,
             hp: 100 + (str * 10) + gearHP,
-            damage: 5 + str + agi + int + gearDamage,
+            damage: Math.floor(finalDmg),
             defense: gearDefense,
-            attackSpeed: finalAttackSpeed
+            attackSpeed: finalAttackSpeed,
+            globals: {
+                xpYield: int * 1,
+                silverYield: int * 1
+            }
         };
     }, [gameState?.state]);
 
@@ -753,13 +769,30 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '6px' : '8px', paddingBottom: '40px' }}>
                     {(MONSTERS[activeTier] || []).filter(m => !m.id.startsWith('BOSS_') && !m.dungeonOnly).map(mob => {
                         const playerDmg = stats.damage;
-                        const roundsToKill = Math.ceil(mob.health / playerDmg);
+
+                        // 1. Calculate Mitigation
+                        const mobDef = mob.defense || 0;
+                        const mobMitigation = mobDef / (mobDef + 2000);
+                        const mitigatedDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
+
+                        // 2. Calculate Time per Cycle
+                        const roundsToKill = Math.ceil(mob.health / mitigatedDmg);
                         const interval = stats.attackSpeed / 1000;
-                        const ttk = roundsToKill * interval;
-                        const killsPerHour = Math.floor(3600 / ttk);
-                        const xpHour = killsPerHour * mob.xp;
+                        const killTime = roundsToKill * interval;
+                        const cycleTime = killTime + 1.0; // +1s Respawn Delay
+
+                        const killsPerHour = 3600 / cycleTime;
+
+                        // 3. Rewards Calculations
+                        const xpBonus = stats.globals?.xpYield || 0;
+                        const silverBonus = stats.globals?.silverYield || 0;
+
+                        const xpPerKill = Math.floor(mob.xp * (1 + xpBonus / 100));
+                        const xpHour = killsPerHour * xpPerKill;
+
                         const avgSilver = (mob.silver[0] + mob.silver[1]) / 2;
-                        const silverHour = killsPerHour * avgSilver;
+                        const silverPerKill = Math.floor(avgSilver * (1 + silverBonus / 100));
+                        const silverHour = killsPerHour * silverPerKill;
 
                         const isLocked = ((activeTier === 1 ? 1 : (activeTier - 1) * 10) > (gameState?.state?.skills?.COMBAT?.level || 1));
 
@@ -848,7 +881,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                         <div style={{ fontSize: '0.55rem', color: '#888' }}>SURVIVAL</div>
                                         {(() => {
                                             const defense = gameState?.calculatedStats?.defense || 0;
-                                            const mitigation = defense / (defense + 2000);
+                                            const mitigation = Math.min(0.60, defense / (defense + 2000));
                                             const mobDmg = Math.max(1, Math.floor(mob.damage * (1 - mitigation)));
 
                                             // Food Logic

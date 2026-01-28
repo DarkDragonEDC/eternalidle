@@ -96,7 +96,7 @@ export class CombatManager {
             mobDmg = mobData ? mobData.damage : 5;
         }
 
-        const playerMitigation = playerStats.defense / (playerStats.defense + 2000);
+        const playerMitigation = Math.min(0.60, playerStats.defense / (playerStats.defense + 2000));
 
         let mobDef = combat.mobDefense;
         if (typeof mobDef === 'undefined') {
@@ -107,6 +107,7 @@ export class CombatManager {
 
         // Apply Player Damage
         combat.mobHealth -= mitigatedPlayerDmg;
+        if (combat.mobHealth < 0) combat.mobHealth = 0;
         combat.totalPlayerDmg = (combat.totalPlayerDmg || 0) + mitigatedPlayerDmg;
 
         // Mob Attack Logic
@@ -193,7 +194,7 @@ export class CombatManager {
                 delete char.state.combat;
             } else {
                 combat.kills = (combat.kills || 0) + 1;
-                combat.mobHealth = combat.mobMaxHealth;
+                // combat.mobHealth = combat.mobMaxHealth; // REMOVED: Managed by GameManager with delay
             }
         }
 

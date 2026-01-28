@@ -83,6 +83,8 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
             return "Raw material gathered in the world. Used to refine materials.";
         }
 
+        if (itm.type === 'POTION') return itm.desc || "Consumable potion with special effects.";
+
         return "A useful item for your journey.";
     };
 
@@ -204,6 +206,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                 {baseStats.agi && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#4caf50' }}>AGI +{item.stats.agi}</div>}
                                 {baseStats.int && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#2196f3' }}>INT +{item.stats.int}</div>}
                                 {item.heal && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#4caf50' }}><Heart size={14} /> Heals {item.heal}</div>}
+                                {item.type === 'POTION' && item.desc && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#d4af37' }}><Zap size={14} /> Effect: {item.desc}</div>}
                                 {baseStats.efficiency && typeof baseStats.efficiency === 'number' && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#d4af37' }}><Star size={14} /> Efficiency +{item.stats.efficiency}%</div>}
                                 {baseStats.efficiency && typeof baseStats.efficiency === 'object' && baseStats.efficiency.GLOBAL && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#d4af37' }}><Star size={14} /> Global Eff +{item.stats.efficiency.GLOBAL}%</div>}
                             </div>
@@ -211,7 +214,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                     </div>
 
                     {/* Rarity Comparison Section */}
-                    {statKeys.length > 0 && (
+                    {statKeys.length > 0 && !['FOOD', 'POTION'].includes(item.type) && !item.id.includes('FOOD') && !item.id.includes('POTION') && (
                         <div>
                             <h4 style={{
                                 fontSize: '0.85rem',

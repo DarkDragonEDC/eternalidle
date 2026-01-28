@@ -50,10 +50,18 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
         agi += getLvl('LUMBERJACK');
         agi += getLvl('PLANK_REFINER');
 
-        // INT: Mage Class (Harvesting, Woodcutting, Weaving, Woodworking, Mage Crafting)
+        // INT: Mage Class (Harvesting, Woodcutting, Weaving, Woodworking, Mage Crafting, Herbalism, Distillation, Alchemy)
         int += getLvl('FIBER_HARVESTER');
         int += getLvl('CLOTH_REFINER');
         int += getLvl('MAGE_CRAFTER');
+        int += getLvl('HERBALISM');
+        int += getLvl('DISTILLATION');
+        int += getLvl('ALCHEMY');
+
+        // Apply Multipliers & Cap
+        str = Math.min(100, str * 0.2);
+        agi = Math.min(100, agi * 0.2);
+        int = Math.min(100, int * (1 / 6));
 
         // Gear Bonuses
         Object.values(equipment).forEach(item => {
@@ -76,6 +84,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
         const gearDamage = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.damage || 0), 0);
         const gearDefense = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.defense || 0), 0);
         const gearHP = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.hp || 0), 0);
+        const gearDmgBonus = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.dmgBonus || 0), 0);
 
         // Resolve Weapon Speed
         const weapon = equipment.mainHand;
@@ -89,7 +98,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
             return acc + (fresh?.stats?.speed || 0);
         }, 0);
 
-        const totalSpeed = weaponSpeed + gearSpeedBonus + (calculatedStats.agi * 0.4);
+        const totalSpeed = weaponSpeed + gearSpeedBonus + (calculatedStats.agi * 2);
         const finalAttackSpeed = Math.max(200, 2000 - totalSpeed);
 
         // Helper para ferramentas
@@ -111,7 +120,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
         return {
             hp: health,
             maxHp: 100 + (calculatedStats.str * 10) + gearHP,
-            damage: 5 + (calculatedStats.str * 1) + (calculatedStats.agi * 1) + (calculatedStats.int * 1) + gearDamage,
+            damage: Math.floor((5 + (calculatedStats.str * 1) + (calculatedStats.agi * 1) + (calculatedStats.int * 1) + gearDamage) * (1 + gearDmgBonus)),
             defense: gearDefense,
             attackSpeed: finalAttackSpeed,
             str: calculatedStats.str,
@@ -127,17 +136,17 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
                 PLANK: (skills.PLANK_REFINER?.level || 1) * 0.3 + globalEff,
                 METAL: (skills.METAL_BAR_REFINER?.level || 1) * 0.3 + globalEff,
                 LEATHER: (skills.LEATHER_REFINER?.level || 1) * 0.3 + globalEff,
-                LEATHER: (skills.LEATHER_REFINER?.level || 1) * 0.3 + globalEff,
                 CLOTH: (skills.CLOTH_REFINER?.level || 1) * 0.3 + globalEff,
                 EXTRACT: (skills.DISTILLATION?.level || 1) * 0.3 + globalEff,
                 WARRIOR: (skills.WARRIOR_CRAFTER?.level || 1) * 0.3 + globalEff,
                 HUNTER: (skills.HUNTER_CRAFTER?.level || 1) * 0.3 + globalEff,
                 MAGE: (skills.MAGE_CRAFTER?.level || 1) * 0.3 + globalEff,
-                POTION: (skills.ALCHEMY?.level || 1) * 0.3 + globalEff,
+                ALCHEMY: (skills.ALCHEMY?.level || 1) * 0.3 + globalEff,
+                TOOLS: (skills.TOOL_CRAFTER?.level || 1) * 0.3 + globalEff,
                 COOKING: (skills.COOKING?.level || 1) * 0.3 + globalEff,
                 GLOBAL: globalEff
             },
-            silverMultiplier: 1.0 + (calculatedStats.int * 0.02)
+            silverMultiplier: 1.0 + (calculatedStats.int * 0.005)
         };
     }, [gameState?.calculatedStats, calculatedStats, health, skills, equipment]);
 
@@ -274,30 +283,52 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
     // Helper para pegar nível de forma segura (duplicado do useMemo acima, mas ok para render)
     const getLvl = (key) => (skills[key]?.level || 1);
 
-    const agiBreakdown = `Sources:
-• Animal Skinner: ${getLvl('ANIMAL_SKINNER')}
-• Leather Refiner: ${getLvl('LEATHER_REFINER')}
-• Hunter Crafter: ${getLvl('HUNTER_CRAFTER')}
-• Lumberjack: ${getLvl('LUMBERJACK')}
-• Plank Refiner: ${getLvl('PLANK_REFINER')}
+    const fmtSkill = (label, key, mult) => {
+        const lvl = getLvl(key);
+        const pts = (lvl * mult).toFixed(1); // Keep 1 decimal for clarity
+        return `• ${label} = LVL ${lvl} = ${pts} pts`;
+    };
 
-Each point grants: +5 Attack Speed and +1 Base Damage`;
+    const agiBreakdown = `BENEFITS:
+• +1 Base Damage per Point = +${Math.floor(calculatedStats.agi)} DMG
+• -2ms Attack Speed Delay per Point = -${Math.floor(calculatedStats.agi * 2)}ms
 
-    const strBreakdown = `Sources:
-• Ore Miner: ${getLvl('ORE_MINER')}
-• Metal Bar Refiner: ${getLvl('METAL_BAR_REFINER')}
-• Warrior Crafter: ${getLvl('WARRIOR_CRAFTER')}
-• Cooking: ${getLvl('COOKING')}
-• Fishing: ${getLvl('FISHING')}
+Sources:
+${fmtSkill('Animal Skinner', 'ANIMAL_SKINNER', 0.2)}
+${fmtSkill('Leather Refiner', 'LEATHER_REFINER', 0.2)}
+${fmtSkill('Hunter Crafter', 'HUNTER_CRAFTER', 0.2)}
+${fmtSkill('Lumberjack', 'LUMBERJACK', 0.2)}
+${fmtSkill('Plank Refiner', 'PLANK_REFINER', 0.2)}
 
-Each point grants: +10 HP and +1 Base Damage`;
+Multiplier: 0.2 per Level (Max 100 Total)`;
 
-    const intBreakdown = `Sources:
-• Fiber Harvester: ${getLvl('FIBER_HARVESTER')}
-• Cloth Refiner: ${getLvl('CLOTH_REFINER')}
-• Mage Crafter: ${getLvl('MAGE_CRAFTER')}
+    const strBreakdown = `BENEFITS:
+• +10 Max Health (HP) per Point = +${Math.floor(calculatedStats.str * 10)} HP
+• +1 Base Damage per Point = +${Math.floor(calculatedStats.str)} DMG
 
-Each point grants: +1% Global XP, +1% Gold Gain and +1 Base Damage`;
+Sources:
+${fmtSkill('Ore Miner', 'ORE_MINER', 0.2)}
+${fmtSkill('Metal Bar Refiner', 'METAL_BAR_REFINER', 0.2)}
+${fmtSkill('Warrior Crafter', 'WARRIOR_CRAFTER', 0.2)}
+${fmtSkill('Cooking', 'COOKING', 0.2)}
+${fmtSkill('Fishing', 'FISHING', 0.2)}
+
+Multiplier: 0.2 per Level (Max 100 Total)`;
+
+    const intBreakdown = `BENEFITS:
+• +0.5% Global XP Gain per Point = +${(calculatedStats.int * 0.5).toFixed(1)}% XP
+• +0.5% Silver Yield per Point = +${(calculatedStats.int * 0.5).toFixed(1)}% Silver
+• +1 Base Damage per Point = +${Math.floor(calculatedStats.int)} DMG
+
+Sources:
+${fmtSkill('Fiber Harvester', 'FIBER_HARVESTER', 1 / 6)}
+${fmtSkill('Cloth Refiner', 'CLOTH_REFINER', 1 / 6)}
+${fmtSkill('Mage Crafter', 'MAGE_CRAFTER', 1 / 6)}
+${fmtSkill('Herbalism', 'HERBALISM', 1 / 6)}
+${fmtSkill('Distillation', 'DISTILLATION', 1 / 6)}
+${fmtSkill('Alchemy', 'ALCHEMY', 1 / 6)}
+
+Multiplier: ~0.16 per Level (Max 100 Total)`;
 
     if (!gameState) return <div style={{ padding: 20, textAlign: 'center', opacity: 0.5 }}>Loading data...</div>;
 
@@ -313,7 +344,12 @@ Each point grants: +1% Global XP, +1% Gold Gain and +1 Base Damage`;
                 background: 'rgba(15, 20, 30, 0.4)',
                 minHeight: 0 // Crucial for nested flex scrolling
             }}>
-                <div className="scroll-container" style={{ padding: isMobile ? '20px' : '30px', overflowY: 'auto' }}>
+                <div className="scroll-container" style={{
+                    padding: isMobile ? '20px' : '30px',
+                    paddingBottom: '130px',
+                    overflowY: 'auto',
+                    flex: 1
+                }}>
                     {/* Header com IP - HUB Style */}
                     <div style={{
                         display: 'flex',
@@ -401,100 +437,105 @@ Each point grants: +1% Global XP, +1% Gold Gain and +1 Base Damage`;
                         </div>
                     </div>
 
-                </div>
 
-                {/* Attributes - Clean HUB Style */}
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-around',
-                    background: 'rgba(255,255,255,0.02)',
-                    padding: '20px',
-                    borderRadius: '12px',
-                    marginBottom: '30px',
-                    border: '1px solid var(--border)'
-                }}>
-                    {[
-                        { label: 'STR', value: stats.str, color: '#ff4444', desc: strBreakdown },
-                        { label: 'AGI', value: stats.agi, color: '#4caf50', desc: agiBreakdown },
-                        { label: 'INT', value: stats.int, color: '#2196f3', desc: intBreakdown }
-                    ].map(stat => (
-                        <div key={stat.label} style={{ textAlign: 'center' }}>
-                            <div
-                                onClick={() => setInfoModal({ title: stat.label, desc: stat.desc })}
-                                style={{ fontSize: '0.55rem', color: '#555', fontWeight: '900', letterSpacing: '1px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
-                            >
-                                {stat.label}
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <Info size={10} color="#777" />
+
+                    {/* Attributes - Clean HUB Style */}
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-around',
+                        background: 'rgba(255,255,255,0.02)',
+                        padding: '20px',
+                        borderRadius: '12px',
+                        marginBottom: '30px',
+                        border: '1px solid var(--border)'
+                    }}>
+                        {[
+                            { label: 'STR', value: stats.str, color: '#ff4444', desc: strBreakdown },
+                            { label: 'AGI', value: stats.agi, color: '#4caf50', desc: agiBreakdown },
+                            { label: 'INT', value: stats.int, color: '#2196f3', desc: intBreakdown }
+                        ].map(stat => (
+                            <div key={stat.label} style={{ textAlign: 'center' }}>
+                                <div
+                                    onClick={() => setInfoModal({ title: stat.label, desc: stat.desc })}
+                                    style={{ fontSize: '0.55rem', color: '#555', fontWeight: '900', letterSpacing: '1px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
+                                >
+                                    {stat.label}
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <Info size={10} color="#777" />
+                                    </div>
                                 </div>
+                                <div style={{ fontSize: '1.6rem', fontWeight: '900', color: stat.color }}>{stat.value}</div>
                             </div>
-                            <div style={{ fontSize: '1.6rem', fontWeight: '900', color: stat.color }}>{stat.value}</div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
 
-                {/* Combat & Action Stats - New Section */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(4, 1fr)',
-                    gap: '10px',
-                    background: 'rgba(0,0,0,0.2)',
-                    padding: '12px',
-                    borderRadius: '12px',
-                    marginBottom: '30px',
-                    border: '1px solid var(--border)'
-                }}>
-                    <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'DAMAGE', value: Math.floor(stats.damage) })}>
-                        <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
-                            <Sword size={10} color="#ff4444" /> DMG
+                    {/* Combat & Action Stats - New Section */}
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(4, 1fr)',
+                        gap: '10px',
+                        background: 'rgba(0,0,0,0.2)',
+                        padding: '12px',
+                        borderRadius: '12px',
+                        marginBottom: '30px',
+                        border: '1px solid var(--border)'
+                    }}>
+                        <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'DAMAGE', value: Math.floor(stats.damage) })}>
+                            <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
+                                <Sword size={10} color="#ff4444" /> DMG
+                            </div>
+                            <div style={{ fontSize: '1rem', fontWeight: '900', color: '#fff' }}>{Math.floor(stats.damage)}</div>
                         </div>
-                        <div style={{ fontSize: '1rem', fontWeight: '900', color: '#fff' }}>{Math.floor(stats.damage)}</div>
+                        <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'DEFENSE', value: Math.floor(stats.defense) })}>
+                            <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
+                                <Shield size={10} color="#4caf50" /> DEF
+                            </div>
+                            <div style={{ fontSize: '1rem', fontWeight: '900', color: '#fff' }}>{Math.floor(stats.defense)}</div>
+                        </div>
+                        <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'SPEED', value: Math.floor(stats.attackSpeed) })}>
+                            <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
+                                <Zap size={10} color="#2196f3" /> SPEED
+                            </div>
+                            <div style={{ fontSize: '1rem', fontWeight: '900', color: '#fff' }}>
+                                {(1000 / stats.attackSpeed).toFixed(1)} h/s
+                            </div>
+                        </div>
+                        <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'EFFICIENCY', value: { total: `+${stats.efficiency.GLOBAL}%`, id: 'GLOBAL' } })}>
+                            <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
+                                <Star size={10} color="#d4af37" /> EFF
+                            </div>
+                            <div style={{ fontSize: '1rem', fontWeight: '900', color: '#d4af37' }}>+{stats.efficiency.GLOBAL}%</div>
+                        </div>
                     </div>
-                    <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'DEFENSE', value: Math.floor(stats.defense) })}>
-                        <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
-                            <Shield size={10} color="#4caf50" /> DEF
-                        </div>
-                        <div style={{ fontSize: '1rem', fontWeight: '900', color: '#fff' }}>{Math.floor(stats.defense)}</div>
-                    </div>
-                    <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'SPEED', value: Math.floor(stats.attackSpeed) })}>
-                        <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
-                            <Zap size={10} color="#2196f3" /> SPEED
-                        </div>
-                        <div style={{ fontSize: '1rem', fontWeight: '900', color: '#fff' }}>
-                            {(1000 / stats.attackSpeed).toFixed(1)} h/s
-                        </div>
-                    </div>
-                    <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'EFFICIENCY', value: { total: `+${stats.efficiency.GLOBAL}%`, id: 'GLOBAL' } })}>
-                        <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
-                            <Star size={10} color="#d4af37" /> EFF
-                        </div>
-                        <div style={{ fontSize: '1rem', fontWeight: '900', color: '#d4af37' }}>+{stats.efficiency.GLOBAL}%</div>
-                    </div>
-                </div>
 
-                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '30px' }}>
-                    <h4 style={{ color: '#fff', fontSize: '0.7rem', fontWeight: '900', textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '2px', opacity: 0.8, textAlign: 'center' }}>Skill Efficiency</h4>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '10px' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '10px' }}>
-                            <EfficiencyCard title="Gathering" items={[
-                                { id: 'WOOD', label: 'Woodcutting' },
-                                { id: 'ORE', label: 'Mining' },
-                                { id: 'HIDE', label: 'Skinning' },
-                                { id: 'FIBER', label: 'Fiber' },
-                                { id: 'FISH', label: 'Fishing' }
-                            ]} stats={stats} onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })} />
-                            <EfficiencyCard title="Refining" items={[
-                                { id: 'PLANK', label: 'Planks' },
-                                { id: 'METAL', label: 'Bars' },
-                                { id: 'LEATHER', label: 'Leathers' },
-                                { id: 'CLOTH', label: 'Cloth' }
-                            ]} stats={stats} onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })} />
-                            <EfficiencyCard title="Crafting" items={[
-                                { id: 'WARRIOR', label: 'Warrior Gear' },
-                                { id: 'HUNTER', label: 'Hunter Gear' },
-                                { id: 'MAGE', label: 'Mage Gear' },
-                                { id: 'COOKING', label: 'Cooking' }
-                            ]} stats={stats} onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })} />
+                    <div style={{ borderTop: '1px solid var(--border)', paddingTop: '30px' }}>
+                        <h4 style={{ color: '#fff', fontSize: '0.7rem', fontWeight: '900', textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '2px', opacity: 0.8, textAlign: 'center' }}>Skill Efficiency</h4>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '10px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '10px' }}>
+                                <EfficiencyCard title="Gathering" items={[
+                                    { id: 'WOOD', label: 'Woodcutting' },
+                                    { id: 'ORE', label: 'Mining' },
+                                    { id: 'HIDE', label: 'Skinning' },
+                                    { id: 'FIBER', label: 'Fiber' },
+                                    { id: 'FISH', label: 'Fishing' },
+                                    { id: 'HERB', label: 'Herbalism' }
+                                ]} stats={stats} onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })} />
+                                <EfficiencyCard title="Refining" items={[
+                                    { id: 'PLANK', label: 'Planks' },
+                                    { id: 'METAL', label: 'Bars' },
+                                    { id: 'LEATHER', label: 'Leathers' },
+                                    { id: 'CLOTH', label: 'Cloth' },
+                                    { id: 'EXTRACT', label: 'Distillation' }
+                                ]} stats={stats} onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })} />
+                                <EfficiencyCard title="Crafting" items={[
+                                    { id: 'WARRIOR', label: 'Warrior Gear' },
+                                    { id: 'HUNTER', label: 'Hunter Gear' },
+                                    { id: 'MAGE', label: 'Mage Gear' },
+                                    { id: 'COOKING', label: 'Cooking' },
+                                    { id: 'ALCHEMY', label: 'Alchemy' },
+                                    { id: 'TOOLS', label: 'Tools' }
+                                ]} stats={stats} onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })} />
+                            </div>
                         </div>
                     </div>
                 </div>

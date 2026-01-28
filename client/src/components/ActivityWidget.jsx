@@ -152,6 +152,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                     height: '64px',
                     borderRadius: '16px',
                     background: (combat || (dungeonState?.active)) ? 'rgba(50, 10, 10, 0.95)' : 'rgba(15, 20, 30, 0.95)',
+                    opacity: 0.5,
                     border: (combat || (dungeonState?.active)) ? '1px solid #ff4444' : '1px solid #d4af37',
                     color: '#fff',
                     cursor: 'pointer',

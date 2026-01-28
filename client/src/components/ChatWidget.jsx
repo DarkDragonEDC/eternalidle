@@ -71,6 +71,7 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
                     height: '56px',
                     borderRadius: '50%',
                     background: '#d4af37',
+                    opacity: 0.5,
                     border: 'none',
                     color: '#000',
                     cursor: 'pointer',
