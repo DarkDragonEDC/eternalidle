@@ -383,12 +383,44 @@ for (const t of TIERS) {
 
 // Generate Dungeon Chests
 for (const t of TIERS) {
-    ITEMS.SPECIAL.CHEST[t] = {
-        id: `T${t}_DUNGEON_CHEST`,
-        name: 'Dungeon Chest',
+    // Common
+    ITEMS.SPECIAL.CHEST[`${t}_COMMON`] = {
+        id: `T${t}_CHEST_COMMON`,
+        name: `T${t} Dungeon Chest (Common)`,
         tier: t,
-        type: 'CONSUMABLE', // Or 'CONTAINER' if supported, but CONSUMABLE allows 'use_item'
-        desc: 'Contains random loot from the dungeon.'
+        rarity: 'COMMON',
+        type: 'CONSUMABLE',
+        desc: 'Contains standard dungeon loot.'
+    };
+    // Rare
+    ITEMS.SPECIAL.CHEST[`${t}_RARE`] = {
+        id: `T${t}_CHEST_RARE`,
+        name: `T${t} Dungeon Chest (Rare)`,
+        tier: t,
+        rarity: 'RARE',
+        type: 'CONSUMABLE',
+        rarityColor: '#3b82f6', // Blue
+        desc: 'Contains dungeon loot and a chance for crests.'
+    };
+    // Gold
+    ITEMS.SPECIAL.CHEST[`${t}_GOLD`] = {
+        id: `T${t}_CHEST_GOLD`,
+        name: `T${t} Dungeon Chest (Gold)`,
+        tier: t,
+        rarity: 'EPIC',
+        type: 'CONSUMABLE',
+        rarityColor: '#ffd700', // Gold
+        desc: 'Contains dungeon loot and crests.'
+    };
+    // Mythic
+    ITEMS.SPECIAL.CHEST[`${t}_MYTHIC`] = {
+        id: `T${t}_CHEST_MYTHIC`,
+        name: `T${t} Dungeon Chest (Mythic)`,
+        tier: t,
+        rarity: 'LEGENDARY',
+        type: 'CONSUMABLE',
+        rarityColor: '#ff0000', // Red
+        desc: 'Contains distinct dungeon loot and crests.'
     };
 }
 

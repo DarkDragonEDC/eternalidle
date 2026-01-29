@@ -1,0 +1,10 @@
+Chest ID,Rarity,Refined Materials (Plank;Bar;Cloth;Leather),Crest Qty,Silver Multiplier
+T1_CHEST_COMMON,Common,5-6 each,0,1x
+T1_CHEST_RARE,Rare,8-9 each,1,1.5x
+T1_CHEST_GOLD,Epic,12-13 each,2,3x
+T1_CHEST_MYTHIC,Legendary,20-21 each,5,5x
+T2_CHEST_COMMON,Common,5+ each,0,1x
+T2_CHEST_RARE,Rare,8+ each,1,1.5x
+T2_CHEST_GOLD,Epic,12+ each,2,3x
+T2_CHEST_MYTHIC,Legendary,20+ each,5,5x
+(Pattern repeats for T3-T10),,,,

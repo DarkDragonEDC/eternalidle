@@ -318,6 +318,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('use_item', async ({ itemId, quantity = 1 }) => {
+        console.log(`[DEBUG-SOCKET] Received use_item for ${itemId}`);
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
                 const result = await gameManager.consumeItem(socket.user.id, socket.data.characterId, itemId, quantity);

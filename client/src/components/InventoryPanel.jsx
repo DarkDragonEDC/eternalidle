@@ -337,8 +337,11 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                         onClose={() => setSelectedItemForModal(null)}
                         onEquip={onEquip}
                         onUse={(id) => {
+                            console.log('[DEBUG-CLIENT] InventoryPanel onUse clicked:', id);
                             setSelectedItemForModal(null);
                             const item = resolveItem(id);
+                            console.log('[DEBUG-CLIENT] Resolved Item Type:', item?.type);
+
                             if (item?.type === 'POTION') {
                                 setUsePotionModal({
                                     itemId: id,
@@ -347,6 +350,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                     quantity: 1
                                 });
                             } else {
+                                console.log('[DEBUG-CLIENT] Calling app level onUse for:', id);
                                 onUse(id);
                             }
                         }}

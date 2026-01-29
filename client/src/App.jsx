@@ -18,6 +18,7 @@ import CombatPanel from './components/CombatPanel';
 import OfflineGainsModal from './components/OfflineGainsModal';
 import MarketListingModal from './components/MarketListingModal';
 import CombatHistoryModal from './components/CombatHistoryModal';
+import LootModal from './components/LootModal';
 import BuffsDrawer from './components/BuffsDrawer';
 import NotificationCenter from './components/NotificationCenter';
 import {
@@ -95,6 +96,8 @@ function App() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCombatHistory, setShowCombatHistory] = useState(false);
   const [showFullNumbers, setShowFullNumbers] = useState(false);
+
+  const [lootModalData, setLootModalData] = useState(null);
 
   useEffect(() => {
     if (gameState?.state?.notifications) {
@@ -318,9 +321,26 @@ function App() {
       setIsConnecting(false);
     });
 
+
+
     newSocket.on('error', (err) => {
       console.error('[SERVER-ERROR]', err);
       setServerError(err.message || 'An error occurred');
+    });
+
+    newSocket.on('item_used', (result) => {
+      console.log('[CLIENT] Item used:', result);
+
+      // If we have structure rewards, show the modal!
+      if (result.rewards) {
+        setLootModalData(result.rewards);
+      } else if (result.message) {
+        // Fallback for potions/food typical use
+        addNotification({
+          type: 'SYSTEM',
+          message: result.message
+        });
+      }
     });
 
     // Attach other listeners if needed here or rely on the main socket instance updating
@@ -359,6 +379,7 @@ function App() {
   };
 
   const handleUseItem = (itemId, quantity = 1) => {
+    console.log('[DEBUG-APP] handleUseItem called for:', itemId, 'Socket:', !!socket, 'Connected:', socket?.connected);
     if (socket) {
       socket.emit('use_item', { itemId, quantity });
     }
@@ -1183,6 +1204,12 @@ function App() {
         isOpen={showCombatHistory}
         onClose={() => setShowCombatHistory(false)}
         socket={socket}
+      />
+
+      <LootModal
+        isOpen={!!lootModalData}
+        onClose={() => setLootModalData(null)}
+        rewards={lootModalData}
       />
 
       <AnimatePresence>

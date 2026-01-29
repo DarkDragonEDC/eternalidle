@@ -230,8 +230,15 @@ export class DungeonManager {
         // Silver reward removed (now charged on entry)
         // char.state.silver = (char.state.silver || 0) + rewards.silver;
 
-        // Guaranteed Chest Drop
-        const chestId = `T${config.tier}_DUNGEON_CHEST`;
+        // Guaranteed Chest Drop with Rarity
+        const roll = Math.random();
+        let rarity = 'COMMON';
+        if (roll < 0.01) rarity = 'MYTHIC';      // 1%
+        else if (roll < 0.10) rarity = 'GOLD';   // 9%
+        else if (roll < 0.40) rarity = 'RARE';   // 30%
+        else rarity = 'COMMON';                  // 60%
+
+        const chestId = `T${config.tier}_CHEST_${rarity}`;
         this.gameManager.inventoryManager.addItemToInventory(char, chestId, 1);
         loot.push(`1x ${chestId}`);
 

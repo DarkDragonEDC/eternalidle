@@ -1055,7 +1055,7 @@ export class GameManager {
         const itemData = this.inventoryManager.resolveItem(itemId);
         const safeQty = Math.max(1, parseInt(quantity) || 1);
 
-        // console.log(`[DEBUG-POTION] Consuming: ${safeQty}x ${itemId}. Found data:`, itemData?.id, itemData?.effect);
+        console.log(`[DEBUG-CONSUME] Consuming ${safeQty}x ${itemId}. Resolved Type: ${itemData?.type}`);
 
         if (!itemData) throw new Error("Item not found");
 
@@ -1077,6 +1077,44 @@ export class GameManager {
 
             this.applyBuff(char, effect, value, totalDuration);
             message += ` (Buff Applied: +${Math.round(value * 100)}% for ${Math.round(totalDuration / 60)}m)`;
+        } else if (itemData.id.includes('CHEST')) {
+            // Chest Logic
+            const tier = itemData.tier || 1;
+            const silverMultiplier = itemData.rarity === 'COMMON' ? 1 : itemData.rarity === 'RARE' ? 1.5 : itemData.rarity === 'EPIC' ? 3 : 5;
+            const silverReward = Math.floor((Math.random() * 50 * tier + (25 * tier)) * silverMultiplier);
+            char.state.silver = (char.state.silver || 0) + silverReward;
+
+            const rewards = {
+                silver: silverReward,
+                items: []
+            };
+
+            message += `\nContents: ${silverReward} Silver`;
+
+            // Refined Resources (All 4 types)
+            const REFINED_TYPES = ['PLANK', 'BAR', 'CLOTH', 'LEATHER'];
+            const baseQty = itemData.rarity === 'COMMON' ? 5 : itemData.rarity === 'RARE' ? 8 : itemData.rarity === 'EPIC' ? 12 : 20;
+
+            REFINED_TYPES.forEach(type => {
+                const qty = Math.floor(baseQty + (Math.random() * tier));
+                if (qty > 0) {
+                    const rId = `T${tier}_${type}`;
+                    this.inventoryManager.addItemToInventory(char, rId, qty);
+                    rewards.items.push({ id: rId, qty });
+                    message += `, ${qty}x ${type}`;
+                }
+            });
+
+            // Crests (For Rare+)
+            if (itemData.rarity === 'RARE' || itemData.rarity === 'EPIC' || itemData.rarity === 'LEGENDARY') {
+                const crestId = `T${tier}_CREST`;
+                const crestQty = itemData.rarity === 'RARE' ? 1 : itemData.rarity === 'EPIC' ? 2 : 5;
+                this.inventoryManager.addItemToInventory(char, crestId, crestQty);
+                rewards.items.push({ id: crestId, qty: crestQty });
+                message += `, ${crestQty}x CREST`;
+            }
+
+            return { success: true, message, itemId, rewards };
         }
 
         await this.saveState(char.id, char.state);
