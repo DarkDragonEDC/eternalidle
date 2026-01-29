@@ -75,6 +75,7 @@ function App() {
   const clockOffset = useRef(0);
   const displayedGameState = useOptimisticState(gameState);
   const [error, setError] = useState('');
+  const [initialAuthView, setInitialAuthView] = useState('LOGIN');
   // characterSelected is no longer needed, we use selectedCharacter (charId) as the source of truth
 
   // Navigation State
@@ -88,6 +89,7 @@ function App() {
   const [modalType, setModalType] = useState(null);
   const [offlineReport, setOfflineReport] = useState(null);
   const [marketSellItem, setMarketSellItem] = useState(null);
+  const [marketFilter, setMarketFilter] = useState('');
   const [notifications, setNotifications] = useState([]);
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -207,14 +209,18 @@ function App() {
       setSession(session);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
+      if (event === 'PASSWORD_RECOVERY') {
+        setInitialAuthView('RESET');
+      }
       if (!session) {
         if (socket) socket.disconnect();
         setGameState(null);
         setSelectedCharacter(null);
         localStorage.removeItem('selectedCharacterId');
         setSocket(null);
+        setInitialAuthView('LOGIN');
       }
     });
 
@@ -530,7 +536,7 @@ function App() {
       case 'profile':
         return <ProfilePanel gameState={displayedGameState} session={session} socket={socket} onShowInfo={setInfoItem} isMobile={isMobile} />;
       case 'market':
-        return <MarketPanel socket={socket} gameState={displayedGameState} silver={displayedGameState?.state?.silver || 0} onShowInfo={setInfoItem} onListOnMarket={handleListOnMarket} isMobile={isMobile} />;
+        return <MarketPanel socket={socket} gameState={displayedGameState} silver={displayedGameState?.state?.silver || 0} onShowInfo={setInfoItem} onListOnMarket={handleListOnMarket} isMobile={isMobile} initialSearch={marketFilter} />;
       case 'gathering':
       case 'refining': {
         const isGathering = activeTab === 'gathering';
@@ -997,10 +1003,16 @@ function App() {
     }
   };
 
+  const handleSearchInMarket = (itemName) => {
+    setMarketFilter(itemName);
+    setActiveTab('market');
+    setModalItem(null);
+  };
 
 
-  if (!session) {
-    return <Auth onLogin={setSession} />;
+
+  if (!session || initialAuthView === 'RESET') {
+    return <Auth onLogin={setSession} initialView={initialAuthView} />;
   }
 
   if (!selectedCharacter) {
@@ -1044,7 +1056,20 @@ function App() {
       }
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', minHeight: 0 }}>
-        <header style={{ position: 'sticky', top: 0, background: 'rgba(10, 14, 20, 0.4)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255, 255, 255, 0.03)', padding: isMobile ? '12px 20px' : '15px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 100 }}>
+        <header style={{
+          position: 'sticky',
+          top: 0,
+          background: 'rgba(10, 14, 20, 0.4)',
+          backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
+          padding: isMobile ? '12px 15px' : '15px 40px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          zIndex: 100,
+          flexWrap: 'wrap',
+          gap: '10px'
+        }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
             {isMobile && <button onClick={() => setSidebarOpen(true)} style={{ color: '#fff', opacity: 0.6 }}><Menu size={24} /></button>}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -1102,7 +1127,7 @@ function App() {
           padding: isMobile ? '10px' : '20px 30px',
           position: 'relative',
           minHeight: 0,
-          maxWidth: isMobile ? '100%' : '1000px',
+          maxWidth: isMobile ? '100vw' : '1440px',
           margin: '0 auto',
           width: '100%'
         }}>
@@ -1123,7 +1148,18 @@ function App() {
         serverTimeOffset={clockOffset.current}
         skillProgress={gameState?.current_activity && displayedGameState?.state?.skills ? (displayedGameState.state.skills[getSkillForItem(gameState.current_activity.item_id, gameState.current_activity.type)]?.xp / calculateNextLevelXP(displayedGameState.state.skills[getSkillForItem(gameState.current_activity.item_id, gameState.current_activity.type)]?.level || 1)) * 100 : 0}
       />
-      {modalItem && <ActivityModal isOpen={!!modalItem} onClose={() => setModalItem(null)} item={modalItem} type={modalType} gameState={displayedGameState} onStart={startActivity} onNavigate={handleNavigate} />}
+      {modalItem && (
+        <ActivityModal
+          isOpen={!!modalItem}
+          onClose={() => setModalItem(null)}
+          item={modalItem}
+          type={modalType}
+          gameState={displayedGameState}
+          onStart={startActivity}
+          onNavigate={handleNavigate}
+          onSearchInMarket={handleSearchInMarket}
+        />
+      )}
 
       <ItemInfoModal item={infoItem} onClose={() => setInfoItem(null)} />
       {marketSellItem && (

@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 
-const Auth = ({ onLogin }) => {
+const Auth = ({ onLogin, initialView = 'LOGIN' }) => {
     const [isRegister, setIsRegister] = useState(false);
+    const [view, setView] = useState(initialView); // 'LOGIN', 'REGISTER', 'FORGOT', 'RESET'
     const [isLoading, setIsLoading] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
+    const [message, setMessage] = useState('');
     const [activePlayers, setActivePlayers] = useState(0);
 
     useEffect(() => {
@@ -33,17 +37,14 @@ const Auth = ({ onLogin }) => {
         e.preventDefault();
         if (isLoading) return;
         setError('');
+        setMessage('');
         setIsLoading(true);
 
-        const formatEmail = (val) => {
-            const trimmed = val.trim();
-            return trimmed.includes('@') ? trimmed : `${trimmed}@game.com`;
-        };
-        const email = formatEmail(username);
+        const email = username.trim().toLowerCase();
         const cleanPassword = password.trim();
 
         try {
-            if (isRegister) {
+            if (view === 'REGISTER') {
                 const { data, error: regError } = await supabase.auth.signUp({
                     email,
                     password: cleanPassword,
@@ -51,10 +52,10 @@ const Auth = ({ onLogin }) => {
                 if (regError) {
                     setError(regError.message);
                 } else {
-                    setIsRegister(false);
-                    setError('Registration successful! Now please log in.');
+                    setView('LOGIN');
+                    setMessage('Registration successful! Now please log in.');
                 }
-            } else {
+            } else if (view === 'LOGIN') {
                 const { data, error: logError } = await supabase.auth.signInWithPassword({
                     email,
                     password: cleanPassword,
@@ -63,6 +64,30 @@ const Auth = ({ onLogin }) => {
                     setError(logError.message);
                 } else {
                     onLogin(data.session);
+                }
+            } else if (view === 'FORGOT') {
+                const { error: forgotError } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}/`,
+                });
+                if (forgotError) {
+                    setError(forgotError.message);
+                } else {
+                    setMessage('Check your email for the reset link!');
+                }
+            } else if (view === 'RESET') {
+                if (newPassword !== confirmPassword) {
+                    setError("Passwords don't match!");
+                    setIsLoading(false);
+                    return;
+                }
+                const { error: resetError } = await supabase.auth.updateUser({
+                    password: newPassword,
+                });
+                if (resetError) {
+                    setError(resetError.message);
+                } else {
+                    setMessage('Password updated! You can now log in.');
+                    setView('LOGIN');
                 }
             }
         } catch (err) {
@@ -152,73 +177,119 @@ const Auth = ({ onLogin }) => {
                 </div>
 
                 <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-                    <div style={{ marginBottom: '1.25rem' }}>
-                        <label style={{
-                            display: 'block',
-                            fontSize: '0.75rem',
-                            color: '#aaa',
-                            fontWeight: '600',
-                            marginBottom: '0.5rem',
-                            letterSpacing: '1px'
-                        }}>
-                            NICKNAME / EMAIL
-                        </label>
-                        <input
-                            type="text"
-                            style={{
-                                width: '100%',
-                                padding: '12px',
-                                background: 'rgba(0,0,0,0.4)',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: '8px',
-                                color: '#fff',
-                                fontSize: '1rem',
-                                outline: 'none',
-                                transition: 'border-color 0.2s'
-                            }}
-                            onFocus={(e) => e.target.style.borderColor = '#d4af37'}
-                            onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
-                            disabled={isLoading}
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value.trim().toLowerCase())}
-                            required
-                            placeholder="Your Nickname"
-                        />
-                    </div>
+                    {view !== 'RESET' && (
+                        <div style={{ marginBottom: '1.25rem' }}>
+                            <label style={{
+                                display: 'block',
+                                fontSize: '0.75rem',
+                                color: '#aaa',
+                                fontWeight: '600',
+                                marginBottom: '0.5rem',
+                                letterSpacing: '1px'
+                            }}>
+                                EMAIL ADDRESS
+                            </label>
+                            <input
+                                type="text"
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    background: 'rgba(0,0,0,0.4)',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    borderRadius: '8px',
+                                    color: '#fff',
+                                    fontSize: '1rem',
+                                    outline: 'none',
+                                    transition: 'border-color 0.2s'
+                                }}
+                                onFocus={(e) => e.target.style.borderColor = '#d4af37'}
+                                onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                                disabled={isLoading}
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value.trim().toLowerCase())}
+                                required
+                                placeholder="email@example.com"
+                            />
+                        </div>
+                    )}
 
-                    <div style={{ marginBottom: '2rem' }}>
-                        <label style={{
-                            display: 'block',
-                            fontSize: '0.75rem',
-                            color: '#aaa',
-                            fontWeight: '600',
-                            marginBottom: '0.5rem',
-                            letterSpacing: '1px'
-                        }}>
-                            PASSWORD
-                        </label>
-                        <input
-                            type="password"
-                            style={{
-                                width: '100%',
-                                padding: '12px',
-                                background: 'rgba(0,0,0,0.4)',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: '8px',
-                                color: '#fff',
-                                fontSize: '1rem',
-                                outline: 'none',
-                                transition: 'border-color 0.2s'
-                            }}
-                            onFocus={(e) => e.target.style.borderColor = '#d4af37'}
-                            onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
-                            disabled={isLoading}
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            placeholder="••••••"
-                        />
-                    </div>
+                    {view !== 'FORGOT' && view !== 'RESET' && (
+                        <div style={{ marginBottom: view === 'LOGIN' ? '0.5rem' : '2rem' }}>
+                            <label style={{
+                                display: 'block',
+                                fontSize: '0.75rem',
+                                color: '#aaa',
+                                fontWeight: '600',
+                                marginBottom: '0.5rem',
+                                letterSpacing: '1px'
+                            }}>
+                                PASSWORD
+                            </label>
+                            <input
+                                type="password"
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    background: 'rgba(0,0,0,0.4)',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    borderRadius: '8px',
+                                    color: '#fff',
+                                    fontSize: '1rem',
+                                    outline: 'none',
+                                    transition: 'border-color 0.2s'
+                                }}
+                                onFocus={(e) => e.target.style.borderColor = '#d4af37'}
+                                onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                                disabled={isLoading}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                placeholder="••••••"
+                            />
+                        </div>
+                    )}
+
+                    {view === 'LOGIN' && (
+                        <div style={{ textAlign: 'right', marginBottom: '1.5rem' }}>
+                            <span
+                                onClick={() => { setView('FORGOT'); setError(''); setMessage(''); }}
+                                style={{ color: '#888', fontSize: '0.75rem', cursor: 'pointer', textDecoration: 'underline' }}
+                            >
+                                Forgot Password?
+                            </span>
+                        </div>
+                    )}
+
+                    {view === 'RESET' && (
+                        <>
+                            <div style={{ marginBottom: '1.25rem' }}>
+                                <label style={{ display: 'block', fontSize: '0.75rem', color: '#aaa', fontWeight: '600', marginBottom: '0.5rem', letterSpacing: '1px' }}>
+                                    NEW PASSWORD
+                                </label>
+                                <input
+                                    type="password"
+                                    style={{ width: '100%', padding: '12px', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff', fontSize: '1rem', outline: 'none' }}
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    required
+                                    placeholder="••••••"
+                                />
+                            </div>
+                            <div style={{ marginBottom: '2rem' }}>
+                                <label style={{ display: 'block', fontSize: '0.75rem', color: '#aaa', fontWeight: '600', marginBottom: '0.5rem', letterSpacing: '1px' }}>
+                                    CONFIRM NEW PASSWORD
+                                </label>
+                                <input
+                                    type="password"
+                                    style={{ width: '100%', padding: '12px', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff', fontSize: '1rem', outline: 'none' }}
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    required
+                                    placeholder="••••••"
+                                />
+                            </div>
+                        </>
+                    )}
 
                     {error && (
                         <div style={{
@@ -232,6 +303,21 @@ const Auth = ({ onLogin }) => {
                             textAlign: 'center'
                         }}>
                             {error}
+                        </div>
+                    )}
+
+                    {message && (
+                        <div style={{
+                            background: 'rgba(68, 255, 68, 0.1)',
+                            border: '1px solid rgba(68, 255, 68, 0.3)',
+                            color: '#44ff44',
+                            padding: '10px',
+                            borderRadius: '8px',
+                            fontSize: '0.85rem',
+                            marginBottom: '1.5rem',
+                            textAlign: 'center'
+                        }}>
+                            {message}
                         </div>
                     )}
 
@@ -259,15 +345,17 @@ const Auth = ({ onLogin }) => {
                         }}
                     >
                         {isLoading
-                            ? (isRegister ? 'CREATING ACCOUNT...' : 'STARTING JOURNEY...')
-                            : (isRegister ? 'CREATE ACCOUNT' : 'START JOURNEY')}
+                            ? (view === 'REGISTER' ? 'CREATING ACCOUNT...' : view === 'FORGOT' ? 'SENDING...' : view === 'RESET' ? 'UPDATING...' : 'STARTING JOURNEY...')
+                            : (view === 'REGISTER' ? 'CREATE ACCOUNT' : view === 'FORGOT' ? 'SEND RESET LINK' : view === 'RESET' ? 'UPDATE PASSWORD' : 'START JOURNEY')}
                     </button>
 
                     <div
                         onClick={() => {
                             if (isLoading) return;
-                            setIsRegister(!isRegister);
+                            if (view === 'LOGIN') setView('REGISTER');
+                            else setView('LOGIN');
                             setError('');
+                            setMessage('');
                         }}
                         style={{
                             color: '#888',
@@ -280,9 +368,11 @@ const Auth = ({ onLogin }) => {
                             gap: '5px'
                         }}
                     >
-                        <span>{isRegister ? 'Already an adventurer?' : 'New here?'}</span>
+                        <span>
+                            {view === 'REGISTER' ? 'Already an adventurer?' : view === 'FORGOT' ? 'Remembered?' : view === 'RESET' ? 'Back to' : 'New here?'}
+                        </span>
                         <span style={{ color: '#d4af37', fontWeight: 'bold' }}>
-                            {isRegister ? 'Login' : 'Create Account'}
+                            {view === 'REGISTER' ? 'Login' : view === 'FORGOT' ? 'Login' : view === 'RESET' ? 'Login' : 'Create Account'}
                         </span>
                     </div>
                 </form>

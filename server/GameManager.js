@@ -433,6 +433,15 @@ export class GameManager {
 
         if (chars && chars.length >= 2) throw new Error("Character limit reached (max 2)");
 
+        // Check if name exists (case-insensitive)
+        const { data: existingChar, error: nameError } = await this.supabase
+            .from('characters')
+            .select('id')
+            .ilike('name', name.trim())
+            .maybeSingle();
+
+        if (existingChar) throw new Error("Character name already taken.");
+
         const initialState = {
             inventory: {},
             skills: { ...INITIAL_SKILLS },
@@ -459,7 +468,12 @@ export class GameManager {
             .select()
             .single();
 
-        if (error) throw new Error(error.message || 'Error creating character');
+        if (error) {
+            if (error.code === '23505') {
+                throw new Error("Character name already taken.");
+            }
+            throw new Error(error.message || 'Error creating character');
+        }
         return data;
     }
 
@@ -499,6 +513,67 @@ export class GameManager {
         }
     }
 
+    async runMaintenance() {
+        const now = new Date().toISOString();
+        const IDLE_LIMIT_HOURS = 12;
+        const limitDate = new Date(Date.now() - (IDLE_LIMIT_HOURS * 60 * 60 * 1000)).toISOString();
+
+        console.log(`[MAINTENANCE] Starting background cleanup (Limit: ${IDLE_LIMIT_HOURS}h)...`);
+
+        try {
+            // Find all characters with any active activity
+            const { data: allActive, error } = await this.supabase
+                .from('characters')
+                .select('id, user_id, name, current_activity, state, activity_started_at')
+                .or('current_activity.not.is.null,state->combat.not.is.null,state->dungeon.not.is.null');
+
+            if (error) throw error;
+
+            if (!allActive || allActive.length === 0) {
+                console.log("[MAINTENANCE] No active characters found.");
+                return;
+            }
+
+            const limitMs = IDLE_LIMIT_HOURS * 60 * 60 * 1000;
+            const nowMs = Date.now();
+
+            const toCleanup = allActive.filter(char => {
+                let startTime = null;
+                if (char.state.dungeon && char.state.dungeon.started_at) {
+                    startTime = new Date(char.state.dungeon.started_at);
+                } else if (char.state.combat && char.state.combat.started_at) {
+                    startTime = new Date(char.state.combat.started_at);
+                } else if (char.current_activity && char.activity_started_at) {
+                    startTime = new Date(char.activity_started_at);
+                }
+
+                if (startTime && !isNaN(startTime.getTime())) {
+                    return (nowMs - startTime.getTime()) > limitMs;
+                }
+                return false;
+            });
+
+            if (toCleanup.length === 0) {
+                console.log("[MAINTENANCE] No characters found exceeding the 12h limit.");
+                return;
+            }
+
+            console.log(`[MAINTENANCE] Found ${toCleanup.length} characters to clean up.`);
+
+            for (const char of toCleanup) {
+                console.log(`[MAINTENANCE] Cleaning up ${char.name} (${char.id})...`);
+                // Calling getCharacter with catchup=true will process gains up to 12h and clear the activity
+                await this.executeLocked(char.user_id, async () => {
+                    await this.getCharacter(char.user_id, char.id, true);
+                });
+            }
+
+            console.log("[MAINTENANCE] Background cleanup finished.");
+        } catch (err) {
+            console.error("[MAINTENANCE] Error during background cleanup:", err);
+        }
+    }
+
     async processTick(userId, characterId) {
         const char = await this.getCharacter(userId, characterId);
         if (!char) return null;
@@ -509,6 +584,41 @@ export class GameManager {
         if (!char.current_activity && !char.state.combat && !foodUsed && !char.state.dungeon) return null;
 
         const now = Date.now();
+        const IDLE_LIMIT_MS = 12 * 60 * 60 * 1000; // 12 Hours
+
+        // Real-time 12h Limit Check
+        let limitExceeded = false;
+        if (char.current_activity && char.activity_started_at) {
+            if (now - new Date(char.activity_started_at).getTime() > IDLE_LIMIT_MS) limitExceeded = true;
+        } else if (char.state.combat && char.state.combat.started_at) {
+            if (now - new Date(char.state.combat.started_at).getTime() > IDLE_LIMIT_MS) limitExceeded = true;
+        } else if (char.state.dungeon && char.state.dungeon.started_at) {
+            if (now - new Date(char.state.dungeon.started_at).getTime() > IDLE_LIMIT_MS) limitExceeded = true;
+        }
+
+        if (limitExceeded) {
+            console.log(`[LIMIT] 12h limit reached for ${char.name}. Stopping action.`);
+            char.current_activity = null;
+            char.activity_started_at = null;
+            if (char.state.combat) delete char.state.combat;
+            if (char.state.dungeon) delete char.state.dungeon;
+
+            await this.supabase
+                .from('characters')
+                .update({
+                    state: char.state,
+                    current_activity: null,
+                    activity_started_at: null,
+                    last_saved: new Date().toISOString()
+                })
+                .eq('id', char.id);
+
+            return {
+                success: false,
+                message: "12-hour idle limit reached. Action stopped.",
+                status: await this.getStatus(char.user_id, false, char.id)
+            };
+        }
         let leveledUp = null;
         let itemsGained = 0;
         let lastActivityResult = null;

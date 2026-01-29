@@ -613,6 +613,16 @@ setInterval(async () => {
     }
 }, 1000);
 
+// --- Background Maintenance (10 mins) ---
+setInterval(() => {
+    gameManager.runMaintenance();
+}, 600000);
+
+// Run once on startup
+setTimeout(() => {
+    gameManager.runMaintenance();
+}, 5000);
+
 httpServer.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT} (0.0.0.0)`);
 });

@@ -250,8 +250,8 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
             <div className="scroll-container" style={{ flex: 1, paddingRight: '5px', overflowY: 'auto' }}>
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(80px, 1fr))' : 'repeat(5, 1fr)',
-                    gap: isMobile ? '8px' : '12px',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))',
+                    gap: isMobile ? '8px' : '15px',
                     paddingBottom: '80px'
                 }}>
                     {itemsToRender.map((item, index) => {

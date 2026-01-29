@@ -377,13 +377,14 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                 <div className="glass-panel" style={{
                     padding: '8px 15px',
                     display: 'flex',
-                    flexDirection: 'row',
+                    flexDirection: isMobile ? 'column' : 'row',
                     justifyContent: 'space-between',
-                    alignItems: 'center',
+                    alignItems: isMobile ? 'flex-start' : 'center',
                     background: 'rgba(255, 68, 68, 0.08)',
                     border: '1px solid rgba(255, 68, 68, 0.2)',
                     borderRadius: '8px',
-                    flexShrink: 0
+                    flexShrink: 0,
+                    gap: isMobile ? '10px' : '0'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{ background: '#ff4444', padding: '6px', borderRadius: '6px', display: 'flex' }}>
@@ -395,9 +396,9 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: isMobile ? '10px' : '20px', alignItems: 'center', width: isMobile ? '100%' : 'auto', justifyContent: isMobile ? 'space-between' : 'flex-end' }}>
                         {/* Survival Estimator */}
-                        <div style={{ textAlign: 'right' }}>
+                        <div style={{ textAlign: isMobile ? 'left' : 'right' }}>
                             <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', letterSpacing: '1px' }}>SURVIVAL</div>
                             {(() => {
                                 const activeMob = (MONSTERS[combat.tier] || []).find(m => m.id === combat.mobId);
@@ -425,7 +426,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                     // Time = (Time until next hit) + (Remaining hits * Interval)
                                     // roundsToDie is roughly (1 + remaining)
                                     // So we take (roundsToDie - 1) * Interval + (nextAttack - now)
-
+                                    // roundsToDie calculation for display:
                                     let secondsToDie = 0;
                                     const nextAttack = combat.next_attack_at ? new Date(combat.next_attack_at).getTime() : Date.now();
                                     const timeToNext = Math.max(0, nextAttack - currentTime);
@@ -649,7 +650,9 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                             overflowY: 'hidden',
                             background: '#0a0a0f',
                             border: '1px solid rgba(212, 175, 55, 0.2)',
-                            height: isMobile ? '200px' : '300px',
+                            flex: 1,
+                            minHeight: isMobile ? '150px' : '200px',
+                            maxHeight: isMobile ? '300px' : '500px',
                             position: 'relative'
                         }}>
                             <div style={{ padding: '6px 12px', background: 'rgba(212, 175, 55, 0.1)', borderBottom: '1px solid rgba(212, 175, 55, 0.2)', display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>

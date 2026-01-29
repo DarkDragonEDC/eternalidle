@@ -7,11 +7,11 @@ import {
 } from 'lucide-react';
 import { resolveItem, getTierColor, formatItemId } from '@shared/items';
 
-const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket, isMobile }) => {
+const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket, isMobile, initialSearch = '' }) => {
     const [activeTab, setActiveTab] = useState('BUY'); // BUY, SELL, LISTINGS, CLAIM
     const [selectedCategory, setSelectedCategory] = useState('ALL');
     const [selectedSubCategory, setSelectedSubCategory] = useState('ALL');
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState(initialSearch || '');
     const [categoryOpen, setCategoryOpen] = useState(false);
     const [selectedListing, setSelectedListing] = useState(null); // For buying
     const [buyModal, setBuyModal] = useState(null);
@@ -58,6 +58,13 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
             socket.off('error', handleError);
         };
     }, [socket]);
+
+    useEffect(() => {
+        if (initialSearch) {
+            setSearchQuery(initialSearch);
+            setSelectedCategory('ALL'); // Reset category to ensure item is found
+        }
+    }, [initialSearch]);
 
     const handleBuy = (listing) => {
         if (listing.amount === 1) {
@@ -129,7 +136,14 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
         if (isOwnListing(l)) return false; // Hide current character's listings
 
         const itemName = l.item_data?.name || formatItemId(l.item_id);
-        const matchesSearch = itemName.toLowerCase().includes(searchQuery.toLowerCase());
+        const itemTier = l.item_data?.tier;
+        const fullDisplay = itemTier ? `T${itemTier} ${itemName}` : itemName;
+        const itemIdSpaces = l.item_id.replace(/_/g, ' ');
+
+        const searchStr = `${fullDisplay} ${itemName} ${l.item_id} ${itemIdSpaces}`.toLowerCase();
+        const keywords = searchQuery.trim().toLowerCase().split(/\s+/);
+
+        const matchesSearch = keywords.every(word => searchStr.includes(word));
 
         let matchesCategory = true;
         if (selectedCategory !== 'ALL') {
@@ -165,15 +179,15 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
                 {/* HEADER */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: '15px', flexWrap: 'wrap', gap: '10px' }}>
-                    <div>
-                        <h2 style={{ color: 'var(--accent)', margin: 0, fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <Tag size={24} /> MARKETPLACE
+                    <div style={{ flex: '1 1 auto', minWidth: '200px' }}>
+                        <h2 style={{ color: 'var(--accent)', margin: 0, fontSize: isMobile ? '1.2rem' : '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <Tag size={isMobile ? 20 : 24} /> MARKETPLACE
                         </h2>
                         <p style={{ margin: '5px 0px 0px', fontSize: '0.8rem', color: 'var(--text-dim)' }}>Shared world trade system</p>
                     </div>
 
                     {/* TOP TABS */}
-                    <div style={{ display: 'flex', background: 'rgba(0, 0, 0, 0.3)', borderRadius: '12px', padding: '4px' }}>
+                    <div style={{ display: 'flex', background: 'rgba(0, 0, 0, 0.3)', borderRadius: '12px', padding: '4px', flexWrap: 'wrap', justifyContent: 'center' }}>
                         <button
                             onClick={() => setActiveTab('BUY')}
                             style={{
@@ -231,11 +245,11 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                 cursor: 'pointer',
                                 fontSize: '0.85rem',
                                 fontWeight: 'bold',
+                                position: 'relative',
                                 background: activeTab === 'CLAIM' ? 'rgba(212, 175, 55, 0.15)' : 'transparent',
                                 color: activeTab === 'CLAIM' ? 'var(--accent)' : 'var(--text-dim)',
                                 border: activeTab === 'CLAIM' ? '1px solid rgba(212, 175, 55, 0.2)' : '1px solid transparent',
-                                transition: '0.2s',
-                                position: 'relative'
+                                transition: '0.2s'
                             }}>
                             Claim
                             {gameState?.state?.claims?.length > 0 && (
@@ -259,62 +273,64 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                 </div>
 
                 {/* SEARCH AND FILTERS (Only visible in BUY tab) */}
-                {activeTab === 'BUY' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
-                        {/* Search Input */}
-                        <div style={{ position: 'relative', width: '100%' }}>
-                            <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-dim)' }} />
-                            <input
-                                placeholder="Search items..."
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                style={{
-                                    width: '100%',
-                                    background: 'rgba(0, 0, 0, 0.3)',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: '8px',
-                                    padding: '10px 10px 10px 40px',
-                                    color: '#fff',
-                                    fontSize: '0.9rem'
-                                }}
-                            />
-                        </div>
-
-                        {/* Filter Buttons */}
-                        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px', width: '100%' }}>
-                            {[
-                                { id: 'ALL', label: 'All Items', icon: <ShoppingBag size={14} /> },
-                                { id: 'EQUIPMENT', label: 'Equipment', icon: <Shield size={14} /> },
-                                { id: 'RESOURCE', label: 'Resources', icon: <Package size={14} /> },
-                                { id: 'REFINED', label: 'Refined', icon: <Zap size={14} /> },
-                                { id: 'CONSUMABLE', label: 'Consumables', icon: <Apple size={14} /> }
-                            ].map(cat => (
-                                <button
-                                    key={cat.id}
-                                    onClick={() => setSelectedCategory(cat.id)}
+                {
+                    activeTab === 'BUY' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
+                            {/* Search Input */}
+                            <div style={{ position: 'relative', width: '100%' }}>
+                                <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-dim)' }} />
+                                <input
+                                    placeholder="Search items..."
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
                                     style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '8px',
-                                        padding: '8px 12px',
+                                        width: '100%',
+                                        background: 'rgba(0, 0, 0, 0.3)',
+                                        border: '1px solid var(--border)',
                                         borderRadius: '8px',
-                                        border: '1px solid',
-                                        borderColor: selectedCategory === cat.id ? 'var(--accent)' : 'var(--border)',
-                                        whiteSpace: 'nowrap',
-                                        fontSize: '0.8rem',
-                                        fontWeight: '500',
-                                        cursor: 'pointer',
-                                        background: selectedCategory === cat.id ? 'rgba(212, 175, 55, 0.1)' : 'rgba(0, 0, 0, 0.2)',
-                                        color: selectedCategory === cat.id ? 'var(--accent)' : 'var(--text-dim)'
+                                        padding: '10px 10px 10px 40px',
+                                        color: '#fff',
+                                        fontSize: '0.9rem'
                                     }}
-                                >
-                                    {cat.icon} {cat.label}
-                                </button>
-                            ))}
+                                />
+                            </div>
+
+                            {/* Filter Buttons */}
+                            <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px', width: '100%' }}>
+                                {[
+                                    { id: 'ALL', label: 'All Items', icon: <ShoppingBag size={14} /> },
+                                    { id: 'EQUIPMENT', label: 'Equipment', icon: <Shield size={14} /> },
+                                    { id: 'RESOURCE', label: 'Resources', icon: <Package size={14} /> },
+                                    { id: 'REFINED', label: 'Refined', icon: <Zap size={14} /> },
+                                    { id: 'CONSUMABLE', label: 'Consumables', icon: <Apple size={14} /> }
+                                ].map(cat => (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => setSelectedCategory(cat.id)}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            padding: '8px 12px',
+                                            borderRadius: '8px',
+                                            border: '1px solid',
+                                            borderColor: selectedCategory === cat.id ? 'var(--accent)' : 'var(--border)',
+                                            whiteSpace: 'nowrap',
+                                            fontSize: '0.8rem',
+                                            fontWeight: '500',
+                                            cursor: 'pointer',
+                                            background: selectedCategory === cat.id ? 'rgba(212, 175, 55, 0.1)' : 'rgba(0, 0, 0, 0.2)',
+                                            color: selectedCategory === cat.id ? 'var(--accent)' : 'var(--text-dim)'
+                                        }}
+                                    >
+                                        {cat.icon} {cat.label}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )
+                }
 
                 {/* CONTENT AREA */}
                 <div className="scroll-container" style={{ flex: '1 1 0%', display: 'flex', flexDirection: 'column', gap: '8px', paddingRight: '5px' }}>
@@ -420,12 +436,12 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
                     {/* View: SELL */}
                     {activeTab === 'SELL' && (
-                        <>
+                        <div className="scroll-container" style={{ flex: 1, paddingRight: '5px' }}>
                             <div style={{
                                 display: 'grid',
-                                gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(80px, 1fr))' : 'repeat(5, 1fr)',
-                                gap: isMobile ? '8px' : '12px',
-                                paddingBottom: '100px'
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                                gap: '12px',
+                                paddingBottom: '20px'
                             }}>
                                 {Object.entries(gameState?.state?.inventory || {}).filter(([id, qty]) => {
                                     const data = resolveItem(id);
@@ -474,8 +490,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                     );
                                 })}
                             </div>
-
-                        </>
+                        </div>
                     )}
 
                     {/* View: MY LISTINGS */}

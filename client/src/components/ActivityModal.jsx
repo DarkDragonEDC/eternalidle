@@ -4,11 +4,17 @@ import { X, Clock, Zap, Target, Star, ChevronRight, Package, Box, Sword, Shield,
 import { motion, AnimatePresence } from 'framer-motion';
 import { resolveItem, formatItemId, QUALITIES, getSkillForItem, getLevelRequirement } from '@shared/items';
 
-const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavigate }) => {
+const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavigate, onSearchInMarket, isMobile }) => {
     const [quantity, setQuantity] = useState(1);
     const [showProbabilities, setShowProbabilities] = useState(false);
 
-    // Fallback se não houver item
+    useEffect(() => {
+        if (item?.id) {
+            setQuantity(maxQuantity);
+        }
+    }, [item?.id]);
+
+    // Fallback se não houver item (Moved after hooks)
     if (!item) return null;
 
     const charStats = gameState?.state?.stats || { str: 0, agi: 0, int: 0 };
@@ -24,7 +30,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
 
         const isLockedStatus = userLevel < requiredLevel;
 
-        console.log(`[DEBUG-LOCKED-MODAL] ID: ${item.id}, Type: ${type}, Tier: ${tier}, Skill: ${skillKey}, User: ${userLevel}, Req: ${requiredLevel}, LOCKED: ${isLockedStatus}`);
+        console.log(`[DEBUG - LOCKED - MODAL] ID: ${item.id}, Type: ${type}, Tier: ${tier}, Skill: ${skillKey}, User: ${userLevel}, Req: ${requiredLevel}, LOCKED: ${isLockedStatus} `);
 
         return {
             locked: isLockedStatus,
@@ -117,20 +123,17 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
     }
     const totalDuration = finalTime * qtyNum;
 
-    useEffect(() => {
-        setQuantity(maxQuantity);
-    }, [item?.id]);
 
 
     const formatDuration = (seconds) => {
         if (!seconds) return '0s';
-        if (seconds < 60) return `${seconds.toFixed(1).replace(/\.0$/, '')}s`;
+        if (seconds < 60) return `${seconds.toFixed(1).replace(/\.0$/, '')} s`;
         const m = Math.floor(seconds / 60);
         const s = (seconds % 60).toFixed(0);
-        if (m < 60) return `${m}m ${s > 0 ? s + 's' : ''}`;
+        if (m < 60) return `${m}m ${s > 0 ? s + 's' : ''} `;
         const h = Math.floor(m / 60);
         const remM = m % 60;
-        return `${h}h ${remM > 0 ? remM + 'm' : ''}`;
+        return `${h}h ${remM > 0 ? remM + 'm' : ''} `;
     };
 
     const handleMax = () => {
@@ -268,12 +271,20 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                                 background: 'rgba(255, 255, 255, 0.03)',
                                                 padding: '12px 15px',
                                                 borderRadius: '8px',
-                                                border: `1px solid ${hasEnough ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255, 68, 68, 0.3)'}`,
+                                                border: `1px solid ${hasEnough ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255, 68, 68, 0.3)'} `,
                                                 cursor: 'pointer'
                                             }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                                                     <div style={{ fontSize: '0.85rem', color: '#d4af37', fontWeight: '700' }}>{displayName}</div>
-                                                    <Package size={14} color="#d4af37" />
+                                                    <button
+                                                        title="Search in Market"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onSearchInMarket(displayName);
+                                                        }}
+                                                        style={{ background: 'rgba(212, 175, 55, 0.1)', border: '1px solid rgba(212, 175, 55, 0.3)', borderRadius: '4px', padding: '2px', cursor: 'pointer', color: '#d4af37', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        <Package size={14} />
+                                                    </button>
                                                 </div>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                     <span style={{ fontSize: '0.75rem', color: 'rgb(136, 136, 136)' }}>Required: {totalReq}</span>
@@ -562,10 +573,16 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                         const displayName = resolvedFn ? `T${resolvedFn.tier} ${resolvedFn.name}` : formatItemId(reqId);
 
                                         return (
-                                            <div onClick={() => onNavigate && onNavigate(reqId)} key={reqId} style={{ flex: '1 1 calc(50% - 3px)', minWidth: '120px', background: 'rgba(255, 255, 255, 0.03)', padding: '8px', borderRadius: '4px', border: `1px solid ${hasEnough ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255, 68, 68, 0.3)'}`, cursor: 'pointer', position: 'relative' }}>
+                                            <div onClick={() => onNavigate && onNavigate(reqId)} key={reqId} style={{ flex: '1 1 calc(50% - 3px)', minWidth: '120px', background: 'rgba(255, 255, 255, 0.03)', padding: '8px', borderRadius: '4px', border: `1px solid ${hasEnough ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255, 68, 68, 0.3)'} `, cursor: 'pointer', position: 'relative' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                                     <div style={{ fontSize: '0.7rem', color: '#d4af37', marginBottom: '2px', fontWeight: '600' }}>{displayName}</div>
-                                                    <button title="Search in Market" style={{ background: 'rgba(212, 175, 55, 0.1)', border: '1px solid rgba(212, 175, 55, 0.3)', borderRadius: '4px', padding: '2px', cursor: 'pointer', color: '#d4af37', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <button
+                                                        title="Search in Market"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onSearchInMarket(displayName);
+                                                        }}
+                                                        style={{ background: 'rgba(212, 175, 55, 0.1)', border: '1px solid rgba(212, 175, 55, 0.3)', borderRadius: '4px', padding: '2px', cursor: 'pointer', color: '#d4af37', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                         <Package size={10} />
                                                     </button>
                                                 </div>
@@ -650,7 +667,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                                             }
 
                                                             return (
-                                                                <div key={idx} style={{ fontSize: '0.7rem', padding: '8px 10px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '6px', display: 'flex', flexDirection: 'column', gap: '6px', borderLeft: `3px solid ${q.color}`, borderTop: '1px solid rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.03)', borderRight: '1px solid rgba(255,255,255,0.03)' }}>
+                                                                <div key={idx} style={{ fontSize: '0.7rem', padding: '8px 10px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '6px', display: 'flex', flexDirection: 'column', gap: '6px', borderLeft: `3px solid ${q.color} `, borderTop: '1px solid rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.03)', borderRight: '1px solid rgba(255,255,255,0.03)' }}>
                                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                                         <span style={{ fontWeight: '600', color: q.color, letterSpacing: '0.5px', textTransform: 'uppercase', fontSize: '0.6rem' }}>{q.name}</span>
                                                                         <span style={{ fontWeight: '700', color: '#fff', fontSize: '0.75rem' }}>{q.chance}</span>
@@ -723,7 +740,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                         boxShadow: hasAllMaterials ? '0 4px 15px rgba(212, 175, 55, 0.2)' : 'none'
                                     }}
                                 >
-                                    {hasAllMaterials ? `START ACTIVITY (${formatDuration(totalDuration)})` : 'INSUFFICIENT MATERIALS'}
+                                    {hasAllMaterials ? `START ACTIVITY(${formatDuration(totalDuration)})` : 'INSUFFICIENT MATERIALS'}
                                 </button>
                             )}
                         </motion.div>
@@ -947,14 +964,16 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                         exit={{ scale: 0.95, opacity: 0, y: 10 }}
                         className="glass-panel"
                         style={{
-                            width: '100%',
-                            maxWidth: '420px',
+                            width: '95%',
+                            maxWidth: '480px',
                             background: 'rgba(15, 20, 30, 0.6)',
-                            padding: '30px',
+                            padding: isMobile ? '20px' : '30px',
                             position: 'relative',
                             borderRadius: '24px',
                             border: '1px solid rgba(255,255,255,0.05)',
-                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 0 30px rgba(0,0,0,0.2)'
+                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 0 30px rgba(0,0,0,0.2)',
+                            maxHeight: '90vh',
+                            overflowY: 'auto'
                         }}
                     >
                         {/* Header Moderno */}
