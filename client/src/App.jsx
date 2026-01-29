@@ -317,6 +317,14 @@ function App() {
         setOfflineReport(status.offlineReport);
       }
 
+      if (status.noCharacter) {
+        console.warn("Character ID not found on server (Migration mismatch). Resetting selection.");
+        localStorage.removeItem('selectedCharacterId');
+        setSelectedCharacter(null);
+        setGameState(null);
+        return;
+      }
+
       setGameState(status);
       setIsConnecting(false);
     });
