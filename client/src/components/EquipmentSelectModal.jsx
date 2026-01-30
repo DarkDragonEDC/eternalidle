@@ -171,9 +171,14 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         border: `1px solid ${bestCandidate.quality > 0 ? bestCandidate.rarityColor : 'var(--accent)'}`,
-                                        boxShadow: bestCandidate.quality > 0 ? `0 0 10px ${bestCandidate.rarityColor}55` : 'none'
+                                        boxShadow: bestCandidate.quality > 0 ? `0 0 10px ${bestCandidate.rarityColor}55` : 'none',
+                                        overflow: 'hidden'
                                     }}>
-                                        <Star size={24} color={bestCandidate.quality > 0 ? bestCandidate.rarityColor : 'var(--accent)'} />
+                                        {bestCandidate.icon ? (
+                                            <img src={bestCandidate.icon} style={{ width: '80%', height: '80%', objectFit: 'contain' }} alt="" />
+                                        ) : (
+                                            <Star size={24} color={bestCandidate.quality > 0 ? bestCandidate.rarityColor : 'var(--accent)'} />
+                                        )}
                                     </div>
                                     <div>
                                         <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>
@@ -215,9 +220,14 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        border: '1px solid rgba(255,255,255,0.1)'
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        overflow: 'hidden'
                                     }}>
-                                        <Star size={24} color="#666" />
+                                        {resolvedCurrent?.icon ? (
+                                            <img src={resolvedCurrent.icon} style={{ width: '80%', height: '80%', objectFit: 'contain' }} alt="" />
+                                        ) : (
+                                            <Star size={24} color="#666" />
+                                        )}
                                     </div>
                                     <div>
                                         <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -303,9 +313,14 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                                     justifyContent: 'center',
                                                     color: '#aaa',
                                                     position: 'relative',
-                                                    border: item.quality > 0 ? `1px solid ${item.rarityColor}55` : 'none'
+                                                    border: item.quality > 0 ? `1px solid ${item.rarityColor}55` : 'none',
+                                                    overflow: 'hidden'
                                                 }}>
-                                                    <Star size={20} color="#aaa" />
+                                                    {item.icon ? (
+                                                        <img src={item.icon} style={{ width: '80%', height: '80%', objectFit: 'contain' }} alt="" />
+                                                    ) : (
+                                                        <Star size={20} color="#aaa" />
+                                                    )}
                                                     <div style={{
                                                         position: 'absolute',
                                                         bottom: -5,

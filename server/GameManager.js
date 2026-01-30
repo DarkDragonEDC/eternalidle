@@ -76,9 +76,9 @@ export class GameManager {
         return this.userLocks.has(userId);
     }
 
-    async getCharacter(userId, characterId = null, catchup = false) {
+    async getCharacter(userId, characterId = null, catchup = false, bypassCache = false) {
         // Try Cache first
-        if (characterId && this.cache.has(characterId)) {
+        if (characterId && this.cache.has(characterId) && !bypassCache) {
             // console.log(`[CACHE] Hit for ${characterId}`);
             return this.cache.get(characterId);
         }
@@ -188,17 +188,22 @@ export class GameManager {
 
                         if (actionsToProcess > 0) {
                             const activityReport = await this.processBatchActions(data, actionsToProcess);
-                            if (activityReport.totalTime > 30) {
-                                finalReport.totalTime += activityReport.totalTime;
-                                // Merge items
-                                for (const [id, qty] of Object.entries(activityReport.itemsGained)) {
-                                    finalReport.itemsGained[id] = (finalReport.itemsGained[id] || 0) + qty;
-                                }
-                                // Merge XP
-                                for (const [skill, qty] of Object.entries(activityReport.xpGained)) {
-                                    finalReport.xpGained[skill] = (finalReport.xpGained[skill] || 0) + qty;
-                                }
+                            if (activityReport.processed > 0) {
+                                // Always update state if anything happened
                                 updated = true;
+
+                                // Only populate the visual report if it's significant (> 10s or gains items)
+                                if (activityReport.totalTime > 10 || Object.keys(activityReport.itemsGained).length > 0) {
+                                    finalReport.totalTime += activityReport.totalTime;
+                                    // Merge items
+                                    for (const [id, qty] of Object.entries(activityReport.itemsGained)) {
+                                        finalReport.itemsGained[id] = (finalReport.itemsGained[id] || 0) + qty;
+                                    }
+                                    // Merge XP
+                                    for (const [skill, qty] of Object.entries(activityReport.xpGained)) {
+                                        finalReport.xpGained[skill] = (finalReport.xpGained[skill] || 0) + qty;
+                                    }
+                                }
                             }
                         }
                     }
@@ -215,22 +220,25 @@ export class GameManager {
 
                         if (maxRounds > 0) {
                             const combatReport = await this.processBatchCombat(data, maxRounds);
-                            if (combatReport.totalTime > 30) {
-                                finalReport.totalTime += combatReport.totalTime;
-                                finalReport.combat = {
-                                    ...combatReport,
-                                    monsterName: combatReport.monsterName
-                                };
-
-                                // Merge items
-                                for (const [id, qty] of Object.entries(combatReport.itemsGained)) {
-                                    finalReport.itemsGained[id] = (finalReport.itemsGained[id] || 0) + qty;
-                                }
-                                // Merge XP
-                                for (const [skill, qty] of Object.entries(combatReport.xpGained)) {
-                                    finalReport.xpGained[skill] = (finalReport.xpGained[skill] || 0) + qty;
-                                }
+                            if (combatReport.processedRounds > 0) {
                                 updated = true;
+
+                                if (combatReport.totalTime > 10 || Object.keys(combatReport.itemsGained).length > 0) {
+                                    finalReport.totalTime += combatReport.totalTime;
+                                    finalReport.combat = {
+                                        ...combatReport,
+                                        monsterName: combatReport.monsterName
+                                    };
+
+                                    // Merge items
+                                    for (const [id, qty] of Object.entries(combatReport.itemsGained)) {
+                                        finalReport.itemsGained[id] = (finalReport.itemsGained[id] || 0) + qty;
+                                    }
+                                    // Merge XP
+                                    for (const [skill, qty] of Object.entries(combatReport.xpGained)) {
+                                        finalReport.xpGained[skill] = (finalReport.xpGained[skill] || 0) + qty;
+                                    }
+                                }
                             }
                         }
                     }
@@ -258,18 +266,23 @@ export class GameManager {
                 }
 
                 if (updated) {
-                    data.offlineReport = finalReport;
-                    data.last_saved = now.toISOString();
+                    // Only show the modal if total catchup was significant
+                    const hasNotableGains = finalReport.totalTime > 30 || Object.keys(finalReport.itemsGained).length > 0;
+                    if (hasNotableGains) {
+                        data.offlineReport = finalReport;
 
-                    // Trigger a system notification for the offline gain
-                    this.addActionSummaryNotification(data, 'Offline Progress', {
-                        itemsGained: finalReport.itemsGained,
-                        xpGained: finalReport.xpGained,
-                        totalTime: finalReport.totalTime,
-                        elapsedTime: elapsedSeconds,
-                        kills: finalReport.combat?.kills || 0,
-                        silverGained: finalReport.combat?.silverGained || 0
-                    });
+                        // Trigger a system notification for the offline gain
+                        this.addActionSummaryNotification(data, 'Offline Progress', {
+                            itemsGained: finalReport.itemsGained,
+                            xpGained: finalReport.xpGained,
+                            totalTime: finalReport.totalTime,
+                            elapsedTime: elapsedSeconds,
+                            kills: finalReport.combat?.kills || 0,
+                            silverGained: finalReport.combat?.silverGained || 0
+                        });
+                    }
+
+                    data.last_saved = now.toISOString();
                 }
 
                 // Hard limit cleanup: Stop activities that exceeded the idle limit
@@ -289,6 +302,11 @@ export class GameManager {
         return data;
     }
 
+    removeFromCache(charId) {
+        this.cache.delete(charId);
+        this.dirty.delete(charId);
+    }
+
     markDirty(charId) {
         this.dirty.add(charId);
     }
@@ -305,7 +323,7 @@ export class GameManager {
                 state: char.state,
                 current_activity: char.current_activity,
                 activity_started_at: char.activity_started_at,
-                last_saved: new Date().toISOString()
+                last_saved: char.last_saved || new Date().toISOString()
             })
             .eq('id', charId);
 
@@ -552,7 +570,8 @@ export class GameManager {
                 id: crypto.randomUUID(),
                 user_id: userId,
                 name: name.trim(),
-                state: initialState
+                state: initialState,
+                last_saved: new Date().toISOString()
             })
             .select()
             .single();
@@ -570,8 +589,8 @@ export class GameManager {
         return data;
     }
 
-    async getStatus(userId, catchup = false, characterId = null) {
-        const char = await this.getCharacter(userId, characterId, catchup);
+    async getStatus(userId, catchup = false, characterId = null, bypassCache = false) {
+        const char = await this.getCharacter(userId, characterId, catchup, bypassCache);
         if (!char) return { noCharacter: true };
 
         const stats = this.inventoryManager.calculateStats(char);
@@ -670,6 +689,9 @@ export class GameManager {
     async processTick(userId, characterId) {
         const char = await this.getCharacter(userId, characterId);
         if (!char) return null;
+
+        // Keep last_saved in sync while online to avoid double-processing if server crashes
+        char.last_saved = new Date().toISOString();
 
         const foodResult = this.processFood(char);
         const foodUsed = foodResult.used;

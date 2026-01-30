@@ -53,6 +53,7 @@ export class CombatManager {
             sessionLoot: {},
             started_at: new Date().toISOString()
         };
+        char.last_saved = new Date().toISOString();
 
         await this.gameManager.saveState(char.id, char.state);
         return { success: true, message: `Combat started against ${mobData.name}` };

@@ -279,6 +279,8 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
         if (type === 'HELMET') return <User size={size} />;
         if (type === 'BOOTS') return <Target size={size} />;
         if (type === 'CAPE') return <Layers size={size} />;
+        if (type === 'TOOL_AXE') return <Axe size={size} />;
+        if (type === 'TOOL_PICKAXE') return <Pickaxe size={size} />;
         return <Star size={size} />;
     };
 

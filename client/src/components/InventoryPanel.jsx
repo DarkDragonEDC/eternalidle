@@ -259,6 +259,12 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                     paddingBottom: '80px'
                 }}>
                     {itemsToRender.map((item, index) => {
+                        // RE-APPLYING FORCED ICON FIX (Bypassing persistent browser cache for items.js)
+                        if (item && item.id && item.id.toUpperCase().includes('AXE')) {
+                            const tier = item.tier || 1;
+                            if (!item.icon) item.icon = `/items/T${tier}_AXE.png`;
+                            if (!item.scale) item.scale = '110%';
+                        }
                         if (!item) {
                             return (
                                 <div key={`empty-${index}`} style={{

@@ -56,6 +56,7 @@ export class DungeonManager {
             wave_started_at: Date.now(),
             lootLog: []
         };
+        char.last_saved = new Date().toISOString();
 
         await this.gameManager.saveState(char.id, char.state);
         return { success: true, message: `Entered ${dungeon.name}` };

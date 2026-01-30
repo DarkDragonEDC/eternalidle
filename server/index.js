@@ -148,10 +148,12 @@ io.on('connection', (socket) => {
         console.log(`[SOCKET] User disconnected: ${socket.id}. Reason: ${reason}`);
         connectedSockets.delete(socket.id);
 
-        // Persist character data on disconnect
+        // Persist character data on disconnect and clear from cache
         if (socket.data.characterId) {
             try {
                 await gameManager.persistCharacter(socket.data.characterId);
+                gameManager.removeFromCache(socket.data.characterId);
+                console.log(`[SOCKET] Char ${socket.data.characterId} persisted and cleared from cache on disconnect.`);
             } catch (err) {
                 console.error(`[SOCKET] Error persisting char ${socket.data.characterId} on disconnect:`, err);
             }
@@ -166,7 +168,7 @@ io.on('connection', (socket) => {
         // Immediately send status for this character
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
-                const status = await gameManager.getStatus(socket.user.id, true, characterId);
+                const status = await gameManager.getStatus(socket.user.id, true, characterId, true);
                 socket.emit('status_update', status);
             });
         } catch (err) {
@@ -179,7 +181,7 @@ io.on('connection', (socket) => {
         try {
             const charId = socket.data.characterId;
             await gameManager.executeLocked(socket.user.id, async () => {
-                const status = await gameManager.getStatus(socket.user.id, true, charId);
+                const status = await gameManager.getStatus(socket.user.id, true, charId, true);
                 socket.emit('status_update', status);
             });
         } catch (err) {

@@ -1,3 +1,4 @@
+export const ITEMS_VERSION = "20260130_2007";
 export const TIERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 export const RESOURCE_TYPES = {
@@ -41,6 +42,7 @@ const CRAFT_DATA = {
     xp: [40, 80, 160, 280, 440, 640, 880, 1160, 1480, 1840],
     time: [240, 320, 480, 640, 800, 960, 1120, 1280, 1440, 1520]
 };
+
 
 export const ITEMS = {
     RAW: {
@@ -331,16 +333,16 @@ if (ITEMS.REFINED.BAR[9]) { ITEMS.REFINED.BAR[9].icon = '/items/T9_BAR.png'; ITE
 if (ITEMS.REFINED.BAR[10]) { ITEMS.REFINED.BAR[10].icon = '/items/T10_BAR.png'; ITEMS.REFINED.BAR[10].scale = '200%'; }
 
 // Override Icons for Leather
-if (ITEMS.REFINED.LEATHER[1]) ITEMS.REFINED.LEATHER[1].icon = '/items/T1_LEATHER.png';
-if (ITEMS.REFINED.LEATHER[2]) ITEMS.REFINED.LEATHER[2].icon = '/items/T2_LEATHER.png';
-if (ITEMS.REFINED.LEATHER[3]) ITEMS.REFINED.LEATHER[3].icon = '/items/T3_LEATHER.png';
-if (ITEMS.REFINED.LEATHER[4]) ITEMS.REFINED.LEATHER[4].icon = '/items/T4_LEATHER.png';
-if (ITEMS.REFINED.LEATHER[5]) ITEMS.REFINED.LEATHER[5].icon = '/items/T5_LEATHER.png';
-if (ITEMS.REFINED.LEATHER[6]) ITEMS.REFINED.LEATHER[6].icon = '/items/T6_LEATHER.png';
-if (ITEMS.REFINED.LEATHER[7]) ITEMS.REFINED.LEATHER[7].icon = '/items/T7_LEATHER.png';
-if (ITEMS.REFINED.LEATHER[8]) ITEMS.REFINED.LEATHER[8].icon = '/items/T8_LEATHER.png';
-if (ITEMS.REFINED.LEATHER[9]) ITEMS.REFINED.LEATHER[9].icon = '/items/T9_LEATHER.png';
-if (ITEMS.REFINED.LEATHER[10]) ITEMS.REFINED.LEATHER[10].icon = '/items/T10_LEATHER.png';
+if (ITEMS.REFINED.LEATHER[1]) { ITEMS.REFINED.LEATHER[1].icon = '/items/T1_LEATHER.png'; ITEMS.REFINED.LEATHER[1].scale = '110%'; }
+if (ITEMS.REFINED.LEATHER[2]) { ITEMS.REFINED.LEATHER[2].icon = '/items/T2_LEATHER.png'; ITEMS.REFINED.LEATHER[2].scale = '110%'; }
+if (ITEMS.REFINED.LEATHER[3]) { ITEMS.REFINED.LEATHER[3].icon = '/items/T3_LEATHER.png'; ITEMS.REFINED.LEATHER[3].scale = '110%'; }
+if (ITEMS.REFINED.LEATHER[4]) { ITEMS.REFINED.LEATHER[4].icon = '/items/T4_LEATHER.png'; ITEMS.REFINED.LEATHER[4].scale = '110%'; }
+if (ITEMS.REFINED.LEATHER[5]) { ITEMS.REFINED.LEATHER[5].icon = '/items/T5_LEATHER.png'; ITEMS.REFINED.LEATHER[5].scale = '110%'; }
+if (ITEMS.REFINED.LEATHER[6]) { ITEMS.REFINED.LEATHER[6].icon = '/items/T6_LEATHER.png'; ITEMS.REFINED.LEATHER[6].scale = '110%'; }
+if (ITEMS.REFINED.LEATHER[7]) { ITEMS.REFINED.LEATHER[7].icon = '/items/T7_LEATHER.png'; ITEMS.REFINED.LEATHER[7].scale = '110%'; }
+if (ITEMS.REFINED.LEATHER[8]) { ITEMS.REFINED.LEATHER[8].icon = '/items/T8_LEATHER.png'; ITEMS.REFINED.LEATHER[8].scale = '110%'; }
+if (ITEMS.REFINED.LEATHER[9]) { ITEMS.REFINED.LEATHER[9].icon = '/items/T9_LEATHER.png'; ITEMS.REFINED.LEATHER[9].scale = '110%'; }
+if (ITEMS.REFINED.LEATHER[10]) { ITEMS.REFINED.LEATHER[10].icon = '/items/T10_LEATHER.png'; ITEMS.REFINED.LEATHER[10].scale = '110%'; }
 
 // Override Icons for Cloth
 if (ITEMS.REFINED.CLOTH[1]) ITEMS.REFINED.CLOTH[1].icon = '/items/T1_CLOTH.png';
@@ -351,9 +353,8 @@ if (ITEMS.REFINED.CLOTH[5]) ITEMS.REFINED.CLOTH[5].icon = '/items/T5_CLOTH.png';
 if (ITEMS.REFINED.CLOTH[6]) ITEMS.REFINED.CLOTH[6].icon = '/items/T6_CLOTH.png';
 if (ITEMS.REFINED.CLOTH[7]) ITEMS.REFINED.CLOTH[7].icon = '/items/T7_CLOTH.png';
 if (ITEMS.REFINED.CLOTH[8]) ITEMS.REFINED.CLOTH[8].icon = '/items/T8_CLOTH.png';
-if (ITEMS.REFINED.CLOTH[9]) ITEMS.REFINED.CLOTH[9].icon = '/items/T9_CLOTH.png';
-// Override Icons for Clause
-if (ITEMS.REFINED.CLOTH[10]) ITEMS.REFINED.CLOTH[10].icon = '/items/T10_CLOTH.png';
+if (ITEMS.REFINED.CLOTH[9]) { ITEMS.REFINED.CLOTH[9].icon = '/items/T9_CLOTH.png'; }
+if (ITEMS.REFINED.CLOTH[10]) { ITEMS.REFINED.CLOTH[10].icon = '/items/T10_CLOTH.png'; }
 
 // Generate Maps
 for (const t of TIERS) {
@@ -546,6 +547,14 @@ genGear('TOOLMAKER', 'SICKLE', 'TOOL_SICKLE', 'SICKLE', 'CLOTH', { eff: 1 });
 genGear('TOOLMAKER', 'FISHING_ROD', 'TOOL_ROD', 'FISHING_ROD', 'PLANK', { eff: 1 });
 genGear('TOOLMAKER', 'POUCH', 'TOOL_POUCH', 'POUCH', 'LEATHER', { eff: 1 });
 
+// --- ICON OVERRIDES FOR TOOLS ---
+if (ITEMS.GEAR.TOOLMAKER.AXE[1]) { ITEMS.GEAR.TOOLMAKER.AXE[1].icon = '/items/T1_AXE.png'; ITEMS.GEAR.TOOLMAKER.AXE[1].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.AXE[2]) { ITEMS.GEAR.TOOLMAKER.AXE[2].icon = '/items/T2_AXE.png'; ITEMS.GEAR.TOOLMAKER.AXE[2].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.AXE[3]) { ITEMS.GEAR.TOOLMAKER.AXE[3].icon = '/items/T3_AXE.png'; ITEMS.GEAR.TOOLMAKER.AXE[3].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.AXE[4]) { ITEMS.GEAR.TOOLMAKER.AXE[4].icon = '/items/T4_AXE.png'; ITEMS.GEAR.TOOLMAKER.AXE[4].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.AXE[5]) { ITEMS.GEAR.TOOLMAKER.AXE[5].icon = '/items/T5_AXE.png'; ITEMS.GEAR.TOOLMAKER.AXE[5].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.AXE[6]) { ITEMS.GEAR.TOOLMAKER.AXE[6].icon = '/items/T6_AXE.png'; ITEMS.GEAR.TOOLMAKER.AXE[6].scale = '110%'; }
+
 
 export const ITEM_LOOKUP = {};
 const indexItems = (obj) => {
@@ -603,7 +612,6 @@ export const resolveItem = (itemId, overrideQuality = null) => {
 
     if (!baseItem) return null;
 
-    // 4. Build return object
     const quality = QUALITIES[qualityId] || QUALITIES[0];
 
     // RESTRICTION: Only Equipment types can have quality bonuses.
@@ -672,7 +680,7 @@ export const resolveItem = (itemId, overrideQuality = null) => {
     // Determine Rarity Name prefix
     const qualityPrefix = (quality.name && quality.name !== 'Normal') ? `${quality.name} ` : '';
 
-    return {
+    const finalItem = {
         ...baseItem,
         id: rawId,
         name: `${qualityPrefix}${baseItem.name}`,
@@ -683,6 +691,19 @@ export const resolveItem = (itemId, overrideQuality = null) => {
         ip: (baseItem.ip || 0) + ipBonus,
         stats: newStats
     };
+
+    // EMERGENCY GLOBAL FIX FOR AXE ICONS
+    if (baseId.toUpperCase().includes('AXE')) {
+        const t = baseItem.tier || 1;
+        if (!finalItem.icon) finalItem.icon = `/items/T${t}_AXE.png`;
+        if (!finalItem.scale) finalItem.scale = '110%';
+    }
+
+    // Secondary emergency fix for ORE and LEATHER T1
+    if (baseId === 'T1_ORE' && !finalItem.icon) finalItem.icon = '/items/T1_ORE.png';
+    if (baseId === 'T1_LEATHER' && !finalItem.icon) finalItem.icon = '/items/T1_LEATHER.png';
+
+    return finalItem;
 };
 
 export const formatItemId = (itemId) => itemId ? itemId.replace(/_/g, ' ') : '';
