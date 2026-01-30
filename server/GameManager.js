@@ -185,7 +185,7 @@ export class GameManager {
                 updated = true;
             }
 
-            if (catchup && (data.current_activity || data.state.combat) && data.last_saved) {
+            if (catchup && (data.current_activity || data.state.combat || data.state.dungeon) && data.last_saved) {
                 const now = new Date();
                 const lastSaved = new Date(data.last_saved).getTime();
                 const elapsedSeconds = (now.getTime() - lastSaved) / 1000;
