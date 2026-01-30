@@ -210,10 +210,20 @@ function App() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      // If we landed with an access token in the hash, clean it up
+      if (window.location.hash && (window.location.hash.includes('access_token') || window.location.hash.includes('error'))) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
+      if (event === 'SIGNED_IN') {
+        // Clear hash after successful OAuth/OTP landing
+        if (window.location.hash && (window.location.hash.includes('access_token') || window.location.hash.includes('error'))) {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+      }
       if (event === 'PASSWORD_RECOVERY') {
         setInitialAuthView('RESET');
       }
@@ -228,7 +238,7 @@ function App() {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [socket]);
 
   // Socket Connection Function
   const connectSocket = (token, characterId) => {
