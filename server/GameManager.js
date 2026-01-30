@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { ITEMS } from '../shared/items.js';
+import { ITEMS, CHEST_DROP_TABLE } from '../shared/items.js';
 import { INITIAL_SKILLS, calculateNextLevelXP } from '../shared/skills.js';
 import { InventoryManager } from './managers/InventoryManager.js';
 import { ActivityManager } from './managers/ActivityManager.js';
@@ -1193,13 +1193,9 @@ export class GameManager {
                 const potentialDrops = [];
 
                 // Refined Resources
-                const REFINED_TYPES = ['PLANK', 'BAR', 'CLOTH', 'LEATHER', 'EXTRACT'];
-                // Base Qty Logic: Normal(5), Good(6), Outstanding(8), Excellent(12), Masterpiece(20)
-                let baseQty = 5;
-                if (itemData.rarity === 'UNCOMMON') baseQty = 6;
-                if (itemData.rarity === 'RARE') baseQty = 8;
-                if (itemData.rarity === 'EPIC') baseQty = 12;
-                if (itemData.rarity === 'LEGENDARY') baseQty = 20;
+                const REFINED_TYPES = CHEST_DROP_TABLE.REFINED_TYPES;
+                const rarityConfig = CHEST_DROP_TABLE.RARITIES[itemData.rarity] || CHEST_DROP_TABLE.RARITIES.COMMON;
+                const baseQty = rarityConfig.baseQty;
 
                 // 2. Calculate Items
                 // Single Refined Type Drop
@@ -1212,12 +1208,7 @@ export class GameManager {
                 }
 
                 // Crests (Low Chance, Max 1 per chest)
-                // Normal: 0%, Good: 1%, Outstanding: 3%, Excellent: 4%, Masterpiece: 5%
-                let crestChance = 0;
-                if (itemData.rarity === 'UNCOMMON') crestChance = 0.01; // 1%
-                if (itemData.rarity === 'RARE') crestChance = 0.03;     // 3%
-                if (itemData.rarity === 'EPIC') crestChance = 0.04;     // 4%
-                if (itemData.rarity === 'LEGENDARY') crestChance = 0.05;// 5%
+                const crestChance = rarityConfig.crestChance;
 
                 if (Math.random() < crestChance) {
                     const crestId = `T${tier}_CREST`;

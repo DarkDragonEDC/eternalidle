@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Sword, Shield, Heart, Star, Zap } from 'lucide-react';
-import { QUALITIES, resolveItem } from '@shared/items';
+import { QUALITIES, resolveItem, CHEST_DROP_TABLE } from '@shared/items';
 
 const ItemInfoModal = ({ item: rawItem, onClose }) => {
     if (!rawItem) return null;
@@ -212,6 +212,38 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                             </div>
                         </div>
                     </div>
+
+                    {/* Chest Drop Table */}
+                    {item.id.includes('CHEST') && (
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '12px',
+                            background: 'rgba(0,0,0,0.2)',
+                            padding: '15px',
+                            borderRadius: '8px',
+                            border: '1px solid rgba(255,255,255,0.05)'
+                        }}>
+                            <div style={{ color: '#888', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Possible Rewards</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {CHEST_DROP_TABLE.REFINED_TYPES.map(type => (
+                                    <div key={type} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                                        <span style={{ color: '#ddd' }}>{type.charAt(0) + type.slice(1).toLowerCase()}</span>
+                                        <span style={{ color: '#4a90e2', fontWeight: 'bold' }}>20%</span>
+                                    </div>
+                                ))}
+                                {CHEST_DROP_TABLE.RARITIES[item.rarity]?.crestChance > 0 && (
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '8px', marginTop: '2px' }}>
+                                        <span style={{ color: '#f5a623' }}>Boss Crest</span>
+                                        <span style={{ color: '#f5a623', fontWeight: 'bold' }}>{(CHEST_DROP_TABLE.RARITIES[item.rarity].crestChance * 100).toFixed(0)}%</span>
+                                    </div>
+                                )}
+                            </div>
+                            <div style={{ marginTop: '5px', fontSize: '0.75rem', color: '#666', fontStyle: 'italic', textAlign: 'center' }}>
+                                * Yields {CHEST_DROP_TABLE.RARITIES[item.rarity]?.baseQty || 5} to {(CHEST_DROP_TABLE.RARITIES[item.rarity]?.baseQty || 5) + item.tier} materials.
+                            </div>
+                        </div>
+                    )}
 
                     {/* Rarity Comparison Section */}
                     {statKeys.length > 0 && !['FOOD', 'POTION'].includes(item.type) && !item.id.includes('FOOD') && !item.id.includes('POTION') && (
