@@ -148,22 +148,31 @@ io.on('connection', (socket) => {
         console.log(`[SOCKET] User disconnected: ${socket.id}. Reason: ${reason}`);
         connectedSockets.delete(socket.id);
 
-        // Persist character data on disconnect and clear from cache
-        if (socket.data.characterId) {
+        const charId = socket.data.characterId;
+        if (charId) {
             try {
-                await gameManager.persistCharacter(socket.data.characterId);
-                gameManager.removeFromCache(socket.data.characterId);
-                console.log(`[SOCKET] Char ${socket.data.characterId} persisted and cleared from cache on disconnect.`);
+                // Save immediately on disconnect to prevent rollback
+                await gameManager.persistCharacter(charId);
+                // Clear cache so next login starts fresh from DB (important for manual edits)
+                gameManager.removeFromCache(charId);
+                console.log(`[SOCKET] Char ${charId} persisted and cleared from cache on disconnect.`);
             } catch (err) {
-                console.error(`[SOCKET] Error persisting char ${socket.data.characterId} on disconnect:`, err);
+                console.error(`[SOCKET] Error persisting char ${charId} on disconnect:`, err);
             }
         }
     });
 
     socket.on('join_character', async ({ characterId }) => {
         if (!characterId) return;
-        console.log(`[SOCKET] User ${socket.user.email} joined character ${characterId}`);
+        const userId = socket.user.id;
+
+        socket.join(`user:${userId}`);
         socket.data.characterId = characterId;
+
+        console.log(`[SOCKET] User ${socket.user.email} joined character ${characterId}`);
+
+        // Sync with DB to pick up any manual edits
+        await gameManager.syncWithDatabase(characterId);
 
         // Immediately send status for this character
         try {

@@ -76,6 +76,10 @@ export class GameManager {
         return this.userLocks.has(userId);
     }
 
+    calculateHash(state) {
+        return crypto.createHash('md5').update(JSON.stringify(state)).digest('hex');
+    }
+
     async getCharacter(userId, characterId = null, catchup = false, bypassCache = false) {
         // Try Cache first
         if (characterId && this.cache.has(characterId) && !bypassCache) {
@@ -105,6 +109,8 @@ export class GameManager {
 
         if (data) {
             if (!data.state) data.state = {};
+            // Attach a snapshot hash of the DB state to detect external changes
+            data.dbHash = this.calculateHash(data.state);
 
             let updated = false;
 
@@ -283,6 +289,8 @@ export class GameManager {
                     }
 
                     data.last_saved = now.toISOString();
+                    // Update the local dbHash to current state since we just processed it
+                    data.dbHash = this.calculateHash(data.state);
                 }
 
                 // Hard limit cleanup: Stop activities that exceeded the idle limit
@@ -312,9 +320,27 @@ export class GameManager {
     }
 
     async persistCharacter(charId) {
-        if (!this.dirty.has(charId)) return;
+        if (!this.dirty.size === 0) return;
         const char = this.cache.get(charId);
         if (!char) return;
+
+        // --- Snapshot Verification (Optimistic Locking) ---
+        // Fetch current DB state to see if someone edited it manually
+        const { data: dbChar, error: fetchError } = await this.supabase
+            .from('characters')
+            .select('state')
+            .eq('id', charId)
+            .single();
+
+        if (!fetchError && dbChar) {
+            const currentDbHash = this.calculateHash(dbChar.state);
+            if (char.dbHash && currentDbHash !== char.dbHash) {
+                console.warn(`[SYNC] Manual DB Edit detected for ${char.name}. Aborting save to prevent overwriting.`);
+                // Invalidate cache so it's reloaded on next get
+                this.removeFromCache(charId);
+                return;
+            }
+        }
 
         // console.log(`[DB] Persisting character ${char.name} (${charId})`);
         const { error } = await this.supabase
@@ -328,10 +354,36 @@ export class GameManager {
             .eq('id', charId);
 
         if (!error) {
+            // Update snapshot hash after successful save
+            char.dbHash = this.calculateHash(char.state);
             this.dirty.delete(charId);
         } else {
             console.error(`[DB] Error persisting ${char.name}:`, error);
         }
+    }
+
+    async syncWithDatabase(charId) {
+        const char = this.cache.get(charId);
+        if (!char) return await this.getCharacter(null, charId, false, true);
+
+        const { data: dbChar, error } = await this.supabase
+            .from('characters')
+            .select('*')
+            .eq('id', charId)
+            .single();
+
+        if (!error && dbChar) {
+            const currentDbHash = this.calculateHash(dbChar.state);
+            if (currentDbHash !== char.dbHash) {
+                console.log(`[SYNC] Refreshing character ${char.name} from DB (Manual edit detected)`);
+                // Clear dirty flag and overwrite with DB data
+                this.dirty.delete(charId);
+                Object.assign(char, dbChar);
+                char.dbHash = currentDbHash;
+                return true;
+            }
+        }
+        return false;
     }
 
     async persistAllDirty() {
