@@ -166,7 +166,7 @@ export class CombatManager {
                     const baseSilver = Math.floor(Math.random() * (sMax - sMin + 1)) + sMin;
 
                     const silverBonus = playerStats.globals?.silverYield || 0;
-                    let finalSilver = Math.floor(baseSilver * (1 + silverBonus / 100));
+                    finalSilver = Math.floor(baseSilver * (1 + silverBonus / 100));
 
                     // Safety Cap
                     if (finalSilver > MAX_SILVER_PER_KILL) finalSilver = MAX_SILVER_PER_KILL;

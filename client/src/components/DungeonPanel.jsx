@@ -92,6 +92,84 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
         return `${s}s`;
     };
 
+    // Calculate max runs possible in 12 hours
+    const calculateMaxRunsIn12Hours = (tier) => {
+        const timeFor1Run = calculateEstimatedTime(tier, 1);
+        if (timeFor1Run <= 0) return 1;
+        const maxTime = 12 * 60 * 60 * 1000; // 12 hours in ms
+        return Math.max(1, Math.floor(maxTime / timeFor1Run));
+    };
+
+    // Calculate if player survives the dungeon runs
+    const calculateSurvival = (tier, count) => {
+        const dungeon = Object.values(DUNGEONS).find(d => d.tier === tier);
+        if (!dungeon || !gameState?.calculatedStats) return { survives: true, runsBeforeDeath: count };
+
+        const stats = gameState.calculatedStats;
+        const playerDefense = stats.defense || 0;
+        const playerMitigation = Math.min(0.60, playerDefense / (playerDefense + 2000));
+        const attackSpeed = stats.attackSpeed || 1000;
+        const playerDmg = stats.damage || 1;
+
+        // Player HP + Food healing
+        const baseHp = gameState?.state?.health || stats.hp || 100;
+        const food = gameState?.state?.equipment?.food;
+        const foodTotalHeal = (food && food.amount > 0) ? (food.amount * (food.heal || 0)) : 0;
+        const totalEffectiveHp = baseHp + foodTotalHeal;
+
+        const trashMobIds = dungeon.trashMobs || [];
+        const boss = MONSTERS[tier]?.find(m => m.id === dungeon.bossId);
+
+        // Calculate total damage taken per run
+        let totalDamagePerRun = 0;
+
+        // Trash mobs damage
+        trashMobIds.forEach((mobId, index) => {
+            const mob = MONSTERS[tier]?.find(m => m.id === mobId);
+            if (mob) {
+                const scaling = 1 + (index * 0.1);
+                const mobDamage = Math.floor((mob.damage || 0) * scaling);
+                const mobDef = (mob.defense || 0) * scaling;
+                const mobHealth = mob.health * scaling;
+
+                // Calculate how many rounds to kill this mob
+                const mobMitigation = mobDef / (mobDef + 2000);
+                const mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
+                const roundsToKill = Math.ceil(mobHealth / mitigatedPlayerDmg);
+
+                // Mob attacks once per player attack (same speed assumption)
+                const mitigatedMobDmg = Math.max(1, Math.floor(mobDamage * (1 - playerMitigation)));
+                totalDamagePerRun += mitigatedMobDmg * roundsToKill;
+            }
+        });
+
+        // Boss damage
+        if (boss) {
+            const scaling = 1.5;
+            const bossDamage = Math.floor((boss.damage || 0) * scaling);
+            const bossDef = (boss.defense || 0) * scaling;
+            const bossHealth = boss.health * scaling;
+
+            const bossMitigation = bossDef / (bossDef + 2000);
+            const mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - bossMitigation)));
+            const roundsToKill = Math.ceil(bossHealth / mitigatedPlayerDmg);
+
+            const mitigatedBossDmg = Math.max(1, Math.floor(bossDamage * (1 - playerMitigation)));
+            totalDamagePerRun += mitigatedBossDmg * roundsToKill;
+        }
+
+        // How many runs before death?
+        const runsBeforeDeath = totalDamagePerRun > 0 ? Math.floor(totalEffectiveHp / totalDamagePerRun) : Infinity;
+        const survives = runsBeforeDeath >= count;
+
+        return {
+            survives,
+            runsBeforeDeath: runsBeforeDeath === Infinity ? '∞' : runsBeforeDeath,
+            totalDamagePerRun,
+            totalEffectiveHp
+        };
+    };
+
     const confirmEnterDungeon = () => {
         if (pendingTier) {
             const dungeon = Object.values(DUNGEONS).find(d => d.tier === pendingTier);
@@ -652,6 +730,15 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                             const mapId = dungeon?.reqItem;
                             const availableMaps = inventory[mapId] || 0;
 
+                            // Calculate max runs based on 12h limit
+                            const maxRunsIn12h = calculateMaxRunsIn12Hours(pendingTier);
+                            const effectiveMax = Math.min(availableMaps, maxRunsIn12h);
+
+                            // Survival calculation
+                            const survival = calculateSurvival(pendingTier, repeatCount);
+                            const food = gameState?.state?.equipment?.food;
+                            const hasFood = food && food.amount > 0;
+
                             return (
                                 <>
                                     <h3 style={{ margin: 0, color: '#fff', textAlign: 'center', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '1px' }}>TOTAL RUNS T{pendingTier}</h3>
@@ -695,7 +782,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                             <input
                                                 type="number"
                                                 value={repeatCount}
-                                                onChange={(e) => setRepeatCount(Math.min(availableMaps, Math.max(1, parseInt(e.target.value) || 1)))}
+                                                onChange={(e) => setRepeatCount(Math.min(effectiveMax, Math.max(1, parseInt(e.target.value) || 1)))}
                                                 style={{
                                                     width: '60px',
                                                     padding: '5px',
@@ -713,7 +800,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                             />
 
                                             <button
-                                                onClick={() => setRepeatCount(prev => Math.min(availableMaps, (parseInt(prev) || 0) + 1))}
+                                                onClick={() => setRepeatCount(prev => Math.min(effectiveMax, (parseInt(prev) || 0) + 1))}
                                                 style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', color: '#fff', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 'bold', cursor: 'pointer' }}
                                             >
                                                 +
@@ -721,7 +808,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                         </div>
 
                                         <button
-                                            onClick={() => setRepeatCount(availableMaps)}
+                                            onClick={() => setRepeatCount(effectiveMax)}
                                             style={{
                                                 padding: '8px 12px',
                                                 background: 'rgba(174, 0, 255, 0.1)',
@@ -738,10 +825,63 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                         </button>
                                     </div>
 
+                                    {/* Time and Limits Info */}
                                     <div style={{ padding: '10px', background: 'rgba(212, 175, 55, 0.05)', borderRadius: '12px', border: '1px solid rgba(212, 175, 55, 0.2)', width: '100%', textAlign: 'center' }}>
                                         <div style={{ fontSize: '0.65rem', color: '#d4af37', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px', marginBottom: '4px' }}>Estimated Time</div>
                                         <div style={{ fontSize: '1.2rem', color: '#fff', fontWeight: '900' }}>{formatDuration(calculateEstimatedTime(pendingTier, repeatCount))}</div>
-                                        <div style={{ fontSize: '0.6rem', color: '#888', marginTop: '4px' }}>AVAILABLE MAPS: {availableMaps}</div>
+                                        <div style={{ fontSize: '0.6rem', color: '#888', marginTop: '4px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
+                                            <span>MAPS: {availableMaps}</span>
+                                            <span>|</span>
+                                            <span>MAX 12H: {maxRunsIn12h}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Survival Prediction */}
+                                    <div style={{
+                                        padding: '12px',
+                                        background: survival.survives ? 'rgba(76, 175, 80, 0.08)' : 'rgba(255, 68, 68, 0.08)',
+                                        borderRadius: '12px',
+                                        border: `1px solid ${survival.survives ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255, 68, 68, 0.3)'}`,
+                                        width: '100%',
+                                        textAlign: 'center'
+                                    }}>
+                                        <div style={{
+                                            fontSize: '0.65rem',
+                                            color: survival.survives ? '#4caf50' : '#ff4444',
+                                            textTransform: 'uppercase',
+                                            fontWeight: '900',
+                                            letterSpacing: '1px',
+                                            marginBottom: '4px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '6px'
+                                        }}>
+                                            <Heart size={12} />
+                                            Survival Prediction
+                                        </div>
+                                        <div style={{
+                                            fontSize: '1rem',
+                                            color: survival.survives ? '#4caf50' : '#ff4444',
+                                            fontWeight: '900'
+                                        }}>
+                                            {survival.survives ? (
+                                                <>✓ SURVIVES ALL {repeatCount} RUNS</>
+                                            ) : (
+                                                <>✗ DIES AT RUN {survival.runsBeforeDeath}</>
+                                            )}
+                                        </div>
+                                        <div style={{ fontSize: '0.55rem', color: '#888', marginTop: '6px', display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                            <span>HP: {formatNumber(Math.floor(survival.totalEffectiveHp))}</span>
+                                            <span>|</span>
+                                            <span>DMG/RUN: {formatNumber(survival.totalDamagePerRun)}</span>
+                                            {hasFood && (
+                                                <>
+                                                    <span>|</span>
+                                                    <span style={{ color: '#ff9800' }}>🍖 {food.amount}x ({food.heal} HP each)</span>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
 
                                     <div style={{ display: 'flex', gap: '12px', width: '100%' }}>

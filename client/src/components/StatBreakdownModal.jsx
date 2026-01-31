@@ -52,18 +52,21 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, onClose
                 return acc + (fresh?.stats?.speed || 0);
             }, 0);
 
-            // Get Weapon Speed (Default 1000 if no weapon)
+            // Get Weapon Speed (0 if no weapon - unarmed has no speed bonus)
             const weapon = equipment.mainHand;
             const freshWeapon = weapon ? resolveItem(weapon.id || weapon.item_id) : null;
-            const weaponSpeed = freshWeapon?.stats?.speed || 1000;
+            const weaponSpeed = freshWeapon?.stats?.speed || 0; // No weapon = no speed bonus
 
             breakdown.push({ label: 'Global Base', value: '2.00s', sub: '(Attack Cycle Start)' });
 
-            breakdown.push({
-                label: 'Weapon Speed',
-                value: `-${(weaponSpeed / 1000).toFixed(2)}s`,
-                sub: freshWeapon ? `${freshWeapon.name} Speed` : '(Default Punch Speed)'
-            });
+            // Only show weapon speed if a weapon is equipped
+            if (freshWeapon && weaponSpeed > 0) {
+                breakdown.push({
+                    label: 'Weapon Speed',
+                    value: `-${(weaponSpeed / 1000).toFixed(2)}s`,
+                    sub: `${freshWeapon.name}`
+                });
+            }
 
             if (agi > 0) {
                 breakdown.push({

@@ -91,7 +91,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
         // Resolve Weapon Speed
         const weapon = equipment.mainHand;
         const freshWeapon = weapon ? resolveItem(weapon.id || weapon.item_id) : null;
-        const weaponSpeed = freshWeapon?.stats?.speed || 1000;
+        const weaponSpeed = freshWeapon?.stats?.speed || 0; // No weapon = no speed bonus
 
         // Resolve Gear Speed (excluding weapon)
         const gearSpeedBonus = Object.entries(equipment).reduce((acc, [slot, item]) => {

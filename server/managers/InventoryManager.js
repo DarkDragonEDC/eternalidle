@@ -365,7 +365,7 @@ export class InventoryManager {
         // Total Speed = WeaponSpeed + GearSpeed
         const weaponObj = equipment.mainHand; // Renaming to avoid conflict if I really want a local handle
         const freshWeapon = weaponObj ? this.resolveItem(weaponObj.id) : null;
-        const weaponSpeed = freshWeapon?.stats?.speed || 1000; // Default punch speed 1000
+        const weaponSpeed = freshWeapon?.stats?.speed || 0; // No weapon = no speed bonus
         const totalSpeed = weaponSpeed + gearSpeedBonus;
 
         const finalAttackSpeed = Math.max(200, 2000 - totalSpeed - (agi * 2));
