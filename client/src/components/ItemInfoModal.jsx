@@ -192,7 +192,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                         <div><span style={{ color: '#888' }}>Tier:</span> T{item.tier}</div>
                         <div><span style={{ color: '#888' }}>Type:</span> {item.type}</div>
                         <div><span style={{ color: '#888' }}>IP:</span> {item.ip || 0}</div>
-                        <div><span style={{ color: '#888' }}>Rarity:</span> <span style={{ color: item.rarityColor || '#fff', fontWeight: 'bold' }}>{item.qualityName}</span></div>
+
 
                         {/* Stats List */}
                         <div style={{ gridColumn: '1 / -1', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>

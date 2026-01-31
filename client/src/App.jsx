@@ -162,7 +162,7 @@ function App() {
   // Monitor Offline Report from GameState
   useEffect(() => {
     if (gameState?.offlineReport) {
-      console.log("OFFLINE REPORT RECEIVED:", gameState.offlineReport);
+
       setOfflineReport(gameState.offlineReport);
     }
   }, [gameState]);
@@ -200,7 +200,7 @@ function App() {
   // Auto-connect if session and character already exist
   useEffect(() => {
     if (session?.access_token && selectedCharacter && !socket) {
-      console.log("Restoring character session:", selectedCharacter);
+
       setIsConnecting(true);
       connectSocket(session.access_token, selectedCharacter);
     }
@@ -245,7 +245,7 @@ function App() {
     if (socket?.connected) return;
 
     const socketUrl = import.meta.env.VITE_API_URL;
-    console.log('[SOCKET-DEBUG] Connecting to:', socketUrl);
+
     const newSocket = io(socketUrl, {
       auth: { token },
       transports: ['websocket']
@@ -273,14 +273,14 @@ function App() {
         if (now - lastAttempt < 2000) {
           console.warn('Auth retry too fast, waiting for standard timeout...');
         } else {
-          console.log('Detected auth error, refreshing session...');
+
           newSocket._lastAuthRetry = now;
 
           // Force a session refresh
           const { data: { session: refreshedSession }, error } = await supabase.auth.refreshSession();
 
           if (refreshedSession && !error) {
-            console.log('Session refreshed successfully');
+
             setSession(refreshedSession);
             newSocket.auth.token = refreshedSession.access_token;
             newSocket.connect();
@@ -295,7 +295,7 @@ function App() {
               error?.code === '400';
 
             if (isFatalAuthError) {
-              console.log('Fatal Auth Error - Forcing Logout and Cleanup');
+
               await supabase.auth.signOut();
 
               // Limpeza profunda para evitar loops de refresh com dados antigos

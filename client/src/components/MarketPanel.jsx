@@ -384,7 +384,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
                                             <div style={{ flex: '2 1 0%', minWidth: '150px' }}>
                                                 <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                                    <span>{l.item_data.qualityName && l.item_data.qualityName !== 'Normal' ? `${l.item_data.qualityName} ` : ''}{l.item_data.name}</span>
+                                                    <span>{l.item_data.name}</span>
                                                     <button onClick={() => onShowInfo(l.item_data)} style={{ background: 'none', border: 'none', padding: '0', color: 'var(--text-dim)', cursor: 'pointer', display: 'flex' }}>
                                                         <Info size={14} />
                                                     </button>
@@ -622,12 +622,10 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                             const data = resolveItem(c.itemId);
                                             if (data) {
                                                 tierColor = getTierColor(data.tier);
-                                                const qualityPrefix = data.qualityName && data.qualityName !== 'Normal' ? `${data.qualityName} ` : '';
-
                                                 if (c.type === 'SOLD_ITEM') {
-                                                    name = `Sold: ${qualityPrefix}${data.name}`;
+                                                    name = `Sold: ${data.name}`;
                                                 } else {
-                                                    name = `${qualityPrefix}${data.name}`;
+                                                    name = `${data.name}`;
                                                 }
 
                                                 if (c.type !== 'SOLD_ITEM') {

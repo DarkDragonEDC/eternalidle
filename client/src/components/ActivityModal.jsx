@@ -30,7 +30,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
 
         const isLockedStatus = userLevel < requiredLevel;
 
-        console.log(`[DEBUG - LOCKED - MODAL] ID: ${item.id}, Type: ${type}, Tier: ${tier}, Skill: ${skillKey}, User: ${userLevel}, Req: ${requiredLevel}, LOCKED: ${isLockedStatus} `);
+
 
         return {
             locked: isLockedStatus,

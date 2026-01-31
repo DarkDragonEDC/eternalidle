@@ -387,7 +387,7 @@ for (const t of TIERS) {
     // Normal (White)
     ITEMS.SPECIAL.CHEST[`${t}_NORMAL`] = {
         id: `T${t}_CHEST_NORMAL`,
-        name: `Dungeon Chest (Normal)`,
+        name: `Dungeon Chest`,
         tier: t,
         rarity: 'COMMON',
         type: 'CONSUMABLE',
@@ -397,7 +397,7 @@ for (const t of TIERS) {
     // Good (Green)
     ITEMS.SPECIAL.CHEST[`${t}_GOOD`] = {
         id: `T${t}_CHEST_GOOD`,
-        name: `Dungeon Chest (Good)`,
+        name: `Dungeon Chest`,
         tier: t,
         rarity: 'UNCOMMON',
         type: 'CONSUMABLE',
@@ -407,7 +407,7 @@ for (const t of TIERS) {
     // Outstanding (Blue)
     ITEMS.SPECIAL.CHEST[`${t}_OUTSTANDING`] = {
         id: `T${t}_CHEST_OUTSTANDING`,
-        name: `Dungeon Chest (Outstanding)`,
+        name: `Dungeon Chest`,
         tier: t,
         rarity: 'RARE',
         type: 'CONSUMABLE',
@@ -417,7 +417,7 @@ for (const t of TIERS) {
     // Excellent (Purple)
     ITEMS.SPECIAL.CHEST[`${t}_EXCELLENT`] = {
         id: `T${t}_CHEST_EXCELLENT`,
-        name: `Dungeon Chest (Excellent)`,
+        name: `Dungeon Chest`,
         tier: t,
         rarity: 'EPIC',
         type: 'CONSUMABLE',
@@ -427,7 +427,7 @@ for (const t of TIERS) {
     // Masterpiece (Orange)
     ITEMS.SPECIAL.CHEST[`${t}_MASTERPIECE`] = {
         id: `T${t}_CHEST_MASTERPIECE`,
-        name: `Dungeon Chest (Masterpiece)`,
+        name: `Dungeon Chest`,
         tier: t,
         rarity: 'LEGENDARY',
         type: 'CONSUMABLE',
@@ -437,7 +437,7 @@ for (const t of TIERS) {
     // Generic/Legacy Fallback
     ITEMS.SPECIAL.CHEST[`${t}_GENERIC`] = {
         id: `T${t}_DUNGEON_CHEST`,
-        name: `Dungeon Chest (Legacy)`,
+        name: `Dungeon Chest`,
         tier: t,
         rarity: 'COMMON',
         type: 'CONSUMABLE',
@@ -446,10 +446,10 @@ for (const t of TIERS) {
 
     // --- LEGACY ALIASES (Fix for crash) ---
     // We copy the object and override ID so resolveItem() indexes it correctly.
-    ITEMS.SPECIAL.CHEST[`${t}_COMMON`] = { ...ITEMS.SPECIAL.CHEST[`${t}_NORMAL`], id: `T${t}_CHEST_COMMON`, name: `Dungeon Chest (Normal)` };
-    ITEMS.SPECIAL.CHEST[`${t}_RARE`] = { ...ITEMS.SPECIAL.CHEST[`${t}_OUTSTANDING`], id: `T${t}_CHEST_RARE`, name: `Dungeon Chest (Outstanding)` };
-    ITEMS.SPECIAL.CHEST[`${t}_GOLD`] = { ...ITEMS.SPECIAL.CHEST[`${t}_EXCELLENT`], id: `T${t}_CHEST_GOLD`, name: `Dungeon Chest (Excellent)` };
-    ITEMS.SPECIAL.CHEST[`${t}_MYTHIC`] = { ...ITEMS.SPECIAL.CHEST[`${t}_MASTERPIECE`], id: `T${t}_CHEST_MYTHIC`, name: `Dungeon Chest (Masterpiece)` };
+    ITEMS.SPECIAL.CHEST[`${t}_COMMON`] = { ...ITEMS.SPECIAL.CHEST[`${t}_NORMAL`], id: `T${t}_CHEST_COMMON`, name: `Dungeon Chest` };
+    ITEMS.SPECIAL.CHEST[`${t}_RARE`] = { ...ITEMS.SPECIAL.CHEST[`${t}_OUTSTANDING`], id: `T${t}_CHEST_RARE`, name: `Dungeon Chest` };
+    ITEMS.SPECIAL.CHEST[`${t}_GOLD`] = { ...ITEMS.SPECIAL.CHEST[`${t}_EXCELLENT`], id: `T${t}_CHEST_GOLD`, name: `Dungeon Chest` };
+    ITEMS.SPECIAL.CHEST[`${t}_MYTHIC`] = { ...ITEMS.SPECIAL.CHEST[`${t}_MASTERPIECE`], id: `T${t}_CHEST_MYTHIC`, name: `Dungeon Chest` };
 
 }
 
@@ -554,6 +554,42 @@ if (ITEMS.GEAR.TOOLMAKER.AXE[3]) { ITEMS.GEAR.TOOLMAKER.AXE[3].icon = '/items/T3
 if (ITEMS.GEAR.TOOLMAKER.AXE[4]) { ITEMS.GEAR.TOOLMAKER.AXE[4].icon = '/items/T4_AXE.png'; ITEMS.GEAR.TOOLMAKER.AXE[4].scale = '110%'; }
 if (ITEMS.GEAR.TOOLMAKER.AXE[5]) { ITEMS.GEAR.TOOLMAKER.AXE[5].icon = '/items/T5_AXE.png'; ITEMS.GEAR.TOOLMAKER.AXE[5].scale = '110%'; }
 if (ITEMS.GEAR.TOOLMAKER.AXE[6]) { ITEMS.GEAR.TOOLMAKER.AXE[6].icon = '/items/T6_AXE.png'; ITEMS.GEAR.TOOLMAKER.AXE[6].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.AXE[7]) { ITEMS.GEAR.TOOLMAKER.AXE[7].icon = '/items/T7_AXE.png'; ITEMS.GEAR.TOOLMAKER.AXE[7].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.AXE[8]) { ITEMS.GEAR.TOOLMAKER.AXE[8].icon = '/items/T8_AXE.png'; ITEMS.GEAR.TOOLMAKER.AXE[8].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.AXE[9]) { ITEMS.GEAR.TOOLMAKER.AXE[9].icon = '/items/T9_AXE.png'; ITEMS.GEAR.TOOLMAKER.AXE[9].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.AXE[10]) { ITEMS.GEAR.TOOLMAKER.AXE[10].icon = '/items/T10_AXE.png'; ITEMS.GEAR.TOOLMAKER.AXE[10].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.PICKAXE[1]) { ITEMS.GEAR.TOOLMAKER.PICKAXE[1].icon = '/items/T1_PICKAXE.png'; ITEMS.GEAR.TOOLMAKER.PICKAXE[1].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.PICKAXE[2]) { ITEMS.GEAR.TOOLMAKER.PICKAXE[2].icon = '/items/T2_PICKAXE.png'; ITEMS.GEAR.TOOLMAKER.PICKAXE[2].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.PICKAXE[3]) { ITEMS.GEAR.TOOLMAKER.PICKAXE[3].icon = '/items/T3_PICKAXE.png'; ITEMS.GEAR.TOOLMAKER.PICKAXE[3].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.PICKAXE[4]) { ITEMS.GEAR.TOOLMAKER.PICKAXE[4].icon = '/items/T4_PICKAXE.png'; ITEMS.GEAR.TOOLMAKER.PICKAXE[4].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.PICKAXE[5]) { ITEMS.GEAR.TOOLMAKER.PICKAXE[5].icon = '/items/T5_PICKAXE.png'; ITEMS.GEAR.TOOLMAKER.PICKAXE[5].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.PICKAXE[6]) { ITEMS.GEAR.TOOLMAKER.PICKAXE[6].icon = '/items/T6_PICKAXE.png'; ITEMS.GEAR.TOOLMAKER.PICKAXE[6].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.PICKAXE[7]) { ITEMS.GEAR.TOOLMAKER.PICKAXE[7].icon = '/items/T7_PICKAXE.png'; ITEMS.GEAR.TOOLMAKER.PICKAXE[7].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.PICKAXE[8]) { ITEMS.GEAR.TOOLMAKER.PICKAXE[8].icon = '/items/T8_PICKAXE.png'; ITEMS.GEAR.TOOLMAKER.PICKAXE[8].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.PICKAXE[9]) { ITEMS.GEAR.TOOLMAKER.PICKAXE[9].icon = '/items/T9_PICKAXE.png'; ITEMS.GEAR.TOOLMAKER.PICKAXE[9].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.PICKAXE[10]) { ITEMS.GEAR.TOOLMAKER.PICKAXE[10].icon = '/items/T10_PICKAXE.png'; ITEMS.GEAR.TOOLMAKER.PICKAXE[10].scale = '110%'; }
+
+// --- ICON OVERRIDES FOR SICKLES ---
+if (ITEMS.GEAR.TOOLMAKER.SICKLE[1]) { ITEMS.GEAR.TOOLMAKER.SICKLE[1].icon = '/items/T1_SICKLE.png'; ITEMS.GEAR.TOOLMAKER.SICKLE[1].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.SICKLE[2]) { ITEMS.GEAR.TOOLMAKER.SICKLE[2].icon = '/items/T2_SICKLE.png'; ITEMS.GEAR.TOOLMAKER.SICKLE[2].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.SICKLE[3]) { ITEMS.GEAR.TOOLMAKER.SICKLE[3].icon = '/items/T3_SICKLE.png'; ITEMS.GEAR.TOOLMAKER.SICKLE[3].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.SICKLE[4]) { ITEMS.GEAR.TOOLMAKER.SICKLE[4].icon = '/items/T4_SICKLE.png'; ITEMS.GEAR.TOOLMAKER.SICKLE[4].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.SICKLE[5]) { ITEMS.GEAR.TOOLMAKER.SICKLE[5].icon = '/items/T5_SICKLE.png'; ITEMS.GEAR.TOOLMAKER.SICKLE[5].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.SICKLE[6]) { ITEMS.GEAR.TOOLMAKER.SICKLE[6].icon = '/items/T6_SICKLE.png'; ITEMS.GEAR.TOOLMAKER.SICKLE[6].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.SICKLE[7]) { ITEMS.GEAR.TOOLMAKER.SICKLE[7].icon = '/items/T7_SICKLE.png'; ITEMS.GEAR.TOOLMAKER.SICKLE[7].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.SICKLE[8]) { ITEMS.GEAR.TOOLMAKER.SICKLE[8].icon = '/items/T8_SICKLE.png'; ITEMS.GEAR.TOOLMAKER.SICKLE[8].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.SICKLE[9]) { ITEMS.GEAR.TOOLMAKER.SICKLE[9].icon = '/items/T9_SICKLE.png'; ITEMS.GEAR.TOOLMAKER.SICKLE[9].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.SICKLE[10]) { ITEMS.GEAR.TOOLMAKER.SICKLE[10].icon = '/items/T10_SICKLE.png'; ITEMS.GEAR.TOOLMAKER.SICKLE[10].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[1]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[1].icon = '/items/T1_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[1].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[2]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[2].icon = '/items/T2_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[2].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[3]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[3].icon = '/items/T3_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[3].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[4]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[4].icon = '/items/T4_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[4].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[5]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[5].icon = '/items/T5_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[5].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[6]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[6].icon = '/items/T6_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[6].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[7]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[7].icon = '/items/T7_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[7].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[8]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[8].icon = '/items/T8_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[8].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[9]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[9].icon = '/items/T9_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[9].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[10]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[10].icon = '/items/T10_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[10].scale = '110%'; }
 
 
 export const ITEM_LOOKUP = {};
@@ -683,7 +719,7 @@ export const resolveItem = (itemId, overrideQuality = null) => {
     const finalItem = {
         ...baseItem,
         id: rawId,
-        name: `${qualityPrefix}${baseItem.name}`,
+        name: baseItem.name,
         rarityColor: baseItem.rarityColor || effectiveQuality.color,
         quality: effectiveQualityId,
         qualityName: effectiveQuality.name,
@@ -693,7 +729,7 @@ export const resolveItem = (itemId, overrideQuality = null) => {
     };
 
     // EMERGENCY GLOBAL FIX FOR AXE ICONS
-    if (baseId.toUpperCase().includes('AXE')) {
+    if (baseId.toUpperCase().includes('AXE') && !baseId.toUpperCase().includes('PICKAXE')) {
         const t = baseItem.tier || 1;
         if (!finalItem.icon) finalItem.icon = `/items/T${t}_AXE.png`;
         if (!finalItem.scale) finalItem.scale = '110%';

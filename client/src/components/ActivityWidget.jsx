@@ -311,8 +311,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                                 {(() => {
                                                     const item = resolveItem(activity.item_id);
                                                     if (item) {
-                                                        const qualityPrefix = item.qualityName && item.qualityName !== 'Normal' ? `${item.qualityName} ` : '';
-                                                        return `${qualityPrefix}T${item.tier} ${item.name}`;
+                                                        return `T${item.tier} ${item.name}`;
                                                     }
 
                                                     // Fallback: try to extract tier from ID (e.g. T2_FISH)
@@ -714,8 +713,47 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                     </button>
                                 </motion.div>
                             )}
-
                         </div>
+
+                        {/* --- CAIXA INFORMATIVA MULTITAREFA (Ao lado do botão) --- */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            style={{
+                                position: 'fixed',
+                                bottom: '30px',
+                                right: isMobile ? '95px' : '105px',
+                                width: isMobile ? '205px' : '205px', // Alinhado com a esquerda dos cards (30+280=310, 105+205=310)
+                                background: 'rgba(15, 20, 30, 0.98)',
+                                backdropFilter: 'blur(20px)',
+                                border: '1px solid rgba(212, 175, 55, 0.3)',
+                                borderRadius: '12px',
+                                padding: '12px',
+                                color: '#fff',
+                                fontSize: '0.75rem',
+                                zIndex: 1001,
+                                boxShadow: '0 10px 40px rgba(0,0,0,0.7)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px'
+                            }}
+                        >
+                            <div style={{
+                                width: '24px',
+                                height: '24px',
+                                borderRadius: '6px',
+                                background: 'rgba(212, 175, 55, 0.1)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#d4af37',
+                                fontWeight: 'bold'
+                            }}>i</div>
+                            <div style={{ lineHeight: '1.4', flex: 1 }}>
+                                You can perform a <b>gathering</b> and a <b>combat</b> action at the same time.
+                            </div>
+                        </motion.div>
                     </>
                 )}
             </AnimatePresence >

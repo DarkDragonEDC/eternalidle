@@ -73,7 +73,7 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUs
                             color: item.rarityColor || '#fff',
                             marginBottom: '4px'
                         }}>
-                            {item.qualityName && item.qualityName !== 'Normal' ? `${item.qualityName} ` : ''}{cleanBaseName}
+                            {cleanBaseName}
                         </div>
                         <div style={{
                             fontSize: '0.8rem',

@@ -19,7 +19,7 @@ const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onCl
         <div style={{ position: 'relative' }}>
             <button
                 onClick={(e) => {
-                    console.log('[NOTIF] Trigger clicked');
+
                     onClickTrigger(e);
                 }}
                 className="notification-trigger"

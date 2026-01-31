@@ -182,7 +182,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                     </div>
                                     <div>
                                         <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>
-                                            {bestCandidate.qualityName && bestCandidate.qualityName !== 'Normal' ? `${bestCandidate.qualityName} ` : ''}{bestCandidate.name}
+                                            {bestCandidate.name}
                                         </div>
                                         <div style={{ fontSize: '0.8rem', color: 'var(--accent)' }}>
                                             IP {bestCandidate.ip || 0} • Tier {bestCandidate.tier}
@@ -231,7 +231,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                     </div>
                                     <div>
                                         <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            {resolvedCurrent?.qualityName && resolvedCurrent.qualityName !== 'Normal' ? `${resolvedCurrent.qualityName} ` : ''}{resolvedCurrent?.name || currentItem.name || currentItem.id}
+                                            {resolvedCurrent?.name || currentItem.name || currentItem.id}
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); onShowInfo(currentItem); }}
                                                 style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.5 }}
@@ -339,7 +339,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                                 </div>
                                                 <div>
                                                     <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                        {item.qualityName && item.qualityName !== 'Normal' ? `${item.qualityName} ` : ''}{item.name}
+                                                        {item.name}
                                                         {isItemRecommended && (
                                                             <span style={{ fontSize: '0.6rem', background: 'var(--accent)', color: '#000', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>BEST</span>
                                                         )}

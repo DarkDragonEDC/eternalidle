@@ -293,7 +293,7 @@ export class GameManager {
 
                 if (updated) {
                     // Only show the modal if total catchup was significant
-                    const hasNotableGains = finalReport.totalTime > 30 || Object.keys(finalReport.itemsGained).length > 0;
+                    const hasNotableGains = finalReport.totalTime > 120 || Object.keys(finalReport.itemsGained).length > 0;
                     if (hasNotableGains) {
                         data.offlineReport = finalReport;
 
