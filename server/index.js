@@ -605,9 +605,7 @@ setInterval(async () => {
         });
 
         const activeCharsCount = Object.keys(charGroups).length;
-        if (activeCharsCount > 0) {
-            // console.log(`[TICKER] Processing ${activeCharsCount} characters...`);
-        }
+        console.log(`[TICKER] Sockets: ${localSockets.length}, Characters: ${activeCharsCount}`);
 
         await Promise.all(Object.values(charGroups).map(async ({ user, charId, sockets }) => {
             try {

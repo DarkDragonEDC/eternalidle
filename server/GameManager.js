@@ -190,6 +190,8 @@ export class GameManager {
                 const lastSaved = new Date(data.last_saved).getTime();
                 const elapsedSeconds = (now.getTime() - lastSaved) / 1000;
 
+                console.log(`[CATCHUP] ${data.name}: last_saved=${data.last_saved}, elapsed=${elapsedSeconds.toFixed(1)}s, hasActivity=${!!data.current_activity}, hasCombat=${!!data.state.combat}`);
+
                 // Unified report structure
                 let finalReport = {
                     elapsedTime: elapsedSeconds, // Wall-clock time passed
@@ -201,12 +203,16 @@ export class GameManager {
 
                 if (data.current_activity && data.activity_started_at) {
                     const timePerAction = data.current_activity.time_per_action || 3;
+                    console.log(`[CATCHUP] ${data.name}: timePerAction=${timePerAction}s, elapsed=${elapsedSeconds.toFixed(1)}s, needsProcessing=${elapsedSeconds >= timePerAction}`);
                     if (elapsedSeconds >= timePerAction) {
                         const actionsPossible = Math.floor(elapsedSeconds / timePerAction);
                         const actionsToProcess = Math.min(actionsPossible, data.current_activity.actions_remaining);
 
+                        console.log(`[CATCHUP] ${data.name}: actionsPossible=${actionsPossible}, remaining=${data.current_activity.actions_remaining}, toProcess=${actionsToProcess}`);
+
                         if (actionsToProcess > 0) {
                             const activityReport = await this.processBatchActions(data, actionsToProcess);
+                            console.log(`[CATCHUP] ${data.name}: processed=${activityReport.processed}, items=${JSON.stringify(activityReport.itemsGained)}`);
                             if (activityReport.processed > 0) {
                                 // Always update state if anything happened
                                 updated = true;
@@ -337,23 +343,8 @@ export class GameManager {
         const char = this.cache.get(charId);
         if (!char) return;
 
-        // --- Snapshot Verification (Optimistic Locking) ---
-        // Fetch current DB state to see if someone edited it manually
-        const { data: dbChar, error: fetchError } = await this.supabase
-            .from('characters')
-            .select('state')
-            .eq('id', charId)
-            .single();
-
-        if (!fetchError && dbChar) {
-            const currentDbHash = this.calculateHash(dbChar.state);
-            if (char.dbHash && currentDbHash !== char.dbHash) {
-                console.warn(`[SYNC] Manual DB Edit detected for ${char.name}. Aborting save to prevent overwriting.`);
-                // Invalidate cache so it's reloaded on next get
-                this.removeFromCache(charId);
-                return;
-            }
-        }
+        // Note: Removed Optimistic Locking check - it was incorrectly blocking all saves
+        // TODO: Implement proper version-based locking if needed in future
 
         // console.log(`[DB] Persisting character ${char.name} (${charId})`);
         const saveTime = new Date().toISOString();

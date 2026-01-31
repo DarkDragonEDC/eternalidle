@@ -245,7 +245,7 @@ function App() {
     if (socket?.connected) return;
 
     const socketUrl = import.meta.env.VITE_API_URL;
-    // console.log('[DEBUG-CLIENT] Connecting to socket URL:', socketUrl);
+    console.log('[SOCKET-DEBUG] Connecting to:', socketUrl);
     const newSocket = io(socketUrl, {
       auth: { token },
       transports: ['websocket']
