@@ -64,21 +64,39 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
     // Handle the event
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object;
-        const { userId, characterId, crownAmount, packageId } = session.metadata;
+        const { userId, characterId, crownAmount, packageId } = session.metadata || {};
 
-        console.log(`[STRIPE] Payment confirmed for user ${userId}, character ${characterId}: ${crownAmount} Crowns`);
+        console.log(`[STRIPE] Delivery started: User=${userId}, Char=${characterId}, Crowns=${crownAmount}, Package=${packageId}`);
+
+        if (!userId || !characterId || !crownAmount) {
+            console.error('[STRIPE] Error: Missing critical metadata in session', session.metadata);
+            return res.json({ received: true, error: 'missing_metadata' });
+        }
 
         try {
             await gameManager.executeLocked(userId, async () => {
-                const char = await gameManager.getCharacter(userId, characterId);
+                console.log(`[STRIPE] Lock acquired for user ${userId}`);
+                const char = await gameManager.getCharacter(userId, characterId, false, true); // Bypass cache to be safe
+
+                if (!char) {
+                    console.error(`[STRIPE] Error: Character ${characterId} not found for user ${userId}`);
+                    return;
+                }
+
+                console.log(`[STRIPE] Character found: ${char.name}. Current Crowns: ${char.state.crowns || 0}`);
+
                 const result = gameManager.crownsManager.addCrowns(char, parseInt(crownAmount), `STRIPE_${packageId}`);
+                console.log(`[STRIPE] addCrowns result: ${JSON.stringify(result)}`);
 
                 if (result.success) {
                     await gameManager.saveState(char.id, char.state);
+                    console.log(`[STRIPE] State saved successfully for ${char.name}`);
 
                     // Notify client if connected
                     const userSockets = Array.from(connectedSockets.values())
                         .filter(s => s.user?.id === userId);
+
+                    console.log(`[STRIPE] Found ${userSockets.length} active sockets to notify`);
 
                     userSockets.forEach(s => {
                         s.emit('crown_purchase_success', {
@@ -90,11 +108,12 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
                             s.emit('status_update', status);
                         });
                     });
+                } else {
+                    console.error(`[STRIPE] addCrowns failed: ${result.error}`);
                 }
             });
         } catch (err) {
-            console.error('[STRIPE] Error processing character update:', err);
-            // Stripe will retry if we don't send 200, but we might want 200 if it's a logic error
+            console.error('[STRIPE] Critical Error processing delivery:', err);
         }
     }
 
