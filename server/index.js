@@ -9,7 +9,10 @@ import Stripe from 'stripe';
 
 dotenv.config();
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
+if (!stripe) {
+    console.warn("WARNING: STRIPE_SECRET_KEY not found. Crown Store purchases will be disabled.");
+}
 
 process.on('unhandledRejection', (reason, promise) => {
     console.error('!!! Unhandled Rejection at:', promise, 'reason:', reason);
@@ -40,6 +43,10 @@ app.use(cors());
 app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
     const sig = req.headers['stripe-signature'];
     let event;
+
+    if (!stripe) {
+        return res.status(503).send('Stripe not configured');
+    }
 
     try {
         event = stripe.webhooks.constructEvent(
@@ -702,6 +709,10 @@ io.on('connection', (socket) => {
 
                 const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
                 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
+
+                if (!stripe) {
+                    return socket.emit('crown_purchase_error', { error: 'Payments are not configured on this server.' });
+                }
 
                 // Create Stripe Checkout Session
                 const session = await stripe.checkout.sessions.create({
