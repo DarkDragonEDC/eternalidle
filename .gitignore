@@ -5,3 +5,5 @@ dist
 
 migration/.env.migration
 migration/backup
+*.log
+server/logs/
