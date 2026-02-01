@@ -163,6 +163,10 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
     const myActiveListings = activeListingsForValues.filter(l => isOwnListing(l));
 
+    const isPremium = gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > Date.now();
+    const maxListings = isPremium ? 30 : 10;
+    const currentListingsCount = myActiveListings.length;
+
 
     return (
         <div className="content-area" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -436,176 +440,222 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
                     {/* View: SELL */}
                     {activeTab === 'SELL' && (
-                        <div className="scroll-container" style={{ flex: 1, paddingRight: '5px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                             <div style={{
-                                display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))',
-                                gap: isMobile ? '8px' : '12px',
-                                paddingBottom: '20px'
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                padding: '10px',
+                                background: 'rgba(0,0,0,0.2)',
+                                borderRadius: '8px',
+                                marginBottom: '15px',
+                                border: '1px solid var(--border)'
                             }}>
-                                {Object.entries(gameState?.state?.inventory || {}).filter(([id, qty]) => {
-                                    const data = resolveItem(id);
-                                    if (!data) return false;
-                                    // Exclude Quest items or explicit non-tradable items if any
-                                    if (data.type === 'QUEST') return false;
-                                    return true;
-                                }).map(([id, qty]) => {
-                                    const data = resolveItem(id);
-                                    // Simple rarity check for border color if needed, similar to Inventory
-                                    let specificBorderColor = 'var(--border)';
-                                    if (data.rarity) {
-                                        switch (data.rarity) {
-                                            case 'COMMON': specificBorderColor = '#9CA3AF'; break;
-                                            case 'UNCOMMON': specificBorderColor = '#10B981'; break;
-                                            case 'RARE': specificBorderColor = '#3B82F6'; break;
-                                            case 'EPIC': specificBorderColor = '#F59E0B'; break;
-                                            case 'LEGENDARY': specificBorderColor = '#EF4444'; break;
-                                            case 'MYTHIC': specificBorderColor = '#A855F7'; break;
-                                            default: specificBorderColor = 'var(--border)';
+                                <div style={{ fontSize: '0.85rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <ShoppingBag size={16} /> Market Slots:
+                                </div>
+                                <div style={{
+                                    fontSize: '0.9rem',
+                                    fontWeight: 'bold',
+                                    color: currentListingsCount >= maxListings ? '#ff4444' : 'var(--accent)'
+                                }}>
+                                    {currentListingsCount} / {maxListings}
+                                </div>
+                            </div>
+                            <div className="scroll-container" style={{ flex: 1, paddingRight: '5px' }}>
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))',
+                                    gap: isMobile ? '8px' : '12px',
+                                    paddingBottom: '20px'
+                                }}>
+                                    {Object.entries(gameState?.state?.inventory || {}).filter(([id, qty]) => {
+                                        const data = resolveItem(id);
+                                        if (!data) return false;
+                                        // Exclude Quest items or explicit non-tradable items if any
+                                        if (data.type === 'QUEST') return false;
+                                        return true;
+                                    }).map(([id, qty]) => {
+                                        const data = resolveItem(id);
+                                        // Simple rarity check for border color if needed, similar to Inventory
+                                        let specificBorderColor = 'var(--border)';
+                                        if (data.rarity) {
+                                            switch (data.rarity) {
+                                                case 'COMMON': specificBorderColor = '#9CA3AF'; break;
+                                                case 'UNCOMMON': specificBorderColor = '#10B981'; break;
+                                                case 'RARE': specificBorderColor = '#3B82F6'; break;
+                                                case 'EPIC': specificBorderColor = '#F59E0B'; break;
+                                                case 'LEGENDARY': specificBorderColor = '#EF4444'; break;
+                                                case 'MYTHIC': specificBorderColor = '#A855F7'; break;
+                                                default: specificBorderColor = 'var(--border)';
+                                            }
                                         }
-                                    }
 
-                                    return (
-                                        <button
-                                            key={id}
-                                            onClick={() => onListOnMarket({ itemId: id, max: qty })}
-                                            style={{
-                                                background: 'rgba(0,0,0,0.2)',
-                                                border: `1px solid ${specificBorderColor}`,
-                                                boxShadow: (data.rarity && data.rarity !== 'COMMON') ? `0 0 4px ${specificBorderColor}40` : 'none',
-                                                borderRadius: '10px',
-                                                padding: '10px',
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                alignItems: 'center',
-                                                justifyContent: 'space-between',
-                                                aspectRatio: '1/1',
-                                                cursor: 'pointer',
-                                                position: 'relative',
-                                                transition: '0.2s',
-                                                minHeight: '80px'
-                                            }}
-                                        >
-                                            <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: '#fff', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>T{data.tier}</div>
-                                            <div style={{ position: 'absolute', top: 6, right: 6, fontSize: '0.7rem', color: '#fff', fontWeight: 'bold' }}>x{qty}</div>
+                                        return (
+                                            <button
+                                                key={id}
+                                                onClick={() => onListOnMarket({ itemId: id, max: qty })}
+                                                style={{
+                                                    background: 'rgba(0,0,0,0.2)',
+                                                    border: `1px solid ${specificBorderColor}`,
+                                                    boxShadow: (data.rarity && data.rarity !== 'COMMON') ? `0 0 4px ${specificBorderColor}40` : 'none',
+                                                    borderRadius: '10px',
+                                                    padding: '10px',
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'space-between',
+                                                    aspectRatio: '1/1',
+                                                    cursor: 'pointer',
+                                                    position: 'relative',
+                                                    transition: '0.2s',
+                                                    minHeight: '80px'
+                                                }}
+                                            >
+                                                <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: '#fff', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>T{data.tier}</div>
+                                                <div style={{ position: 'absolute', top: 6, right: 6, fontSize: '0.7rem', color: '#fff', fontWeight: 'bold' }}>x{qty}</div>
 
-                                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', overflow: 'hidden' }}>
-                                                {data.icon ? (
-                                                    <img src={data.icon} alt={data.name} style={{ width: '130%', height: '130%', objectFit: 'contain' }} />
-                                                ) : (
-                                                    <Package size={32} color="#666" style={{ opacity: 0.8 }} />
-                                                )}
-                                            </div>
+                                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', overflow: 'hidden' }}>
+                                                    {data.icon ? (
+                                                        <img src={data.icon} alt={data.name} style={{ width: '130%', height: '130%', objectFit: 'contain' }} />
+                                                    ) : (
+                                                        <Package size={32} color="#666" style={{ opacity: 0.8 }} />
+                                                    )}
+                                                </div>
 
-                                            <div style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'bold', textAlign: 'center', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                {data.name}
-                                            </div>
-                                        </button>
-                                    );
-                                })}
+                                                <div style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'bold', textAlign: 'center', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {data.name}
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </div>
                     )}
 
                     {/* View: MY LISTINGS */}
                     {activeTab === 'MY_ORDERS' && (
-                        <>
-                            {myOrders.length === 0 ? (
-                                <div style={{ textAlign: 'center', padding: '100px', color: 'var(--text-dim)' }}>
-                                    <Tag size={48} style={{ marginBottom: '15px', opacity: 0.3, margin: '0 auto' }} />
-                                    <p>You have no active listings.</p>
+                        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                padding: '10px',
+                                background: 'rgba(0,0,0,0.2)',
+                                borderRadius: '8px',
+                                marginBottom: '15px',
+                                border: '1px solid var(--border)'
+                            }}>
+                                <div style={{ fontSize: '0.85rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <Tag size={16} /> Active Listings:
                                 </div>
-                            ) : (
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
-                                    {myOrders.map(l => (
-                                        <div key={l.id} style={{
-                                            background: 'rgba(255, 255, 255, 0.02)',
-                                            borderColor: 'rgba(255, 255, 255, 0.1)',
-                                            borderWidth: '1px',
-                                            borderStyle: 'solid',
-                                            padding: '12px 20px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '15px',
-                                            transition: '0.2s',
-                                            position: 'relative',
-                                            flexWrap: 'wrap',
-                                            borderRadius: '8px'
-                                        }}>
-                                            <div style={{
-                                                width: '40px',
-                                                height: '40px',
-                                                background: 'rgba(0, 0, 0, 0.4)',
-                                                borderRadius: '6px',
+                                <div style={{
+                                    fontSize: '0.9rem',
+                                    fontWeight: 'bold',
+                                    color: currentListingsCount >= maxListings ? '#ff4444' : 'var(--accent)'
+                                }}>
+                                    {currentListingsCount} / {maxListings}
+                                </div>
+                            </div>
+                            <div className="scroll-container" style={{ flex: 1, paddingRight: '5px' }}>
+                                {myOrders.length === 0 ? (
+                                    <div style={{ textAlign: 'center', padding: '100px', color: 'var(--text-dim)' }}>
+                                        <Tag size={48} style={{ marginBottom: '15px', opacity: 0.3, margin: '0 auto' }} />
+                                        <p>You have no active listings.</p>
+                                    </div>
+                                ) : (
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
+                                        {myOrders.map(l => (
+                                            <div key={l.id} style={{
+                                                background: 'rgba(255, 255, 255, 0.02)',
+                                                borderColor: 'rgba(255, 255, 255, 0.1)',
+                                                borderWidth: '1px',
+                                                borderStyle: 'solid',
+                                                padding: '12px 20px',
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                justifyContent: 'center',
-                                                border: `1px solid ${l.item_data.rarityColor || 'rgba(255, 255, 255, 0.1)'}`,
-                                                flexShrink: 0,
+                                                gap: '15px',
+                                                transition: '0.2s',
                                                 position: 'relative',
-                                                overflow: 'hidden'
+                                                flexWrap: 'wrap',
+                                                borderRadius: '8px'
                                             }}>
-                                                {l.item_data.icon ? (
-                                                    <img src={l.item_data.icon} alt={l.item_data.name} style={{ width: '130%', height: '130%', objectFit: 'contain', opacity: 1.0 }} />
-                                                ) : (
-                                                    <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{l.item_data.tier}</span>
-                                                )}
-                                                <div style={{ position: 'absolute', top: 2, left: 2, fontSize: '0.6rem', fontWeight: '900', color: '#fff', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>
-                                                    T{l.item_data.tier}
+                                                <div style={{
+                                                    width: '40px',
+                                                    height: '40px',
+                                                    background: 'rgba(0, 0, 0, 0.4)',
+                                                    borderRadius: '6px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    border: `1px solid ${l.item_data.rarityColor || 'rgba(255, 255, 255, 0.1)'}`,
+                                                    flexShrink: 0,
+                                                    position: 'relative',
+                                                    overflow: 'hidden'
+                                                }}>
+                                                    {l.item_data.icon ? (
+                                                        <img src={l.item_data.icon} alt={l.item_data.name} style={{ width: '130%', height: '130%', objectFit: 'contain', opacity: 1.0 }} />
+                                                    ) : (
+                                                        <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{l.item_data.tier}</span>
+                                                    )}
+                                                    <div style={{ position: 'absolute', top: 2, left: 2, fontSize: '0.6rem', fontWeight: '900', color: '#fff', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>
+                                                        T{l.item_data.tier}
+                                                    </div>
                                                 </div>
-                                            </div>
 
-                                            <div style={{ flex: '2 1 0%', minWidth: '150px' }}>
-                                                <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                                    <span>{l.item_data.qualityName && l.item_data.qualityName !== 'Normal' ? `${l.item_data.qualityName} ` : ''}{resolveItem(l.item_id)?.name || l.item_data.name}</span>
+                                                <div style={{ flex: '2 1 0%', minWidth: '150px' }}>
+                                                    <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                                        <span>{l.item_data.qualityName && l.item_data.qualityName !== 'Normal' ? `${l.item_data.qualityName} ` : ''}{resolveItem(l.item_id)?.name || l.item_data.name}</span>
+                                                    </div>
+                                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '2px', display: 'flex', gap: '15px' }}>
+                                                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                            <Clock size={12} /> {new Date(l.created_at).toLocaleString()}
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '2px', display: 'flex', gap: '15px' }}>
-                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                        <Clock size={12} /> {new Date(l.created_at).toLocaleString()}
-                                                    </span>
-                                                </div>
-                                            </div>
 
-                                            <div style={{ flex: '1 1 0%', textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '120px' }}>
-                                                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '2px' }}>{l.amount}x units</div>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--accent)' }}>
-                                                    <Coins size={16} /> {formatSilver(l.price)}
+                                                <div style={{ flex: '1 1 0%', textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '120px' }}>
+                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '2px' }}>{l.amount}x units</div>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--accent)' }}>
+                                                        <Coins size={16} /> {formatSilver(l.price)}
+                                                    </div>
+                                                </div>
+
+                                                <div style={{ marginLeft: '10px' }}>
+                                                    <button
+                                                        onClick={() => handleCancel(l.id)}
+                                                        style={{
+                                                            padding: '8px 16px',
+                                                            borderRadius: '6px',
+                                                            border: 'none',
+                                                            cursor: 'pointer',
+                                                            background: 'rgba(255, 68, 68, 0.1)',
+                                                            color: '#ff4444',
+                                                            fontWeight: 'bold',
+                                                            fontSize: '0.8rem',
+                                                            minWidth: '100px',
+                                                            border: '1px solid rgba(255, 68, 68, 0.3)',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            gap: '5px'
+                                                        }}
+                                                    >
+                                                        <Trash2 size={12} /> CANCEL
+                                                    </button>
                                                 </div>
                                             </div>
-
-                                            <div style={{ marginLeft: '10px' }}>
-                                                <button
-                                                    onClick={() => handleCancel(l.id)}
-                                                    style={{
-                                                        padding: '8px 16px',
-                                                        borderRadius: '6px',
-                                                        border: 'none',
-                                                        cursor: 'pointer',
-                                                        background: 'rgba(255, 68, 68, 0.1)',
-                                                        color: '#ff4444',
-                                                        fontWeight: 'bold',
-                                                        fontSize: '0.8rem',
-                                                        minWidth: '100px',
-                                                        border: '1px solid rgba(255, 68, 68, 0.3)',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        gap: '5px'
-                                                    }}
-                                                >
-                                                    <Trash2 size={12} /> CANCEL
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     )}
 
                     {/* View: CLAIM */}
                     {activeTab === 'CLAIM' && (
-                        <>
+                        <div className="scroll-container" style={{ flex: 1, paddingRight: '5px' }}>
                             {(!gameState?.state?.claims || gameState.state.claims.length === 0) ? (
                                 <div style={{ textAlign: 'center', padding: '100px', color: 'var(--text-dim)' }}>
                                     <ShoppingBag size={48} style={{ marginBottom: '15px', opacity: 0.3, margin: '0 auto' }} />
@@ -710,8 +760,6 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                             fontWeight: 'bold',
                                                             fontSize: '0.8rem',
                                                             minWidth: '100px',
-                                                            minWidth: '100px',
-                                                            // border: '1px solid rgba(76, 175, 80, 0.3)', // duplicate removed
                                                             display: 'flex',
                                                             alignItems: 'center',
                                                             justifyContent: 'center',
@@ -726,7 +774,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                     })}
                                 </div>
                             )}
-                        </>
+                        </div>
                     )}
 
                 </div>

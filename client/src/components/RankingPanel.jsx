@@ -234,7 +234,13 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
 
                                     {/* Player Info */}
                                     <div style={{ flex: 1 }}>
-                                        <div style={{ fontSize: '0.9rem', fontWeight: '900', color: index < 3 ? '#fff' : '#aaa' }}>{char.name}</div>
+                                        <div style={{
+                                            fontSize: '0.9rem',
+                                            fontWeight: '900',
+                                            color: char.state?.membership?.active && char.state?.membership?.expiresAt > Date.now()
+                                                ? '#d4af37'
+                                                : (index < 3 ? '#fff' : '#aaa')
+                                        }}>{char.name}</div>
                                         <div style={{ fontSize: '0.55rem', color: '#555', fontWeight: 'bold', letterSpacing: '1px' }}>
                                             {char.label}
                                         </div>

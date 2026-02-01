@@ -588,9 +588,19 @@ if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[5]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[5].i
 if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[6]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[6].icon = '/items/T6_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[6].scale = '110%'; }
 if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[7]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[7].icon = '/items/T7_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[7].scale = '110%'; }
 if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[8]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[8].icon = '/items/T8_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[8].scale = '110%'; }
-if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[9]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[9].icon = '/items/T9_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[9].scale = '110%'; }
-if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[10]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[10].icon = '/items/T10_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[10].scale = '110%'; }
+// Generate Dungeon Chests
+for (const t of TIERS) {
+    // ... existing chest code ...
+}
 
+ITEMS.SPECIAL.MEMBERSHIP = {
+    id: 'ETERNAL_MEMBERSHIP',
+    name: 'Eternal Membership',
+    description: 'Use to activate 30 days of VIP status and exclusive benefits.',
+    type: 'CONSUMABLE',
+    tier: 1,
+    icon: ''
+};
 
 export const ITEM_LOOKUP = {};
 const indexItems = (obj) => {

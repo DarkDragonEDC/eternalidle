@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { X, Crown, Zap, Package, Sparkles, Star, ShoppingBag, Check } from 'lucide-react';
+import { X, Crown, Zap, Package, Sparkles, Star, ShoppingBag, Check, Trophy, Info } from 'lucide-react';
 
 const CrownShop = ({ socket, gameState, onClose }) => {
     const [storeItems, setStoreItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [purchasing, setPurchasing] = useState(null);
     const [purchaseResult, setPurchaseResult] = useState(null);
+
+    const [showMSInfo, setShowMSInfo] = useState(false);
 
     const crowns = gameState?.state?.crowns || 0;
 
@@ -54,7 +56,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
     }, [socket]);
 
     const handlePurchase = (item) => {
-        if (item.category === 'PACKAGE') {
+        if (item.category === 'PACKAGE' || item.category === 'MEMBERSHIP') {
             setPurchasing(item.id);
             // Simulate payment gateway start
             socket.emit('buy_crown_package', { packageId: item.id });
@@ -70,6 +72,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
             case 'CONVENIENCE': return <Package size={16} color="#4caf50" />;
             case 'COSMETIC': return <Sparkles size={16} color="#e040fb" />;
             case 'PACKAGE': return <Crown size={16} color="#ffd700" />;
+            case 'MEMBERSHIP': return <Trophy size={16} color="#4fc3f7" />;
             default: return <Star size={16} />;
         }
     };
@@ -80,6 +83,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
             case 'CONVENIENCE': return '#4caf50';
             case 'COSMETIC': return '#e040fb';
             case 'PACKAGE': return '#ffd700';
+            case 'MEMBERSHIP': return '#4fc3f7';
             default: return '#888';
         }
     };
@@ -213,7 +217,8 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                         {category === 'BOOST' ? 'Boosts (24h)' :
                                             category === 'CONVENIENCE' ? 'Convenience' :
                                                 category === 'COSMETIC' ? 'Cosmetics' :
-                                                    category === 'PACKAGE' ? 'Crown Packages' : category}
+                                                    category === 'PACKAGE' ? 'Crown Packages' :
+                                                        category === 'MEMBERSHIP' ? 'VIP Membership' : category}
                                     </span>
                                 </div>
 
@@ -223,14 +228,16 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                     gap: '12px'
                                 }}>
                                     {items.map(item => {
+                                        const isRealMoney = item.category === 'PACKAGE' || item.category === 'MEMBERSHIP';
                                         const isPackage = item.category === 'PACKAGE';
-                                        const canAfford = isPackage ? true : (crowns >= item.cost);
+                                        const isMembership = item.category === 'MEMBERSHIP';
+                                        const canAfford = isRealMoney ? true : (crowns >= item.cost);
                                         const isPurchasing = purchasing === item.id;
 
                                         return (
                                             <div key={item.id} style={{
                                                 background: 'rgba(255,255,255,0.03)',
-                                                border: `1px solid ${isPackage ? 'rgba(212, 175, 55, 0.4)' : (canAfford ? 'rgba(255,255,255,0.1)' : 'rgba(255,0,0,0.2)')}`,
+                                                border: `1px solid ${isRealMoney ? 'rgba(76, 175, 80, 0.4)' : (canAfford ? 'rgba(255,255,255,0.1)' : 'rgba(255,0,0,0.2)')}`,
                                                 borderRadius: '12px',
                                                 padding: '15px',
                                                 opacity: canAfford ? 1 : 0.6,
@@ -278,7 +285,11 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                                                 <span style={{ fontSize: '0.6rem', color: '#4caf50', textTransform: 'uppercase' }}>Permanent</span>
                                                             )}
                                                             {item.duration && (
-                                                                <span style={{ fontSize: '0.6rem', color: '#ffd700', textTransform: 'uppercase' }}>24 Hours</span>
+                                                                <span style={{ fontSize: '0.6rem', color: '#ffd700', textTransform: 'uppercase' }}>
+                                                                    {item.duration >= 24 * 60 * 60 * 1000
+                                                                        ? `${Math.round(item.duration / (24 * 60 * 60 * 1000))} Days`
+                                                                        : `${Math.round(item.duration / (60 * 60 * 1000))} Hours`}
+                                                                </span>
                                                             )}
                                                             {isPackage && item.amount && (
                                                                 <span style={{ fontSize: '0.65rem', color: '#ffd700', fontWeight: 'bold' }}>{item.amount} CROWNS</span>
@@ -289,17 +300,33 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                                         display: 'flex',
                                                         alignItems: 'center',
                                                         gap: '4px',
-                                                        background: isPackage ? 'rgba(76, 175, 80, 0.1)' : 'rgba(255,215,0,0.1)',
+                                                        background: isRealMoney ? 'rgba(76, 175, 80, 0.1)' : 'rgba(255,215,0,0.1)',
                                                         padding: '4px 10px',
                                                         borderRadius: '12px',
-                                                        border: `1px solid ${isPackage ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255,215,0,0.2)'}`,
+                                                        border: `1px solid ${isRealMoney ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255,215,0,0.2)'}`,
                                                         position: 'relative',
                                                         zIndex: 2
                                                     }}>
-                                                        {!isPackage && <Crown size={12} color="#ffd700" />}
-                                                        <span style={{ color: isPackage ? '#4caf50' : '#ffd700', fontWeight: 'bold', fontSize: '0.85rem' }}>
-                                                            {isPackage ? `$${item.price.toFixed(2)}` : item.cost}
+                                                        {!isRealMoney && <Crown size={12} color="#ffd700" />}
+                                                        <span style={{ color: isRealMoney ? '#4caf50' : '#ffd700', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                                                            {isRealMoney ? `$${item.price.toFixed(2)}` : item.cost}
                                                         </span>
+                                                        {item.id === 'ETERNAL_MEMBERSHIP' && (
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); setShowMSInfo(true); }}
+                                                                style={{
+                                                                    background: 'none',
+                                                                    border: 'none',
+                                                                    color: '#4fc3f7',
+                                                                    cursor: 'pointer',
+                                                                    padding: '2px',
+                                                                    display: 'flex',
+                                                                    marginLeft: '4px'
+                                                                }}
+                                                            >
+                                                                <Info size={16} />
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </div>
 
@@ -313,14 +340,14 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                                     style={{
                                                         width: '100%',
                                                         padding: '10px',
-                                                        background: isPackage
+                                                        background: isRealMoney
                                                             ? 'linear-gradient(90deg, rgba(76, 175, 80, 0.4), rgba(76, 175, 80, 0.1))'
                                                             : (canAfford
                                                                 ? 'linear-gradient(90deg, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.1))'
                                                                 : 'rgba(100,100,100,0.2)'),
-                                                        border: `1px solid ${isPackage ? 'rgba(76, 175, 80, 0.5)' : (canAfford ? 'rgba(212, 175, 55, 0.5)' : 'rgba(100,100,100,0.3)')}`,
+                                                        border: `1px solid ${isRealMoney ? 'rgba(76, 175, 80, 0.5)' : (canAfford ? 'rgba(212, 175, 55, 0.5)' : 'rgba(100,100,100,0.3)')}`,
                                                         borderRadius: '8px',
-                                                        color: isPackage ? '#4caf50' : (canAfford ? '#ffd700' : '#666'),
+                                                        color: isRealMoney ? '#4caf50' : (canAfford ? '#ffd700' : '#666'),
                                                         fontWeight: 'bold',
                                                         fontSize: '0.8rem',
                                                         cursor: canAfford && !isPurchasing ? 'pointer' : 'not-allowed',
@@ -333,10 +360,10 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                                 >
                                                     {isPurchasing ? (
                                                         'Processing...'
-                                                    ) : isPackage ? (
+                                                    ) : isRealMoney ? (
                                                         <>
-                                                            <Crown size={14} />
-                                                            BUY CROWNS
+                                                            <ShoppingBag size={14} />
+                                                            {item.category === 'MEMBERSHIP' ? 'BUY MEMBERSHIP' : 'BUY CROWNS'}
                                                         </>
                                                     ) : canAfford ? (
                                                         <>
@@ -355,6 +382,79 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                         ))
                     )}
                 </div>
+
+                {/* Membership Benefits Modal */}
+                {showMSInfo && (
+                    <div style={{
+                        position: 'fixed',
+                        top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(0,0,0,0.8)',
+                        zIndex: 10000,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '20px'
+                    }} onClick={() => setShowMSInfo(false)}>
+                        <div style={{
+                            background: '#1a1d26',
+                            border: '1px solid #4fc3f7',
+                            borderRadius: '16px',
+                            padding: '24px',
+                            maxWidth: '400px',
+                            width: '100%',
+                            boxShadow: '0 0 30px rgba(79, 195, 247, 0.2)'
+                        }} onClick={e => e.stopPropagation()}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <Trophy size={20} color="#4fc3f7" />
+                                    <h3 style={{ margin: 0, color: '#fff' }}>Membership Benefits</h3>
+                                </div>
+                                <button onClick={() => setShowMSInfo(false)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}>
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #ffca28' }}>
+                                    <div style={{ fontWeight: 'bold', color: '#ffca28', fontSize: '0.9rem', marginBottom: '4px' }}>Global XP Bonus</div>
+                                    <div style={{ fontSize: '0.8rem', color: '#aaa' }}>Gain <strong style={{ color: '#fff' }}>+10% more XP</strong> from all sources (Gathering, Refining, Crafting, and Combat).</div>
+                                </div>
+
+                                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #4caf50' }}>
+                                    <div style={{ fontWeight: 'bold', color: '#4caf50', fontSize: '0.9rem', marginBottom: '4px' }}>Inventory Expansion</div>
+                                    <div style={{ fontSize: '0.8rem', color: '#aaa' }}>Increase your base inventory space from <strong style={{ color: '#fff' }}>30 to 50 slots</strong>.</div>
+                                </div>
+
+                                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #42a5f5' }}>
+                                    <div style={{ fontWeight: 'bold', color: '#42a5f5', fontSize: '0.9rem', marginBottom: '4px' }}>Market Domination</div>
+                                    <div style={{ fontSize: '0.8rem', color: '#aaa' }}>List up to <strong style={{ color: '#fff' }}>30 items</strong> simultaneously on the Market (Base: 10).</div>
+                                </div>
+
+                                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #ec407a' }}>
+                                    <div style={{ fontWeight: 'bold', color: '#ec407a', fontSize: '0.9rem', marginBottom: '4px' }}>Productive Inactivity</div>
+                                    <div style={{ fontSize: '0.8rem', color: '#aaa' }}>The IDLE productivity limit is increased from <strong style={{ color: '#fff' }}>8h to 12h</strong>.</div>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => setShowMSInfo(false)}
+                                style={{
+                                    width: '100%',
+                                    marginTop: '20px',
+                                    padding: '12px',
+                                    background: 'rgba(79, 195, 247, 0.1)',
+                                    border: '1px solid rgba(79, 195, 247, 0.3)',
+                                    borderRadius: '8px',
+                                    color: '#4fc3f7',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                CLOSE
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

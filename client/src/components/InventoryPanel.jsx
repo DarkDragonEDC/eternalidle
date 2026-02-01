@@ -93,7 +93,8 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
         return sortDir === 'asc' ? comparison : -comparison;
     });
 
-    const totalSlots = 50;
+    const isPremium = gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > Date.now();
+    const totalSlots = isPremium ? 50 : 30;
     const itemsToRender = [...sortedItems];
     while (itemsToRender.length < totalSlots) {
         itemsToRender.push(null);

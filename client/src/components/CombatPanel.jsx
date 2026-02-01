@@ -455,8 +455,11 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                     const totalEffectiveHp = playerHp + (foodAmount * foodHealPerUse);
                                     const secondsToDie = totalEffectiveHp / netDmgPerSecond;
 
-                                    // Threshold: 12 Hours
-                                    if (secondsToDie > 43200) {
+                                    // Threshold: Dynamic Idle Limit (8h normal / 12h Membership)
+                                    const isPremium = gameState?.state?.isPremium || gameState?.state?.membership?.active;
+                                    const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
+
+                                    if (secondsToDie > idleLimitSeconds) {
                                         survivalText = "∞";
                                         survivalColor = "#4caf50";
                                     } else {
@@ -483,7 +486,10 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                     const secondsAfterFood = playerHp / mobDmgPerSecond;
                                     const totalSeconds = secondsOfFood + secondsAfterFood;
 
-                                    if (totalSeconds > 43200) {
+                                    const isPremium = gameState?.state?.isPremium || gameState?.state?.membership?.active;
+                                    const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
+
+                                    if (totalSeconds > idleLimitSeconds) {
                                         survivalText = "∞";
                                         survivalColor = "#4caf50";
                                     } else {
@@ -506,7 +512,10 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                     // No food, survival based purely on HP
                                     const secondsToDie = playerHp / mobDmgPerSecond;
 
-                                    if (secondsToDie > 43200) {
+                                    const isPremium = gameState?.state?.isPremium || gameState?.state?.membership?.active;
+                                    const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
+
+                                    if (secondsToDie > idleLimitSeconds) {
                                         survivalText = "∞";
                                         survivalColor = "#4caf50";
                                     } else {

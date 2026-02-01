@@ -484,7 +484,10 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                                                 secondsToDie = (timeToNext + ((roundsToDie - 1) * atkSpeed)) / 1000;
                                                             }
 
-                                                            if (secondsToDie > 43200) {
+                                                            const isPremium = gameState?.state?.isPremium || gameState?.state?.membership?.active;
+                                                            const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
+
+                                                            if (secondsToDie > idleLimitSeconds) {
                                                                 survivalText = "∞";
                                                                 survivalColor = "#4caf50";
                                                             } else {

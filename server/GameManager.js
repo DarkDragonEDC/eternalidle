@@ -82,6 +82,11 @@ export class GameManager {
         return this.userLocks.has(userId);
     }
 
+    getMaxIdleTime(char) {
+        const isPremium = char.state?.isPremium || char.state?.membership?.active;
+        return (isPremium ? 12 : 8) * 60 * 60 * 1000;
+    }
+
     calculateHash(state) {
         try {
             if (!state) return '';
@@ -243,7 +248,8 @@ export class GameManager {
                     const secondsPerRound = atkSpeed / 1000;
 
                     if (elapsedSeconds >= secondsPerRound) {
-                        const maxEffectSeconds = Math.min(elapsedSeconds, 43200); // Max 12 hours real time
+                        const maxIdleMs = this.getMaxIdleTime(data);
+                        const maxEffectSeconds = Math.min(elapsedSeconds, maxIdleMs / 1000);
                         const maxRounds = Math.floor(maxEffectSeconds / secondsPerRound);
 
                         if (maxRounds > 0) {
@@ -693,10 +699,7 @@ export class GameManager {
 
     async runMaintenance() {
         const now = new Date().toISOString();
-        const IDLE_LIMIT_HOURS = 12;
-        const limitDate = new Date(Date.now() - (IDLE_LIMIT_HOURS * 60 * 60 * 1000)).toISOString();
-
-        console.log(`[MAINTENANCE] Starting background cleanup (Limit: ${IDLE_LIMIT_HOURS}h)...`);
+        console.log(`[MAINTENANCE] Starting background cleanup (Dynamic Limits 8h/12h)...`);
 
         try {
             // Find all characters with any active activity
@@ -712,10 +715,8 @@ export class GameManager {
                 return;
             }
 
-            const limitMs = IDLE_LIMIT_HOURS * 60 * 60 * 1000;
-            const nowMs = Date.now();
-
             const toCleanup = allActive.filter(char => {
+                const limitMs = this.getMaxIdleTime(char);
                 let startTime = null;
                 if (char.state.dungeon && char.state.dungeon.started_at) {
                     startTime = new Date(char.state.dungeon.started_at);
@@ -732,7 +733,7 @@ export class GameManager {
             });
 
             if (toCleanup.length === 0) {
-                console.log("[MAINTENANCE] No characters found exceeding the 12h limit.");
+                console.log("[MAINTENANCE] No characters found exceeding their respective idle limits.");
                 return;
             }
 
@@ -765,7 +766,7 @@ export class GameManager {
         if (!char.current_activity && !char.state.combat && !foodUsed && !char.state.dungeon) return null;
 
         const now = Date.now();
-        const IDLE_LIMIT_MS = 12 * 60 * 60 * 1000; // 12 Hours
+        const IDLE_LIMIT_MS = this.getMaxIdleTime(char);
 
         // Real-time 12h Limit Check
         let limitExceeded = false;
@@ -778,7 +779,8 @@ export class GameManager {
         }
 
         if (limitExceeded) {
-            console.log(`[LIMIT] 12h limit reached for ${char.name}. Stopping action.`);
+            const limitHours = IDLE_LIMIT_MS / (60 * 60 * 1000);
+            console.log(`[LIMIT] ${limitHours}h limit reached for ${char.name}. Stopping action.`);
             char.current_activity = null;
             char.activity_started_at = null;
             if (char.state.combat) delete char.state.combat;
@@ -789,7 +791,7 @@ export class GameManager {
 
             return {
                 success: false,
-                message: "12-hour idle limit reached. Action stopped.",
+                message: `${limitHours}-hour idle limit reached. Action stopped.`,
                 status: await this.getStatus(char.user_id, false, char.id)
             };
         }
@@ -1239,13 +1241,21 @@ export class GameManager {
 
             this.applyBuff(char, effect, value, totalDuration);
             message += ` (Buff Applied: +${Math.round(value * 100)}% for ${Math.round(totalDuration / 60)}m)`;
+        } else if (itemData.id === 'ETERNAL_MEMBERSHIP') {
+            const membershipItem = { duration: (itemData.duration || 30 * 24 * 60 * 60 * 1000) * safeQty };
+            const result = this.crownsManager.applyMembership(char, membershipItem);
+            if (result.success) {
+                message = result.message;
+            } else {
+                throw new Error(result.error || "Failed to activate membership");
+            }
         } else if (itemData.id.includes('CHEST')) {
             // Chest Logic
             const tier = itemData.tier || 1;
 
             // Simulate adding items to check for space (Approximation)
             const tempInv = { ...char.state.inventory };
-            const SIMULATED_MAX = 50;
+            const simulatedMax = this.inventoryManager.getMaxSlots(char);
 
             const totalRewards = {
                 items: {}
@@ -1289,7 +1299,7 @@ export class GameManager {
                 }
             }
 
-            if (Object.keys(tempInv).length + newSlotsNeeded > SIMULATED_MAX) {
+            if (Object.keys(tempInv).length + newSlotsNeeded > simulatedMax) {
                 throw new Error("Inventory Full! Cannot open all chests.");
             }
 

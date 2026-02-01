@@ -115,8 +115,13 @@ const BuffsDrawer = ({ gameState, isMobile }) => {
                             // We can clamp to avoid negative numbers if we know INT can't be negative.
                             if (baseBonus < 0) baseBonus = 0;
 
-                            if (key === 'GLOBAL_XP' || key === 'GOLD') {
-                                // For these, we know INT is the source
+                            const msActive = activeBuffs.MEMBERSHIP_BOOST && activeBuffs.MEMBERSHIP_BOOST.expiresAt > now;
+                            let msDisplayBonus = 0;
+                            let intDisplayBonus = baseBonus;
+
+                            if (key === 'GLOBAL_XP' && msActive) {
+                                msDisplayBonus = 10;
+                                intDisplayBonus = Math.max(0, baseBonus - msDisplayBonus);
                             }
 
                             return (
@@ -145,8 +150,10 @@ const BuffsDrawer = ({ gameState, isMobile }) => {
                                             {active && (
                                                 <>POTION: <span style={{ color: '#d4af37' }}>+{potionBonusPercent}%</span> | </>
                                             )}
-                                            {/* INT ou Base Bonus. Se for muito óbvio que é só INT, talvez nem precise do label, mas vamos manter o padrão. */}
-                                            INT: +{baseBonus.toFixed(0)}%
+                                            {key === 'GLOBAL_XP' && msActive && (
+                                                <>MS: <span style={{ color: '#d4af37' }}>+{msDisplayBonus}%</span> | </>
+                                            )}
+                                            INT: +{intDisplayBonus.toFixed(0)}%
                                         </div>
                                         {active && (
                                             <span style={{ fontSize: '0.55rem', color: '#d4af37', display: 'flex', alignItems: 'center', gap: '2px' }}>

@@ -98,9 +98,13 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
     const reductionFactor = Math.max(0.1, 1 - (parseFloat(efficiency) / 100));
     const finalTime = Math.max(0.5, baseTime * reductionFactor);
 
-    // Máximo 12h
-    // Máximo 12h ou limitado por materiais
-    const timeLimitMax = Math.floor(43200 / finalTime);
+    // Limite Dinâmico de Idle (8h normal / 12h Membership)
+    const isPremium = gameState?.state?.isPremium || gameState?.state?.membership?.active;
+    const idleLimitHours = isPremium ? 12 : 8;
+    const idleLimitSeconds = idleLimitHours * 60 * 60;
+
+    // Máximo limitado por tempo ou materiais
+    const timeLimitMax = Math.floor(idleLimitSeconds / finalTime);
     let maxQuantity = timeLimitMax;
 
     if (type === 'CRAFTING' || type === 'REFINING') {

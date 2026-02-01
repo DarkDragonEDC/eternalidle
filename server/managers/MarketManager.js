@@ -72,6 +72,20 @@ export class MarketManager {
         const char = await this.gameManager.getCharacter(userId, characterId);
         if (!char) throw new Error("Character not found");
 
+        // Check Listing Limit (10 base, 30 Premium)
+        const isPremium = char.state?.membership?.active && char.state?.membership?.expiresAt > Date.now();
+        const maxListings = isPremium ? 30 : 10;
+
+        const { count, error: countError } = await this.gameManager.supabase
+            .from('market_listings')
+            .select('*', { count: 'exact', head: true })
+            .eq('seller_id', userId);
+
+        if (countError) throw countError;
+        if (count >= maxListings) {
+            throw new Error(`Market listing limit reached (${count}/${maxListings}). ${!isPremium ? 'Upgrade to Premium for 30 slots!' : ''}`);
+        }
+
         const inventory = char.state.inventory;
         if (!inventory[itemId] || inventory[itemId] < amount) {
             throw new Error("Insufficient quantity in inventory");

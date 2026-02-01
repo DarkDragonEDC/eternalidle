@@ -21,12 +21,17 @@ export class InventoryManager {
         return resolveItem(id);
     }
 
+    getMaxSlots(char) {
+        const isPremium = char.state?.membership?.active && char.state?.membership?.expiresAt > Date.now();
+        return isPremium ? 50 : 30;
+    }
+
     addItemToInventory(char, itemId, amount) {
         if (!char.state.inventory) char.state.inventory = {};
         const inv = char.state.inventory;
 
         if (!inv[itemId]) {
-            if (Object.keys(inv).length >= 50) {
+            if (Object.keys(inv).length >= this.getMaxSlots(char)) {
                 return false;
             }
         }
@@ -41,7 +46,7 @@ export class InventoryManager {
         if (!char.state.inventory) return true;
         const inv = char.state.inventory;
         if (!inv[itemId]) {
-            if (Object.keys(inv).length >= 50) {
+            if (Object.keys(inv).length >= this.getMaxSlots(char)) {
                 return false;
             }
         }
@@ -348,19 +353,24 @@ export class InventoryManager {
                             case 'CRAFT_XP':
                                 xpBonus.CRAFTING += valPc;
                                 break;
+                            case 'MEMBERSHIP_BOOST':
+                                // 10% XP Bonus
+                                globals.xpYield += (buff.xpBonus || 0.10) * 100;
+                                // Speed bonus removed
+                                break;
                         }
                     }
                 });
             }
         }
 
-        // Apply Global to all specific categories (if we had any global efficiency sources, they would go here)
+        // Apply Global and Membership efficiency to all specific categories
         const keys = Object.keys(efficiency).filter(k => k !== 'GLOBAL');
         keys.forEach(k => {
-            efficiency[k] += efficiency.GLOBAL;
+            efficiency[k] += efficiency.GLOBAL + (globals.efficiency || 0);
             efficiency[k] = parseFloat(efficiency[k].toFixed(2));
         });
-        efficiency.GLOBAL = parseFloat(efficiency.GLOBAL.toFixed(2));
+        efficiency.GLOBAL = parseFloat((efficiency.GLOBAL + (globals.efficiency || 0)).toFixed(2));
 
         // Total Speed = WeaponSpeed + GearSpeed
         const weaponObj = equipment.mainHand; // Renaming to avoid conflict if I really want a local handle

@@ -348,6 +348,46 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                         </React.Fragment>
                     );
                 })}
+
+                {/* Membership Status */}
+                {gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > Date.now() && (
+                    <div style={{
+                        marginTop: '20px',
+                        marginBottom: '10px',
+                        background: '#1E2330',
+                        borderRadius: '8px',
+                        padding: '12px',
+                        border: '1px solid rgba(34, 197, 94, 0.2)',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                    }}>
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            marginBottom: '6px'
+                        }}>
+                            <span style={{
+                                fontSize: '0.8rem',
+                                fontWeight: '600',
+                                color: '#4ade80'
+                            }}>Premium Member</span>
+                            <span style={{
+                                fontSize: '0.65rem',
+                                background: 'rgba(34, 197, 94, 0.2)',
+                                color: '#4ade80',
+                                padding: '1px 6px',
+                                borderRadius: '4px',
+                                fontWeight: 'bold'
+                            }}>Active</span>
+                        </div>
+                        <div style={{
+                            fontSize: '0.7rem',
+                            color: '#8B8D91'
+                        }}>
+                            Expires: {new Date(gameState.state.membership.expiresAt).toLocaleDateString('pt-BR')}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Footer Buttons */}

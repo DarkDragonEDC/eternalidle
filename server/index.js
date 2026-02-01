@@ -68,7 +68,7 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
 
         console.log(`[STRIPE] Delivery started: User=${userId}, Char=${characterId}, Crowns=${crownAmount}, Package=${packageId}`);
 
-        if (!userId || !characterId || !crownAmount) {
+        if (!userId || !characterId) {
             console.error('[STRIPE] Error: Missing critical metadata in session', session.metadata);
             return res.json({ received: true, error: 'missing_metadata' });
         }
@@ -85,8 +85,33 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
 
                 console.log(`[STRIPE] Character found: ${char.name}. Current Crowns: ${char.state.crowns || 0}`);
 
-                const result = gameManager.crownsManager.addCrowns(char, parseInt(crownAmount), `STRIPE_${packageId}`);
-                console.log(`[STRIPE] addCrowns result: ${JSON.stringify(result)}`);
+                let result;
+                let deliveryMessage = '';
+
+                if (packageId === 'ETERNAL_MEMBERSHIP') {
+                    // Purchase is ETERNAL_MEMBERSHIP
+                    const added = gameManager.inventoryManager.addItemToInventory(char, 'ETERNAL_MEMBERSHIP', 1);
+                    if (added) {
+                        result = { success: true, message: 'Membership item added to inventory!' };
+                    } else {
+                        // Inventory Full - Add to Claims instead
+                        gameManager.marketManager.addClaim(char, {
+                            type: 'PURCHASED_ITEM',
+                            itemId: 'ETERNAL_MEMBERSHIP',
+                            amount: 1,
+                            name: 'Eternal Membership',
+                            timestamp: Date.now()
+                        });
+                        result = { success: true, message: 'Inventory full! Membership item sent to Market -> Claims tab.' };
+                    }
+                    deliveryMessage = result.message;
+                } else {
+                    // Standard crowns package
+                    result = gameManager.crownsManager.addCrowns(char, parseInt(crownAmount), `STRIPE_${packageId}`);
+                    deliveryMessage = `Payment confirmed! Added ${crownAmount} Crowns.`;
+                }
+
+                console.log(`[STRIPE] Delivery result: ${JSON.stringify(result)}`);
 
                 if (result.success) {
                     await gameManager.saveState(char.id, char.state);
@@ -100,8 +125,8 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
 
                     userSockets.forEach(s => {
                         s.emit('crown_purchase_success', {
-                            message: `Payment confirmed! Added ${crownAmount} Crowns.`,
-                            newBalance: result.newBalance
+                            message: deliveryMessage,
+                            newBalance: char.state.crowns
                         });
                         // Also trigger a full status update
                         gameManager.getStatus(userId, true, characterId).then(status => {
@@ -721,8 +746,8 @@ io.on('connection', (socket) => {
     socket.on('buy_crown_package', async ({ packageId }) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
-                const { CROWN_STORE } = await import('../shared/crownStore.js');
-                const pkg = CROWN_STORE.PACKAGES[packageId];
+                const { getStoreItem } = await import('../shared/crownStore.js');
+                const pkg = getStoreItem(packageId);
 
                 if (!pkg) {
                     return socket.emit('crown_purchase_error', { error: 'Package not found' });
@@ -757,7 +782,7 @@ io.on('connection', (socket) => {
                         userId: socket.user.id,
                         characterId: socket.data.characterId,
                         packageId: packageId,
-                        crownAmount: pkg.amount
+                        crownAmount: pkg.amount || 0
                     }
                 });
 

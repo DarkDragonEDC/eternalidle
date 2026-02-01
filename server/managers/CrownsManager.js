@@ -131,6 +131,11 @@ export class CrownsManager {
                 return this.applyConvenience(char, item);
             case 'COSMETIC':
                 return this.applyCosmetic(char, item);
+            case 'MEMBERSHIP':
+                // Instead of applying immediately, add to inventory
+                const added = this.gameManager.inventoryManager.addItemToInventory(char, item.id, 1);
+                if (!added) return { success: false, error: 'Inventory full!' };
+                return { success: true, message: `${item.name} added to your inventory! Use it when you want to activate.` };
             default:
                 return { success: false, error: 'Unknown item category' };
         }
@@ -219,6 +224,49 @@ export class CrownsManager {
             default:
                 return { success: false, error: 'Unknown cosmetic item' };
         }
+    }
+
+    /**
+     * Apply membership status and benefits
+     */
+    applyMembership(char, item) {
+        const now = Date.now();
+        const duration = item.duration || (30 * 24 * 60 * 60 * 1000);
+
+        // Initialize membership if needed
+        if (!char.state.membership) {
+            char.state.membership = {
+                active: true,
+                startedAt: now,
+                expiresAt: now + duration
+            };
+        } else {
+            // Extend existing membership
+            const currentExpiry = char.state.membership.expiresAt || now;
+            char.state.membership.expiresAt = Math.max(currentExpiry, now) + duration;
+            char.state.membership.active = true;
+        }
+
+        // Apply 10% XP Buff
+        if (!char.state.active_buffs) char.state.active_buffs = {};
+        const buffs = typeof char.state.active_buffs === 'string'
+            ? JSON.parse(char.state.active_buffs)
+            : char.state.active_buffs;
+
+        // Membership provides 1.1x XP (10% bonus)
+        buffs['MEMBERSHIP_BOOST'] = {
+            xpBonus: 0.10,
+            speedBonus: 0,
+            expiresAt: char.state.membership.expiresAt,
+            source: 'MEMBERSHIP'
+        };
+        char.state.active_buffs = buffs;
+
+        return {
+            success: true,
+            message: `Membership activated! +10% XP Bonus until ${new Date(char.state.membership.expiresAt).toLocaleDateString()}`,
+            expiresAt: char.state.membership.expiresAt
+        };
     }
 
     /**

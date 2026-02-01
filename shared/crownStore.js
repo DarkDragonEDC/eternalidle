@@ -48,7 +48,20 @@ export const CROWN_STORE = {
     },
     BOOSTS: {},
     CONVENIENCE: {},
-    COSMETICS: {}
+    COSMETICS: {},
+    MEMBERSHIP: {
+        ETERNAL_MEMBERSHIP: {
+            id: 'ETERNAL_MEMBERSHIP',
+            name: 'Eternal Membership',
+            description: 'Activate to receive 30 days of VIP status and exclusive benefits.',
+            price: 6.99,
+            currency: 'USD',
+            icon: '',
+            category: 'MEMBERSHIP',
+            duration: 30 * 24 * 60 * 60 * 1000,
+            permanent: false
+        }
+    }
 };
 
 // Helper to get all store items as flat array
