@@ -59,6 +59,8 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
+    console.log(`[STRIPE] Webhook received: ${event.type}`);
+
     // Handle the event
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object;
