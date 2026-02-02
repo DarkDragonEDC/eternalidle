@@ -191,17 +191,26 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                     flex-direction: column;
                     align-items: center;
                     justify-content: center;
-                    height: 100vh;
+                    min-height: 100vh;
+                    padding: 20px;
                     background: #1a1a1a;
                     color: #fff;
-                    font-family: 'Press Start 2P', cursive;
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                }
+                .char-select-container h1 {
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    color: #d4af37;
+                    text-align: center;
+                    margin-bottom: 10px;
                 }
                 .char-list {
                     display: flex;
                     gap: 20px;
-                    margin-top: 40px;
+                    margin-top: 20px;
                     flex-wrap: wrap;
                     justify-content: center;
+                    max-width: 100%;
                 }
                 .char-card {
                     background: #2a2a2a;
@@ -224,12 +233,29 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                 .char-name {
                     color: #ffd700;
                     margin-bottom: 10px;
-                    font-size: 1.1em;
+                    font-size: 1.1rem;
+                    font-weight: 600;
                 }
                 .char-info p {
-                    font-size: 0.8em;
+                    font-size: 0.85rem;
                     color: #ccc;
                     margin: 5px 0;
+                }
+                
+                @media (max-width: 480px) {
+                    .char-select-container h1 {
+                        font-size: 1.25rem;
+                    }
+                    .char-card {
+                        width: 85vw;
+                        max-width: 280px;
+                    }
+                    .char-name {
+                        font-size: 1rem;
+                    }
+                    .char-info p {
+                        font-size: 0.8rem;
+                    }
                 }
                 .char-icons {
                     font-size: 1.2em;
