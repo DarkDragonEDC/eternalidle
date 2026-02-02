@@ -164,7 +164,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
     const myActiveListings = activeListingsForValues.filter(l => isOwnListing(l));
 
     const isPremium = gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > Date.now();
-    const maxListings = isPremium ? 30 : 10;
+    const maxListings = isPremium ? 50 : 30;
     const currentListingsCount = myActiveListings.length;
 
 
