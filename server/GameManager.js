@@ -735,7 +735,7 @@ export class GameManager {
     }
 
     async runMaintenance() {
-        const now = new Date().toISOString();
+        const nowMs = Date.now();
         console.log(`[MAINTENANCE] Starting background cleanup (Dynamic Limits 8h/12h)...`);
 
         try {
