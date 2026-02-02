@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { formatNumber, formatSilver } from '@utils/format';
 import { Package, Star, Clock, X, AlertCircle, Sword, Coins, Zap, Shield, Heart, Axe, Pickaxe, Scissors, Anchor, Apple, Box, Trophy, Hammer, Utensils, Anvil } from 'lucide-react';
-import { resolveItem, getTierColor } from '@shared/items';
+import { resolveItem, getTierColor, formatItemId } from '@shared/items';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const OfflineGainsModal = ({ isOpen, data, onClose }) => {
@@ -366,7 +366,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                                         whiteSpace: 'nowrap',
                                                         textOverflow: 'ellipsis'
                                                     }}>
-                                                        {item?.name || itemId}
+                                                        {item?.name || formatItemId(itemId)}
                                                     </div>
                                                 </div>
                                             </div>

@@ -28,7 +28,7 @@ import {
   Axe, Pickaxe, Target, Shield, Sword,
   Star, Layers, Box, Castle, Lock, Menu, X, Tag, Clock, Heart, LogOut, ChevronDown, Crown, Circle
 } from 'lucide-react';
-import { ITEMS, resolveItem, getSkillForItem, getLevelRequirement } from '@shared/items';
+import { ITEMS, resolveItem, getSkillForItem, getLevelRequirement, formatItemId } from '@shared/items';
 import { calculateNextLevelXP, XP_TABLE } from '@shared/skills';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOptimisticState } from './hooks/useOptimisticState';
@@ -489,8 +489,8 @@ function App() {
       <div className="glass-panel" style={{
         padding: '12px 20px',
         marginBottom: '15px',
-        background: 'rgba(212, 175, 55, 0.03)',
-        border: '1px solid rgba(212, 175, 55, 0.08)',
+        background: 'var(--accent-soft)',
+        border: '1px solid var(--border-active)',
         borderRadius: '10px'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -513,8 +513,8 @@ function App() {
             style={{
               width: `${progress}%`,
               height: '100%',
-              background: '#d4af37',
-              boxShadow: '0 0 8px rgba(212, 175, 55, 0.3)',
+              background: 'var(--accent)',
+              boxShadow: '0 0 8px var(--accent-soft)',
               transition: 'width 0.2s ease-out'
             }}
           />
@@ -544,7 +544,7 @@ function App() {
               background: activeTier === t ? 'var(--accent-soft)' : 'rgba(255,255,255,0.02)',
               border: '1px solid',
               borderColor: activeTier === t ? 'var(--border-active)' : 'rgba(255,255,255,0.03)',
-              color: activeTier === t ? '#d4af37' : '#555',
+              color: activeTier === t ? 'var(--accent)' : 'var(--text-dim)',
               padding: '12px',
               borderRadius: '6px',
               cursor: 'pointer',
@@ -633,7 +633,7 @@ function App() {
               <div className="glass-panel" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '16px', background: 'rgba(15, 20, 30, 0.4)' }}>
                 <div style={{ textAlign: 'center', opacity: 0.5 }}>
                   <div style={{ fontSize: '3rem', marginBottom: '10px' }}>🧪</div>
-                  <h2 style={{ color: '#d4af37', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '2px' }}>COMING SOON</h2>
+                  <h2 style={{ color: 'var(--accent)', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '2px' }}>COMING SOON</h2>
                   <p style={{ color: '#888' }}>Alchemy system in development.</p>
                 </div>
               </div>
@@ -651,7 +651,7 @@ function App() {
                 </h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', marginTop: '15px' }}>
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(t => (
-                    <button key={t} onClick={() => setActiveTier(t)} style={{ padding: '6px', background: activeTier === t ? 'var(--accent-soft)' : 'rgba(255,255,255,0.02)', border: '1px solid', borderColor: activeTier === t ? 'var(--border-active)' : 'rgba(255,255,255,0.05)', borderRadius: '4px', color: activeTier === t ? '#d4af37' : '#555', fontSize: '0.65rem', fontWeight: '900' }}>T{t}</button>
+                    <button key={t} onClick={() => setActiveTier(t)} style={{ padding: '6px', background: activeTier === t ? 'var(--accent-soft)' : 'rgba(255,255,255,0.02)', border: '1px solid', borderColor: activeTier === t ? 'var(--border-active)' : 'rgba(255,255,255,0.05)', borderRadius: '4px', color: activeTier === t ? 'var(--accent)' : '#555', fontSize: '0.65rem', fontWeight: '900' }}>T{t}</button>
                   ))}
                 </div>
               </div>
@@ -688,7 +688,7 @@ function App() {
                           opacity: locked ? 0.7 : 1,
                           cursor: 'pointer',
                           filter: 'none',
-                          background: isActive ? 'rgba(212, 175, 55, 0.05)' : 'rgba(0,0,0,0.2)',
+                          background: isActive ? 'var(--accent-soft)' : 'rgba(0,0,0,0.2)',
                           width: '100%',
                           textAlign: 'left',
                           border: isActive ? '1px solid var(--accent)' : '1px solid rgba(255,255,255,0.05)',
@@ -831,7 +831,7 @@ function App() {
               <div className="glass-panel" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '16px', background: 'rgba(15, 20, 30, 0.4)' }}>
                 <div style={{ textAlign: 'center', opacity: 0.5 }}>
                   <div style={{ fontSize: '3rem', marginBottom: '10px' }}>⚗️</div>
-                  <h2 style={{ color: '#d4af37', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '2px' }}>COMING SOON</h2>
+                  <h2 style={{ color: 'var(--accent)', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '2px' }}>COMING SOON</h2>
                   <p style={{ color: '#888' }}>Alchemy Lab under construction.</p>
                 </div>
               </div>
@@ -848,7 +848,7 @@ function App() {
                 </h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', marginTop: '15px' }}>
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(t => (
-                    <button key={t} onClick={() => setActiveTier(t)} style={{ padding: '6px', background: activeTier === t ? 'var(--accent-soft)' : 'rgba(255,255,255,0.02)', border: '1px solid', borderColor: activeTier === t ? 'var(--border-active)' : 'rgba(255,255,255,0.05)', borderRadius: '4px', color: activeTier === t ? '#d4af37' : '#555', fontSize: '0.65rem', fontWeight: '900' }}>T{t}</button>
+                    <button key={t} onClick={() => setActiveTier(t)} style={{ padding: '6px', background: activeTier === t ? 'var(--accent-soft)' : 'rgba(255,255,255,0.02)', border: '1px solid', borderColor: activeTier === t ? 'var(--border-active)' : 'rgba(255,255,255,0.05)', borderRadius: '4px', color: activeTier === t ? 'var(--accent)' : '#555', fontSize: '0.65rem', fontWeight: '900' }}>T{t}</button>
                   ))}
                 </div>
               </div>
@@ -892,7 +892,7 @@ function App() {
                           opacity: locked ? 0.7 : 1,
                           cursor: 'pointer',
                           filter: 'none',
-                          background: isActive ? 'rgba(212, 175, 55, 0.05)' : 'rgba(0,0,0,0.2)',
+                          background: isActive ? 'var(--accent-soft)' : 'rgba(0,0,0,0.2)',
                           width: '100%',
                           textAlign: 'left',
                           border: isActive ? '1px solid var(--accent)' : '1px solid rgba(255,255,255,0.05)',
@@ -939,7 +939,7 @@ function App() {
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                             <span style={{ fontWeight: 'bold', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px', color: locked ? '#888' : (isActive ? 'var(--accent)' : '#eee') }}>
                               {item.name}
-                              {isActive && <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 2 }} style={{ fontSize: '0.6rem', background: 'var(--accent)', color: '#000', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>ACTIVE</motion.span>}
+                              {isActive && <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 2 }} style={{ fontSize: '0.6rem', background: 'var(--accent)', color: 'var(--panel-bg)', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>ACTIVE</motion.span>}
                             </span>
                           </div>
 
@@ -971,7 +971,7 @@ function App() {
 
                             {/* Potion Description Badge */}
                             {item.desc && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(212, 175, 55, 0.1)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: '#d4af37', border: '1px solid rgba(212, 175, 55, 0.2)' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--accent-soft)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--accent)', border: '1px solid var(--border-active)' }}>
                                 <Zap size={12} />
                                 <span>{item.desc}</span>
                               </div>
@@ -991,7 +991,7 @@ function App() {
                                   color: hasEnough ? '#4caf50' : '#ff4444',
                                   border: `1px solid ${hasEnough ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255, 68, 68, 0.2)'}`
                                 }}>
-                                  <span>{userQty}/{reqQty} {reqId}</span>
+                                  <span>{userQty}/{reqQty} {formatItemId(reqId)}</span>
                                 </div>
                               )
                             })}
@@ -1521,9 +1521,9 @@ const ActivityProgressBar = ({ activity, serverTimeOffset = 0 }) => {
       <div style={{
         width: `${progress}%`,
         height: '100%',
-        background: 'linear-gradient(90deg, #d4af37, #f2d06b)',
+        background: 'var(--accent)',
         transition: 'width 0.1s linear', // Faster transition for smoother updates
-        boxShadow: '0 0 8px rgba(212, 175, 55, 0.3)'
+        boxShadow: '0 0 8px var(--accent-soft)'
       }}></div>
       <div style={{ fontSize: '0.6rem', textAlign: 'right', color: '#aaa', marginTop: '2px' }}>
         {progress.toFixed(1)}%

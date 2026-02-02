@@ -265,7 +265,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                             newLogs.push({
                                 id: generateLogId(),
                                 type: 'loot',
-                                content: `Item found: ${itemData?.name || item}!`,
+                                content: `Item found: ${itemData ? (itemData.tier ? `T${itemData.tier} ${itemData.name}` : itemData.name) : formatItemId(item)}!`,
                                 color: '#ae00ff'
                             });
                         });
@@ -547,7 +547,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                         <div style={{ textAlign: 'right' }}>
                             <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', letterSpacing: '1px' }}>DURATION</div>
                             <div style={{ fontSize: '1rem', fontWeight: 'bold', fontFamily: 'monospace', color: 'var(--text-main)' }}>
-                                {Math.floor(duration / 60)}:{(duration % 60).toString().padStart(2, '0')}
+                                {`${Math.floor(duration / 3600).toString().padStart(2, '0')}:${Math.floor((duration % 3600) / 60).toString().padStart(2, '0')}:${(duration % 60).toString().padStart(2, '0')}`}
                             </div>
                         </div>
                     </div>
@@ -714,7 +714,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                                 gap: '5px'
                                             }}>
                                                 <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{qty}x</span>
-                                                <span style={{ fontSize: '0.7rem', color: '#ae00ff', textTransform: 'capitalize' }}>{itemData?.name || id.replace(/_/g, ' ')}</span>
+                                                <span style={{ fontSize: '0.7rem', color: '#ae00ff', textTransform: 'capitalize' }}>{itemData ? (itemData.tier ? `T${itemData.tier} ${itemData.name}` : itemData.name) : formatItemId(id)}</span>
                                             </div>
                                         );
                                     })

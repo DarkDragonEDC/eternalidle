@@ -171,7 +171,7 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUs
                             </button>
                         )}
 
-                        {(['POTION', 'FOOD', 'CONSUMABLE'].includes(item.type)) && (
+                        {(['POTION', 'CONSUMABLE'].includes(item.type)) && (
                             <button
                                 onClick={() => { onUse(item.id); onClose(); }}
                                 style={{
@@ -188,7 +188,7 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUs
                                     cursor: 'pointer'
                                 }}
                             >
-                                <Zap size={18} /> {item.type === 'FOOD' ? 'EAT' : item.type === 'POTION' ? 'DRINK' : 'USE/OPEN'}
+                                <Zap size={18} /> {item.type === 'POTION' ? 'DRINK' : 'USE/OPEN'}
                             </button>
                         )}
 

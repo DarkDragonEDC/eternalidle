@@ -8,10 +8,10 @@ const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onCl
 
     const getIcon = (type) => {
         switch (type) {
-            case 'LEVEL_UP': return <Star size={16} color="#ffd700" />;
+            case 'LEVEL_UP': return <Star size={16} color="var(--accent)" />;
             case 'SUCCESS': return <Check size={16} color="#4caf50" />;
             case 'COMBAT': return <Star size={16} color="#ff4444" />; // Use existing or add more case
-            default: return <Info size={16} color="#4a90e2" />;
+            default: return <Info size={16} color="var(--accent)" />;
         }
     };
 
@@ -28,7 +28,7 @@ const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onCl
                     border: '1px solid rgba(255, 255, 255, 0.1)',
                     padding: '8px',
                     borderRadius: '8px',
-                    color: unreadCount > 0 ? '#ffd700' : '#fff',
+                    color: unreadCount > 0 ? 'var(--accent)' : '#fff',
                     cursor: 'pointer',
                     position: 'relative',
                     transition: '0.2s'
@@ -159,7 +159,7 @@ const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onCl
                                                     style={{
                                                         padding: '12px 15px',
                                                         borderBottom: '1px solid rgba(255,255,255,0.03)',
-                                                        background: notif.read ? 'transparent' : 'rgba(255, 215, 0, 0.03)',
+                                                        background: notif.read ? 'transparent' : 'var(--accent-soft)',
                                                         display: 'flex',
                                                         gap: '12px',
                                                         cursor: 'pointer',
@@ -178,7 +178,7 @@ const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onCl
                                                         </div>
                                                     </div>
                                                     {!notif.read && (
-                                                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ffd700', marginTop: '6px' }} />
+                                                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent)', marginTop: '6px' }} />
                                                     )}
                                                 </div>
                                             ))

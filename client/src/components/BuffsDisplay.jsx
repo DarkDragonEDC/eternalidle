@@ -13,11 +13,11 @@ const BuffsDisplay = ({ activeBuffs }) => {
 
     const getBuffInfo = (type) => {
         switch (type) {
-            case 'GLOBAL_XP': return { icon: <Star size={16} color="#d4af37" />, label: 'Global XP' };
+            case 'GLOBAL_XP': return { icon: <Star size={16} color="var(--accent)" />, label: 'Global XP' };
             case 'GATHER_XP': return { icon: <Sprout size={16} color="#4caf50" />, label: 'Gather XP' };
             case 'CRAFT_XP': return { icon: <Hammer size={16} color="#ff9800" />, label: 'Craft XP' };
             case 'REFINE_XP': return { icon: <ArrowUpCircle size={16} color="#2196f3" />, label: 'Refine XP' };
-            case 'GOLD': return { icon: <Coins size={16} color="#ffd700" />, label: 'Gold Gain' };
+            case 'GOLD': return { icon: <Coins size={16} color="var(--accent)" />, label: 'Gold Gain' };
             case 'DROP': return { icon: <Clover size={16} color="#4caf50" />, label: 'Drop Rate' };
             case 'QUALITY': return { icon: <Diamond size={16} color="#00bcd4" />, label: 'Quality' };
             default: return { icon: <Wand2 size={16} color="#fff" />, label: type };
@@ -70,7 +70,7 @@ const BuffsDisplay = ({ activeBuffs }) => {
                             <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#fff' }}>
                                 {label} <span style={{ color: '#aaa' }}>+{valuePercent}%</span>
                             </span>
-                            <span style={{ fontSize: '0.65rem', color: '#d4af37', fontWeight: 'bold' }}>
+                            <span style={{ fontSize: '0.65rem', color: 'var(--accent)', fontWeight: 'bold' }}>
                                 {formatTime(remaining)}
                             </span>
                         </div>

@@ -3,11 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FlaskConical, ChevronUp, Star, Coins, Sprout, Hammer, ArrowUpCircle, Clover, Diamond, Clock } from 'lucide-react';
 
 const POTION_METADATA = {
-    GLOBAL_XP: { label: 'Global XP', icon: <Star size={16} color="#d4af37" />, color: '#d4af37' },
+    GLOBAL_XP: { label: 'Global XP', icon: <Star size={16} color="#d4af37" />, color: 'var(--accent)' },
     GATHER_XP: { label: 'Gathering XP', icon: <Sprout size={16} color="#4caf50" />, color: '#4caf50' },
     REFINE_XP: { label: 'Refining XP', icon: <ArrowUpCircle size={16} color="#2196f3" />, color: '#2196f3' },
     CRAFT_XP: { label: 'Crafting XP', icon: <Hammer size={16} color="#ff9800" />, color: '#ff9800' },
-    GOLD: { label: 'Silver', icon: <Coins size={16} color="#ffd700" />, color: '#ffd700' },
+    GOLD: { label: 'Silver', icon: <Coins size={16} color="#ffd700" />, color: 'var(--accent)' },
     DROP: { label: 'Luck / Drop', icon: <Clover size={16} color="#4caf50" />, color: '#4caf50' },
     QUALITY: { label: 'Quality', icon: <Diamond size={16} color="#00bcd4" />, color: '#00bcd4' },
 };
@@ -129,9 +129,9 @@ const BuffsDrawer = ({ gameState, isMobile }) => {
                                     display: 'flex',
                                     flexDirection: 'column',
                                     padding: '5px 8px',
-                                    background: (active || totalBonus > 0) ? 'rgba(212,175,55,0.05)' : 'rgba(255,255,255,0.02)',
+                                    background: (active || totalBonus > 0) ? 'var(--accent-soft)' : 'rgba(255,255,255,0.02)',
                                     borderRadius: '6px',
-                                    border: `1px solid ${active ? 'rgba(212,175,55,0.2)' : 'rgba(255,255,255,0.05)'}`,
+                                    border: `1px solid ${active ? 'var(--border-active)' : 'rgba(255,255,255,0.05)'}`,
                                     opacity: (active || totalBonus > 0) ? 1 : 0.4,
                                     transition: 'all 0.2s'
                                 }}>
@@ -148,15 +148,15 @@ const BuffsDrawer = ({ gameState, isMobile }) => {
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '12px' }}>
                                         <div style={{ fontSize: '0.55rem', color: '#555', fontWeight: 'bold' }}>
                                             {active && (
-                                                <>POTION: <span style={{ color: '#d4af37' }}>+{potionBonusPercent}%</span> | </>
+                                                <>POTION: <span style={{ color: 'var(--accent)' }}>+{potionBonusPercent}%</span> | </>
                                             )}
                                             {key === 'GLOBAL_XP' && msActive && (
-                                                <>MS: <span style={{ color: '#d4af37' }}>+{msDisplayBonus}%</span> | </>
+                                                <>MS: <span style={{ color: 'var(--accent)' }}>+{msDisplayBonus}%</span> | </>
                                             )}
                                             INT: +{intDisplayBonus.toFixed(0)}%
                                         </div>
                                         {active && (
-                                            <span style={{ fontSize: '0.55rem', color: '#d4af37', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                                            <span style={{ fontSize: '0.55rem', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '2px' }}>
                                                 <Clock size={8} /> {formatTime(timeRemaining)}
                                             </span>
                                         )}
@@ -170,7 +170,7 @@ const BuffsDrawer = ({ gameState, isMobile }) => {
 
             {/* Toggle Button */}
             <motion.button
-                whileHover={{ scale: 1.1, backgroundColor: 'rgba(212, 175, 55, 0.15)' }}
+                whileHover={{ scale: 1.1, backgroundColor: 'var(--accent-soft)' }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setIsOpen(!isOpen)}
                 style={{
@@ -179,8 +179,8 @@ const BuffsDrawer = ({ gameState, isMobile }) => {
                     borderRadius: '12px',
                     background: 'rgba(15, 20, 30, 0.95)',
                     opacity: 0.5,
-                    border: `1px solid ${isOpen ? '#d4af37' : 'rgba(212,175,55,0.3)'}`,
-                    color: '#d4af37',
+                    border: `1px solid ${isOpen ? 'var(--accent)' : 'var(--border-active)'}`,
+                    color: 'var(--accent)',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -205,7 +205,7 @@ const BuffsDrawer = ({ gameState, isMobile }) => {
                             width: '8px',
                             height: '8px',
                             borderRadius: '50%',
-                            background: '#d4af37',
+                            background: 'var(--accent)',
                             border: '1.5px solid #0f141e'
                         }}
                     />

@@ -1268,7 +1268,12 @@ export class GameManager {
         let message = `Used ${safeQty}x ${itemData.name}`;
 
         if (itemData.type === 'FOOD') {
+            const stats = this.inventoryManager.calculateStats(char);
             const healAmount = (itemData.heal || 50) * safeQty;
+            const currentHp = char.state.health || 0;
+            const newHp = Math.min(stats.maxHP, currentHp + healAmount);
+
+            char.state.health = newHp;
             message += ` (Recovered ${healAmount} HP)`;
         } else if (itemData.type === 'POTION') {
             const effect = itemData.effect;

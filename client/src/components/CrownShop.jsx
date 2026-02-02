@@ -79,10 +79,10 @@ const CrownShop = ({ socket, gameState, onClose }) => {
 
     const getCategoryColor = (category) => {
         switch (category) {
-            case 'BOOST': return '#ffd700';
+            case 'BOOST': return 'var(--accent)';
             case 'CONVENIENCE': return '#4caf50';
             case 'COSMETIC': return '#e040fb';
-            case 'PACKAGE': return '#ffd700';
+            case 'PACKAGE': return 'var(--accent)';
             case 'MEMBERSHIP': return '#4fc3f7';
             default: return '#888';
         }
@@ -149,7 +149,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                             <span style={{ color: 'var(--accent)', fontWeight: '900', fontSize: '1.1rem' }}>{crowns}</span>
                         </div>
                         <button onClick={onClose} style={{
-                            background: 'rgba(255,255,255,0.05)',
+                            background: 'var(--accent-soft)',
                             border: 'none',
                             color: '#888',
                             cursor: 'pointer',
@@ -250,7 +250,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                                         position: 'absolute',
                                                         top: '6px',
                                                         right: '-32px',
-                                                        background: '#ffd700',
+                                                        background: 'var(--accent)',
                                                         color: '#000',
                                                         padding: '4px 35px',
                                                         fontSize: '0.6rem',
@@ -285,14 +285,14 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                                                 <span style={{ fontSize: '0.6rem', color: '#4caf50', textTransform: 'uppercase' }}>Permanent</span>
                                                             )}
                                                             {item.duration && (
-                                                                <span style={{ fontSize: '0.6rem', color: '#ffd700', textTransform: 'uppercase' }}>
+                                                                <span style={{ fontSize: '0.6rem', color: 'var(--accent)', textTransform: 'uppercase' }}>
                                                                     {item.duration >= 24 * 60 * 60 * 1000
                                                                         ? `${Math.round(item.duration / (24 * 60 * 60 * 1000))} Days`
                                                                         : `${Math.round(item.duration / (60 * 60 * 1000))} Hours`}
                                                                 </span>
                                                             )}
                                                             {isPackage && item.amount && (
-                                                                <span style={{ fontSize: '0.65rem', color: '#ffd700', fontWeight: 'bold' }}>{item.amount} ORBS</span>
+                                                                <span style={{ fontSize: '0.65rem', color: 'var(--accent)', fontWeight: 'bold' }}>{item.amount} ORBS</span>
                                                             )}
                                                         </div>
                                                     </div>
@@ -307,7 +307,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                                         position: 'relative',
                                                         zIndex: 2
                                                     }}>
-                                                        {!isRealMoney && <Circle size={12} color="#ffd700" />}
+                                                        {!isRealMoney && <Circle size={12} color="var(--accent)" />}
                                                         <span style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '0.85rem' }}>
                                                             {isRealMoney
                                                                 ? (item.currency === 'BRL' ? `R$ ${item.price.toFixed(2).replace('.', ',')}` : `$${item.price.toFixed(2)}`)
@@ -345,11 +345,11 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                                         background: isRealMoney
                                                             ? 'linear-gradient(90deg, rgba(76, 175, 80, 0.4), rgba(76, 175, 80, 0.1))'
                                                             : (canAfford
-                                                                ? 'linear-gradient(90deg, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.1))'
+                                                                ? 'linear-gradient(90deg, var(--accent), var(--accent-soft))'
                                                                 : 'rgba(100,100,100,0.2)'),
-                                                        border: `1px solid ${isRealMoney ? 'rgba(76, 175, 80, 0.5)' : (canAfford ? 'rgba(212, 175, 55, 0.5)' : 'rgba(100,100,100,0.3)')}`,
+                                                        border: `1px solid ${isRealMoney ? 'rgba(76, 175, 80, 0.5)' : (canAfford ? 'var(--accent)' : 'rgba(100,100,100,0.3)')}`,
                                                         borderRadius: '8px',
-                                                        color: isRealMoney ? '#4caf50' : (canAfford ? '#ffd700' : '#666'),
+                                                        color: isRealMoney ? '#4caf50' : (canAfford ? 'var(--accent)' : '#666'),
                                                         fontWeight: 'bold',
                                                         fontSize: '0.8rem',
                                                         cursor: canAfford && !isPurchasing ? 'pointer' : 'not-allowed',

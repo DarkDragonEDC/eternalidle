@@ -28,7 +28,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
 
     const name = gameState?.name || 'Explorer';
     const state = gameState?.state || {};
-    const { skills = {}, silver = 0, health = 100, maxHealth = 100, equipment = {} } = state;
+    const { skills = {}, silver = 0, health, maxHealth = 100, equipment = {} } = state;
     const charStats = state.stats || { str: 0, agi: 0, int: 0 };
 
     const calculatedStats = useMemo(() => {
@@ -122,7 +122,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         }, 0);
 
         return {
-            hp: health,
+            hp: health !== undefined ? health : (100 + (calculatedStats.str * 10) + gearHP),
             maxHp: 100 + (calculatedStats.str * 10) + gearHP,
             damage: Math.floor((5 + (calculatedStats.str * 1) + (calculatedStats.agi * 1) + (calculatedStats.int * 1) + gearDamage) * (1 + gearDmgBonus)),
             defense: gearDefense,

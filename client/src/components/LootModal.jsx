@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Coins, Box } from 'lucide-react';
-import { getTierColor, resolveItem } from '@shared/items';
+import { getTierColor, resolveItem, formatItemId } from '@shared/items';
 
 const LootModal = ({ isOpen, onClose, rewards }) => {
     if (!isOpen || !rewards) return null;
@@ -81,8 +81,8 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                         <style>{`
                             .custom-scroll::-webkit-scrollbar { width: 6px; }
                             .custom-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 4px; }
-                            .custom-scroll::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.5); border-radius: 4px; }
-                            .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.8); }
+                            .custom-scroll::-webkit-scrollbar-thumb { background: var(--accent-soft); border-radius: 4px; }
+                            .custom-scroll::-webkit-scrollbar-thumb:hover { background: var(--accent); }
                         `}</style>
                         {/* Silver Reward */}
                         {rewards.silver > 0 && (
@@ -102,7 +102,7 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                             >
                                 <div style={{
                                     width: '40px', height: '40px',
-                                    background: 'linear-gradient(135deg, #ffd700 0%, #b8860b 100%)',
+                                    background: 'var(--accent)',
                                     borderRadius: '50%',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -112,7 +112,7 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                                     <Coins size={20} color="var(--panel-bg)" />
                                 </div>
                                 <div style={{ textAlign: 'left' }}>
-                                    <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#ffd700' }}>+{rewards.silver}</div>
+                                    <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--accent)' }}>+{rewards.silver}</div>
                                     <div style={{ fontSize: '0.8rem', color: '#aaa' }}>Silver Coins</div>
                                 </div>
                             </motion.div>
@@ -171,7 +171,7 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                                     </div>
                                     <div style={{ textAlign: 'left' }}>
                                         <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>
-                                            {item.qty}x <span style={{ color: tierColor }}>{resolvedItem?.name || item.id}</span>
+                                            {item.qty}x <span style={{ color: tierColor }}>{resolvedItem ? (resolvedItem.tier ? `T${resolvedItem.tier} ${resolvedItem.name}` : resolvedItem.name) : formatItemId(item.id)}</span>
                                         </div>
                                         <div style={{ fontSize: '0.8rem', color: '#888' }}>{resolvedItem?.type || 'Resource'}</div>
                                     </div>
