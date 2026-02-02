@@ -844,7 +844,8 @@ io.on('connection', (socket) => {
             });
         } catch (err) {
             console.error('Error creating checkout session:', err);
-            socket.emit('crown_purchase_error', { error: 'Failed to initiate payment' });
+            // Send actual error message to client for easier debugging
+            socket.emit('crown_purchase_error', { error: err.message || 'Failed to initiate payment' });
         }
     });
 
