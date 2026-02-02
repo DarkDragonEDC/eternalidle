@@ -78,7 +78,7 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
                 style={{
                     position: 'fixed',
                     bottom: '30px',
-                    left: isMobile ? '20px' : '30px',
+                    left: isMobile ? '20px' : '270px',
                     width: '56px',
                     height: '56px',
                     borderRadius: '50%',
@@ -90,9 +90,8 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    justifyContent: 'center',
                     boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
-                    zIndex: 10000,
+                    zIndex: 1000,
                     transition: 'transform 0.2s'
                 }}
                 onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
@@ -132,7 +131,7 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
             <div style={{
                 position: 'fixed',
                 bottom: isMobile ? '0' : '100px',
-                left: isMobile ? '50%' : '30px',
+                left: isMobile ? '50%' : '270px',
                 right: 'auto',
                 transform: isMobile ? 'translateX(-50%)' : 'none',
                 width: isMobile ? '90vw' : '320px',
