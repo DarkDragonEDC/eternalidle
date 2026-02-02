@@ -818,13 +818,13 @@ io.on('connection', (socket) => {
                     payment_method_types: ['card', 'pix', 'boleto', 'link'],
                     line_items: [{
                         price_data: {
-                            currency: pkg.currency.toLowerCase(),
+                            currency: pkg.priceBRL ? 'brl' : pkg.currency.toLowerCase(),
                             product_data: {
                                 name: pkg.name,
                                 description: pkg.description,
                                 images: ['https://raw.githubusercontent.com/lucide-react/lucide/main/icons/crown.svg'],
                             },
-                            unit_amount: Math.round(pkg.price * 100),
+                            unit_amount: pkg.priceBRL ? Math.round(pkg.priceBRL * 100) : Math.round(pkg.price * 100),
                         },
                         quantity: 1,
                     }],
