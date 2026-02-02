@@ -9,7 +9,7 @@ import Stripe from 'stripe';
 
 dotenv.config();
 
-const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' }) : null;
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2024-11-20' }) : null;
 if (!stripe) {
     console.warn("WARNING: STRIPE_SECRET_KEY not found. Crown Store purchases will be disabled.");
 }
@@ -815,7 +815,8 @@ io.on('connection', (socket) => {
                 // Reverting to standard Card payment in USD.
 
                 const session = await stripe.checkout.sessions.create({
-                    // ADAPTIVE PRICING: Send USD, Stripe shows BRL option to BR users.
+                    // ADAPTIVE PRICING: Explicitly enable to show currency selector.
+                    adaptive_pricing: { enabled: true },
                     payment_method_types: ['card'],
                     line_items: [{
                         price_data: {
