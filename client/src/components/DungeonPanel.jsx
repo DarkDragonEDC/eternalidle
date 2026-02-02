@@ -300,6 +300,9 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                 </motion.div>
 
                 <div style={{ textAlign: 'center', zIndex: 1 }}>
+                    <div style={{ color: '#ae00ff', fontSize: '0.9rem', fontWeight: '900', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '1px' }}>
+                        TIER {dungeonState.tier}
+                    </div>
                     <motion.h2
                         key={dungeonState.wave}
                         style={{ color: 'var(--text-main)', fontSize: '1.4rem', fontWeight: '900', margin: 0, letterSpacing: '1px' }}

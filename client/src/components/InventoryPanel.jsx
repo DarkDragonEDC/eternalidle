@@ -57,7 +57,16 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
 
         // Search Filter
         if (searchQuery) {
-            return item.name.toLowerCase().includes(searchQuery.toLowerCase());
+            const lowerQuery = searchQuery.toLowerCase();
+
+            // Tier Filter (e.g., "t3")
+            const tierMatch = lowerQuery.match(/^t(\d+)$/);
+            if (tierMatch) {
+                const searchTier = parseInt(tierMatch[1]);
+                return item.tier === searchTier;
+            }
+
+            return item.name.toLowerCase().includes(lowerQuery);
         }
         return true;
     });
@@ -88,6 +97,9 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                 const indexA = Object.keys(gameState?.state?.inventory || {}).indexOf(a.id);
                 const indexB = Object.keys(gameState?.state?.inventory || {}).indexOf(b.id);
                 comparison = indexA - indexB;
+                break;
+            case 'TIER':
+                comparison = (a.tier || 0) - (b.tier || 0);
                 break;
         }
         return sortDir === 'asc' ? comparison : -comparison;
@@ -201,7 +213,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                     zIndex: 101,
                                     boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
                                 }}>
-                                    {['DATE', 'QUALITY', 'QUANTITY', 'TYPE', 'VALUE', 'NAME'].map(opt => (
+                                    {['DATE', 'QUALITY', 'QUANTITY', 'TYPE', 'VALUE', 'NAME', 'TIER'].map(opt => (
                                         <button
                                             key={opt}
                                             onClick={() => { setSortBy(opt); setIsSortMenuOpen(false); }}

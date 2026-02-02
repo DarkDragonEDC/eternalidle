@@ -495,6 +495,17 @@ export class GameManager {
                             itemsGained[itemId] = (itemsGained[itemId] || 0) + 1;
                         });
                     }
+
+                    // FIX: Reset Mob Health for next fight
+                    if (char.state.combat) {
+                        char.state.combat.mobHealth = char.state.combat.mobMaxHealth || 100;
+                    }
+
+                    // FIX: Simulate Respawn Delay (1000ms)
+                    // We skip 'N' rounds equivalent to 1s of time
+                    // rounds = totalTime / atkSpeed
+                    const roundsToSkip = Math.ceil(1000 / atkSpeed);
+                    i += roundsToSkip;
                 }
             }
         }

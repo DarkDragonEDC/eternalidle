@@ -147,29 +147,56 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
                 </div>
 
                 {/* Filtros */}
-                <div style={{ display: 'flex', gap: '10px', marginBottom: '30px', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', background: 'rgba(0,0,0,0.2)', padding: '4px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.02)' }}>
+                {/* Filtros */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '30px' }}>
+                    {/* Horizontal Scrollable Tabs */}
+                    <div className="ranking-tabs-scroll" style={{
+                        display: 'flex',
+                        gap: '8px',
+                        overflowX: 'auto',
+                        paddingBottom: '8px',
+                        WebkitOverflowScrolling: 'touch'
+                    }}>
+                        <style>{`
+                            .ranking-tabs-scroll::-webkit-scrollbar {
+                                height: 6px;
+                            }
+                            .ranking-tabs-scroll::-webkit-scrollbar-track {
+                                background: rgba(0,0,0,0.2);
+                                border-radius: 3px;
+                            }
+                            .ranking-tabs-scroll::-webkit-scrollbar-thumb {
+                                background: var(--accent);
+                                border-radius: 3px;
+                            }
+                            .ranking-tabs-scroll::-webkit-scrollbar-thumb:hover {
+                                background: #fff;
+                            }
+                        `}</style>
                         {Object.keys(CATEGORIES).map(key => (
                             <button
                                 key={key}
                                 onClick={() => handleMainCategoryChange(key)}
                                 style={{
-                                    padding: '8px 16px',
-                                    borderRadius: '6px',
-                                    border: 'none',
-                                    background: mainCategory === key ? 'rgba(212, 175, 55, 0.1)' : 'transparent',
+                                    padding: '10px 18px',
+                                    borderRadius: '8px',
+                                    border: '1px solid',
+                                    borderColor: mainCategory === key ? 'var(--accent)' : 'rgba(255,255,255,0.1)',
+                                    background: mainCategory === key ? 'rgba(212, 175, 55, 0.1)' : 'rgba(0,0,0,0.2)',
                                     color: mainCategory === key ? 'var(--accent)' : 'var(--text-dim)',
-                                    fontSize: '0.65rem',
+                                    fontSize: '0.75rem',
                                     fontWeight: '900',
                                     cursor: 'pointer',
+                                    whiteSpace: 'nowrap',
                                     transition: '0.2s',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '6px'
+                                    gap: '6px',
+                                    flexShrink: 0 // Prevent shrinking
                                 }}
                             >
-                                {key === 'COMBAT' && <Star size={12} />}
-                                {key === 'DUNGEON' && <Circle size={12} />}
+                                {key === 'COMBAT' && <Star size={14} />}
+                                {key === 'DUNGEON' && <Circle size={14} />}
                                 {CATEGORIES[key].label}
                             </button>
                         ))}

@@ -5,6 +5,34 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MONSTERS } from '@shared/monsters';
 import { resolveItem } from '@shared/items';
 
+const AnimatedCounter = ({ value, maxValue, triggerKey }) => {
+    const [displayValue, setDisplayValue] = useState(value);
+
+    useEffect(() => {
+        // Reset to Max on trigger (Kill)
+        setDisplayValue(maxValue);
+        // Small delay then drop to target
+        const timer = setTimeout(() => {
+            setDisplayValue(value);
+        }, 50);
+        return () => clearTimeout(timer);
+    }, [triggerKey]);
+
+    useEffect(() => {
+        setDisplayValue(value);
+    }, [value]);
+
+    return (
+        <motion.span
+            initial={{ opacity: 0.5 }}
+            animate={{ opacity: 1 }}
+            key={`${triggerKey}-${displayValue}`}
+        >
+            {Math.round(displayValue)}
+        </motion.span>
+    );
+};
+
 const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
     const [activeTier, setActiveTier] = useState(1);
     const [battleLogs, setBattleLogs] = useState([]);
@@ -619,7 +647,9 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                     <Skull size={isMobile ? 25 : 50} color="#ff4444" />
                                 </motion.div>
                                 <div style={{ fontSize: isMobile ? '0.6rem' : '0.9rem', fontWeight: '900', color: 'var(--text-main)' }}>{combat.mobName.toUpperCase()}</div>
-                                <div style={{ fontSize: isMobile ? '0.9rem' : '1.3rem', fontWeight: '900', color: '#ff4444', marginTop: '2px' }}>{Math.round(combat.mobHealth)} HP</div>
+                                <div style={{ fontSize: isMobile ? '0.9rem' : '1.3rem', fontWeight: '900', color: '#ff4444', marginTop: '2px' }}>
+                                    <AnimatedCounter value={combat.mobHealth} maxValue={combat.mobMaxHealth} triggerKey={combat.kills} /> HP
+                                </div>
                             </div>
 
 
@@ -637,7 +667,13 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 <div style={{ flex: 1, minWidth: '120px' }}>
                                     <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', textAlign: isMobile ? 'left' : 'right', marginBottom: '3px' }}>MONSTER HEALTH</div>
                                     <div style={{ height: '8px', background: 'var(--slot-bg)', borderRadius: '4px', overflow: 'hidden' }}>
-                                        <div style={{ width: `${(combat.mobHealth / combat.mobMaxHealth) * 100}%`, height: '100%', background: '#ff4444', transition: 'width 0.3s' }} />
+                                        <motion.div
+                                            key={`mob-hp-${combat.kills}`}
+                                            initial={{ width: '100%' }}
+                                            animate={{ width: `${(combat.mobHealth / combat.mobMaxHealth) * 100}%` }}
+                                            transition={{ duration: 0.3, ease: "easeOut" }}
+                                            style={{ height: '100%', background: '#ff4444' }}
+                                        />
                                     </div>
                                 </div>
                             </div>

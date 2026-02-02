@@ -111,7 +111,34 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
         ? Math.max(0, Math.min(100, ((timePerAction * 1000) - (new Date(activity.next_action_at).getTime() - (Date.now() + serverTimeOffset))) / (timePerAction * 10)))
         : 0;
 
-    const skillProgressCapped = currentActionProgressPercent;
+    const [smoothProgress, setSmoothProgress] = useState(0);
+
+    useEffect(() => {
+        if (!activity?.next_action_at) {
+            setSmoothProgress(0);
+            return;
+        }
+
+        let animationFrameId;
+
+        const updateSmoothProgress = () => {
+            const now = Date.now() + serverTimeOffset;
+            const endTime = new Date(activity.next_action_at).getTime();
+            const durationMs = (activity.time_per_action || 3) * 1000;
+            const startTime = endTime - durationMs;
+
+            const rawProgress = ((now - startTime) / durationMs) * 100;
+            const progress = Math.max(0, Math.min(100, rawProgress));
+
+            setSmoothProgress(progress);
+            animationFrameId = requestAnimationFrame(updateSmoothProgress);
+        };
+
+        animationFrameId = requestAnimationFrame(updateSmoothProgress);
+        return () => cancelAnimationFrame(animationFrameId);
+    }, [activity?.next_action_at, activity?.time_per_action, serverTimeOffset]);
+
+    const skillProgressCapped = smoothProgress;
     // Formatar Tempo (HH:MM:SS)
     const formatTime = (secs) => {
         const h = Math.floor(secs / 3600);
@@ -325,8 +352,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                             <span style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '0.8rem' }}>{doneQty} <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)' }}>/ {initialQty}</span></span>
                                         </div>
 
-                                        {/* Barra de Progresso Total (Única Barra) */}
-                                        <div style={{ height: '8px', background: 'rgba(0,0,0,0.5)', borderRadius: '4px', overflow: 'hidden', position: 'relative', marginBottom: '4px' }}>
+                                        <div style={{ height: '8px', background: 'rgba(0,0,0,0.5)', borderRadius: '4px', overflow: 'hidden', position: 'relative', marginBottom: '8px' }}>
                                             <div style={{
                                                 width: `${totalProgress}%`,
                                                 height: '100%',
@@ -334,6 +360,23 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                                 transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                                 boxShadow: '0 0 10px var(--accent-soft)'
                                             }} />
+                                        </div>
+
+                                        {/* Barra de Progresso da Ação Atual */}
+                                        <div style={{ marginBottom: '4px' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.55rem', color: 'var(--text-dim)', marginBottom: '2px' }}>
+                                                <span>Action Progress</span>
+                                                <span>{Math.round(smoothProgress)}%</span>
+                                            </div>
+                                            <div style={{ height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+                                                <div style={{
+                                                    width: `${smoothProgress}%`,
+                                                    height: '100%',
+                                                    background: '#4caf50',
+                                                    transition: 'width 0.05s linear', // Faster transition for 60fps
+                                                    boxShadow: '0 0 5px rgba(76, 175, 80, 0.4)'
+                                                }} />
+                                            </div>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '0.55rem', color: 'var(--text-dim)' }}>
                                             <span>{doneQty} completed</span>
