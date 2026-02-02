@@ -141,7 +141,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                 position: isMobile ? 'fixed' : 'sticky',
                 top: 0,
                 left: (isMobile && !isOpen) ? '-100%' : 0,
-                zIndex: 999,
+                zIndex: 10001,
                 transition: '0.4s cubic-bezier(0.16, 1, 0.3, 1)',
                 borderRight: '1px solid var(--border)',
                 background: '#0d1117',
