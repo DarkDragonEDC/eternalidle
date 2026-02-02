@@ -387,6 +387,56 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('change_name', async ({ newName }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                if (!char) throw new Error("Character not found");
+
+                if (!char.state.pendingNameChange) {
+                    throw new Error("You do not have a pending name change!");
+                }
+
+                // Name Validation
+                const safeName = (newName || "").trim();
+                if (safeName.length < 3 || safeName.length > 20) {
+                    throw new Error("Name must be between 3 and 20 characters.");
+                }
+                if (!/^[a-zA-Z0-9_ ]+$/.test(safeName)) {
+                    throw new Error("Name can only contain letters, numbers, spaces, and underscores.");
+                }
+
+                // Check Uniqueness handled by DB constraint unique violation (23505) but we can pre-check too
+                // But let's trust the error handler we write below
+
+                // Update in DB (Characters table 'name' column)
+                // We need to update both the column AND the state if name is stored there (it's not usually, but good to check)
+
+                const { error } = await supabase
+                    .from('characters')
+                    .update({ name: safeName })
+                    .eq('id', char.id);
+
+                if (error) {
+                    if (error.code === '23505') throw new Error("Name already taken via DB Check.");
+                    throw error;
+                }
+
+                // Success
+                char.name = safeName;
+                char.state.pendingNameChange = false;
+
+                await gameManager.saveState(char.id, char.state); // Save the flag removal
+
+                socket.emit('name_changed', { success: true, newName: safeName });
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            });
+        } catch (err) {
+            console.error("Name Change Error:", err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
     socket.on('stop_dungeon', async () => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
@@ -761,17 +811,21 @@ io.on('connection', (socket) => {
                 }
 
                 // Create Stripe Checkout Session
+                // HYBRID MODE: Show USD in game, but charge in BRL to enable PIX
+                const priceAmount = pkg.priceBRL ? Math.round(pkg.priceBRL * 100) : Math.round(pkg.price * 100);
+                const currency = pkg.priceBRL ? 'brl' : pkg.currency.toLowerCase();
+
                 const session = await stripe.checkout.sessions.create({
-                    payment_method_types: ['card'],
+                    payment_method_types: ['card', 'pix', 'boleto'],
                     line_items: [{
                         price_data: {
-                            currency: pkg.currency.toLowerCase(),
+                            currency: currency,
                             product_data: {
                                 name: pkg.name,
                                 description: pkg.description,
                                 images: ['https://raw.githubusercontent.com/lucide-react/lucide/main/icons/crown.svg'],
                             },
-                            unit_amount: Math.round(pkg.price * 100), // Stripe uses cents
+                            unit_amount: priceAmount,
                         },
                         quantity: 1,
                     }],

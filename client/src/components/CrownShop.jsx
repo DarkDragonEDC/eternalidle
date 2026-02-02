@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Crown, Zap, Package, Sparkles, Star, ShoppingBag, Check, Trophy, Info } from 'lucide-react';
+import { X, Circle, Zap, Package, Sparkles, Star, ShoppingBag, Check, Trophy, Info } from 'lucide-react';
 
 const CrownShop = ({ socket, gameState, onClose }) => {
     const [storeItems, setStoreItems] = useState([]);
@@ -71,7 +71,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
             case 'BOOST': return <Zap size={16} color="#ffd700" />;
             case 'CONVENIENCE': return <Package size={16} color="#4caf50" />;
             case 'COSMETIC': return <Sparkles size={16} color="#e040fb" />;
-            case 'PACKAGE': return <Crown size={16} color="#ffd700" />;
+            case 'PACKAGE': return <Circle size={16} color="#ffd700" />;
             case 'MEMBERSHIP': return <Trophy size={16} color="#4fc3f7" />;
             default: return <Star size={16} />;
         }
@@ -129,9 +129,9 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                     alignItems: 'center'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <Crown size={28} color="#ffd700" />
+                        <Circle size={28} color="#ffd700" />
                         <div>
-                            <h2 style={{ margin: 0, color: '#fff', fontSize: '1.3rem', fontWeight: '900' }}>CROWN SHOP</h2>
+                            <h2 style={{ margin: 0, color: '#fff', fontSize: '1.3rem', fontWeight: '900' }}>ORB SHOP</h2>
                             <div style={{ fontSize: '0.7rem', color: '#888', letterSpacing: '1px' }}>PREMIUM STORE</div>
                         </div>
                     </div>
@@ -145,7 +145,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                             alignItems: 'center',
                             gap: '8px'
                         }}>
-                            <Crown size={18} color="#ffd700" />
+                            <Circle size={18} color="#ffd700" />
                             <span style={{ color: '#ffd700', fontWeight: '900', fontSize: '1.1rem' }}>{crowns}</span>
                         </div>
                         <button onClick={onClose} style={{
@@ -217,7 +217,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                         {category === 'BOOST' ? 'Boosts (24h)' :
                                             category === 'CONVENIENCE' ? 'Convenience' :
                                                 category === 'COSMETIC' ? 'Cosmetics' :
-                                                    category === 'PACKAGE' ? 'Crown Packages' :
+                                                    category === 'PACKAGE' ? 'Orb Packages' :
                                                         category === 'MEMBERSHIP' ? 'VIP Membership' : category}
                                     </span>
                                 </div>
@@ -292,7 +292,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                                                 </span>
                                                             )}
                                                             {isPackage && item.amount && (
-                                                                <span style={{ fontSize: '0.65rem', color: '#ffd700', fontWeight: 'bold' }}>{item.amount} CROWNS</span>
+                                                                <span style={{ fontSize: '0.65rem', color: '#ffd700', fontWeight: 'bold' }}>{item.amount} ORBS</span>
                                                             )}
                                                         </div>
                                                     </div>
@@ -307,9 +307,11 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                                         position: 'relative',
                                                         zIndex: 2
                                                     }}>
-                                                        {!isRealMoney && <Crown size={12} color="#ffd700" />}
+                                                        {!isRealMoney && <Circle size={12} color="#ffd700" />}
                                                         <span style={{ color: isRealMoney ? '#4caf50' : '#ffd700', fontWeight: 'bold', fontSize: '0.85rem' }}>
-                                                            {isRealMoney ? `$${item.price.toFixed(2)}` : item.cost}
+                                                            {isRealMoney
+                                                                ? (item.currency === 'BRL' ? `R$ ${item.price.toFixed(2).replace('.', ',')}` : `$${item.price.toFixed(2)}`)
+                                                                : item.cost}
                                                         </span>
                                                         {item.id === 'ETERNAL_MEMBERSHIP' && (
                                                             <button
@@ -363,7 +365,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                                     ) : isRealMoney ? (
                                                         <>
                                                             <ShoppingBag size={14} />
-                                                            {item.category === 'MEMBERSHIP' ? 'BUY MEMBERSHIP' : 'BUY CROWNS'}
+                                                            {item.category === 'MEMBERSHIP' ? 'BUY MEMBERSHIP' : 'BUY ORBS'}
                                                         </>
                                                     ) : canAfford ? (
                                                         <>
@@ -371,7 +373,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                                             PURCHASE
                                                         </>
                                                     ) : (
-                                                        'Insufficient Crowns'
+                                                        'Insufficient Orbs'
                                                     )}
                                                 </button>
                                             </div>

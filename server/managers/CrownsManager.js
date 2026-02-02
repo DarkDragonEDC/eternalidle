@@ -73,7 +73,7 @@ export class CrownsManager {
         if (currentBalance < item.cost) {
             return {
                 success: false,
-                error: 'Insufficient crowns',
+                error: 'Insufficient Orbs',
                 required: item.cost,
                 current: currentBalance
             };
@@ -173,6 +173,14 @@ export class CrownsManager {
      */
     applyConvenience(char, item) {
         switch (item.id) {
+            case 'INVENTORY_SLOT_TICKET':
+                const added = this.gameManager.inventoryManager.addItemToInventory(char, item.id, 1);
+                if (!added) return { success: false, error: 'Inventory full! Cannot purchase item.' };
+                return {
+                    success: true,
+                    message: `${item.name} added to your inventory!`
+                };
+
             case 'INVENTORY_EXPANSION':
                 if (!char.state.inventorySlots) {
                     char.state.inventorySlots = 50; // Default
@@ -183,12 +191,12 @@ export class CrownsManager {
                     message: `Inventory expanded! New capacity: ${char.state.inventorySlots} slots`
                 };
 
-            case 'NAME_CHANGE':
-                // Set a flag that allows name change
-                char.state.pendingNameChange = true;
+            case 'NAME_CHANGE_TOKEN':
+                const addedToken = this.gameManager.inventoryManager.addItemToInventory(char, item.id, 1);
+                if (!addedToken) return { success: false, error: 'Inventory full! Cannot purchase item.' };
                 return {
                     success: true,
-                    message: 'Name change token acquired! Use it in your profile settings.'
+                    message: 'Name Change Token added to your inventory!'
                 };
 
             case 'CHARACTER_SLOT':
@@ -218,8 +226,8 @@ export class CrownsManager {
                 return { success: true, message: 'Golden frame unlocked!' };
 
             case 'TITLE_CROWN_OWNER':
-                char.state.cosmetics.title = 'Crown Owner';
-                return { success: true, message: 'Title "Crown Owner" unlocked!' };
+                char.state.cosmetics.title = 'Orb Owner';
+                return { success: true, message: 'Title "Orb Owner" unlocked!' };
 
             default:
                 return { success: false, error: 'Unknown cosmetic item' };

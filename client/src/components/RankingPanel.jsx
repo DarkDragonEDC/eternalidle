@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { formatNumber, formatSilver } from '@utils/format';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Users, Star, Coins, Crown, ChevronDown } from 'lucide-react';
+import { Trophy, Users, Star, Coins, Circle, ChevronDown } from 'lucide-react';
 
 const CATEGORIES = {
     GENERAL: {
@@ -169,7 +169,7 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
                                 }}
                             >
                                 {key === 'COMBAT' && <Star size={12} />}
-                                {key === 'DUNGEON' && <Crown size={12} />}
+                                {key === 'DUNGEON' && <Circle size={12} />}
                                 {CATEGORIES[key].label}
                             </button>
                         ))}
@@ -229,7 +229,7 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
                                 >
                                     {/* Medalha / Numero */}
                                     <div style={{ width: '40px', fontSize: '1.2rem', fontWeight: '900', color: index === 0 ? '#d4af37' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : '#222' }}>
-                                        {index === 0 ? <Crown size={20} /> : index + 1}
+                                        {index === 0 ? <Circle size={20} /> : index + 1}
                                     </div>
 
                                     {/* Player Info */}

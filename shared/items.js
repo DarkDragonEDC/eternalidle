@@ -52,7 +52,21 @@ export const ITEMS = {
         PLANK: {}, BAR: {}, LEATHER: {}, CLOTH: {}, EXTRACT: {}
     },
     CONSUMABLE: {
-        FOOD: {}
+        FOOD: {},
+        INVENTORY_SLOT_TICKET: {
+            id: 'INVENTORY_SLOT_TICKET',
+            name: 'Inventory Slot expansion',
+            description: 'Permanently increases your inventory by 1 slot.',
+            type: 'CONSUMABLE',
+            rarity: 'LEGENDARY'
+        },
+        NAME_CHANGE_TOKEN: {
+            id: 'NAME_CHANGE_TOKEN',
+            name: 'Name Change Token',
+            description: 'Use to unlock a one-time character name change.',
+            type: 'CONSUMABLE',
+            rarity: 'EPIC'
+        }
     },
     GEAR: {
         WARRIORS_FORGE: { SWORD: {}, SHIELD: {}, PLATE_ARMOR: {}, PLATE_HELMET: {}, PLATE_BOOTS: {}, PLATE_GLOVES: {}, PLATE_CAPE: {}, PICKAXE: {} },
@@ -63,7 +77,10 @@ export const ITEMS = {
         ALCHEMY_LAB: { POTION: {} }
     },
     MAPS: {},
-    SPECIAL: { CREST: {}, CHEST: {} }
+    SPECIAL: {
+        CREST: {},
+        CHEST: {}
+    }
 };
 
 // --- GENERATOR FUNCTIONS ---

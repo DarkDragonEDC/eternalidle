@@ -23,7 +23,9 @@ export class InventoryManager {
 
     getMaxSlots(char) {
         const isPremium = char.state?.membership?.active && char.state?.membership?.expiresAt > Date.now();
-        return isPremium ? 50 : 30;
+        const baseSlots = isPremium ? 50 : 30;
+        const extraSlots = parseInt(char.state?.extraInventorySlots) || 0;
+        return baseSlots + extraSlots;
     }
 
     addItemToInventory(char, itemId, amount) {

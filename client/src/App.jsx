@@ -13,6 +13,7 @@ import MarketPanel from './components/MarketPanel';
 import ActivityModal from './components/ActivityModal';
 import RankingPanel from './components/RankingPanel';
 import DungeonPanel from './components/DungeonPanel';
+import RenameModal from './components/RenameModal';
 
 import CombatPanel from './components/CombatPanel';
 import OfflineGainsModal from './components/OfflineGainsModal';
@@ -25,7 +26,7 @@ import CrownShop from './components/CrownShop';
 import {
   Zap, Package, User, Trophy, Coins,
   Axe, Pickaxe, Target, Shield, Sword,
-  Star, Layers, Box, Castle, Lock, Menu, X, Tag, Clock, Heart, LogOut, ChevronDown, Crown
+  Star, Layers, Box, Castle, Lock, Menu, X, Tag, Clock, Heart, LogOut, ChevronDown, Crown, Circle
 } from 'lucide-react';
 import { ITEMS, resolveItem, getSkillForItem, getLevelRequirement } from '@shared/items';
 import { calculateNextLevelXP, XP_TABLE } from '@shared/skills';
@@ -100,7 +101,14 @@ function App() {
 
   const [lootModalData, setLootModalData] = useState(null);
   const [showCrownShop, setShowCrownShop] = useState(false);
+
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+
+  const handleRenameSubmit = (newName) => {
+    socket.emit('change_name', { newName });
+    setIsRenameModalOpen(false);
+  };
 
   useEffect(() => {
     if (gameState?.state?.notifications) {
@@ -367,13 +375,18 @@ function App() {
     });
 
     newSocket.on('item_used', (result) => {
-      console.log('[CLIENT] Item used:', result);
 
-      // If we have structure rewards, show the modal!
       if (result.rewards) {
         setLootModalData(result.rewards);
-      } else if (result.message) {
-        // Fallback for potions/food typical use
+      }
+
+      // Separate check for special token handling
+      if (result.itemId === 'NAME_CHANGE_TOKEN') {
+        setIsRenameModalOpen(true);
+      }
+
+      // Always show message if present
+      if (result.message) {
         addNotification({
           type: 'SYSTEM',
           message: result.message
@@ -594,7 +607,9 @@ function App() {
   const renderContent = () => {
     switch (activeTab) {
       case 'profile':
-        return <ProfilePanel gameState={displayedGameState} session={session} socket={socket} onShowInfo={setInfoItem} isMobile={isMobile} />;
+        return <ProfilePanel gameState={displayedGameState} session={session} socket={socket} onShowInfo={setInfoItem} isMobile={isMobile} onOpenRenameModal={() => {
+          setIsRenameModalOpen(true);
+        }} />;
       case 'market':
         return <MarketPanel socket={socket} gameState={displayedGameState} silver={displayedGameState?.state?.silver || 0} onShowInfo={setInfoItem} onListOnMarket={handleListOnMarket} isMobile={isMobile} initialSearch={marketFilter} />;
       case 'gathering':
@@ -1244,9 +1259,9 @@ function App() {
                     onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 215, 0, 0.05)'}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <Crown size={20} color="#ffd700" />
+                      <Circle size={20} color="#ffd700" />
                       <div>
-                        <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: 'bold', letterSpacing: '1px' }}>CROWNS</div>
+                        <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: 'bold', letterSpacing: '1px' }}>ORBS</div>
                         <div style={{ fontSize: '1rem', fontWeight: '900', color: '#ffd700', fontFamily: 'monospace' }}>
                           {displayedGameState?.state?.crowns || 0}
                         </div>
@@ -1423,6 +1438,12 @@ function App() {
           </div>
         )}
       </AnimatePresence>
+
+      <RenameModal
+        isOpen={isRenameModalOpen}
+        onClose={() => setIsRenameModalOpen(false)}
+        onSubmit={handleRenameSubmit}
+      />
     </div >
   );
 }

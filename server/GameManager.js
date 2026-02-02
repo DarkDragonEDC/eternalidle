@@ -661,6 +661,43 @@ export class GameManager {
         return data;
     }
 
+    async deleteCharacter(userId, characterId) {
+        // 1. Verify existence and ownership
+        const { data: char, error: fetchError } = await this.supabase
+            .from('characters')
+            .select('*')
+            .eq('id', characterId)
+            .eq('user_id', userId)
+            .single();
+
+        if (fetchError || !char) throw new Error("Character not found or access denied.");
+
+        // 2. Cleanup related data (Market Listings)
+        // Note: seller_id is userId, but to be safe we should clean by character metadata if possible.
+        // Since seller_character_id column is missing, we use characterId in item_data workaround if we have it, 
+        // or just accept that listings stay until expiration if we only have userId.
+        // Actually, let's delete all listings by this character name or characterId in metadata
+        await this.supabase
+            .from('market_listings')
+            .delete()
+            .eq('seller_id', userId)
+            .eq('seller_name', char.name);
+
+        // 3. Delete from database
+        const { error: deleteError } = await this.supabase
+            .from('characters')
+            .delete()
+            .eq('id', characterId)
+            .eq('user_id', userId);
+
+        if (deleteError) throw deleteError;
+
+        // 4. Remove from cache
+        this.cache.delete(characterId);
+
+        return { success: true };
+    }
+
     async getStatus(userId, catchup = false, characterId = null, bypassCache = false) {
         const char = await this.getCharacter(userId, characterId, catchup, bypassCache);
         if (!char) return { noCharacter: true };
@@ -1249,6 +1286,16 @@ export class GameManager {
             } else {
                 throw new Error(result.error || "Failed to activate membership");
             }
+        } else if (itemData.id === 'INVENTORY_SLOT_TICKET') {
+            // Permanent Inventory Expansion
+            char.state.extraInventorySlots = (parseInt(char.state.extraInventorySlots) || 0) + safeQty;
+            message = `Used ${safeQty}x Inventory Expansion Tickets! Your inventory capacity permanently increased by ${safeQty} slots.`;
+        } else if (itemData.id === 'NAME_CHANGE_TOKEN') {
+            if (char.state.pendingNameChange) {
+                throw new Error("You already have a pending name change!");
+            }
+            char.state.pendingNameChange = true;
+            message = "Name Change Unlocked! You can now change your name in the Profile panel.";
         } else if (itemData.id.includes('CHEST')) {
             // Chest Logic
             const tier = itemData.tier || 1;

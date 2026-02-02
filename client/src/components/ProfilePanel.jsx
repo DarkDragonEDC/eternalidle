@@ -4,17 +4,19 @@ import { motion } from 'framer-motion';
 import {
     Heart, Shield, Sword, Zap,
     User, Target, Star, Layers,
-    Axe, Pickaxe, Scissors, Anchor, Apple, Info, ShoppingBag
+    Axe, Pickaxe, Scissors, Anchor, Apple, Info, ShoppingBag, Edit
 } from 'lucide-react';
 import { resolveItem, getTierColor } from '@shared/items';
 import StatBreakdownModal from './StatBreakdownModal';
 import { supabase } from '../supabase';
 
 
-const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile }) => {
+const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpenRenameModal }) => {
     const [selectedSlot, setSelectedSlot] = useState(null);
     const [infoModal, setInfoModal] = useState(null);
     const [breakdownModal, setBreakdownModal] = useState(null);
+
+
 
     const handleEquip = (itemId) => {
         socket.emit('equip_item', { itemId });
@@ -364,7 +366,25 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                         marginBottom: '30px'
                     }}>
                         <div>
-                            <h2 style={{ margin: 0, color: '#fff', fontSize: '1.4rem', fontWeight: '900', letterSpacing: '1px' }}>{name.toUpperCase()}</h2>
+                            <h2 style={{ margin: 0, color: '#fff', fontSize: '1.4rem', fontWeight: '900', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                {name.toUpperCase()}
+                                {state.pendingNameChange && (
+                                    <button
+                                        onClick={() => onOpenRenameModal && onOpenRenameModal()}
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            color: '#fbbf24', // Yellow-400
+                                            padding: 0,
+                                            display: 'flex'
+                                        }}
+                                        title="Rename Character"
+                                    >
+                                        <Edit size={18} />
+                                    </button>
+                                )}
+                            </h2>
                             <div style={{ fontSize: '0.6rem', color: '#555', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>Lands Explorer</div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
@@ -657,6 +677,8 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                     </div>
                 </div>
             )}
+
+
         </>
     );
 };

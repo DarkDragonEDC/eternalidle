@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
+import { Trash2, LogOut } from 'lucide-react';
 import '../index.css';
 
 import { formatNumber, formatSilver } from '@utils/format';
@@ -10,6 +11,16 @@ const CharacterSelection = ({ onSelectCharacter }) => {
     const [creating, setCreating] = useState(false);
     const [newCharName, setNewCharName] = useState('');
     const [error, setError] = useState(null);
+    const [confirmDelete, setConfirmDelete] = useState(null); // stores char.id if confirming
+
+    const handleLogout = async () => {
+        try {
+            await supabase.auth.signOut();
+        } catch (err) {
+            console.error('Error logging out:', err);
+            setError('Failed to log out');
+        }
+    };
 
     useEffect(() => {
         fetchCharacters();
@@ -74,10 +85,41 @@ const CharacterSelection = ({ onSelectCharacter }) => {
         }
     };
 
+    const handleDelete = async (e, charId) => {
+        e.stopPropagation();
+        if (confirmDelete !== charId) {
+            setConfirmDelete(charId);
+            return;
+        }
+
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = session?.access_token;
+
+            const apiUrl = import.meta.env.VITE_API_URL;
+            const res = await fetch(`${apiUrl}/api/characters/${charId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.error || 'Failed to delete character');
+            }
+
+            setCharacters(characters.filter(c => c.id !== charId));
+            setConfirmDelete(null);
+            setError(null);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
     const getEquipmentIcons = (char) => {
         if (!char || !char.state || !char.state.equipment) return null;
         const equip = char.state.equipment;
-        // Simple visual indicators of progression
         const icons = [];
         if (equip.mainHand) icons.push('⚔️');
         if (equip.chest) icons.push('🛡️');
@@ -89,6 +131,11 @@ const CharacterSelection = ({ onSelectCharacter }) => {
 
     return (
         <div className="char-select-container">
+            <button className="logout-btn" onClick={handleLogout} title="Logout">
+                <LogOut size={20} />
+                <span>Logout</span>
+            </button>
+
             <h1>Select Your Character</h1>
 
             {error && <div className="error-message">{error}</div>}
@@ -96,7 +143,16 @@ const CharacterSelection = ({ onSelectCharacter }) => {
             <div className="char-list">
                 {characters.map(char => (
                     <div key={char.id} className="char-card" onClick={() => onSelectCharacter(char.id)}>
-                        <h3 className="char-name">{char.name}</h3>
+                        <div style={{ position: 'relative' }}>
+                            <h3 className="char-name">{char.name}</h3>
+                            <button
+                                className={`delete-btn ${confirmDelete === char.id ? 'confirming' : ''}`}
+                                onClick={(e) => handleDelete(e, char.id)}
+                                title={confirmDelete === char.id ? "Click again to confirm" : "Delete character"}
+                            >
+                                {confirmDelete === char.id ? '?' : <Trash2 size={16} />}
+                            </button>
+                        </div>
                         <div className="char-info">
                             <p>Total Level: {char.state && char.state.skills ? formatNumber(Object.values(char.state.skills).reduce((acc, s) => acc + (s.level || 0), 0)) : 0}</p>
                             <p>Silver: {char.state ? formatNumber(char.state.silver || 0) : 0}</p>
@@ -190,6 +246,65 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                 }
                 .play-btn:hover { background: #45a049; }
                 
+                .delete-btn {
+                    position: absolute;
+                    top: -5px;
+                    right: -5px;
+                    background: #ff5252;
+                    border: none;
+                    color: white;
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    transition: 0.2s;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+                    z-index: 10;
+                }
+                .delete-btn:hover {
+                    background: #ff1744;
+                    transform: scale(1.1);
+                }
+                .delete-btn.confirming {
+                    background: #f44336;
+                    width: 32px;
+                    height: 32px;
+                    font-weight: bold;
+                    animation: pulse 1s infinite;
+                }
+                @keyframes pulse {
+                    0% { transform: scale(1); }
+                    50% { transform: scale(1.1); }
+                    100% { transform: scale(1); }
+                }
+
+                .logout-btn {
+                    position: absolute;
+                    top: 20px;
+                    right: 20px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    background: rgba(211, 47, 47, 0.1);
+                    border: 1px solid rgba(211, 47, 47, 0.3);
+                    color: #ff5252;
+                    padding: 8px 16px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-family: inherit;
+                    font-size: 0.8rem;
+                    transition: all 0.2s;
+                }
+                .logout-btn:hover {
+                    background: rgba(211, 47, 47, 0.2);
+                    border-color: #ff5252;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(211, 47, 47, 0.2);
+                }
+
                 .new-char {
                     border-style: dashed;
                     display: flex;

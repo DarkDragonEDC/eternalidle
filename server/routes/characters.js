@@ -39,5 +39,17 @@ export const characterRoutes = (gameManager) => {
         }
     });
 
+    // Delete Character
+    router.delete('/:id', async (req, res) => {
+        try {
+            const { id } = req.params;
+            const result = await gameManager.deleteCharacter(req.user.id, id);
+            res.json(result);
+        } catch (err) {
+            console.error('Error deleting character:', err);
+            res.status(500).json({ error: err.message });
+        }
+    });
+
     return router;
 };
