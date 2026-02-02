@@ -815,11 +815,11 @@ io.on('connection', (socket) => {
                 // Reverting to standard Card payment in USD.
 
                 const session = await stripe.checkout.sessions.create({
-                    // SIMPLE MODE: Card only in USD to guarantee functionality.
+                    // ADAPTIVE PRICING: Send USD, Stripe shows BRL option to BR users.
                     payment_method_types: ['card'],
                     line_items: [{
                         price_data: {
-                            currency: pkg.currency.toLowerCase(),
+                            currency: 'usd',
                             product_data: {
                                 name: pkg.name,
                                 description: pkg.description,
