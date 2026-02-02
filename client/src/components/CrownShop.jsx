@@ -429,7 +429,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
 
                                 <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #42a5f5' }}>
                                     <div style={{ fontWeight: 'bold', color: '#42a5f5', fontSize: '0.9rem', marginBottom: '4px' }}>Market Domination</div>
-                                    <div style={{ fontSize: '0.8rem', color: '#aaa' }}>List up to <strong style={{ color: '#fff' }}>30 items</strong> simultaneously on the Market (Base: 10).</div>
+                                    <div style={{ fontSize: '0.8rem', color: '#aaa' }}>List up to <strong style={{ color: '#fff' }}>50 items</strong> simultaneously on the Market (Base: 30).</div>
                                 </div>
 
                                 <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #ec407a' }}>
