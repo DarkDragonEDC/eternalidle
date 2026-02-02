@@ -74,7 +74,7 @@ export class MarketManager {
 
         // Check Listing Limit (10 base, 30 Premium)
         const isPremium = char.state?.membership?.active && char.state?.membership?.expiresAt > Date.now();
-        const maxListings = isPremium ? 30 : 10;
+        const maxListings = isPremium ? 50 : 30;
 
         const { count, error: countError } = await this.gameManager.supabase
             .from('market_listings')
@@ -83,7 +83,7 @@ export class MarketManager {
 
         if (countError) throw countError;
         if (count >= maxListings) {
-            throw new Error(`Market listing limit reached (${count}/${maxListings}). ${!isPremium ? 'Upgrade to Premium for 30 slots!' : ''}`);
+            throw new Error(`Market listing limit reached (${count}/${maxListings}). ${!isPremium ? 'Upgrade to Premium for 50 slots!' : ''}`);
         }
 
         const inventory = char.state.inventory;
