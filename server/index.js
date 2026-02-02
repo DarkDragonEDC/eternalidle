@@ -815,7 +815,9 @@ io.on('connection', (socket) => {
                 // Reverting to standard Card payment in USD.
 
                 const session = await stripe.checkout.sessions.create({
-                    payment_method_types: ['card', 'pix', 'boleto', 'link'],
+                    // REMOVED 'pix' explicitly to prevent crash (Account limitation).
+                    // Trying 'boleto' (Enabled) and 'link'.
+                    payment_method_types: ['card', 'boleto', 'link'],
                     line_items: [{
                         price_data: {
                             currency: pkg.priceBRL ? 'brl' : pkg.currency.toLowerCase(),
