@@ -10,6 +10,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
     const [combatElapsed, setCombatElapsed] = useState(0);
     const [dungeonElapsed, setDungeonElapsed] = useState(0);
     const [syncedElapsed, setSyncedElapsed] = useState(0);
+    const [smoothProgress, setSmoothProgress] = useState(0);
 
     const activity = gameState?.current_activity;
     const combat = gameState?.state?.combat;
@@ -93,26 +94,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
         return () => clearInterval(interval);
     }, [activity, serverTimeOffset]);
 
-    // ... keydown handler ...
-
-    if (!activity && !combat && (!dungeonState || !dungeonState.active)) return null;
-
-    const isGathering = activity?.type === 'GATHERING';
-    const isRefining = activity?.type === 'REFINING';
-    const isCrafting = activity?.type === 'CRAFTING';
-
-    const totalDuration = initialQty * timePerAction;
-    const totalProgress = Math.min(100, (syncedElapsed / totalDuration) * 100);
-    const remainingSeconds = Math.max(0, totalDuration - syncedElapsed);
-
-    // Skill Badge Progress (Capped 0-100)
-    // Calculate based on the fraction of the current action completed
-    const currentActionProgressPercent = activity?.next_action_at
-        ? Math.max(0, Math.min(100, ((timePerAction * 1000) - (new Date(activity.next_action_at).getTime() - (Date.now() + serverTimeOffset))) / (timePerAction * 10)))
-        : 0;
-
-    const [smoothProgress, setSmoothProgress] = useState(0);
-
+    // Smooth Progress Animation (60fps)
     useEffect(() => {
         if (!activity?.next_action_at) {
             setSmoothProgress(0);
@@ -137,6 +119,24 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
         animationFrameId = requestAnimationFrame(updateSmoothProgress);
         return () => cancelAnimationFrame(animationFrameId);
     }, [activity?.next_action_at, activity?.time_per_action, serverTimeOffset]);
+
+    // ... keydown handler ...
+
+    if (!activity && !combat && (!dungeonState || !dungeonState.active)) return null;
+
+    const isGathering = activity?.type === 'GATHERING';
+    const isRefining = activity?.type === 'REFINING';
+    const isCrafting = activity?.type === 'CRAFTING';
+
+    const totalDuration = initialQty * timePerAction;
+    const totalProgress = Math.min(100, (syncedElapsed / totalDuration) * 100);
+    const remainingSeconds = Math.max(0, totalDuration - syncedElapsed);
+
+    // Skill Badge Progress (Capped 0-100)
+    // Calculate based on the fraction of the current action completed
+    const currentActionProgressPercent = activity?.next_action_at
+        ? Math.max(0, Math.min(100, ((timePerAction * 1000) - (new Date(activity.next_action_at).getTime() - (Date.now() + serverTimeOffset))) / (timePerAction * 10)))
+        : 0;
 
     const skillProgressCapped = smoothProgress;
     // Formatar Tempo (HH:MM:SS)
