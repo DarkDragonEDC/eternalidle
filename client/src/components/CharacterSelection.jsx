@@ -355,18 +355,35 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                 }
                 .create-actions {
                     display: flex;
-                    gap: 5px;
+                    gap: 10px;
                     justify-content: center;
+                    margin-top: 5px;
                 }
                 .create-actions button {
-                    padding: 5px 10px;
+                    padding: 10px 20px;
                     cursor: pointer;
                     font-family: inherit;
                     border: none;
+                    border-radius: 6px;
+                    font-weight: 600;
+                    transition: all 0.2s;
+                }
+                .create-actions button:first-child {
+                    background: linear-gradient(135deg, #d4af37 0%, #b8960b 100%);
+                    color: #000;
+                    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+                }
+                .create-actions button:first-child:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
                 }
                 .create-actions button.cancel {
-                    background: #d32f2f;
-                    color: white;
+                    background: rgba(211, 47, 47, 0.2);
+                    color: #ff5252;
+                    border: 1px solid rgba(211, 47, 47, 0.4);
+                }
+                .create-actions button.cancel:hover {
+                    background: rgba(211, 47, 47, 0.3);
                 }
                 .error-message {
                     color: #ff6b6b;
