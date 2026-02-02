@@ -810,16 +810,10 @@ io.on('connection', (socket) => {
                     return socket.emit('crown_purchase_error', { error: 'Payments are not configured on this server.' });
                 }
 
-                // Stripe Price IDs for products created in Stripe Dashboard
-                const STRIPE_PRICE_IDS = {
-                    'CROWNS_250': 'price_1SwBkAEPuC7Jnm1waAnD6Lx4'
-                };
-                const stripePriceId = STRIPE_PRICE_IDS[packageId];
-
-                // Use pre-created Stripe Price if available (enables Adaptive Pricing)
-                const lineItem = stripePriceId
-                    ? { price: stripePriceId, quantity: 1 }
-                    : {
+                // Simple Card/USD checkout
+                const session = await stripe.checkout.sessions.create({
+                    payment_method_types: ['card'],
+                    line_items: [{
                         price_data: {
                             currency: 'usd',
                             product_data: {
@@ -830,11 +824,7 @@ io.on('connection', (socket) => {
                             unit_amount: Math.round(pkg.price * 100),
                         },
                         quantity: 1,
-                    };
-
-                const session = await stripe.checkout.sessions.create({
-                    payment_method_types: ['card'],
-                    line_items: [lineItem],
+                    }],
                     mode: 'payment',
                     success_url: `${CLIENT_URL}/?payment=success&package=${packageId}`,
                     cancel_url: `${CLIENT_URL}/?payment=cancel`,
