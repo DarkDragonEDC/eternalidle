@@ -811,21 +811,20 @@ io.on('connection', (socket) => {
                 }
 
                 // Create Stripe Checkout Session
-                // HYBRID MODE: Show USD in game, but charge in BRL to enable PIX
-                const priceAmount = pkg.priceBRL ? Math.round(pkg.priceBRL * 100) : Math.round(pkg.price * 100);
-                const currency = pkg.priceBRL ? 'brl' : pkg.currency.toLowerCase();
+                // FALLBACK: User's Stripe account does not support PIX/BRL or is US-based.
+                // Reverting to standard Card payment in USD.
 
                 const session = await stripe.checkout.sessions.create({
-                    payment_method_types: ['card', 'pix', 'boleto'],
+                    payment_method_types: ['card'],
                     line_items: [{
                         price_data: {
-                            currency: currency,
+                            currency: pkg.currency.toLowerCase(),
                             product_data: {
                                 name: pkg.name,
                                 description: pkg.description,
                                 images: ['https://raw.githubusercontent.com/lucide-react/lucide/main/icons/crown.svg'],
                             },
-                            unit_amount: priceAmount,
+                            unit_amount: Math.round(pkg.price * 100),
                         },
                         quantity: 1,
                     }],
