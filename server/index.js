@@ -815,9 +815,9 @@ io.on('connection', (socket) => {
                 // Reverting to standard Card payment in USD.
 
                 const session = await stripe.checkout.sessions.create({
-                    // REMOVED 'pix' explicitly to prevent crash (Account limitation).
-                    // Trying 'boleto' (Enabled) and 'link'.
-                    payment_method_types: ['card', 'boleto', 'link'],
+                    // AUTOMATIC MODE: Lets Stripe decide valid methods to avoid crashes.
+                    // Currency is forced to BRL to encourage PIX/Boleto visibility if enabled.
+                    automatic_payment_methods: { enabled: true },
                     line_items: [{
                         price_data: {
                             currency: pkg.priceBRL ? 'brl' : pkg.currency.toLowerCase(),
