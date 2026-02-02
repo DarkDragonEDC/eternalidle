@@ -815,18 +815,17 @@ io.on('connection', (socket) => {
                 // Reverting to standard Card payment in USD.
 
                 const session = await stripe.checkout.sessions.create({
-                    // AUTOMATIC MODE: Lets Stripe decide valid methods to avoid crashes.
-                    // Currency is forced to BRL to encourage PIX/Boleto visibility if enabled.
-                    automatic_payment_methods: { enabled: true },
+                    // SIMPLE MODE: Card only in USD to guarantee functionality.
+                    payment_method_types: ['card'],
                     line_items: [{
                         price_data: {
-                            currency: pkg.priceBRL ? 'brl' : pkg.currency.toLowerCase(),
+                            currency: pkg.currency.toLowerCase(),
                             product_data: {
                                 name: pkg.name,
                                 description: pkg.description,
                                 images: ['https://raw.githubusercontent.com/lucide-react/lucide/main/icons/crown.svg'],
                             },
-                            unit_amount: pkg.priceBRL ? Math.round(pkg.priceBRL * 100) : Math.round(pkg.price * 100),
+                            unit_amount: Math.round(pkg.price * 100),
                         },
                         quantity: 1,
                     }],
