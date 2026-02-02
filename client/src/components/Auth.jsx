@@ -107,21 +107,21 @@ const Auth = ({ onLogin, initialView = 'LOGIN' }) => {
             background: 'radial-gradient(circle at center, #2a2a2a 0%, #0d0d0d 100%)',
             fontFamily: 'system-ui, sans-serif',
             color: '#fff',
-            position: 'relative'
         }}>
-            {/* Active Players at Top */}
             <div style={{
-                position: 'absolute',
-                top: '40px',
+                width: '380px',
+                maxWidth: '95vw',
+                padding: '1.5rem',
+                background: 'rgba(20, 20, 20, 0.8)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '16px',
+                border: '1px solid rgba(212, 175, 55, 0.3)',
+                boxShadow: '0 0 40px rgba(0,0,0,0.6)',
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center',
-                gap: '8px',
-                color: 'rgba(255,255,255,0.4)',
-                fontSize: '0.8rem',
-                textShadow: '0 1px 2px rgba(0,0,0,0.5)',
-                zIndex: 10
+                alignItems: 'center'
             }}>
+                {/* Active Players Badge - Inside card */}
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -130,7 +130,8 @@ const Auth = ({ onLogin, initialView = 'LOGIN' }) => {
                     padding: '4px 12px',
                     borderRadius: '20px',
                     border: '1px solid rgba(212, 175, 55, 0.2)',
-                    color: '#d4af37'
+                    color: '#d4af37',
+                    marginBottom: '1rem'
                 }}>
                     <span style={{
                         width: '8px',
@@ -142,19 +143,7 @@ const Auth = ({ onLogin, initialView = 'LOGIN' }) => {
                     <span style={{ fontWeight: 'bold' }}>{activePlayers}</span>
                     <span style={{ fontSize: '0.7rem', letterSpacing: '1px' }}>ACTIVE PLAYERS</span>
                 </div>
-            </div>
-            <div style={{
-                width: '380px',
-                padding: '1.5rem',
-                background: 'rgba(20, 20, 20, 0.8)',
-                backdropFilter: 'blur(10px)',
-                borderRadius: '16px',
-                border: '1px solid rgba(212, 175, 55, 0.3)',
-                boxShadow: '0 0 40px rgba(0,0,0,0.6)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center'
-            }}>
+
                 {/* Logo and Title */}
                 <div style={{ marginBottom: '1.25rem', textAlign: 'center' }}>
                     <img
