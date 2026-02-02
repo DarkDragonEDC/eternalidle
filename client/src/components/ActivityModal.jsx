@@ -183,10 +183,10 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 width: '100%',
                                 maxWidth: '400px',
                                 padding: '2rem',
-                                background: '#1a1f2e',
+                                background: 'var(--panel-bg)',
                                 borderRadius: '16px',
-                                boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
-                                border: '1px solid rgba(255,255,255,0.1)',
+                                boxShadow: 'var(--panel-shadow)',
+                                border: '1px solid var(--border)',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
@@ -196,7 +196,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem', width: '100%', position: 'relative' }}>
                                 {item.icon && <img src={item.icon} style={{ width: 64, height: 64, objectFit: 'contain', marginBottom: '10px', filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.3))' }} alt={item.name} />}
                                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
-                                    <h3 style={{ color: '#d4af37', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
+                                    <h3 style={{ color: 'var(--accent)', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
                                 </div>
                                 <button
                                     onClick={onClose}
@@ -229,10 +229,10 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                             flex: '1 1 0%',
                                             padding: '6px 8px',
                                             fontSize: '0.85rem',
-                                            background: 'rgba(255, 255, 255, 0.05)',
-                                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                                            background: 'var(--glass-bg)',
+                                            border: '1px solid var(--border)',
                                             borderRadius: '4px',
-                                            color: 'rgb(255, 255, 255)',
+                                            color: 'var(--text-main)',
                                             outline: 'none'
                                         }}
                                     />
@@ -240,9 +240,9 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                         onClick={handleMax}
                                         style={{
                                             padding: '6px 10px',
-                                            background: 'rgba(212, 175, 55, 0.1)',
-                                            border: '1px solid #d4af37',
-                                            color: '#d4af37',
+                                            background: 'var(--accent-soft)',
+                                            border: '1px solid var(--border-active)',
+                                            color: 'var(--accent)',
                                             borderRadius: '4px',
                                             cursor: 'pointer',
                                             fontSize: '0.7rem',
@@ -279,19 +279,19 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                                 cursor: 'pointer'
                                             }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                                    <div style={{ fontSize: '0.85rem', color: '#d4af37', fontWeight: '700' }}>{displayName}</div>
+                                                    <div style={{ fontSize: '0.85rem', color: 'var(--accent)', fontWeight: '700' }}>{displayName}</div>
                                                     <button
                                                         title="Search in Market"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             onSearchInMarket(displayName);
                                                         }}
-                                                        style={{ background: 'rgba(212, 175, 55, 0.1)', border: '1px solid rgba(212, 175, 55, 0.3)', borderRadius: '4px', padding: '2px', cursor: 'pointer', color: '#d4af37', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        style={{ background: 'var(--accent-soft)', border: '1px solid var(--border-active)', borderRadius: '4px', padding: '2px', cursor: 'pointer', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                         <Package size={14} />
                                                     </button>
                                                 </div>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                    <span style={{ fontSize: '0.75rem', color: 'rgb(136, 136, 136)' }}>Required: {totalReq}</span>
+                                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Required: {totalReq}</span>
                                                     <span style={{ fontSize: '1rem', fontWeight: '900', color: hasEnough ? '#4caf50' : '#ff4444' }}>{userQty}</span>
                                                 </div>
                                             </div>
@@ -300,30 +300,30 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 </div>
                             </div>
 
-                            <div style={{ marginBottom: '1.25rem', padding: '16px', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)', width: '100%' }}>
+                            <div style={{ marginBottom: '1.25rem', padding: '16px', background: 'var(--slot-bg)', borderRadius: '12px', border: '1px solid var(--border)', width: '100%' }}>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1rem' }}>
                                         <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: '700' }}>Efficiency</span>
                                         <span style={{ color: '#4caf50', fontWeight: '900', fontSize: '1.2rem' }}>+{efficiency}%</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
-                                        <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>Time per action</span>
-                                        <span style={{ color: '#fff', fontWeight: '800' }}>{finalTime.toFixed(1)}s {finalTime < baseTime && <span style={{ fontSize: '0.6rem', color: '#666', textDecoration: 'line-through', marginLeft: '4px' }}>{baseTime}s</span>}</span>
+                                        <span style={{ color: 'var(--text-dim)', fontWeight: '600' }}>Time per action</span>
+                                        <span style={{ color: 'var(--text-main)', fontWeight: '800' }}>{finalTime.toFixed(1)}s {finalTime < baseTime && <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textDecoration: 'line-through', marginLeft: '4px' }}>{baseTime}s</span>}</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                         <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>XP per action</span>
-                                        <span style={{ color: '#d4af37', fontWeight: '800' }}>{xpPerAction}</span>
+                                        <span style={{ color: 'var(--accent)', fontWeight: '800' }}>{xpPerAction}</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                         <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>Total Cost</span>
-                                        <span style={{ color: '#d4af37', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <span style={{ color: 'var(--accent)', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                             <div style={{ width: 10, height: 10, borderRadius: '50%', border: '2px solid currentColor' }}></div>
                                             {totalCost}
                                         </span>
                                     </div>
-                                    <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span style={{ color: '#fff', fontWeight: '900', fontSize: '0.85rem' }}>TOTAL XP</span>
-                                        <span style={{ color: '#4caf50', fontWeight: '900', fontSize: '1rem' }}>{totalXP}</span>
+                                    <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ color: 'var(--text-main)', fontWeight: '900', fontSize: '0.85rem' }}>TOTAL XP</span>
+                                        <span style={{ color: 'var(--t2)', fontWeight: '900', fontSize: '1rem' }}>{totalXP}</span>
                                     </div>
                                 </div>
                             </div>
@@ -359,8 +359,8 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                     style={{
                                         width: '100%',
                                         padding: '12px',
-                                        background: '#d4af37',
-                                        color: '#000',
+                                        background: 'var(--accent)',
+                                        color: 'var(--bg-dark)',
                                         border: 'none',
                                         borderRadius: '8px',
                                         fontWeight: '900',
@@ -490,10 +490,10 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 width: '100%',
                                 maxWidth: '400px',
                                 padding: '2rem',
-                                background: '#1a1f2e',
+                                background: 'var(--panel-bg)',
                                 borderRadius: '16px',
-                                boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
-                                border: '1px solid rgba(255,255,255,0.1)',
+                                boxShadow: 'var(--panel-shadow)',
+                                border: '1px solid var(--border)',
                                 maxHeight: '90vh',
                                 overflowY: 'auto',
                                 display: 'flex',
@@ -505,7 +505,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem', width: '100%', position: 'relative' }}>
                                 {item.icon && <img src={item.icon} style={{ width: 64, height: 64, objectFit: 'contain', marginBottom: '10px', filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.3))' }} alt={item.name} />}
                                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
-                                    <h3 style={{ color: '#d4af37', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
+                                    <h3 style={{ color: 'var(--accent)', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
                                 </div>
                                 <button
                                     onClick={onClose}
@@ -538,10 +538,10 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                             flex: '1 1 0%',
                                             padding: '6px 8px',
                                             fontSize: '0.85rem',
-                                            background: 'rgba(255, 255, 255, 0.05)',
-                                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                                            background: 'var(--slot-bg)',
+                                            border: '1px solid var(--border)',
                                             borderRadius: '4px',
-                                            color: 'rgb(255, 255, 255)',
+                                            color: 'var(--text-main)',
                                             outline: 'none'
                                         }}
                                     />
@@ -549,9 +549,9 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                         onClick={handleMax}
                                         style={{
                                             padding: '6px 10px',
-                                            background: 'rgba(212, 175, 55, 0.1)',
-                                            border: '1px solid #d4af37',
-                                            color: '#d4af37',
+                                            background: 'var(--accent-soft)',
+                                            border: '1px solid var(--border-active)',
+                                            color: 'var(--accent)',
                                             borderRadius: '4px',
                                             cursor: 'pointer',
                                             fontSize: '0.7rem',
@@ -579,14 +579,14 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                         return (
                                             <div onClick={() => onNavigate && onNavigate(reqId)} key={reqId} style={{ flex: '1 1 calc(50% - 3px)', minWidth: '120px', background: 'rgba(255, 255, 255, 0.03)', padding: '8px', borderRadius: '4px', border: `1px solid ${hasEnough ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255, 68, 68, 0.3)'} `, cursor: 'pointer', position: 'relative' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                    <div style={{ fontSize: '0.7rem', color: '#d4af37', marginBottom: '2px', fontWeight: '600' }}>{displayName}</div>
+                                                    <div style={{ fontSize: '0.7rem', color: 'var(--accent)', marginBottom: '2px', fontWeight: '600' }}>{displayName}</div>
                                                     <button
                                                         title="Search in Market"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             onSearchInMarket(displayName);
                                                         }}
-                                                        style={{ background: 'rgba(212, 175, 55, 0.1)', border: '1px solid rgba(212, 175, 55, 0.3)', borderRadius: '4px', padding: '2px', cursor: 'pointer', color: '#d4af37', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        style={{ background: 'var(--accent-soft)', border: '1px solid var(--border-active)', borderRadius: '4px', padding: '2px', cursor: 'pointer', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                         <Package size={10} />
                                                     </button>
                                                 </div>
@@ -600,30 +600,30 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 </div>
                             </div>
 
-                            <div style={{ marginBottom: '1.25rem', padding: '16px', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)', width: '100%' }}>
+                            <div style={{ marginBottom: '1.25rem', padding: '16px', background: 'var(--slot-bg)', borderRadius: '12px', border: '1px solid var(--border)', width: '100%' }}>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                         <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>Efficiency</span>
                                         <span style={{ color: '#4caf50', fontWeight: '800' }}>+{efficiency}%</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
-                                        <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>Time per action</span>
-                                        <span style={{ color: '#fff', fontWeight: '800' }}>{finalTime.toFixed(1)}s {finalTime < baseTime && <span style={{ fontSize: '0.6rem', color: '#666', textDecoration: 'line-through', marginLeft: '4px' }}>{baseTime}s</span>}</span>
+                                        <span style={{ color: 'var(--text-dim)', fontWeight: '600' }}>Time per action</span>
+                                        <span style={{ color: 'var(--text-main)', fontWeight: '800' }}>{finalTime.toFixed(1)}s {finalTime < baseTime && <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textDecoration: 'line-through', marginLeft: '4px' }}>{baseTime}s</span>}</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                         <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>XP per action</span>
-                                        <span style={{ color: '#d4af37', fontWeight: '800' }}>{xpPerAction}</span>
+                                        <span style={{ color: 'var(--accent)', fontWeight: '800' }}>{xpPerAction}</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                         <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>Total Cost</span>
-                                        <span style={{ color: '#d4af37', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <span style={{ color: 'var(--accent)', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                             <div style={{ width: 10, height: 10, borderRadius: '50%', border: '2px solid currentColor' }}></div>
                                             {totalCost}
                                         </span>
                                     </div>
-                                    <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span style={{ color: '#fff', fontWeight: '900', fontSize: '0.85rem' }}>TOTAL XP</span>
-                                        <span style={{ color: '#4caf50', fontWeight: '900', fontSize: '1rem' }}>{totalXP}</span>
+                                    <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ color: 'var(--text-main)', fontWeight: '900', fontSize: '0.85rem' }}>TOTAL XP</span>
+                                        <span style={{ color: 'var(--t2)', fontWeight: '900', fontSize: '1rem' }}>{totalXP}</span>
                                     </div>
                                 </div>
                             </div>
@@ -633,7 +633,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 <div style={{ marginBottom: '0.75rem', width: '100%' }}>
                                     <button
                                         onClick={() => setShowProbabilities(!showProbabilities)}
-                                        style={{ width: '100%', background: 'rgba(212, 175, 55, 0.05)', padding: '8px 10px', borderRadius: '4px', border: '1px solid rgba(212, 175, 55, 0.2)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#d4af37', fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase' }}
+                                        style={{ width: '100%', background: 'var(--accent-soft)', padding: '8px 10px', borderRadius: '4px', border: '1px solid var(--border-active)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--accent)', fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase' }}
                                     >
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                             <Box size={14} />
@@ -661,13 +661,13 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                                             if (stats.damage) showStats.push({ label: 'Dmg', val: stats.damage, icon: <Sword size={11} />, color: '#ff4444' });
                                                             if (stats.defense) showStats.push({ label: 'Def', val: stats.defense, icon: <Shield size={11} />, color: '#4caf50' });
                                                             if (stats.hp) showStats.push({ label: 'HP', val: stats.hp, icon: <Heart size={11} />, color: '#ff4d4d' });
-                                                            if (stats.speed) showStats.push({ label: 'Spd', val: '-' + (stats.speed / 1000).toFixed(2) + 's', icon: <Zap size={11} />, color: '#ffd700' });
-                                                            if (stats.attackSpeed) showStats.push({ label: 'Base', val: (stats.attackSpeed / 1000).toFixed(2) + 's', icon: <Zap size={11} />, color: '#ffd700' });
+                                                            if (stats.speed) showStats.push({ label: 'Spd', val: '-' + (stats.speed / 1000).toFixed(2) + 's', icon: <Zap size={11} />, color: 'var(--accent)' });
+                                                            if (stats.attackSpeed) showStats.push({ label: 'Base', val: (stats.attackSpeed / 1000).toFixed(2) + 's', icon: <Zap size={11} />, color: 'var(--accent)' });
 
                                                             // Handle Efficiency
                                                             if (stats.efficiency) {
                                                                 const effVal = typeof stats.efficiency === 'object' ? stats.efficiency.GLOBAL : stats.efficiency;
-                                                                if (effVal) showStats.push({ label: 'Eff', val: effVal + '%', icon: <Star size={11} />, color: '#d4af37' });
+                                                                if (effVal) showStats.push({ label: 'Eff', val: effVal + '%', icon: <Star size={11} />, color: '#90d5ff' });
                                                             }
 
                                                             return (
@@ -783,10 +783,10 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 width: '100%',
                                 maxWidth: '400px',
                                 padding: '2rem',
-                                background: '#1a1f2e',
+                                background: 'var(--panel-bg)',
                                 borderRadius: '16px',
-                                boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
-                                border: '1px solid rgba(255,255,255,0.1)',
+                                boxShadow: 'var(--panel-shadow)',
+                                border: '1px solid var(--border)',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
@@ -796,7 +796,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem', width: '100%', position: 'relative' }}>
                                 {item.icon && <img src={item.icon} style={{ width: 64, height: 64, objectFit: 'contain', marginBottom: '10px', filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.3))' }} alt={item.name} />}
                                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
-                                    <h3 style={{ color: '#d4af37', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
+                                    <h3 style={{ color: 'var(--accent)', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
                                 </div>
                                 <button
                                     onClick={onClose}
@@ -829,10 +829,10 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                             flex: '1 1 0%',
                                             padding: '6px 8px',
                                             fontSize: '0.85rem',
-                                            background: 'rgba(255, 255, 255, 0.05)',
-                                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                                            background: 'var(--slot-bg)',
+                                            border: '1px solid var(--border)',
                                             borderRadius: '4px',
-                                            color: 'rgb(255, 255, 255)',
+                                            color: 'var(--text-main)',
                                             outline: 'none'
                                         }}
                                     />
@@ -840,9 +840,9 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                         onClick={handleMax}
                                         style={{
                                             padding: '6px 10px',
-                                            background: 'rgba(212, 175, 55, 0.1)',
-                                            border: '1px solid #d4af37',
-                                            color: '#d4af37',
+                                            background: 'var(--accent-soft)',
+                                            border: '1px solid var(--border-active)',
+                                            color: 'var(--accent)',
                                             borderRadius: '4px',
                                             cursor: 'pointer',
                                             fontSize: '0.7rem',
@@ -856,7 +856,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 <div style={{ fontSize: '0.6rem', color: 'rgb(102, 102, 102)', marginTop: '3px' }}>Max: {formatNumber(maxQuantity)}</div>
                             </div>
 
-                            <div style={{ marginBottom: '1.25rem', padding: '16px', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)', width: '100%' }}>
+                            <div style={{ marginBottom: '1.25rem', padding: '16px', background: 'var(--slot-bg)', borderRadius: '12px', border: '1px solid var(--border)', width: '100%' }}>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1rem' }}>
                                         <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: '700' }}>Efficiency</span>
@@ -868,11 +868,11 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                         <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>XP per action</span>
-                                        <span style={{ color: '#d4af37', fontWeight: '800' }}>{xpPerAction}</span>
+                                        <span style={{ color: 'var(--accent)', fontWeight: '800' }}>{xpPerAction}</span>
                                     </div>
-                                    <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span style={{ color: '#fff', fontWeight: '900', fontSize: '0.85rem' }}>TOTAL XP</span>
-                                        <span style={{ color: '#4caf50', fontWeight: '900', fontSize: '1rem' }}>{totalXP}</span>
+                                    <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ color: 'var(--text-main)', fontWeight: '900', fontSize: '0.85rem' }}>TOTAL XP</span>
+                                        <span style={{ color: 'var(--t2)', fontWeight: '900', fontSize: '1rem' }}>{totalXP}</span>
                                     </div>
                                 </div>
                             </div>
@@ -908,8 +908,8 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                     style={{
                                         width: '100%',
                                         padding: '12px',
-                                        background: '#d4af37',
-                                        color: '#000',
+                                        background: 'var(--accent)',
+                                        color: 'var(--bg-dark)',
                                         border: 'none',
                                         borderRadius: '8px',
                                         fontWeight: '900',

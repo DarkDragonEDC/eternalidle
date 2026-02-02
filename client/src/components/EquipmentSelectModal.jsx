@@ -84,7 +84,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(0,0,0,0.8)',
+            background: 'rgba(0,0,0,0.7)',
             zIndex: 2000,
             display: 'flex',
             alignItems: 'center',
@@ -92,15 +92,15 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
             backdropFilter: 'blur(5px)'
         }} onClick={handleBackdropClick}>
             <div style={{
-                background: '#1a1d26',
-                border: '1px solid rgba(255,255,255,0.1)',
+                background: 'var(--panel-bg)',
+                border: '1px solid var(--border)',
                 borderRadius: '16px',
                 width: '90%',
                 maxWidth: '500px',
                 maxHeight: '80vh',
                 display: 'flex',
                 flexDirection: 'column',
-                boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+                boxShadow: 'var(--panel-shadow)',
                 overflow: 'hidden'
             }}>
                 {/* Header */}
@@ -110,10 +110,10 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    background: 'rgba(0,0,0,0.2)',
+                    background: 'var(--accent-soft)',
                     flexShrink: 0
                 }}>
-                    <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '1px' }}>
                         Select {slot}
                     </h3>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#aaa', cursor: 'pointer', padding: '5px' }}>
@@ -150,7 +150,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                             <div
                                 onClick={() => { onEquip(bestCandidate.id); onClose(); }}
                                 style={{
-                                    background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(0, 0, 0, 0.4) 100%)',
+                                    background: 'var(--slot-bg)',
                                     border: '1px solid var(--accent)',
                                     borderRadius: '12px',
                                     padding: '15px',
@@ -181,7 +181,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                         )}
                                     </div>
                                     <div>
-                                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>
+                                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>
                                             {bestCandidate.name}
                                         </div>
                                         <div style={{ fontSize: '0.8rem', color: 'var(--accent)' }}>
@@ -189,7 +189,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                         </div>
                                     </div>
                                 </div>
-                                <div style={{ background: 'var(--accent)', color: '#000', padding: '6px 12px', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.75rem' }}>
+                                <div style={{ background: 'var(--accent)', color: 'var(--panel-bg)', padding: '6px 12px', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.75rem' }}>
                                     EQUIP BEST
                                 </div>
                             </div>
@@ -230,13 +230,13 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                         )}
                                     </div>
                                     <div>
-                                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                             {resolvedCurrent?.name || currentItem.name || currentItem.id}
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); onShowInfo(currentItem); }}
                                                 style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.5 }}
                                             >
-                                                <Info size={14} color="#fff" />
+                                                <Info size={14} color="var(--text-main)" />
                                             </button>
                                         </div>
                                         <div style={{ fontSize: '0.8rem', color: '#888' }}>Tier {currentItem.tier} • IP {currentItem.ip || 0}</div>
@@ -272,7 +272,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                 padding: '30px',
                                 textAlign: 'center',
                                 color: '#555',
-                                background: 'rgba(255,255,255,0.02)',
+                                background: 'var(--slot-bg)',
                                 borderRadius: '12px',
                                 fontSize: '0.9rem'
                             }}>
@@ -287,8 +287,8 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                             key={`${item.id}-${idx}`}
                                             onClick={() => { onEquip(item.id); onClose(); }}
                                             style={{
-                                                background: 'rgba(255,255,255,0.03)',
-                                                border: `1px solid ${isItemRecommended ? 'rgba(212, 175, 55, 0.3)' : (item.quality > 0 ? item.rarityColor : 'rgba(255,255,255,0.05)')}`,
+                                                background: 'var(--slot-bg)',
+                                                border: `1px solid ${isItemRecommended ? 'var(--accent)' : (item.quality > 0 ? item.rarityColor : 'var(--border)')}`,
                                                 borderRadius: '12px',
                                                 padding: '12px',
                                                 display: 'flex',
@@ -299,8 +299,8 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                                 transition: '0.2s',
                                                 boxShadow: isItemRecommended ? '0 0 10px rgba(212, 175, 55, 0.05)' : (item.quality > 0 ? `0 0 10px ${item.rarityColor}10` : 'none')
                                             }}
-                                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
-                                            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                                            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--accent-soft)'}
+                                            onMouseLeave={(e) => e.currentTarget.style.background = 'var(--slot-bg)'}
                                         >
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                                                 <div style={{
@@ -338,7 +338,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                                     }}>{item.qty}</div>
                                                 </div>
                                                 <div>
-                                                    <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                         {item.name}
                                                         {isItemRecommended && (
                                                             <span style={{ fontSize: '0.6rem', background: 'var(--accent)', color: '#000', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>BEST</span>

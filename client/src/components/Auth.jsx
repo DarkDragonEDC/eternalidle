@@ -104,18 +104,18 @@ const Auth = ({ onLogin, initialView = 'LOGIN' }) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'radial-gradient(circle at center, #2a2a2a 0%, #0d0d0d 100%)',
+            background: 'radial-gradient(circle at center, #1e2330 0%, var(--bg-dark) 100%)',
             fontFamily: 'system-ui, sans-serif',
-            color: '#fff',
+            color: 'var(--text-main)',
         }}>
             <div style={{
                 width: '380px',
                 maxWidth: '95vw',
                 padding: '1.5rem',
-                background: 'rgba(20, 20, 20, 0.8)',
+                background: 'var(--panel-bg)',
                 backdropFilter: 'blur(10px)',
                 borderRadius: '16px',
-                border: '1px solid rgba(212, 175, 55, 0.3)',
+                border: '1px solid var(--border)',
                 boxShadow: '0 0 40px rgba(0,0,0,0.6)',
                 display: 'flex',
                 flexDirection: 'column',
@@ -171,7 +171,7 @@ const Auth = ({ onLogin, initialView = 'LOGIN' }) => {
                             <label style={{
                                 display: 'block',
                                 fontSize: '0.7rem',
-                                color: '#aaa',
+                                color: 'var(--text-dim)',
                                 fontWeight: '600',
                                 marginBottom: '0.4rem',
                                 letterSpacing: '1px'
@@ -220,15 +220,15 @@ const Auth = ({ onLogin, initialView = 'LOGIN' }) => {
                                     width: '100%',
                                     padding: '8px 12px',
                                     background: 'rgba(0,0,0,0.4)',
-                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    border: '1px solid var(--border)',
                                     borderRadius: '8px',
-                                    color: '#fff',
+                                    color: 'var(--text-main)',
                                     fontSize: '1rem',
                                     outline: 'none',
                                     transition: 'border-color 0.2s'
                                 }}
-                                onFocus={(e) => e.target.style.borderColor = '#d4af37'}
-                                onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                                onFocus={(e) => e.target.style.borderColor = 'var(--accent)'}
+                                onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
                                 disabled={isLoading}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -322,7 +322,7 @@ const Auth = ({ onLogin, initialView = 'LOGIN' }) => {
                                 : 'linear-gradient(135deg, #d4af37 0%, #b8860b 100%)',
                             border: 'none',
                             borderRadius: '8px',
-                            color: '#000',
+                            color: 'var(--bg-dark)',
                             fontWeight: 'bold',
                             fontSize: '1rem',
                             cursor: isLoading ? 'not-allowed' : 'pointer',

@@ -34,7 +34,7 @@ const DungeonHistoryModal = ({ isOpen, onClose, history }) => {
                 justifyContent: 'center',
                 zIndex: 3000,
                 padding: '20px',
-                background: 'rgba(0,0,0,0.85)',
+                background: 'rgba(0,0,0,0.7)',
                 backdropFilter: 'blur(8px)'
             }} onClick={(e) => e.target === e.currentTarget && onClose()}>
                 <motion.div
@@ -45,27 +45,27 @@ const DungeonHistoryModal = ({ isOpen, onClose, history }) => {
                         width: '100%',
                         maxWidth: '500px',
                         maxHeight: '80vh',
-                        background: '#0f141e',
-                        border: '1px solid rgba(174, 0, 255, 0.3)',
+                        background: 'var(--panel-bg)',
+                        border: '1px solid var(--border-active)',
                         borderRadius: '16px',
                         display: 'flex',
                         flexDirection: 'column',
                         overflow: 'hidden',
-                        boxShadow: '0 0 40px rgba(174, 0, 255, 0.2)'
+                        boxShadow: 'var(--panel-shadow)'
                     }}
                 >
                     {/* Header */}
                     <div style={{
                         padding: '20px',
-                        borderBottom: '1px solid rgba(255,255,255,0.05)',
+                        borderBottom: '1px solid var(--border)',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        background: 'linear-gradient(to right, rgba(174,0,255,0.1), transparent)'
+                        background: 'var(--accent-soft)'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <History size={24} color="#ae00ff" />
-                            <h2 style={{ margin: 0, color: '#fff', fontSize: '1.2rem', fontWeight: 'bold' }}>Dungeon History</h2>
+                            <History size={24} color="var(--accent)" />
+                            <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: 'bold' }}>Dungeon History</h2>
                         </div>
                         <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#888', cursor: 'pointer' }}>
                             <X size={20} />
@@ -83,13 +83,13 @@ const DungeonHistoryModal = ({ isOpen, onClose, history }) => {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                 {history.map((run) => (
                                     <div key={run.id} style={{
-                                        background: 'rgba(255,255,255,0.03)',
+                                        background: 'var(--slot-bg)',
                                         borderRadius: '12px',
                                         padding: '12px',
                                         borderLeft: `4px solid ${run.outcome === 'COMPLETED' ? '#4caf50' : '#ff4444'}`
                                     }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                            <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                                            <span style={{ color: 'var(--text-main)', fontWeight: 'bold', fontSize: '0.9rem' }}>
                                                 {run.dungeon_name || 'Dungeon'} (T{run.tier})
                                             </span>
                                             <span style={{ fontSize: '0.7rem', color: '#888' }}>{formatDate(run.occurred_at)}</span>
@@ -132,11 +132,11 @@ const DungeonHistoryModal = ({ isOpen, onClose, history }) => {
                                                     return (
                                                         <span key={idx} style={{
                                                             fontSize: '0.65rem',
-                                                            background: 'rgba(255, 255, 255, 0.1)',
-                                                            color: '#aaa',
+                                                            background: 'var(--panel-bg)',
+                                                            color: 'var(--text-dim)',
                                                             padding: '2px 6px',
                                                             borderRadius: '4px',
-                                                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                            border: '1px solid var(--border)',
                                                             display: 'flex',
                                                             alignItems: 'center',
                                                             gap: '4px'

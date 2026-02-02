@@ -177,7 +177,7 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, onClose
         <div style={{
             position: 'fixed',
             top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.8)',
+            background: 'rgba(0,0,0,0.7)',
             zIndex: 3000,
             display: 'flex',
             alignItems: 'center',
@@ -185,16 +185,16 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, onClose
             backdropFilter: 'blur(5px)'
         }} onClick={onClose}>
             <div style={{
-                background: '#1a1d26',
-                border: '1px solid rgba(255,255,255,0.1)',
+                background: 'var(--panel-bg)',
+                border: '1px solid var(--border)',
                 borderRadius: '16px',
                 padding: '20px',
                 width: '90%',
                 maxWidth: '350px',
-                boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-                color: '#fff'
+                boxShadow: 'var(--panel-shadow)',
+                color: 'var(--text-main)'
             }} onClick={e => e.stopPropagation()}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', borderBottom: '1px solid var(--border)', paddingBottom: '8px' }}>
                     <h3 style={{ margin: 0, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase' }}>
                         {statType === 'DAMAGE' && <Sword size={18} color="#ff4444" />}
                         {statType === 'DEFENSE' && <Shield size={18} color="#4caf50" />}
@@ -220,32 +220,32 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, onClose
                             justifyContent: 'space-between',
                             alignItems: 'center',
                             padding: '4px 0',
-                            borderBottom: row.isTotal ? '1px dashed rgba(255,255,255,0.1)' : 'none',
+                            borderBottom: row.isTotal ? '1px dashed var(--border)' : 'none',
                             fontWeight: row.isTotal ? 'bold' : 'normal',
-                            color: row.isTotal ? '#fff' : '#ccc'
+                            color: row.isTotal ? 'var(--text-main)' : 'var(--text-dim)'
                         }}>
                             <div>
                                 <div style={{ fontSize: '0.9rem' }}>{row.label}</div>
                                 {row.sub && <div style={{ fontSize: '0.65rem', color: '#666' }}>{row.sub}</div>}
                             </div>
-                            <div style={{ fontSize: '0.9rem', color: '#fff' }}>{row.value}</div>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>{row.value}</div>
                         </div>
                     ))}
 
                     <div style={{
                         marginTop: '10px',
                         paddingTop: '10px',
-                        borderTop: '2px solid rgba(255,255,255,0.1)',
+                        borderTop: '2px solid var(--border)',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center'
                     }}>
-                        <div style={{ fontWeight: 'bold', color: '#aaa', fontSize: '0.9rem' }}>TOTAL</div>
-                        <div style={{ fontSize: '1.3rem', fontWeight: '900', color: '#fff' }}>{value}</div>
+                        <div style={{ fontWeight: 'bold', color: 'var(--text-dim)', fontSize: '0.9rem' }}>TOTAL</div>
+                        <div style={{ fontSize: '1.3rem', fontWeight: '900', color: 'var(--text-main)' }}>{value}</div>
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

@@ -15,7 +15,7 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                 style={{
                     position: 'fixed',
                     top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0,0,0,0.85)',
+                    background: 'rgba(0,0,0,0.7)',
                     zIndex: 3000,
                     display: 'flex',
                     alignItems: 'center',
@@ -31,13 +31,13 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                     transition={{ type: 'spring', damping: 20 }}
                     onClick={(e) => e.stopPropagation()}
                     style={{
-                        background: 'linear-gradient(135deg, #1a1a1b 0%, #0d0d10 100%)',
-                        border: '1px solid #d4af37',
+                        background: 'var(--panel-bg)',
+                        border: '1px solid var(--accent)',
                         borderRadius: '20px',
                         padding: '30px',
                         width: '90%',
                         maxWidth: '400px',
-                        boxShadow: '0 0 50px rgba(212, 175, 55, 0.2)',
+                        boxShadow: 'var(--panel-shadow), 0 0 50px var(--accent-soft)',
                         textAlign: 'center',
                         position: 'relative',
                         overflow: 'hidden'
@@ -50,13 +50,13 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                         left: -50,
                         right: -50,
                         height: '200px',
-                        background: 'linear-gradient(180deg, rgba(212,175,55,0.05) 0%, transparent 100%)',
+                        background: 'linear-gradient(180deg, var(--accent-soft) 0%, transparent 100%)',
                         zIndex: 0,
                         borderRadius: '50%'
                     }} />
 
                     <h2 style={{
-                        color: '#d4af37',
+                        color: 'var(--accent)',
                         fontWeight: '900',
                         fontSize: '1.8rem',
                         letterSpacing: '2px',
@@ -94,10 +94,10 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '15px',
-                                    background: 'rgba(212, 175, 55, 0.1)',
+                                    background: 'var(--accent-soft)',
                                     padding: '15px 20px',
                                     borderRadius: '12px',
-                                    border: '1px solid rgba(212, 175, 55, 0.2)'
+                                    border: '1px solid var(--border-active)'
                                 }}
                             >
                                 <div style={{
@@ -109,7 +109,7 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                                     justifyContent: 'center',
                                     boxShadow: '0 4px 10px rgba(0,0,0,0.3)'
                                 }}>
-                                    <Coins size={20} color="#000" />
+                                    <Coins size={20} color="var(--panel-bg)" />
                                 </div>
                                 <div style={{ textAlign: 'left' }}>
                                     <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#ffd700' }}>+{rewards.silver}</div>
@@ -146,7 +146,7 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '15px',
-                                        background: 'rgba(255, 255, 255, 0.03)',
+                                        background: 'var(--slot-bg)',
                                         padding: '15px 20px',
                                         borderRadius: '12px',
                                         border: `1px solid ${tierColor}44`
@@ -170,7 +170,7 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                                         )}
                                     </div>
                                     <div style={{ textAlign: 'left' }}>
-                                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#fff' }}>
+                                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>
                                             {item.qty}x <span style={{ color: tierColor }}>{resolvedItem?.name || item.id}</span>
                                         </div>
                                         <div style={{ fontSize: '0.8rem', color: '#888' }}>{resolvedItem?.type || 'Resource'}</div>
@@ -186,8 +186,8 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                         onClick={onClose}
                         style={{
                             marginTop: '30px',
-                            background: '#d4af37',
-                            color: '#000',
+                            background: 'var(--accent)',
+                            color: 'var(--panel-bg)',
                             border: 'none',
                             padding: '12px 40px',
                             borderRadius: '10px',
@@ -195,7 +195,7 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                             cursor: 'pointer',
                             fontSize: '1rem',
                             letterSpacing: '1px',
-                            boxShadow: '0 4px 15px rgba(212, 175, 55, 0.3)',
+                            boxShadow: '0 4px 15px var(--accent-soft)',
                             position: 'relative',
                             zIndex: 1
                         }}

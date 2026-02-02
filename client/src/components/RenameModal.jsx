@@ -34,7 +34,7 @@ const RenameModal = ({ isOpen, onClose, onSubmit, isSubmitting }) => {
         <div style={{
             position: 'fixed',
             top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.8)',
+            background: 'rgba(0,0,0,0.7)',
             zIndex: 2147483647, // Max Safe Integer for z-index
             display: 'flex',
             alignItems: 'center',
@@ -42,19 +42,19 @@ const RenameModal = ({ isOpen, onClose, onSubmit, isSubmitting }) => {
             backdropFilter: 'blur(4px)'
         }}>
             <div style={{
-                background: '#111',
-                border: '1px solid #333',
+                background: 'var(--panel-bg)',
+                border: '1px solid var(--border)',
                 borderRadius: '16px',
                 padding: '24px',
                 width: '100%',
                 maxWidth: '400px',
-                boxShadow: '0 10px 40px rgba(0,0,0,0.5)'
+                boxShadow: 'var(--panel-shadow)'
             }}>
-                <h3 style={{ color: '#fff', marginTop: 0, display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem' }}>
-                    <Edit size={20} color="#fbbf24" />
+                <h3 style={{ color: 'var(--text-main)', marginTop: 0, display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem' }}>
+                    <Edit size={20} color="var(--accent)" />
                     Change Character Name
                 </h3>
-                <p style={{ color: '#ccc', fontSize: '0.9rem', marginBottom: '20px', lineHeight: '1.5' }}>
+                <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginBottom: '20px', lineHeight: '1.5' }}>
                     Enter your new name below. This will consume your Name Change Token.
                 </p>
 
@@ -66,11 +66,11 @@ const RenameModal = ({ isOpen, onClose, onSubmit, isSubmitting }) => {
                             onChange={(e) => setNewName(e.target.value)}
                             style={{
                                 width: '100%',
-                                background: 'rgba(255,255,255,0.05)',
-                                border: '1px solid #444',
+                                background: 'var(--slot-bg)',
+                                border: '1px solid var(--border)',
                                 borderRadius: '8px',
                                 padding: '12px',
-                                color: '#fff',
+                                color: 'var(--text-main)',
                                 fontSize: '1rem',
                                 outline: 'none'
                             }}
@@ -88,10 +88,10 @@ const RenameModal = ({ isOpen, onClose, onSubmit, isSubmitting }) => {
                             style={{
                                 flex: 1,
                                 padding: '12px',
-                                background: 'rgba(255,255,255,0.05)',
-                                border: '1px solid #444',
+                                background: 'var(--accent-soft)',
+                                border: '1px solid var(--border)',
                                 borderRadius: '8px',
-                                color: '#fff',
+                                color: 'var(--text-main)',
                                 cursor: 'pointer',
                                 fontWeight: '600'
                             }}
@@ -103,13 +103,13 @@ const RenameModal = ({ isOpen, onClose, onSubmit, isSubmitting }) => {
                             style={{
                                 flex: 1,
                                 padding: '12px',
-                                background: 'linear-gradient(to right, #d4af37, #b4932a)',
+                                background: 'var(--accent)',
                                 border: 'none',
                                 borderRadius: '8px',
-                                color: '#000',
+                                color: 'var(--panel-bg)',
                                 cursor: 'pointer',
                                 fontWeight: 'bold',
-                                boxShadow: '0 4px 15px rgba(212, 175, 55, 0.3)'
+                                boxShadow: 'var(--panel-shadow)'
                             }}
                         >
                             Confirm Change

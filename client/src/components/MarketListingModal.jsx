@@ -52,7 +52,7 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(0,0,0,0.8)',
+            background: 'rgba(0,0,0,0.7)',
             zIndex: 3000,
             display: 'flex',
             alignItems: 'center',
@@ -62,7 +62,7 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
             if (e.target === e.currentTarget) onClose();
         }}>
             <div style={{
-                background: '#1a1a1a',
+                background: 'var(--panel-bg)',
                 border: '1px solid var(--border)',
                 borderRadius: '16px',
                 width: '90%',
@@ -71,11 +71,11 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '20px',
-                boxShadow: '0 20px 50px rgba(0,0,0,0.8)'
+                boxShadow: 'var(--panel-shadow)'
             }}>
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3 style={{ margin: '0px', color: '#fff', fontSize: '1.2rem' }}>List Item on Market</h3>
+                    <h3 style={{ margin: '0px', color: 'var(--text-main)', fontSize: '1.2rem' }}>List Item on Market</h3>
                     <button
                         onClick={onClose}
                         style={{ background: 'none', border: 'none', color: 'rgb(136, 136, 136)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 0 }}
@@ -85,7 +85,7 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                 </div>
 
                 {/* Item Info */}
-                <div style={{ display: 'flex', gap: '15px', alignItems: 'center', background: 'rgba(255, 255, 255, 0.03)', padding: '15px', borderRadius: '12px' }}>
+                <div style={{ display: 'flex', gap: '15px', alignItems: 'center', background: 'var(--slot-bg)', padding: '15px', borderRadius: '12px', border: '1px solid var(--border)' }}>
                     <div style={{
                         width: '40px',
                         height: '40px',
@@ -99,7 +99,7 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                         <span style={{ color: tierColor, fontWeight: 'bold' }}>T{itemData?.tier}</span>
                     </div>
                     <div>
-                        <div style={{ fontWeight: 'bold', color: '#fff' }}>{itemData?.name || formatItemId(listingItem.itemId)}</div>
+                        <div style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>{itemData?.name || formatItemId(listingItem.itemId)}</div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Owned: {listingItem.max}</div>
                     </div>
                 </div>
@@ -113,8 +113,8 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                             <button
                                 onClick={() => setAmount(String(listingItem.max))}
                                 style={{
-                                    background: 'rgba(255, 255, 255, 0.1)',
-                                    border: 'none',
+                                    background: 'var(--accent-soft)',
+                                    border: '1px solid var(--border)',
                                     color: 'var(--accent)',
                                     padding: '2px 8px',
                                     borderRadius: '4px',
@@ -177,10 +177,10 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                     </div>
 
                     {/* Calculation Box */}
-                    <div style={{ background: 'rgba(0, 0, 0, 0.2)', padding: '12px', borderRadius: '8px', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ background: 'var(--panel-bg)', padding: '12px', borderRadius: '8px', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '6px', border: '1px solid var(--border)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                             <span style={{ color: 'var(--text-dim)' }}>Total Price:</span>
-                            <span style={{ color: '#fff', fontWeight: 'bold' }}>{formatNumber(totalPrice)} Silver</span>
+                            <span style={{ color: 'var(--text-main)', fontWeight: 'bold' }}>{formatNumber(totalPrice)} Silver</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                             <span style={{ color: 'var(--text-dim)' }}>Market Tax (5%):</span>
@@ -188,8 +188,8 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                                 - {formatNumber(fee)}
                             </span>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', borderTop: '1px solid rgba(255, 255, 255, 0.1)', paddingTop: '6px' }}>
-                            <span style={{ color: '#fff' }}>You receive:</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', borderTop: '1px solid var(--border)', paddingTop: '6px' }}>
+                            <span style={{ color: 'var(--text-main)' }}>You receive:</span>
                             <span style={{ color: 'rgb(68, 255, 68)' }}>
                                 {formatNumber(receive)}
                             </span>
@@ -206,7 +206,7 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                         borderRadius: '12px',
                         border: 'none',
                         background: 'var(--accent)',
-                        color: 'rgb(0, 0, 0)',
+                        color: 'var(--panel-bg)',
                         fontWeight: 'bold',
                         cursor: 'pointer',
                         marginTop: '10px',

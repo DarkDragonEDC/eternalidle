@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import {
     Package, User, Pickaxe, Hammer, Sword,
     ChevronDown, ChevronRight, Coins, Castle,
-    Trophy, Tag, Zap, Box, Axe, Shield, Users, MessageSquare
+    Trophy, Tag, Zap, Box, Axe, Shield, Users, MessageSquare, Sun, Moon
 } from 'lucide-react';
 
-const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActiveCategory, isMobile, isOpen, onClose, onSwitchCharacter }) => {
+const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActiveCategory, isMobile, isOpen, onClose, onSwitchCharacter, theme, toggleTheme }) => {
     const [expanded, setExpanded] = useState({
         gathering: true,
         refining: false,
@@ -72,12 +72,12 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
 
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px', minWidth: '45px' }}>
-                <div style={{ fontSize: '0.6rem', fontWeight: '900', color: '#d4af37', display: 'flex', gap: '4px', alignItems: 'center' }}>
+                <div style={{ fontSize: '0.6rem', fontWeight: '900', color: 'var(--accent)', display: 'flex', gap: '4px', alignItems: 'center' }}>
                     <span style={{ opacity: 0.6, fontSize: '0.45rem' }}>LV</span>
                     {level}
                 </div>
                 <div style={{ width: '40px', height: '2px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
-                    <div style={{ width: `${progress}%`, height: '100%', background: 'linear-gradient(90deg, #d4af37, #f2d06b)', boxShadow: '0 0 5px rgba(212, 175, 55, 0.3)' }} />
+                    <div style={{ width: `${progress}%`, height: '100%', background: 'linear-gradient(90deg, var(--accent), var(--t2))', boxShadow: '0 0 5px rgba(212, 175, 55, 0.3)' }} />
                 </div>
             </div>
         );
@@ -131,20 +131,20 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
 
     return (
         <div
-            className="glass-panel"
             style={{
-                width: isMobile ? '65vw' : '250px',
-                height: '100vh',
+                width: isMobile ? '75vw' : '220px',
+                height: isMobile ? '100%' : '100vh',
+                background: theme === 'light' ? '#ffffff' : 'var(--panel-bg)',
+                borderRight: '1px solid var(--border)',
                 display: 'flex',
                 flexDirection: 'column',
-                overflow: 'hidden',
-                position: isMobile ? 'fixed' : 'sticky',
+                transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                position: isMobile ? 'fixed' : 'relative',
+                left: isMobile && !isOpen ? '-100%' : '0',
                 top: 0,
-                left: (isMobile && !isOpen) ? '-100%' : 0,
                 zIndex: (isMobile && isOpen) ? 10001 : 100,
-                transition: '0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                borderRight: '1px solid var(--border)',
-                background: '#0d1117',
+                boxShadow: theme === 'light' ? '4px 0 15px rgba(0,0,0,0.05)' : 'var(--panel-shadow)',
+                flexShrink: 0
             }}
         >
             {isMobile && (
@@ -154,7 +154,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                         position: 'absolute',
                         top: '15px',
                         right: '15px',
-                        color: '#555',
+                        color: 'var(--text-dim)',
                         background: 'transparent',
                         border: 'none',
                         zIndex: 1001
@@ -165,16 +165,16 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
             )}
 
             {/* Active Players at Sidebar Top */}
-            <div style={{ padding: '20px 15px 0 15px', display: 'flex', gap: '8px' }}>
+            <div style={{ padding: '20px 10px 0 10px', display: 'flex', gap: '6px' }}>
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px',
-                    background: 'rgba(212, 175, 55, 0.05)',
+                    background: 'rgba(144, 213, 255, 0.05)',
                     padding: '8px 12px',
                     borderRadius: '12px',
-                    border: '1px solid rgba(212, 175, 55, 0.1)',
-                    color: '#d4af37',
+                    border: '1px solid var(--border)',
+                    color: 'var(--accent)',
                     boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
                     flex: 1
                 }}>
@@ -187,7 +187,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                         flexShrink: 0
                     }}></span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ fontSize: '0.8rem', fontWeight: '900', letterSpacing: '0.5px', color: '#d4af37' }}>{activePlayers}</span>
+                        <span style={{ fontSize: '0.8rem', fontWeight: '900', letterSpacing: '0.5px', color: 'var(--accent)' }}>{activePlayers}</span>
                         <span style={{ fontSize: '0.6rem', fontWeight: 'bold', opacity: 0.8, letterSpacing: '1px' }}>ACTIVE PLAYERS</span>
                     </div>
                 </div>
@@ -204,7 +204,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                         width: '40px',
                         background: '#5865F2',
                         borderRadius: '12px',
-                        color: '#fff',
+                        color: 'var(--text-main)',
                         transition: '0.2s',
                         border: 'none',
                         cursor: 'pointer',
@@ -224,9 +224,32 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                         <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.71,32.65-1.82,56.6.4,80.21a105.73,105.73,0,0,0,32.17,16.15,77.7,77.7,0,0,0,6.89-11.11,68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c3.39-28.32-5.42-52.09-23.75-72.13ZM42.45,65.69C36.18,65.69,31,60,31,53s5.07-12.72,11.41-12.72S54,46,53.86,53,48.81,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.72,11.44-12.72S96.11,46,96,53,91,65.69,84.69,65.69Z" />
                     </svg>
                 </a>
+
+                {/* Theme Toggle Button */}
+                <button
+                    onClick={toggleTheme}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '40px',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: '12px',
+                        color: 'var(--accent)',
+                        transition: '0.2s',
+                        border: '1px solid var(--border)',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+                    }}
+                    title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'; }}
+                >
+                    {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                </button>
             </div>
 
-            <div style={{ padding: '20px 15px 10px 15px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <div style={{ padding: '20px 10px 10px 10px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
                     {[
                         { id: 'profile', label: 'PROFILE', icon: <User size={14} /> },
@@ -246,9 +269,9 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                                 padding: '10px 0',
                                 borderRadius: '10px',
                                 border: '1px solid',
-                                borderColor: activeTab === item.id ? 'rgba(212, 175, 55, 0.3)' : 'rgba(255,255,255,0.05)',
-                                background: activeTab === item.id ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255,255,255,0.02)',
-                                color: activeTab === item.id ? '#d4af37' : '#888',
+                                borderColor: activeTab === item.id ? 'rgba(144, 213, 255, 0.3)' : 'rgba(240, 240, 240, 0.05)',
+                                background: activeTab === item.id ? 'rgba(144, 213, 255, 0.1)' : 'rgba(240, 240, 240, 0.02)',
+                                color: activeTab === item.id ? 'var(--accent)' : 'var(--text-dim)',
                                 transition: '0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                                 cursor: 'pointer'
                             }}
@@ -260,8 +283,8 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                 </div>
             </div>
 
-            <div className="scroll-container" style={{ padding: '0 15px', flex: 1 }}>
-                <div style={{ color: '#444', fontSize: '0.55rem', fontWeight: '900', letterSpacing: '2px', padding: '15px 0 8px 10px', borderBottom: '1px solid rgba(255,255,255,0.02)', marginBottom: '10px' }}>ACTIVITIES</div>
+            <div className="scroll-container" style={{ padding: '0 10px', flex: 1 }}>
+                <div style={{ color: 'var(--text-dim)', fontSize: '0.55rem', fontWeight: '900', letterSpacing: '2px', padding: '15px 0 8px 10px', borderBottom: '1px solid var(--border)', marginBottom: '10px' }}>ACTIVITIES</div>
 
                 {menuItems.slice(2).map(item => {
                     const isMainItemActive = activeTab === item.id;
@@ -273,7 +296,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                     return (
                         <React.Fragment key={item.id}>
                             {showAdventureHeader && (
-                                <div style={{ color: '#444', fontSize: '0.55rem', fontWeight: '900', letterSpacing: '2px', padding: '25px 0 8px 10px', borderBottom: '1px solid rgba(255,255,255,0.02)', marginBottom: '10px' }}>WORLD</div>
+                                <div style={{ color: 'var(--text-dim)', fontSize: '0.55rem', fontWeight: '900', letterSpacing: '2px', padding: '25px 0 8px 10px', borderBottom: '1px solid var(--border)', marginBottom: '10px' }}>WORLD</div>
                             )}
 
                             <div style={{ marginBottom: '4px' }}>
@@ -292,16 +315,16 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '12px',
-                                        background: isMainItemActive ? 'linear-gradient(90deg, rgba(212, 175, 55, 0.1), transparent)' : 'transparent',
+                                        background: isMainItemActive ? 'linear-gradient(90deg, rgba(144, 213, 255, 0.1), transparent)' : 'transparent',
                                         borderRadius: '8px',
-                                        color: isMainItemActive ? '#fff' : '#888',
+                                        color: isMainItemActive ? 'var(--text-main)' : 'var(--text-dim)',
                                         textAlign: 'left',
                                         border: '1px solid',
-                                        borderColor: isMainItemActive ? 'rgba(212, 175, 55, 0.2)' : 'transparent',
+                                        borderColor: isMainItemActive ? 'rgba(144, 213, 255, 0.2)' : 'transparent',
                                         transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
                                     }}
                                 >
-                                    <span style={{ color: isMainItemActive ? '#d4af37' : '#555', transition: '0.2s' }}>{item.icon}</span>
+                                    <span style={{ color: isMainItemActive ? 'var(--accent)' : 'var(--text-dim)', transition: '0.2s' }}>{item.icon}</span>
                                     <span style={{ flex: 1, fontWeight: isMainItemActive ? '700' : '500', fontSize: '0.85rem', letterSpacing: '0.3px' }}>{item.label}</span>
 
                                     {item.skill && !item.children && <SkillInfo skillKey={item.skill} />}
@@ -313,7 +336,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                                 </button>
 
                                 {isGroupHeader && expanded[item.id] && (
-                                    <div style={{ paddingLeft: '28px', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '4px', borderLeft: '1px solid rgba(212, 175, 55, 0.1)', marginLeft: '20px' }}>
+                                    <div style={{ paddingLeft: '28px', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '4px', borderLeft: '1px solid var(--border-active)', marginLeft: '20px' }}>
                                         {item.children.map(child => {
                                             const isChildActive = activeTab === item.id && activeCategory === child.id;
                                             return (
@@ -330,9 +353,9 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                                                         display: 'flex',
                                                         alignItems: 'center',
                                                         justifyContent: 'space-between',
-                                                        background: isChildActive ? 'rgba(212, 175, 55, 0.05)' : 'transparent',
+                                                        background: isChildActive ? 'rgba(144, 213, 255, 0.05)' : 'transparent',
                                                         borderRadius: '6px',
-                                                        color: isChildActive ? '#d4af37' : '#666',
+                                                        color: isChildActive ? 'var(--accent)' : 'var(--text-dim)',
                                                         fontSize: '0.8rem',
                                                         transition: '0.2s'
                                                     }}
@@ -354,7 +377,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                     <div style={{
                         marginTop: '20px',
                         marginBottom: '10px',
-                        background: '#1E2330',
+                        background: 'var(--panel-bg)',
                         borderRadius: '8px',
                         padding: '12px',
                         border: '1px solid rgba(34, 197, 94, 0.2)',
@@ -382,7 +405,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                         </div>
                         <div style={{
                             fontSize: '0.7rem',
-                            color: '#8B8D91'
+                            color: 'var(--text-dim)'
                         }}>
                             Expires: {new Date(gameState.state.membership.expiresAt).toLocaleDateString('pt-BR')}
                         </div>
@@ -397,10 +420,10 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                     style={{
                         width: '100%',
                         padding: '12px',
-                        background: 'rgba(255,255,255,0.02)',
-                        border: '1px solid rgba(255,255,255,0.05)',
+                        background: 'rgba(240, 240, 240, 0.02)',
+                        border: '1px solid var(--border)',
                         borderRadius: '10px',
-                        color: '#666',
+                        color: 'var(--text-dim)',
                         fontSize: '0.65rem',
                         fontWeight: '900',
                         display: 'flex',
@@ -411,8 +434,8 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                         transition: '0.2s',
                         letterSpacing: '1px'
                     }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#888'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.color = '#666'; }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'var(--text-main)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(240, 240, 240, 0.02)'; e.currentTarget.style.color = 'var(--text-dim)'; }}
                 >
                     <Users size={14} />
                     SWITCH CHARACTER

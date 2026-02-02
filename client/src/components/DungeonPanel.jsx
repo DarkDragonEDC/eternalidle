@@ -249,7 +249,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '12px',
-                    background: 'linear-gradient(135deg, rgba(15, 20, 30, 0.95) 0%, rgba(10, 5, 20, 0.95) 100%)',
+                    background: 'var(--panel-bg)',
                     position: 'relative',
                     overflow: 'hidden'
                 }}
@@ -269,7 +269,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                     zIndex: 0
                 }} />
 
-                <div style={{ display: 'flex', gap: '20px', textAlign: 'center', zIndex: 1, background: 'rgba(0,0,0,0.3)', padding: '10px 20px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ display: 'flex', gap: '20px', textAlign: 'center', zIndex: 1, background: 'var(--bg-dark)', padding: '10px 20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
                     <div>
                         <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.6rem', fontWeight: '900', letterSpacing: '0.5px', marginBottom: '2px', textTransform: 'uppercase' }}>
                             Current Run
@@ -283,7 +283,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                         <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.6rem', fontWeight: '900', letterSpacing: '0.5px', marginBottom: '2px', textTransform: 'uppercase' }}>
                             Total Queue
                         </div>
-                        <div style={{ color: '#fff', fontSize: '1.1rem', fontWeight: '900', fontFamily: 'monospace' }}>
+                        <div style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: '900', fontFamily: 'monospace' }}>
                             {estimatedTime?.queue || '--'}
                         </div>
                     </div>
@@ -302,7 +302,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                 <div style={{ textAlign: 'center', zIndex: 1 }}>
                     <motion.h2
                         key={dungeonState.wave}
-                        style={{ color: '#fff', fontSize: '1.4rem', fontWeight: '900', margin: 0, letterSpacing: '1px' }}
+                        style={{ color: 'var(--text-main)', fontSize: '1.4rem', fontWeight: '900', margin: 0, letterSpacing: '1px' }}
                     >
                         {dungeonState.status === 'BOSS_FIGHT' ? 'THE BOSS' : `WAVE ${dungeonState.wave} / ${dungeonState.maxWaves}`}
                     </motion.h2>
@@ -314,7 +314,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                 style={{
                                     color: dungeonState.status === 'COMPLETED' ? '#4caf50' :
                                         dungeonState.status === 'FAILED' ? '#ff4444' :
-                                            dungeonState.status === 'BOSS_FIGHT' ? '#ff0000' : '#aaa',
+                                            dungeonState.status === 'BOSS_FIGHT' ? '#ff0000' : 'var(--text-dim)',
                                     fontSize: '0.85rem',
                                     fontWeight: 'bold',
                                     textTransform: 'uppercase'
@@ -366,8 +366,8 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                     style={{
                         width: '100%',
                         maxWidth: '420px',
-                        background: 'rgba(0,0,0,0.4)',
-                        border: '1px solid rgba(255,255,255,0.06)',
+                        background: 'var(--bg-dark)',
+                        border: '1px solid var(--border)',
                         borderRadius: '16px',
                         padding: '12px 16px',
                         zIndex: 1
@@ -397,13 +397,13 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                             return (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                                        <div style={{ background: 'rgba(76, 175, 80, 0.05)', padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(76, 175, 80, 0.1)' }}>
-                                            <div style={{ color: 'rgba(76, 175, 80, 0.6)', fontSize: '0.55rem', fontWeight: '900' }}>XP</div>
+                                        <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid var(--border)' }}>
+                                            <div style={{ color: 'var(--text-dim)', fontSize: '0.55rem', fontWeight: '900' }}>XP</div>
                                             <div style={{ color: '#4caf50', fontWeight: '900', fontSize: '1rem' }}>+{formatNumber(totals.xp)}</div>
                                         </div>
-                                        <div style={{ background: 'rgba(255, 215, 0, 0.05)', padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid rgba(255, 215, 0, 0.1)' }}>
-                                            <div style={{ color: 'rgba(255, 215, 0, 0.6)', fontSize: '0.55rem', fontWeight: '900' }}>SILVER</div>
-                                            <div style={{ color: '#ffd700', fontWeight: '900', fontSize: '1rem' }}>+{formatNumber(totals.silver)}</div>
+                                        <div style={{ background: 'var(--accent-soft)', padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid var(--accent)' }}>
+                                            <div style={{ color: 'var(--accent)', fontSize: '0.55rem', fontWeight: '900' }}>SILVER</div>
+                                            <div style={{ color: 'var(--accent)', fontWeight: '900', fontSize: '1rem' }}>+{formatNumber(totals.silver)}</div>
                                         </div>
                                     </div>
 
@@ -416,7 +416,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                             maxHeight: '80px',
                                             overflowY: 'auto',
                                             padding: '8px',
-                                            background: 'rgba(0,0,0,0.2)',
+                                            background: 'var(--panel-bg)',
                                             borderRadius: '10px'
                                         }}>
                                             {Object.entries(totals.items).map(([id, qty]) => {
@@ -474,18 +474,18 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '10px', gap: '15px', overflow: 'hidden' }}>
             {/* New Hunting Grounds Header */}
-            <div style={{ padding: '12px 20px', borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0, 0, 0, 0.2)', borderRadius: '12px' }}>
+            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', background: 'var(--panel-bg)', borderRadius: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Sword color="#ff4444" size={18} />
-                        <h2 style={{ margin: 0, color: '#fff', fontSize: '0.9rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase' }}>Hunting Grounds</h2>
+                        <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase' }}>Hunting Grounds</h2>
                     </div>
                     <button
                         onClick={() => {
                             setIsHistoryOpen(true);
                             socket.emit('get_dungeon_history');
                         }}
-                        style={{ background: 'none', border: '1px solid rgba(255,255,255,0.1)', padding: '3px 8px', borderRadius: '4px', color: 'rgba(255, 255, 255, 0.3)', cursor: 'pointer', fontSize: '0.65rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+                        style={{ background: 'none', border: '1px solid var(--border)', padding: '3px 8px', borderRadius: '4px', color: 'var(--text-dim)', cursor: 'pointer', fontSize: '0.65rem', display: 'flex', alignItems: 'center', gap: '4px' }}
                     >
                         <Clock size={12} /> HISTORY
                     </button>
@@ -502,7 +502,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                 border: '1px solid',
                                 borderColor: selectedTier === t ? '#ff4444' : 'rgba(255, 255, 255, 0.05)',
                                 borderRadius: '4px',
-                                color: selectedTier === t ? '#ff4444' : '#555',
+                                color: selectedTier === t ? '#ff4444' : 'var(--text-dim)',
                                 fontSize: '0.7rem',
                                 fontWeight: 'bold',
                                 cursor: 'pointer',
@@ -556,7 +556,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                 style={{
                                     position: 'relative',
                                     padding: '20px',
-                                    background: '#1E2330',
+                                    background: 'var(--panel-bg)',
                                     borderRadius: '12px',
                                     border: `1px solid ${levelLocked ? 'rgba(255, 68, 68, 0.3)' : 'rgba(174, 0, 255, 0.3)'}`,
                                     opacity: levelLocked ? 0.8 : 1,
@@ -568,7 +568,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                     <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                                         <div>
                                             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                                                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800', color: '#fff' }}>{dungeon.name}</h3>
+                                                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-main)' }}>{dungeon.name}</h3>
                                                 {levelLocked ? (
                                                     <span style={{ fontSize: '0.65rem', background: 'rgba(255, 68, 68, 0.2)', color: '#ff6b6b', px: '8px', py: '2px', borderRadius: '4px', fontWeight: 'bold', textTransform: 'uppercase' }}>Requires Level {reqLevel}</span>
                                                 ) : (
@@ -614,22 +614,22 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                         <h4 style={{ fontSize: '0.75rem', fontWeight: '600', color: '#8B8D91', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Required Items</h4>
                                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                                             {/* Map Ticket */}
-                                            <div style={{ position: 'relative', width: '52px', height: '52px', background: '#2A3041', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                                <div style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#1E2330', fontSize: '0.6rem', padding: '2px 6px', borderRadius: '4px', border: '1px solid #2A3041', color: hasMap ? '#4caf50' : '#ff4444', fontWeight: 'bold', zIndex: 2 }}>
+                                            <div style={{ position: 'relative', width: '52px', height: '52px', background: 'var(--bg-dark)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)' }}>
+                                                <div style={{ position: 'absolute', top: '-6px', right: '-6px', background: 'var(--slot-bg)', fontSize: '0.6rem', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border)', color: hasMap ? '#4caf50' : '#ff4444', fontWeight: 'bold', zIndex: 2 }}>
                                                     {mapQty}/1
                                                 </div>
                                                 <div style={{ fontSize: '1.2rem', opacity: 0.8 }}>
-                                                    <MapIcon size={28} color="#666" />
+                                                    <MapIcon size={28} color="var(--text-dim)" />
                                                 </div>
                                             </div>
 
                                             {/* Silver Cost (if any, showing reward silver for now) */}
-                                            <div style={{ position: 'relative', width: '52px', height: '52px', background: '#2A3041', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                                <div style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#1E2330', fontSize: '0.6rem', padding: '2px 6px', borderRadius: '4px', border: '1px solid #2A3041', color: '#ffd700', fontWeight: 'bold', zIndex: 2 }}>
+                                            <div style={{ position: 'relative', width: '52px', height: '52px', background: 'var(--bg-dark)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)' }}>
+                                                <div style={{ position: 'absolute', top: '-6px', right: '-6px', background: 'var(--slot-bg)', fontSize: '0.6rem', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border)', color: 'var(--accent)', fontWeight: 'bold', zIndex: 2 }}>
                                                     {formatNumber(dungeon.rewards.silver)}
                                                 </div>
                                                 <div style={{ fontSize: '1.2rem', opacity: 0.8 }}>
-                                                    <Coins size={28} color="#ffd700" />
+                                                    <Coins size={28} color="var(--accent)" />
                                                 </div>
                                             </div>
                                         </div>
@@ -648,9 +648,9 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                                 const scaling = 1 + (idx * 0.1);
                                                 const powerStr = (scaling * 100).toFixed(0);
                                                 return (
-                                                    <div key={`${mobId}-${idx}`} title={`${mob?.name} (Lvl ${tier * 10}, ${powerStr}%)`} style={{ width: '40px', height: '40px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2A3041', border: `1px solid rgba(255,255,255,${0.05 + (idx * 0.05)})`, flexShrink: 0, position: 'relative' }}>
+                                                    <div key={`${mobId}-${idx}`} title={`${mob?.name} (Lvl ${tier * 10}, ${powerStr}%)`} style={{ width: '40px', height: '40px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--slot-bg)', border: `1px solid var(--border)`, flexShrink: 0, position: 'relative' }}>
                                                         <Skull size={20} color={idx === 3 ? '#ff6666' : '#ff4444'} />
-                                                        <div style={{ position: 'absolute', bottom: '1px', right: '3px', fontSize: '0.45rem', fontWeight: '900', color: 'rgba(255,255,255,0.4)' }}>{idx + 1}</div>
+                                                        <div style={{ position: 'absolute', bottom: '1px', right: '3px', fontSize: '0.45rem', fontWeight: '900', color: 'var(--text-dim)' }}>{idx + 1}</div>
                                                     </div>
                                                 )
                                             })}
@@ -675,10 +675,10 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                                         width: '42px', height: '42px', borderRadius: '10px', overflow: 'hidden',
                                                         border: `1px solid ${borderColor}`,
                                                         boxShadow: `0 0 5px ${borderColor}20`,
-                                                        background: '#2A3041', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        background: 'var(--slot-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                         position: 'relative'
                                                     }}>
-                                                        <div style={{ width: '100%', height: '100%', background: '#1E2330', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                                                        <div style={{ width: '100%', height: '100%', background: 'var(--bg-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                                                             {item?.icon ? (
                                                                 <img src={item.icon} alt={item.name} style={{ width: '120%', height: '120%', objectFit: 'contain' }} />
                                                             ) : (
@@ -721,8 +721,8 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                         justifyContent: 'center',
                         gap: '20px',
                         borderRadius: '24px',
-                        border: '1px solid #ae00ff',
-                        background: 'rgba(15, 20, 30, 0.95)',
+                        border: '1px solid var(--accent)',
+                        background: 'var(--panel-bg)',
                         boxShadow: '0 20px 40px rgba(0,0,0,0.4)'
                     }}>
                         {(() => {
@@ -741,7 +741,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
 
                             return (
                                 <>
-                                    <h3 style={{ margin: 0, color: '#fff', textAlign: 'center', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '1px' }}>TOTAL RUNS T{pendingTier}</h3>
+                                    <h3 style={{ margin: 0, color: 'var(--text-main)', textAlign: 'center', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '1px' }}>TOTAL RUNS T{pendingTier}</h3>
 
                                     <div style={{
                                         display: 'flex',
@@ -774,7 +774,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                             <button
                                                 onClick={() => setRepeatCount(prev => Math.max(1, (parseInt(prev) || 0) - 1))}
-                                                style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', color: '#fff', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 'bold', cursor: 'pointer' }}
+                                                style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--slot-bg)', color: 'var(--text-main)', borderRadius: '10px', border: '1px solid var(--border)', fontWeight: 'bold', cursor: 'pointer' }}
                                             >
                                                 -
                                             </button>
@@ -788,7 +788,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                                     padding: '5px',
                                                     background: 'transparent',
                                                     border: 'none',
-                                                    color: '#fff',
+                                                    color: 'var(--text-main)',
                                                     textAlign: 'center',
                                                     fontWeight: 'bold',
                                                     fontSize: '1.4rem',
@@ -801,7 +801,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
 
                                             <button
                                                 onClick={() => setRepeatCount(prev => Math.min(effectiveMax, (parseInt(prev) || 0) + 1))}
-                                                style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', color: '#fff', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 'bold', cursor: 'pointer' }}
+                                                style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--slot-bg)', color: 'var(--text-main)', borderRadius: '10px', border: '1px solid var(--border)', fontWeight: 'bold', cursor: 'pointer' }}
                                             >
                                                 +
                                             </button>
@@ -826,9 +826,9 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                     </div>
 
                                     {/* Time and Limits Info */}
-                                    <div style={{ padding: '10px', background: 'rgba(212, 175, 55, 0.05)', borderRadius: '12px', border: '1px solid rgba(212, 175, 55, 0.2)', width: '100%', textAlign: 'center' }}>
-                                        <div style={{ fontSize: '0.65rem', color: '#d4af37', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px', marginBottom: '4px' }}>Estimated Time</div>
-                                        <div style={{ fontSize: '1.2rem', color: '#fff', fontWeight: '900' }}>{formatDuration(calculateEstimatedTime(pendingTier, repeatCount))}</div>
+                                    <div style={{ padding: '10px', background: 'var(--accent-soft)', borderRadius: '12px', border: '1px solid var(--accent)', width: '100%', textAlign: 'center' }}>
+                                        <div style={{ fontSize: '0.65rem', color: 'var(--accent)', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px', marginBottom: '4px' }}>Estimated Time</div>
+                                        <div style={{ fontSize: '1.2rem', color: 'var(--text-main)', fontWeight: '900' }}>{formatDuration(calculateEstimatedTime(pendingTier, repeatCount))}</div>
                                         <div style={{ fontSize: '0.6rem', color: '#888', marginTop: '4px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
                                             <span>MAPS: {availableMaps}</span>
                                             <span>|</span>
@@ -871,7 +871,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                                 <>✗ DIES AT RUN {survival.runsBeforeDeath}</>
                                             )}
                                         </div>
-                                        <div style={{ fontSize: '0.55rem', color: '#888', marginTop: '6px', display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                        <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', marginTop: '6px', display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                             <span>HP: {formatNumber(Math.floor(survival.totalEffectiveHp))}</span>
                                             <span>|</span>
                                             <span>DMG/RUN: {formatNumber(survival.totalDamagePerRun)}</span>
@@ -885,7 +885,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                     </div>
 
                                     <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
-                                        <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.05)', color: '#aaa', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 'bold', cursor: 'pointer' }}>CANCEL</button>
+                                        <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: '12px', background: 'var(--slot-bg)', color: 'var(--text-dim)', borderRadius: '12px', border: '1px solid var(--border)', fontWeight: 'bold', cursor: 'pointer' }}>CANCEL</button>
                                         <button onClick={confirmEnterDungeon} style={{ flex: 1, padding: '12px', background: 'linear-gradient(to bottom, #ae00ff, #8a00cc)', color: '#fff', borderRadius: '12px', border: 'none', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 15px rgba(174, 0, 255, 0.3)' }}>START</button>
                                     </div>
                                 </>

@@ -56,7 +56,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                 style={{
                     position: 'fixed',
                     top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0, 0, 0, 0.85)',
+                    background: 'rgba(0, 0, 0, 0.7)',
                     backdropFilter: 'blur(10px)',
                     zIndex: 2000,
                     display: 'flex',
@@ -70,13 +70,13 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                     animate={{ scale: 1, y: 0, opacity: 1 }}
                     exit={{ scale: 0.9, y: 30, opacity: 0 }}
                     style={{
-                        background: '#12141a',
-                        border: '1px solid rgba(212, 175, 55, 0.3)',
+                        background: 'var(--panel-bg)',
+                        border: '1px solid var(--border-active)',
                         borderRadius: '24px',
                         width: '100%',
                         maxWidth: '420px',
                         maxHeight: '90vh',
-                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(212, 175, 55, 0.1)',
+                        boxShadow: 'var(--panel-shadow)',
                         overflow: 'hidden',
                         display: 'flex',
                         flexDirection: 'column',
@@ -88,8 +88,8 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                         padding: '15px 15px 8px',
                         textAlign: 'center',
                         position: 'relative',
-                        background: 'linear-gradient(180deg, rgba(212, 175, 55, 0.08) 0%, transparent 100%)',
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.03)'
+                        background: 'linear-gradient(180deg, var(--accent-soft) 0%, transparent 100%)',
+                        borderBottom: '1px solid var(--border)'
                     }}>
                         <div style={{
                             position: 'absolute',
@@ -103,13 +103,13 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                             margin: 0,
                             fontSize: '1rem',
                             fontWeight: '900',
-                            color: '#fff',
+                            color: 'var(--text-main)',
                             letterSpacing: '2px',
                             textTransform: 'uppercase',
                             position: 'relative',
                             zIndex: 1
                         }}>
-                            OFFLINE <span style={{ color: '#d4af37' }}>PROGRESS</span>
+                            OFFLINE <span style={{ color: 'var(--accent)' }}>PROGRESS</span>
                         </h2>
 
                         <div style={{
@@ -118,12 +118,12 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                             justifyContent: 'center',
                             gap: '6px',
                             marginTop: '4px',
-                            color: 'rgba(255, 255, 255, 0.35)',
+                            color: 'var(--text-dim)',
                             fontSize: '0.7rem',
                             fontWeight: '500'
                         }}>
-                            <Clock size={12} color="#d4af37" />
-                            <span>Away for <strong style={{ color: '#fff' }}>{formatTime(elapsedTime || totalTime || 0)}</strong></span>
+                            <Clock size={12} color="var(--accent)" />
+                            <span>Away for <strong style={{ color: 'var(--text-main)' }}>{formatTime(elapsedTime || totalTime || 0)}</strong></span>
                         </div>
                     </div>
 
@@ -140,10 +140,10 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                         {/* Combat Summary - Visual Overhaul */}
                         {combat && (
                             <div style={{
-                                background: 'rgba(255, 255, 255, 0.02)',
+                                background: 'var(--slot-bg)',
                                 padding: '15px',
                                 borderRadius: '16px',
-                                border: '1px solid rgba(255, 68, 68, 0.15)',
+                                border: '1px solid var(--border)',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 gap: '12px',
@@ -177,17 +177,17 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                 <div style={{
                                     display: 'flex',
                                     justifyContent: 'space-around',
-                                    background: 'rgba(0,0,0,0.15)',
+                                    background: 'var(--panel-bg)',
                                     padding: '6px',
                                     borderRadius: '8px',
-                                    border: '1px solid rgba(255, 255, 255, 0.03)'
+                                    border: '1px solid var(--border)'
                                 }}>
                                     <div
                                         onClick={() => setShowFullNumbers(!showFullNumbers)}
                                         style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' }}
                                     >
-                                        <span style={{ fontSize: '0.5rem', color: '#666', textTransform: 'uppercase', fontWeight: '800' }}>Kills</span>
-                                        <span style={{ fontSize: '0.9rem', fontWeight: '900', color: '#fff' }}>
+                                        <span style={{ fontSize: '0.5rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: '800' }}>Kills</span>
+                                        <span style={{ fontSize: '0.9rem', fontWeight: '900', color: 'var(--text-main)' }}>
                                             {showFullNumbers ? formatNumber(combat.kills || 0) : formatValue(combat.kills || 0)}
                                         </span>
                                     </div>
@@ -196,7 +196,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                         onClick={() => setShowFullNumbers(!showFullNumbers)}
                                         style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' }}
                                     >
-                                        <span style={{ fontSize: '0.5rem', color: '#666', textTransform: 'uppercase', fontWeight: '800' }}>Silver</span>
+                                        <span style={{ fontSize: '0.5rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: '800' }}>Silver</span>
                                         <span style={{ fontSize: '0.9rem', fontWeight: '900', color: '#ffca28' }}>
                                             {showFullNumbers ? formatNumber(combat.silverGained || 0) : formatValue(combat.silverGained || 0)}
                                         </span>
@@ -206,7 +206,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                         onClick={() => setShowFullNumbers(!showFullNumbers)}
                                         style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' }}
                                     >
-                                        <span style={{ fontSize: '0.5rem', color: '#666', textTransform: 'uppercase', fontWeight: '800' }}>Healing</span>
+                                        <span style={{ fontSize: '0.5rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: '800' }}>Healing</span>
                                         <span style={{ fontSize: '0.9rem', fontWeight: '900', color: '#49cc90' }}>
                                             {showFullNumbers ? formatNumber(combat.foodConsumed || 0) : formatValue(combat.foodConsumed || 0)}
                                         </span>
@@ -240,7 +240,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                 <h3 style={{
                                     margin: '0 0 10px 0',
                                     fontSize: '0.65rem',
-                                    color: 'rgba(255,255,255,0.3)',
+                                    color: 'var(--text-dim)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '8px',
@@ -248,7 +248,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                     letterSpacing: '1px',
                                     fontWeight: '900'
                                 }}>
-                                    <Star size={12} color="#d4af37" /> Experience
+                                    <Star size={12} color="var(--accent)" /> Experience
                                 </h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
                                     {Object.entries(xpGained).map(([skill, amount]) => (
@@ -259,19 +259,19 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                                 display: 'flex',
                                                 justifyContent: 'space-between',
                                                 alignItems: 'center',
-                                                background: 'rgba(255, 255, 255, 0.02)',
+                                                background: 'var(--slot-bg)',
                                                 padding: '12px 15px',
                                                 borderRadius: '12px',
-                                                border: '1px solid rgba(255, 255, 255, 0.05)',
+                                                border: '1px solid var(--border)',
                                                 transition: '0.2s',
                                                 cursor: 'pointer'
                                             }}
                                         >
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                                <div style={{ opacity: 0.5, color: '#d4af37' }}>
+                                                <div style={{ opacity: 0.5, color: 'var(--accent)' }}>
                                                     {SKILL_ICONS[skill] || <Star size={14} />}
                                                 </div>
-                                                <span style={{ fontWeight: '700', color: '#fff', fontSize: '0.85rem' }}>
+                                                <span style={{ fontWeight: '700', color: 'var(--text-main)', fontSize: '0.85rem' }}>
                                                     {SKILL_NAMES[skill] || skill}
                                                 </span>
                                             </div>
@@ -290,7 +290,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                 <h3 style={{
                                     margin: '0 0 10px 0',
                                     fontSize: '0.65rem',
-                                    color: 'rgba(255,255,255,0.3)',
+                                    color: 'var(--text-dim)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '8px',
@@ -298,7 +298,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                     letterSpacing: '1px',
                                     fontWeight: '900'
                                 }}>
-                                    <Package size={12} color="#d4af37" /> Resources
+                                    <Package size={12} color="var(--accent)" /> Resources
                                 </h3>
                                 <div style={{
                                     display: 'grid',
@@ -311,8 +311,8 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
 
                                         return (
                                             <div key={itemId} style={{
-                                                background: 'rgba(0, 0, 0, 0.3)',
-                                                border: '1px solid rgba(255, 255, 255, 0.05)',
+                                                background: 'var(--slot-bg)',
+                                                border: '1px solid var(--border)',
                                                 borderRadius: '16px',
                                                 padding: '15px 10px',
                                                 display: 'flex',
@@ -324,7 +324,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                                 <div style={{
                                                     width: '40px',
                                                     height: '40px',
-                                                    background: 'rgba(255, 255, 255, 0.02)',
+                                                    background: 'var(--panel-bg)',
                                                     borderRadius: '10px',
                                                     display: 'flex',
                                                     alignItems: 'center',
@@ -343,8 +343,8 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                                     position: 'absolute',
                                                     top: '5px',
                                                     right: '5px',
-                                                    background: '#d4af37',
-                                                    color: '#000',
+                                                    background: 'var(--accent)',
+                                                    color: 'var(--panel-bg)',
                                                     fontSize: '0.6rem',
                                                     fontWeight: '900',
                                                     padding: '1px 5px',
@@ -378,11 +378,11 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                             (!xpGained || Object.keys(xpGained).length === 0) && (
                                 <div style={{
                                     textAlign: 'center',
-                                    color: 'rgba(255,255,255,0.2)',
+                                    color: 'var(--text-dim)',
                                     padding: '40px 20px',
-                                    background: 'rgba(0,0,0,0.1)',
+                                    background: 'var(--slot-bg)',
                                     borderRadius: '16px',
-                                    border: '1px dashed rgba(255,255,255,0.05)'
+                                    border: '1px dashed var(--border)'
                                 }}>
                                     <AlertCircle size={32} style={{ marginBottom: '10px', opacity: 0.5, margin: '0 auto' }} />
                                     <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: '500' }}>No progress made during this period.</p>
@@ -393,16 +393,16 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                     </div>
 
                     {/* Footer / Action */}
-                    <div style={{ padding: '12px 20px', background: 'rgba(0,0,0,0.2)', borderTop: '1px solid rgba(255, 255, 255, 0.03)' }}>
+                    <div style={{ padding: '12px 20px', background: 'var(--panel-bg)', borderTop: '1px solid var(--border)' }}>
                         <button
                             onClick={onClose}
                             style={{
                                 width: '100%',
-                                background: 'linear-gradient(135deg, #d4af37 0%, #8a6d0a 100%)',
+                                background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent-soft) 100%)',
                                 border: 'none',
                                 padding: '10px',
                                 borderRadius: '12px',
-                                color: '#000',
+                                color: 'var(--panel-bg)',
                                 fontWeight: '950',
                                 fontSize: '0.9rem',
                                 cursor: 'pointer',

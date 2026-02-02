@@ -248,7 +248,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                             id: generateLogId(),
                             type: 'reward',
                             content: `+${details.silverGained} Silver collected!`,
-                            color: '#d4af37'
+                            color: 'var(--accent)'
                         });
                     }
 
@@ -546,7 +546,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
 
                         <div style={{ textAlign: 'right' }}>
                             <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', letterSpacing: '1px' }}>DURATION</div>
-                            <div style={{ fontSize: '1rem', fontWeight: 'bold', fontFamily: 'monospace', color: '#fff' }}>
+                            <div style={{ fontSize: '1rem', fontWeight: 'bold', fontFamily: 'monospace', color: 'var(--text-main)' }}>
                                 {Math.floor(duration / 60)}:{(duration % 60).toString().padStart(2, '0')}
                             </div>
                         </div>
@@ -565,10 +565,10 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 <motion.div
                                     style={{
                                         width: isMobile ? '50px' : '100px', height: isMobile ? '50px' : '100px',
-                                        background: 'linear-gradient(135deg, #d4af37 0%, #8a6d0a 100%)',
+                                        background: 'linear-gradient(135deg, var(--accent) 0%, #003366 100%)',
                                         borderRadius: '50%', border: isMobile ? '2px solid #fff' : '4px solid #fff',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        boxShadow: '0 0 20px rgba(212, 175, 55, 0.4)',
+                                        boxShadow: '0 0 20px var(--accent-soft)',
                                         marginBottom: '10px',
                                         position: 'relative',
                                         zIndex: 2
@@ -597,18 +597,18 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                         </div>
                                     )}
                                 </motion.div>
-                                <div style={{ fontSize: isMobile ? '0.6rem' : '0.9rem', fontWeight: '900', color: '#fff' }}>{gameState?.name?.toUpperCase()}</div>
+                                <div style={{ fontSize: isMobile ? '0.6rem' : '0.9rem', fontWeight: '900', color: 'var(--text-main)' }}>{gameState?.name?.toUpperCase()}</div>
                                 <div style={{ fontSize: isMobile ? '0.9rem' : '1.3rem', fontWeight: '900', color: '#4caf50', marginTop: '2px' }}>{Math.round(combat.playerHealth)} HP</div>
                             </div>
 
-                            <div style={{ fontSize: isMobile ? '1rem' : '1.5rem', fontWeight: '900', color: 'rgba(255,255,255,0.1)' }}>VS</div>
+                            <div style={{ fontSize: isMobile ? '1rem' : '1.5rem', fontWeight: '900', color: 'var(--text-dim)', opacity: 0.2 }}>VS</div>
 
                             {/* Mob Side */}
                             <div style={{ textAlign: 'center', position: 'relative' }}>
                                 <motion.div
                                     style={{
                                         width: isMobile ? '50px' : '100px', height: isMobile ? '50px' : '100px',
-                                        background: 'rgba(20, 20, 25, 0.8)',
+                                        background: 'var(--slot-bg)',
                                         borderRadius: '50%', border: isMobile ? '2px solid #ff4444' : '4px solid #ff4444',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         boxShadow: '0 0 20px rgba(255, 68, 68, 0.4)',
@@ -618,7 +618,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                     }}>
                                     <Skull size={isMobile ? 25 : 50} color="#ff4444" />
                                 </motion.div>
-                                <div style={{ fontSize: isMobile ? '0.6rem' : '0.9rem', fontWeight: '900', color: '#fff' }}>{combat.mobName.toUpperCase()}</div>
+                                <div style={{ fontSize: isMobile ? '0.6rem' : '0.9rem', fontWeight: '900', color: 'var(--text-main)' }}>{combat.mobName.toUpperCase()}</div>
                                 <div style={{ fontSize: isMobile ? '0.9rem' : '1.3rem', fontWeight: '900', color: '#ff4444', marginTop: '2px' }}>{Math.round(combat.mobHealth)} HP</div>
                             </div>
 
@@ -626,17 +626,17 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                         </div>
 
                         {/* Health Bars Overlay */}
-                        <div style={{ padding: '15px', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.2)' }}>
+                        <div style={{ padding: '15px', borderTop: '1px solid var(--border)', background: 'var(--bg-dark)' }}>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
                                 <div style={{ flex: 1, minWidth: '120px' }}>
                                     <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', marginBottom: '3px' }}>CHARACTER HEALTH</div>
-                                    <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+                                    <div style={{ height: '8px', background: 'var(--slot-bg)', borderRadius: '4px', overflow: 'hidden' }}>
                                         <div style={{ width: `${(combat.playerHealth / stats.hp) * 100}%`, height: '100%', background: '#4caf50', transition: 'width 0.3s' }} />
                                     </div>
                                 </div>
                                 <div style={{ flex: 1, minWidth: '120px' }}>
                                     <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', textAlign: isMobile ? 'left' : 'right', marginBottom: '3px' }}>MONSTER HEALTH</div>
-                                    <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+                                    <div style={{ height: '8px', background: 'var(--slot-bg)', borderRadius: '4px', overflow: 'hidden' }}>
                                         <div style={{ width: `${(combat.mobHealth / combat.mobMaxHealth) * 100}%`, height: '100%', background: '#ff4444', transition: 'width 0.3s' }} />
                                     </div>
                                 </div>
@@ -654,35 +654,35 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                             gap: '5px',
                             flexShrink: 0
                         }}>
-                            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.03)' }}>
+                            <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)' }}>
                                 <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Activity size={10} /> DPS
                                 </div>
                                 <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4a90e2' }}>{dps.toFixed(1)}</div>
                             </div>
-                            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.03)' }}>
+                            <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)' }}>
                                 <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Trophy size={10} /> KILLS
                                 </div>
                                 <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4caf50' }}>{kills}</div>
                             </div>
-                            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.03)' }}>
+                            <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)' }}>
                                 <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <TrendingUp size={10} /> DAMAGE
                                 </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>{formatNumber(totalDmgDealt)}</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{formatNumber(totalDmgDealt)}</div>
                             </div>
-                            <div style={{ background: 'rgba(212, 175, 55, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(212, 175, 55, 0.2)' }}>
-                                <div style={{ fontSize: '0.55rem', color: '#d4af37', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <div style={{ background: 'var(--accent-soft)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-active)' }}>
+                                <div style={{ fontSize: '0.55rem', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Coins size={10} /> SILVER
                                 </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#d4af37' }}>{formatNumber(silverGained)}</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--accent)' }}>{formatNumber(silverGained)}</div>
                             </div>
                             <div style={{ background: 'rgba(76, 175, 80, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(76, 175, 80, 0.2)' }}>
                                 <div style={{ fontSize: '0.55rem', color: '#4caf50', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Star size={10} /> TOTAL XP
                                 </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>{formatNumber(xpGained)}</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{formatNumber(xpGained)}</div>
                             </div>
                             <div style={{ background: 'rgba(76, 175, 80, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(76, 175, 80, 0.2)' }}>
                                 <div style={{ fontSize: '0.55rem', color: '#4caf50', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -705,15 +705,15 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                         const itemData = resolveItem(id);
                                         return (
                                             <div key={id} style={{
-                                                background: 'rgba(0,0,0,0.3)',
+                                                background: 'var(--slot-bg)',
                                                 padding: '2px 8px',
                                                 borderRadius: '4px',
-                                                border: '1px solid rgba(174, 0, 255, 0.2)',
+                                                border: '1px solid var(--border)',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 gap: '5px'
                                             }}>
-                                                <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#fff' }}>{qty}x</span>
+                                                <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{qty}x</span>
                                                 <span style={{ fontSize: '0.7rem', color: '#ae00ff', textTransform: 'capitalize' }}>{itemData?.name || id.replace(/_/g, ' ')}</span>
                                             </div>
                                         );
@@ -728,25 +728,25 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                             display: 'flex',
                             flexDirection: 'column',
                             overflowY: 'hidden',
-                            background: '#0a0a0f',
-                            border: '1px solid rgba(212, 175, 55, 0.2)',
+                            background: 'var(--bg-dark)',
+                            border: '1px solid var(--border)',
                             flex: 1,
                             minHeight: isMobile ? '150px' : '200px',
                             maxHeight: isMobile ? '300px' : '500px',
                             position: 'relative'
                         }}>
-                            <div style={{ padding: '6px 12px', background: 'rgba(212, 175, 55, 0.1)', borderBottom: '1px solid rgba(212, 175, 55, 0.2)', display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                                <Terminal size={10} color="#d4af37" />
-                                <span style={{ fontSize: '0.55rem', fontWeight: '900', color: '#d4af37', letterSpacing: '1px' }}>LOG_</span>
+                            <div style={{ padding: '6px 12px', background: 'var(--accent-soft)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                                <Terminal size={10} color="var(--accent)" />
+                                <span style={{ fontSize: '0.55rem', fontWeight: '900', color: 'var(--accent)', letterSpacing: '1px' }}>LOG_</span>
                             </div>
                             <div
                                 className="scroll-container"
                                 ref={scrollContainerRef}
-                                style={{ flex: 1, height: '100%', padding: '10px', fontFamily: 'monospace', fontSize: isMobile ? '0.7rem' : '0.85rem', color: '#ccc', overflowY: 'scroll' }}
+                                style={{ flex: 1, height: '100%', padding: '10px', fontFamily: 'monospace', fontSize: isMobile ? '0.7rem' : '0.85rem', color: 'var(--text-main)', overflowY: 'scroll' }}
                             >
                                 {battleLogs.map(log => (
                                     <div key={log.id} style={{ marginBottom: '3px', borderLeft: `2px solid ${log.color || '#333'}`, paddingLeft: '6px' }}>
-                                        <span style={{ color: log.color || '#fff', opacity: 0.5 }}>[{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span> {log.content}
+                                        <span style={{ color: log.color || 'var(--text-main)', opacity: 0.5 }}>[{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span> {log.content}
                                     </div>
                                 ))}
                                 <div ref={logsEndRef} />
@@ -761,7 +761,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                         bottom: '10px',
                                         left: '50%',
                                         transform: 'translateX(-50%)',
-                                        background: '#d4af37',
+                                        background: 'var(--accent)',
                                         color: '#000',
                                         border: 'none',
                                         padding: '4px 10px',
@@ -813,13 +813,13 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
             {/* Header / Filter */}
-            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', background: 'rgba(0,0,0,0.2)' }}>
+            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', background: 'var(--panel-bg)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Sword size={18} color="#ff4444" />
-                        <h2 style={{ margin: 0, color: '#fff', fontSize: '0.9rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase' }}>Hunting Grounds</h2>
+                        <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase' }}>Hunting Grounds</h2>
                     </div>
-                    <button onClick={onShowHistory} style={{ background: 'none', border: '1px solid var(--border)', padding: '3px 8px', borderRadius: '4px', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '0.65rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <button onClick={onShowHistory} style={{ background: 'none', border: '1px solid var(--border)', padding: '3px 8px', borderRadius: '4px', color: 'var(--text-dim)', cursor: 'pointer', fontSize: '0.65rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <Clock size={12} /> History
                     </button>
                 </div>
@@ -848,7 +848,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
             </div>
 
             {/* Mobs List */}
-            <div className="glass-panel scroll-container" style={{ flex: 1, padding: isMobile ? '5px' : '15px', background: 'rgba(10, 10, 15, 0.4)', overflowY: 'auto', overflowX: 'hidden' }}>
+            <div className="glass-panel scroll-container" style={{ flex: 1, padding: isMobile ? '5px' : '15px', background: 'var(--bg-dark)', overflowY: 'auto', overflowX: 'hidden' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '6px' : '8px', paddingBottom: '40px' }}>
                     {(MONSTERS[activeTier] || []).filter(m => !m.id.startsWith('BOSS_') && !m.dungeonOnly).map(mob => {
                         const playerDmg = stats.damage;
@@ -884,8 +884,8 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 display: 'flex',
                                 flexDirection: 'row',
                                 flexWrap: isMobile ? 'wrap' : 'nowrap', // Wrap on mobile
-                                background: isLocked ? 'rgba(20, 20, 25, 0.4)' : 'rgba(255, 255, 255, 0.02)',
-                                border: `1px solid ${isLocked ? 'rgba(255,255,255,0.03)' : 'rgba(255, 255, 255, 0.05)'}`,
+                                background: isLocked ? 'var(--bg-dark)' : 'var(--panel-bg)',
+                                border: `1px solid ${isLocked ? 'var(--border)' : 'var(--border-active)'}`,
                                 borderRadius: '8px',
                                 padding: isMobile ? '8px' : '12px 16px', // Less padding mobile
                                 gap: isMobile ? '8px' : '15px',
@@ -898,13 +898,13 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 {/* Mob Basic Info */}
                                 <div style={{ flex: isMobile ? '1 1 auto' : '1.2', display: 'flex', gap: '8px', alignItems: 'center', minWidth: isMobile ? '50%' : 'auto' }}>
                                     <div style={{
-                                        width: isMobile ? '32px' : '40px', height: isMobile ? '32px' : '40px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0
+                                        width: isMobile ? '32px' : '40px', height: isMobile ? '32px' : '40px', background: 'var(--slot-bg)', borderRadius: '8px',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', flexShrink: 0
                                     }}>
                                         <Skull size={isMobile ? 16 : 20} color={isLocked ? '#555' : '#ff4444'} />
                                     </div>
                                     <div>
-                                        <div style={{ color: '#fff', fontWeight: 'bold', fontSize: isMobile ? '0.85rem' : '1rem' }}>{mob.name}</div>
+                                        <div style={{ color: 'var(--text-main)', fontWeight: 'bold', fontSize: isMobile ? '0.85rem' : '1rem' }}>{mob.name}</div>
                                         <div style={{ color: 'var(--text-dim)', fontSize: isMobile ? '0.6rem' : '0.7rem', display: 'flex', gap: '6px' }}>
                                             <span style={{ color: '#ff4444' }}>HP:{mob.health}</span>
                                             <span style={{ color: '#ff9800' }}>D:{mob.damage}</span>
@@ -940,28 +940,28 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                     display: 'grid',
                                     gridTemplateColumns: 'repeat(3, 1fr)',
                                     gap: '5px',
-                                    borderLeft: isMobile ? 'none' : '1px solid rgba(255,255,255,0.05)',
-                                    borderRight: isMobile ? 'none' : '1px solid rgba(255,255,255,0.05)',
+                                    borderLeft: isMobile ? 'none' : '1px solid var(--border)',
+                                    borderRight: isMobile ? 'none' : '1px solid var(--border)',
                                     padding: isMobile ? '6px 0' : '0 15px',
                                     order: 3,
                                     borderTop: isMobile ? '1px solid rgba(255,255,255,0.03)' : 'none',
                                     marginTop: isMobile ? '4px' : '0'
                                 }}>
                                     <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '0.55rem', color: '#888' }}>XP/H</div>
+                                        <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)' }}>XP/H</div>
                                         <div style={{ fontSize: isMobile ? '0.75rem' : '0.85rem', fontWeight: 'bold', color: '#4caf50' }}>
                                             {isMobile && xpHour > 1000 ? `${(xpHour / 1000).toFixed(1)}k` : formatNumber(xpHour)}
                                         </div>
                                     </div>
                                     <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '0.55rem', color: '#888' }}>SILVER/H</div>
+                                        <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)' }}>SILVER/H</div>
                                         <div style={{ fontSize: isMobile ? '0.75rem' : '0.85rem', fontWeight: 'bold', color: '#d4af37' }}>
                                             {isMobile && silverHour > 1000 ? `${(silverHour / 1000).toFixed(1)}k` : formatNumber(silverHour)}
                                         </div>
                                     </div>
 
                                     <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '0.55rem', color: '#888' }}>SURVIVAL</div>
+                                        <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)' }}>SURVIVAL</div>
                                         {(() => {
                                             const defense = gameState?.calculatedStats?.defense || 0;
                                             const mitigation = Math.min(0.60, defense / (defense + 2000));

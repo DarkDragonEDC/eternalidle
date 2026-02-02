@@ -98,6 +98,14 @@ function App() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCombatHistory, setShowCombatHistory] = useState(false);
   const [showFullNumbers, setShowFullNumbers] = useState(false);
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+
+  useEffect(() => {
+    document.body.className = `theme-${theme}`;
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
   const [lootModalData, setLootModalData] = useState(null);
   const [showCrownShop, setShowCrownShop] = useState(false);
@@ -492,10 +500,10 @@ function App() {
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: '900', color: '#fff' }}>
-              Lv {skill.level} <span style={{ fontSize: '0.65rem', color: '#888', fontWeight: 'normal' }}>({Math.floor(progress)}%)</span>
+            <div style={{ fontSize: '0.85rem', fontWeight: '900', color: 'var(--text-main)' }}>
+              Lv {skill.level} <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: 'normal' }}>({Math.floor(progress)}%)</span>
             </div>
-            <div style={{ fontSize: '0.55rem', color: '#555', fontWeight: 'bold' }}>
+            <div style={{ fontSize: '0.55rem', color: '#5b5d61', fontWeight: 'bold' }}>
               {formatNumber((XP_TABLE[skill.level - 1] || 0) + skill.xp)} / {XP_TABLE[skill.level] ? formatNumber(XP_TABLE[skill.level]) : 'MAX'} XP
             </div>
           </div>
@@ -636,9 +644,9 @@ function App() {
         return (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <SkillProgressHeader tab={activeTab} category={activeCategory} />
-            <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRadius: '16px', background: 'rgba(15, 20, 30, 0.4)' }}>
+            <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRadius: '16px', background: 'var(--panel-bg)' }}>
               <div style={{ padding: isMobile ? '20px' : '30px 40px', borderBottom: '1px solid var(--border)' }}>
-                <h2 style={{ margin: 0, color: '#fff', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '2px' }}>
+                <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '2px' }}>
                   {activeCategory} {isGathering ? 'GATHERING' : 'REFINING'}
                 </h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', marginTop: '15px' }}>
@@ -690,19 +698,19 @@ function App() {
                           position: 'relative',
                           overflow: 'hidden'
                         }}
-                        onMouseEnter={(e) => { if (!locked && !isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
-                        onMouseLeave={(e) => { if (!locked && !isActive) e.currentTarget.style.background = 'rgba(0,0,0,0.2)'; }}
+                        onMouseEnter={(e) => { if (!locked && !isActive) e.currentTarget.style.background = 'var(--accent-soft)'; }}
+                        onMouseLeave={(e) => { if (!locked && !isActive) e.currentTarget.style.background = 'var(--slot-bg)'; }}
                       >
                         {/* Icon Container */}
                         <div style={{
                           width: '48px',
                           height: '48px',
-                          background: 'rgba(255, 255, 255, 0.03)',
+                          background: 'var(--panel-bg)',
                           borderRadius: '8px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          border: '1px solid var(--border)',
                           flexShrink: 0,
                           overflow: 'hidden'
                         }}>
@@ -729,10 +737,10 @@ function App() {
                         {/* Content */}
                         <div style={{ flex: '1 1 0%' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                            <span style={{ fontWeight: 'bold', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px', color: locked ? '#888' : (isActive ? 'var(--accent)' : '#eee') }}>
+                            <span style={{ fontWeight: 'bold', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px', color: locked ? 'var(--text-dim)' : (isActive ? 'var(--accent)' : 'var(--text-main)') }}>
                               {item.name}
-                              {locked && <Lock size={14} color="#ff4444" />}
-                              {isActive && <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 2 }} style={{ fontSize: '0.6rem', background: 'var(--accent)', color: '#000', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>ACTIVE</motion.span>}
+                              {locked && <Lock size={14} color="#f87171" />}
+                              {isActive && <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 2 }} style={{ fontSize: '0.6rem', background: 'var(--accent)', color: 'var(--bg-dark)', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>ACTIVE</motion.span>}
                             </span>
                           </div>
 
@@ -894,19 +902,19 @@ function App() {
                           position: 'relative',
                           overflow: 'hidden'
                         }}
-                        onMouseEnter={(e) => { if (!locked && !isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
-                        onMouseLeave={(e) => { if (!locked && !isActive) e.currentTarget.style.background = 'rgba(0,0,0,0.2)'; }}
+                        onMouseEnter={(e) => { if (!locked && !isActive) e.currentTarget.style.background = 'var(--accent-soft)'; }}
+                        onMouseLeave={(e) => { if (!locked && !isActive) e.currentTarget.style.background = 'var(--slot-bg)'; }}
                       >
                         {/* Icon Container */}
                         <div style={{
                           width: '48px',
                           height: '48px',
-                          background: 'rgba(255, 255, 255, 0.03)',
+                          background: 'var(--panel-bg)',
                           borderRadius: '8px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          border: '1px solid var(--border)',
                           flexShrink: 0,
                           overflow: 'hidden'
                         }}>
@@ -937,25 +945,25 @@ function App() {
 
                           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                             {/* Tier Badge */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(0, 0, 0, 0.3)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--accent)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--slot-bg)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--accent)', border: '1px solid var(--border)' }}>
                               <span>T{item.tier}</span>
                             </div>
 
                             {/* Time Badge */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(0, 0, 0, 0.3)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: '#888', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--slot-bg)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--text-dim)', border: '1px solid var(--border)' }}>
                               <Clock size={12} />
                               <span>{item.time || 3.0}s</span>
                             </div>
 
                             {/* XP Badge */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(0, 0, 0, 0.3)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: '#888', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--slot-bg)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--text-dim)', border: '1px solid var(--border)' }}>
                               <Star size={12} />
                               <span>{item.xp} XP</span>
                             </div>
 
                             {/* Main Stat Badge */}
                             {mainStat && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(0, 0, 0, 0.3)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: locked ? '#555' : mainStat.color, border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--slot-bg)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: locked ? '#555' : mainStat.color, border: '1px solid var(--border)' }}>
                                 {React.cloneElement(mainStat.icon, { size: 12, color: locked ? '#555' : mainStat.color })}
                                 <span>{mainStat.val}</span>
                               </div>
@@ -1105,7 +1113,7 @@ function App() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#0a0a0f', color: '#fff', fontFamily: "'Inter', sans-serif", position: 'relative' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-dark)', color: 'var(--text-main)', fontFamily: "'Inter', sans-serif", position: 'relative' }}>
       <Sidebar
         gameState={displayedGameState}
         activeTab={activeTab}
@@ -1115,6 +1123,8 @@ function App() {
         isMobile={isMobile}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        theme={theme}
+        toggleTheme={toggleTheme}
         onSwitchCharacter={() => {
           if (socket) socket.disconnect();
           setSelectedCharacter(null);
@@ -1148,10 +1158,10 @@ function App() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 20, minWidth: 0 }}>
             {isMobile && <button onClick={() => setSidebarOpen(true)} style={{ color: '#fff', opacity: 0.6 }}><Menu size={24} /></button>}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-              <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, #d4af37 0%, #8a6d0a 100%)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, #90d5ff 0%, #003366 100%)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <User color="#000" size={16} />
               </div>
-              <div style={{ fontWeight: '900', fontSize: isMobile ? '0.85rem' : '1rem', color: '#fff', letterSpacing: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: isMobile ? '90px' : '200px' }}>{displayedGameState?.name?.toUpperCase() || 'ADVENTURER'}</div>
+              <div style={{ fontWeight: '900', fontSize: isMobile ? '0.85rem' : '1rem', color: 'var(--text-main)', letterSpacing: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: isMobile ? '90px' : '200px' }}>{displayedGameState?.name?.toUpperCase() || 'ADVENTURER'}</div>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 12 : 20 }}>
@@ -1160,8 +1170,8 @@ function App() {
               <button
                 onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
                 style={{
-                  background: 'rgba(212, 175, 55, 0.08)',
-                  border: '1px solid rgba(212, 175, 55, 0.2)',
+                  background: 'var(--accent-soft)',
+                  border: '1px solid var(--border-active)',
                   borderRadius: '8px',
                   padding: '6px 12px',
                   display: 'flex',
@@ -1171,18 +1181,18 @@ function App() {
                   marginRight: isMobile ? '4px' : '8px',
                   transition: '0.2s'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(212, 175, 55, 0.15)'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(212, 175, 55, 0.08)'}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(144, 213, 255, 0.25)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent-soft)'}
               >
-                <Coins size={16} color="#d4af37" />
-                <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#d4af37', fontFamily: 'monospace' }}>
+                <Coins size={16} color="var(--accent)" />
+                <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--accent)', fontFamily: 'monospace' }}>
                   {showFullNumbers
                     ? formatNumber(displayedGameState?.state?.silver || 0)
                     : formatSilver(displayedGameState?.state?.silver || 0)}
                 </span>
                 <ChevronDown
                   size={14}
-                  color="#d4af37"
+                  color="var(--accent)"
                   style={{
                     transition: '0.2s',
                     transform: showCurrencyDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -1199,8 +1209,8 @@ function App() {
                     top: '100%',
                     right: 0,
                     marginTop: '8px',
-                    background: 'rgba(20, 25, 35, 0.98)',
-                    border: '1px solid rgba(212, 175, 55, 0.2)',
+                    background: 'var(--panel-bg)',
+                    border: '1px solid var(--border-active)',
                     borderRadius: '12px',
                     padding: '12px',
                     minWidth: '200px',
@@ -1220,18 +1230,18 @@ function App() {
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       padding: '10px 12px',
-                      background: 'rgba(212, 175, 55, 0.1)',
+                      background: 'var(--accent-soft)',
                       borderRadius: '8px',
                       marginBottom: '8px',
                       cursor: 'pointer',
-                      border: '1px solid rgba(212, 175, 55, 0.15)'
+                      border: '1px solid var(--border-active)'
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <Coins size={20} color="#d4af37" />
+                      <Coins size={20} color="var(--accent)" />
                       <div>
-                        <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: 'bold', letterSpacing: '1px' }}>SILVER</div>
-                        <div style={{ fontSize: '1rem', fontWeight: '900', color: '#d4af37', fontFamily: 'monospace' }}>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>SILVER</div>
+                        <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--accent)', fontFamily: 'monospace' }}>
                           {formatNumber(displayedGameState?.state?.silver || 0)}
                         </div>
                       </div>
@@ -1249,25 +1259,25 @@ function App() {
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       padding: '10px 12px',
-                      background: 'rgba(255, 215, 0, 0.05)',
+                      background: 'var(--accent-soft)',
                       borderRadius: '8px',
                       cursor: 'pointer',
-                      border: '1px solid rgba(255, 215, 0, 0.15)',
+                      border: '1px solid var(--border-active)',
                       transition: '0.2s'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 215, 0, 0.12)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 215, 0, 0.05)'}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(144, 213, 255, 0.25)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent-soft)'}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <Circle size={20} color="#ffd700" />
+                      <Circle size={20} color="var(--accent)" />
                       <div>
-                        <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: 'bold', letterSpacing: '1px' }}>ORBS</div>
-                        <div style={{ fontSize: '1rem', fontWeight: '900', color: '#ffd700', fontFamily: 'monospace' }}>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>ORBS</div>
+                        <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--accent)', fontFamily: 'monospace' }}>
                           {displayedGameState?.state?.crowns || 0}
                         </div>
                       </div>
                     </div>
-                    <div style={{ fontSize: '0.6rem', color: '#ffd700', fontWeight: 'bold', opacity: 0.7 }}>SHOP →</div>
+                    <div style={{ fontSize: '0.6rem', color: 'var(--accent)', fontWeight: 'bold', opacity: 0.7 }}>SHOP →</div>
                   </div>
                 </div>
               )}

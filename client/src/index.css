@@ -1,26 +1,50 @@
 :root {
-  --bg-dark: #0a0e14;
-  --panel-bg: rgba(20, 25, 35, 0.7);
-  --accent: #d4af37;
-  --accent-soft: rgba(212, 175, 55, 0.15);
-  --text-main: #e0e0e0;
-  --text-dim: #888888;
-  --border: rgba(255, 255, 255, 0.05);
-  --border-active: rgba(212, 175, 55, 0.3);
-
-  --glass-bg: rgba(15, 20, 30, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.03);
-  --glass-blur: blur(12px);
-
-  /* Tiers Color Palette */
+  /* Common variables (Tier Colors) */
   --t1: #a0a0a0;
-  --t2: #4caf50;
-  --t3: #4a90e2;
-  --t4: #9013fe;
-  --t5: #f5a623;
-  --t6: #d0021b;
-  --t7: #ffffff;
+  --t2: #4ade80;
+  --t3: #60a5fa;
+  --t4: #a855f7;
+  --t5: #fbbf24;
+  --t6: #f87171;
+  --t7: #f0f0f0;
   --t8: #d4af37;
+}
+
+body.theme-dark {
+  --bg-dark: #0d1117;
+  --panel-bg: rgba(22, 27, 34, 0.82);
+  --accent: #90d5ff;
+  --accent-soft: rgba(144, 213, 255, 0.15);
+  --text-main: #f0f0f0;
+  --text-dim: #8b8d91;
+  --border: rgba(240, 240, 240, 0.08);
+  --border-active: rgba(144, 213, 255, 0.3);
+  --glass-bg: rgba(13, 17, 23, 0.7);
+  --glass-border: rgba(240, 240, 240, 0.05);
+  --glass-blur: blur(12px);
+  --scrollbar-track: rgba(0, 0, 0, 0.3);
+  --slot-bg: rgba(0, 0, 0, 0.2);
+  --panel-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+body.theme-light {
+  --bg-dark: #d7dee5;
+  --panel-bg: #ffffff;
+  --accent: #003366;
+  --accent-soft: rgba(179, 206, 229, 0.4);
+  /* #b3cee5 with transparency */
+  --text-main: #001f3f;
+  --text-dim: #2a3d54;
+  --border: #a1bcd6;
+  --border-active: #003366;
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-border: #b3cee5;
+  --glass-blur: blur(0px);
+  --scrollbar-track: #d7dee5;
+  --slot-bg: #e5f1fc;
+  --panel-shadow: 0 4px 15px rgba(0, 31, 63, 0.12);
+  /* Dark blue shadow */
+  --contrast: #ccb4a1;
 }
 
 * {
@@ -63,14 +87,14 @@ button:active {
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  box-shadow: var(--panel-shadow);
 }
 
 /* Custom Scrollbar - Sophisticated Hub Style */
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(212, 175, 55, 0.5) rgba(0, 0, 0, 0.2);
+  scrollbar-color: var(--accent) var(--scrollbar-track);
 }
 
 /* Chrome, Edge, Safari */
@@ -80,21 +104,21 @@ button:active {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--scrollbar-track);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(212, 175, 55, 0.6);
-  /* More visible gold */
+  background: var(--accent);
+  opacity: 0.6;
   border-radius: 4px;
   border: 1px solid transparent;
   background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(212, 175, 55, 1);
-  /* Solid gold on hover */
+  background: var(--accent);
+  opacity: 1;
 }
 
 /* Typography Utilities */
@@ -117,5 +141,6 @@ button:active {
 .scroll-container {
   overflow-y: auto;
   flex: 1;
+}
 
-  /* Floating Combat Text Animations REMOVED */
+/* Floating Combat Text Animations REMOVED */

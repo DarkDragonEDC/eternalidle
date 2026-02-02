@@ -100,7 +100,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
         <div style={{
             position: 'fixed',
             top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.9)',
+            background: 'rgba(0,0,0,0.7)',
             zIndex: 9999,
             display: 'flex',
             alignItems: 'center',
@@ -108,45 +108,45 @@ const CrownShop = ({ socket, gameState, onClose }) => {
             backdropFilter: 'blur(10px)'
         }} onClick={onClose}>
             <div style={{
-                background: 'linear-gradient(180deg, #1a1d26 0%, #0d0f14 100%)',
-                border: '1px solid rgba(212, 175, 55, 0.3)',
+                background: 'var(--panel-bg)',
+                border: '1px solid var(--border-active)',
                 borderRadius: '20px',
                 padding: '0',
                 width: '95%',
                 maxWidth: '600px',
                 maxHeight: '85vh',
                 overflow: 'hidden',
-                boxShadow: '0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(212, 175, 55, 0.1)'
+                boxShadow: 'var(--panel-shadow)'
             }} onClick={e => e.stopPropagation()}>
 
                 {/* Header */}
                 <div style={{
-                    background: 'linear-gradient(90deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.05))',
+                    background: 'linear-gradient(90deg, var(--accent-soft), transparent)',
                     padding: '20px 25px',
-                    borderBottom: '1px solid rgba(212, 175, 55, 0.2)',
+                    borderBottom: '1px solid var(--border)',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <Circle size={28} color="#ffd700" />
+                        <Circle size={28} color="var(--accent)" />
                         <div>
-                            <h2 style={{ margin: 0, color: '#fff', fontSize: '1.3rem', fontWeight: '900' }}>ORB SHOP</h2>
+                            <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.3rem', fontWeight: '900' }}>ORB SHOP</h2>
                             <div style={{ fontSize: '0.7rem', color: '#888', letterSpacing: '1px' }}>PREMIUM STORE</div>
                         </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                         <div style={{
-                            background: 'rgba(255,215,0,0.1)',
-                            border: '1px solid rgba(255,215,0,0.3)',
+                            background: 'var(--accent-soft)',
+                            border: '1px solid var(--border-active)',
                             padding: '8px 16px',
                             borderRadius: '20px',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '8px'
                         }}>
-                            <Circle size={18} color="#ffd700" />
-                            <span style={{ color: '#ffd700', fontWeight: '900', fontSize: '1.1rem' }}>{crowns}</span>
+                            <Circle size={18} color="var(--accent)" />
+                            <span style={{ color: 'var(--accent)', fontWeight: '900', fontSize: '1.1rem' }}>{crowns}</span>
                         </div>
                         <button onClick={onClose} style={{
                             background: 'rgba(255,255,255,0.05)',
@@ -236,8 +236,8 @@ const CrownShop = ({ socket, gameState, onClose }) => {
 
                                         return (
                                             <div key={item.id} style={{
-                                                background: 'rgba(255,255,255,0.03)',
-                                                border: `1px solid ${isRealMoney ? 'rgba(76, 175, 80, 0.4)' : (canAfford ? 'rgba(255,255,255,0.1)' : 'rgba(255,0,0,0.2)')}`,
+                                                background: 'var(--slot-bg)',
+                                                border: `1px solid ${isRealMoney ? 'var(--accent)' : (canAfford ? 'var(--border)' : 'rgba(255,0,0,0.2)')}`,
                                                 borderRadius: '12px',
                                                 padding: '15px',
                                                 opacity: canAfford ? 1 : 0.6,
@@ -280,7 +280,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                         <span style={{ fontSize: '1.5rem' }}>{item.icon}</span>
                                                         <div>
-                                                            <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.9rem' }}>{item.name}</div>
+                                                            <div style={{ color: 'var(--text-main)', fontWeight: 'bold', fontSize: '0.9rem' }}>{item.name}</div>
                                                             {item.permanent && (
                                                                 <span style={{ fontSize: '0.6rem', color: '#4caf50', textTransform: 'uppercase' }}>Permanent</span>
                                                             )}
@@ -300,15 +300,15 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                                         display: 'flex',
                                                         alignItems: 'center',
                                                         gap: '4px',
-                                                        background: isRealMoney ? 'rgba(76, 175, 80, 0.1)' : 'rgba(255,215,0,0.1)',
+                                                        background: 'var(--accent-soft)',
                                                         padding: '4px 10px',
                                                         borderRadius: '12px',
-                                                        border: `1px solid ${isRealMoney ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255,215,0,0.2)'}`,
+                                                        border: `1px solid var(--border-active)`,
                                                         position: 'relative',
                                                         zIndex: 2
                                                     }}>
                                                         {!isRealMoney && <Circle size={12} color="#ffd700" />}
-                                                        <span style={{ color: isRealMoney ? '#4caf50' : '#ffd700', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                                                        <span style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '0.85rem' }}>
                                                             {isRealMoney
                                                                 ? (item.currency === 'BRL' ? `R$ ${item.price.toFixed(2).replace('.', ',')}` : `$${item.price.toFixed(2)}`)
                                                                 : item.cost}
@@ -398,18 +398,18 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                         padding: '20px'
                     }} onClick={() => setShowMSInfo(false)}>
                         <div style={{
-                            background: '#1a1d26',
-                            border: '1px solid #4fc3f7',
+                            background: 'var(--panel-bg)',
+                            border: '1px solid var(--accent)',
                             borderRadius: '16px',
                             padding: '24px',
                             maxWidth: '400px',
                             width: '100%',
-                            boxShadow: '0 0 30px rgba(79, 195, 247, 0.2)'
+                            boxShadow: 'var(--panel-shadow)'
                         }} onClick={e => e.stopPropagation()}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <Trophy size={20} color="#4fc3f7" />
-                                    <h3 style={{ margin: 0, color: '#fff' }}>Membership Benefits</h3>
+                                    <Trophy size={20} color="var(--accent)" />
+                                    <h3 style={{ margin: 0, color: 'var(--text-main)' }}>Membership Benefits</h3>
                                 </div>
                                 <button onClick={() => setShowMSInfo(false)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}>
                                     <X size={20} />
@@ -417,24 +417,24 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #ffca28' }}>
+                                <div style={{ background: 'var(--slot-bg)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #ffca28' }}>
                                     <div style={{ fontWeight: 'bold', color: '#ffca28', fontSize: '0.9rem', marginBottom: '4px' }}>Global XP Bonus</div>
-                                    <div style={{ fontSize: '0.8rem', color: '#aaa' }}>Gain <strong style={{ color: '#fff' }}>+10% more XP</strong> from all sources (Gathering, Refining, Crafting, and Combat).</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Gain <strong style={{ color: 'var(--text-main)' }}>+10% more XP</strong> from all sources (Gathering, Refining, Crafting, and Combat).</div>
                                 </div>
 
-                                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #4caf50' }}>
+                                <div style={{ background: 'var(--slot-bg)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #4caf50' }}>
                                     <div style={{ fontWeight: 'bold', color: '#4caf50', fontSize: '0.9rem', marginBottom: '4px' }}>Inventory Expansion</div>
-                                    <div style={{ fontSize: '0.8rem', color: '#aaa' }}>Increase your base inventory space from <strong style={{ color: '#fff' }}>30 to 50 slots</strong>.</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Increase your base inventory space from <strong style={{ color: 'var(--text-main)' }}>30 to 50 slots</strong>.</div>
                                 </div>
 
-                                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #42a5f5' }}>
+                                <div style={{ background: 'var(--slot-bg)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #42a5f5' }}>
                                     <div style={{ fontWeight: 'bold', color: '#42a5f5', fontSize: '0.9rem', marginBottom: '4px' }}>Market Domination</div>
-                                    <div style={{ fontSize: '0.8rem', color: '#aaa' }}>List up to <strong style={{ color: '#fff' }}>50 items</strong> simultaneously on the Market (Base: 30).</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>List up to <strong style={{ color: 'var(--text-main)' }}>50 items</strong> simultaneously on the Market (Base: 30).</div>
                                 </div>
 
-                                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #ec407a' }}>
+                                <div style={{ background: 'var(--slot-bg)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #ec407a' }}>
                                     <div style={{ fontWeight: 'bold', color: '#ec407a', fontSize: '0.9rem', marginBottom: '4px' }}>Productive Inactivity</div>
-                                    <div style={{ fontSize: '0.8rem', color: '#aaa' }}>The IDLE productivity limit is increased from <strong style={{ color: '#fff' }}>8h to 12h</strong>.</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>The IDLE productivity limit is increased from <strong style={{ color: 'var(--text-main)' }}>8h to 12h</strong>.</div>
                                 </div>
                             </div>
 

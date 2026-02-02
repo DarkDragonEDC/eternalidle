@@ -96,7 +96,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
             left: 0,
             width: '100vw',
             height: '100vh',
-            background: 'rgba(0,0,0,0.85)',
+            background: 'rgba(0,0,0,0.7)',
             zIndex: 2000,
             display: 'flex',
             alignItems: 'center',
@@ -105,18 +105,18 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
             padding: '20px'
         }} onClick={handleBackdropClick}>
             <div style={{
-                background: 'rgb(26, 26, 46)',
+                background: 'var(--panel-bg)',
                 width: '95%',
                 maxWidth: '450px',
                 maxHeight: '90vh',
                 borderRadius: '12px',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
+                border: '1px solid var(--border)',
                 display: 'flex',
                 flexDirection: 'column',
                 padding: '20px',
                 gap: '20px',
-                boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-                color: '#fff',
+                boxShadow: 'var(--panel-shadow)',
+                color: 'var(--text-main)',
                 overflow: 'hidden' // Fix overflow leaking
             }}>
                 {/* Header */}
@@ -124,7 +124,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderBottom: '1px solid var(--border)',
                     paddingBottom: '12px',
                     position: 'relative',
                     flexShrink: 0 // Prevent header shrinking
@@ -135,10 +135,10 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                         left: -20,
                         right: -20,
                         height: '4px',
-                        background: item.rarityColor || '#d4af37',
+                        background: item.rarityColor || 'var(--accent)',
                         borderRadius: '12px 12px 0 0'
                     }}></div>
-                    <h3 style={{ margin: 0, color: item.rarityColor || '#d4af37', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                    <h3 style={{ margin: 0, color: item.rarityColor || 'var(--accent)', fontSize: '1.2rem', fontWeight: 'bold' }}>
                         {cleanBaseName} T{item.tier}
                     </h3>
                     <button
@@ -166,11 +166,11 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                     {/* Description Section */}
                     <div style={{
                         padding: '12px',
-                        background: 'rgba(255, 255, 255, 0.05)',
+                        background: 'var(--accent-soft)',
                         borderRadius: '8px',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        border: '1px solid var(--border)',
                         fontSize: '0.9rem',
-                        color: '#ddd',
+                        color: 'var(--text-main)',
                         fontStyle: 'italic',
                         lineHeight: '1.4',
                         textAlign: 'center'
@@ -184,10 +184,10 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                         gridTemplateColumns: '1fr 1fr',
                         gap: '12px',
                         fontSize: '0.9rem',
-                        background: 'rgba(0,0,0,0.2)',
+                        background: 'var(--slot-bg)',
                         padding: '15px',
                         borderRadius: '8px',
-                        border: '1px solid rgba(255,255,255,0.05)'
+                        border: '1px solid var(--border)'
                     }}>
                         <div><span style={{ color: '#888' }}>Tier:</span> T{item.tier}</div>
                         <div><span style={{ color: '#888' }}>Type:</span> {item.type}</div>
@@ -195,21 +195,21 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
 
 
                         {/* Stats List */}
-                        <div style={{ gridColumn: '1 / -1', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ gridColumn: '1 / -1', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid var(--border)' }}>
                             <div style={{ color: '#888', marginBottom: '8px', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Attributes</div>
                             <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
                                 {baseStats.damage && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#ff4444' }}><Sword size={14} /> {item.stats.damage} Dmg</div>}
                                 {baseStats.hp && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#ff4d4d' }}><Heart size={14} /> {item.stats.hp} HP</div>}
                                 {baseStats.defense && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#4caf50' }}><Shield size={14} /> {item.stats.defense} Def</div>}
-                                {baseStats.attackSpeed && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#ffd700' }}><Zap size={14} /> {(1000 / item.stats.attackSpeed).toFixed(1)}/s Spd</div>}
-                                {baseStats.speed && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#ffd700' }}><Zap size={14} /> {item.stats.speed} Spd</div>}
+                                {baseStats.attackSpeed && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--accent)' }}><Zap size={14} /> {(1000 / item.stats.attackSpeed).toFixed(1)}/s Spd</div>}
+                                {baseStats.speed && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--accent)' }}><Zap size={14} /> {item.stats.speed} Spd</div>}
                                 {baseStats.str && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#ff4444' }}>STR +{item.stats.str}</div>}
                                 {baseStats.agi && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#4caf50' }}>AGI +{item.stats.agi}</div>}
                                 {baseStats.int && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#2196f3' }}>INT +{item.stats.int}</div>}
                                 {item.heal && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#4caf50' }}><Heart size={14} /> Heals {item.heal}</div>}
-                                {item.type === 'POTION' && item.desc && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#d4af37' }}><Zap size={14} /> Effect: {item.desc}</div>}
-                                {baseStats.efficiency && typeof baseStats.efficiency === 'number' && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#d4af37' }}><Star size={14} /> Efficiency +{item.stats.efficiency}%</div>}
-                                {baseStats.efficiency && typeof baseStats.efficiency === 'object' && baseStats.efficiency.GLOBAL && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#d4af37' }}><Star size={14} /> Global Eff +{item.stats.efficiency.GLOBAL}%</div>}
+                                {item.type === 'POTION' && item.desc && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--accent)' }}><Zap size={14} /> Effect: {item.desc}</div>}
+                                {baseStats.efficiency && typeof baseStats.efficiency === 'number' && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--accent)' }}><Star size={14} /> Efficiency +{item.stats.efficiency}%</div>}
+                                {baseStats.efficiency && typeof baseStats.efficiency === 'object' && baseStats.efficiency.GLOBAL && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--accent)' }}><Star size={14} /> Global Eff +{item.stats.efficiency.GLOBAL}%</div>}
                             </div>
                         </div>
                     </div>
@@ -220,10 +220,10 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                             display: 'flex',
                             flexDirection: 'column',
                             gap: '12px',
-                            background: 'rgba(0,0,0,0.2)',
+                            background: 'var(--slot-bg)',
                             padding: '15px',
                             borderRadius: '8px',
-                            border: '1px solid rgba(255,255,255,0.05)'
+                            border: '1px solid var(--border)'
                         }}>
                             <div style={{ color: '#888', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Possible Rewards</div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -234,9 +234,9 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                     </div>
                                 ))}
                                 {CHEST_DROP_TABLE.RARITIES[item.rarity]?.crestChance > 0 && (
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '8px', marginTop: '2px' }}>
-                                        <span style={{ color: '#f5a623' }}>Boss Crest</span>
-                                        <span style={{ color: '#f5a623', fontWeight: 'bold' }}>{(CHEST_DROP_TABLE.RARITIES[item.rarity].crestChance * 100).toFixed(0)}%</span>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', borderTop: '1px solid var(--border)', paddingTop: '8px', marginTop: '2px' }}>
+                                        <span style={{ color: 'var(--accent)' }}>Boss Crest</span>
+                                        <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{(CHEST_DROP_TABLE.RARITIES[item.rarity].crestChance * 100).toFixed(0)}%</span>
                                     </div>
                                 )}
                             </div>
@@ -270,8 +270,8 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                         justifyContent: 'space-between',
                                         padding: '8px 12px',
                                         borderRadius: '6px',
-                                        background: q.id === (item.quality || 0) ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.2)',
-                                        border: q.id === (item.quality || 0) ? `1px solid ${q.color}` : '1px solid transparent',
+                                        background: q.id === (item.quality || 0) ? 'var(--accent-soft)' : 'var(--slot-bg)',
+                                        border: q.id === (item.quality || 0) ? `1px solid ${q.color}` : '1px solid var(--border)',
                                         transition: '0.2s',
                                         boxShadow: q.id === (item.quality || 0) ? `0 0 15px ${q.color}20` : 'none'
                                     }}>
@@ -292,7 +292,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                                 </span>
                                             )}
                                         </div>
-                                        <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: q.id === (item.quality || 0) ? '#fff' : '#aaa', display: 'flex', gap: '8px', textAlign: 'right' }}>
+                                        <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: q.id === (item.quality || 0) ? 'var(--text-main)' : 'var(--text-dim)', display: 'flex', gap: '8px', textAlign: 'right' }}>
                                             {Object.entries(q.calculatedStats).map(([key, val]) => {
                                                 let label = key.toUpperCase();
                                                 if (key === 'damage') label = 'Dmg';

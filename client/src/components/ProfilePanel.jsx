@@ -347,7 +347,7 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                 flexDirection: 'column',
                 overflow: 'hidden', // Keeps rounded corners
                 borderRadius: '16px',
-                background: 'rgba(15, 20, 30, 0.4)',
+                background: 'var(--panel-bg)',
                 minHeight: 0 // Crucial for nested flex scrolling
             }}>
                 <div className="scroll-container" style={{
@@ -366,7 +366,7 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                         marginBottom: '30px'
                     }}>
                         <div>
-                            <h2 style={{ margin: 0, color: '#fff', fontSize: '1.4rem', fontWeight: '900', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.4rem', fontWeight: '900', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 {name.toUpperCase()}
                                 {state.pendingNameChange && (
                                     <button
@@ -385,12 +385,12 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                     </button>
                                 )}
                             </h2>
-                            <div style={{ fontSize: '0.6rem', color: '#555', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>Lands Explorer</div>
+                            <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>Lands Explorer</div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
                             {/* Item Power */}
                             <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#d4af37', textShadow: '0 0 15px rgba(212, 175, 55, 0.2)' }}>{avgIP}</div>
-                            <div style={{ fontSize: '0.55rem', color: '#555', fontWeight: '900', letterSpacing: '1px' }}>ITEM POWER</div>
+                            <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: '900', letterSpacing: '1px' }}>ITEM POWER</div>
                         </div>
                     </div>
 
@@ -398,7 +398,7 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                     <div style={{ marginBottom: '35px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', marginBottom: '8px', fontWeight: '900', letterSpacing: '1px', color: '#888' }}>
                             <span>VITALITY</span>
-                            <span style={{ color: '#fff' }}>{Math.floor(stats.hp)} / {Math.floor(stats.maxHp)} HP</span>
+                            <span style={{ color: 'var(--text-main)' }}>{Math.floor(stats.hp)} / {Math.floor(stats.maxHp)} HP</span>
                         </div>
                         <div style={{ background: 'rgba(255, 0, 0, 0.05)', height: '6px', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255, 0, 0, 0.1)' }}>
                             <motion.div
@@ -431,9 +431,9 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                         <div style={{
                             width: '64px',
                             height: '64px',
-                            border: '2px dashed rgba(255,255,255,0.1)',
+                            border: '2px dashed var(--border)',
                             borderRadius: '12px',
-                            background: 'rgba(0,0,0,0.2)',
+                            background: 'var(--bg-dark)',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
@@ -483,7 +483,7 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                             <div key={stat.label} style={{ textAlign: 'center' }}>
                                 <div
                                     onClick={() => setInfoModal({ title: stat.label, desc: stat.desc })}
-                                    style={{ fontSize: '0.55rem', color: '#555', fontWeight: '900', letterSpacing: '1px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
+                                    style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: '900', letterSpacing: '1px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
                                 >
                                     {stat.label}
                                     <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -510,19 +510,19 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                             <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
                                 <Sword size={10} color="#ff4444" /> DMG
                             </div>
-                            <div style={{ fontSize: '1rem', fontWeight: '900', color: '#fff' }}>{Math.floor(stats.damage)}</div>
+                            <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)' }}>{Math.floor(stats.damage)}</div>
                         </div>
                         <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'DEFENSE', value: Math.floor(stats.defense) })}>
                             <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
                                 <Shield size={10} color="#4caf50" /> DEF
                             </div>
-                            <div style={{ fontSize: '1rem', fontWeight: '900', color: '#fff' }}>{Math.floor(stats.defense)}</div>
+                            <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)' }}>{Math.floor(stats.defense)}</div>
                         </div>
                         <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'SPEED', value: Math.floor(stats.attackSpeed) })}>
                             <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
                                 <Zap size={10} color="#2196f3" /> SPEED
                             </div>
-                            <div style={{ fontSize: '1rem', fontWeight: '900', color: '#fff' }}>
+                            <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)' }}>
                                 {(1000 / stats.attackSpeed).toFixed(1)} h/s
                             </div>
                         </div>
@@ -535,7 +535,7 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                     </div>
 
                     <div style={{ borderTop: '1px solid var(--border)', paddingTop: '30px' }}>
-                        <h4 style={{ color: '#fff', fontSize: '0.7rem', fontWeight: '900', textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '2px', opacity: 0.8, textAlign: 'center' }}>Skill Efficiency</h4>
+                        <h4 style={{ color: 'var(--text-main)', fontSize: '0.7rem', fontWeight: '900', textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '2px', opacity: 0.8, textAlign: 'center' }}>Skill Efficiency</h4>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '10px' }}>
                             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '10px' }}>
                                 <EfficiencyCard title="Gathering" items={[
@@ -567,7 +567,7 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
 
                     {/* Account Management Section */}
                     <div style={{ borderTop: '1px solid var(--border)', marginTop: '40px', paddingTop: '30px' }}>
-                        <h4 style={{ color: '#fff', fontSize: '0.7rem', fontWeight: '900', textTransform: 'uppercase', marginBottom: '15px', letterSpacing: '2px', opacity: 0.8 }}>Account Settings</h4>
+                        <h4 style={{ color: 'var(--text-main)', fontSize: '0.7rem', fontWeight: '900', textTransform: 'uppercase', marginBottom: '15px', letterSpacing: '2px', opacity: 0.8 }}>Account Settings</h4>
 
                         <div style={{ background: 'rgba(255,255,255,0.02)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
                             <p style={{ fontSize: '0.75rem', color: '#888', marginBottom: '15px', lineHeight: '1.4' }}>
@@ -589,10 +589,10 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                     alignItems: 'center',
                                     gap: '10px',
                                     padding: '10px 20px',
-                                    background: 'rgba(255,255,255,0.05)',
-                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    background: 'var(--bg-dark)',
+                                    border: '1px solid var(--border)',
                                     borderRadius: '8px',
-                                    color: '#fff',
+                                    color: 'var(--text-main)',
                                     fontSize: '0.85rem',
                                     fontWeight: '600',
                                     cursor: 'pointer',
@@ -650,7 +650,7 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                     backdropFilter: 'blur(2px)'
                 }} onClick={() => setInfoModal(null)}>
                     <div style={{
-                        background: '#1a1a1a',
+                        background: 'var(--bg-dark)',
                         border: '1px solid var(--border)',
                         borderRadius: '12px',
                         padding: '20px',
@@ -658,7 +658,7 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                         boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
                     }} onClick={e => e.stopPropagation()}>
                         <h3 style={{ color: 'var(--accent)', marginTop: 0 }}>{infoModal.title}</h3>
-                        <p style={{ color: '#ccc', fontSize: '0.9rem', whiteSpace: 'pre-line' }}>{infoModal.desc}</p>
+                        <p style={{ color: 'var(--text-main)', fontSize: '0.9rem', whiteSpace: 'pre-line' }}>{infoModal.desc}</p>
                         <button
                             onClick={() => setInfoModal(null)}
                             style={{
@@ -692,7 +692,7 @@ const EfficiencyCard = ({ title, items, stats, onShowBreakdown }) => (
                 onClick={() => onShowBreakdown && onShowBreakdown(item.id, `+${(stats.efficiency[item.id] || 0).toFixed(1)}%`)}
             >
                 <span style={{ color: '#888' }}>{item.label}</span>
-                <span style={{ color: '#fff', fontWeight: 'bold' }}>+{(stats.efficiency[item.id] || 0).toFixed(1)}% <Info size={10} color="#555" /></span>
+                <span style={{ color: 'var(--text-main)', fontWeight: 'bold' }}>+{(stats.efficiency[item.id] || 0).toFixed(1)}% <Info size={10} color="#555" /></span>
             </div>
         ))}
     </div>

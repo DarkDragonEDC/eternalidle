@@ -38,7 +38,7 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile }) => {
                 left: 0,
                 width: '100%',
                 height: '100%',
-                background: 'rgba(0,0,0,0.8)',
+                background: 'rgba(0,0,0,0.7)',
                 backdropFilter: 'blur(5px)',
                 zIndex: 2000,
                 display: 'flex',
@@ -51,8 +51,8 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile }) => {
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.9, opacity: 0 }}
                     style={{
-                        background: '#1a1a2e',
-                        border: '1px solid #d4af37',
+                        background: 'var(--panel-bg)',
+                        border: '1px solid var(--border-active)',
                         borderRadius: '16px',
                         width: '100%',
                         maxWidth: '500px',
@@ -60,21 +60,21 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile }) => {
                         display: 'flex',
                         flexDirection: 'column',
                         overflow: 'hidden',
-                        boxShadow: '0 0 50px rgba(212, 175, 55, 0.2)'
+                        boxShadow: 'var(--panel-shadow)'
                     }}
                 >
                     {/* Header */}
                     <div style={{
                         padding: '15px 20px',
-                        borderBottom: '1px solid rgba(255,255,255,0.1)',
+                        borderBottom: '1px solid var(--border)',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        background: 'rgba(0,0,0,0.2)'
+                        background: 'var(--accent-soft)'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <Trophy color="#d4af37" size={24} />
-                            <h2 style={{ margin: 0, color: '#d4af37', fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Leaderboard</h2>
+                            <Trophy color="var(--accent)" size={24} />
+                            <h2 style={{ margin: 0, color: 'var(--accent)', fontSize: '1.2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Leaderboard</h2>
                         </div>
                         <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff' }}>
                             <X size={24} />
@@ -82,15 +82,15 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile }) => {
                     </div>
 
                     {/* Tabs */}
-                    <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div style={{ display: 'flex', borderBottom: '1px solid var(--border)' }}>
                         <button
                             onClick={() => setActiveTab('COMBAT')}
                             style={{
                                 flex: 1,
                                 padding: '15px',
-                                background: activeTab === 'COMBAT' ? 'rgba(212, 175, 55, 0.1)' : 'transparent',
+                                background: activeTab === 'COMBAT' ? 'var(--accent-soft)' : 'transparent',
                                 border: 'none',
-                                color: activeTab === 'COMBAT' ? '#d4af37' : '#888',
+                                color: activeTab === 'COMBAT' ? 'var(--accent)' : 'var(--text-dim)',
                                 cursor: 'pointer',
                                 fontWeight: 'bold',
                                 display: 'flex',
@@ -98,7 +98,7 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile }) => {
                                 justifyContent: 'center',
                                 gap: '8px',
                                 transition: '0.2s',
-                                borderBottom: activeTab === 'COMBAT' ? '2px solid #d4af37' : 'none'
+                                borderBottom: activeTab === 'COMBAT' ? '2px solid var(--accent)' : 'none'
                             }}
                         >
                             <Sword size={18} />
@@ -109,9 +109,9 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile }) => {
                             style={{
                                 flex: 1,
                                 padding: '15px',
-                                background: activeTab === 'DUNGEON' ? 'rgba(174, 0, 255, 0.1)' : 'transparent',
+                                background: activeTab === 'DUNGEON' ? 'var(--accent-soft)' : 'transparent',
                                 border: 'none',
-                                color: activeTab === 'DUNGEON' ? '#ae00ff' : '#888',
+                                color: activeTab === 'DUNGEON' ? 'var(--accent)' : 'var(--text-dim)',
                                 cursor: 'pointer',
                                 fontWeight: 'bold',
                                 display: 'flex',
@@ -119,7 +119,7 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile }) => {
                                 justifyContent: 'center',
                                 gap: '8px',
                                 transition: '0.2s',
-                                borderBottom: activeTab === 'DUNGEON' ? '2px solid #ae00ff' : 'none'
+                                borderBottom: activeTab === 'DUNGEON' ? '2px solid var(--accent)' : 'none'
                             }}
                         >
                             <Skull size={18} />
@@ -128,7 +128,7 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile }) => {
                     </div>
 
                     {/* Content */}
-                    <div style={{ flex: 1, overflowY: 'auto', padding: '10px', background: '#131323' }}>
+                    <div style={{ flex: 1, overflowY: 'auto', padding: '10px', background: 'var(--panel-bg)' }}>
                         {loading ? (
                             <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>Loading rankings...</div>
                         ) : (
@@ -144,12 +144,12 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile }) => {
 
                                         return (
                                             <div key={char.id} style={{
-                                                background: isTop3 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.02)',
+                                                background: isTop3 ? 'var(--accent-soft)' : 'var(--slot-bg)',
                                                 borderRadius: '8px',
                                                 padding: '12px 15px',
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                border: isTop3 ? `1px solid ${activeTab === 'COMBAT' ? '#d4af37' : '#ae00ff'}` : '1px solid transparent'
+                                                border: isTop3 ? `1px solid var(--accent)` : '1px solid var(--border)'
                                             }}>
                                                 <div style={{
                                                     width: '30px',
@@ -160,13 +160,13 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile }) => {
                                                     {index + 1}
                                                 </div>
                                                 <div style={{ flex: 1 }}>
-                                                    <div style={{ fontWeight: 'bold', color: '#fff' }}>{char.name}</div>
+                                                    <div style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>{char.name}</div>
                                                     <div style={{ fontSize: '0.75rem', color: '#888' }}>Level {char.state?.skills?.COMBAT?.level || 1}</div>
                                                 </div>
                                                 <div style={{
                                                     fontSize: '1.2rem',
                                                     fontWeight: 'bold',
-                                                    color: activeTab === 'COMBAT' ? '#ff4444' : '#ae00ff',
+                                                    color: 'var(--accent)',
                                                     fontFamily: 'monospace'
                                                 }}>
                                                     {formatNumber(score)}

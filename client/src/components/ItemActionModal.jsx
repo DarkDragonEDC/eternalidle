@@ -25,7 +25,7 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUs
                 style={{
                     position: 'fixed',
                     top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0,0,0,0.8)',
+                    background: 'rgba(0,0,0,0.7)',
                     zIndex: 2000,
                     display: 'flex',
                     alignItems: 'center',
@@ -40,13 +40,13 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUs
                     exit={{ scale: 0.9, opacity: 0 }}
                     onClick={(e) => e.stopPropagation()}
                     style={{
-                        background: '#1a1a1a',
+                        background: 'var(--panel-bg)',
                         border: `1px solid ${borderColor}`,
                         borderRadius: '16px',
                         padding: '24px',
                         width: '90%',
                         maxWidth: '350px',
-                        boxShadow: `0 0 30px ${borderColor}33`,
+                        boxShadow: 'var(--panel-shadow)',
                         position: 'relative'
                     }}
                 >
@@ -94,11 +94,11 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUs
                             display: 'grid',
                             gridTemplateColumns: '1fr 1fr',
                             gap: '10px',
-                            background: 'rgba(255,255,255,0.03)',
+                            background: 'var(--slot-bg)',
                             padding: '15px',
                             borderRadius: '10px',
                             marginBottom: '20px',
-                            border: '1px solid rgba(255,255,255,0.05)'
+                            border: '1px solid var(--border)'
                         }}>
                             {/* Primary Stats */}
                             {item.stats.damage > 0 && (
@@ -130,7 +130,7 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUs
 
                             {/* Attributes */}
                             {(item.stats.str > 0 || item.stats.agi > 0 || item.stats.int > 0) && (
-                                <div style={{ gridColumn: '1 / -1', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-around' }}>
+                                <div style={{ gridColumn: '1 / -1', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-around' }}>
                                     {item.stats.str > 0 && <span style={{ color: '#ff8888', fontWeight: 'bold', fontSize: '0.9rem' }}>+{item.stats.str} STR</span>}
                                     {item.stats.agi > 0 && <span style={{ color: '#88ff88', fontWeight: 'bold', fontSize: '0.9rem' }}>+{item.stats.agi} AGI</span>}
                                     {item.stats.int > 0 && <span style={{ color: '#8888ff', fontWeight: 'bold', fontSize: '0.9rem' }}>+{item.stats.int} INT</span>}
@@ -158,7 +158,7 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUs
                                     borderRadius: '8px',
                                     border: 'none',
                                     background: 'var(--accent)',
-                                    color: '#000',
+                                    color: 'var(--panel-bg)',
                                     fontWeight: 'bold',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -179,7 +179,7 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUs
                                     borderRadius: '8px',
                                     border: 'none',
                                     background: 'var(--accent)',
-                                    color: '#000',
+                                    color: 'var(--panel-bg)',
                                     fontWeight: 'bold',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -216,9 +216,9 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUs
                             style={{
                                 padding: '12px',
                                 borderRadius: '8px',
-                                border: '1px solid rgba(255, 255, 255, 0.2)',
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                color: '#ccc',
+                                border: '1px solid var(--border)',
+                                background: 'var(--accent-soft)',
+                                color: 'var(--text-main)',
                                 fontWeight: 'bold',
                                 display: 'flex',
                                 alignItems: 'center',

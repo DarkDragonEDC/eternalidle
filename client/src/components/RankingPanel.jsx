@@ -129,7 +129,7 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
             display: 'flex',
             flexDirection: 'column',
             borderRadius: '16px',
-            background: 'rgba(15, 20, 30, 0.4)',
+            background: 'var(--panel-bg)',
             minHeight: 0,
             overflow: 'hidden'
         }}>
@@ -137,12 +137,12 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                     <div>
-                        <h2 style={{ margin: 0, color: '#fff', fontSize: '1.4rem', fontWeight: '900', letterSpacing: '2px' }}>HALL OF FAME</h2>
-                        <div style={{ fontSize: '0.6rem', color: '#555', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>The best of Albion Lands</div>
+                        <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.4rem', fontWeight: '900', letterSpacing: '2px' }}>HALL OF FAME</h2>
+                        <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>The best of Albion Lands</div>
                     </div>
                     <div style={{ padding: '10px 20px', background: 'rgba(212, 175, 55, 0.05)', borderRadius: '8px', border: '1px solid rgba(212, 175, 55, 0.1)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <Trophy size={18} color="#d4af37" />
-                        <span style={{ color: '#d4af37', fontWeight: '900', fontSize: '0.8rem' }}>RANKINGS</span>
+                        <Trophy size={18} color="var(--accent)" />
+                        <span style={{ color: 'var(--accent)', fontWeight: '900', fontSize: '0.8rem' }}>RANKINGS</span>
                     </div>
                 </div>
 
@@ -158,7 +158,7 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
                                     borderRadius: '6px',
                                     border: 'none',
                                     background: mainCategory === key ? 'rgba(212, 175, 55, 0.1)' : 'transparent',
-                                    color: mainCategory === key ? '#d4af37' : '#555',
+                                    color: mainCategory === key ? 'var(--accent)' : 'var(--text-dim)',
                                     fontSize: '0.65rem',
                                     fontWeight: '900',
                                     cursor: 'pointer',
@@ -182,8 +182,8 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
                             style={{
                                 appearance: 'none',
                                 background: 'rgba(0,0,0,0.2)',
-                                color: '#fff',
-                                border: '1px solid rgba(255,255,255,0.05)',
+                                color: 'var(--text-main)',
+                                border: '1px solid var(--border)',
                                 padding: '8px 30px 8px 15px',
                                 borderRadius: '8px',
                                 fontSize: '0.7rem',
@@ -238,20 +238,20 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
                                             fontSize: '0.9rem',
                                             fontWeight: '900',
                                             color: char.state?.membership?.active && char.state?.membership?.expiresAt > Date.now()
-                                                ? '#d4af37'
-                                                : (index < 3 ? '#fff' : '#aaa')
+                                                ? 'var(--accent)'
+                                                : (index < 3 ? 'var(--text-main)' : 'var(--text-dim)')
                                         }}>{char.name}</div>
-                                        <div style={{ fontSize: '0.55rem', color: '#555', fontWeight: 'bold', letterSpacing: '1px' }}>
+                                        <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>
                                             {char.label}
                                         </div>
                                     </div>
 
                                     {/* Valor */}
                                     <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontSize: '1.1rem', fontWeight: '900', color: index === 0 ? '#d4af37' : '#fff' }}>
+                                        <div style={{ fontSize: '1.1rem', fontWeight: '900', color: index === 0 ? 'var(--accent)' : 'var(--text-main)' }}>
                                             {subCategory === 'SILVER' ? formatSilver(char.value) : formatNumber(char.value)}
                                         </div>
-                                        <div style={{ fontSize: '0.55rem', color: '#555', fontWeight: 'bold' }}>
+                                        <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: 'bold' }}>
                                             {char.label}
                                         </div>
                                     </div>

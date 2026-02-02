@@ -122,9 +122,9 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                             style={{
                                 padding: '6px 12px',
                                 borderRadius: '8px',
-                                background: filter === f ? 'rgba(212, 175, 55, 0.15)' : 'rgba(255,255,255,0.05)',
+                                background: filter === f ? 'var(--accent-soft)' : 'var(--glass-bg)',
                                 color: filter === f ? 'var(--accent)' : 'var(--text-dim)',
-                                border: filter === f ? '1px solid rgba(212, 175, 55, 0.3)' : '1px solid transparent',
+                                border: filter === f ? '1px solid var(--accent)' : '1px solid var(--border)',
                                 fontWeight: 'bold',
                                 fontSize: '0.75rem',
                                 cursor: 'pointer',
@@ -148,11 +148,11 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                             onChange={(e) => setSearchQuery(e.target.value)}
                             style={{
                                 width: '100%',
-                                background: 'rgba(255,255,255,0.05)',
+                                background: 'var(--glass-bg)',
                                 border: '1px solid var(--border)',
                                 borderRadius: '8px',
                                 padding: '8px 10px 8px 32px',
-                                color: '#fff',
+                                color: 'var(--text-main)',
                                 fontSize: '0.8rem',
                                 outline: 'none',
                                 transition: '0.2s'
@@ -169,11 +169,11 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
-                                background: 'rgba(255,255,255,0.05)',
+                                background: 'var(--glass-bg)',
                                 border: '1px solid var(--border)',
                                 borderRadius: '8px',
                                 padding: '8px 10px',
-                                color: '#fff',
+                                color: 'var(--text-main)',
                                 fontSize: '0.75rem',
                                 cursor: 'pointer'
                             }}
@@ -194,7 +194,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                     top: 'calc(100% + 5px)',
                                     right: 0,
                                     width: '120px',
-                                    background: '#1a1a2e',
+                                    background: 'var(--panel-bg)',
                                     border: '1px solid var(--border)',
                                     borderRadius: '8px',
                                     padding: '5px',
@@ -211,7 +211,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                                 textAlign: 'left',
                                                 background: sortBy === opt ? 'rgba(255,255,255,0.05)' : 'transparent',
                                                 border: 'none',
-                                                color: sortBy === opt ? 'var(--accent)' : '#fff',
+                                                color: sortBy === opt ? 'var(--accent)' : 'var(--text-main)',
                                                 fontSize: '0.75rem',
                                                 cursor: 'pointer',
                                                 borderRadius: '4px'
@@ -272,7 +272,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                         if (!item) {
                             return (
                                 <div key={`empty-${index}`} style={{
-                                    background: 'rgba(255, 255, 255, 0.02)',
+                                    background: 'var(--slot-bg)',
                                     borderRadius: '6px',
                                     border: '1px solid var(--border)',
                                     aspectRatio: '1/1',
@@ -309,7 +309,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                 key={item.id}
                                 onClick={() => handleItemClick(item)}
                                 style={{
-                                    background: 'rgba(0,0,0,0.2)',
+                                    background: 'var(--slot-bg)',
                                     border: `1px solid ${specificBorderColor}`,
                                     boxShadow: (item.rarity && item.rarity !== 'COMMON') ? `0 0 4px ${specificBorderColor}40` : 'none', // Subtle glow
                                     borderRadius: '10px',
@@ -325,8 +325,8 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                     minHeight: '80px'
                                 }}
                             >
-                                <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: '#fff', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>T{item.tier}</div>
-                                <div style={{ position: 'absolute', top: 6, right: 6, fontSize: '0.7rem', color: '#fff', fontWeight: 'bold' }}>x{item.qty}</div>
+                                <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: 'var(--text-main)', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>T{item.tier}</div>
+                                <div style={{ position: 'absolute', top: 6, right: 6, fontSize: '0.7rem', color: 'var(--text-main)', fontWeight: 'bold' }}>x{item.qty}</div>
                                 <div
                                     onClick={(e) => { e.stopPropagation(); onShowInfo(item); }}
                                     style={{
@@ -355,7 +355,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                     )}
                                 </div>
 
-                                <div style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'bold', textAlign: 'center', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 'bold', textAlign: 'center', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                     {item.name}
                                 </div>
                             </div>
@@ -399,7 +399,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                     <div style={{
                         position: 'fixed',
                         top: 0, left: 0, right: 0, bottom: 0,
-                        background: 'rgba(0,0,0,0.8)',
+                        background: 'rgba(0,0,0,0.7)',
                         zIndex: 2000,
                         display: 'flex',
                         alignItems: 'center',
@@ -407,8 +407,8 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                         backdropFilter: 'blur(8px)'
                     }} onClick={() => setSellModal(null)}>
                         <div style={{
-                            background: '#1a1a1a',
-                            border: '1px solid rgba(255, 215, 0, 0.3)',
+                            background: 'var(--panel-bg)',
+                            border: '1px solid var(--border)',
                             borderRadius: '16px',
                             padding: '24px',
                             width: '90%',
@@ -416,9 +416,9 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                             boxShadow: '0 0 30px rgba(0,0,0,0.5)'
                         }} onClick={e => e.stopPropagation()}>
                             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                                <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#fff' }}>Sell {sellModal.item.name}</h3>
+                                <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-main)' }}>Sell {sellModal.item.name}</h3>
                                 <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '4px' }}>
-                                    Unit Price: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{sellModal.unitPrice} Silver</span>
+                                    Unit Price: <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{sellModal.unitPrice} Silver</span>
                                 </div>
                             </div>
 
@@ -470,7 +470,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                             background: 'rgba(0,0,0,0.3)',
                                             border: '1px solid var(--border)',
                                             borderRadius: '6px',
-                                            color: '#fff',
+                                            color: 'var(--text-main)',
                                             padding: '8px',
                                             textAlign: 'center',
                                             fontWeight: 'bold',
@@ -532,7 +532,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                         socket.emit('sell_item', { itemId: sellModal.itemId, quantity: qty });
                                         setSellModal(null);
                                     }}
-                                    style={{ flex: 1, padding: '12px', background: 'var(--accent)', border: 'none', color: '#000', borderRadius: '8px', fontWeight: 'bold' }}
+                                    style={{ flex: 1, padding: '12px', background: 'var(--accent)', border: 'none', color: 'var(--bg-dark)', borderRadius: '8px', fontWeight: 'bold' }}
                                 >
                                     SELL NOW
                                 </button>
@@ -555,8 +555,8 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                         backdropFilter: 'blur(10px)'
                     }} onClick={() => setUsePotionModal(null)}>
                         <div style={{
-                            background: '#1a1d26',
-                            border: '1px solid rgba(212, 175, 55, 0.4)',
+                            background: 'var(--panel-bg)',
+                            border: '1px solid var(--border)',
                             borderRadius: '20px',
                             padding: '24px',
                             width: '90%',
@@ -578,7 +578,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    border: '1px solid rgba(212, 175, 55, 0.2)'
+                                    border: '1px solid var(--border)'
                                 }}>
                                     {usePotionModal.item.icon ? (
                                         <img src={usePotionModal.item.icon} alt="" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />

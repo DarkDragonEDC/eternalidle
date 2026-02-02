@@ -294,7 +294,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                         border: '1px solid var(--border)',
                                         borderRadius: '8px',
                                         padding: '10px 10px 10px 40px',
-                                        color: '#fff',
+                                        color: 'var(--text-main)',
                                         fontSize: '0.9rem'
                                     }}
                                 />
@@ -382,13 +382,13 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                 ) : (
                                                     <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{l.item_data.tier}</span>
                                                 )}
-                                                <div style={{ position: 'absolute', top: 2, left: 2, fontSize: '0.6rem', fontWeight: '900', color: '#fff', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>
+                                                <div style={{ position: 'absolute', top: 2, left: 2, fontSize: '0.6rem', fontWeight: '900', color: 'var(--text-main)', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>
                                                     T{l.item_data.tier}
                                                 </div>
                                             </div>
 
                                             <div style={{ flex: '2 1 0%', minWidth: '150px' }}>
-                                                <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                                <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                                     <span>{resolveItem(l.item_id)?.name || l.item_data.name}</span>
                                                     <button onClick={() => onShowInfo(l.item_data)} style={{ background: 'none', border: 'none', padding: '0', color: 'var(--text-dim)', cursor: 'pointer', display: 'flex' }}>
                                                         <Info size={14} />
@@ -512,8 +512,8 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                     minHeight: '80px'
                                                 }}
                                             >
-                                                <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: '#fff', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>T{data.tier}</div>
-                                                <div style={{ position: 'absolute', top: 6, right: 6, fontSize: '0.7rem', color: '#fff', fontWeight: 'bold' }}>x{qty}</div>
+                                                <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: 'var(--text-main)', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>T{data.tier}</div>
+                                                <div style={{ position: 'absolute', top: 6, right: 6, fontSize: '0.7rem', color: 'var(--text-main)', fontWeight: 'bold' }}>x{qty}</div>
 
                                                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', overflow: 'hidden' }}>
                                                     {data.icon ? (
@@ -523,7 +523,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                     )}
                                                 </div>
 
-                                                <div style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 'bold', textAlign: 'center', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 'bold', textAlign: 'center', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                     {data.name}
                                                 </div>
                                             </button>
@@ -599,13 +599,13 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                     ) : (
                                                         <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{l.item_data.tier}</span>
                                                     )}
-                                                    <div style={{ position: 'absolute', top: 2, left: 2, fontSize: '0.6rem', fontWeight: '900', color: '#fff', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>
+                                                    <div style={{ position: 'absolute', top: 2, left: 2, fontSize: '0.6rem', fontWeight: '900', color: 'var(--text-main)', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>
                                                         T{l.item_data.tier}
                                                     </div>
                                                 </div>
 
                                                 <div style={{ flex: '2 1 0%', minWidth: '150px' }}>
-                                                    <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                                    <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                                         <span>{l.item_data.qualityName && l.item_data.qualityName !== 'Normal' ? `${l.item_data.qualityName} ` : ''}{resolveItem(l.item_id)?.name || l.item_data.name}</span>
                                                     </div>
                                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '2px', display: 'flex', gap: '15px' }}>
@@ -719,7 +719,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                     {isItem && icon.props?.style ? React.cloneElement(icon, { style: { ...icon.props.style, width: '130%', height: '130%', objectFit: 'contain' } }) : icon}
                                                 </div>
                                                 <div style={{ flex: '2 1 0%', minWidth: '150px' }}>
-                                                    <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                                    <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                                         <span>{name}</span>
                                                     </div>
                                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '2px', display: 'flex', gap: '15px' }}>
@@ -788,7 +788,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                             left: '50%',
                             transform: 'translateX(-50%)',
                             background: notification.type === 'error' ? 'rgba(255, 68, 68, 0.9)' : 'rgba(76, 175, 80, 0.9)',
-                            color: '#fff',
+                            color: 'var(--text-main)',
                             padding: '12px 24px',
                             borderRadius: '8px',
                             boxShadow: '0 4px 12px rgba(0,0,0,0.3)',

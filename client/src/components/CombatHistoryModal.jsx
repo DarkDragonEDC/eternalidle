@@ -38,8 +38,9 @@ const CombatHistoryModal = ({ isOpen, onClose, socket }) => {
         <AnimatePresence>
             <div style={{
                 position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-                background: 'rgba(0,0,0,0.8)', zIndex: 10000,
-                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                background: 'rgba(0,0,0,0.7)', zIndex: 10000,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                backdropFilter: 'blur(5px)'
             }}>
                 <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
@@ -48,20 +49,20 @@ const CombatHistoryModal = ({ isOpen, onClose, socket }) => {
                     style={{
                         width: '600px', maxWidth: '95vw',
                         maxHeight: '80vh',
-                        background: '#1a1a1a',
-                        border: '1px solid #333',
+                        background: 'var(--panel-bg)',
+                        border: '1px solid var(--border)',
                         borderRadius: '12px',
                         display: 'flex', flexDirection: 'column',
-                        boxShadow: '0 0 40px rgba(0,0,0,0.8)'
+                        boxShadow: 'var(--panel-shadow)'
                     }}
                 >
                     {/* Header */}
                     <div style={{
-                        padding: '16px', borderBottom: '1px solid #333',
+                        padding: '16px', borderBottom: '1px solid var(--border)',
                         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                        background: 'rgba(255,255,255,0.02)'
+                        background: 'var(--accent-soft)'
                     }}>
-                        <h2 style={{ margin: 0, fontSize: '1.2rem', color: '#eee', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <h2 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <Sword size={20} color="#ff4444" />
                             Combat Sessions
                         </h2>
@@ -87,7 +88,7 @@ const CombatHistoryModal = ({ isOpen, onClose, socket }) => {
 
                                 return (
                                     <div key={log.id} style={{
-                                        background: 'rgba(255,255,255,0.03)',
+                                        background: 'var(--slot-bg)',
                                         borderRadius: '8px',
                                         display: 'flex',
                                         flexDirection: 'column',
@@ -97,14 +98,14 @@ const CombatHistoryModal = ({ isOpen, onClose, socket }) => {
                                         {/* Session Header */}
                                         <div style={{
                                             padding: '12px',
-                                            background: 'rgba(0,0,0,0.2)',
+                                            background: 'var(--panel-bg)',
                                             display: 'flex',
                                             justifyContent: 'space-between',
                                             alignItems: 'center',
-                                            borderBottom: '1px solid rgba(255,255,255,0.05)'
+                                            borderBottom: '1px solid var(--border)'
                                         }}>
                                             <div>
-                                                <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <div style={{ fontWeight: 'bold', color: 'var(--text-main)', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                     {log.mob_name || 'Unknown Enemy'}
                                                     <span style={{ fontSize: '0.7rem', color: '#888', fontWeight: 'normal' }}>
                                                         ({formatDuration(log.duration_seconds)})
@@ -126,16 +127,16 @@ const CombatHistoryModal = ({ isOpen, onClose, socket }) => {
                                         </div>
 
                                         {/* Stats Grid */}
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', background: 'rgba(255,255,255,0.05)' }}>
-                                            <StatBox label="KILLS" value={log.kills || 0} color="#fff" />
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', background: 'var(--border)' }}>
+                                            <StatBox label="KILLS" value={log.kills || 0} color="var(--text-main)" />
                                             <StatBox label="DPS" value={dps.toFixed(1)} color="#ff4444" />
                                             <StatBox label="XP/H" value={formatNumber(Math.floor(xph))} color="#4caf50" />
-                                            <StatBox label="SILVER/H" value={formatNumber(Math.floor(silverh))} color="#d4af37" />
+                                            <StatBox label="SILVER/H" value={formatNumber(Math.floor(silverh))} color="var(--accent)" />
                                         </div>
 
                                         {/* Rewards Footer */}
                                         {(log.xp_gained > 0 || log.silver_gained > 0 || (log.loot_gained && log.loot_gained.length > 0)) && (
-                                            <div style={{ padding: '12px', background: 'rgba(0,0,0,0.1)' }}>
+                                            <div style={{ padding: '12px', background: 'var(--slot-bg)' }}>
                                                 <div style={{ fontSize: '0.7rem', color: '#888', marginBottom: '8px', fontWeight: 'bold', textTransform: 'uppercase' }}>Session Rewards</div>
                                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                                                     {log.xp_gained > 0 && (
@@ -162,7 +163,7 @@ const CombatHistoryModal = ({ isOpen, onClose, socket }) => {
 };
 
 const StatBox = ({ label, value, color }) => (
-    <div style={{ background: '#1a1a1a', padding: '10px', textAlign: 'center' }}>
+    <div style={{ background: 'var(--panel-bg)', padding: '10px', textAlign: 'center' }}>
         <div style={{ fontSize: '0.6rem', color: '#777', marginBottom: '2px' }}>{label}</div>
         <div style={{ fontWeight: 'bold', color: color, fontSize: '0.9rem' }}>{value}</div>
     </div>

@@ -82,7 +82,7 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
                     width: '56px',
                     height: '56px',
                     borderRadius: '50%',
-                    background: '#d4af37',
+                    background: 'var(--accent)',
                     opacity: 0.5,
                     border: 'none',
                     color: '#000',
@@ -137,7 +137,7 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
                 width: isMobile ? '90vw' : '320px',
                 height: '400px',
                 background: '#1a1a2e',
-                border: '2px solid #d4af37',
+                border: '2px solid var(--accent)',
                 borderRadius: '12px',
                 display: 'flex',
                 flexDirection: 'column',
@@ -148,15 +148,15 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
                 {/* Header */}
                 <div style={{
                     padding: '12px 20px',
-                    background: 'rgba(212, 175, 55, 0.1)',
-                    borderBottom: '1px solid rgba(212, 175, 55, 0.3)',
+                    background: 'var(--accent-soft)',
+                    borderBottom: '1px solid var(--border-active)',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <MessageSquare size={18} color="#d4af37" />
-                        <span style={{ fontWeight: 'bold', fontSize: '1rem', color: '#d4af37' }}>Global Chat</span>
+                        <MessageSquare size={18} color="var(--accent)" />
+                        <span style={{ fontWeight: 'bold', fontSize: '1rem', color: 'var(--accent)' }}>Global Chat</span>
                     </div>
                     <button
                         onClick={() => setIsOpen(false)}
@@ -188,7 +188,7 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
                         }}>
                             <div style={{
                                 fontSize: '0.7rem',
-                                color: msg.sender_name === characterName ? '#d4af37' : '#4caf50',
+                                color: msg.sender_name === characterName ? 'var(--accent)' : '#4caf50',
                                 display: 'flex',
                                 justifyContent: msg.sender_name === characterName ? 'flex-end' : 'flex-start',
                                 marginBottom: '4px',
@@ -199,8 +199,8 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
                             </div>
                             <div style={{
                                 padding: '8px 12px',
-                                background: msg.sender_name === characterName ? 'rgba(212, 175, 55, 0.15)' : 'rgba(255,255,255,0.05)',
-                                border: msg.sender_name === characterName ? '1px solid rgba(212, 175, 55, 0.3)' : '1px solid rgba(255,255,255,0.1)',
+                                background: msg.sender_name === characterName ? 'var(--accent-soft)' : 'rgba(255,255,255,0.05)',
+                                border: msg.sender_name === characterName ? '1px solid var(--border-active)' : '1px solid rgba(255,255,255,0.1)',
                                 borderRadius: '12px',
                                 color: '#fff',
                                 fontSize: '0.9rem',
@@ -242,7 +242,7 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
                         type="submit"
                         disabled={!message.trim() || cooldown > 0}
                         style={{
-                            background: (message.trim() && cooldown === 0) ? '#d4af37' : 'rgba(212, 175, 55, 0.2)',
+                            background: (message.trim() && cooldown === 0) ? 'var(--accent)' : 'var(--accent-soft)',
                             border: 'none',
                             borderRadius: '6px',
                             width: '40px',

@@ -193,8 +193,8 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                     justify-content: center;
                     min-height: 100vh;
                     padding: 20px;
-                    background: #1a1a1a;
-                    color: #fff;
+                    background: #12151e;
+                    color: #e2e8f0;
                     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                 }
                 .char-select-container h1 {
@@ -213,8 +213,8 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                     max-width: 100%;
                 }
                 .char-card {
-                    background: #2a2a2a;
-                    border: 2px solid #444;
+                    background: #1a1f2e;
+                    border: 2px solid #2d3748;
                     padding: 20px;
                     width: 200px;
                     border-radius: 8px;
@@ -227,18 +227,18 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                 }
                 .char-card:hover {
                     transform: translateY(-5px);
-                    border-color: #ffd700;
+                    border-color: #d4af37;
                     box-shadow: 0 5px 15px rgba(0,0,0,0.5);
                 }
                 .char-name {
-                    color: #ffd700;
+                    color: #d4af37;
                     margin-bottom: 10px;
                     font-size: 1.1rem;
                     font-weight: 600;
                 }
                 .char-info p {
                     font-size: 0.85rem;
-                    color: #ccc;
+                    color: #94a3b8;
                     margin: 5px 0;
                 }
                 
@@ -263,20 +263,22 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                 }
                 .play-btn {
                     margin-top: 15px;
-                    background: #4CAF50;
-                    color: white;
+                    background: #d4af37;
+                    color: #12151e;
                     border: none;
                     padding: 8px;
                     cursor: pointer;
                     font-family: inherit;
+                    font-weight: 700;
+                    border-radius: 4px;
                 }
-                .play-btn:hover { background: #45a049; }
+                .play-btn:hover { background: #b8960b; }
                 
                 .delete-btn {
                     position: absolute;
                     top: -5px;
                     right: -5px;
-                    background: #ff5252;
+                    background: #ef4444;
                     border: none;
                     color: white;
                     width: 28px;
@@ -291,11 +293,11 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                     z-index: 10;
                 }
                 .delete-btn:hover {
-                    background: #ff1744;
+                    background: #dc2626;
                     transform: scale(1.1);
                 }
                 .delete-btn.confirming {
-                    background: #f44336;
+                    background: #dc2626;
                     width: 32px;
                     height: 32px;
                     font-weight: bold;
