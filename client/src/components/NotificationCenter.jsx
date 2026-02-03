@@ -71,19 +71,7 @@ const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onCl
                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                            style={{
-                                position: 'absolute',
-                                top: '45px',
-                                right: 0,
-                                width: '320px',
-                                background: 'rgba(20, 20, 25, 0.95)',
-                                backdropFilter: 'blur(10px)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                borderRadius: '12px',
-                                boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
-                                zIndex: 1000,
-                                overflow: 'hidden'
-                            }}
+                            className="notification-panel"
                         >
                             <div style={{
                                 padding: '15px',
