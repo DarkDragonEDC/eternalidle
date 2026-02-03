@@ -125,31 +125,96 @@ export class ActivityManager {
     }
 
     async processGathering(char, item) {
-        const added = this.gameManager.inventoryManager.addItemToInventory(char, item.id, 1);
-        if (!added) return { error: "Inventory Full", success: false, message: "Inventory Full" };
-
         const skillKey = this.getSkillKeyForResource(item.id);
         const stats = this.gameManager.inventoryManager.calculateStats(char);
+
+        const efficiencyMap = {
+            'LUMBERJACK': 'WOOD',
+            'ORE_MINER': 'ORE',
+            'ANIMAL_SKINNER': 'HIDE',
+            'FIBER_HARVESTER': 'FIBER',
+            'FISHING': 'FISH',
+            'HERBALISM': 'HERB'
+        };
+        const actKey = efficiencyMap[skillKey];
+
+        // 1. Duplication Logic
+        let amountGained = 1;
+        let isDuplication = false;
+        if (actKey && stats.duplication && stats.duplication[actKey]) {
+            const chance = stats.duplication[actKey];
+            if (Math.random() * 100 < chance) {
+                amountGained = 2;
+                isDuplication = true;
+            }
+        }
+
+        const added = this.gameManager.inventoryManager.addItemToInventory(char, item.id, amountGained);
+        if (!added) return { error: "Inventory Full", success: false, message: "Inventory Full" };
+
         const baseXp = item.xp || 5;
 
         // Multipliers
         const yieldMult = 1 + (stats.globals?.xpYield || 0) / 100;
         const specificMult = 1 + (stats.xpBonus?.GATHERING || 0) / 100;
-        let xpAmount = Math.floor(baseXp * yieldMult * specificMult);
+        const runeSkillMult = 1 + (actKey ? (stats.xpBonus?.[actKey] || 0) : 0) / 100;
+
+        let xpAmount = Math.floor(baseXp * yieldMult * specificMult * runeSkillMult * amountGained);
 
         if (xpAmount > MAX_ACTIVITY_XP) xpAmount = MAX_ACTIVITY_XP;
 
         const leveledUp = this.gameManager.addXP(char, skillKey, xpAmount);
 
+        // 2. Auto-Refine Logic
+        let isAutoRefine = false;
+        let refinedItemGained = null;
+        if (actKey && stats.autoRefine && stats.autoRefine[actKey]) {
+            const refineChance = stats.autoRefine[actKey];
+            if (Math.random() * 100 < refineChance) {
+                // Try to find a refined version
+                const refinedId = this.findRefinedItem(item.id);
+                if (refinedId) {
+                    // Check if we have raw material (consume 2 to make 1 refined)
+                    if (this.gameManager.inventoryManager.hasItems(char, { [item.id]: 2 })) {
+                        this.gameManager.inventoryManager.consumeItems(char, { [item.id]: 2 });
+                        this.gameManager.inventoryManager.addItemToInventory(char, refinedId, 1);
+                        isAutoRefine = true;
+                        refinedItemGained = refinedId;
+                    }
+                }
+            }
+        }
+
+        let message = isDuplication ? `Gathered ${item.name} (x2!)` : `Gathered ${item.name}`;
+        if (isAutoRefine) {
+            const refinedItem = ITEM_LOOKUP[refinedItemGained];
+            message += ` + Auto-Refined into ${refinedItem?.name || 'Refined Item'}!`;
+        }
+
         return {
             success: true,
-            message: `Gathered ${item.name}`,
+            message,
             leveledUp,
             itemGained: item.id,
-            amountGained: 1,
+            amountGained,
+            isDuplication,
+            isAutoRefine,
+            refinedItemGained,
             skillKey,
             xpGained: xpAmount
         };
+    }
+
+    findRefinedItem(rawId) {
+        // Search through ITEMS.REFINING for a recipe that uses this raw material
+        for (const cat of Object.values(ITEMS.REFINING || {})) {
+            for (const res of Object.values(cat)) {
+                if (res.req && res.req[rawId]) {
+                    return res.id;
+                }
+            }
+        }
+        return null;
     }
 
     async processRefining(char, item) {
@@ -167,7 +232,18 @@ export class ActivityManager {
         // Multipliers
         const yieldMult = 1 + (stats.globals?.xpYield || 0) / 100;
         const specificMult = 1 + (stats.xpBonus?.REFINING || 0) / 100;
-        let xpAmount = Math.floor(baseXp * yieldMult * specificMult);
+
+        const refiningMap = {
+            'PLANK_REFINER': 'PLANK',
+            'METAL_BAR_REFINER': 'METAL',
+            'LEATHER_REFINER': 'LEATHER',
+            'CLOTH_REFINER': 'CLOTH',
+            'DISTILLATION': 'EXTRACT'
+        };
+        const actKey = refiningMap[skillKey];
+        const runeSkillMult = 1 + (actKey ? (stats.xpBonus?.[actKey] || 0) : 0) / 100;
+
+        let xpAmount = Math.floor(baseXp * yieldMult * specificMult * runeSkillMult);
 
         if (xpAmount > MAX_ACTIVITY_XP) xpAmount = MAX_ACTIVITY_XP;
 
@@ -253,7 +329,19 @@ export class ActivityManager {
         // Multipliers
         const yieldMult = 1 + (stats.globals?.xpYield || 0) / 100;
         const specificMult = 1 + (stats.xpBonus?.CRAFTING || 0) / 100;
-        let xpAmount = Math.floor(baseXp * yieldMult * specificMult);
+
+        const craftingMap = {
+            'WARRIOR_CRAFTER': 'WARRIOR',
+            'HUNTER_CRAFTER': 'HUNTER',
+            'MAGE_CRAFTER': 'MAGE',
+            'ALCHEMY': 'ALCHEMY',
+            'TOOL_CRAFTER': 'TOOLS',
+            'COOKING': 'COOKING'
+        };
+        const actKey = craftingMap[skillKey];
+        const runeSkillMult = 1 + (actKey ? (stats.xpBonus?.[actKey] || 0) : 0) / 100;
+
+        let xpAmount = Math.floor(baseXp * yieldMult * specificMult * runeSkillMult);
 
         if (xpAmount > MAX_ACTIVITY_XP) xpAmount = MAX_ACTIVITY_XP;
 

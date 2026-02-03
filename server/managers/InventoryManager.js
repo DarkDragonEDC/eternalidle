@@ -28,13 +28,24 @@ export class InventoryManager {
         return baseSlots + extraSlots;
     }
 
+    getUsedSlots(char) {
+        if (!char.state.inventory) return 0;
+        return Object.keys(char.state.inventory).filter(itemId => {
+            const item = this.resolveItem(itemId);
+            return !item?.noInventorySpace;
+        }).length;
+    }
+
     addItemToInventory(char, itemId, amount) {
         if (!char.state.inventory) char.state.inventory = {};
         const inv = char.state.inventory;
 
         if (!inv[itemId]) {
-            if (Object.keys(inv).length >= this.getMaxSlots(char)) {
-                return false;
+            const item = this.resolveItem(itemId);
+            if (!item?.noInventorySpace) {
+                if (this.getUsedSlots(char) >= this.getMaxSlots(char)) {
+                    return false;
+                }
             }
         }
 
@@ -48,8 +59,11 @@ export class InventoryManager {
         if (!char.state.inventory) return true;
         const inv = char.state.inventory;
         if (!inv[itemId]) {
-            if (Object.keys(inv).length >= this.getMaxSlots(char)) {
-                return false;
+            const item = this.resolveItem(itemId);
+            if (!item?.noInventorySpace) {
+                if (this.getUsedSlots(char) >= this.getMaxSlots(char)) {
+                    return false;
+                }
             }
         }
         return true;
@@ -76,7 +90,7 @@ export class InventoryManager {
         const item = this.resolveItem(itemId);
         if (!item) throw new Error("Item not found");
 
-        const validSlots = ['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFF_HAND', 'TOOL', 'TOOL_AXE', 'TOOL_PICKAXE', 'TOOL_KNIFE', 'TOOL_SICKLE', 'TOOL_ROD', 'TOOL_POUCH', 'FOOD'];
+        const validSlots = ['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFF_HAND', 'TOOL', 'TOOL_AXE', 'TOOL_PICKAXE', 'TOOL_KNIFE', 'TOOL_SICKLE', 'TOOL_ROD', 'TOOL_POUCH', 'FOOD', 'RUNE'];
         if (!validSlots.includes(item.type)) {
             throw new Error("This item cannot be equipped");
         }
@@ -87,24 +101,30 @@ export class InventoryManager {
         }
 
         let slotName = '';
-        switch (item.type) {
-            case 'WEAPON': slotName = 'mainHand'; break;
-            case 'OFF_HAND': slotName = 'offHand'; break;
-            case 'ARMOR': slotName = 'chest'; break;
-            case 'HELMET': slotName = 'helmet'; break;
-            case 'BOOTS': slotName = 'boots'; break;
-            case 'GLOVES': slotName = 'gloves'; break;
-            case 'CAPE': slotName = 'cape'; break;
-            case 'TOOL': slotName = 'tool'; break;
-            case 'TOOL_AXE': slotName = 'tool_axe'; break;
-            case 'TOOL_PICKAXE': slotName = 'tool_pickaxe'; break;
-            case 'TOOL_KNIFE': slotName = 'tool_knife'; break;
-            case 'TOOL_SICKLE': slotName = 'tool_sickle'; break;
-            case 'TOOL_SICKLE': slotName = 'tool_sickle'; break;
-            case 'TOOL_ROD': slotName = 'tool_rod'; break;
-            case 'TOOL_POUCH': slotName = 'tool_pouch'; break;
-            case 'FOOD': slotName = 'food'; break;
-            default: throw new Error("Unknown slot type");
+        if (item.type === 'RUNE') {
+            // ID Format: T{tier}_RUNE_{ACT}_{EFF}_{stars}STAR
+            const match = itemId.match(/^T\d+_RUNE_(.+)_(\d+)STAR$/);
+            if (!match) throw new Error("Invalid Rune format");
+            slotName = `rune_${match[1]}`; // e.g., rune_WOOD_XP
+        } else {
+            switch (item.type) {
+                case 'WEAPON': slotName = 'mainHand'; break;
+                case 'OFF_HAND': slotName = 'offHand'; break;
+                case 'ARMOR': slotName = 'chest'; break;
+                case 'HELMET': slotName = 'helmet'; break;
+                case 'BOOTS': slotName = 'boots'; break;
+                case 'GLOVES': slotName = 'gloves'; break;
+                case 'CAPE': slotName = 'cape'; break;
+                case 'TOOL': slotName = 'tool'; break;
+                case 'TOOL_AXE': slotName = 'tool_axe'; break;
+                case 'TOOL_PICKAXE': slotName = 'tool_pickaxe'; break;
+                case 'TOOL_KNIFE': slotName = 'tool_knife'; break;
+                case 'TOOL_SICKLE': slotName = 'tool_sickle'; break;
+                case 'TOOL_ROD': slotName = 'tool_rod'; break;
+                case 'TOOL_POUCH': slotName = 'tool_pouch'; break;
+                case 'FOOD': slotName = 'food'; break;
+                default: throw new Error("Unknown slot type");
+            }
         }
 
         if (!state.equipment) state.equipment = {};
@@ -312,10 +332,45 @@ export class InventoryManager {
             GLOBAL: 0,
             GATHERING: 0,
             REFINING: 0,
-            CRAFTING: 0
+            CRAFTING: 0,
+            // Skill specific
+            WOOD: 0, ORE: 0, HIDE: 0, FIBER: 0, FISH: 0, HERB: 0,
+            PLANK: 0, METAL: 0, LEATHER: 0, CLOTH: 0, EXTRACT: 0,
+            WARRIOR: 0, HUNTER: 0, MAGE: 0, ALCHEMY: 0, TOOLS: 0, COOKING: 0
         };
 
-        // 5. Active Buffs Process
+        const duplication = {
+            WOOD: 0, ORE: 0, HIDE: 0, FIBER: 0, FISH: 0, HERB: 0
+        };
+
+        const autoRefine = {
+            WOOD: 0, ORE: 0, HIDE: 0, FIBER: 0, FISH: 0, HERB: 0
+        };
+
+        // 5. Rune Bonuses
+        Object.entries(equipment).forEach(([slot, item]) => {
+            if (slot.startsWith('rune_') && item) {
+                // slot format: rune_{ACT}_{EFF}
+                const parts = slot.split('_');
+                const act = parts[1]; // WOOD, ORE, etc.
+                const eff = parts[2]; // XP, COPY, SPEED
+
+                const freshItem = this.resolveItem(item.id);
+                if (freshItem) {
+                    const bonusValue = (freshItem.tier - 1) * 5 + freshItem.stars;
+
+                    if (eff === 'XP') {
+                        if (xpBonus[act] !== undefined) xpBonus[act] += bonusValue;
+                    } else if (eff === 'COPY') {
+                        if (duplication[act] !== undefined) duplication[act] += bonusValue;
+                    } else if (eff === 'SPEED') {
+                        if (autoRefine[act] !== undefined) autoRefine[act] += bonusValue;
+                    }
+                }
+            }
+        });
+
+        // 6. Active Buffs Process
         if (char.state.active_buffs) {
             const now = Date.now();
             const activeBuffs = typeof char.state.active_buffs === 'string'
@@ -358,6 +413,8 @@ export class InventoryManager {
                             case 'MEMBERSHIP_BOOST':
                                 // 10% XP Bonus
                                 globals.xpYield += (buff.xpBonus || 0.10) * 100;
+                                // 10% Silver Bonus
+                                globals.silverYield += 10;
                                 // 10% Efficiency Bonus
                                 globals.efficiency += 10;
                                 // Speed bonus removed
@@ -392,6 +449,8 @@ export class InventoryManager {
             attackSpeed: finalAttackSpeed,
             dmgBonus: gearDmgBonus,
             efficiency,
+            duplication,
+            autoRefine,
             globals, // Return globals so we can use them in GameManager/CombatManager
             xpBonus // Return detailed XP bonuses
         };

@@ -89,7 +89,8 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
     else if (type === 'CRAFTING') specificKey = 'CRAFTING';
 
     const specificMult = 1 + (stats.xpBonus?.[specificKey] || 0) / 100;
-    const xpPerAction = parseFloat((baseXp * yieldMult * specificMult).toFixed(1));
+    const runeMult = 1 + (stats.xpBonus?.[effKey] || 0) / 100;
+    const xpPerAction = parseFloat((baseXp * yieldMult * specificMult * runeMult).toFixed(1));
     const totalXP = formatNumber(xpPerAction * qtyNum);
 
     // Tempo base & Redução

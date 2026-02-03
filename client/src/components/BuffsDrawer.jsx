@@ -126,8 +126,7 @@ const BuffsDrawer = ({ gameState, isMobile }) => {
                             // XP e Silver agora usam 0.5% por INT
                             let baseBonus = totalBonus - potionBonusPercent;
 
-                            // Visual Fix: If Base Bonus is effectively 0 (or close to it), show 0 to avoid "-1%" noise
-                            if (Math.abs(baseBonus) < 1) baseBonus = 0;
+                            // Visual Fix: Remove negative noise
                             if (baseBonus < 0) baseBonus = 0;
 
                             const isPremium = gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > now;
@@ -149,7 +148,7 @@ const BuffsDrawer = ({ gameState, isMobile }) => {
                                             <span style={{ fontSize: '0.7rem', color: '#fff', fontWeight: '800' }}>{meta.label}</span>
                                         </div>
                                         <div style={{ color: (active || totalBonus > 0) ? meta.color : '#666', fontWeight: '900', fontSize: '0.75rem' }}>
-                                            +{totalBonus.toFixed(0)}%
+                                            +{totalBonus.toFixed(1)}%
                                         </div>
                                     </div>
 
@@ -159,18 +158,21 @@ const BuffsDrawer = ({ gameState, isMobile }) => {
                                                 <>POTION: <span style={{ color: 'var(--accent)' }}>+{potionBonusPercent}%</span> | </>
                                             )}
                                             {key === 'GLOBAL_XP' && isPremium && (
-                                                <>MS: <span style={{ color: 'var(--accent)' }}>+10%</span> | </>
+                                                <>MS: <span style={{ color: 'var(--accent)' }}>+10.0%</span> | </>
+                                            )}
+                                            {key === 'GOLD' && isPremium && (
+                                                <>MS: <span style={{ color: 'var(--accent)' }}>+10.0%</span> | </>
                                             )}
                                             {key === 'GLOBAL_EFF' ? (
                                                 <>
-                                                    {isPremium && <>MS: <span style={{ color: 'var(--accent)' }}>+10%</span></>}
+                                                    {isPremium && <>MS: <span style={{ color: 'var(--accent)' }}>+10.0%</span></>}
                                                     {isPremium && (totalBonus - 10 > 0) && <> | </>}
                                                     {(totalBonus - (isPremium ? 10 : 0) > 0) && (
-                                                        <>CAPE: <span style={{ color: 'var(--accent)' }}>+{(totalBonus - (isPremium ? 10 : 0)).toFixed(0)}%</span></>
+                                                        <>CAPE: <span style={{ color: 'var(--accent)' }}>+{(totalBonus - (isPremium ? 10 : 0)).toFixed(1)}%</span></>
                                                     )}
                                                 </>
                                             ) : (
-                                                <>INT: +{baseBonus.toFixed(0)}%</>
+                                                <>INT: +{(baseBonus - ((isPremium && (key === 'GLOBAL_XP' || key === 'GOLD')) ? 10 : 0)).toFixed(1)}%</>
                                             )}
                                         </div>
                                         {active && (

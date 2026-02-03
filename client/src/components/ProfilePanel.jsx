@@ -12,10 +12,13 @@ import { supabase } from '../supabase';
 
 
 const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpenRenameModal, theme, toggleTheme }) => {
+    const isPremium = gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > (gameState?._clientTime || Date.now());
     const [selectedSlot, setSelectedSlot] = useState(null);
     const [infoModal, setInfoModal] = useState(null);
     const [breakdownModal, setBreakdownModal] = useState(null);
     const [activePlayers, setActivePlayers] = useState(0);
+    const [activeProfileTab, setActiveProfileTab] = useState('EQUIPMENT'); // 'EQUIPMENT' or 'RUNES'
+    const [activeRuneTab, setActiveRuneTab] = useState('GATHERING'); // 'GATHERING', 'REFINING', 'CRAFTING', 'COMBAT'
 
     // Fetch Active Players logic (duplicated from Sidebar for Mobile Profile)
     React.useEffect(() => {
@@ -142,7 +145,6 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
             return acc + effVal;
         }, 0);
 
-        const isPremium = gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > Date.now();
         if (isPremium) {
             globalEff += 10; // Add 10% (or 10 points, assuming 10 means 10%)
         }
@@ -176,9 +178,28 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                 COOKING: (skills.COOKING?.level || 1) * 0.2 + globalEff,
                 GLOBAL: globalEff
             },
-            silverMultiplier: 1.0 + (calculatedStats.int * 0.005)
+            silverMultiplier: 1.0 + (calculatedStats.int * 0.005) + (isPremium ? 0.10 : 0)
         };
-    }, [gameState?.calculatedStats, calculatedStats, health, skills, equipment]);
+    }, [gameState?.calculatedStats, calculatedStats, health, skills, equipment, isPremium]);
+
+    const activeRuneBuffs = useMemo(() => {
+        const summary = {};
+        Object.entries(equipment).forEach(([slot, item]) => {
+            if (slot.startsWith('rune_') && item) {
+                const parts = slot.split('_');
+                const act = parts[1];
+                const eff = parts[2];
+
+                const freshItem = resolveItem(item.id || item.item_id);
+                if (freshItem) {
+                    const bonusValue = (freshItem.tier - 1) * 5 + freshItem.stars;
+                    if (!summary[act]) summary[act] = {};
+                    summary[act][eff] = (summary[act][eff] || 0) + bonusValue;
+                }
+            }
+        });
+        return summary;
+    }, [equipment]);
 
     const avgIP = useMemo(() => {
         const combatSlots = ['head', 'chest', 'shoes', 'gloves', 'cape', 'mainHand', 'offHand'];
@@ -477,217 +498,494 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                         </div>
                     </div>
 
-                    {/* Barra de Vida - Sophisticated */}
-                    <div style={{ marginBottom: '35px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', marginBottom: '8px', fontWeight: '900', letterSpacing: '1px', color: '#888' }}>
-                            <span>VITALITY</span>
-                            <span style={{ color: 'var(--text-main)' }}>{Math.floor(stats.hp)} / {Math.floor(stats.maxHp)} HP</span>
-                        </div>
-                        <div style={{ background: 'rgba(255, 0, 0, 0.05)', height: '6px', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255, 0, 0, 0.1)' }}>
-                            <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: `${(stats.hp / stats.maxHp) * 100}%` }}
-                                style={{ height: '100%', background: 'linear-gradient(90deg, #ff4d4d, #b30000)' }}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Grid de Equipamentos - Compact Layout */}
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(3, auto)',
-                        gap: isMobile ? '10px' : '15px',
-                        marginBottom: '40px',
-                        justifyContent: 'center',
-                        padding: isMobile ? '10px 5px' : '25px',
-                    }}>
-                        <EquipmentSlot slot="cape" icon={<Layers size={20} />} label="CAPE" item={equipment.cape} onClick={() => setSelectedSlot('cape')} onShowInfo={onShowInfo} />
-                        <EquipmentSlot slot="helmet" icon={<User size={20} />} label="HEAD" item={equipment.helmet} onClick={() => setSelectedSlot('helmet')} onShowInfo={onShowInfo} />
-                        <EquipmentSlot slot="food" icon={<Apple size={20} />} label="FOOD" item={equipment.food} onClick={() => setSelectedSlot('food')} onShowInfo={onShowInfo} />
-
-                        <EquipmentSlot slot="gloves" icon={<Shield size={20} />} label="HANDS" item={equipment.gloves} onClick={() => setSelectedSlot('gloves')} onShowInfo={onShowInfo} />
-                        <EquipmentSlot slot="chest" icon={<Shield size={20} />} label="CHEST" item={equipment.chest} onClick={() => setSelectedSlot('chest')} onShowInfo={onShowInfo} />
-                        <EquipmentSlot slot="offHand" icon={<Target size={20} />} label="OFF-HAND" item={equipment.offHand} onClick={() => setSelectedSlot('offHand')} onShowInfo={onShowInfo} />
-
-                        <EquipmentSlot slot="mainHand" icon={<Sword size={20} />} label="WEAPON" item={equipment.mainHand} onClick={() => setSelectedSlot('mainHand')} onShowInfo={onShowInfo} />
-                        <EquipmentSlot slot="boots" icon={<Target size={20} />} label="FEET" item={equipment.boots} onClick={() => setSelectedSlot('boots')} onShowInfo={onShowInfo} />
-                        <div style={{
-                            width: '64px',
-                            height: '64px',
-                            border: '2px dashed var(--border)',
-                            borderRadius: '12px',
-                            background: 'var(--bg-dark)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'rgba(255,255,255,0.15)',
-                            cursor: 'not-allowed'
-                        }}>
-                            <div style={{ fontSize: '0.6rem', fontWeight: 'bold' }}>LOCKED</div>
-                        </div>
-                    </div>
-
-                    {/* Gathering Tools - New Section */}
-                    <div style={{ marginBottom: '40px' }}>
-                        <h4 style={{ color: 'var(--accent, #d4af37)', fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '1rem', textAlign: 'center', letterSpacing: '1px' }}>Gathering Tools</h4>
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            gap: '10px',
-                            flexWrap: 'wrap'
-                        }}>
-                            <EquipmentSlot slot="tool_axe" icon={<Axe size={20} />} label="AXE" item={equipment.tool_axe} onClick={() => setSelectedSlot('tool_axe')} onShowInfo={onShowInfo} />
-                            <EquipmentSlot slot="tool_pickaxe" icon={<Pickaxe size={20} />} label="PICKAXE" item={equipment.tool_pickaxe} onClick={() => setSelectedSlot('tool_pickaxe')} onShowInfo={onShowInfo} />
-                            <EquipmentSlot slot="tool_sickle" icon={<Scissors size={20} />} label="SICKLE" item={equipment.tool_sickle} onClick={() => setSelectedSlot('tool_sickle')} onShowInfo={onShowInfo} />
-                            <EquipmentSlot slot="tool_knife" icon={<Sword size={20} style={{ transform: 'rotate(45deg)' }} />} label="KNIFE" item={equipment.tool_knife} onClick={() => setSelectedSlot('tool_knife')} onShowInfo={onShowInfo} />
-                            <EquipmentSlot slot="tool_rod" icon={<Anchor size={20} />} label="ROD" item={equipment.tool_rod} onClick={() => setSelectedSlot('tool_rod')} onShowInfo={onShowInfo} />
-                            <EquipmentSlot slot="tool_pouch" icon={<ShoppingBag size={20} />} label="POUCH" item={equipment.tool_pouch} onClick={() => setSelectedSlot('tool_pouch')} onShowInfo={onShowInfo} />
-                        </div>
-                    </div>
-
-
-
-                    {/* Attributes - Clean HUB Style */}
+                    {/* Tab Navigation */}
                     <div style={{
                         display: 'flex',
-                        justifyContent: 'space-around',
-                        background: 'rgba(255,255,255,0.02)',
-                        padding: '20px',
+                        gap: '10px',
+                        marginBottom: '25px',
+                        padding: '4px',
+                        background: 'rgba(0,0,0,0.2)',
                         borderRadius: '12px',
-                        marginBottom: '30px',
                         border: '1px solid var(--border)'
                     }}>
-                        {[
-                            { label: 'STR', value: stats.str, color: '#ff4444', desc: strBreakdown },
-                            { label: 'AGI', value: stats.agi, color: '#4caf50', desc: agiBreakdown },
-                            { label: 'INT', value: stats.int, color: '#2196f3', desc: intBreakdown }
-                        ].map(stat => (
-                            <div key={stat.label} style={{ textAlign: 'center' }}>
-                                <div
-                                    onClick={() => setInfoModal({ title: stat.label, desc: stat.desc })}
-                                    style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: '900', letterSpacing: '1px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
-                                >
-                                    {stat.label}
-                                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                                        <Info size={10} color="#777" />
+                        <button
+                            onClick={() => setActiveProfileTab('EQUIPMENT')}
+                            style={{
+                                flex: 1,
+                                padding: '10px',
+                                borderRadius: '8px',
+                                border: 'none',
+                                background: activeProfileTab === 'EQUIPMENT' ? 'var(--accent-soft)' : 'transparent',
+                                color: activeProfileTab === 'EQUIPMENT' ? 'var(--accent)' : 'var(--text-dim)',
+                                fontWeight: 'bold',
+                                fontSize: '0.8rem',
+                                cursor: 'pointer',
+                                transition: '0.2s',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px'
+                            }}
+                        >
+                            <Sword size={16} /> EQUIPMENT
+                        </button>
+                        <button
+                            onClick={() => setActiveProfileTab('RUNES')}
+                            style={{
+                                flex: 1,
+                                padding: '10px',
+                                borderRadius: '8px',
+                                border: 'none',
+                                background: activeProfileTab === 'RUNES' ? 'var(--accent-soft)' : 'transparent',
+                                color: activeProfileTab === 'RUNES' ? 'var(--accent)' : 'var(--text-dim)',
+                                fontWeight: 'bold',
+                                fontSize: '0.8rem',
+                                cursor: 'pointer',
+                                transition: '0.2s',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px'
+                            }}
+                        >
+                            <Zap size={16} /> RUNES
+                        </button>
+                    </div>
+
+                    {activeProfileTab === 'EQUIPMENT' ? (
+                        <>
+
+                            {/* Barra de Vida - Sophisticated */}
+                            <div style={{ marginBottom: '35px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', marginBottom: '8px', fontWeight: '900', letterSpacing: '1px', color: '#888' }}>
+                                    <span>VITALITY</span>
+                                    <span style={{ color: 'var(--text-main)' }}>{Math.floor(stats.hp)} / {Math.floor(stats.maxHp)} HP</span>
+                                </div>
+                                <div style={{ background: 'rgba(255, 0, 0, 0.05)', height: '6px', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255, 0, 0, 0.1)' }}>
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${(stats.hp / stats.maxHp) * 100}%` }}
+                                        style={{ height: '100%', background: 'linear-gradient(90deg, #ff4d4d, #b30000)' }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Grid de Equipamentos - Compact Layout */}
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(3, auto)',
+                                gap: isMobile ? '10px' : '15px',
+                                marginBottom: '40px',
+                                justifyContent: 'center',
+                                padding: isMobile ? '10px 5px' : '25px',
+                            }}>
+                                <EquipmentSlot slot="cape" icon={<Layers size={20} />} label="CAPE" item={equipment.cape} onClick={() => setSelectedSlot('cape')} onShowInfo={onShowInfo} />
+                                <EquipmentSlot slot="helmet" icon={<User size={20} />} label="HEAD" item={equipment.helmet} onClick={() => setSelectedSlot('helmet')} onShowInfo={onShowInfo} />
+                                <EquipmentSlot slot="food" icon={<Apple size={20} />} label="FOOD" item={equipment.food} onClick={() => setSelectedSlot('food')} onShowInfo={onShowInfo} />
+
+                                <EquipmentSlot slot="gloves" icon={<Shield size={20} />} label="HANDS" item={equipment.gloves} onClick={() => setSelectedSlot('gloves')} onShowInfo={onShowInfo} />
+                                <EquipmentSlot slot="chest" icon={<Shield size={20} />} label="CHEST" item={equipment.chest} onClick={() => setSelectedSlot('chest')} onShowInfo={onShowInfo} />
+                                <EquipmentSlot slot="offHand" icon={<Target size={20} />} label="OFF-HAND" item={equipment.offHand} onClick={() => setSelectedSlot('offHand')} onShowInfo={onShowInfo} />
+
+                                <EquipmentSlot slot="mainHand" icon={<Sword size={20} />} label="WEAPON" item={equipment.mainHand} onClick={() => setSelectedSlot('mainHand')} onShowInfo={onShowInfo} />
+                                <EquipmentSlot slot="boots" icon={<Target size={20} />} label="FEET" item={equipment.boots} onClick={() => setSelectedSlot('boots')} onShowInfo={onShowInfo} />
+                                <div style={{
+                                    width: '64px',
+                                    height: '64px',
+                                    border: '2px dashed var(--border)',
+                                    borderRadius: '12px',
+                                    background: 'var(--bg-dark)',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'rgba(255,255,255,0.15)',
+                                    cursor: 'not-allowed'
+                                }}>
+                                    <div style={{ fontSize: '0.6rem', fontWeight: 'bold' }}>LOCKED</div>
+                                </div>
+                            </div>
+
+                            {/* Gathering Tools - New Section */}
+                            <div style={{ marginBottom: '40px' }}>
+                                <h4 style={{ color: 'var(--accent, #d4af37)', fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '1rem', textAlign: 'center', letterSpacing: '1px' }}>Gathering Tools</h4>
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    gap: '10px',
+                                    flexWrap: 'wrap'
+                                }}>
+                                    <EquipmentSlot slot="tool_axe" icon={<Axe size={20} />} label="AXE" item={equipment.tool_axe} onClick={() => setSelectedSlot('tool_axe')} onShowInfo={onShowInfo} />
+                                    <EquipmentSlot slot="tool_pickaxe" icon={<Pickaxe size={20} />} label="PICKAXE" item={equipment.tool_pickaxe} onClick={() => setSelectedSlot('tool_pickaxe')} onShowInfo={onShowInfo} />
+                                    <EquipmentSlot slot="tool_sickle" icon={<Scissors size={20} />} label="SICKLE" item={equipment.tool_sickle} onClick={() => setSelectedSlot('tool_sickle')} onShowInfo={onShowInfo} />
+                                    <EquipmentSlot slot="tool_knife" icon={<Sword size={20} style={{ transform: 'rotate(45deg)' }} />} label="KNIFE" item={equipment.tool_knife} onClick={() => setSelectedSlot('tool_knife')} onShowInfo={onShowInfo} />
+                                    <EquipmentSlot slot="tool_rod" icon={<Anchor size={20} />} label="ROD" item={equipment.tool_rod} onClick={() => setSelectedSlot('tool_rod')} onShowInfo={onShowInfo} />
+                                    <EquipmentSlot slot="tool_pouch" icon={<ShoppingBag size={20} />} label="POUCH" item={equipment.tool_pouch} onClick={() => setSelectedSlot('tool_pouch')} onShowInfo={onShowInfo} />
+                                </div>
+                            </div>
+
+
+
+                            {/* Attributes - Clean HUB Style */}
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-around',
+                                background: 'rgba(255,255,255,0.02)',
+                                padding: '20px',
+                                borderRadius: '12px',
+                                marginBottom: '30px',
+                                border: '1px solid var(--border)'
+                            }}>
+                                {[
+                                    { label: 'STR', value: stats.str, color: '#ff4444', desc: strBreakdown },
+                                    { label: 'AGI', value: stats.agi, color: '#4caf50', desc: agiBreakdown },
+                                    { label: 'INT', value: stats.int, color: '#2196f3', desc: intBreakdown }
+                                ].map(stat => (
+                                    <div key={stat.label} style={{ textAlign: 'center' }}>
+                                        <div
+                                            onClick={() => setInfoModal({ title: stat.label, desc: stat.desc })}
+                                            style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: '900', letterSpacing: '1px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
+                                        >
+                                            {stat.label}
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <Info size={10} color="#777" />
+                                            </div>
+                                        </div>
+                                        <div style={{ fontSize: '1.6rem', fontWeight: '900', color: stat.color }}>{parseFloat(Number(stat.value).toFixed(2))}</div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Combat & Action Stats - New Section */}
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(3, 1fr)',
+                                gap: '10px',
+                                background: 'rgba(0,0,0,0.2)',
+                                padding: '12px',
+                                borderRadius: '12px',
+                                marginBottom: '30px',
+                                border: '1px solid var(--border)'
+                            }}>
+                                <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'DAMAGE', value: Math.floor(stats.damage) })}>
+                                    <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
+                                        <Sword size={10} color="#ff4444" /> DMG
+                                    </div>
+                                    <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)' }}>{Math.floor(stats.damage)}</div>
+                                </div>
+                                <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'DEFENSE', value: Math.floor(stats.defense) })}>
+                                    <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
+                                        <Shield size={10} color="#4caf50" /> DEF
+                                    </div>
+                                    <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)' }}>{Math.floor(stats.defense)}</div>
+                                </div>
+                                <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'SPEED', value: Math.floor(stats.attackSpeed) })}>
+                                    <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
+                                        <Zap size={10} color="#2196f3" /> SPEED
+                                    </div>
+                                    <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)' }}>
+                                        {(1000 / stats.attackSpeed).toFixed(1)} h/s
                                     </div>
                                 </div>
-                                <div style={{ fontSize: '1.6rem', fontWeight: '900', color: stat.color }}>{parseFloat(Number(stat.value).toFixed(2))}</div>
                             </div>
-                        ))}
-                    </div>
 
-                    {/* Combat & Action Stats - New Section */}
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(3, 1fr)',
-                        gap: '10px',
-                        background: 'rgba(0,0,0,0.2)',
-                        padding: '12px',
-                        borderRadius: '12px',
-                        marginBottom: '30px',
-                        border: '1px solid var(--border)'
-                    }}>
-                        <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'DAMAGE', value: Math.floor(stats.damage) })}>
-                            <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
-                                <Sword size={10} color="#ff4444" /> DMG
+                            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '30px' }}>
+                                <h4 style={{ color: 'var(--text-main)', fontSize: '0.7rem', fontWeight: '900', textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '2px', opacity: 0.8, textAlign: 'center' }}>Skill Efficiency</h4>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '10px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '10px' }}>
+                                        <EfficiencyCard title="Gathering" items={[
+                                            { id: 'WOOD', label: 'Woodcutting' },
+                                            { id: 'ORE', label: 'Mining' },
+                                            { id: 'HIDE', label: 'Skinning' },
+                                            { id: 'FIBER', label: 'Fiber' },
+                                            { id: 'FISH', label: 'Fishing' },
+                                            { id: 'HERB', label: 'Herbalism' }
+                                        ]} stats={stats} onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })} />
+                                        <EfficiencyCard title="Refining" items={[
+                                            { id: 'PLANK', label: 'Planks' },
+                                            { id: 'METAL', label: 'Bars' },
+                                            { id: 'LEATHER', label: 'Leathers' },
+                                            { id: 'CLOTH', label: 'Cloth' },
+                                            { id: 'EXTRACT', label: 'Distillation' }
+                                        ]} stats={stats} onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })} />
+                                        <EfficiencyCard title="Crafting" items={[
+                                            { id: 'WARRIOR', label: 'Warrior Gear' },
+                                            { id: 'HUNTER', label: 'Hunter Gear' },
+                                            { id: 'MAGE', label: 'Mage Gear' },
+                                            { id: 'COOKING', label: 'Cooking' },
+                                            { id: 'ALCHEMY', label: 'Alchemy' },
+                                            { id: 'TOOLS', label: 'Tools' }
+                                        ]} stats={stats} onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })} />
+                                    </div>
+                                </div>
                             </div>
-                            <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)' }}>{Math.floor(stats.damage)}</div>
-                        </div>
-                        <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'DEFENSE', value: Math.floor(stats.defense) })}>
-                            <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
-                                <Shield size={10} color="#4caf50" /> DEF
-                            </div>
-                            <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)' }}>{Math.floor(stats.defense)}</div>
-                        </div>
-                        <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'SPEED', value: Math.floor(stats.attackSpeed) })}>
-                            <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
-                                <Zap size={10} color="#2196f3" /> SPEED
-                            </div>
-                            <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)' }}>
-                                {(1000 / stats.attackSpeed).toFixed(1)} h/s
-                            </div>
-                        </div>
-                    </div>
 
-                    <div style={{ borderTop: '1px solid var(--border)', paddingTop: '30px' }}>
-                        <h4 style={{ color: 'var(--text-main)', fontSize: '0.7rem', fontWeight: '900', textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '2px', opacity: 0.8, textAlign: 'center' }}>Skill Efficiency</h4>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '10px' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '10px' }}>
-                                <EfficiencyCard title="Gathering" items={[
-                                    { id: 'WOOD', label: 'Woodcutting' },
-                                    { id: 'ORE', label: 'Mining' },
-                                    { id: 'HIDE', label: 'Skinning' },
-                                    { id: 'FIBER', label: 'Fiber' },
-                                    { id: 'FISH', label: 'Fishing' },
-                                    { id: 'HERB', label: 'Herbalism' }
-                                ]} stats={stats} onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })} />
-                                <EfficiencyCard title="Refining" items={[
-                                    { id: 'PLANK', label: 'Planks' },
-                                    { id: 'METAL', label: 'Bars' },
-                                    { id: 'LEATHER', label: 'Leathers' },
-                                    { id: 'CLOTH', label: 'Cloth' },
-                                    { id: 'EXTRACT', label: 'Distillation' }
-                                ]} stats={stats} onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })} />
-                                <EfficiencyCard title="Crafting" items={[
-                                    { id: 'WARRIOR', label: 'Warrior Gear' },
-                                    { id: 'HUNTER', label: 'Hunter Gear' },
-                                    { id: 'MAGE', label: 'Mage Gear' },
-                                    { id: 'COOKING', label: 'Cooking' },
-                                    { id: 'ALCHEMY', label: 'Alchemy' },
-                                    { id: 'TOOLS', label: 'Tools' }
-                                ]} stats={stats} onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })} />
+                            {/* Account Management Section */}
+                            <div style={{ borderTop: '1px solid var(--border)', marginTop: '40px', paddingTop: '30px' }}>
+                                <h4 style={{ color: 'var(--text-main)', fontSize: '0.7rem', fontWeight: '900', textTransform: 'uppercase', marginBottom: '15px', letterSpacing: '2px', opacity: 0.8 }}>Account Settings</h4>
+
+                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                                    <p style={{ fontSize: '0.75rem', color: '#888', marginBottom: '15px', lineHeight: '1.4' }}>
+                                        Link your Google account to enable one-click login and secure your progress.
+                                        This is recommended if you registered with an email/password.
+                                    </p>
+
+                                    <button
+                                        onClick={async () => {
+                                            const { error } = await supabase.auth.linkIdentity({
+                                                provider: 'google',
+                                                options: { redirectTo: window.location.origin }
+                                            });
+                                            if (error) alert(error.message);
+                                            else alert('Verification email sent or linking process started. Follow the instructions to complete.');
+                                        }}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '10px',
+                                            padding: '10px 20px',
+                                            background: 'var(--bg-dark)',
+                                            border: '1px solid var(--border)',
+                                            borderRadius: '8px',
+                                            color: 'var(--text-main)',
+                                            fontSize: '0.85rem',
+                                            fontWeight: '600',
+                                            cursor: 'pointer',
+                                            transition: '0.2s'
+                                        }}
+                                        onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                                        onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                                    >
+                                        <svg width="18" height="18" viewBox="0 0 18 18">
+                                            <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.248h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" />
+                                            <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.248c-.806.54-1.836.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" />
+                                            <path fill="#FBBC05" d="M3.964 10.719c-.18-.54-.282-1.117-.282-1.719s.102-1.179.282-1.719V4.949H.957C.347 6.169 0 7.548 0 9s.347 2.831.957 4.051l3.007-2.332z" />
+                                            <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.949L3.964 7.28c.708-2.127 2.692-3.711 5.036-3.711z" />
+                                        </svg>
+                                        LINK GOOGLE ACCOUNT
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    </div>
+                        </>
+                    ) : (
+                        <div style={{ width: '100%' }}>
+                            {/* Rune Sub-Tabs */}
+                            <div style={{
+                                display: 'flex',
+                                background: 'rgba(0,0,0,0.3)',
+                                borderRadius: '12px',
+                                padding: '4px',
+                                marginBottom: '25px',
+                                border: '1px solid var(--border)'
+                            }}>
+                                {['GATHERING', 'REFINING', 'CRAFTING', 'COMBAT'].map(t => (
+                                    <button
+                                        key={t}
+                                        onClick={() => setActiveRuneTab(t)}
+                                        style={{
+                                            flex: 1,
+                                            padding: '10px 5px',
+                                            border: 'none',
+                                            background: activeRuneTab === t ? 'var(--accent)' : 'transparent',
+                                            color: activeRuneTab === t ? '#000' : '#888',
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.65rem',
+                                            fontWeight: '900',
+                                            transition: '0.2s',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '1px'
+                                        }}
+                                    >
+                                        {t.replace('GATHERING', 'GATHER').replace('COMBAT', 'COMBATE')}
+                                    </button>
+                                ))}
+                            </div>
 
-                    {/* Account Management Section */}
-                    <div style={{ borderTop: '1px solid var(--border)', marginTop: '40px', paddingTop: '30px' }}>
-                        <h4 style={{ color: 'var(--text-main)', fontSize: '0.7rem', fontWeight: '900', textTransform: 'uppercase', marginBottom: '15px', letterSpacing: '2px', opacity: 0.8 }}>Account Settings</h4>
+                            {activeRuneTab === 'GATHERING' ? (
+                                <>
+                                    <h3 style={{
+                                        color: 'var(--accent)',
+                                        fontSize: '1.2rem',
+                                        fontWeight: '900',
+                                        letterSpacing: '2px',
+                                        textTransform: 'uppercase',
+                                        marginBottom: '25px',
+                                        textAlign: 'center',
+                                        borderBottom: '1px solid var(--border)',
+                                        paddingBottom: '10px'
+                                    }}>
+                                        Gathering Runes
+                                    </h3>
 
-                        <div style={{ background: 'rgba(255,255,255,0.02)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                            <p style={{ fontSize: '0.75rem', color: '#888', marginBottom: '15px', lineHeight: '1.4' }}>
-                                Link your Google account to enable one-click login and secure your progress.
-                                This is recommended if you registered with an email/password.
-                            </p>
+                                    <div style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '30px'
+                                    }}>
+                                        {[
+                                            { id: 'WOOD', label: 'Woodcutting', icon: <Axe size={16} /> },
+                                            { id: 'ORE', label: 'Mining', icon: <Pickaxe size={16} /> },
+                                            { id: 'HIDE', label: 'Skinning', icon: <Sword size={16} style={{ transform: 'rotate(45deg)' }} /> },
+                                            { id: 'FIBER', label: 'Fiber', icon: <Scissors size={16} /> },
+                                            { id: 'HERB', label: 'Herbalism', icon: <Apple size={16} /> },
+                                            { id: 'FISH', label: 'Fishing', icon: <Anchor size={16} /> }
+                                        ].map(category => (
+                                            <div key={category.id} style={{
+                                                background: 'rgba(255,255,255,0.03)',
+                                                borderRadius: '16px',
+                                                padding: '20px',
+                                                border: '1px solid var(--border)'
+                                            }}>
+                                                <div style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '10px',
+                                                    marginBottom: '15px',
+                                                    color: '#888',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: 'bold',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '1px'
+                                                }}>
+                                                    {category.icon} {category.label}
+                                                </div>
+                                                <div style={{
+                                                    display: 'grid',
+                                                    gridTemplateColumns: 'repeat(3, 1fr)',
+                                                    gap: '15px'
+                                                }}>
+                                                    <EquipmentSlot
+                                                        slot={`rune_${category.id}_XP`}
+                                                        icon={<Zap size={20} />}
+                                                        label="XP"
+                                                        item={equipment[`rune_${category.id}_XP`]}
+                                                        onClick={() => setSelectedSlot(`rune_${category.id}_XP`)}
+                                                        onShowInfo={onShowInfo}
+                                                    />
+                                                    <EquipmentSlot
+                                                        slot={`rune_${category.id}_COPY`}
+                                                        icon={<Layers size={20} />}
+                                                        label="DUPLIC."
+                                                        item={equipment[`rune_${category.id}_COPY`]}
+                                                        onClick={() => setSelectedSlot(`rune_${category.id}_COPY`)}
+                                                        onShowInfo={onShowInfo}
+                                                    />
+                                                    <EquipmentSlot
+                                                        slot={`rune_${category.id}_SPEED`}
+                                                        icon={<Zap size={20} />}
+                                                        label="AUTO-REF"
+                                                        item={equipment[`rune_${category.id}_SPEED`]}
+                                                        onClick={() => setSelectedSlot(`rune_${category.id}_SPEED`)}
+                                                        onShowInfo={onShowInfo}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
 
-                            <button
-                                onClick={async () => {
-                                    const { error } = await supabase.auth.linkIdentity({
-                                        provider: 'google',
-                                        options: { redirectTo: window.location.origin }
-                                    });
-                                    if (error) alert(error.message);
-                                    else alert('Verification email sent or linking process started. Follow the instructions to complete.');
-                                }}
-                                style={{
+                                        {/* Rune Buff Summary */}
+                                        {Object.entries(activeRuneBuffs).length > 0 && (
+                                            <div style={{
+                                                marginTop: '40px',
+                                                padding: '20px',
+                                                background: 'rgba(212, 175, 55, 0.05)',
+                                                borderRadius: '16px',
+                                                border: '1px solid rgba(212, 175, 55, 0.2)'
+                                            }}>
+                                                <h4 style={{
+                                                    color: 'var(--accent)',
+                                                    fontSize: '0.9rem',
+                                                    fontWeight: '900',
+                                                    letterSpacing: '1px',
+                                                    textTransform: 'uppercase',
+                                                    margin: '0 0 15px 0',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '8px'
+                                                }}>
+                                                    <Zap size={16} fill="var(--accent)" /> Soma de Bônus de Runas Ativos
+                                                </h4>
+                                                <div style={{
+                                                    display: 'grid',
+                                                    gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                                                    gap: '12px'
+                                                }}>
+                                                    {Object.entries(activeRuneBuffs).map(([act, buffs]) => (
+                                                        <div key={act} style={{
+                                                            padding: '12px',
+                                                            background: 'rgba(0,0,0,0.4)',
+                                                            borderRadius: '10px',
+                                                            border: '1px solid rgba(255,255,255,0.05)'
+                                                        }}>
+                                                            <div style={{
+                                                                fontSize: '0.7rem',
+                                                                color: '#888',
+                                                                fontWeight: 'bold',
+                                                                marginBottom: '8px',
+                                                                textTransform: 'uppercase'
+                                                            }}>
+                                                                {act.replace('HERB', 'Herbalism').replace('HIDE', 'Skinning').replace('WOOD', 'Wood').replace('ORE', 'Ore').replace('FIBER', 'Fiber').replace('FISH', 'Fish')}
+                                                            </div>
+                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                                {buffs.XP && (
+                                                                    <div style={{ fontSize: '0.75rem', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
+                                                                        <span style={{ color: '#aaa' }}>XP:</span>
+                                                                        <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>+{buffs.XP}%</span>
+                                                                    </div>
+                                                                )}
+                                                                {buffs.COPY && (
+                                                                    <div style={{ fontSize: '0.75rem', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
+                                                                        <span style={{ color: '#aaa' }}>Duplic.:</span>
+                                                                        <span style={{ color: '#4caf50', fontWeight: 'bold' }}>+{buffs.COPY}%</span>
+                                                                    </div>
+                                                                )}
+                                                                {buffs.SPEED && (
+                                                                    <div style={{ fontSize: '0.75rem', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
+                                                                        <span style={{ color: '#aaa' }}>Auto-Ref:</span>
+                                                                        <span style={{ color: '#2196f3', fontWeight: 'bold' }}>+{buffs.SPEED}%</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
+                            ) : (
+                                <div style={{
                                     display: 'flex',
+                                    flexDirection: 'column',
                                     alignItems: 'center',
-                                    gap: '10px',
-                                    padding: '10px 20px',
-                                    background: 'var(--bg-dark)',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: '8px',
-                                    color: 'var(--text-main)',
-                                    fontSize: '0.85rem',
-                                    fontWeight: '600',
-                                    cursor: 'pointer',
-                                    transition: '0.2s'
-                                }}
-                                onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                                onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-                            >
-                                <svg width="18" height="18" viewBox="0 0 18 18">
-                                    <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.248h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" />
-                                    <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.248c-.806.54-1.836.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" />
-                                    <path fill="#FBBC05" d="M3.964 10.719c-.18-.54-.282-1.117-.282-1.719s.102-1.179.282-1.719V4.949H.957C.347 6.169 0 7.548 0 9s.347 2.831.957 4.051l3.007-2.332z" />
-                                    <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.949L3.964 7.28c.708-2.127 2.692-3.711 5.036-3.711z" />
-                                </svg>
-                                LINK GOOGLE ACCOUNT
-                            </button>
+                                    justifyContent: 'center',
+                                    padding: '60px 20px',
+                                    textAlign: 'center',
+                                    opacity: 0.6
+                                }}>
+                                    <div style={{
+                                        width: '60px',
+                                        height: '60px',
+                                        background: 'rgba(255,255,255,0.05)',
+                                        borderRadius: '50%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        marginBottom: '15px',
+                                        border: '1px dashed var(--border)'
+                                    }}>
+                                        <Zap size={30} color="var(--accent)" />
+                                    </div>
+                                    <h4 style={{ color: 'var(--text-main)', margin: '0 0 10px 0', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                        {activeRuneTab} Runes
+                                    </h4>
+                                    <p style={{ color: 'var(--text-dim)', fontSize: '0.8rem', margin: 0 }}>
+                                        Coming soon!
+                                    </p>
+                                </div>
+                            )}
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
 
@@ -715,7 +1013,6 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                 />
             )}
 
-            {/* INFO MODAL FOR STATS */}
             {infoModal && (
                 <div style={{
                     position: 'fixed',
@@ -755,8 +1052,6 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                     </div>
                 </div>
             )}
-
-
         </>
     );
 };
