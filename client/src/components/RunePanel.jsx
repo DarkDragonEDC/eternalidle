@@ -92,7 +92,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                 const aggregated = result.items.reduce((acc, r) => {
                     const key = r.item;
                     if (!acc[key]) {
-                        acc[key] = { ...resolveItem(key), ...r, qty: 0 };
+                        acc[key] = { id: key, ...resolveItem(key), ...r, qty: 0 };
                     }
                     acc[key].qty += 1;
                     return acc;
@@ -992,7 +992,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                         position: 'relative', overflow: 'hidden',
                                         boxShadow: item.rarityColor ? `0 0 5px ${item.rarityColor}15` : 'none'
                                     }}>
-                                        {item.id.includes('SHARD') ? (
+                                        {item.id && item.id.includes('SHARD') ? (
                                             <Package size={24} />
                                         ) : (
                                             item.icon ? (
@@ -1034,9 +1034,9 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                         textAlign: 'center', lineHeight: '1.1',
                                         height: '2.2em', display: 'flex', alignItems: 'center', justifyContent: 'center'
                                     }}>
-                                        {item.id.includes('RUNE_') && !item.id.includes('SHARD')
-                                            ? item.name.replace(/^T\d+\sRune\sof\s/, '')
-                                            : item.name}
+                                        {item.id && item.id.includes('RUNE_') && !item.id.includes('SHARD')
+                                            ? (item.name || 'Rune').replace(/^T\d+\sRune\sof\s/, '')
+                                            : (item.name || 'Unknown Item')}
                                     </div>
                                 </motion.div>
                             ))}
