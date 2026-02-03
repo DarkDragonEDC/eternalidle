@@ -1569,7 +1569,7 @@ export class GameManager {
         let nextStars = stars + 1;
         let nextTier = tier;
 
-        if (stars >= 5) {
+        if (stars >= 3) {
             if (tier >= 10) {
                 return { success: false, error: "Rune is at absolute Maximum Tier and Star Level!" };
             }
