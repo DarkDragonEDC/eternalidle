@@ -40,6 +40,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
             return null;
         }
         if (qty <= 0) return null;
+        if (item.noInventorySpace) return null; // Filter out items that don't take space
         return { ...item, qty, id }; // id is key
     }).filter(Boolean);
 

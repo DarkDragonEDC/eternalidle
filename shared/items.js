@@ -79,7 +79,9 @@ export const ITEMS = {
     MAPS: {},
     SPECIAL: {
         CREST: {},
-        CHEST: {}
+        CHEST: {},
+        RUNE_SHARD: {},
+        RUNE: {}
     }
 };
 
@@ -399,6 +401,17 @@ for (const t of TIERS) {
     ITEMS.SPECIAL.CREST[t] = { id: `T${t}_CREST`, name: 'Boss Crest', tier: t, type: 'CRAFTING_MATERIAL' };
 }
 
+// Generate T1 Rune Shards (Unified system)
+ITEMS.SPECIAL.RUNE_SHARD[1] = {
+    id: `T1_RUNE_SHARD`,
+    name: 'Rune Shard',
+    tier: 1,
+    type: 'CRAFTING_MATERIAL',
+    rarity: 'UNCOMMON',
+    noInventorySpace: true,
+    description: 'A mysterious shard from a shattered rune. Used in rune crafting.'
+};
+
 // Generate Dungeon Chests
 for (const t of TIERS) {
     // Normal (White)
@@ -414,13 +427,11 @@ for (const t of TIERS) {
     // Good (Green)
     ITEMS.SPECIAL.CHEST[`${t}_GOOD`] = {
         id: `T${t}_CHEST_GOOD`,
-        name: `Dungeon Chest (Good)`,
-        tier: t,
-        rarity: 'UNCOMMON',
         type: 'CONSUMABLE',
-        rarityColor: '#4caf50',
-        desc: 'A good chest with decent rewards.'
+        rarityColor: '#10b981', // Green
+        desc: 'Contains better dungeon loot.'
     };
+
     // Outstanding (Blue)
     ITEMS.SPECIAL.CHEST[`${t}_OUTSTANDING`] = {
         id: `T${t}_CHEST_OUTSTANDING`,
@@ -469,7 +480,6 @@ for (const t of TIERS) {
     ITEMS.SPECIAL.CHEST[`${t}_MYTHIC`] = { ...ITEMS.SPECIAL.CHEST[`${t}_MASTERPIECE`], id: `T${t}_CHEST_MYTHIC` };
 
 }
-
 
 // Helper for Gear Generation
 const genGear = (category, slot, type, idSuffix, matType, statMultipliers = {}) => {
@@ -631,7 +641,7 @@ const indexItems = (obj) => {
         }
     });
 };
-indexItems(ITEMS);
+// indexItems(ITEMS); // Moved to end of file
 
 export const resolveItem = (itemId, overrideQuality = null) => {
     if (!itemId) return null;
@@ -847,3 +857,75 @@ export const getLevelRequirement = (tier) => {
     if (t <= 1) return 1;
     return (t - 1) * 10;
 };
+
+// Generate Runes & Shards
+const RUNE_GATHER_ACTIVITIES = ['WOOD', 'ORE', 'HIDE', 'FIBER', 'HERB', 'FISH'];
+const RUNE_EFFECTS = ['XP', 'COPY', 'SPEED'];
+
+// Export for server usage
+export const ALL_RUNE_TYPES = [];
+RUNE_GATHER_ACTIVITIES.forEach(act => {
+    RUNE_EFFECTS.forEach(eff => {
+        ALL_RUNE_TYPES.push(`${act}_${eff}`);
+    });
+});
+
+for (const t of TIERS) {
+    // Rune Shards (T1 Only)
+    if (t === 1) {
+        ITEMS.SPECIAL.RUNE_SHARD[`T1_RUNE_SHARD`] = {
+            id: `T1_RUNE_SHARD`,
+            name: `Rune Shard`,
+            tier: 1,
+            type: 'RESOURCE',
+            noInventorySpace: true,
+            icon: `/items/T1_RUNE_SHARD.png`
+        };
+    }
+
+    // Runes (Hidden from main inventory)
+    RUNE_GATHER_ACTIVITIES.forEach(act => {
+        RUNE_EFFECTS.forEach(eff => {
+            for (let s = 1; s <= 5; s++) {
+                const id = `T${t}_RUNE_${act}_${eff}_${s}STAR`;
+
+                // Map nice display names
+                let actName = act.charAt(0) + act.slice(1).toLowerCase();
+                if (act === 'HERB') actName = 'Herbalism';
+                if (act === 'HIDE') actName = 'Skinning';
+
+                let effName = 'XP';
+                if (eff === 'COPY') effName = 'Duplication';
+                if (eff === 'SPEED') effName = 'Auto-Refine';
+
+                const bonusValue = (t - 1) * 5 + s;
+                let effectLabel = 'Experience';
+                if (eff === 'COPY') effectLabel = 'Duplication';
+                if (eff === 'SPEED') effectLabel = 'Auto-Refine Chance';
+
+                const description = eff === 'SPEED'
+                    ? `Chance to automatically refine gathered materials by ${bonusValue}%.`
+                    : `Increases ${actName} ${effectLabel} by ${bonusValue}%.`;
+
+                // Ensure sub-object exists
+                if (!ITEMS.SPECIAL.RUNE) ITEMS.SPECIAL.RUNE = {};
+
+                ITEMS.SPECIAL.RUNE[id] = {
+                    id: id,
+                    name: `T${t} ${actName} Rune of ${effName}`,
+                    tier: t,
+                    type: 'RUNE',
+                    stars: s,
+                    rarity: ['COMMON', 'UNCOMMON', 'RARE', 'EPIC', 'LEGENDARY'][s - 1] || 'COMMON',
+                    noInventorySpace: true,
+                    description: description,
+                    icon: '', // Icons removed per request
+                    rarityColor: QUALITIES[s - 1] ? QUALITIES[s - 1].color : '#fff'
+                };
+            }
+        });
+    });
+}
+
+// Index items AFTER generation
+indexItems(ITEMS);

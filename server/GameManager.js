@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { ITEMS } from '../shared/items.js';
+import { ITEMS, ALL_RUNE_TYPES } from '../shared/items.js';
 import { CHEST_DROP_TABLE } from '../shared/chest_drops.js';
 import { INITIAL_SKILLS, calculateNextLevelXP } from '../shared/skills.js';
 import { InventoryManager } from './managers/InventoryManager.js';
@@ -299,27 +299,43 @@ export class GameManager {
                     }
                 }
 
-                if (updated) {
-                    // Only show the modal if total catchup was significant
-                    const hasNotableGains = finalReport.totalTime > 120 || Object.keys(finalReport.itemsGained).length > 0;
-                    if (hasNotableGains) {
-                        data.offlineReport = finalReport;
-
-                        // Trigger a system notification for the offline gain
-                        this.addActionSummaryNotification(data, 'Offline Progress', {
-                            itemsGained: finalReport.itemsGained,
-                            xpGained: finalReport.xpGained,
-                            totalTime: finalReport.totalTime,
-                            elapsedTime: elapsedSeconds,
-                            kills: finalReport.combat?.kills || 0,
-                            silverGained: finalReport.combat?.silverGained || 0
-                        });
+                // Shard Migration Logic: Convert any T2+ shards to T1
+                let migrationHappened = false;
+                Object.keys(data.state.inventory).forEach(itemId => {
+                    if (itemId.includes('_RUNE_SHARD') && !itemId.startsWith('T1_')) {
+                        const qty = data.state.inventory[itemId];
+                        if (qty > 0) {
+                            data.state.inventory['T1_RUNE_SHARD'] = (data.state.inventory['T1_RUNE_SHARD'] || 0) + qty;
+                            delete data.state.inventory[itemId];
+                            migrationHappened = true;
+                            console.log(`[MIGRATION] Converted ${qty} of ${itemId} to T1_RUNE_SHARD for ${data.name}`);
+                        }
                     }
+                });
 
-                    data.last_saved = now.toISOString();
-                    // Update the local dbHash to current state since we just processed it
-                    data.dbHash = this.calculateHash(data.state);
+                if (migrationHappened) {
+                    updated = true;
                 }
+
+                // Only show the modal if total catchup was significant
+                const hasNotableGains = finalReport.totalTime > 120 || Object.keys(finalReport.itemsGained).length > 0;
+                if (hasNotableGains) {
+                    data.offlineReport = finalReport;
+
+                    // Trigger a system notification for the offline gain
+                    this.addActionSummaryNotification(data, 'Offline Progress', {
+                        itemsGained: finalReport.itemsGained,
+                        xpGained: finalReport.xpGained,
+                        totalTime: finalReport.totalTime,
+                        elapsedTime: elapsedSeconds,
+                        kills: finalReport.combat?.kills || 0,
+                        silverGained: finalReport.combat?.silverGained || 0
+                    });
+                }
+
+                data.last_saved = now.toISOString();
+                // Update the local dbHash to current state since we just processed it
+                data.dbHash = this.calculateHash(data.state);
 
                 // Hard limit cleanup: Stop activities that exceeded the idle limit
                 if (elapsedSeconds > 43200) {
@@ -329,12 +345,12 @@ export class GameManager {
                     if (data.state.dungeon) delete data.state.dungeon;
                     updated = true;
                 }
-            }
-
-            if (updated) {
-                this.markDirty(data.id);
+                if (updated) {
+                    this.markDirty(data.id);
+                }
             }
         }
+
         return data;
     }
 
@@ -1330,33 +1346,29 @@ export class GameManager {
                 items: {}
             };
 
-            // Loop for Quantity
+            // 2. Loop for Quantity
+            const rarityConfig = CHEST_DROP_TABLE.RARITIES[itemData.rarity] || CHEST_DROP_TABLE.RARITIES.COMMON;
+            const crestChance = rarityConfig.crestChance;
+
+            // New Shard Drop Formula: min = (tier-1)*10 + (rarity*2)+1, max = min + 1
+            const rarities = ['COMMON', 'UNCOMMON', 'RARE', 'EPIC', 'LEGENDARY'];
+            const rarityOffset = Math.max(0, rarities.indexOf(itemData.rarity));
+            const min = (tier - 1) * 10 + (rarityOffset * 2) + 1;
+            const max = min + 1;
+            const shardId = `T1_RUNE_SHARD`;
+
             for (let i = 0; i < safeQty; i++) {
                 // Collect all potential new items first
                 const potentialDrops = [];
-
-                // Refined Resources
-                const REFINED_TYPES = CHEST_DROP_TABLE.REFINED_TYPES;
-                const rarityConfig = CHEST_DROP_TABLE.RARITIES[itemData.rarity] || CHEST_DROP_TABLE.RARITIES.COMMON;
-                const baseQty = rarityConfig.baseQty;
-
-                // 2. Calculate Items
-                // Single Refined Type Drop
-                const randomType = REFINED_TYPES[Math.floor(Math.random() * REFINED_TYPES.length)];
-                const qty = Math.floor(baseQty + (Math.random() * tier));
-
-                if (qty > 0) {
-                    const rId = `T${tier}_${randomType}`;
-                    totalRewards.items[rId] = (totalRewards.items[rId] || 0) + qty;
-                }
-
-                // Crests (Low Chance, Max 1 per chest)
-                const crestChance = rarityConfig.crestChance;
 
                 if (Math.random() < crestChance) {
                     const crestId = `T${tier}_CREST`;
                     totalRewards.items[crestId] = (totalRewards.items[crestId] || 0) + 1;
                 }
+
+                // Rune Shards (Guaranteed range per chest: 80% min, 20% max)
+                const shardQty = Math.random() < 0.8 ? min : max;
+                totalRewards.items[shardId] = (totalRewards.items[shardId] || 0) + shardQty;
             }
 
             // 3. Check Space using TOTAL rewards list
@@ -1364,7 +1376,10 @@ export class GameManager {
             let newSlotsNeeded = 0;
             for (const [rId, qty] of Object.entries(totalRewards.items)) {
                 if (!tempInv[rId]) {
-                    newSlotsNeeded++;
+                    const item = resolveItem(rId);
+                    if (!item?.noInventorySpace) {
+                        newSlotsNeeded++;
+                    }
                 }
             }
 
@@ -1436,5 +1451,158 @@ export class GameManager {
             };
             // console.log(`[DEBUG-POTION] Applied fresh ${type} buff: ${value} for ${durationSeconds}s`);
         }
+    }
+    async craftRune(userId, shardId) {
+        return this.executeLocked(userId, async () => {
+            const char = await this.getCharacter(userId);
+            if (!char) return { success: false, error: 'Character not found' };
+
+            const inventory = char.state.inventory || {};
+            const cost = 50;
+
+            if (!inventory[shardId] || inventory[shardId] < cost) {
+                return { success: false, error: 'Not enough shards' };
+            }
+
+            // Determine Tier from Shard ID (T{t}_RUNE_SHARD)
+            const tierMatch = shardId.match(/^T(\d+)_/);
+            if (!tierMatch) return { success: false, error: 'Invalid shard' };
+            const tier = parseInt(tierMatch[1]);
+
+            // Deduct Shards
+            this.inventoryManager.removeItemFromInventory(char, shardId, cost);
+
+            // Select Random Rune Type
+            const runeTypes = ['GATHER_XP', 'GATHER_COPY', 'GATHER_REFINE'];
+            const randomType = runeTypes[Math.floor(Math.random() * runeTypes.length)];
+
+            // Create Result Item: T{t}_RUNE_{TYPE}_1STAR
+            // Always 1 Star as requested
+            const resultId = `T${tier}_RUNE_${randomType}_1STAR`;
+
+            // Add to inventory (Rune takes no space, handled by addItem logic if flag is checked)
+            this.inventoryManager.addItemToInventory(char, resultId, 1);
+
+            this.markDirty(char.id);
+            return {
+                success: true,
+                item: resultId,
+                remainingShards: inventory[shardId] || 0
+            };
+        });
+    }
+    async craftRune(userId, characterId, shardId, qty = 1) {
+        console.log(`[GameManager] craftRune called for ${characterId}, shard: ${shardId}, qty: ${qty}`);
+        const count = Math.max(1, parseInt(qty) || 1);
+        const char = await this.getCharacter(userId, characterId);
+        if (!char) return { success: false, error: "Character not found" };
+
+        // 1. Validate Shard ID (Always T1 now)
+        const activeShardId = 'T1_RUNE_SHARD';
+
+        // 2. Check Quantity (Need 10 * qty)
+        const totalNeeded = 10 * count;
+        const currentQty = char.state.inventory[activeShardId] || 0;
+        if (currentQty < totalNeeded) {
+            return { success: false, error: `Not enough shards (Need ${totalNeeded})` };
+        }
+
+        // 3. Consume Shards
+        this.inventoryManager.consumeItems(char, { [activeShardId]: totalNeeded });
+
+        // 4. Force Tier 1 for Forgery
+        const tier = 1;
+
+        const results = [];
+        const types = ALL_RUNE_TYPES;
+
+        // 5. Generate Runes
+        for (let i = 0; i < count; i++) {
+            const randomType = types[Math.floor(Math.random() * types.length)];
+            const stars = 1;
+            const runeId = `T${tier}_RUNE_${randomType}_${stars}STAR`;
+
+            this.inventoryManager.addItemToInventory(char, runeId, 1);
+            results.push({ item: runeId, stars, type: randomType });
+        }
+
+        // 7. Mark Dirty
+        this.markDirty(char.id);
+
+        return {
+            success: true,
+            items: results,
+            count: count,
+            // Return last item for legacy UI compatibility if needed
+            item: results[results.length - 1].item,
+            stars: 1
+        };
+    }
+    async upgradeRune(userId, characterId, runeId, qty = 1) {
+        console.log(`[GameManager] upgradeRune called for ${characterId}, rune: ${runeId}, qty: ${qty}`);
+        const count = Math.max(1, parseInt(qty) || 1);
+        const char = await this.getCharacter(userId, characterId);
+        if (!char) return { success: false, error: "Character not found" };
+
+        // 1. Validate Rune ID
+        if (!runeId || !runeId.includes('_RUNE_')) {
+            return { success: false, error: "Invalid Rune ID" };
+        }
+
+        // 2. Parse ID (Format: T{tier}_RUNE_{TYPE}_{stars}STAR)
+        const match = runeId.match(/^T(\d+)_RUNE_(.+)_(\d+)STAR$/);
+        if (!match) return { success: false, error: "Malformed Rune ID" };
+
+        const tier = parseInt(match[1]);
+        const type = match[2];
+        const stars = parseInt(match[3]);
+
+        // 3. Check Max Level & Tier Transition
+        let nextStars = stars + 1;
+        let nextTier = tier;
+
+        if (stars >= 5) {
+            if (tier >= 10) {
+                return { success: false, error: "Rune is at absolute Maximum Tier and Star Level!" };
+            }
+            // Evolve to Next Tier
+            nextStars = 1;
+            nextTier = tier + 1;
+            console.log(`[GameManager] Evolving rune ${runeId} to Tier ${nextTier}`);
+        }
+
+        // 4. Check Quantity (Need 3 * qty)
+        const totalNeeded = 3 * count;
+        const currentQty = char.state.inventory[runeId] || 0;
+        if (currentQty < totalNeeded) {
+            return { success: false, error: `Not enough runes (Need ${totalNeeded})` };
+        }
+
+        // 5. Consume Runes
+        this.inventoryManager.consumeItems(char, { [runeId]: totalNeeded });
+
+        // 6. Generate New Runes/Next Tier
+        const newRuneId = `T${nextTier}_RUNE_${type}_${nextStars}STAR`;
+
+        // 7. Add New Runes
+        this.inventoryManager.addItemToInventory(char, newRuneId, count);
+
+        // 8. Mark Dirty
+        this.markDirty(char.id);
+
+        const results = Array.from({ length: count }).map(() => ({
+            item: newRuneId,
+            stars: nextStars,
+            type: type
+        }));
+
+        return {
+            success: true,
+            items: results,
+            item: newRuneId,
+            count: count,
+            stars: nextStars,
+            type: type
+        };
     }
 }

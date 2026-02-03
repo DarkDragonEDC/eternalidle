@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pickaxe, Box, Hammer, Sword, Castle, Trophy, ShoppingBag } from 'lucide-react';
+import { Pickaxe, Box, Hammer, Sword, Castle, Trophy, ShoppingBag, Zap } from 'lucide-react';
 
 const HubButton = ({ label, icon, onClick, color = 'var(--text-main)', level, progress }) => (
     <button
@@ -70,6 +70,9 @@ const mapTabCategoryToSkill = (tab, category) => {
             COOKING_STATION: 'COOKING',
             ALCHEMY_LAB: 'ALCHEMY',
             TOOLMAKER: 'TOOL_CRAFTER'
+        },
+        merging: {
+            RUNE: 'RUNE'
         }
     };
     return maps[tab.toLowerCase()]?.[category.toUpperCase()];
@@ -122,6 +125,15 @@ export const SkillsOverview = ({ onNavigate, gameState }) => {
                 { id: 'TOOLMAKER', label: 'Toolmaker' },
                 { id: 'COOKING_STATION', label: 'Kitchen' },
                 { id: 'ALCHEMY_LAB', label: 'Alchemy Lab' }
+            ]
+        },
+        {
+            id: 'merging',
+            label: 'Merging',
+            icon: <Zap size={18} />,
+            color: 'var(--accent)',
+            items: [
+                { id: 'RUNE', label: 'Rune' }
             ]
         }
     ];
@@ -226,30 +238,32 @@ export const SkillsOverview = ({ onNavigate, gameState }) => {
                                             }}
                                         >
                                             <div style={{ color: 'var(--text-main)' }}>{item.label}</div>
-                                            <div style={{ display: 'flex', gap: '4px' }}>
-                                                <div style={{
-                                                    fontSize: '0.7rem',
-                                                    color: 'var(--accent)',
-                                                    background: 'rgba(0,0,0,0.3)',
-                                                    padding: '2px 8px',
-                                                    borderRadius: '4px',
-                                                    fontWeight: 'bold',
-                                                    border: '1px solid var(--accent-soft)'
-                                                }}>
-                                                    Lv {level}
+                                            {skillKey !== 'RUNE' && (
+                                                <div style={{ display: 'flex', gap: '4px' }}>
+                                                    <div style={{
+                                                        fontSize: '0.7rem',
+                                                        color: 'var(--accent)',
+                                                        background: 'rgba(0,0,0,0.3)',
+                                                        padding: '2px 8px',
+                                                        borderRadius: '4px',
+                                                        fontWeight: 'bold',
+                                                        border: '1px solid var(--accent-soft)'
+                                                    }}>
+                                                        Lv {level}
+                                                    </div>
+                                                    <div style={{
+                                                        fontSize: '0.7rem',
+                                                        color: 'var(--text-dim)',
+                                                        background: 'rgba(255,255,255,0.05)',
+                                                        padding: '2px 6px',
+                                                        borderRadius: '4px',
+                                                        fontWeight: 'normal',
+                                                        border: '1px solid rgba(255,255,255,0.1)'
+                                                    }}>
+                                                        {Math.floor(progress)}%
+                                                    </div>
                                                 </div>
-                                                <div style={{
-                                                    fontSize: '0.7rem',
-                                                    color: 'var(--text-dim)',
-                                                    background: 'rgba(255,255,255,0.05)',
-                                                    padding: '2px 6px',
-                                                    borderRadius: '4px',
-                                                    fontWeight: 'normal',
-                                                    border: '1px solid rgba(255,255,255,0.1)'
-                                                }}>
-                                                    {Math.floor(progress)}%
-                                                </div>
-                                            </div>
+                                            )}
                                         </button>
                                     );
                                 })}

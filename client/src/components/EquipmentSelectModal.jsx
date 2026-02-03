@@ -14,21 +14,43 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
             if (!item) return;
 
             let matches = false;
-            switch (slot) {
-                case 'cape': matches = item.type === 'CAPE'; break;
-                case 'helmet': case 'head': matches = item.type === 'HELMET'; break;
-                case 'tool_axe': matches = item.type === 'TOOL_AXE'; break;
-                case 'tool_pickaxe': matches = item.type === 'TOOL_PICKAXE'; break;
-                case 'tool_knife': matches = item.type === 'TOOL_KNIFE'; break;
-                case 'tool_sickle': matches = item.type === 'TOOL_SICKLE'; break;
-                case 'tool_rod': matches = item.type === 'TOOL_ROD'; break;
-                case 'gloves': matches = item.type === 'GLOVES'; break;
-                case 'chest': matches = item.type === 'ARMOR'; break;
-                case 'offHand': matches = item.type === 'OFF_HAND'; break;
-                case 'mainHand': matches = item.type === 'WEAPON'; break;
-                case 'boots': case 'shoes': matches = item.type === 'BOOTS'; break;
-                case 'food': matches = item.type === 'FOOD'; break;
-                default: matches = false;
+            if (slot.startsWith('rune_')) {
+                // slot: rune_{ACT}_{EFF}
+                const parts = slot.split('_');
+                const targetAct = parts[1];
+                const targetEff = parts[2];
+
+                if (item.type === 'RUNE') {
+                    // item id: T{tier}_RUNE_{ACT}_{EFF}_{stars}STAR
+                    const itemMatch = itemId.match(/^T\d+_RUNE_(.+)_(\d+)STAR$/);
+                    if (itemMatch) {
+                        const runeKey = itemMatch[1]; // e.g. WOOD_XP
+                        const runeParts = runeKey.split('_');
+                        const itemAct = runeParts[0];
+                        const itemEff = runeParts[1];
+
+                        if (itemAct === targetAct && itemEff === targetEff) {
+                            matches = true;
+                        }
+                    }
+                }
+            } else {
+                switch (slot) {
+                    case 'cape': matches = item.type === 'CAPE'; break;
+                    case 'helmet': case 'head': matches = item.type === 'HELMET'; break;
+                    case 'tool_axe': matches = item.type === 'TOOL_AXE'; break;
+                    case 'tool_pickaxe': matches = item.type === 'TOOL_PICKAXE'; break;
+                    case 'tool_knife': matches = item.type === 'TOOL_KNIFE'; break;
+                    case 'tool_sickle': matches = item.type === 'TOOL_SICKLE'; break;
+                    case 'tool_rod': matches = item.type === 'TOOL_ROD'; break;
+                    case 'gloves': matches = item.type === 'GLOVES'; break;
+                    case 'chest': matches = item.type === 'ARMOR'; break;
+                    case 'offHand': matches = item.type === 'OFF_HAND'; break;
+                    case 'mainHand': matches = item.type === 'WEAPON'; break;
+                    case 'boots': case 'shoes': matches = item.type === 'BOOTS'; break;
+                    case 'food': matches = item.type === 'FOOD'; break;
+                    default: matches = false;
+                }
             }
 
             if (matches) {

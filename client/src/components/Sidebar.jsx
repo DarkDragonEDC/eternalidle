@@ -10,6 +10,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
         gathering: true,
         refining: false,
         crafting: false,
+        merging: false,
         combat: false
     });
     const [activePlayers, setActivePlayers] = useState(0);
@@ -38,6 +39,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
             gathering: false,
             refining: false,
             crafting: false,
+            merging: false,
             combat: false,
             [id]: !prev[id]
         }));
@@ -64,6 +66,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
     };
 
     const SkillInfo = ({ skillKey }) => {
+        if (skillKey === 'RUNE') return null;
         const skill = skills[skillKey] || { level: 1, xp: 0 };
         const level = skill.level || 1;
         const xp = skill.xp || 0;
@@ -122,6 +125,14 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                 { id: 'TOOLMAKER', label: 'Toolmaker', skill: 'TOOL_CRAFTER' },
                 { id: 'COOKING_STATION', label: 'Kitchen', skill: 'COOKING' },
                 { id: 'ALCHEMY_LAB', label: 'Alchemy Lab', skill: 'ALCHEMY' },
+            ]
+        },
+        {
+            id: 'merging',
+            label: 'Merging',
+            icon: <Zap size={18} />,
+            children: [
+                { id: 'RUNE', label: 'Rune', skill: 'RUNE' },
             ]
         },
         { id: 'combat', label: 'Combat', icon: <Sword size={18} />, skill: 'COMBAT' },

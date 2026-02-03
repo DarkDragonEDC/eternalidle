@@ -603,6 +603,39 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('craft_rune', async ({ shardId, qty = 1 }) => {
+        console.log(`[SERVER] Received craft_rune request from ${socket.user.email} for shard ${shardId}, qty ${qty}`);
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.craftRune(socket.user.id, socket.data.characterId, shardId, qty);
+                if (result.success) {
+                    socket.emit('craft_rune_success', result);
+                    socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+                } else {
+                    socket.emit('error', { message: result.error });
+                }
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('upgrade_rune', async ({ runeId, qty = 1 }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.upgradeRune(socket.user.id, socket.data.characterId, runeId, qty);
+                if (result.success) {
+                    socket.emit('craft_rune_success', result); // Reusing same success event since structure is similar
+                    socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+                } else {
+                    socket.emit('error', { message: result.error });
+                }
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
     socket.on('claim_market_item', async ({ claimId }) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {

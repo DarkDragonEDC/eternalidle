@@ -90,4 +90,5 @@ export const INITIAL_SKILLS = {
     HERBALISM: { level: 1, xp: 0, nextLevelXp: 84 },
     DISTILLATION: { level: 1, xp: 0, nextLevelXp: 84 },
     ALCHEMY: { level: 1, xp: 0, nextLevelXp: 84 },
+    RUNE: { level: 1, xp: 0, nextLevelXp: Infinity },
 };

@@ -66,6 +66,11 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
     const cleanBaseName = (item.name || '').replace(new RegExp(` T${item.tier}$`), '');
 
     const getItemDescription = (itm) => {
+        // Prioritize actual item description if it exists (for Runes and others)
+        if (itm.description && itm.description !== "A useful item for your journey.") {
+            return itm.description;
+        }
+
         if (['WEAPON'].includes(itm.type)) return "Offensive equipment. Increases your Damage.";
         if (['ARMOR', 'HELMET', 'BOOTS', 'GLOVES'].includes(itm.type)) return "Defensive equipment. Increases your Health and Defense.";
         if (['OFF_HAND'].includes(itm.type)) {
@@ -86,7 +91,9 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
 
         if (itm.type === 'POTION') return itm.desc || "Consumable potion with special effects.";
 
-        return "A useful item for your journey.";
+        if (itm.type === 'RUNE') return itm.description || "A magical rune with special power.";
+
+        return itm.description || "A useful item for your journey.";
     };
 
     return (
@@ -227,21 +234,28 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                         }}>
                             <div style={{ color: '#888', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Possible Rewards</div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                {CHEST_DROP_TABLE.REFINED_TYPES.map(type => (
-                                    <div key={type} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                                        <span style={{ color: '#ddd' }}>{type.charAt(0) + type.slice(1).toLowerCase()}</span>
-                                        <span style={{ color: '#4a90e2', fontWeight: 'bold' }}>20%</span>
+                                {/* Rune Shards - Guaranteed */}
+                                {CHEST_DROP_TABLE.RARITIES[item.rarity]?.runeShardRange && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                                            <span style={{ color: '#ddd' }}>Rune Shard (T{item.tier})</span>
+                                            <span style={{ color: '#4a90e2', fontWeight: 'bold' }}>100%</span>
+                                        </div>
+                                        <div style={{ fontSize: '0.75rem', color: '#888', textAlign: 'right' }}>
+                                            {CHEST_DROP_TABLE.RARITIES[item.rarity].runeShardRange[0]} (80%) / {CHEST_DROP_TABLE.RARITIES[item.rarity].runeShardRange[1]} (20%)
+                                        </div>
                                     </div>
-                                ))}
+                                )}
+
                                 {CHEST_DROP_TABLE.RARITIES[item.rarity]?.crestChance > 0 && (
                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', borderTop: '1px solid var(--border)', paddingTop: '8px', marginTop: '2px' }}>
-                                        <span style={{ color: 'var(--accent)' }}>Boss Crest</span>
+                                        <span style={{ color: 'var(--accent)' }}>Boss Crest (T{item.tier})</span>
                                         <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{(CHEST_DROP_TABLE.RARITIES[item.rarity].crestChance * 100).toFixed(0)}%</span>
                                     </div>
                                 )}
                             </div>
                             <div style={{ marginTop: '5px', fontSize: '0.75rem', color: '#666', fontStyle: 'italic', textAlign: 'center' }}>
-                                * Yields {CHEST_DROP_TABLE.RARITIES[item.rarity]?.baseQty || 5} to {(CHEST_DROP_TABLE.RARITIES[item.rarity]?.baseQty || 5) + item.tier} materials.
+                                * Yields guaranteed Rune Shards and a chance for Boss Crests.
                             </div>
                         </div>
                     )}

@@ -18,6 +18,7 @@ import BottomNav from './components/BottomNav';
 import { SkillsOverview, TownOverview, CombatOverview } from './components/MobileHubs';
 
 import CombatPanel from './components/CombatPanel';
+import RunePanel from './components/RunePanel';
 import OfflineGainsModal from './components/OfflineGainsModal';
 import MarketListingModal from './components/MarketListingModal';
 import CombatHistoryModal from './components/CombatHistoryModal';
@@ -64,6 +65,9 @@ const mapTabCategoryToSkill = (tab, category) => {
     },
     combat: {
       COMBAT: 'COMBAT'
+    },
+    merging: {
+      RUNE: 'RUNE'
     }
   };
   return maps[tab.toLowerCase()]?.[category.toUpperCase()];
@@ -511,6 +515,22 @@ function App() {
     const skill = displayedGameState.state.skills[skillKey];
 
     if (!skill) return null;
+
+    if (skillKey === 'RUNE') {
+      return (
+        <div className="glass-panel" style={{
+          padding: '12px 20px',
+          marginBottom: '15px',
+          background: 'var(--accent-soft)',
+          border: '1px solid var(--border-active)',
+          borderRadius: '10px'
+        }}>
+          <div style={{ fontSize: '1rem', fontWeight: '900', color: '#fff', letterSpacing: '1px', textTransform: 'uppercase' }}>
+            {category}
+          </div>
+        </div>
+      );
+    }
 
     const nextXP = calculateNextLevelXP(skill.level);
     const progress = Math.min(100, (skill.xp / nextXP) * 100);
@@ -1078,6 +1098,15 @@ function App() {
         );
       case 'dungeon':
         return <DungeonPanel socket={socket} gameState={displayedGameState} isMobile={isMobile} serverTimeOffset={clockOffset.current} />;
+      case 'merging':
+        return (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <SkillProgressHeader tab="merging" category={activeCategory} />
+            <div className="scroll-container" style={{ flex: 1, overflowY: 'auto' }}>
+              <RunePanel gameState={displayedGameState} onShowInfo={setInfoItem} isMobile={isMobile} socket={socket} onListOnMarket={handleListOnMarket} />
+            </div>
+          </div>
+        );
       default:
         return <div style={{ padding: 20, textAlign: 'center', color: '#555' }}>Select a category</div>;
     }
