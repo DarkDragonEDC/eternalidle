@@ -934,6 +934,10 @@ export class GameManager {
                         }
 
                         const newActionsRemaining = actions_remaining - 1;
+                        if (result.isDuplication) {
+                            console.log(`[ACTIVITY-LOG] Duplication Hit! User=${char.name}, Item=${result.itemGained}, RemBefore=${actions_remaining}, RemAfter=${newActionsRemaining}`);
+                        }
+
                         activityFinished = newActionsRemaining <= 0;
                         if (activityFinished) {
                             // Generate final report before clearing

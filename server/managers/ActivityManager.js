@@ -159,7 +159,7 @@ export class ActivityManager {
         const specificMult = 1 + (stats.xpBonus?.GATHERING || 0) / 100;
         const runeSkillMult = 1 + (actKey ? (stats.xpBonus?.[actKey] || 0) : 0) / 100;
 
-        let xpAmount = Math.floor(baseXp * yieldMult * specificMult * runeSkillMult * amountGained);
+        let xpAmount = Math.floor(baseXp * yieldMult * specificMult * runeSkillMult);
 
         if (xpAmount > MAX_ACTIVITY_XP) xpAmount = MAX_ACTIVITY_XP;
 
