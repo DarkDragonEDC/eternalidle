@@ -74,9 +74,12 @@ export class CombatManager {
         return { success: true, message: "Combat ended" };
     }
 
-    async processCombatRound(char) {
+    async processCombatRound(char, currentTime = null) {
         const combat = char.state.combat;
         if (!combat) return null;
+
+        // Use simulated time if provided, otherwise real time
+        const now = currentTime || Date.now();
 
         // Legacy/Safety Init
         if (!combat.sessionLoot) combat.sessionLoot = {};
@@ -116,7 +119,6 @@ export class CombatManager {
 
         // Mob Attack Logic
         let mitigatedMobDmg = 0;
-        const now = Date.now();
         if (now >= (combat.mob_next_attack_at || 0)) {
             mitigatedMobDmg = Math.max(1, Math.floor(mobDmg * (1 - playerMitigation)));
             combat.playerHealth -= mitigatedMobDmg;

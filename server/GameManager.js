@@ -472,14 +472,19 @@ export class GameManager {
         const atkSpeed = Number(stats.attackSpeed) || 1000;
         const monsterName = char.state.combat?.mobName || "Unknown Monster";
 
+        const startTime = char.state.combat?.started_at ? new Date(char.state.combat.started_at).getTime() : Date.now();
+
         let roundsProcessed = 0;
         for (let i = 0; i < rounds; i++) {
             roundsProcessed = i + 1;
+            // Simulated current time for this round
+            const currentTime = startTime + (i * atkSpeed);
+
             // Check food before each round
             const foodResult = this.processFood(char);
             if (foodResult.used) foodConsumed += foodResult.amount;
 
-            const result = await this.combatManager.processCombatRound(char);
+            const result = await this.combatManager.processCombatRound(char, currentTime);
             if (!result || !char.state.combat) {
                 if (!char.state.combat && char.state.health <= 0) died = true;
                 break;
@@ -984,8 +989,8 @@ export class GameManager {
 
             while (now >= combat.next_attack_at && roundsThisTick < MAX_ROUNDS && char.state.combat) {
                 try {
-                    const roundResult = await this.combatManager.processCombatRound(char);
-                    roundsThisTick++;
+                    const roundResult = await this.combatManager.processCombatRound(char, combat.next_attack_at);
+                    roundsProcessed++;
 
                     if (roundResult) {
                         combatRounds.push(roundResult);

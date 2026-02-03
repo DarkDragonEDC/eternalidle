@@ -16,7 +16,38 @@ const HubButton = ({ label, icon, onClick, color = 'var(--text-main)' }) => (
     </button>
 );
 
-export const SkillsOverview = ({ onNavigate }) => {
+import { calculateNextLevelXP } from '@shared/skills';
+
+const mapTabCategoryToSkill = (tab, category) => {
+    const maps = {
+        gathering: {
+            WOOD: 'LUMBERJACK',
+            ORE: 'ORE_MINER',
+            HIDE: 'ANIMAL_SKINNER',
+            FIBER: 'FIBER_HARVESTER',
+            FISH: 'FISHING',
+            HERB: 'HERBALISM'
+        },
+        refining: {
+            PLANK: 'PLANK_REFINER',
+            BAR: 'METAL_BAR_REFINER',
+            LEATHER: 'LEATHER_REFINER',
+            CLOTH: 'CLOTH_REFINER',
+            EXTRACT: 'DISTILLATION'
+        },
+        crafting: {
+            WARRIORS_FORGE: 'WARRIOR_CRAFTER',
+            HUNTERS_LODGE: 'HUNTER_CRAFTER',
+            MAGES_TOWER: 'MAGE_CRAFTER',
+            COOKING_STATION: 'COOKING',
+            ALCHEMY_LAB: 'ALCHEMY',
+            TOOLMAKER: 'TOOL_CRAFTER'
+        }
+    };
+    return maps[tab.toLowerCase()]?.[category.toUpperCase()];
+};
+
+export const SkillsOverview = ({ onNavigate, gameState }) => {
     const [expanded, setExpanded] = React.useState(null);
 
     const toggleExpand = (id) => {
@@ -44,10 +75,10 @@ export const SkillsOverview = ({ onNavigate }) => {
             icon: <Box />,
             color: '#60a5fa',
             items: [
-                { id: 'PLANK', label: 'Lumber Mill' },
-                { id: 'BAR', label: 'Smelting' },
-                { id: 'LEATHER', label: 'Tannery' },
-                { id: 'CLOTH', label: 'Loom' },
+                { id: 'PLANK', label: 'Lumberjack' },
+                { id: 'BAR', label: 'Mining' },
+                { id: 'LEATHER', label: 'Skinning' },
+                { id: 'CLOTH', label: 'Harvesting' },
                 { id: 'EXTRACT', label: 'Distillation' }
             ]
         },
@@ -130,34 +161,70 @@ export const SkillsOverview = ({ onNavigate }) => {
                             transition: 'height 0.3s ease'
                         }}>
                             <div style={{ padding: '5px 15px 15px 15px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                                {cat.items.map((item) => (
-                                    <button
-                                        key={item.id}
-                                        onClick={() => onNavigate(cat.id, item.id)}
-                                        style={{
-                                            padding: '12px',
-                                            background: 'rgba(255,255,255,0.03)',
-                                            border: '1px solid rgba(255,255,255,0.05)',
-                                            borderRadius: '8px',
-                                            color: 'var(--text-dim)',
-                                            fontSize: '0.85rem',
-                                            fontWeight: '600',
-                                            cursor: 'pointer',
-                                            textAlign: 'center',
-                                            transition: '0.2s'
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
-                                            e.currentTarget.style.color = 'var(--text-main)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                                            e.currentTarget.style.color = 'var(--text-dim)';
-                                        }}
-                                    >
-                                        {item.label}
-                                    </button>
-                                ))}
+                                {cat.items.map((item) => {
+                                    const skillKey = mapTabCategoryToSkill(cat.id, item.id);
+                                    const skill = gameState?.state?.skills?.[skillKey];
+                                    const level = skill?.level || 1;
+                                    const nextXP = calculateNextLevelXP(level);
+                                    const progress = Math.min(100, ((skill?.xp || 0) / nextXP) * 100);
+
+                                    return (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => onNavigate(cat.id, item.id)}
+                                            style={{
+                                                padding: '12px',
+                                                background: 'rgba(255,255,255,0.03)',
+                                                border: '1px solid rgba(255,255,255,0.05)',
+                                                borderRadius: '8px',
+                                                color: 'var(--text-main)',
+                                                fontSize: '0.85rem',
+                                                fontWeight: '600',
+                                                cursor: 'pointer',
+                                                textAlign: 'center',
+                                                transition: '0.2s',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                gap: '4px'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                                                e.currentTarget.style.borderColor = 'var(--accent-soft)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                                                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
+                                            }}
+                                        >
+                                            <div style={{ color: 'var(--text-main)' }}>{item.label}</div>
+                                            <div style={{ display: 'flex', gap: '4px' }}>
+                                                <div style={{
+                                                    fontSize: '0.7rem',
+                                                    color: 'var(--accent)',
+                                                    background: 'rgba(0,0,0,0.3)',
+                                                    padding: '2px 8px',
+                                                    borderRadius: '4px',
+                                                    fontWeight: 'bold',
+                                                    border: '1px solid var(--accent-soft)'
+                                                }}>
+                                                    Lv {level}
+                                                </div>
+                                                <div style={{
+                                                    fontSize: '0.7rem',
+                                                    color: 'var(--text-dim)',
+                                                    background: 'rgba(255,255,255,0.05)',
+                                                    padding: '2px 6px',
+                                                    borderRadius: '4px',
+                                                    fontWeight: 'normal',
+                                                    border: '1px solid rgba(255,255,255,0.1)'
+                                                }}>
+                                                    {Math.floor(progress)}%
+                                                </div>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>

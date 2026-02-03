@@ -662,7 +662,7 @@ function App() {
       case 'market':
         return <MarketPanel socket={socket} gameState={displayedGameState} silver={displayedGameState?.state?.silver || 0} onShowInfo={setInfoItem} onListOnMarket={handleListOnMarket} isMobile={isMobile} initialSearch={marketFilter} />;
       case 'skills_overview':
-        return <SkillsOverview onNavigate={(tab, cat) => { setActiveTab(tab); if (cat) setActiveCategory(cat); }} />;
+        return <SkillsOverview gameState={displayedGameState} onNavigate={(tab, cat) => { setActiveTab(tab); if (cat) setActiveCategory(cat); }} />;
       case 'town_overview':
         return <TownOverview onNavigate={(tab) => setActiveTab(tab)} />;
       case 'combat_overview':
