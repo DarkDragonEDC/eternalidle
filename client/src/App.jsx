@@ -25,6 +25,7 @@ import CombatHistoryModal from './components/CombatHistoryModal';
 import LootModal from './components/LootModal';
 import BuffsDrawer from './components/BuffsDrawer';
 import NotificationCenter from './components/NotificationCenter';
+import ToastContainer from './components/ToastContainer';
 import CrownShop from './components/CrownShop';
 import {
   Zap, Package, User, Trophy, Coins,
@@ -1415,6 +1416,7 @@ function App() {
         serverTimeOffset={clockOffset.current}
         skillProgress={gameState?.current_activity && displayedGameState?.state?.skills ? (displayedGameState.state.skills[getSkillForItem(gameState.current_activity.item_id, gameState.current_activity.type)]?.xp / calculateNextLevelXP(displayedGameState.state.skills[getSkillForItem(gameState.current_activity.item_id, gameState.current_activity.type)]?.level || 1)) * 100 : 0}
       />
+      <ToastContainer socket={socket} />
       {modalItem && (
         <ActivityModal
           isOpen={!!modalItem}
