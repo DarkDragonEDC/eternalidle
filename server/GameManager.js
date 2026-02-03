@@ -1372,18 +1372,23 @@ export class GameManager {
             }
 
             // 3. Check Space using TOTAL rewards list
-            // We count how many NEW slots we need
+            // Calculate current used slots (excluding noInventorySpace items like Runes)
+            const currentUsedSlots = Object.keys(tempInv).filter(k => {
+                const item = this.inventoryManager.resolveItem(k);
+                return item && !item.noInventorySpace;
+            }).length;
+
             let newSlotsNeeded = 0;
             for (const [rId, qty] of Object.entries(totalRewards.items)) {
                 if (!tempInv[rId]) {
-                    const item = resolveItem(rId);
-                    if (!item?.noInventorySpace) {
+                    const item = this.inventoryManager.resolveItem(rId);
+                    if (item && !item.noInventorySpace) {
                         newSlotsNeeded++;
                     }
                 }
             }
 
-            if (Object.keys(tempInv).length + newSlotsNeeded > simulatedMax) {
+            if (currentUsedSlots + newSlotsNeeded > simulatedMax) {
                 throw new Error("Inventory Full! Cannot open all chests.");
             }
 

@@ -427,6 +427,7 @@ for (const t of TIERS) {
     // Good (Green)
     ITEMS.SPECIAL.CHEST[`${t}_GOOD`] = {
         id: `T${t}_CHEST_GOOD`,
+        name: `Dungeon Chest (Good)`,
         type: 'CONSUMABLE',
         rarityColor: '#10b981', // Green
         desc: 'Contains better dungeon loot.'
