@@ -403,7 +403,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                             )}
                                         </div>
                                         <div style={{ position: 'absolute', top: 4, right: 4, fontSize: '0.7rem', fontWeight: 'bold', zIndex: 2, textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>
-                                            {selectedShard.id.includes('RUNE_SHARD') ? 'x10' : 'x3'}
+                                            {selectedShard.id.includes('RUNE_SHARD') ? 'x5' : 'x2'}
                                         </div>
                                     </div>
                                 ) : (
@@ -520,7 +520,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                             if (!selectedShard || isCrafting) return;
                             const shardId = activeTab === 'shards' ? 'T1_RUNE_SHARD' : selectedShard.id;
                             const currentQty = inventory[shardId] || 0;
-                            const maxBatch = Math.floor(activeTab === 'shards' ? currentQty / 10 : currentQty / 3);
+                            const maxBatch = Math.floor(activeTab === 'shards' ? currentQty / 5 : currentQty / 2);
 
                             if (maxBatch <= 0) return;
 
@@ -535,17 +535,17 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                 });
                             }
                         }}
-                        disabled={isCrafting || !selectedShard || (activeTab === 'shards' ? (inventory['T1_RUNE_SHARD'] || 0) < 10 : (inventory[selectedShard.id] || 0) < 3)}
+                        disabled={isCrafting || !selectedShard || (activeTab === 'shards' ? (inventory['T1_RUNE_SHARD'] || 0) < 5 : (inventory[selectedShard.id] || 0) < 2)}
                         style={{
                             marginTop: '10px',
                             padding: '10px 30px',
-                            background: (!selectedShard || (activeTab === 'shards' ? (inventory['T1_RUNE_SHARD'] || 0) < 10 : (inventory[selectedShard.id] || 0) < 3)) ? 'var(--bg-dark)' : 'var(--accent)',
+                            background: (!selectedShard || (activeTab === 'shards' ? (inventory['T1_RUNE_SHARD'] || 0) < 5 : (inventory[selectedShard.id] || 0) < 2)) ? 'var(--bg-dark)' : 'var(--accent)',
                             color: '#fff',
                             border: 'none',
                             borderRadius: '8px',
                             fontWeight: 'bold',
-                            cursor: (!selectedShard || (activeTab === 'shards' ? (inventory['T1_RUNE_SHARD'] || 0) < 10 : (inventory[selectedShard.id] || 0) < 3)) ? 'not-allowed' : 'pointer',
-                            opacity: (!selectedShard || (activeTab === 'shards' ? (inventory['T1_RUNE_SHARD'] || 0) < 10 : (inventory[selectedShard.id] || 0) < 3)) ? 0.5 : 1,
+                            cursor: (!selectedShard || (activeTab === 'shards' ? (inventory['T1_RUNE_SHARD'] || 0) < 5 : (inventory[selectedShard.id] || 0) < 2)) ? 'not-allowed' : 'pointer',
+                            opacity: (!selectedShard || (activeTab === 'shards' ? (inventory['T1_RUNE_SHARD'] || 0) < 5 : (inventory[selectedShard.id] || 0) < 2)) ? 0.5 : 1,
                             display: 'flex',
                             alignItems: 'center',
                             gap: '8px',
@@ -848,7 +848,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                             <div>
                                 <div style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>{batchModal.item.name}</div>
                                 <div style={{ fontSize: '0.8rem', color: 'var(--accent)' }}>
-                                    Cost: {batchModal.type === 'FORGE' ? '50 Shards' : '3 Runes'} / unit
+                                    Cost: {batchModal.type === 'FORGE' ? '5 Shards' : '2 Runes'} / unit
                                 </div>
                             </div>
                         </div>
@@ -910,7 +910,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                         <div style={{ textAlign: 'center', marginBottom: '20px', padding: '10px', background: 'rgba(255, 215, 0, 0.05)', borderRadius: '8px', border: '1px solid rgba(255, 215, 0, 0.1)' }}>
                             <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Total Requirement</div>
                             <div style={{ fontSize: '1.2rem', fontWeight: '900', color: 'var(--text-bright)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                                {batchModal.quantity * (batchModal.type === 'FORGE' ? 50 : 3)} {batchModal.type === 'FORGE' ? 'Shards' : 'Runes'}
+                                {batchModal.quantity * (batchModal.type === 'FORGE' ? 5 : 2)} {batchModal.type === 'FORGE' ? 'Shards' : 'Runes'}
                             </div>
                         </div>
 

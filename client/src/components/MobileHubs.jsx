@@ -106,10 +106,10 @@ export const SkillsOverview = ({ onNavigate, gameState }) => {
             icon: <Box />,
             color: '#60a5fa',
             items: [
-                { id: 'PLANK', label: 'Lumberjack' },
-                { id: 'BAR', label: 'Mining' },
-                { id: 'LEATHER', label: 'Skinning' },
-                { id: 'CLOTH', label: 'Harvesting' },
+                { id: 'PLANK', label: 'Lumber Mill' },
+                { id: 'BAR', label: 'Smelting' },
+                { id: 'LEATHER', label: 'Tannery' },
+                { id: 'CLOTH', label: 'Loom' },
                 { id: 'EXTRACT', label: 'Distillation' }
             ]
         },

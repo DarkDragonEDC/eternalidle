@@ -192,7 +192,8 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
 
                 const freshItem = resolveItem(item.id || item.item_id);
                 if (freshItem) {
-                    const bonusValue = (freshItem.tier - 1) * 5 + freshItem.stars;
+                    const starBonus = { 1: 1, 2: 3, 3: 5 };
+                    const bonusValue = (freshItem.tier - 1) * 5 + (starBonus[freshItem.stars] || freshItem.stars);
                     if (!summary[act]) summary[act] = {};
                     summary[act][eff] = (summary[act][eff] || 0) + bonusValue;
                 }
@@ -226,7 +227,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         // Logic: STRICTLY use rarity color. Tier color does NOT affect border.
         // Normal items (Quality 0) will use their defined rarity color (usually White/#fff).
         const borderColor = item && item.rarityColor ? item.rarityColor : 'rgba(255,255,255,0.1)';
-        const hasQuality = item && item.quality > 0;
+        const hasQuality = (item && item.quality > 0) || (item && item.stars > 0);
 
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
@@ -263,10 +264,12 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                                     {item.amount}
                                 </span>
                             )}
-                            {/* Se tiver qualidade, mostrar um pequeno indicador (estrela ou ponto) */}
+                            {/* Se tiver qualidade ou estrelas, mostrar indicadores */}
                             {hasQuality && (
-                                <div style={{ position: 'absolute', top: 2, right: 2 }}>
-                                    <Star size={10} color={borderColor} fill={borderColor} />
+                                <div style={{ position: 'absolute', top: 2, right: 2, display: 'flex', gap: '1px' }}>
+                                    {Array.from({ length: item.stars || 1 }).map((_, i) => (
+                                        <Star key={i} size={10} color={borderColor} fill={borderColor} />
+                                    ))}
                                 </div>
                             )}
                             {/* Botão de Info (i) */}

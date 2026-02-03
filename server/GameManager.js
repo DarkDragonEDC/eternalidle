@@ -1508,8 +1508,8 @@ export class GameManager {
         // 1. Validate Shard ID (Always T1 now)
         const activeShardId = 'T1_RUNE_SHARD';
 
-        // 2. Check Quantity (Need 10 * qty)
-        const totalNeeded = 10 * count;
+        // 2. Check Quantity (Need 5 * qty)
+        const totalNeeded = 5 * count;
         const currentQty = char.state.inventory[activeShardId] || 0;
         if (currentQty < totalNeeded) {
             return { success: false, error: `Not enough shards (Need ${totalNeeded})` };
@@ -1579,8 +1579,8 @@ export class GameManager {
             console.log(`[GameManager] Evolving rune ${runeId} to Tier ${nextTier}`);
         }
 
-        // 4. Check Quantity (Need 3 * qty)
-        const totalNeeded = 3 * count;
+        // 4. Check Quantity (Need 2 * qty)
+        const totalNeeded = 2 * count;
         const currentQty = char.state.inventory[runeId] || 0;
         if (currentQty < totalNeeded) {
             return { success: false, error: `Not enough runes (Need ${totalNeeded})` };

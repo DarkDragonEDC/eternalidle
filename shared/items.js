@@ -887,7 +887,7 @@ for (const t of TIERS) {
     // Runes (Hidden from main inventory)
     RUNE_GATHER_ACTIVITIES.forEach(act => {
         RUNE_EFFECTS.forEach(eff => {
-            for (let s = 1; s <= 5; s++) {
+            for (let s = 1; s <= 3; s++) {
                 const id = `T${t}_RUNE_${act}_${eff}_${s}STAR`;
 
                 // Map nice display names
@@ -899,7 +899,11 @@ for (const t of TIERS) {
                 if (eff === 'COPY') effName = 'Duplication';
                 if (eff === 'SPEED') effName = 'Auto-Refine';
 
-                const bonusValue = (t - 1) * 5 + s;
+                // Adjusted scaling: T1(1*) = 1% ... T10(3*) = 50%
+                // (Tier-1)*5 + StarBonus(1, 3, 5)
+                const starBonus = { 1: 1, 2: 3, 3: 5 };
+                const bonusValue = (t - 1) * 5 + (starBonus[s] || s);
+
                 let effectLabel = 'Experience';
                 if (eff === 'COPY') effectLabel = 'Duplication';
                 if (eff === 'SPEED') effectLabel = 'Auto-Refine Chance';
@@ -911,17 +915,20 @@ for (const t of TIERS) {
                 // Ensure sub-object exists
                 if (!ITEMS.SPECIAL.RUNE) ITEMS.SPECIAL.RUNE = {};
 
+                const rarityMap = { 1: 'COMMON', 2: 'RARE', 3: 'LEGENDARY' };
+                const qualityIdMap = { 1: 0, 2: 2, 3: 4 }; // 0=Normal, 2=Outstanding(Rare), 4=Masterpiece(Legendary)
+
                 ITEMS.SPECIAL.RUNE[id] = {
                     id: id,
                     name: `T${t} ${actName} Rune of ${effName}`,
                     tier: t,
                     type: 'RUNE',
                     stars: s,
-                    rarity: ['COMMON', 'UNCOMMON', 'RARE', 'EPIC', 'LEGENDARY'][s - 1] || 'COMMON',
+                    rarity: rarityMap[s],
                     noInventorySpace: true,
                     description: description,
                     icon: '', // Icons removed per request
-                    rarityColor: QUALITIES[s - 1] ? QUALITIES[s - 1].color : '#fff'
+                    rarityColor: QUALITIES[qualityIdMap[s]] ? QUALITIES[qualityIdMap[s]].color : '#fff'
                 };
             }
         });
