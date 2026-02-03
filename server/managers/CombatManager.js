@@ -117,13 +117,36 @@ export class CombatManager {
         if (combat.mobHealth < 0) combat.mobHealth = 0;
         combat.totalPlayerDmg = (combat.totalPlayerDmg || 0) + mitigatedPlayerDmg;
 
-        // Mob Attack Logic
+        // Mob Attack Logic (with catch-up for slow players)
         let mitigatedMobDmg = 0;
-        if (now >= (combat.mob_next_attack_at || 0)) {
-            mitigatedMobDmg = Math.max(1, Math.floor(mobDmg * (1 - playerMitigation)));
+
+        // Ensure initialization
+        if (!combat.mob_next_attack_at) combat.mob_next_attack_at = now + (combat.mobAtkSpeed || 1000);
+
+        if (now >= combat.mob_next_attack_at) {
+            const mobSpeed = combat.mobAtkSpeed || 1000;
+
+            // Calculate how many attacks fit in the elapsed time
+            // +1 because the current due attack counts
+            let attackCount = 1 + Math.floor((now - combat.mob_next_attack_at) / mobSpeed);
+
+            // Safety Cap to prevent infinite loops or millions of damage on lag spike
+            if (attackCount > 50) attackCount = 50;
+
+            const singleHitDmg = Math.max(1, Math.floor(mobDmg * (1 - playerMitigation)));
+            mitigatedMobDmg = singleHitDmg * attackCount;
+
             combat.playerHealth -= mitigatedMobDmg;
             combat.totalMobDmg = (combat.totalMobDmg || 0) + mitigatedMobDmg;
-            combat.mob_next_attack_at = now + (combat.mobAtkSpeed || 1000);
+
+            // Advance the timer by the EXACT amount of time covered by these attacks
+            // This maintains the rhythm/average DPS
+            combat.mob_next_attack_at += (attackCount * mobSpeed);
+
+            // If for some reason we are still behind (due to cap or drift), force sync to avoid death spiral
+            if (combat.mob_next_attack_at < now - 10000) {
+                combat.mob_next_attack_at = now + mobSpeed;
+            }
         }
 
         char.state.health = Math.max(0, combat.playerHealth);

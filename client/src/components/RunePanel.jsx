@@ -582,36 +582,75 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                             gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '10px',
                             padding: '5px'
                         }}>
-                            {filteredItems.filter(i => activeTab === 'shards' ? i.id.includes('RUNE_SHARD') : (i.id.includes('RUNE_') && !i.id.includes('SHARD'))).map(item => (
-                                <div key={item.id}
-                                    onClick={() => {
-                                        setSelectedShard(item);
-                                        setIsShardSelectionOpen(false);
-                                    }}
-                                    style={{
-                                        background: 'var(--slot-bg)', border: '1px solid var(--border)',
-                                        borderRadius: '8px', padding: '10px', aspectRatio: '1',
-                                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                        cursor: 'pointer', position: 'relative'
-                                    }}>
+                            {filteredItems.filter(i => activeTab === 'shards' ? i.id.includes('RUNE_SHARD') : (i.id.includes('RUNE_') && !i.id.includes('SHARD'))).map(item => {
+                                const specificBorderColor = item.rarityColor || (() => {
+                                    switch (item.rarity) {
+                                        case 'COMMON': return '#9CA3AF';
+                                        case 'UNCOMMON': return '#10B981';
+                                        case 'RARE': return '#3B82F6';
+                                        case 'EPIC': return '#F59E0B';
+                                        case 'LEGENDARY': return '#EF4444';
+                                        case 'MYTHIC': return '#A855F7';
+                                        default: return 'var(--border)';
+                                    }
+                                })();
 
-                                    {/* Item Icon */}
-                                    {item.icon && !item.id.includes('RUNE_SHARD') ? (
-                                        <img src={item.icon} alt={item.name} style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
-                                    ) : (
-                                        <Package size={24} color="var(--accent)" style={{ opacity: 0.8 }} />
-                                    )}
+                                return (
+                                    <div key={item.id}
+                                        onClick={() => {
+                                            setSelectedShard(item);
+                                            setIsShardSelectionOpen(false);
+                                        }}
+                                        style={{
+                                            background: 'var(--slot-bg)',
+                                            border: `1px solid ${specificBorderColor}`,
+                                            boxShadow: (item.rarity && item.rarity !== 'COMMON') ? `0 0 4px ${specificBorderColor}40` : 'none',
+                                            borderRadius: '8px', padding: '10px', aspectRatio: '1',
+                                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                            cursor: 'pointer', position: 'relative'
+                                        }}>
 
-                                    <div style={{ fontSize: '0.65rem', textAlign: 'center', marginTop: '5px', lineHeight: '1.1' }}>
-                                        {item.name.replace(' Rune Shard', '').replace('Rune of ', '')}
+                                        {/* Item Icon */}
+                                        {item.icon && !item.id.includes('RUNE_SHARD') ? (
+                                            <img src={item.icon} alt={item.name} style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
+                                        ) : (
+                                            <Package size={24} color={specificBorderColor} style={{ opacity: 0.8 }} />
+                                        )}
+
+                                        <div style={{ fontSize: '0.65rem', textAlign: 'center', marginTop: '5px', lineHeight: '1.1' }}>
+                                            {item.name.replace(' Rune Shard', '').replace('Rune of ', '')}
+                                        </div>
+                                        <div style={{ position: 'absolute', top: 2, right: 4, fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--text-dim)' }}>
+                                            {item.qty}
+                                        </div>
+
+                                        {/* Star Rating based on Rarity (Runes Only) */}
+                                        {!item.id.includes('RUNE_SHARD') && (
+                                            <div style={{
+                                                position: 'absolute',
+                                                bottom: 4,
+                                                left: '50%',
+                                                transform: 'translateX(-50%)',
+                                                display: 'flex',
+                                                gap: '1px',
+                                                zIndex: 2
+                                            }}>
+                                                {(() => {
+                                                    const rarityStars = {
+                                                        'COMMON': 1, 'UNCOMMON': 2, 'RARE': 3,
+                                                        'EPIC': 4, 'LEGENDARY': 5, 'MYTHIC': 6
+                                                    };
+                                                    const starCount = item.stars || rarityStars[item.rarity] || 1;
+                                                    return Array.from({ length: starCount }).map((_, i) => (
+                                                        <Star key={i} size={6} fill="#FFD700" color="#FFD700" style={{ filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.8))' }} />
+                                                    ));
+                                                })()}
+                                            </div>
+                                        )}
                                     </div>
-                                    <div style={{ position: 'absolute', top: 2, right: 4, fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--text-dim)' }}>
-                                        {item.qty}
-                                    </div>
+                                );
 
-                                    {/* Small Tier/Stars indicators could go here if needed, but keeping it simple for modal */}
-                                </div>
-                            ))}
+                            })}
                             {filteredItems.filter(i => activeTab === 'shards' ? i.id.includes('RUNE_SHARD') : (i.id.includes('RUNE_') && !i.id.includes('SHARD'))).length === 0 && (
                                 <div style={{ gridColumn: '1/-1', textAlign: 'center', color: 'var(--text-dim)', padding: '20px' }}>
                                     {activeTab === 'shards' ? 'No Rune Shards found.' : 'No Runes found.'}

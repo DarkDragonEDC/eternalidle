@@ -1006,7 +1006,7 @@ export class GameManager {
             while (now >= combat.next_attack_at && roundsThisTick < MAX_ROUNDS && char.state.combat) {
                 try {
                     const roundResult = await this.combatManager.processCombatRound(char, combat.next_attack_at);
-                    roundsProcessed++;
+                    roundsThisTick++;
 
                     if (roundResult) {
                         combatRounds.push(roundResult);
@@ -1031,6 +1031,9 @@ export class GameManager {
 
                 } catch (e) {
                     console.error(`[COMBAT_ERROR] Error in processCombatRound for ${char.name}:`, e);
+                    // Write to file for debug
+                    const fs = require('fs');
+                    fs.appendFileSync('server_combat_errors.log', `[${new Date().toISOString()}] ${e.message}\n${e.stack}\n---\n`);
                     break;
                 }
             }

@@ -321,9 +321,38 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
 
             if (newLogs.length > 0) {
                 setBattleLogs(prev => {
-                    const updated = [...prev, ...newLogs];
-                    if (updated.length > 30) {
-                        return updated.slice(updated.length - 30);
+                    let updated = [...prev];
+
+                    newLogs.forEach(newLog => {
+                        const lastLog = updated[updated.length - 1];
+
+                        // Aggregate Heals
+                        if (newLog.type === 'heal' && lastLog && lastLog.type === 'heal') {
+                            // Extract numeric amount from previous log content
+                            const prevAmountMatch = lastLog.content.match(/healed for (\d+) HP/);
+                            const newAmountMatch = newLog.content.match(/healed for (\d+) HP/);
+
+                            if (prevAmountMatch && newAmountMatch) {
+                                const prevAmount = parseInt(prevAmountMatch[1]);
+                                const newAmount = parseInt(newAmountMatch[1]);
+                                const total = prevAmount + newAmount;
+
+                                // Update last log instead of adding new one
+                                updated[updated.length - 1] = {
+                                    ...lastLog,
+                                    content: `You healed for ${total} HP.`,
+                                    count: (lastLog.count || 1) + 1,
+                                    id: newLog.id // Refresh ID to trigger animation if needed, or keep old? separate ID usually better for keys
+                                };
+                                return;
+                            }
+                        }
+
+                        updated.push(newLog);
+                    });
+
+                    if (updated.length > 20) {
+                        return updated.slice(updated.length - 20);
                     }
                     return updated;
                 });
