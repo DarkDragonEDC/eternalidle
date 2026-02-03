@@ -132,7 +132,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
     return (
         <div
             style={{
-                width: isMobile ? '75vw' : '220px',
+                width: isMobile ? '75vw' : '330px',
                 height: isMobile ? '100%' : '100vh',
                 background: theme === 'light' ? '#ffffff' : 'var(--panel-bg)',
                 borderRight: '1px solid var(--border)',
@@ -373,10 +373,15 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                 })}
 
                 {/* Membership Status */}
+
+            </div>
+
+            {/* Footer Buttons */}
+            <div style={{ padding: '15px 10px', borderTop: '1px solid var(--border)' }}>
+                {/* Membership Status - Moved to Footer */}
                 {gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > Date.now() && (
                     <div style={{
-                        marginTop: '20px',
-                        marginBottom: '10px',
+                        marginBottom: '15px',
                         background: 'var(--panel-bg)',
                         borderRadius: '8px',
                         padding: '12px',
@@ -411,38 +416,8 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                         </div>
                     </div>
                 )}
-            </div>
 
-            {/* Footer Buttons */}
-            <div style={{ padding: '15px 10px', borderTop: '1px solid var(--border)' }}>
-                <button
-                    onClick={onSwitchCharacter}
-                    style={{
-                        width: '100%',
-                        padding: '12px',
-                        background: 'rgba(240, 240, 240, 0.02)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '10px',
-                        color: 'var(--text-dim)',
-                        fontSize: '0.65rem',
-                        fontWeight: '900',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px',
-                        cursor: 'pointer',
-                        transition: '0.2s',
-                        letterSpacing: '1px'
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'var(--text-main)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(240, 240, 240, 0.02)'; e.currentTarget.style.color = 'var(--text-dim)'; }}
-                >
-                    <Users size={14} />
-                    SWITCH CHARACTER
-                </button>
-                <div style={{ textAlign: 'center', fontSize: '0.55rem', color: '#333', marginTop: '10px', fontWeight: 'bold' }}>
-                    v2.1 Rarity
-                </div>
+
             </div>
         </div>
     );

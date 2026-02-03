@@ -14,6 +14,8 @@ import ActivityModal from './components/ActivityModal';
 import RankingPanel from './components/RankingPanel';
 import DungeonPanel from './components/DungeonPanel';
 import RenameModal from './components/RenameModal';
+import BottomNav from './components/BottomNav';
+import { SkillsOverview, TownOverview, CombatOverview } from './components/MobileHubs';
 
 import CombatPanel from './components/CombatPanel';
 import OfflineGainsModal from './components/OfflineGainsModal';
@@ -26,7 +28,7 @@ import CrownShop from './components/CrownShop';
 import {
   Zap, Package, User, Trophy, Coins,
   Axe, Pickaxe, Target, Shield, Sword,
-  Star, Layers, Box, Castle, Lock, Menu, X, Tag, Clock, Heart, LogOut, ChevronDown, Crown, Circle
+  Star, Layers, Box, Castle, Lock, Menu, X, Tag, Clock, Heart, LogOut, ChevronDown, Crown, Circle, Users
 } from 'lucide-react';
 import { ITEMS, resolveItem, getSkillForItem, getLevelRequirement, formatItemId } from '@shared/items';
 import { calculateNextLevelXP, XP_TABLE } from '@shared/skills';
@@ -227,6 +229,27 @@ function App() {
 
   const [selectedCharacter, setSelectedCharacter] = useState(() => localStorage.getItem('selectedCharacterId'));
   const [serverError, setServerError] = useState(null);
+  const [activePlayers, setActivePlayers] = useState(0);
+
+  // Fetch Active Players for Header (and mobile profile)
+  useEffect(() => {
+    const fetchActivePlayers = async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${apiUrl}/api/active_players`);
+        if (res.ok) {
+          const data = await res.json();
+          setActivePlayers(data.count || 0);
+        }
+      } catch (err) {
+        console.warn('Could not fetch active players count');
+      }
+    };
+
+    fetchActivePlayers();
+    const interval = setInterval(fetchActivePlayers, 15000); // 15s refresh
+    return () => clearInterval(interval);
+  }, []);
 
   // Auto-connect if session and character already exist
   useEffect(() => {
@@ -423,6 +446,14 @@ function App() {
   };
 
 
+  const handleSwitchCharacter = () => {
+    if (socket) socket.disconnect();
+    setSelectedCharacter(null);
+    localStorage.removeItem('selectedCharacterId');
+    setGameState(null);
+    setSocket(null);
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     localStorage.removeItem('selectedCharacterId');
@@ -615,11 +646,27 @@ function App() {
   const renderContent = () => {
     switch (activeTab) {
       case 'profile':
-        return <ProfilePanel gameState={displayedGameState} session={session} socket={socket} onShowInfo={setInfoItem} isMobile={isMobile} onOpenRenameModal={() => {
-          setIsRenameModalOpen(true);
-        }} />;
+        return <ProfilePanel
+          gameState={displayedGameState}
+          session={session}
+          socket={socket}
+          onShowInfo={setInfoItem}
+          isMobile={isMobile}
+          theme={theme}
+          toggleTheme={toggleTheme}
+
+          onOpenRenameModal={() => {
+            setIsRenameModalOpen(true);
+          }} />;
+
       case 'market':
         return <MarketPanel socket={socket} gameState={displayedGameState} silver={displayedGameState?.state?.silver || 0} onShowInfo={setInfoItem} onListOnMarket={handleListOnMarket} isMobile={isMobile} initialSearch={marketFilter} />;
+      case 'skills_overview':
+        return <SkillsOverview onNavigate={(tab, cat) => { setActiveTab(tab); if (cat) setActiveCategory(cat); }} />;
+      case 'town_overview':
+        return <TownOverview onNavigate={(tab) => setActiveTab(tab)} />;
+      case 'combat_overview':
+        return <CombatOverview onNavigate={(tab) => setActiveTab(tab)} />;
       case 'gathering':
       case 'refining': {
         const isGathering = activeTab === 'gathering';
@@ -1113,32 +1160,24 @@ function App() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-dark)', color: 'var(--text-main)', fontFamily: "'Inter', sans-serif", position: 'relative' }}>
-      <Sidebar
-        gameState={displayedGameState}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        activeCategory={activeCategory}
-        setActiveCategory={setActiveCategory}
-        isMobile={isMobile}
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        theme={theme}
-        toggleTheme={toggleTheme}
-        onSwitchCharacter={() => {
-          if (socket) socket.disconnect();
-          setSelectedCharacter(null);
-          localStorage.removeItem('selectedCharacterId');
-          setGameState(null);
-          setSocket(null);
-        }}
-      />
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-dark)', color: 'var(--text-main)', fontFamily: "'Inter', sans-serif", position: 'relative', paddingBottom: isMobile ? '70px' : '0' }}>
+      {!isMobile && (
+        <Sidebar
+          gameState={displayedGameState}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          activeCategory={activeCategory}
+          setActiveCategory={setActiveCategory}
+          isMobile={isMobile}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          theme={theme}
+          toggleTheme={toggleTheme}
+          onSwitchCharacter={handleSwitchCharacter}
+        />
+      )}
 
-      {
-        isMobile && sidebarOpen && (
-          <div onClick={() => setSidebarOpen(false)} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 998, backdropFilter: 'blur(4px)' }} />
-        )
-      }
+      {isMobile && <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} onNavigate={(tab) => setActiveTab(tab)} />}
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', minHeight: 0 }}>
         <header style={{
@@ -1156,13 +1195,31 @@ function App() {
           gap: '10px'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 20, minWidth: 0 }}>
-            {isMobile && <button onClick={() => setSidebarOpen(true)} style={{ color: '#fff', opacity: 0.6 }}><Menu size={24} /></button>}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-              <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, #90d5ff 0%, #003366 100%)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <User color="#000" size={16} />
+            {isMobile && <div style={{ width: 24 }}></div>}
+
+            {/* Active Players Indicator - Header Left - Mobile Only */}
+            {isMobile && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                background: 'rgba(74, 222, 128, 0.05)', padding: '6px 12px',
+                borderRadius: '8px', border: '1px solid rgba(74, 222, 128, 0.15)',
+                marginRight: '12px',
+                cursor: 'help'
+              }} title="Players Online">
+                <span style={{ width: '8px', height: '8px', background: '#4ade80', borderRadius: '50%', boxShadow: '0 0 8px #4ade80' }}></span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4ade80', fontFamily: 'monospace' }}>{activePlayers}</span>
               </div>
-              <div style={{ fontWeight: '900', fontSize: isMobile ? '0.85rem' : '1rem', color: 'var(--text-main)', letterSpacing: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: isMobile ? '90px' : '200px' }}>{displayedGameState?.name?.toUpperCase() || 'ADVENTURER'}</div>
-            </div>
+            )}
+
+
+            {!isMobile && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+                <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, #90d5ff 0%, #003366 100%)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <User color="#000" size={16} />
+                </div>
+                <div style={{ fontWeight: '900', fontSize: '1rem', color: 'var(--text-main)', letterSpacing: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>{displayedGameState?.name?.toUpperCase() || 'ADVENTURER'}</div>
+              </div>
+            )}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 12 : 20 }}>
             {/* Currency Display with Dropdown */}
@@ -1291,8 +1348,11 @@ function App() {
               onClearAll={clearAllNotifications}
               onClickTrigger={() => setShowNotifications(!showNotifications)}
             />
-            <button onClick={handleLogout} style={{ color: '#fff', fontSize: '0.65rem', fontWeight: '900', padding: isMobile ? '8px' : '8px 12px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)', letterSpacing: '1.5px', opacity: 0.6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {isMobile ? <LogOut size={16} /> : 'LOGOUT'}
+            <button onClick={handleSwitchCharacter} style={{ color: '#fff', fontSize: '0.65rem', fontWeight: '900', padding: '8px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)', letterSpacing: '1.5px', opacity: 0.6, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '8px' }} title="Switch Character">
+              <Users size={16} />
+            </button>
+            <button onClick={handleLogout} style={{ color: '#fff', fontSize: '0.65rem', fontWeight: '900', padding: '8px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)', letterSpacing: '1.5px', opacity: 0.6, display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Logout">
+              <LogOut size={16} />
             </button>
           </div>
         </header>

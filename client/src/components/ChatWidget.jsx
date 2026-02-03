@@ -77,8 +77,8 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
                 }}
                 style={{
                     position: 'fixed',
-                    bottom: '30px',
-                    left: isMobile ? '20px' : '270px',
+                    bottom: isMobile ? '80px' : '30px',
+                    left: isMobile ? '20px' : '360px',
                     width: '56px',
                     height: '56px',
                     borderRadius: '50%',
@@ -131,7 +131,7 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
             <div style={{
                 position: 'fixed',
                 bottom: isMobile ? '0' : '100px',
-                left: isMobile ? '50%' : '270px',
+                left: isMobile ? '50%' : '360px',
                 right: 'auto',
                 transform: isMobile ? 'translateX(-50%)' : 'none',
                 width: isMobile ? '90vw' : '320px',

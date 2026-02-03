@@ -1,12 +1,12 @@
 Category,Source,Type,Formula/Value,Min %,Max %
-Skill,Logging (Lumberjack),Level,Level * 0.3%,0.3% (Lv1),30.0% (Lv100)
-Skill,Mining (Ore Miner),Level,Level * 0.3%,0.3% (Lv1),30.0% (Lv100)
-Skill,Skinning (Animal Skinner),Level,Level * 0.3%,0.3% (Lv1),30.0% (Lv100)
-Skill,Harvesting (Fiber Harvester),Level,Level * 0.3%,0.3% (Lv1),30.0% (Lv100)
-Skill,Fishing (Fishing),Level,Level * 0.3%,0.3% (Lv1),30.0% (Lv100)
-Skill,Herbalism (Herbalism),Level,Level * 0.3%,0.3% (Lv1),30.0% (Lv100)
-Skill,Refining (All Types),Level,Level * 0.3%,0.3% (Lv1),30.0% (Lv100)
-Skill,Crafting (All Types),Level,Level * 0.3%,0.3% (Lv1),30.0% (Lv100)
+Skill,Logging (Lumberjack),Level,Level * 0.2%,0.2% (Lv1),20.0% (Lv100)
+Skill,Mining (Ore Miner),Level,Level * 0.2%,0.2% (Lv1),20.0% (Lv100)
+Skill,Skinning (Animal Skinner),Level,Level * 0.2%,0.2% (Lv1),20.0% (Lv100)
+Skill,Harvesting (Fiber Harvester),Level,Level * 0.2%,0.2% (Lv1),20.0% (Lv100)
+Skill,Fishing (Fishing),Level,Level * 0.2%,0.2% (Lv1),20.0% (Lv100)
+Skill,Herbalism (Herbalism),Level,Level * 0.2%,0.2% (Lv1),20.0% (Lv100)
+Skill,Refining (All Types),Level,Level * 0.2%,0.2% (Lv1),20.0% (Lv100)
+Skill,Crafting (All Types),Level,Level * 0.2%,0.2% (Lv1),20.0% (Lv100)
 Global,Intelligence (Attribute),Stat,0%,0%,0%
 Tool,Axe (Wood),Item,1.0 + (Index * 0.898) %,1.0% (T1 Normal),45.0% (T10 Masterpiece)
 Tool,Pickaxe (Ore),Item,1.0 + (Index * 0.898) %,1.0% (T1 Normal),45.0% (T10 Masterpiece)
@@ -15,3 +15,4 @@ Tool,Sickle (Fiber),Item,1.0 + (Index * 0.898) %,1.0% (T1 Normal),45.0% (T10 Mas
 Tool,Rod (Fish),Item,1.0 + (Index * 0.898) %,1.0% (T1 Normal),45.0% (T10 Masterpiece)
 Tool,Pouch (Herb),Item,1.0 + (Index * 0.898) %,1.0% (T1 Normal),45.0% (T10 Masterpiece)
 Equipment,Cape (Global Efficiency),Item,1.0 + (Index * 0.286) %,1.0% (T1 Normal),15.0% (T10 Masterpiece)
+Global,Premium Membership,Special,Fixed,10.0%,10.0%

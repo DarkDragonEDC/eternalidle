@@ -134,7 +134,8 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                         flexDirection: 'column',
                         gap: '15px',
                         flex: 1,
-                        overflowY: 'auto'
+                        overflowY: 'auto',
+                        overflowX: 'hidden'
                     }}>
 
                         {/* Combat Summary - Visual Overhaul */}

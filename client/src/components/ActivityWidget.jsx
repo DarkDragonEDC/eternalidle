@@ -173,7 +173,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                 onClick={() => setIsOpen(!isOpen)}
                 style={{
                     position: 'fixed',
-                    bottom: '30px',
+                    bottom: isMobile ? '80px' : '30px',
                     right: isMobile ? '20px' : '30px',
                     width: '64px',
                     height: '64px',
@@ -262,7 +262,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                         />
                         <div style={{
                             position: 'fixed',
-                            bottom: '110px',
+                            bottom: isMobile ? '160px' : '110px',
                             right: isMobile ? '20px' : '30px',
                             display: 'flex',
                             flexDirection: 'column',
@@ -768,7 +768,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                             exit={{ opacity: 0, x: 20 }}
                             style={{
                                 position: 'fixed',
-                                bottom: '30px',
+                                bottom: isMobile ? '80px' : '30px',
                                 right: isMobile ? '95px' : '105px',
                                 width: isMobile ? '205px' : '205px', // Alinhado com a esquerda dos cards (30+280=310, 105+205=310)
                                 background: 'var(--panel-bg)',

@@ -1149,23 +1149,24 @@ export class GameManager {
         else if (timeVal < 3600) timeStr = `${Math.floor(timeVal / 60)}m ${Math.floor(timeVal % 60)}s`;
         else timeStr = `${Math.floor(timeVal / 3600)}h ${Math.floor((timeVal % 3600) / 60)}m`;
 
-        let itemsStr = Object.entries(itemsGained || {})
-            .map(([id, qty]) => `${qty}x ${id.replace(/_/g, ' ')}`)
-            .join(', ');
+        let message = `📜 ${actionType} Summary\n`;
+        message += `⏱️ ${timeStr}`;
 
-        let xpParts = [];
+        if (kills) message += `\n💀 ${kills} Kills`;
+
         for (const [skill, xp] of Object.entries(xpGained || {})) {
-            if (xp > 0) xpParts.push(`+${xp} ${skill.replace(/_/g, ' ')}`);
+            if (xp > 0) message += `\n✨ +${xp} ${skill.replace(/_/g, ' ')}`;
         }
-        let xpStr = xpParts.join(', ');
 
-        let message = `${actionType} Summary: `;
-        message += `Duration: ${timeStr}. `;
-        if (kills) message += `Kills: ${kills}. `;
-        if (xpStr) message += `XP: ${xpStr}. `;
-        if (silverGained) message += `Silver: +${silverGained.toLocaleString()}. `;
-        if (itemsStr) message += `Gained: ${itemsStr}.`;
-        else message += "No items gained.";
+        if (silverGained) message += `\n💰 +${silverGained.toLocaleString()} Silver`;
+
+        const itemEntries = Object.entries(itemsGained || {});
+        if (itemEntries.length > 0) {
+            message += `\n📦 Loot:`;
+            for (const [id, qty] of itemEntries) {
+                message += `\n • ${qty}x ${id.replace(/_/g, ' ')}`;
+            }
+        }
 
         // console.log(`[NOTIF] Adding system notif for ${char.name}: ${message}`);
         this.addNotification(char, 'SYSTEM', message);

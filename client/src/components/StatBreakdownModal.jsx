@@ -2,7 +2,7 @@ import React from 'react';
 import { X, Sword, Shield, Zap, Heart } from 'lucide-react';
 import { resolveItem } from '@shared/items';
 
-const StatBreakdownModal = ({ statType, statId, value, stats, equipment, onClose }) => {
+const StatBreakdownModal = ({ statType, statId, value, stats, equipment, membership, onClose }) => {
     // Calculate breakdowns based on known formulas
     const getBreakdown = () => {
         const breakdown = [];
@@ -113,19 +113,29 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, onClose
             breakdown.push({ label: 'Gear HP', value: gearHP });
         } else if (statType === 'EFFICIENCY') {
             const effId = statId; // Skill context
-            const globalEff = stats.efficiency?.GLOBAL || 0;
-            const int = stats.int || 0;
+            const globalEffVal = stats.efficiency?.GLOBAL || 0;
 
             if (effId === 'GLOBAL') {
-                if (globalEff > 0) {
-                    breakdown.push({ label: 'Global Bonus (Cape)', value: `+${globalEff}%` });
-                } else {
-                    breakdown.push({ label: 'No Global Bonus', value: '+0%' });
+                const isPremium = membership?.active && membership?.expiresAt > Date.now();
+                if (isPremium) {
+                    breakdown.push({ label: 'Premium Membership', value: '+10%' });
+                }
+
+                // Global items (usually cape)
+                const globalSource = Object.values(equipment).find(item => {
+                    if (!item) return false;
+                    const fresh = resolveItem(item.id || item.item_id);
+                    return fresh?.stats?.efficiency?.GLOBAL > 0;
+                });
+
+                if (globalSource) {
+                    const freshGlobal = resolveItem(globalSource.id || globalSource.item_id);
+                    const actualGlobalEff = freshGlobal?.stats?.efficiency?.GLOBAL || 0;
+                    breakdown.push({ label: `Global Item (${freshGlobal.name.split(' ').pop()})`, value: `+${actualGlobalEff}%` });
                 }
             } else {
                 breakdown.push({ label: 'Skill Base', value: '100% Speed' });
                 if (effId) {
-                    // If we have a specific skill (e.g. WOOD), show tool vs skill level
                     const skillsMap = {
                         WOOD: 'LUMBERJACK', ORE: 'ORE_MINER', HIDE: 'ANIMAL_SKINNER', FIBER: 'FIBER_HARVESTER', FISH: 'FISHING',
                         PLANK: 'PLANK_REFINER', METAL: 'METAL_BAR_REFINER', LEATHER: 'LEATHER_REFINER', CLOTH: 'CLOTH_REFINER',
@@ -134,10 +144,9 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, onClose
                     const skillName = skillsMap[effId];
                     if (skillName) {
                         const skillLvl = stats.skills?.[skillName]?.level || 1;
-                        breakdown.push({ label: 'Skill Level Bonus', value: `+${(skillLvl * 0.3).toFixed(1)}%`, sub: `(0.3% per ${skillName} Lv)` });
+                        breakdown.push({ label: 'Skill Level Bonus', value: `+${(skillLvl * 0.2).toFixed(1)}%`, sub: `(0.2% per ${skillName} Lv)` });
                     }
 
-                    // Tools
                     const toolMap = { WOOD: 'tool_axe', ORE: 'tool_pickaxe', HIDE: 'tool_knife', FIBER: 'tool_sickle', FISH: 'tool_rod' };
                     const toolKey = toolMap[effId];
                     if (toolKey && equipment[toolKey]) {
@@ -147,21 +156,22 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, onClose
                     }
                 }
 
-                if (globalEff > 0) {
-                    // Find which item provides global efficiency (usually the cape)
-                    const globalSource = Object.values(equipment).find(item => {
-                        if (!item) return false;
-                        const fresh = resolveItem(item.id || item.item_id);
-                        return fresh?.stats?.efficiency?.GLOBAL > 0;
-                    });
+                // Global Bonuses (Membership + Items)
+                const isPremium = membership?.active && membership?.expiresAt > Date.now();
+                if (isPremium) {
+                    breakdown.push({ label: 'Premium Membership', value: '+10%' });
+                }
 
-                    if (globalSource) {
-                        const freshGlobal = resolveItem(globalSource.id || globalSource.item_id);
-                        const actualGlobalEff = freshGlobal?.stats?.efficiency?.GLOBAL || 0;
-                        breakdown.push({ label: `Global Bonus (${freshGlobal.name.split(' ').pop()})`, value: `+${actualGlobalEff}%` });
-                    } else {
-                        breakdown.push({ label: 'Global Bonus', value: `+${globalEff}%` });
-                    }
+                const globalSource = Object.values(equipment).find(item => {
+                    if (!item) return false;
+                    const fresh = resolveItem(item.id || item.item_id);
+                    return fresh?.stats?.efficiency?.GLOBAL > 0;
+                });
+
+                if (globalSource) {
+                    const freshGlobal = resolveItem(globalSource.id || globalSource.item_id);
+                    const actualGlobalEff = freshGlobal?.stats?.efficiency?.GLOBAL || 0;
+                    breakdown.push({ label: `Global Bonus (${freshGlobal.name.split(' ').pop()})`, value: `+${actualGlobalEff}%` });
                 }
             }
 

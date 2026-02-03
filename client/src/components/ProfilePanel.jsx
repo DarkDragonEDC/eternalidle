@@ -11,12 +11,33 @@ import StatBreakdownModal from './StatBreakdownModal';
 import { supabase } from '../supabase';
 
 
-const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpenRenameModal }) => {
+const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpenRenameModal, theme, toggleTheme }) => {
     const [selectedSlot, setSelectedSlot] = useState(null);
     const [infoModal, setInfoModal] = useState(null);
     const [breakdownModal, setBreakdownModal] = useState(null);
+    const [activePlayers, setActivePlayers] = useState(0);
 
+    // Fetch Active Players logic (duplicated from Sidebar for Mobile Profile)
+    React.useEffect(() => {
+        if (!isMobile) return; // Only needed on mobile here
 
+        const fetchActivePlayers = async () => {
+            try {
+                const apiUrl = import.meta.env.VITE_API_URL;
+                const res = await fetch(`${apiUrl}/api/active_players`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setActivePlayers(data.count || 0);
+                }
+            } catch (err) {
+                console.warn('Could not fetch active players count in profile');
+            }
+        };
+
+        fetchActivePlayers();
+        const interval = setInterval(fetchActivePlayers, 15000);
+        return () => clearInterval(interval);
+    }, [isMobile]);
 
     const handleEquip = (itemId) => {
         socket.emit('equip_item', { itemId });
@@ -113,13 +134,18 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
             return fresh?.stats?.efficiency || 0;
         };
 
-        const globalEff = Object.values(equipment).reduce((acc, item) => {
+        let globalEff = Object.values(equipment).reduce((acc, item) => {
             if (!item) return acc;
             const fresh = resolveItem(item.id || item.item_id);
             const statsToUse = fresh?.stats || item.stats;
             const effVal = typeof statsToUse?.efficiency === 'object' ? (statsToUse.efficiency.GLOBAL || 0) : 0;
             return acc + effVal;
         }, 0);
+
+        const isPremium = gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > Date.now();
+        if (isPremium) {
+            globalEff += 10; // Add 10% (or 10 points, assuming 10 means 10%)
+        }
 
         return {
             hp: health !== undefined ? health : (100 + (calculatedStats.str * 10) + gearHP),
@@ -131,23 +157,23 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
             agi: calculatedStats.agi,
             int: calculatedStats.int,
             efficiency: {
-                WOOD: (skills.LUMBERJACK?.level || 1) * 0.3 + getToolEff('tool_axe') + globalEff,
-                ORE: (skills.ORE_MINER?.level || 1) * 0.3 + getToolEff('tool_pickaxe') + globalEff,
-                HIDE: (skills.ANIMAL_SKINNER?.level || 1) * 0.3 + getToolEff('tool_knife') + globalEff,
-                FIBER: (skills.FIBER_HARVESTER?.level || 1) * 0.3 + getToolEff('tool_sickle') + globalEff,
-                HERB: (skills.HERBALISM?.level || 1) * 0.3 + globalEff, // No tool for now? Or maybe sickle?
-                FISH: (skills.FISHING?.level || 1) * 0.3 + getToolEff('tool_rod') + globalEff,
-                PLANK: (skills.PLANK_REFINER?.level || 1) * 0.3 + globalEff,
-                METAL: (skills.METAL_BAR_REFINER?.level || 1) * 0.3 + globalEff,
-                LEATHER: (skills.LEATHER_REFINER?.level || 1) * 0.3 + globalEff,
-                CLOTH: (skills.CLOTH_REFINER?.level || 1) * 0.3 + globalEff,
-                EXTRACT: (skills.DISTILLATION?.level || 1) * 0.3 + globalEff,
-                WARRIOR: (skills.WARRIOR_CRAFTER?.level || 1) * 0.3 + globalEff,
-                HUNTER: (skills.HUNTER_CRAFTER?.level || 1) * 0.3 + globalEff,
-                MAGE: (skills.MAGE_CRAFTER?.level || 1) * 0.3 + globalEff,
-                ALCHEMY: (skills.ALCHEMY?.level || 1) * 0.3 + globalEff,
-                TOOLS: (skills.TOOL_CRAFTER?.level || 1) * 0.3 + globalEff,
-                COOKING: (skills.COOKING?.level || 1) * 0.3 + globalEff,
+                WOOD: (skills.LUMBERJACK?.level || 1) * 0.2 + getToolEff('tool_axe') + globalEff,
+                ORE: (skills.ORE_MINER?.level || 1) * 0.2 + getToolEff('tool_pickaxe') + globalEff,
+                HIDE: (skills.ANIMAL_SKINNER?.level || 1) * 0.2 + getToolEff('tool_knife') + globalEff,
+                FIBER: (skills.FIBER_HARVESTER?.level || 1) * 0.2 + getToolEff('tool_sickle') + globalEff,
+                HERB: (skills.HERBALISM?.level || 1) * 0.2 + globalEff, // No tool for now? Or maybe sickle?
+                FISH: (skills.FISHING?.level || 1) * 0.2 + getToolEff('tool_rod') + globalEff,
+                PLANK: (skills.PLANK_REFINER?.level || 1) * 0.2 + globalEff,
+                METAL: (skills.METAL_BAR_REFINER?.level || 1) * 0.2 + globalEff,
+                LEATHER: (skills.LEATHER_REFINER?.level || 1) * 0.2 + globalEff,
+                CLOTH: (skills.CLOTH_REFINER?.level || 1) * 0.2 + globalEff,
+                EXTRACT: (skills.DISTILLATION?.level || 1) * 0.2 + globalEff,
+                WARRIOR: (skills.WARRIOR_CRAFTER?.level || 1) * 0.2 + globalEff,
+                HUNTER: (skills.HUNTER_CRAFTER?.level || 1) * 0.2 + globalEff,
+                MAGE: (skills.MAGE_CRAFTER?.level || 1) * 0.2 + globalEff,
+                ALCHEMY: (skills.ALCHEMY?.level || 1) * 0.2 + globalEff,
+                TOOLS: (skills.TOOL_CRAFTER?.level || 1) * 0.2 + globalEff,
+                COOKING: (skills.COOKING?.level || 1) * 0.2 + globalEff,
                 GLOBAL: globalEff
             },
             silverMultiplier: 1.0 + (calculatedStats.int * 0.005)
@@ -356,6 +382,63 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                     overflowY: 'auto',
                     flex: 1
                 }}>
+
+                    {/* MOBILE MENU SECTION */}
+                    {isMobile && (
+                        <div style={{ marginBottom: '30px', paddingBottom: '20px', borderBottom: '1px solid var(--border)' }}>
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '15px' }}>
+
+
+                                {/* Theme Toggle */}
+                                <button onClick={toggleTheme} style={{
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                    flex: 1, height: '40px', background: 'rgba(255,255,255,0.05)',
+                                    borderRadius: '12px', border: '1px solid var(--border)', color: 'var(--accent)',
+                                    fontSize: '0.75rem', fontWeight: 'bold'
+                                }}>
+                                    {theme === 'dark' ? (
+                                        <><React.Fragment>☀️</React.Fragment> Switch to Light Mode</>
+                                    ) : (
+                                        <><React.Fragment>🌙</React.Fragment> Switch to Dark Mode</>
+                                    )}
+                                </button>
+
+                                {/* Discord */}
+                                <a href="https://discord.gg/YNHtx5xStV" target="_blank" rel="noopener noreferrer" style={{
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    width: '40px', height: '40px', background: '#5865F2',
+                                    borderRadius: '12px', color: '#fff'
+                                }}>
+                                    <svg width="20" height="20" viewBox="0 0 127.14 96.36" fill="currentColor">
+                                        <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.71,32.65-1.82,56.6.4,80.21a105.73,105.73,0,0,0,32.17,16.15,77.7,77.7,0,0,0,6.89-11.11,68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c3.39-28.32-5.42-52.09-23.75-72.13ZM42.45,65.69C36.18,65.69,31,60,31,53s5.07-12.72,11.41-12.72S54,46,53.86,53,48.81,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.72,11.44-12.72S96.11,46,96,53,91,65.69,84.69,65.69Z" />
+                                    </svg>
+                                </a>
+                            </div>
+
+
+
+                            {/* Membership Status for Mobile */}
+                            {gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > Date.now() && (
+                                <div style={{
+                                    marginTop: '15px',
+                                    background: 'var(--panel-bg)',
+                                    borderRadius: '8px',
+                                    padding: '12px',
+                                    border: '1px solid rgba(34, 197, 94, 0.2)',
+                                    display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                                }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <span style={{ fontSize: '0.8rem', fontWeight: '600', color: '#4ade80' }}>Premium</span>
+                                        <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>
+                                            Expires: {new Date(gameState.state.membership.expiresAt).toLocaleDateString('pt-BR')}
+                                        </span>
+                                    </div>
+                                    <span style={{ fontSize: '0.65rem', background: 'rgba(34, 197, 94, 0.2)', color: '#4ade80', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>ACTIVE</span>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     {/* Header com IP - HUB Style */}
                     <div style={{
                         display: 'flex',
@@ -498,7 +581,7 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                     {/* Combat & Action Stats - New Section */}
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(4, 1fr)',
+                        gridTemplateColumns: 'repeat(3, 1fr)',
                         gap: '10px',
                         background: 'rgba(0,0,0,0.2)',
                         padding: '12px',
@@ -525,12 +608,6 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                             <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)' }}>
                                 {(1000 / stats.attackSpeed).toFixed(1)} h/s
                             </div>
-                        </div>
-                        <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'EFFICIENCY', value: { total: `+${stats.efficiency.GLOBAL}%`, id: 'GLOBAL' } })}>
-                            <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
-                                <Star size={10} color="#d4af37" /> EFF
-                            </div>
-                            <div style={{ fontSize: '1rem', fontWeight: '900', color: '#d4af37' }}>+{stats.efficiency.GLOBAL}%</div>
                         </div>
                     </div>
 
@@ -632,7 +709,8 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                     value={typeof breakdownModal.value === 'object' ? breakdownModal.value.total : breakdownModal.value}
                     statId={typeof breakdownModal.value === 'object' ? breakdownModal.value.id : null}
                     stats={{ ...stats, skills }} // Pass skills for efficiency breakdown
-                    equipment={equipment}
+                    equipment={gameState?.state?.equipment || {}}
+                    membership={gameState?.state?.membership}
                     onClose={() => setBreakdownModal(null)}
                 />
             )}

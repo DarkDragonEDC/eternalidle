@@ -110,26 +110,53 @@ const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onCl
 
                             <div>
                                 <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                    {['LEVEL_UP', 'MARKET', 'SYSTEM'].map(tab => (
-                                        <button
-                                            key={tab}
-                                            onClick={() => setActiveTab(tab)}
-                                            style={{
-                                                flex: 1,
-                                                padding: '10px 0',
-                                                background: 'transparent',
-                                                border: 'none',
-                                                borderBottom: activeTab === tab ? '2px solid var(--accent)' : '2px solid transparent',
-                                                color: activeTab === tab ? '#fff' : 'rgba(255,255,255,0.4)',
-                                                fontSize: '0.7rem',
-                                                fontWeight: 'bold',
-                                                cursor: 'pointer',
-                                                transition: '0.2s'
-                                            }}
-                                        >
-                                            {tab.replace('_', ' ')}
-                                        </button>
-                                    ))}
+                                    {['LEVEL_UP', 'MARKET', 'SYSTEM'].map(tab => {
+                                        const count = notifications.filter(n => {
+                                            if (n.read) return false;
+                                            if (tab === 'LEVEL_UP') return n.type === 'LEVEL_UP';
+                                            if (tab === 'MARKET') return n.type === 'SUCCESS';
+                                            if (tab === 'SYSTEM') return n.type !== 'LEVEL_UP' && n.type !== 'SUCCESS';
+                                            return false;
+                                        }).length;
+
+                                        return (
+                                            <button
+                                                key={tab}
+                                                onClick={() => setActiveTab(tab)}
+                                                style={{
+                                                    flex: 1,
+                                                    padding: '10px 0',
+                                                    background: 'transparent',
+                                                    border: 'none',
+                                                    borderBottom: activeTab === tab ? '2px solid var(--accent)' : '2px solid transparent',
+                                                    color: activeTab === tab ? '#fff' : 'rgba(255,255,255,0.4)',
+                                                    fontSize: '0.7rem',
+                                                    fontWeight: 'bold',
+                                                    cursor: 'pointer',
+                                                    transition: '0.2s',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '6px'
+                                                }}
+                                            >
+                                                {tab.replace('_', ' ')}
+                                                {count > 0 && (
+                                                    <span style={{
+                                                        background: 'var(--accent)',
+                                                        color: '#000',
+                                                        borderRadius: '10px',
+                                                        padding: '1px 5px',
+                                                        fontSize: '0.6rem',
+                                                        minWidth: '16px',
+                                                        textAlign: 'center'
+                                                    }}>
+                                                        {count}
+                                                    </span>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
 
                                 <div className="scroll-container" style={{ maxHeight: '400px', overflowY: 'auto' }}>
@@ -170,7 +197,7 @@ const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onCl
                                                         {getIcon(notif.type)}
                                                     </div>
                                                     <div style={{ flex: 1 }}>
-                                                        <div style={{ fontSize: '0.85rem', color: '#fff', lineHeight: '1.4' }}>
+                                                        <div style={{ fontSize: '0.85rem', color: '#fff', lineHeight: '1.4', whiteSpace: 'pre-wrap' }}>
                                                             {notif.message}
                                                         </div>
                                                         <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', marginTop: '4px' }}>

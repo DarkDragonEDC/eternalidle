@@ -401,40 +401,45 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                             background: 'var(--panel-bg)',
                             border: '1px solid var(--accent)',
                             borderRadius: '16px',
-                            padding: '24px',
-                            maxWidth: '400px',
+                            padding: '30px',
+                            maxWidth: '500px',
                             width: '100%',
                             boxShadow: 'var(--panel-shadow)'
                         }} onClick={e => e.stopPropagation()}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <Trophy size={20} color="var(--accent)" />
-                                    <h3 style={{ margin: 0, color: 'var(--text-main)' }}>Membership Benefits</h3>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <Trophy size={24} color="var(--accent)" />
+                                    <h3 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.2rem' }}>Membership Benefits</h3>
                                 </div>
                                 <button onClick={() => setShowMSInfo(false)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}>
-                                    <X size={20} />
+                                    <X size={24} />
                                 </button>
                             </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                <div style={{ background: 'var(--slot-bg)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #ffca28' }}>
-                                    <div style={{ fontWeight: 'bold', color: '#ffca28', fontSize: '0.9rem', marginBottom: '4px' }}>Global XP Bonus</div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Gain <strong style={{ color: 'var(--text-main)' }}>+10% more XP</strong> from all sources (Gathering, Refining, Crafting, and Combat).</div>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
+                                <div style={{ background: 'var(--slot-bg)', padding: '15px', borderRadius: '10px', borderLeft: '4px solid #ffca28' }}>
+                                    <div style={{ fontWeight: 'bold', color: '#ffca28', fontSize: '0.95rem', marginBottom: '4px' }}>Global XP Bonus</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Gain <strong style={{ color: 'var(--text-main)' }}>+10% more XP</strong> from all sources.</div>
                                 </div>
 
-                                <div style={{ background: 'var(--slot-bg)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #4caf50' }}>
-                                    <div style={{ fontWeight: 'bold', color: '#4caf50', fontSize: '0.9rem', marginBottom: '4px' }}>Inventory Expansion</div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Increase your base inventory space from <strong style={{ color: 'var(--text-main)' }}>30 to 50 slots</strong>.</div>
+                                <div style={{ background: 'var(--slot-bg)', padding: '15px', borderRadius: '10px', borderLeft: '4px solid #4caf50' }}>
+                                    <div style={{ fontWeight: 'bold', color: '#4caf50', fontSize: '0.95rem', marginBottom: '4px' }}>Inventory Expansion</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Increase base inventory from <strong style={{ color: 'var(--text-main)' }}>30 to 50 slots</strong>.</div>
                                 </div>
 
-                                <div style={{ background: 'var(--slot-bg)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #42a5f5' }}>
-                                    <div style={{ fontWeight: 'bold', color: '#42a5f5', fontSize: '0.9rem', marginBottom: '4px' }}>Market Domination</div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>List up to <strong style={{ color: 'var(--text-main)' }}>50 items</strong> simultaneously on the Market (Base: 30).</div>
+                                <div style={{ background: 'var(--slot-bg)', padding: '15px', borderRadius: '10px', borderLeft: '4px solid #42a5f5' }}>
+                                    <div style={{ fontWeight: 'bold', color: '#42a5f5', fontSize: '0.95rem', marginBottom: '4px' }}>Market Domination</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>List up to <strong style={{ color: 'var(--text-main)' }}>50 items</strong> (Base: 30).</div>
                                 </div>
 
-                                <div style={{ background: 'var(--slot-bg)', padding: '12px', borderRadius: '8px', borderLeft: '3px solid #ec407a' }}>
-                                    <div style={{ fontWeight: 'bold', color: '#ec407a', fontSize: '0.9rem', marginBottom: '4px' }}>Productive Inactivity</div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>The IDLE productivity limit is increased from <strong style={{ color: 'var(--text-main)' }}>8h to 12h</strong>.</div>
+                                <div style={{ background: 'var(--slot-bg)', padding: '15px', borderRadius: '10px', borderLeft: '4px solid #ec407a' }}>
+                                    <div style={{ fontWeight: 'bold', color: '#ec407a', fontSize: '0.95rem', marginBottom: '4px' }}>Productive Inactivity</div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>IDLE limit increased from <strong style={{ color: 'var(--text-main)' }}>8h to 12h</strong>.</div>
+                                </div>
+
+                                <div style={{ background: 'var(--slot-bg)', padding: '15px', borderRadius: '10px', borderLeft: '4px solid var(--accent)', gridColumn: 'span 2' }}>
+                                    <div style={{ fontWeight: 'bold', color: 'var(--accent)', fontSize: '0.95rem', marginBottom: '4px' }}>Global Efficiency</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Gain an additional <strong style={{ color: 'var(--text-main)' }}>+10% Global Efficiency</strong> (Mining, Logging, Crafting speed, etc).</div>
                                 </div>
                             </div>
 
