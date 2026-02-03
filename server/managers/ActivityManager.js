@@ -185,10 +185,13 @@ export class ActivityManager {
             }
         }
 
-        let message = isDuplication ? `Gathered ${item.name} (x2!)` : `Gathered ${item.name}`;
-        if (isAutoRefine) {
-            const refinedItem = ITEM_LOOKUP[refinedItemGained];
-            message += ` + Auto-Refined into ${refinedItem?.name || 'Refined Item'}!`;
+        let message = null;
+        if (isDuplication || isAutoRefine) {
+            message = isDuplication ? `Gathered ${item.name} (x2!)` : `Gathered ${item.name}`;
+            if (isAutoRefine) {
+                const refinedItem = ITEM_LOOKUP[refinedItemGained];
+                message += ` + Auto-Refined into ${refinedItem?.name || 'Refined Item'}!`;
+            }
         }
 
         return {
