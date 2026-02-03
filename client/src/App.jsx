@@ -666,7 +666,7 @@ function App() {
       case 'town_overview':
         return <TownOverview onNavigate={(tab) => setActiveTab(tab)} />;
       case 'combat_overview':
-        return <CombatOverview onNavigate={(tab) => setActiveTab(tab)} />;
+        return <CombatOverview gameState={displayedGameState} onNavigate={(tab) => setActiveTab(tab)} />;
       case 'gathering':
       case 'refining': {
         const isGathering = activeTab === 'gathering';

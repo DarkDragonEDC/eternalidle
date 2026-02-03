@@ -1,18 +1,46 @@
 import React from 'react';
 import { Pickaxe, Box, Hammer, Sword, Castle, Trophy, ShoppingBag } from 'lucide-react';
 
-const HubButton = ({ label, icon, onClick, color = 'var(--text-main)' }) => (
+const HubButton = ({ label, icon, onClick, color = 'var(--text-main)', level, progress }) => (
     <button
         onClick={onClick}
         style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
             padding: '20px', background: 'var(--panel-bg)', border: '1px solid var(--border)',
-            borderRadius: '12px', width: '100%', aspectRatio: '1/1', gap: '10px',
+            borderRadius: '12px', width: '100%', aspectRatio: '1/1', gap: '8px',
             cursor: 'pointer', transition: '0.2s', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
         }}
     >
         <div style={{ color: color }}>{React.cloneElement(icon, { size: 32 })}</div>
         <span style={{ fontWeight: 'bold', fontSize: '1rem', color: 'var(--text-main)' }}>{label}</span>
+        {level !== undefined && (
+            <div style={{ display: 'flex', gap: '4px', marginTop: '2px' }}>
+                <div style={{
+                    fontSize: '0.7rem',
+                    color: 'var(--accent)',
+                    background: 'rgba(0,0,0,0.3)',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    fontWeight: 'bold',
+                    border: '1px solid var(--accent-soft)'
+                }}>
+                    Lv {level}
+                </div>
+                {progress !== undefined && (
+                    <div style={{
+                        fontSize: '0.7rem',
+                        color: 'var(--text-dim)',
+                        background: 'rgba(255,255,255,0.05)',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        fontWeight: 'normal',
+                        border: '1px solid rgba(255,255,255,0.1)'
+                    }}>
+                        {Math.floor(progress)}%
+                    </div>
+                )}
+            </div>
+        )}
     </button>
 );
 
@@ -241,9 +269,30 @@ export const TownOverview = ({ onNavigate }) => (
     </div>
 );
 
-export const CombatOverview = ({ onNavigate }) => (
-    <div style={{ padding: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', alignContent: 'start' }}>
-        <HubButton label="Adventure" icon={<Sword />} color="#ef4444" onClick={() => onNavigate('combat')} />
-        <HubButton label="Dungeons" icon={<Castle />} color="#94a3b8" onClick={() => onNavigate('dungeon')} />
-    </div>
-);
+export const CombatOverview = ({ onNavigate, gameState }) => {
+    const skill = gameState?.state?.skills?.COMBAT || { level: 1, xp: 0 };
+    const level = skill.level;
+    const nextXP = calculateNextLevelXP(level);
+    const progress = (skill.xp / nextXP) * 100;
+
+    return (
+        <div style={{ padding: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', alignContent: 'start' }}>
+            <HubButton
+                label="Adventure"
+                icon={<Sword />}
+                color="#ef4444"
+                onClick={() => onNavigate('combat')}
+                level={level}
+                progress={progress}
+            />
+            <HubButton
+                label="Dungeons"
+                icon={<Castle />}
+                color="#94a3b8"
+                onClick={() => onNavigate('dungeon')}
+                level={level}
+                progress={progress}
+            />
+        </div>
+    );
+};
