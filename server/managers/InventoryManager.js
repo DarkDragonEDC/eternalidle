@@ -162,7 +162,7 @@ export class InventoryManager {
         }
 
         await this.gameManager.saveState(char.id, state);
-        return { success: true, message: `${item.name} equipped!` };
+        return { success: true };
     }
 
     async unequipItem(userId, characterId, slotName) {
@@ -183,7 +183,7 @@ export class InventoryManager {
         delete state.equipment[slotName];
 
         await this.gameManager.saveState(char.id, state);
-        return { success: true, message: "Item unequipped", state };
+        return { success: true, state };
     }
 
     calculateStats(char) {

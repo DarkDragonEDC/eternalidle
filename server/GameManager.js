@@ -368,8 +368,25 @@ export class GameManager {
         const char = this.cache.get(charId);
         if (!char) return;
 
-        // Note: Removed Optimistic Locking check - it was incorrectly blocking all saves
-        // TODO: Implement proper version-based locking if needed in future
+        // --- Optimistic Locking Check ---
+        // Fetch current last_saved from DB to verify we aren't overwriting someone else's newer data
+        const { data: remote, error: fetchError } = await this.supabase
+            .from('characters')
+            .select('last_saved')
+            .eq('id', charId)
+            .single();
+
+        if (!fetchError && remote && char.last_saved) {
+            const dbTime = new Date(remote.last_saved).getTime();
+            const cacheTime = new Date(char.last_saved).getTime();
+
+            if (dbTime > cacheTime) {
+                console.warn(`[DB] PERSISTENCE CONFLICT for ${char.name}! DB has newer data (${remote.last_saved}) than Cache (${char.last_saved}). Aborting save to prevent rolling back progress.`);
+                // Force cache to mark as clean to prevent further attempts until re-synced
+                this.dirty.delete(charId);
+                return;
+            }
+        }
 
         // console.log(`[DB] Persisting character ${char.name} (${charId})`);
         const saveTime = new Date().toISOString();
@@ -1198,7 +1215,7 @@ export class GameManager {
         }
 
         // console.log(`[NOTIF] Adding system notif for ${char.name}: ${message}`);
-        this.addNotification(char, 'SYSTEM', message);
+        // this.addNotification(char, 'SYSTEM', message);
     }
 
     processFood(char) {
@@ -1306,7 +1323,7 @@ export class GameManager {
 
         this.inventoryManager.consumeItems(char, { [itemId]: safeQty });
 
-        let message = `Used ${safeQty}x ${itemData.name}`;
+        // let message = `Used ${safeQty}x ${itemData.name}`;
 
         if (itemData.type === 'FOOD') {
             const stats = this.inventoryManager.calculateStats(char);
@@ -1315,7 +1332,7 @@ export class GameManager {
             const newHp = Math.min(stats.maxHP, currentHp + healAmount);
 
             char.state.health = newHp;
-            message += ` (Recovered ${healAmount} HP)`;
+            // message += ` (Recovered ${healAmount} HP)`;
         } else if (itemData.type === 'POTION') {
             const effect = itemData.effect;
             const value = itemData.value;
@@ -1323,25 +1340,25 @@ export class GameManager {
             const totalDuration = baseDuration * safeQty;
 
             this.applyBuff(char, effect, value, totalDuration);
-            message += ` (Buff Applied: +${Math.round(value * 100)}% for ${Math.round(totalDuration / 60)}m)`;
+            // message += ` (Buff Applied: +${Math.round(value * 100)}% for ${Math.round(totalDuration / 60)}m)`;
         } else if (itemData.id === 'ETERNAL_MEMBERSHIP') {
             const membershipItem = { duration: (itemData.duration || 30 * 24 * 60 * 60 * 1000) * safeQty };
             const result = this.crownsManager.applyMembership(char, membershipItem);
             if (result.success) {
-                message = result.message;
+                // message = result.message;
             } else {
                 throw new Error(result.error || "Failed to activate membership");
             }
         } else if (itemData.id === 'INVENTORY_SLOT_TICKET') {
             // Permanent Inventory Expansion
             char.state.extraInventorySlots = (parseInt(char.state.extraInventorySlots) || 0) + safeQty;
-            message = `Used ${safeQty}x Inventory Expansion Tickets! Your inventory capacity permanently increased by ${safeQty} slots.`;
+            // message = `Used ${safeQty}x Inventory Expansion Tickets! Your inventory capacity permanently increased by ${safeQty} slots.`;
         } else if (itemData.id === 'NAME_CHANGE_TOKEN') {
             if (char.state.pendingNameChange) {
                 throw new Error("You already have a pending name change!");
             }
             char.state.pendingNameChange = true;
-            message = "Name Change Unlocked! You can now change your name in the Profile panel.";
+            // message = "Name Change Unlocked! You can now change your name in the Profile panel.";
         } else if (itemData.id.includes('CHEST')) {
             // Chest Logic
             const tier = itemData.tier || 1;
@@ -1401,7 +1418,7 @@ export class GameManager {
             }
 
             // 4. Apply Rewards (Space Guaranteed)
-            let message = `Opened ${safeQty}x ${itemData.name}\nContents:`;
+            // let message = `Opened ${safeQty}x ${itemData.name}\nContents:`;
 
             const rewards = { items: [] }; // For the UI return
 

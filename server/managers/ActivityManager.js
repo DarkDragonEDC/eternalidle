@@ -254,7 +254,7 @@ export class ActivityManager {
 
         return {
             success: true,
-            message: `Refined ${item.name}`,
+            message: null,
             leveledUp,
             itemGained: item.id,
             amountGained: 1,
@@ -352,7 +352,7 @@ export class ActivityManager {
 
         return {
             success: true,
-            message: `Crafted ${qualityName}${item.name}`,
+            message: null,
             leveledUp,
             itemGained: finalItemId,
             amountGained: 1,

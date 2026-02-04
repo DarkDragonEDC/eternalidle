@@ -60,7 +60,7 @@ export class DungeonManager {
         char.last_saved = new Date().toISOString();
 
         await this.gameManager.saveState(char.id, char.state);
-        return { success: true, message: `Entered ${dungeon.name}` };
+        return { success: true };
     }
 
     async processDungeonTick(char) {
@@ -106,7 +106,7 @@ export class DungeonManager {
                     return {
                         dungeonUpdate: {
                             status: 'WALKING',
-                            message: `Walking to next area (${timeLeft}s)...`,
+                            message: null,
                             timeLeft: timeLeft
                         }
                     };
@@ -119,7 +119,7 @@ export class DungeonManager {
             if (char.state.health <= 0) {
                 await this.saveDungeonLog(char, dungeonConfig, 'FAILED');
                 delete char.state.dungeon;
-                return { dungeonUpdate: { status: 'FAILED', message: "You died in the dungeon!" } };
+                return { dungeonUpdate: { status: 'FAILED', message: null } };
             }
 
             if (dungeonState.status === 'PREPARING' || dungeonState.status === 'WAITING_NEXT_WAVE') {
@@ -139,7 +139,7 @@ export class DungeonManager {
                     return {
                         dungeonUpdate: {
                             status: 'WALKING',
-                            message: `Area cleared! Walking... (${timeLeft}s)`,
+                            message: null,
                             timeLeft: timeLeft
                         }
                     };
@@ -211,7 +211,7 @@ export class DungeonManager {
                 status: char.state.dungeon.status,
                 wave: char.state.dungeon.wave,
                 totalWaves: char.state.dungeon.maxWaves,
-                message: isBoss ? "BOSS FIGHT STARTED!" : `Wave ${char.state.dungeon.wave} Started`
+                message: null
             }
         };
     }
@@ -250,7 +250,7 @@ export class DungeonManager {
             loot.push(`1x ${chestId}`);
         } else {
             loot.push(`(Full) ${chestId} LOST`);
-            this.gameManager.addNotification(char, 'WARNING', `Inventory Full! ${chestId} lost.`);
+            // this.gameManager.addNotification(char, 'WARNING', `Inventory Full! ${chestId} lost.`);
         }
 
         // Removed old random drops (Crest/Resource) in favor of the Chest
@@ -305,7 +305,7 @@ export class DungeonManager {
             return {
                 dungeonUpdate: {
                     status: 'PREPARING',
-                    message: `Dungeon Cleared! Starting next run...`,
+                    message: null,
                     rewards: { xp: rewards.xp, silver: rewards.silver, items: loot },
                     autoRepeat: true,
                     lootLog: char.state.dungeon.lootLog
@@ -320,7 +320,7 @@ export class DungeonManager {
         return {
             dungeonUpdate: {
                 status: 'COMPLETED',
-                message: `Dungeon Cleared! Rewards: ${loot.join(', ') || 'No rare drops'}`,
+                message: null,
                 rewards: { xp: rewards.xp, silver: rewards.silver, items: loot },
                 lootLog: char.state.dungeon.lootLog
             },
@@ -341,7 +341,7 @@ export class DungeonManager {
             }
             await this.gameManager.saveState(char.id, char.state);
         }
-        return { success: true, message: "Left the dungeon" };
+        return { success: true };
     }
 
     async saveDungeonLog(char, config, outcome, runLoot = null) {
@@ -395,12 +395,14 @@ export class DungeonManager {
                 }
             });
 
+            /*
             this.gameManager.addActionSummaryNotification(char, `Dungeon (${outcome})`, {
                 itemsGained: itemsMap,
                 xpGained: { DUNGEONEERING: totalXp },
                 totalTime: duration,
                 silverGained: totalSilver
             });
+            */
 
         } catch (err) {
             console.error("Error saving dungeon history log:", err);
