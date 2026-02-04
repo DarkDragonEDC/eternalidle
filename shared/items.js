@@ -428,6 +428,8 @@ for (const t of TIERS) {
     ITEMS.SPECIAL.CHEST[`${t}_GOOD`] = {
         id: `T${t}_CHEST_GOOD`,
         name: `Dungeon Chest (Good)`,
+        tier: t,
+        rarity: 'UNCOMMON',
         type: 'CONSUMABLE',
         rarityColor: '#10b981', // Green
         desc: 'Contains better dungeon loot.'
@@ -887,7 +889,7 @@ for (const t of TIERS) {
     // Runes (Hidden from main inventory)
     RUNE_GATHER_ACTIVITIES.forEach(act => {
         RUNE_EFFECTS.forEach(eff => {
-            for (let s = 1; s <= 3; s++) {
+            for (let s = 1; s <= 5; s++) {
                 const id = `T${t}_RUNE_${act}_${eff}_${s}STAR`;
 
                 // Map nice display names
@@ -901,7 +903,7 @@ for (const t of TIERS) {
 
                 // Adjusted scaling: T1(1*) = 1% ... T10(3*) = 50%
                 // (Tier-1)*5 + StarBonus(1, 3, 5)
-                const starBonus = { 1: 1, 2: 3, 3: 5 };
+                const starBonus = { 1: 1, 2: 3, 3: 5, 4: 7, 5: 10 };
                 const bonusValue = (t - 1) * 5 + (starBonus[s] || s);
 
                 let effectLabel = 'Experience';

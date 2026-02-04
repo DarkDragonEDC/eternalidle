@@ -1323,7 +1323,7 @@ export class GameManager {
 
         this.inventoryManager.consumeItems(char, { [itemId]: safeQty });
 
-        // let message = `Used ${safeQty}x ${itemData.name}`;
+        let message = ""; // Neutralized message for toast suppression
 
         if (itemData.type === 'FOOD') {
             const stats = this.inventoryManager.calculateStats(char);
@@ -1418,7 +1418,7 @@ export class GameManager {
             }
 
             // 4. Apply Rewards (Space Guaranteed)
-            // let message = `Opened ${safeQty}x ${itemData.name}\nContents:`;
+            let message = ""; // Neutralized for toast simplification
 
             const rewards = { items: [] }; // For the UI return
 
