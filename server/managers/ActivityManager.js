@@ -90,7 +90,7 @@ export class ActivityManager {
         char.last_saved = new Date().toISOString();
 
         // Mark for persistence
-        this.gameManager.markDirty(char.id);
+        await this.gameManager.saveState(char.id, char.state);
 
         return { success: true, actionType, itemId, quantity, timePerAction };
     }
@@ -119,7 +119,7 @@ export class ActivityManager {
         char.activity_started_at = null;
 
         // Mark for persistence
-        this.gameManager.markDirty(char.id);
+        await this.gameManager.saveState(char.id, char.state);
 
         return { success: true, message: "Activity stopped" };
     }

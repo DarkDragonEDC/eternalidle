@@ -1148,6 +1148,7 @@ export class GameManager {
 
     async saveState(charId, state) {
         this.markDirty(charId);
+        await this.persistCharacter(charId);
     }
 
     addNotification(char, type, message) {
@@ -1538,8 +1539,9 @@ export class GameManager {
             results.push({ item: runeId, stars, type: randomType });
         }
 
-        // 7. Mark Dirty
+        // 7. Mark Dirty & Persist Immediately
         this.markDirty(char.id);
+        await this.persistCharacter(char.id);
 
         return {
             success: true,
@@ -1599,8 +1601,9 @@ export class GameManager {
         // 7. Add New Runes
         this.inventoryManager.addItemToInventory(char, newRuneId, count);
 
-        // 8. Mark Dirty
+        // 8. Mark Dirty & Persist Immediately
         this.markDirty(char.id);
+        await this.persistCharacter(char.id);
 
         const results = Array.from({ length: count }).map(() => ({
             item: newRuneId,

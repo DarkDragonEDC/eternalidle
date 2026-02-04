@@ -992,14 +992,29 @@ setInterval(async () => {
     }
 }, 600000);
 
-// --- Background Sync (1 min) ---
+// --- Background Sync (15s) ---
 setInterval(async () => {
     try {
         await gameManager.persistAllDirty();
     } catch (err) {
         console.error('[SYNC-LOOP] Error:', err);
     }
-}, 60000);
+}, 15000);
+
+// --- Shutdown Handling ---
+const shutdown = async (signal) => {
+    console.log(`[SERVER] Received ${signal}. Persisting data and exiting...`);
+    try {
+        await gameManager.persistAllDirty();
+        console.log('[SERVER] All dirty data persisted.');
+    } catch (err) {
+        console.error('[SERVER] Error during shutdown persistence:', err);
+    }
+    process.exit(0);
+};
+
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 // Run once on startup
 setTimeout(() => {
