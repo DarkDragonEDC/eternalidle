@@ -210,7 +210,7 @@ export class ActivityManager {
 
     findRefinedItem(rawId) {
         // Search through ITEMS.REFINING for a recipe that uses this raw material
-        for (const cat of Object.values(ITEMS.REFINING || {})) {
+        for (const cat of Object.values(ITEMS.REFINED || {})) {
             for (const res of Object.values(cat)) {
                 if (res.req && res.req[rawId]) {
                     return res.id;
