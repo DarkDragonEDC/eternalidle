@@ -57,10 +57,10 @@ export class GameManager {
     async executeLocked(userId, task) {
         if (!userId) return await task();
 
-        // Obtém a trava atual para este usuário (ou uma Promise resolvida se não houver)
+        // Get current lock for this user (or a resolved Promise if none)
         const currentLock = this.userLocks.get(userId) || Promise.resolve();
 
-        // Cria a próxima trava que aguarda a anterior
+        // Create the next lock that waits for the previous one
         const nextLock = currentLock.then(async () => {
             try {
                 return await task();
@@ -69,7 +69,7 @@ export class GameManager {
                 throw err;
             }
         }).finally(() => {
-            // Se esta for a última trava na fila, limpa o Map
+            // If this is the last lock in the queue, clear the Map
             if (this.userLocks.get(userId) === nextLock) {
                 this.userLocks.delete(userId);
             }

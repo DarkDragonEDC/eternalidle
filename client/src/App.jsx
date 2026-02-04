@@ -197,7 +197,7 @@ function App() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Persistir navegação
+  // Persist navigation
   useEffect(() => {
     localStorage.setItem('activeTab', activeTab);
     localStorage.setItem('activeCategory', activeCategory);
@@ -364,7 +364,7 @@ function App() {
 
               await supabase.auth.signOut();
 
-              // Limpeza profunda para evitar loops de refresh com dados antigos
+              // Deep cleanup to avoid search loops with old data
               localStorage.clear();
               sessionStorage.clear();
 
@@ -373,7 +373,7 @@ function App() {
               setSelectedCharacter(null);
               setSocket(null);
 
-              // Recarrega para garantir que o estado do Supabase seja reiniciado
+              // Reload to ensure Supabase state is reset
               window.location.reload();
               return;
             }

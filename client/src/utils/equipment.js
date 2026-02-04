@@ -79,6 +79,7 @@ export const getBestItemForSlot = (slot, inventory) => {
                 case 'tool_knife': matches = item.type === 'TOOL_KNIFE'; break;
                 case 'tool_sickle': matches = item.type === 'TOOL_SICKLE'; break;
                 case 'tool_rod': matches = item.type === 'TOOL_ROD'; break;
+                case 'tool_pouch': matches = item.type === 'TOOL_POUCH'; break;
                 case 'gloves': matches = item.type === 'GLOVES'; break;
                 case 'chest': matches = item.type === 'ARMOR'; break;
                 case 'offHand': matches = item.type === 'OFF_HAND'; break;

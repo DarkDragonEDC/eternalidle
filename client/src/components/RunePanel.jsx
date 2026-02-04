@@ -1322,13 +1322,15 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                             )}
                                         </div>
                                         <div style={{
-                                            width: '100%', fontSize: '0.65rem', color: 'var(--text-bright)',
-                                            fontWeight: 'bold', overflow: 'hidden',
-                                            textAlign: 'center', lineHeight: '1.1',
-                                            height: '2.2em', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                            width: '100%', fontSize: '0.62rem', color: 'var(--text-bright)',
+                                            fontWeight: 'bold',
+                                            textAlign: 'center', lineHeight: '1.2',
+                                            minHeight: '2.5em', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            padding: '0 2px',
+                                            wordBreak: 'break-word'
                                         }}>
                                             {item.id && item.id.includes('RUNE_') && !item.id.includes('SHARD')
-                                                ? (item.name || 'Rune').replace(/^T\d+\sRune\sof\s/, '')
+                                                ? (item.name || 'Rune').replace(/^T\d+\s/, '').replace(/\sRune\sof\s/i, ' ')
                                                 : (item.name || 'Unknown Item')}
                                         </div>
                                     </motion.div>

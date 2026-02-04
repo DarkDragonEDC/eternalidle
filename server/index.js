@@ -213,14 +213,14 @@ app.get('/api/last_active', authMiddleware, async (req, res) => {
 
 // Public route for active players count (characters with actions)
 app.get('/api/active_players', async (req, res) => {
-    // Log em arquivo para depuração persistente
-    const logMsg = `[${new Date().toISOString()}] Contador acessado. Origin: ${req.headers.origin}\n`;
+    // Persistent log for debugging
+    const logMsg = `[${new Date().toISOString()}] Counter accessed. Origin: ${req.headers.origin}\n`;
     try {
         if (!fs.existsSync('logs')) fs.mkdirSync('logs');
         fs.appendFileSync('logs/access.log', logMsg);
     } catch (e) { }
 
-    // Forçar cabeçalhos CORS para evitar bloqueio do navegador local
+    // Force CORS headers to avoid local browser block
     try {
         const { count, error } = await supabase
             .from('characters')
