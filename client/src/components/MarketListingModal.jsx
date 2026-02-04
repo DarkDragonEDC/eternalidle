@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { formatNumber, formatSilver } from '@utils/format';
-import { Package, X } from 'lucide-react';
+import { Package, X, Star } from 'lucide-react';
 import { resolveItem, getTierColor, formatItemId } from '@shared/items';
 
 const MarketListingModal = ({ listingItem, onClose, socket }) => {
@@ -18,6 +18,7 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
 
     const itemData = resolveItem(listingItem.itemId);
     const tierColor = getTierColor(itemData?.tier || 1);
+    const maxQty = listingItem.max || listingItem.qty || 0;
 
     const handleConfirm = () => {
         const parsedAmount = parseInt(amount);
@@ -94,13 +95,33 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        border: `1px solid ${tierColor}`
+                        border: `1px solid ${tierColor}`,
+                        position: 'relative' // relative for absolute stars
                     }}>
                         <span style={{ color: tierColor, fontWeight: 'bold' }}>T{itemData?.tier}</span>
+                        {/* Rune Stars Overlay */}
+                        {itemData?.stars > 0 && (
+                            <div style={{
+                                position: 'absolute',
+                                bottom: '-6px',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                display: 'flex',
+                                gap: '1px',
+                                background: 'rgba(0,0,0,0.8)',
+                                padding: '2px 4px',
+                                borderRadius: '4px',
+                                border: '1px solid rgba(255,215,0,0.3)'
+                            }}>
+                                {Array.from({ length: itemData.stars }).map((_, i) => (
+                                    <Star key={i} size={8} fill="#FFD700" color="#FFD700" />
+                                ))}
+                            </div>
+                        )}
                     </div>
                     <div>
                         <div style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>{itemData?.name || formatItemId(listingItem.itemId)}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Owned: {listingItem.max}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Owned: {maxQty}</div>
                     </div>
                 </div>
 
@@ -111,7 +132,7 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                             <label style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Amount to sell:</label>
                             <button
-                                onClick={() => setAmount(String(listingItem.max))}
+                                onClick={() => setAmount(String(maxQty))}
                                 style={{
                                     background: 'var(--accent-soft)',
                                     border: '1px solid var(--border)',
@@ -128,11 +149,11 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                         </div>
                         <input
                             min="1"
-                            max={listingItem.max}
+                            max={maxQty}
                             type="number"
                             value={amount}
                             onChange={(e) => {
-                                const val = Math.min(listingItem.max, parseInt(e.target.value) || 0);
+                                const val = Math.min(maxQty, parseInt(e.target.value) || 0);
                                 setAmount(String(val || ''));
                             }}
                             style={{

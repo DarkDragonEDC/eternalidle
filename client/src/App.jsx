@@ -148,8 +148,14 @@ function App() {
     socket?.emit('clear_notifications');
   };
 
-  const handleListOnMarket = (item) => {
-    setMarketSellItem(item);
+  const handleListOnMarket = (id, item) => {
+    if (item && typeof item === 'object') {
+      setMarketSellItem({ ...item, itemId: id });
+    } else if (typeof id === 'object') {
+      setMarketSellItem({ ...id, itemId: id.id });
+    } else {
+      setMarketSellItem({ itemId: id });
+    }
   };
 
   useEffect(() => {

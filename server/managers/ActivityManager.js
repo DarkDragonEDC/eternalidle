@@ -154,12 +154,14 @@ export class ActivityManager {
 
         const baseXp = item.xp || 5;
 
-        // Multipliers
-        const yieldMult = 1 + (stats.globals?.xpYield || 0) / 100;
-        const specificMult = 1 + (stats.xpBonus?.GATHERING || 0) / 100;
-        const runeSkillMult = 1 + (actKey ? (stats.xpBonus?.[actKey] || 0) : 0) / 100;
+        // Multipliers (Now Additive)
+        const yieldBonus = (stats.globals?.xpYield || 0); // e.g. 15 for 15%
+        const specificBonus = (stats.xpBonus?.GATHERING || 0);
+        const runeSkillBonus = (actKey ? (stats.xpBonus?.[actKey] || 0) : 0);
 
-        let xpAmount = Math.floor(baseXp * yieldMult * specificMult * runeSkillMult);
+        // FORMULA: Base * (1 + (Global + Specific + Rune)/100)
+        let totalBonusPc = yieldBonus + specificBonus + runeSkillBonus;
+        let xpAmount = Math.floor(baseXp * (1 + totalBonusPc / 100));
 
         if (xpAmount > MAX_ACTIVITY_XP) xpAmount = MAX_ACTIVITY_XP;
 
@@ -252,13 +254,14 @@ export class ActivityManager {
 
         const baseXp = item.xp || 10;
 
-        // Multipliers
-        const yieldMult = 1 + (stats.globals?.xpYield || 0) / 100;
-        const specificMult = 1 + (stats.xpBonus?.REFINING || 0) / 100;
+        // Multipliers (Now Additive)
+        const yieldBonus = (stats.globals?.xpYield || 0);
+        const specificBonus = (stats.xpBonus?.REFINING || 0);
+        const runeSkillBonus = (actKey ? (stats.xpBonus?.[actKey] || 0) : 0);
 
-        const runeSkillMult = 1 + (actKey ? (stats.xpBonus?.[actKey] || 0) : 0) / 100;
-
-        let xpAmount = Math.floor(baseXp * yieldMult * specificMult * runeSkillMult);
+        // FORMULA: Base * (1 + (Global + Specific + Rune)/100)
+        let totalBonusPc = yieldBonus + specificBonus + runeSkillBonus;
+        let xpAmount = Math.floor(baseXp * (1 + totalBonusPc / 100));
 
 
         if (xpAmount > MAX_ACTIVITY_XP) xpAmount = MAX_ACTIVITY_XP;
@@ -369,13 +372,14 @@ export class ActivityManager {
 
         const baseXp = item.xp || 50;
 
-        // Multipliers
-        const yieldMult = 1 + (stats.globals?.xpYield || 0) / 100;
-        const specificMult = 1 + (stats.xpBonus?.CRAFTING || 0) / 100;
+        // Multipliers (Now Additive)
+        const yieldBonus = (stats.globals?.xpYield || 0);
+        const specificBonus = (stats.xpBonus?.CRAFTING || 0);
+        const runeSkillBonus = (actKey ? (stats.xpBonus?.[actKey] || 0) : 0);
 
-        const runeSkillMult = 1 + (actKey ? (stats.xpBonus?.[actKey] || 0) : 0) / 100;
-
-        let xpAmount = Math.floor(baseXp * yieldMult * specificMult * runeSkillMult);
+        // FORMULA: Base * (1 + (Global + Specific + Rune)/100)
+        let totalBonusPc = yieldBonus + specificBonus + runeSkillBonus;
+        let xpAmount = Math.floor(baseXp * (1 + totalBonusPc / 100));
 
         if (xpAmount > MAX_ACTIVITY_XP) xpAmount = MAX_ACTIVITY_XP;
 

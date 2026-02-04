@@ -3,7 +3,7 @@ import { formatNumber, formatSilver } from '@utils/format';
 import {
     Tag, ShoppingBag, Package, Search,
     Coins, ArrowRight, User, Info, Trash2,
-    Shield, Zap, Apple, Box, Clock, Check, AlertTriangle, X
+    Shield, Zap, Apple, Box, Clock, Check, AlertTriangle, X, Star
 } from 'lucide-react';
 import { resolveItem, getTierColor, formatItemId } from '@shared/items';
 
@@ -385,6 +385,25 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                 <div style={{ position: 'absolute', top: 2, left: 2, fontSize: '0.6rem', fontWeight: '900', color: 'var(--text-main)', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>
                                                     T{l.item_data.tier}
                                                 </div>
+                                                {/* Rune Stars */}
+                                                {(l.item_data.stars > 0) && (
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        bottom: '-2px',
+                                                        left: '50%',
+                                                        transform: 'translateX(-50%)',
+                                                        display: 'flex',
+                                                        gap: '0px',
+                                                        background: 'rgba(0,0,0,0.4)',
+                                                        padding: '1px 2px',
+                                                        borderRadius: '4px',
+                                                        whiteSpace: 'nowrap'
+                                                    }}>
+                                                        {Array.from({ length: l.item_data.stars }).map((_, i) => (
+                                                            <Star key={i} size={6} fill="#FFD700" color="#FFD700" />
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div style={{ flex: '2 1 0%', minWidth: '150px' }}>
@@ -515,11 +534,28 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                 <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: 'var(--text-main)', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>T{data.tier}</div>
                                                 <div style={{ position: 'absolute', top: 6, right: 6, fontSize: '0.7rem', color: 'var(--text-main)', fontWeight: 'bold' }}>x{qty}</div>
 
-                                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', overflow: 'hidden' }}>
+                                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
                                                     {data.icon ? (
                                                         <img src={data.icon} alt={data.name} style={{ width: '130%', height: '130%', objectFit: 'contain' }} />
                                                     ) : (
                                                         <Package size={32} color="#666" style={{ opacity: 0.8 }} />
+                                                    )}
+                                                    {/* Rune Stars Overlay */}
+                                                    {data.stars > 0 && (
+                                                        <div style={{
+                                                            position: 'absolute',
+                                                            bottom: 0,
+                                                            left: '50%',
+                                                            transform: 'translateX(-50%)',
+                                                            display: 'flex',
+                                                            gap: '0px',
+                                                            zIndex: 10,
+                                                            filter: 'drop-shadow(0px 0px 2px black)'
+                                                        }}>
+                                                            {Array.from({ length: data.stars }).map((_, i) => (
+                                                                <Star key={i} size={8} fill="#FFD700" color="#FFD700" />
+                                                            ))}
+                                                        </div>
                                                     )}
                                                 </div>
 
@@ -602,6 +638,25 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                     <div style={{ position: 'absolute', top: 2, left: 2, fontSize: '0.6rem', fontWeight: '900', color: 'var(--text-main)', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>
                                                         T{l.item_data.tier}
                                                     </div>
+                                                    {/* Rune Stars */}
+                                                    {(l.item_data.stars > 0) && (
+                                                        <div style={{
+                                                            position: 'absolute',
+                                                            bottom: '-2px',
+                                                            left: '50%',
+                                                            transform: 'translateX(-50%)',
+                                                            display: 'flex',
+                                                            gap: '0px',
+                                                            background: 'rgba(0,0,0,0.4)',
+                                                            padding: '1px 2px',
+                                                            borderRadius: '4px',
+                                                            whiteSpace: 'nowrap'
+                                                        }}>
+                                                            {Array.from({ length: l.item_data.stars }).map((_, i) => (
+                                                                <Star key={i} size={6} fill="#FFD700" color="#FFD700" />
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </div>
 
                                                 <div style={{ flex: '2 1 0%', minWidth: '150px' }}>
@@ -669,19 +724,20 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                         let icon = <Coins size={24} color="var(--accent)" />;
                                         let tierColor = '#fff';
 
+                                        let itemData = null;
                                         if (isItem && c.itemId) {
-                                            const data = resolveItem(c.itemId);
-                                            if (data) {
-                                                tierColor = getTierColor(data.tier);
+                                            itemData = resolveItem(c.itemId);
+                                            if (itemData) {
+                                                tierColor = getTierColor(itemData.tier);
                                                 if (c.type === 'SOLD_ITEM') {
-                                                    name = `Sold: ${data.name}`;
+                                                    name = `Sold: ${itemData.name}`;
                                                 } else {
-                                                    name = `${data.name}`;
+                                                    name = `${itemData.name}`;
                                                 }
 
                                                 if (c.type !== 'SOLD_ITEM') {
-                                                    if (data.icon) {
-                                                        icon = <img src={data.icon} alt={data.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />;
+                                                    if (itemData.icon) {
+                                                        icon = <img src={itemData.icon} alt={itemData.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />;
                                                     } else {
                                                         icon = <Package size={24} color="#666" style={{ opacity: 0.8 }} />;
                                                     }
@@ -714,9 +770,30 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                     justifyContent: 'center',
                                                     border: isItem ? `1px solid ${tierColor}` : '1px solid var(--accent)',
                                                     flexShrink: 0,
-                                                    overflow: 'hidden'
+                                                    overflow: 'hidden',
+                                                    position: 'relative'
                                                 }}>
                                                     {isItem && icon.props?.style ? React.cloneElement(icon, { style: { ...icon.props.style, width: '130%', height: '130%', objectFit: 'contain' } }) : icon}
+
+                                                    {/* Rune Stars Overlay */}
+                                                    {itemData?.stars > 0 && (
+                                                        <div style={{
+                                                            position: 'absolute',
+                                                            bottom: '-1px',
+                                                            left: '50%',
+                                                            transform: 'translateX(-50%)',
+                                                            display: 'flex',
+                                                            gap: '0px',
+                                                            background: 'rgba(0,0,0,0.4)',
+                                                            padding: '1px 2px',
+                                                            borderRadius: '4px',
+                                                            whiteSpace: 'nowrap'
+                                                        }}>
+                                                            {Array.from({ length: itemData.stars }).map((_, i) => (
+                                                                <Star key={i} size={6} fill="#FFD700" color="#FFD700" />
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <div style={{ flex: '2 1 0%', minWidth: '150px' }}>
                                                     <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>

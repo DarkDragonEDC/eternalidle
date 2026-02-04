@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { X, Sword, Shield, Heart, Zap, Play, Layers, User, Pickaxe, Target, Apple, Star, Info } from 'lucide-react';
-import { resolveItem, getTierColor } from '@shared/items';
+import { resolveItem, getTierColor, calculateRuneBonus } from '@shared/items';
 import { getBestItemForSlot, isBetterItem } from '../utils/equipment';
 
 const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, inventory, onShowInfo }) => {
@@ -55,7 +55,17 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
         });
 
         // Use same sorting as utility
+        // Use same sorting as utility
         itemArray.sort((a, b) => {
+            // Special sort for Runes using calculated bonus
+            if (a.type === 'RUNE' && b.type === 'RUNE') {
+                const bVal = calculateRuneBonus(b.tier || 1, b.stars || 1);
+                const aVal = calculateRuneBonus(a.tier || 1, a.stars || 1);
+                if (bVal !== aVal) return bVal - aVal;
+                // If bonus is same, prefer tier
+                return (b.tier || 0) - (a.tier || 0);
+            }
+
             if ((b.ip || 0) !== (a.ip || 0)) return (b.ip || 0) - (a.ip || 0);
             const bQual = b.quality || b.stars || 0;
             const aQual = a.quality || a.stars || 0;

@@ -857,8 +857,12 @@ export const getSkillForItem = (itemId, actionType) => {
  */
 export const getLevelRequirement = (tier) => {
     const t = parseInt(tier) || 1;
-    if (t <= 1) return 1;
     return (t - 1) * 10;
+};
+
+export const calculateRuneBonus = (tier, stars) => {
+    const starBonus = { 1: 1, 2: 3, 3: 5, 4: 7, 5: 10 };
+    return (tier - 1) * 5 + (starBonus[stars] || stars);
 };
 
 // Generate Runes & Shards

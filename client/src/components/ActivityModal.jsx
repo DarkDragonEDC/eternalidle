@@ -81,16 +81,19 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
     // XP
     const stats = gameState?.calculatedStats || {};
     const baseXp = item.xp || (type === 'GATHERING' ? 5 : (type === 'REFINING' ? 10 : 50));
-    const yieldMult = 1 + (stats.globals?.xpYield || 0) / 100;
+    const yieldBonus = (stats.globals?.xpYield || 0);
 
     let specificKey = '';
     if (type === 'GATHERING') specificKey = 'GATHERING';
     else if (type === 'REFINING') specificKey = 'REFINING';
     else if (type === 'CRAFTING') specificKey = 'CRAFTING';
 
-    const specificMult = 1 + (stats.xpBonus?.[specificKey] || 0) / 100;
-    const runeMult = 1 + (stats.xpBonus?.[effKey] || 0) / 100;
-    const xpPerAction = parseFloat((baseXp * yieldMult * specificMult * runeMult).toFixed(1));
+    const specificBonus = (stats.xpBonus?.[specificKey] || 0);
+    const runeBonus = (stats.xpBonus?.[effKey] || 0);
+
+    // Additive Formula: Base * (1 + (Global + Specific + Rune)/100)
+    const totalBonusPc = yieldBonus + specificBonus + runeBonus;
+    const xpPerAction = parseFloat((baseXp * (1 + totalBonusPc / 100)).toFixed(1));
     const totalXP = formatNumber(xpPerAction * qtyNum);
 
     // Tempo base & Redução
