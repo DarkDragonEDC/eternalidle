@@ -285,7 +285,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                         whiteSpace: 'nowrap'
                                     }}
                                 >
-                                    {cat.charAt(0) + cat.slice(1).toLowerCase()}
+                                    {cat === 'COMBAT' ? 'Combat' : cat === 'ALL' ? 'All' : cat.charAt(0) + cat.slice(1).toLowerCase()}
                                 </button>
                             ))}
                         </div>

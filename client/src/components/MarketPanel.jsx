@@ -148,7 +148,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
         let matchesCategory = true;
         if (selectedCategory !== 'ALL') {
             if (selectedCategory === 'EQUIPMENT') {
-                matchesCategory = ['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'OFF_HAND', 'GLOVES', 'CAPE'].includes(l.item_data?.type);
+                matchesCategory = ['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'OFF_HAND', 'GLOVES', 'CAPE', 'TOOL'].includes(l.item_data?.type);
             } else if (selectedCategory === 'RESOURCE') {
                 matchesCategory = l.item_data?.type === 'RESOURCE' || l.item_data?.type === 'RAW' || l.item_data?.type === 'REFINED'; // 'REFINED' was separate in old code?
             } else if (selectedCategory === 'REFINED') { // Adding REFINED as per old code

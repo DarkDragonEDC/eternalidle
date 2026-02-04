@@ -857,7 +857,7 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                             letterSpacing: '1px'
                                         }}
                                     >
-                                        {t.replace('GATHERING', 'GATHER').replace('COMBAT', 'COMBATE')}
+                                        {t.replace('GATHERING', 'GATHER')}
                                     </button>
                                 ))}
                             </div>
