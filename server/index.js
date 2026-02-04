@@ -221,9 +221,6 @@ app.get('/api/active_players', async (req, res) => {
     } catch (e) { }
 
     // Forçar cabeçalhos CORS para evitar bloqueio do navegador local
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-
     try {
         const { count, error } = await supabase
             .from('characters')

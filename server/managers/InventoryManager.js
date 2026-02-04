@@ -50,8 +50,13 @@ export class InventoryManager {
         }
 
         const safeAmount = Number(amount) || 0;
-        inv[itemId] = (Number(inv[itemId]) || 0) + safeAmount;
-        if (inv[itemId] <= 0) delete inv[itemId];
+        if (typeof inv[itemId] === 'object' && inv[itemId] !== null) {
+            inv[itemId].amount = (inv[itemId].amount || 0) + safeAmount;
+            if (inv[itemId].amount <= 0) delete inv[itemId];
+        } else {
+            inv[itemId] = (Number(inv[itemId]) || 0) + safeAmount;
+            if (inv[itemId] <= 0) delete inv[itemId];
+        }
         return true;
     }
 
@@ -73,15 +78,24 @@ export class InventoryManager {
         if (!req) return true;
         const inv = char.state.inventory;
         if (!inv) return false;
-        return Object.entries(req).every(([id, amount]) => (inv[id] || 0) >= amount);
+        return Object.entries(req).every(([id, amount]) => {
+            const entry = inv[id];
+            const qty = typeof entry === 'object' ? (entry?.amount || 0) : (Number(entry) || 0);
+            return qty >= amount;
+        });
     }
 
     consumeItems(char, req) {
         if (!req) return;
         const inv = char.state.inventory;
         Object.entries(req).forEach(([id, amount]) => {
-            inv[id] -= amount;
-            if (inv[id] <= 0) delete inv[id];
+            if (typeof inv[id] === 'object' && inv[id] !== null) {
+                inv[id].amount -= amount;
+                if (inv[id].amount <= 0) delete inv[id];
+            } else {
+                inv[id] -= amount;
+                if (inv[id] <= 0) delete inv[id];
+            }
         });
     }
 
@@ -96,7 +110,8 @@ export class InventoryManager {
         }
 
         const state = char.state;
-        if (!state.inventory[itemId] || state.inventory[itemId] < 1) {
+        const qty = typeof state.inventory[itemId] === 'object' ? (state.inventory[itemId]?.amount || 0) : (Number(state.inventory[itemId]) || 0);
+        if (qty < 1) {
             throw new Error("You do not have this item");
         }
 

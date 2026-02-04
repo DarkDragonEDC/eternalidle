@@ -35,18 +35,27 @@ export class MarketManager {
         if (!char) throw new Error("Character not found");
 
         const inventory = char.state.inventory;
-        if (!inventory[itemId] || inventory[itemId] < quantity) {
+        const entry = inventory[itemId];
+        const currentQty = typeof entry === 'object' ? (entry?.amount || 0) : (Number(entry) || 0);
+
+        if (!entry || currentQty < quantity) {
             throw new Error("Insufficient quantity in inventory");
         }
 
-        const itemData = this.gameManager.inventoryManager.resolveItem(itemId);
+        const quality = typeof entry === 'object' ? (entry?.quality || 0) : 0;
+        const itemData = this.gameManager.inventoryManager.resolveItem(itemId, quality);
         if (!itemData) throw new Error("Invalid item");
 
         const pricePerUnit = calculateItemSellPrice(itemData, itemId);
         const totalSilver = pricePerUnit * quantity;
 
-        inventory[itemId] -= quantity;
-        if (inventory[itemId] <= 0) delete inventory[itemId];
+        if (typeof inventory[itemId] === 'object' && inventory[itemId] !== null) {
+            inventory[itemId].amount -= quantity;
+            if (inventory[itemId].amount <= 0) delete inventory[itemId];
+        } else {
+            inventory[itemId] -= quantity;
+            if (inventory[itemId] <= 0) delete inventory[itemId];
+        }
 
         char.state.silver = (char.state.silver || 0) + totalSilver;
 
@@ -87,37 +96,52 @@ export class MarketManager {
         }
 
         const inventory = char.state.inventory;
-        if (!inventory[itemId] || inventory[itemId] < amount) {
+        const entry = inventory[itemId];
+        const currentQty = typeof entry === 'object' ? (entry?.amount || 0) : (Number(entry) || 0);
+
+        if (!entry || currentQty < parsedAmount) {
             throw new Error("Insufficient quantity in inventory");
         }
 
-        const itemData = this.gameManager.inventoryManager.resolveItem(itemId);
+        const quality = typeof entry === 'object' ? (entry?.quality || 0) : 0;
+        const stars = typeof entry === 'object' ? (entry?.stars || 0) : 0;
+
+        const itemData = this.gameManager.inventoryManager.resolveItem(itemId, quality);
         if (!itemData) throw new Error("Invalid item");
 
-        inventory[itemId] -= amount;
-        if (inventory[itemId] <= 0) delete inventory[itemId];
+        // Use metadata if present
+        if (stars) {
+            itemData.stars = stars;
+        }
 
         const { error: insertError } = await this.gameManager.supabase
             .from('market_listings')
             .insert({
                 seller_id: userId,
-                // Workaround: seller_character_id column is missing in DB
-                // seller_character_id: char.id, 
                 seller_name: char.name,
                 item_id: itemId,
-                item_data: { ...itemData, seller_character_id: char.id },
-                amount: amount,
-                price: price
+                item_data: { ...itemData, seller_character_id: char.id, stars, quality },
+                amount: parsedAmount,
+                price: parsedPrice
             });
 
         if (insertError) {
-            inventory[itemId] = (inventory[itemId] || 0) + amount;
             throw insertError;
+        }
+
+        // Deduct item
+        if (typeof inventory[itemId] === 'object' && inventory[itemId] !== null) {
+            inventory[itemId].amount -= parsedAmount;
+            if (inventory[itemId].amount <= 0) delete inventory[itemId];
+        } else {
+            inventory[itemId] -= parsedAmount;
+            if (inventory[itemId] <= 0) delete inventory[itemId];
         }
 
         await this.gameManager.saveState(char.id, char.state);
         return { success: true, message: `Item listed successfully!` };
     }
+
 
     async buyMarketItem(buyerId, characterId, listingId, quantity = 1) {
         const qtyNum = parseInt(quantity) || 1;

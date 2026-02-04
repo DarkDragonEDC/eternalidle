@@ -152,11 +152,12 @@ function App() {
     if (item && typeof item === 'object') {
       setMarketSellItem({ ...item, itemId: id });
     } else if (typeof id === 'object') {
-      setMarketSellItem({ ...id, itemId: id.id });
+      setMarketSellItem({ ...id, itemId: id.itemId || id.id });
     } else {
       setMarketSellItem({ itemId: id });
     }
   };
+
 
   useEffect(() => {
     const handleKeyDown = (e) => {

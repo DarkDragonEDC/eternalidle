@@ -8,6 +8,7 @@ import { CombatManager } from './managers/CombatManager.js';
 import { MarketManager } from './managers/MarketManager.js';
 import { DungeonManager } from './managers/DungeonManager.js';
 import { CrownsManager } from './managers/CrownsManager.js';
+import { pruneState, hydrateState } from './utils/statePruner.js';
 
 const ITEM_LOOKUP = {};
 const flattenItems = (obj) => {
@@ -130,6 +131,10 @@ export class GameManager {
 
         if (data) {
             if (!data.state) data.state = {};
+
+            // Rehydrate the state after loading from database
+            data.state = hydrateState(data.state);
+
             // Attach a snapshot hash of the DB state to detect external changes
             data.dbHash = this.calculateHash(data.state);
 
@@ -388,12 +393,15 @@ export class GameManager {
             }
         }
 
+        // Create a pruned version of the state for storage
+        const prunedState = pruneState(JSON.parse(JSON.stringify(char.state)));
+
         // console.log(`[DB] Persisting character ${char.name} (${charId})`);
         const saveTime = new Date().toISOString();
         const { error } = await this.supabase
             .from('characters')
             .update({
-                state: char.state,
+                state: prunedState,
                 current_activity: char.current_activity,
                 activity_started_at: char.activity_started_at,
                 last_saved: saveTime
@@ -426,6 +434,10 @@ export class GameManager {
                 console.log(`[SYNC] Refreshing character ${char.name} from DB (Manual edit detected)`);
                 // Clear dirty flag and overwrite with DB data
                 this.dirty.delete(charId);
+
+                // Hydrate before assigning
+                dbChar.state = hydrateState(dbChar.state || {});
+
                 Object.assign(char, dbChar);
                 char.dbHash = currentDbHash;
                 return true;
