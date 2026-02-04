@@ -284,10 +284,16 @@ export const TownOverview = ({ onNavigate }) => (
 );
 
 export const CombatOverview = ({ onNavigate, gameState }) => {
-    const skill = gameState?.state?.skills?.COMBAT || { level: 1, xp: 0 };
-    const level = skill.level;
-    const nextXP = calculateNextLevelXP(level);
-    const progress = (skill.xp / nextXP) * 100;
+    const combatSkill = gameState?.state?.skills?.COMBAT || { level: 1, xp: 0 };
+    const dungeonSkill = gameState?.state?.skills?.DUNGEONEERING || { level: 1, xp: 0 };
+
+    const combatLevel = combatSkill.level;
+    const combatNextXP = calculateNextLevelXP(combatLevel);
+    const combatProgress = (combatSkill.xp / combatNextXP) * 100;
+
+    const dungeonLevel = dungeonSkill.level;
+    const dungeonNextXP = calculateNextLevelXP(dungeonLevel);
+    const dungeonProgress = (dungeonSkill.xp / dungeonNextXP) * 100;
 
     return (
         <div style={{ padding: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', alignContent: 'start' }}>
@@ -296,16 +302,16 @@ export const CombatOverview = ({ onNavigate, gameState }) => {
                 icon={<Sword />}
                 color="#ef4444"
                 onClick={() => onNavigate('combat')}
-                level={level}
-                progress={progress}
+                level={combatLevel}
+                progress={combatProgress}
             />
             <HubButton
                 label="Dungeons"
                 icon={<Castle />}
                 color="#94a3b8"
                 onClick={() => onNavigate('dungeon')}
-                level={level}
-                progress={progress}
+                level={dungeonLevel}
+                progress={dungeonProgress}
             />
         </div>
     );

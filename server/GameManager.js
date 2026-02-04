@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { ITEMS, ALL_RUNE_TYPES } from '../shared/items.js';
+import { ITEMS, ALL_RUNE_TYPES, RUNES_BY_CATEGORY } from '../shared/items.js';
 import { CHEST_DROP_TABLE } from '../shared/chest_drops.js';
 import { INITIAL_SKILLS, calculateNextLevelXP } from '../shared/skills.js';
 import { InventoryManager } from './managers/InventoryManager.js';
@@ -1482,71 +1482,37 @@ export class GameManager {
             // console.log(`[DEBUG-POTION] Applied fresh ${type} buff: ${value} for ${durationSeconds}s`);
         }
     }
-    async craftRune(userId, shardId) {
-        return this.executeLocked(userId, async () => {
-            const char = await this.getCharacter(userId);
-            if (!char) return { success: false, error: 'Character not found' };
-
-            const inventory = char.state.inventory || {};
-            const cost = 50;
-
-            if (!inventory[shardId] || inventory[shardId] < cost) {
-                return { success: false, error: 'Not enough shards' };
-            }
-
-            // Determine Tier from Shard ID (T{t}_RUNE_SHARD)
-            const tierMatch = shardId.match(/^T(\d+)_/);
-            if (!tierMatch) return { success: false, error: 'Invalid shard' };
-            const tier = parseInt(tierMatch[1]);
-
-            // Deduct Shards
-            this.inventoryManager.removeItemFromInventory(char, shardId, cost);
-
-            // Select Random Rune Type
-            const runeTypes = ['GATHER_XP', 'GATHER_COPY', 'GATHER_REFINE'];
-            const randomType = runeTypes[Math.floor(Math.random() * runeTypes.length)];
-
-            // Create Result Item: T{t}_RUNE_{TYPE}_1STAR
-            // Always 1 Star as requested
-            const resultId = `T${tier}_RUNE_${randomType}_1STAR`;
-
-            // Add to inventory (Rune takes no space, handled by addItem logic if flag is checked)
-            this.inventoryManager.addItemToInventory(char, resultId, 1);
-
-            this.markDirty(char.id);
-            return {
-                success: true,
-                item: resultId,
-                remainingShards: inventory[shardId] || 0
-            };
-        });
-    }
-    async craftRune(userId, characterId, shardId, qty = 1) {
-        console.log(`[GameManager] craftRune called for ${characterId}, shard: ${shardId}, qty: ${qty}`);
+    async craftRune(userId, characterId, shardId, qty = 1, category = 'GATHERING') {
+        console.log(`[GameManager] craftRune called for ${characterId}, shard: ${shardId}, qty: ${qty}, category: ${category}`);
         const count = Math.max(1, parseInt(qty) || 1);
         const char = await this.getCharacter(userId, characterId);
         if (!char) return { success: false, error: "Character not found" };
 
-        // 1. Validate Shard ID (Always T1 now)
+        // 1. Validate Category
+        const types = RUNES_BY_CATEGORY[category];
+        if (!types || types.length === 0) {
+            return { success: false, error: `Rune type '${category}' is currently under development!` };
+        }
+
+        // 2. Validate Shard ID (Always T1 now)
         const activeShardId = 'T1_RUNE_SHARD';
 
-        // 2. Check Quantity (Need 5 * qty)
+        // 3. Check Quantity (Need 5 * qty)
         const totalNeeded = 5 * count;
         const currentQty = char.state.inventory[activeShardId] || 0;
         if (currentQty < totalNeeded) {
             return { success: false, error: `Not enough shards (Need ${totalNeeded})` };
         }
 
-        // 3. Consume Shards
+        // 4. Consume Shards
         this.inventoryManager.consumeItems(char, { [activeShardId]: totalNeeded });
 
-        // 4. Force Tier 1 for Forgery
+        // 5. Force Tier 1 for Forgery
         const tier = 1;
 
         const results = [];
-        const types = ALL_RUNE_TYPES;
 
-        // 5. Generate Runes
+        // 6. Generate Runes
         for (let i = 0; i < count; i++) {
             const randomType = types[Math.floor(Math.random() * types.length)];
             const stars = 1;

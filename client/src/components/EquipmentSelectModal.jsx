@@ -2,12 +2,13 @@
 import React from 'react';
 import { X, Sword, Shield, Heart, Zap, Play, Layers, User, Pickaxe, Target, Apple, Star, Info } from 'lucide-react';
 import { resolveItem, getTierColor } from '@shared/items';
+import { getBestItemForSlot, isBetterItem } from '../utils/equipment';
 
 const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, inventory, onShowInfo }) => {
 
     // Filter candidates from inventory based on slot
     const { candidates, bestCandidate } = React.useMemo(() => {
-        const list = [];
+        const itemArray = [];
         Object.entries(inventory).forEach(([itemId, qty]) => {
             if (qty <= 0) return;
             const item = resolveItem(itemId);
@@ -15,21 +16,16 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
 
             let matches = false;
             if (slot.startsWith('rune_')) {
-                // slot: rune_{ACT}_{EFF}
                 const parts = slot.split('_');
                 const targetAct = parts[1];
                 const targetEff = parts[2];
 
                 if (item.type === 'RUNE') {
-                    // item id: T{tier}_RUNE_{ACT}_{EFF}_{stars}STAR
                     const itemMatch = itemId.match(/^T\d+_RUNE_(.+)_(\d+)STAR$/);
                     if (itemMatch) {
-                        const runeKey = itemMatch[1]; // e.g. WOOD_XP
+                        const runeKey = itemMatch[1];
                         const runeParts = runeKey.split('_');
-                        const itemAct = runeParts[0];
-                        const itemEff = runeParts[1];
-
-                        if (itemAct === targetAct && itemEff === targetEff) {
+                        if (runeParts[0] === targetAct && runeParts[1] === targetEff) {
                             matches = true;
                         }
                     }
@@ -54,20 +50,21 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
             }
 
             if (matches) {
-                list.push({ ...item, qty });
+                itemArray.push({ ...item, id: itemId, qty });
             }
         });
 
-        // Sort by IP desc, then quality desc
-        list.sort((a, b) => {
+        // Use same sorting as utility
+        itemArray.sort((a, b) => {
             if ((b.ip || 0) !== (a.ip || 0)) return (b.ip || 0) - (a.ip || 0);
-            if ((b.quality || 0) !== (a.quality || 0)) return (b.quality || 0) - (a.quality || 0);
-            return b.tier - a.tier;
+            const bQual = b.quality || b.stars || 0;
+            const aQual = a.quality || a.stars || 0;
+            if (bQual !== aQual) return bQual - aQual;
+            return (b.tier || 0) - (a.tier || 0);
         });
 
-        const best = list.length > 0 ? list[0] : null;
-
-        return { candidates: list, bestCandidate: best };
+        const best = itemArray.length > 0 ? itemArray[0] : null;
+        return { candidates: itemArray, bestCandidate: best };
     }, [slot, inventory]);
 
     // Resolve current item for comparison
@@ -78,18 +75,8 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
 
     // Check if the best candidate is actually better than current
     const isRecommended = React.useCallback((candidate) => {
-        if (!candidate) return false;
-        if (!resolvedCurrent) return true;
-
-        const cVal = candidate.ip || candidate.tier || 0;
-        const curVal = resolvedCurrent.ip || resolvedCurrent.tier || 0;
-
-        if (cVal > curVal) return true;
-        // If IP is equal, check quality
-        if (cVal === curVal && (candidate.quality || 0) > (resolvedCurrent.quality || 0)) return true;
-
-        return false;
-    }, [resolvedCurrent]);
+        return isBetterItem(candidate, currentItem);
+    }, [currentItem]);
 
     const showRecommendation = bestCandidate && isRecommended(bestCandidate);
 
@@ -192,22 +179,38 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        border: `1px solid ${bestCandidate.quality > 0 ? bestCandidate.rarityColor : 'var(--accent)'}`,
-                                        boxShadow: bestCandidate.quality > 0 ? `0 0 10px ${bestCandidate.rarityColor}55` : 'none',
-                                        overflow: 'hidden'
+                                        border: `1px solid ${bestCandidate.rarityColor || (bestCandidate.quality > 0 ? bestCandidate.rarityColor : 'var(--accent)')}`,
+                                        boxShadow: bestCandidate.rarityColor ? `0 0 10px ${bestCandidate.rarityColor}55` : (bestCandidate.quality > 0 ? `0 0 10px ${bestCandidate.rarityColor}55` : 'none'),
+                                        overflow: 'hidden',
+                                        position: 'relative'
                                     }}>
                                         {bestCandidate.icon ? (
                                             <img src={bestCandidate.icon} style={{ width: '80%', height: '80%', objectFit: 'contain' }} alt="" />
                                         ) : (
-                                            <Star size={24} color={bestCandidate.quality > 0 ? bestCandidate.rarityColor : 'var(--accent)'} />
+                                            <Star size={24} color={bestCandidate.rarityColor || (bestCandidate.quality > 0 ? bestCandidate.rarityColor : 'var(--accent)')} />
+                                        )}
+                                        {bestCandidate.type === 'RUNE' && bestCandidate.stars && (
+                                            <div style={{
+                                                position: 'absolute',
+                                                bottom: 2,
+                                                left: 0,
+                                                right: 0,
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                gap: '1px'
+                                            }}>
+                                                {Array.from({ length: bestCandidate.stars }).map((_, i) => (
+                                                    <Star key={i} size={6} fill="#FFD700" color="#FFD700" strokeWidth={1} />
+                                                ))}
+                                            </div>
                                         )}
                                     </div>
                                     <div>
                                         <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>
                                             {bestCandidate.name}
                                         </div>
-                                        <div style={{ fontSize: '0.8rem', color: 'var(--accent)' }}>
-                                            IP {bestCandidate.ip || 0} • Tier {bestCandidate.tier}
+                                        <div style={{ fontSize: '0.8rem', color: bestCandidate.rarityColor || 'var(--accent)' }}>
+                                            {bestCandidate.type === 'RUNE' ? `Tier ${bestCandidate.tier} • ${bestCandidate.stars} Stars` : `IP ${bestCandidate.ip || 0} • Tier ${bestCandidate.tier}`}
                                         </div>
                                     </div>
                                 </div>
@@ -242,13 +245,30 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        border: '1px solid rgba(255,255,255,0.1)',
-                                        overflow: 'hidden'
+                                        border: `1px solid ${resolvedCurrent?.rarityColor || 'rgba(255,255,255,0.1)'}`,
+                                        boxShadow: resolvedCurrent?.rarityColor ? `0 0 10px ${resolvedCurrent.rarityColor}33` : 'none',
+                                        overflow: 'hidden',
+                                        position: 'relative'
                                     }}>
                                         {resolvedCurrent?.icon ? (
                                             <img src={resolvedCurrent.icon} style={{ width: '80%', height: '80%', objectFit: 'contain' }} alt="" />
                                         ) : (
-                                            <Star size={24} color="#666" />
+                                            <Star size={24} color={resolvedCurrent?.rarityColor || "#666"} />
+                                        )}
+                                        {resolvedCurrent?.type === 'RUNE' && resolvedCurrent.stars && (
+                                            <div style={{
+                                                position: 'absolute',
+                                                bottom: 2,
+                                                left: 0,
+                                                right: 0,
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                gap: '1px'
+                                            }}>
+                                                {Array.from({ length: resolvedCurrent.stars }).map((_, i) => (
+                                                    <Star key={i} size={6} fill="#FFD700" color="#FFD700" strokeWidth={1} />
+                                                ))}
+                                            </div>
                                         )}
                                     </div>
                                     <div>
@@ -261,7 +281,9 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                                 <Info size={14} color="var(--text-main)" />
                                             </button>
                                         </div>
-                                        <div style={{ fontSize: '0.8rem', color: '#888' }}>Tier {currentItem.tier} • IP {currentItem.ip || 0}</div>
+                                        <div style={{ fontSize: '0.8rem', color: resolvedCurrent?.rarityColor || '#888' }}>
+                                            {resolvedCurrent?.type === 'RUNE' ? `Tier ${currentItem.tier} • ${resolvedCurrent.stars} Stars` : `Tier ${currentItem.tier} • IP ${currentItem.ip || 0}`}
+                                        </div>
                                     </div>
                                 </div>
                                 <button
@@ -335,28 +357,48 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                                     justifyContent: 'center',
                                                     color: '#aaa',
                                                     position: 'relative',
-                                                    border: item.quality > 0 ? `1px solid ${item.rarityColor}55` : 'none',
+                                                    border: `1px solid ${item.rarityColor || (item.quality > 0 ? item.rarityColor : 'var(--border)')}`,
+                                                    boxShadow: item.rarityColor ? `0 0 10px ${item.rarityColor}33` : (item.quality > 0 ? `0 0 10px ${item.rarityColor}10` : 'none'),
                                                     overflow: 'hidden'
                                                 }}>
                                                     {item.icon ? (
                                                         <img src={item.icon} style={{ width: '80%', height: '80%', objectFit: 'contain' }} alt="" />
                                                     ) : (
-                                                        <Star size={20} color="#aaa" />
+                                                        <Star size={20} color={item.rarityColor || '#aaa'} />
+                                                    )}
+                                                    {item.type === 'RUNE' && item.stars && (
+                                                        <div style={{
+                                                            position: 'absolute',
+                                                            bottom: 0,
+                                                            left: 0,
+                                                            right: 0,
+                                                            display: 'flex',
+                                                            justifyContent: 'center',
+                                                            gap: '1px',
+                                                            background: 'rgba(0,0,0,0.4)',
+                                                            padding: '1px 0'
+                                                        }}>
+                                                            {Array.from({ length: item.stars }).map((_, i) => (
+                                                                <Star key={i} size={5} fill="#FFD700" color="#FFD700" strokeWidth={1} />
+                                                            ))}
+                                                        </div>
                                                     )}
                                                     <div style={{
                                                         position: 'absolute',
-                                                        bottom: -5,
-                                                        right: -5,
+                                                        top: -2,
+                                                        right: -2,
                                                         background: '#333',
                                                         borderRadius: '50%',
-                                                        width: '18px',
-                                                        height: '18px',
-                                                        fontSize: '0.6rem',
+                                                        width: '16px',
+                                                        height: '16px',
+                                                        fontSize: '0.55rem',
                                                         display: 'flex',
                                                         alignItems: 'center',
                                                         justifyContent: 'center',
                                                         border: '1px solid #555',
-                                                        color: '#fff'
+                                                        color: '#fff',
+                                                        fontWeight: 'bold',
+                                                        zIndex: 2
                                                     }}>{item.qty}</div>
                                                 </div>
                                                 <div>
@@ -372,7 +414,9 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                                             <Info size={14} color="#fff" />
                                                         </button>
                                                     </div>
-                                                    <div style={{ fontSize: '0.75rem', color: '#888' }}>Tier {item.tier} {item.ip ? `• IP ${item.ip}` : ''}</div>
+                                                    <div style={{ fontSize: '0.75rem', color: item.rarityColor || '#888' }}>
+                                                        {item.type === 'RUNE' ? `Tier ${item.tier} • ${item.stars} Stars` : `Tier ${item.tier} ${item.ip ? `• IP ${item.ip}` : ''}`}
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div style={{ color: isItemRecommended ? 'var(--accent)' : '#4caf50', fontSize: '0.8rem', fontWeight: 'bold' }}>EQUIP</div>

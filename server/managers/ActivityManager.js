@@ -186,12 +186,11 @@ export class ActivityManager {
         }
 
         let message = null;
-        if (isDuplication || isAutoRefine) {
-            message = isDuplication ? `Gathered ${item.name} (x2!)` : `Gathered ${item.name}`;
-            if (isAutoRefine) {
-                const refinedItem = ITEM_LOOKUP[refinedItemGained];
-                message += ` + Auto-Refined into ${refinedItem?.name || 'Refined Item'}!`;
-            }
+        if (isAutoRefine) {
+            const refinedItem = ITEM_LOOKUP[refinedItemGained];
+            message = `- Auto-Refined into ${refinedItem?.name || 'Refined Item'}!`;
+        } else if (isDuplication) {
+            message = `Gathered ${item.name} (x2!)`;
         }
 
         return {
@@ -223,18 +222,8 @@ export class ActivityManager {
     async processRefining(char, item) {
         if (!this.gameManager.inventoryManager.hasItems(char, item.req)) return { error: "Insufficient ingredients", success: false, message: "Insufficient ingredients" };
 
-        const added = this.gameManager.inventoryManager.addItemToInventory(char, item.id, 1);
-        if (!added) return { error: "Inventory Full", success: false, message: "Inventory Full" };
-
-        this.gameManager.inventoryManager.consumeItems(char, item.req);
-
-        const skillKey = this.getSkillKeyForRefining(item.id);
         const stats = this.gameManager.inventoryManager.calculateStats(char);
-        const baseXp = item.xp || 10;
-
-        // Multipliers
-        const yieldMult = 1 + (stats.globals?.xpYield || 0) / 100;
-        const specificMult = 1 + (stats.xpBonus?.REFINING || 0) / 100;
+        const skillKey = this.getSkillKeyForRefining(item.id);
 
         const refiningMap = {
             'PLANK_REFINER': 'PLANK',
@@ -244,20 +233,49 @@ export class ActivityManager {
             'DISTILLATION': 'EXTRACT'
         };
         const actKey = refiningMap[skillKey];
+
+        // 1. Duplication Logic
+        let amountGained = 1;
+        let isDuplication = false;
+        if (actKey && stats.duplication && stats.duplication[actKey]) {
+            const chance = stats.duplication[actKey];
+            if (Math.random() * 100 < chance) {
+                amountGained = 2;
+                isDuplication = true;
+            }
+        }
+
+        const added = this.gameManager.inventoryManager.addItemToInventory(char, item.id, amountGained);
+        if (!added) return { error: "Inventory Full", success: false, message: "Inventory Full" };
+
+        this.gameManager.inventoryManager.consumeItems(char, item.req);
+
+        const baseXp = item.xp || 10;
+
+        // Multipliers
+        const yieldMult = 1 + (stats.globals?.xpYield || 0) / 100;
+        const specificMult = 1 + (stats.xpBonus?.REFINING || 0) / 100;
+
         const runeSkillMult = 1 + (actKey ? (stats.xpBonus?.[actKey] || 0) : 0) / 100;
 
         let xpAmount = Math.floor(baseXp * yieldMult * specificMult * runeSkillMult);
+
 
         if (xpAmount > MAX_ACTIVITY_XP) xpAmount = MAX_ACTIVITY_XP;
 
         const leveledUp = this.gameManager.addXP(char, skillKey, xpAmount);
 
+        let message = null;
+        if (isDuplication) {
+            message = `Refined ${item.name} (x2!)`;
+        }
+
         return {
             success: true,
-            message: null,
+            message,
             leveledUp,
             itemGained: item.id,
-            amountGained: 1,
+            amountGained,
             skillKey,
             xpGained: xpAmount
         };
@@ -320,18 +338,8 @@ export class ActivityManager {
             }
         }
 
-        const added = this.gameManager.inventoryManager.addItemToInventory(char, finalItemId, 1);
-        if (!added) return { error: "Inventory Full" };
-
-        this.gameManager.inventoryManager.consumeItems(char, item.req);
-
         const skillKey = this.getSkillKeyForCrafting(item.id);
         const stats = this.gameManager.inventoryManager.calculateStats(char);
-        const baseXp = item.xp || 50;
-
-        // Multipliers
-        const yieldMult = 1 + (stats.globals?.xpYield || 0) / 100;
-        const specificMult = 1 + (stats.xpBonus?.CRAFTING || 0) / 100;
 
         const craftingMap = {
             'WARRIOR_CRAFTER': 'WARRIOR',
@@ -342,6 +350,29 @@ export class ActivityManager {
             'COOKING': 'COOKING'
         };
         const actKey = craftingMap[skillKey];
+
+        // 1. Duplication Logic
+        let amountGained = 1;
+        let isDuplication = false;
+        if (actKey && stats.duplication && stats.duplication[actKey]) {
+            const chance = stats.duplication[actKey];
+            if (Math.random() * 100 < chance) {
+                amountGained = 2;
+                isDuplication = true;
+            }
+        }
+
+        const added = this.gameManager.inventoryManager.addItemToInventory(char, finalItemId, amountGained);
+        if (!added) return { error: "Inventory Full" };
+
+        this.gameManager.inventoryManager.consumeItems(char, item.req);
+
+        const baseXp = item.xp || 50;
+
+        // Multipliers
+        const yieldMult = 1 + (stats.globals?.xpYield || 0) / 100;
+        const specificMult = 1 + (stats.xpBonus?.CRAFTING || 0) / 100;
+
         const runeSkillMult = 1 + (actKey ? (stats.xpBonus?.[actKey] || 0) : 0) / 100;
 
         let xpAmount = Math.floor(baseXp * yieldMult * specificMult * runeSkillMult);
@@ -352,10 +383,10 @@ export class ActivityManager {
 
         return {
             success: true,
-            message: null,
+            message: isDuplication ? `Crafted ${item.name} (x2!)` : null,
             leveledUp,
             itemGained: finalItemId,
-            amountGained: 1,
+            amountGained,
             skillKey,
             xpGained: xpAmount
         };

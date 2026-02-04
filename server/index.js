@@ -603,11 +603,11 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('craft_rune', async ({ shardId, qty = 1 }) => {
-        console.log(`[SERVER] Received craft_rune request from ${socket.user.email} for shard ${shardId}, qty ${qty}`);
+    socket.on('craft_rune', async ({ shardId, qty = 1, category = 'GATHERING' }) => {
+        console.log(`[SERVER] Received craft_rune request from ${socket.user.email} for shard ${shardId}, qty ${qty}, category ${category}`);
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
-                const result = await gameManager.craftRune(socket.user.id, socket.data.characterId, shardId, qty);
+                const result = await gameManager.craftRune(socket.user.id, socket.data.characterId, shardId, qty, category);
                 if (result.success) {
                     socket.emit('craft_rune_success', result);
                     socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));

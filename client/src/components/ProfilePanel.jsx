@@ -7,6 +7,8 @@ import {
     Axe, Pickaxe, Scissors, Anchor, Apple, Info, ShoppingBag, Edit
 } from 'lucide-react';
 import { resolveItem, getTierColor } from '@shared/items';
+import { getBestItemForSlot, isBetterItem } from '../utils/equipment';
+import { ChevronUp } from 'lucide-react';
 import StatBreakdownModal from './StatBreakdownModal';
 import { supabase } from '../supabase';
 
@@ -19,6 +21,8 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
     const [activePlayers, setActivePlayers] = useState(0);
     const [activeProfileTab, setActiveProfileTab] = useState('EQUIPMENT'); // 'EQUIPMENT' or 'RUNES'
     const [activeRuneTab, setActiveRuneTab] = useState('GATHERING'); // 'GATHERING', 'REFINING', 'CRAFTING', 'COMBAT'
+    const isGoogleLinked = session?.user?.app_metadata?.providers?.includes('google') ||
+        session?.user?.identities?.some(id => id.provider === 'google');
 
     // Fetch Active Players logic (duplicated from Sidebar for Mobile Profile)
     React.useEffect(() => {
@@ -192,7 +196,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
 
                 const freshItem = resolveItem(item.id || item.item_id);
                 if (freshItem) {
-                    const starBonus = { 1: 1, 2: 3, 3: 5 };
+                    const starBonus = { 1: 1, 2: 3, 3: 5, 4: 7, 5: 10 };
                     const bonusValue = (freshItem.tier - 1) * 5 + (starBonus[freshItem.stars] || freshItem.stars);
                     if (!summary[act]) summary[act] = {};
                     summary[act][eff] = (summary[act][eff] || 0) + bonusValue;
@@ -229,6 +233,12 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         const borderColor = item && item.rarityColor ? item.rarityColor : 'rgba(255,255,255,0.1)';
         const hasQuality = (item && item.quality > 0) || (item && item.stars > 0);
 
+        // Upgrade Detection
+        const hasUpgrade = useMemo(() => {
+            const best = getBestItemForSlot(slot, state.inventory || {});
+            return isBetterItem(best, item);
+        }, [slot, state.inventory, item]);
+
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
                 <div style={{
@@ -242,11 +252,34 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                     justifyContent: 'center',
                     position: 'relative',
                     cursor: 'pointer',
+                    cursor: 'pointer',
                     transition: '0.2s',
-                    boxShadow: hasQuality ? `0 0 10px ${borderColor}66` : 'none'
+                    boxShadow: hasQuality ? `0 0 10px ${borderColor}66` : 'none',
+                    position: 'relative'
                 }}
                     onClick={onClick}
                 >
+                    {/* Upgrade Indicator */}
+                    {hasUpgrade && (
+                        <div style={{
+                            position: 'absolute',
+                            top: -8,
+                            right: -8,
+                            background: '#22c55e', // Green-500
+                            borderRadius: '50%',
+                            width: '20px',
+                            height: '20px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: '2px solid var(--panel-bg)',
+                            boxShadow: '0 0 10px rgba(34, 197, 94, 0.5)',
+                            zIndex: 10,
+                            animation: 'pulse 1.5s infinite'
+                        }}>
+                            <ChevronUp size={14} color="#fff" strokeWidth={3} />
+                        </div>
+                    )}
                     {item ? (
                         <div style={{ color: tierColor, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                             <span style={{ fontSize: '0.6rem', fontWeight: 'bold', position: 'absolute', top: 2, left: 4 }}>T{item.tier}</span>
@@ -729,44 +762,68 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
 
                                 <div style={{ background: 'rgba(255,255,255,0.02)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
                                     <p style={{ fontSize: '0.75rem', color: '#888', marginBottom: '15px', lineHeight: '1.4' }}>
-                                        Link your Google account to enable one-click login and secure your progress.
-                                        This is recommended if you registered with an email/password.
+                                        {isGoogleLinked
+                                            ? "Your account is successfully linked to Google. You can use one-click login anytime."
+                                            : "Link your Google account to enable one-click login and secure your progress. This is recommended if you registered with an email/password."}
                                     </p>
 
-                                    <button
-                                        onClick={async () => {
-                                            const { error } = await supabase.auth.linkIdentity({
-                                                provider: 'google',
-                                                options: { redirectTo: window.location.origin }
-                                            });
-                                            if (error) alert(error.message);
-                                            else alert('Verification email sent or linking process started. Follow the instructions to complete.');
-                                        }}
-                                        style={{
-                                            display: 'flex',
+                                    {isGoogleLinked ? (
+                                        <div style={{
+                                            display: 'inline-flex',
                                             alignItems: 'center',
                                             gap: '10px',
                                             padding: '10px 20px',
-                                            background: 'var(--bg-dark)',
-                                            border: '1px solid var(--border)',
+                                            background: 'rgba(34, 197, 94, 0.1)',
+                                            border: '1px solid rgba(34, 197, 94, 0.3)',
                                             borderRadius: '8px',
-                                            color: 'var(--text-main)',
+                                            color: '#4ade80',
                                             fontSize: '0.85rem',
-                                            fontWeight: '600',
-                                            cursor: 'pointer',
-                                            transition: '0.2s'
-                                        }}
-                                        onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                                        onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-                                    >
-                                        <svg width="18" height="18" viewBox="0 0 18 18">
-                                            <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.248h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" />
-                                            <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.248c-.806.54-1.836.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" />
-                                            <path fill="#FBBC05" d="M3.964 10.719c-.18-.54-.282-1.117-.282-1.719s.102-1.179.282-1.719V4.949H.957C.347 6.169 0 7.548 0 9s.347 2.831.957 4.051l3.007-2.332z" />
-                                            <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.949L3.964 7.28c.708-2.127 2.692-3.711 5.036-3.711z" />
-                                        </svg>
-                                        LINK GOOGLE ACCOUNT
-                                    </button>
+                                            fontWeight: '600'
+                                        }}>
+                                            <svg width="18" height="18" viewBox="0 0 18 18">
+                                                <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.248h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" />
+                                                <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.248c-.806.54-1.836.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" />
+                                                <path fill="#FBBC05" d="M3.964 10.719c-.18-.54-.282-1.117-.282-1.719s.102-1.179.282-1.719V4.949H.957C.347 6.169 0 7.548 0 9s.347 2.831.957 4.051l3.007-2.332z" />
+                                                <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.949L3.964 7.28c.708-2.127 2.692-3.711 5.036-3.711z" />
+                                            </svg>
+                                            GOOGLE ACCOUNT LINKED
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={async () => {
+                                                const { error } = await supabase.auth.linkIdentity({
+                                                    provider: 'google',
+                                                    options: { redirectTo: window.location.origin }
+                                                });
+                                                if (error) alert(error.message);
+                                                else alert('Verification email sent or linking process started. Follow the instructions to complete.');
+                                            }}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '10px',
+                                                padding: '10px 20px',
+                                                background: 'var(--bg-dark)',
+                                                border: '1px solid var(--border)',
+                                                borderRadius: '8px',
+                                                color: 'var(--text-main)',
+                                                fontSize: '0.85rem',
+                                                fontWeight: '600',
+                                                cursor: 'pointer',
+                                                transition: '0.2s'
+                                            }}
+                                            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                                            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                                        >
+                                            <svg width="18" height="18" viewBox="0 0 18 18">
+                                                <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.248h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" />
+                                                <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.248c-.806.54-1.836.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" />
+                                                <path fill="#FBBC05" d="M3.964 10.719c-.18-.54-.282-1.117-.282-1.719s.102-1.179.282-1.719V4.949H.957C.347 6.169 0 7.548 0 9s.347 2.831.957 4.051l3.007-2.332z" />
+                                                <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.949L3.964 7.28c.708-2.127 2.692-3.711 5.036-3.711z" />
+                                            </svg>
+                                            LINK GOOGLE ACCOUNT
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </>
@@ -887,73 +944,188 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                         ))}
 
                                         {/* Rune Buff Summary */}
-                                        {Object.entries(activeRuneBuffs).length > 0 && (
-                                            <div style={{
-                                                marginTop: '40px',
-                                                padding: '20px',
-                                                background: 'rgba(212, 175, 55, 0.05)',
+                                        <RuneBuffSummary activeRuneBuffs={Object.fromEntries(
+                                            Object.entries(activeRuneBuffs).filter(([act]) =>
+                                                ['WOOD', 'ORE', 'HIDE', 'FIBER', 'HERB', 'FISH'].includes(act)
+                                            )
+                                        )} />
+                                    </div>
+                                </>
+                            ) : activeRuneTab === 'REFINING' ? (
+                                <>
+                                    <h3 style={{
+                                        color: 'var(--accent)',
+                                        fontSize: '1.2rem',
+                                        fontWeight: '900',
+                                        letterSpacing: '2px',
+                                        textTransform: 'uppercase',
+                                        marginBottom: '25px',
+                                        textAlign: 'center',
+                                        borderBottom: '1px solid var(--border)',
+                                        paddingBottom: '10px'
+                                    }}>
+                                        Refining Runes
+                                    </h3>
+
+                                    <div style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '30px'
+                                    }}>
+                                        {[
+                                            { id: 'METAL', label: 'Bars (Metal)', icon: <Layers size={16} /> },
+                                            { id: 'PLANK', label: 'Planks (Wood)', icon: <Axe size={16} /> },
+                                            { id: 'LEATHER', label: 'Leather', icon: <Sword size={16} style={{ transform: 'rotate(45deg)' }} /> },
+                                            { id: 'CLOTH', label: 'Cloth', icon: <Scissors size={16} /> },
+                                            { id: 'EXTRACT', label: 'Extracts', icon: <Apple size={16} /> }
+                                        ].map(category => (
+                                            <div key={category.id} style={{
+                                                background: 'rgba(255,255,255,0.03)',
                                                 borderRadius: '16px',
-                                                border: '1px solid rgba(212, 175, 55, 0.2)'
+                                                padding: '20px',
+                                                border: '1px solid var(--border)'
                                             }}>
-                                                <h4 style={{
-                                                    color: 'var(--accent)',
-                                                    fontSize: '0.9rem',
-                                                    fontWeight: '900',
-                                                    letterSpacing: '1px',
-                                                    textTransform: 'uppercase',
-                                                    margin: '0 0 15px 0',
+                                                <div style={{
                                                     display: 'flex',
                                                     alignItems: 'center',
-                                                    gap: '8px'
+                                                    gap: '10px',
+                                                    marginBottom: '15px',
+                                                    color: '#888',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: 'bold',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '1px'
                                                 }}>
-                                                    <Zap size={16} fill="var(--accent)" /> Soma de Bônus de Runas Ativos
-                                                </h4>
+                                                    {category.icon} {category.label}
+                                                </div>
                                                 <div style={{
                                                     display: 'grid',
-                                                    gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-                                                    gap: '12px'
+                                                    gridTemplateColumns: 'repeat(3, 1fr)',
+                                                    gap: '15px'
                                                 }}>
-                                                    {Object.entries(activeRuneBuffs).map(([act, buffs]) => (
-                                                        <div key={act} style={{
-                                                            padding: '12px',
-                                                            background: 'rgba(0,0,0,0.4)',
-                                                            borderRadius: '10px',
-                                                            border: '1px solid rgba(255,255,255,0.05)'
-                                                        }}>
-                                                            <div style={{
-                                                                fontSize: '0.7rem',
-                                                                color: '#888',
-                                                                fontWeight: 'bold',
-                                                                marginBottom: '8px',
-                                                                textTransform: 'uppercase'
-                                                            }}>
-                                                                {act.replace('HERB', 'Herbalism').replace('HIDE', 'Skinning').replace('WOOD', 'Wood').replace('ORE', 'Ore').replace('FIBER', 'Fiber').replace('FISH', 'Fish')}
-                                                            </div>
-                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                                {buffs.XP && (
-                                                                    <div style={{ fontSize: '0.75rem', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
-                                                                        <span style={{ color: '#aaa' }}>XP:</span>
-                                                                        <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>+{buffs.XP}%</span>
-                                                                    </div>
-                                                                )}
-                                                                {buffs.COPY && (
-                                                                    <div style={{ fontSize: '0.75rem', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
-                                                                        <span style={{ color: '#aaa' }}>Duplic.:</span>
-                                                                        <span style={{ color: '#4caf50', fontWeight: 'bold' }}>+{buffs.COPY}%</span>
-                                                                    </div>
-                                                                )}
-                                                                {buffs.SPEED && (
-                                                                    <div style={{ fontSize: '0.75rem', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
-                                                                        <span style={{ color: '#aaa' }}>Auto-Ref:</span>
-                                                                        <span style={{ color: '#2196f3', fontWeight: 'bold' }}>+{buffs.SPEED}%</span>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    ))}
+                                                    <EquipmentSlot
+                                                        slot={`rune_${category.id}_XP`}
+                                                        icon={<Zap size={20} />}
+                                                        label="XP"
+                                                        item={equipment[`rune_${category.id}_XP`]}
+                                                        onClick={() => setSelectedSlot(`rune_${category.id}_XP`)}
+                                                        onShowInfo={onShowInfo}
+                                                    />
+                                                    <EquipmentSlot
+                                                        slot={`rune_${category.id}_COPY`}
+                                                        icon={<Layers size={20} />}
+                                                        label="DUPLIC."
+                                                        item={equipment[`rune_${category.id}_COPY`]}
+                                                        onClick={() => setSelectedSlot(`rune_${category.id}_COPY`)}
+                                                        onShowInfo={onShowInfo}
+                                                    />
+                                                    <EquipmentSlot
+                                                        slot={`rune_${category.id}_EFF`}
+                                                        icon={<Zap size={20} />}
+                                                        label="EFFICIENCY"
+                                                        item={equipment[`rune_${category.id}_EFF`]}
+                                                        onClick={() => setSelectedSlot(`rune_${category.id}_EFF`)}
+                                                        onShowInfo={onShowInfo}
+                                                    />
                                                 </div>
                                             </div>
-                                        )}
+                                        ))}
+
+                                        {/* Rune Buff Summary */}
+                                        <RuneBuffSummary activeRuneBuffs={Object.fromEntries(
+                                            Object.entries(activeRuneBuffs).filter(([act]) =>
+                                                ['METAL', 'PLANK', 'LEATHER', 'CLOTH', 'EXTRACT'].includes(act)
+                                            )
+                                        )} />
+                                    </div>
+                                </>
+                            ) : activeRuneTab === 'CRAFTING' ? (
+                                <>
+                                    <h3 style={{
+                                        color: 'var(--accent)',
+                                        fontSize: '1.2rem',
+                                        fontWeight: '900',
+                                        letterSpacing: '2px',
+                                        textTransform: 'uppercase',
+                                        marginBottom: '25px',
+                                        textAlign: 'center',
+                                        borderBottom: '1px solid var(--border)',
+                                        paddingBottom: '10px'
+                                    }}>
+                                        Crafting Runes
+                                    </h3>
+
+                                    <div style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '30px'
+                                    }}>
+                                        {[
+                                            { id: 'WARRIOR', label: 'Warrior', icon: <Sword size={16} /> },
+                                            { id: 'HUNTER', label: 'Hunter', icon: <Target size={16} /> },
+                                            { id: 'MAGE', label: 'Mage', icon: <Star size={16} /> },
+                                            { id: 'TOOLS', label: 'Tools', icon: <Pickaxe size={16} /> },
+                                            { id: 'COOKING', label: 'Cooking', icon: <Apple size={16} /> },
+                                            { id: 'ALCHEMY', label: 'Alchemy', icon: <Zap size={16} /> }
+                                        ].map(category => (
+                                            <div key={category.id} style={{
+                                                background: 'rgba(255,255,255,0.03)',
+                                                borderRadius: '16px',
+                                                padding: '20px',
+                                                border: '1px solid var(--border)'
+                                            }}>
+                                                <div style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '10px',
+                                                    marginBottom: '15px',
+                                                    color: '#888',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: 'bold',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '1px'
+                                                }}>
+                                                    {category.icon} {category.label}
+                                                </div>
+                                                <div style={{
+                                                    display: 'grid',
+                                                    gridTemplateColumns: 'repeat(3, 1fr)',
+                                                    gap: '15px'
+                                                }}>
+                                                    <EquipmentSlot
+                                                        slot={`rune_${category.id}_XP`}
+                                                        icon={<Zap size={20} />}
+                                                        label="XP"
+                                                        item={equipment[`rune_${category.id}_XP`]}
+                                                        onClick={() => setSelectedSlot(`rune_${category.id}_XP`)}
+                                                        onShowInfo={onShowInfo}
+                                                    />
+                                                    <EquipmentSlot
+                                                        slot={`rune_${category.id}_COPY`}
+                                                        icon={<Layers size={20} />}
+                                                        label="DUPLIC."
+                                                        item={equipment[`rune_${category.id}_COPY`]}
+                                                        onClick={() => setSelectedSlot(`rune_${category.id}_COPY`)}
+                                                        onShowInfo={onShowInfo}
+                                                    />
+                                                    <EquipmentSlot
+                                                        slot={`rune_${category.id}_EFF`}
+                                                        icon={<Zap size={20} />}
+                                                        label="EFFICIENCY"
+                                                        item={equipment[`rune_${category.id}_EFF`]}
+                                                        onClick={() => setSelectedSlot(`rune_${category.id}_EFF`)}
+                                                        onShowInfo={onShowInfo}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
+
+                                        {/* Rune Buff Summary */}
+                                        <RuneBuffSummary activeRuneBuffs={Object.fromEntries(
+                                            Object.entries(activeRuneBuffs).filter(([act]) =>
+                                                ['WARRIOR', 'HUNTER', 'MAGE', 'TOOLS', 'COOKING', 'ALCHEMY'].includes(act)
+                                            )
+                                        )} />
                                     </div>
                                 </>
                             ) : (
@@ -1087,5 +1259,99 @@ const StatRow = ({ label, value, color }) => (
         <span style={{ color, fontWeight: 'bold' }}>{value}</span>
     </div>
 );
+
+const RuneBuffSummary = ({ activeRuneBuffs }) => {
+    if (Object.entries(activeRuneBuffs).length === 0) return null;
+
+    return (
+        <div style={{
+            marginTop: '40px',
+            padding: '20px',
+            background: 'rgba(212, 175, 55, 0.05)',
+            borderRadius: '16px',
+            border: '1px solid rgba(212, 175, 55, 0.2)'
+        }}>
+            <h4 style={{
+                color: 'var(--accent)',
+                fontSize: '0.9rem',
+                fontWeight: '900',
+                letterSpacing: '1px',
+                textTransform: 'uppercase',
+                margin: '0 0 15px 0',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+            }}>
+                <Zap size={16} fill="var(--accent)" /> Active Rune Bonus Summary
+            </h4>
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                gap: '12px'
+            }}>
+                {Object.entries(activeRuneBuffs).map(([act, buffs]) => (
+                    <div key={act} style={{
+                        padding: '12px',
+                        background: 'rgba(0,0,0,0.4)',
+                        borderRadius: '10px',
+                        border: '1px solid rgba(255,255,255,0.05)'
+                    }}>
+                        <div style={{
+                            fontSize: '0.7rem',
+                            color: '#888',
+                            fontWeight: 'bold',
+                            marginBottom: '8px',
+                            textTransform: 'uppercase'
+                        }}>
+                            {act.replace('HERB', 'Herbalism')
+                                .replace('HIDE', 'Skinning')
+                                .replace('WOOD', 'Wood')
+                                .replace('ORE', 'Ore')
+                                .replace('FIBER', 'Fiber')
+                                .replace('FISH', 'Fish')
+                                .replace('METAL', 'Metal Bars')
+                                .replace('PLANK', 'Planks')
+                                .replace('LEATHER', 'Leather')
+                                .replace('CLOTH', 'Cloth')
+                                .replace('EXTRACT', 'Extracts')
+                                .replace('WARRIOR', 'Warrior Gear')
+                                .replace('HUNTER', 'Hunter Gear')
+                                .replace('MAGE', 'Mage Gear')
+                                .replace('TOOLS', 'Tools')
+                                .replace('COOKING', 'Cooking')
+                                .replace('ALCHEMY', 'Alchemy')}
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            {buffs.XP && (
+                                <div style={{ fontSize: '0.75rem', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ color: '#aaa' }}>XP:</span>
+                                    <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>+{buffs.XP}%</span>
+                                </div>
+                            )}
+                            {buffs.COPY && (
+                                <div style={{ fontSize: '0.75rem', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ color: '#aaa' }}>Duplication:</span>
+                                    <span style={{ color: '#4caf50', fontWeight: 'bold' }}>+{buffs.COPY}%</span>
+                                </div>
+                            )}
+                            {buffs.SPEED && (
+                                <div style={{ fontSize: '0.75rem', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ color: '#aaa' }}>Auto-Refine:</span>
+                                    <span style={{ color: '#2196f3', fontWeight: 'bold' }}>+{buffs.SPEED}%</span>
+                                </div>
+                            )}
+                            {buffs.EFF && (
+                                <div style={{ fontSize: '0.75rem', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ color: '#aaa' }}>Efficiency:</span>
+                                    <span style={{ color: '#2196f3', fontWeight: 'bold' }}>+{buffs.EFF}%</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
 
 export default ProfilePanel;

@@ -862,14 +862,41 @@ export const getLevelRequirement = (tier) => {
 };
 
 // Generate Runes & Shards
-const RUNE_GATHER_ACTIVITIES = ['WOOD', 'ORE', 'HIDE', 'FIBER', 'HERB', 'FISH'];
-const RUNE_EFFECTS = ['XP', 'COPY', 'SPEED'];
+export const RUNE_GATHER_ACTIVITIES = ['WOOD', 'ORE', 'HIDE', 'FIBER', 'HERB', 'FISH'];
+export const RUNE_REFINE_ACTIVITIES = ['METAL', 'PLANK', 'LEATHER', 'CLOTH', 'EXTRACT'];
+export const RUNE_CRAFT_ACTIVITIES = ['WARRIOR', 'HUNTER', 'MAGE', 'TOOLS', 'COOKING', 'ALCHEMY'];
+const RUNE_EFFECTS = ['XP', 'COPY', 'SPEED', 'EFF'];
 
 // Export for server usage
 export const ALL_RUNE_TYPES = [];
+export const RUNES_BY_CATEGORY = {
+    GATHERING: [],
+    REFINING: [],
+    CRAFTING: [],
+    COMBAT: []
+};
+
 RUNE_GATHER_ACTIVITIES.forEach(act => {
-    RUNE_EFFECTS.forEach(eff => {
-        ALL_RUNE_TYPES.push(`${act}_${eff}`);
+    ['XP', 'COPY', 'SPEED'].forEach(eff => {
+        const type = `${act}_${eff}`;
+        ALL_RUNE_TYPES.push(type);
+        RUNES_BY_CATEGORY.GATHERING.push(type);
+    });
+});
+
+RUNE_REFINE_ACTIVITIES.forEach(act => {
+    ['XP', 'COPY', 'EFF'].forEach(eff => {
+        const type = `${act}_${eff}`;
+        ALL_RUNE_TYPES.push(type);
+        RUNES_BY_CATEGORY.REFINING.push(type);
+    });
+});
+
+RUNE_CRAFT_ACTIVITIES.forEach(act => {
+    ['XP', 'COPY', 'EFF'].forEach(eff => {
+        const type = `${act}_${eff}`;
+        ALL_RUNE_TYPES.push(type);
+        RUNES_BY_CATEGORY.CRAFTING.push(type);
     });
 });
 
@@ -887,53 +914,55 @@ for (const t of TIERS) {
     }
 
     // Runes (Hidden from main inventory)
-    RUNE_GATHER_ACTIVITIES.forEach(act => {
-        RUNE_EFFECTS.forEach(eff => {
-            for (let s = 1; s <= 5; s++) {
-                const id = `T${t}_RUNE_${act}_${eff}_${s}STAR`;
+    ALL_RUNE_TYPES.forEach(typeKey => {
+        const [act, eff] = typeKey.split('_');
 
-                // Map nice display names
-                let actName = act.charAt(0) + act.slice(1).toLowerCase();
-                if (act === 'HERB') actName = 'Herbalism';
-                if (act === 'HIDE') actName = 'Skinning';
+        for (let s = 1; s <= 5; s++) {
+            const id = `T${t}_RUNE_${act}_${eff}_${s}STAR`;
 
-                let effName = 'XP';
-                if (eff === 'COPY') effName = 'Duplication';
-                if (eff === 'SPEED') effName = 'Auto-Refine';
+            // Map nice display names
+            const ACT_NAME_MAP = {
+                WOOD: 'Woodcutting', ORE: 'Mining', HIDE: 'Skinning', FIBER: 'Fiber', FISH: 'Fishing', HERB: 'Herbalism',
+                METAL: 'Metal', PLANK: 'Plank', LEATHER: 'Leather', CLOTH: 'Cloth', EXTRACT: 'Extract',
+                WARRIOR: 'Warrior', HUNTER: 'Hunter', MAGE: 'Mage', TOOLS: 'Tools', COOKING: 'Cooking', ALCHEMY: 'Alchemy'
+            };
+            const EFF_NAME_MAP = { XP: 'XP', COPY: 'Duplication', SPEED: 'Auto-Refine', EFF: 'Efficiency' };
+            const EFF_LABEL_MAP = { XP: 'Experience', COPY: 'Duplication', SPEED: 'Auto-Refine Chance', EFF: 'Speed' };
 
-                // Adjusted scaling: T1(1*) = 1% ... T10(3*) = 50%
-                // (Tier-1)*5 + StarBonus(1, 3, 5)
-                const starBonus = { 1: 1, 2: 3, 3: 5, 4: 7, 5: 10 };
-                const bonusValue = (t - 1) * 5 + (starBonus[s] || s);
+            const actName = ACT_NAME_MAP[act] || act;
+            const effName = EFF_NAME_MAP[eff] || eff;
+            const effectLabel = EFF_LABEL_MAP[eff] || eff;
 
-                let effectLabel = 'Experience';
-                if (eff === 'COPY') effectLabel = 'Duplication';
-                if (eff === 'SPEED') effectLabel = 'Auto-Refine Chance';
+            const starBonus = { 1: 1, 2: 3, 3: 5, 4: 7, 5: 10 };
+            const bonusValue = (t - 1) * 5 + (starBonus[s] || s);
 
-                const description = eff === 'SPEED'
-                    ? `Chance to automatically refine gathered materials by ${bonusValue}%.`
-                    : `Increases ${actName} ${effectLabel} by ${bonusValue}%.`;
-
-                // Ensure sub-object exists
-                if (!ITEMS.SPECIAL.RUNE) ITEMS.SPECIAL.RUNE = {};
-
-                const rarityMap = { 1: 'COMMON', 2: 'RARE', 3: 'LEGENDARY' };
-                const qualityIdMap = { 1: 0, 2: 2, 3: 4 }; // 0=Normal, 2=Outstanding(Rare), 4=Masterpiece(Legendary)
-
-                ITEMS.SPECIAL.RUNE[id] = {
-                    id: id,
-                    name: `T${t} ${actName} Rune of ${effName}`,
-                    tier: t,
-                    type: 'RUNE',
-                    stars: s,
-                    rarity: rarityMap[s],
-                    noInventorySpace: true,
-                    description: description,
-                    icon: '', // Icons removed per request
-                    rarityColor: QUALITIES[qualityIdMap[s]] ? QUALITIES[qualityIdMap[s]].color : '#fff'
-                };
+            let description = '';
+            if (eff === 'SPEED') {
+                description = `Chance to automatically refine gathered materials by ${bonusValue}%.`;
+            } else if (eff === 'EFF') {
+                description = `Increases speed by ${bonusValue}%.`;
+            } else {
+                description = `Increases ${actName} ${effectLabel} by ${bonusValue}%.`;
             }
-        });
+
+            if (!ITEMS.SPECIAL.RUNE) ITEMS.SPECIAL.RUNE = {};
+
+            const rarityMap = { 1: 'COMMON', 2: 'RARE', 3: 'LEGENDARY', 4: 'EPIC', 5: 'MYTHIC' };
+            const qualityIdMap = { 1: 0, 2: 2, 3: 4, 4: 3, 5: 5 };
+
+            ITEMS.SPECIAL.RUNE[id] = {
+                id: id,
+                name: `T${t} ${actName} Rune of ${effName}`,
+                tier: t,
+                type: 'RUNE',
+                stars: s,
+                rarity: rarityMap[s] || 'COMMON',
+                noInventorySpace: true,
+                description: description,
+                icon: '',
+                rarityColor: QUALITIES[qualityIdMap[s]] ? QUALITIES[qualityIdMap[s]].color : '#fff'
+            };
+        }
     });
 }
 

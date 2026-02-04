@@ -340,7 +340,9 @@ export class InventoryManager {
         };
 
         const duplication = {
-            WOOD: 0, ORE: 0, HIDE: 0, FIBER: 0, FISH: 0, HERB: 0
+            WOOD: 0, ORE: 0, HIDE: 0, FIBER: 0, FISH: 0, HERB: 0,
+            PLANK: 0, METAL: 0, LEATHER: 0, CLOTH: 0, EXTRACT: 0,
+            WARRIOR: 0, HUNTER: 0, MAGE: 0, ALCHEMY: 0, TOOLS: 0, COOKING: 0
         };
 
         const autoRefine = {
@@ -352,12 +354,12 @@ export class InventoryManager {
             if (slot.startsWith('rune_') && item) {
                 // slot format: rune_{ACT}_{EFF}
                 const parts = slot.split('_');
-                const act = parts[1]; // WOOD, ORE, etc.
-                const eff = parts[2]; // XP, COPY, SPEED
+                const act = parts[1]; // WOOD, METAL, etc.
+                const eff = parts[2]; // XP, COPY, SPEED, EFF
 
                 const freshItem = this.resolveItem(item.id);
                 if (freshItem) {
-                    const starBonus = { 1: 1, 2: 3, 3: 5 };
+                    const starBonus = { 1: 1, 2: 3, 3: 5, 4: 7, 5: 10 };
                     const bonusValue = (freshItem.tier - 1) * 5 + (starBonus[freshItem.stars] || freshItem.stars);
 
                     if (eff === 'XP') {
@@ -366,6 +368,8 @@ export class InventoryManager {
                         if (duplication[act] !== undefined) duplication[act] += bonusValue;
                     } else if (eff === 'SPEED') {
                         if (autoRefine[act] !== undefined) autoRefine[act] += bonusValue;
+                    } else if (eff === 'EFF') {
+                        if (efficiency[act] !== undefined) efficiency[act] += bonusValue;
                     }
                 }
             }
