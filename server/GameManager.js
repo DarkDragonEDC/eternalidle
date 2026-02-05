@@ -1733,26 +1733,68 @@ export class GameManager {
 
         // --- STEP 2: APPLY MERGES AND DEDUCT SILVER ---
         char.state.silver -= totalSilverCost;
-        const finalProducts = {};
+        const createdItems = [];
 
-        // We reuse the simulated final inventory result
-        char.state.inventory = tempInv;
+        // Track what was created at each step
+        let subChanged = true;
+        const subInv = { ...char.state.inventory };
+        while (subChanged) {
+            subChanged = false;
+            for (const [itemId, qty] of Object.entries(subInv)) {
+                if (qty < 2) continue;
+                if (!itemId.includes('_RUNE_') || itemId.includes('SHARD')) continue;
 
-        // Track final products for the summary
-        // Note: For simplicity and since we overwrote the inventory, 
-        // we can just return the total upgrades count.
-        // If we want the specific items created list, we can track them in step 1.
+                const match = itemId.match(/^T(\d+)_RUNE_(.+)_(\d+)STAR$/);
+                if (!match) continue;
 
-        // Re-tracking final products specifically created during this session
-        // (This part is a bit redundant if we just overwrite, but good for UI)
-        // I'll just use the total upgrades count and a general message.
+                const tier = parseInt(match[1]);
+                const stars = parseInt(match[3]);
+                if (stars >= 3 && tier >= 10) continue;
 
+                // Apply same filters
+                const itemData = this.inventoryManager.resolveItem(itemId);
+                if (!itemData) continue;
+                if (search && !itemData.name.toLowerCase().includes(search.toLowerCase()) && !itemId.toLowerCase().includes(search.toLowerCase())) continue;
+                if (categoryFilter !== 'ALL') {
+                    const isInCategory = RUNES_BY_CATEGORY[categoryFilter]?.some(catType => itemId.includes(`_RUNE_${catType}_`));
+                    if (!isInCategory) continue;
+                }
+                if (activityFilter !== 'ALL' && !itemId.includes(`_RUNE_${activityFilter}_`)) continue;
+                if (effectFilter !== 'ALL' && !itemId.includes(`_${effectFilter}_`)) continue;
+                if (tierFilter !== 'ALL' && tier !== parseInt(tierFilter)) continue;
+                if (starsFilter !== 'ALL' && stars !== parseInt(starsFilter)) continue;
+
+                const pairs = Math.floor(qty / 2);
+                if (pairs > 0) {
+                    let nextStars = stars + 1;
+                    let nextTier = tier;
+                    if (stars >= 3) {
+                        nextStars = 1;
+                        nextTier = tier + 1;
+                    }
+                    const nextItemId = `T${nextTier}_RUNE_${match[2]}_${nextStars}STAR`;
+
+                    subInv[itemId] -= (pairs * 2);
+                    if (subInv[itemId] <= 0) delete subInv[itemId];
+                    subInv[nextItemId] = (subInv[nextItemId] || 0) + pairs;
+
+                    // Track for result modal
+                    for (let i = 0; i < pairs; i++) {
+                        createdItems.push({ item: nextItemId, qty: 1 });
+                    }
+                    subChanged = true;
+                }
+            }
+        }
+
+        char.state.inventory = subInv;
         this.markDirty(char.id);
         await this.persistCharacter(char.id);
 
         return {
             success: true,
-            count: totalUpgrades,
+            items: createdItems,
+            count: createdItems.length,
             message: `Successfully performed ${totalUpgrades} merges for ${totalSilverCost.toLocaleString()} Silver!`
         };
     }
