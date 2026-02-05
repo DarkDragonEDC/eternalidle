@@ -360,8 +360,8 @@ function App() {
               error?.message?.includes('Invalid Refresh Token') ||
               error?.code === '400';
 
-            if (isFatalAuthError) {
-
+            if (isFatalAuthError || err.message?.includes('Invalid token')) {
+              console.warn('Fatal Auth Error detected. Clearing storage and logging out...');
               await supabase.auth.signOut();
 
               // Deep cleanup to avoid search loops with old data

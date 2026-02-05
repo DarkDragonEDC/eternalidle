@@ -6,8 +6,10 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import fs from 'fs';
 import Stripe from 'stripe';
+import { getStoreItem, getAllStoreItems } from '../shared/crownStore.js';
 
 dotenv.config();
+
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 if (!stripe) {
@@ -64,7 +66,20 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
     // Handle the event
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object;
-        const { userId, characterId, crownAmount, packageId } = session.metadata || {};
+        let { userId, characterId, crownAmount, packageId } = session.metadata || {};
+
+        // Handle static links via client_reference_id
+        if (!userId && session.client_reference_id) {
+            const [uId, cId, pkgId] = session.client_reference_id.split(':');
+            userId = uId;
+            characterId = cId;
+            packageId = pkgId;
+
+            // If it's the membership, we need the amount if it's not in metadata
+            if (packageId === 'ETERNAL_MEMBERSHIP') {
+                crownAmount = 0; // Memberships don't usually give crowns directly unless defined
+            }
+        }
 
         console.log(`[STRIPE] Delivery started: User=${userId}, Char=${characterId}, Crowns=${crownAmount}, Package=${packageId}`);
 
@@ -153,6 +168,7 @@ import { authMiddleware } from './authMiddleware.js';
 const PORT = process.env.PORT || 3000;
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_KEY;
+
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
     console.warn("WARNING: Supabase credentials not found in .env");
@@ -790,7 +806,6 @@ io.on('connection', (socket) => {
     socket.on('get_crown_store', async () => {
         try {
             console.log(`[CROWN STORE] Request from ${socket.user?.email}`);
-            const { getAllStoreItems } = await import('../shared/crownStore.js');
             const items = getAllStoreItems();
             console.log(`[CROWN STORE] Sending ${items.length} items to client`);
             socket.emit('crown_store_update', items);
@@ -822,11 +837,9 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Buy crowns (real money package)
     socket.on('buy_crown_package', async ({ packageId }) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
-                const { getStoreItem } = await import('../shared/crownStore.js');
                 const pkg = getStoreItem(packageId);
 
                 if (!pkg) {
@@ -835,6 +848,18 @@ io.on('connection', (socket) => {
 
                 const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
                 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
+
+                // If item has a manual stripe link, use it
+                let stripeLink = pkg.stripeLink;
+
+                if (stripeLink) {
+                    const checkoutUrl = new URL(stripeLink);
+                    checkoutUrl.searchParams.set('client_reference_id', `${socket.user.id}:${socket.data.characterId}:${packageId}`);
+                    // Support pre-filling email if desired
+                    if (socket.user.email) checkoutUrl.searchParams.set('prefilled_email', socket.user.email);
+
+                    return socket.emit('stripe_checkout_session', { url: checkoutUrl.toString() });
+                }
 
                 if (!stripe) {
                     return socket.emit('crown_purchase_error', { error: 'Payments are not configured on this server.' });
