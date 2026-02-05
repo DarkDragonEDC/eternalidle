@@ -88,7 +88,13 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
             console.log(`[STRIPE] Fallback - Payment Link: ${plink}, Amount: ${amount}, Currency: ${currency}`);
 
             // Hardcoded mapping for known links if metadata is missing
-            if (plink === 'plink_1SxHviEPuC7Jnm1w4tB581M2') packageId = 'ETERNAL_MEMBERSHIP';
+            if (plink === 'plink_1SxHviEPuC7Jnm1w4tB581M2') {
+                console.log('[STRIPE] Matched link plink_1SxHviEPuC7Jnm1w4tB581M2 to CROWNS_250');
+                packageId = 'CROWNS_250';
+            }
+            if (!packageId && plink === 'plink_for_membership_id') { // We need to find the real ID for membership
+                packageId = 'ETERNAL_MEMBERSHIP';
+            }
 
             // If still no pkg, try to guess by amount (rough fallback per crownStore.js)
             if (!packageId) {
