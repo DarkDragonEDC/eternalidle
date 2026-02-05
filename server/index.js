@@ -57,7 +57,8 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
             process.env.STRIPE_WEBHOOK_SECRET || 'whsec_test_secret'
         );
     } catch (err) {
-        console.error(`Webhook Error: ${err.message}`);
+        console.error(`[STRIPE] Webhook Signature Error: ${err.message}`);
+        console.error(`[STRIPE] Expected Secret: ${process.env.STRIPE_WEBHOOK_SECRET?.substring(0, 10)}...`);
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
@@ -70,14 +71,78 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
 
         // Handle static links via client_reference_id
         if (!userId && session.client_reference_id) {
-            const [uId, cId, pkgId] = session.client_reference_id.split(':');
-            userId = uId;
-            characterId = cId;
-            packageId = pkgId;
+            const parts = session.client_reference_id.split(':');
+            if (parts.length >= 3) {
+                userId = parts[0];
+                characterId = parts[1];
+                packageId = parts[2];
+            }
+        }
 
-            // If it's the membership, we need the amount if it's not in metadata
+        // FALLBACK 1: Identify Package by Payment Link ID or Amount
+        if (!packageId) {
+            const plink = session.payment_link;
+            const amount = session.amount_total;
+            const currency = session.currency?.toUpperCase();
+
+            console.log(`[STRIPE] Fallback - Payment Link: ${plink}, Amount: ${amount}, Currency: ${currency}`);
+
+            // Hardcoded mapping for known links if metadata is missing
+            if (plink === 'plink_1SxHviEPuC7Jnm1w4tB581M2') packageId = 'ETERNAL_MEMBERSHIP';
+
+            // If still no pkg, try to guess by amount (rough fallback per crownStore.js)
+            if (!packageId) {
+                if (currency === 'BRL') {
+                    if (amount >= 3500 && amount <= 4500) packageId = 'CROWNS_250';
+                    else if (amount >= 7000 && amount <= 8500) packageId = 'CROWNS_500';
+                    else if (amount >= 14000 && amount <= 16000) packageId = 'CROWNS_1000';
+                    else if (amount >= 28000 && amount <= 32000) packageId = 'CROWNS_2500';
+                } else {
+                    // USD fallbacks
+                    if (amount >= 600 && amount <= 800) packageId = 'CROWNS_250';
+                    else if (amount >= 1300 && amount <= 1500) packageId = 'CROWNS_500';
+                    else if (amount >= 2400 && amount <= 2700) packageId = 'CROWNS_1000';
+                    else if (amount >= 6000 && amount <= 7000) packageId = 'CROWNS_2500';
+                }
+            }
+        }
+
+        // Set amount based on identified package if not in metadata
+        if (packageId && !crownAmount) {
             if (packageId === 'ETERNAL_MEMBERSHIP') {
-                crownAmount = 0; // Memberships don't usually give crowns directly unless defined
+                crownAmount = 0;
+            } else {
+                const pkg = getStoreItem(packageId);
+                if (pkg) crownAmount = pkg.amount;
+            }
+        }
+
+        // FALLBACK 2: Identify User by Email if ID is missing
+        if (!userId && session.customer_details?.email) {
+            const email = session.customer_details.email;
+            console.log(`[STRIPE] Searching for user by email: ${email}`);
+
+            try {
+                // Since we have service role key, we can list users (limited but works for simple cases)
+                const { data: users, error: userError } = await supabase.auth.admin.listUsers();
+                if (!userError && users) {
+                    const targetUser = users.users.find(u => u.email === email);
+                    if (targetUser) {
+                        userId = targetUser.id;
+                        console.log(`[STRIPE] Found user ${userId} for email ${email}`);
+
+                        // If we have userId but no characterId, pick the most recent character
+                        if (!characterId) {
+                            const { data: chars } = await supabase.from('characters').select('id, name').eq('user_id', userId).order('last_active', { ascending: false }).limit(1);
+                            if (chars && chars.length > 0) {
+                                characterId = chars[0].id;
+                                console.log(`[STRIPE] Auto-selected character ${chars[0].name} (${characterId})`);
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('[STRIPE] User recovery failed:', e);
             }
         }
 
