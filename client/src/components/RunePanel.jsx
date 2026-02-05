@@ -1679,6 +1679,16 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                         {formatNumber(gameState?.state?.silver || 0)}
                                     </div>
                                 </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px', paddingTop: '4px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Remaining Silver:</div>
+                                    <div style={{
+                                        fontSize: '1rem',
+                                        fontWeight: 'bold',
+                                        color: (gameState?.state?.silver || 0) - autoMergeConfirm.totalSilverCost < 0 ? '#ef4444' : '#10b981'
+                                    }}>
+                                        {formatNumber(Math.max(0, (gameState?.state?.silver || 0) - autoMergeConfirm.totalSilverCost))}
+                                    </div>
+                                </div>
                             </div>
 
                             {(gameState?.state?.silver || 0) < autoMergeConfirm.totalSilverCost && (
