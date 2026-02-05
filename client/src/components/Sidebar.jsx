@@ -236,6 +236,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                     </svg>
                 </a>
 
+
                 {/* Theme Toggle Button */}
                 <button
                     onClick={toggleTheme}

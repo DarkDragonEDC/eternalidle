@@ -189,7 +189,7 @@ export class MarketManager {
         // Note: Seller might be offline or playing another character.
         let seller = await this.gameManager.getCharacter(listing.seller_id, sellerCharId || null);
         if (seller) {
-            const tax = Math.floor(totalCost * 0.06);
+            const tax = Math.floor(totalCost * 0.20);
             const sellerProfit = totalCost - tax;
 
             this.addClaim(seller, {

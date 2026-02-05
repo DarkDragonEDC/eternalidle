@@ -872,6 +872,32 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                             </div>
                         </div>
 
+                        {/* Silver Cost Display */}
+                        {selectedShard && (
+                            <div style={{
+                                width: '100%',
+                                padding: '10px',
+                                background: 'rgba(255, 215, 0, 0.05)',
+                                borderRadius: '8px',
+                                border: '1px solid rgba(255, 215, 0, 0.1)',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                marginTop: '5px'
+                            }}>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                    <Coins size={14} /> Service Fee:
+                                </div>
+                                <div style={{
+                                    fontSize: '1rem',
+                                    fontWeight: '900',
+                                    color: (gameState?.state?.silver || 0) < (activeTab === 'shards' ? 1000 : 2500 * selectedShard.tier) ? '#ef4444' : '#ffd700'
+                                }}>
+                                    {formatNumber(activeTab === 'shards' ? 1000 : 2500 * selectedShard.tier)} Silver
+                                </div>
+                            </div>
+                        )}
+
                         <button
                             onClick={() => {
                                 if (!selectedShard || isCrafting) return;
@@ -910,7 +936,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                 width: '100%'
                             }}
                         >
-                            {isCrafting ? (activeTab === 'shards' ? 'Forging...' : 'Merging...') : (activeTab === 'shards' ? 'Forge Rune' : 'Merge Runes')}
+                            {isCrafting ? (activeTab === 'shards' ? 'Forging...' : 'Merging...') : (activeTab === 'shards' ? `Forge (1,000 Silver)` : `Merge (2,500 × T${selectedShard?.tier} Silver)`)}
                         </button>
 
                         {activeTab === 'runes' && (
@@ -956,7 +982,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                 }}
                             >
                                 {(gameState?.state?.membership?.active && new Date(gameState.state.membership.expiresAt) > new Date()) ? <Sparkles size={18} /> : <Lock size={16} />}
-                                Auto Merge All Runes
+                                Auto Merge All Runes (2.5k × Tier per merge)
                             </button>
                         )}
                     </div>
@@ -1265,7 +1291,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                 <div>
                                     <div style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>{batchModal.item.name}</div>
                                     <div style={{ fontSize: '0.8rem', color: 'var(--accent)' }}>
-                                        Cost: {batchModal.type === 'FORGE' ? '5 Shards' : '2 Runes'} / unit
+                                        {batchModal.type === 'FORGE' ? 'Forge Cost' : 'Merge Cost'}: {formatNumber(batchModal.type === 'FORGE' ? 1000 : 2500 * batchModal.item.tier)} Silver
                                     </div>
                                 </div>
                             </div>
@@ -1332,6 +1358,9 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                 <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Total Requirement</div>
                                 <div style={{ fontSize: '1.2rem', fontWeight: '900', color: 'var(--text-bright)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                                     {batchModal.quantity * (batchModal.type === 'FORGE' ? 5 : 2)} {batchModal.type === 'FORGE' ? 'Shards' : 'Runes'}
+                                </div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: '900', color: '#ffd700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '5px' }}>
+                                    <Coins size={16} /> {formatNumber(batchModal.quantity * (batchModal.type === 'FORGE' ? 1000 : 2500 * batchModal.item.tier))} Silver
                                 </div>
                             </div>
 

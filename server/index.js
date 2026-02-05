@@ -225,7 +225,6 @@ app.get('/api/active_players', async (req, res) => {
         fs.appendFileSync('logs/access.log', logMsg);
     } catch (e) { }
 
-    // Force CORS headers to avoid local browser block
     try {
         const { count, error } = await supabase
             .from('characters')

@@ -43,7 +43,7 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
     const parsedAmount = parseInt(amount) || 0;
     const parsedPrice = parseFloat(unitPrice.toString().replace(',', '.')) || 0;
     const totalPrice = Math.floor(parsedAmount * parsedPrice);
-    const fee = Math.floor(totalPrice * 0.06); // Sync with server: 6% tax
+    const fee = Math.floor(totalPrice * 0.20); // Sync with server: 20% tax
     const receive = totalPrice - fee;
 
     return (
@@ -204,7 +204,7 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                             <span style={{ color: 'var(--text-main)', fontWeight: 'bold' }}>{formatNumber(totalPrice)} Silver</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span style={{ color: 'var(--text-dim)' }}>Market Tax (5%):</span>
+                            <span style={{ color: 'var(--text-dim)' }}>Market Tax (20%):</span>
                             <span style={{ color: 'rgb(255, 68, 68)' }}>
                                 - {formatNumber(fee)}
                             </span>
