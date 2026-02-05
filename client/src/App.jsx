@@ -119,6 +119,7 @@ function App() {
 
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [pendingPotion, setPendingPotion] = useState(null);
 
   const handleRenameSubmit = (newName) => {
     socket.emit('change_name', { newName });
@@ -146,6 +147,10 @@ function App() {
 
   const clearAllNotifications = () => {
     socket?.emit('clear_notifications');
+  };
+
+  const markAllAsRead = () => {
+    socket?.emit('mark_all_notifications_read');
   };
 
   const handleListOnMarket = (id, item) => {
@@ -418,6 +423,10 @@ function App() {
     });
 
     newSocket.on('item_used', (result) => {
+      if (result.requiresConfirmation) {
+        setPendingPotion(result.pendingItem);
+        return;
+      }
 
       if (result.rewards) {
         setLootModalData(result.rewards);
@@ -1382,6 +1391,7 @@ function App() {
               isOpen={showNotifications}
               onClose={() => setShowNotifications(false)}
               onMarkAsRead={markAsRead}
+              onMarkAllAsRead={markAllAsRead}
               onClearAll={clearAllNotifications}
               onClickTrigger={() => setShowNotifications(!showNotifications)}
             />
@@ -1552,7 +1562,73 @@ function App() {
         onClose={() => setIsRenameModalOpen(false)}
         onSubmit={handleRenameSubmit}
       />
-    </div >
+
+      {/* Potion Replacement Confirmation Modal */}
+      <AnimatePresence>
+        {pendingPotion && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 10000, padding: '20px'
+          }}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              style={{
+                background: 'var(--panel-bg)', border: '1px solid var(--border-active)',
+                borderRadius: '20px', padding: '30px', maxWidth: '400px', width: '100%',
+                textAlign: 'center', boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+              }}
+            >
+              <div style={{
+                width: '60px', height: '60px', borderRadius: '50%',
+                background: 'rgba(174, 0, 255, 0.1)', display: 'flex',
+                alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px'
+              }}>
+                <Zap size={30} color="#ae00ff" />
+              </div>
+              <h3 style={{ margin: '0 0 10px', color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: '800' }}>
+                Replace Buff?
+              </h3>
+              <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', lineHeight: '1.5', margin: '0 0 25px' }}>
+                You have an active <strong>Tier {pendingPotion.oldTier}</strong> buff.
+                Consuming this <strong>{pendingPotion.name} (T{pendingPotion.newTier})</strong> will cancel the previous effect.
+                <br /><br />
+                Do you want to proceed?
+              </p>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  onClick={() => setPendingPotion(null)}
+                  style={{
+                    flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid var(--border)',
+                    background: 'rgba(255,255,255,0.05)', color: 'var(--text-main)',
+                    fontWeight: '700', cursor: 'pointer'
+                  }}
+                >
+                  CANCEL
+                </button>
+                <button
+                  onClick={() => {
+                    handleUseItem(pendingPotion.itemId, { force: true, qty: pendingPotion.quantity });
+                    setPendingPotion(null);
+                  }}
+                  style={{
+                    flex: 1, padding: '12px', borderRadius: '12px', border: 'none',
+                    background: 'linear-gradient(135deg, #ae00ff 0%, #7a00cc 100%)',
+                    color: '#fff', fontWeight: '700', cursor: 'pointer',
+                    boxShadow: '0 4px 15px rgba(174, 0, 255, 0.3)'
+                  }}
+                >
+                  CONFIRM
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 

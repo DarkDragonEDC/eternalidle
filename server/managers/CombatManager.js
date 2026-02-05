@@ -8,10 +8,10 @@ export class CombatManager {
         this.gameManager = gameManager;
     }
 
-    async startCombat(userId, characterId, mobId, tier, existingChar = null, isDungeon = false, customStats = null) {
+    async startCombat(userId, characterId, mobId, tier, existingChar = null, customStats = null) {
         const char = existingChar || await this.gameManager.getCharacter(userId, characterId);
 
-        if (char.state.dungeon && !isDungeon) {
+        if (char.state.dungeon) {
             throw new Error("Cannot start combat while in a dungeon");
         }
 
@@ -23,7 +23,7 @@ export class CombatManager {
 
         if (!mobData) throw new Error("Monster not found");
 
-        if (mobData.dungeonOnly && !isDungeon) {
+        if (mobData.dungeonOnly) {
             throw new Error("This monster is found only in dungeons");
         }
 
@@ -225,12 +225,8 @@ export class CombatManager {
             } catch (err) {
             }
 
-            if (combat.isDungeon) {
-                delete char.state.combat;
-            } else {
-                combat.kills = (combat.kills || 0) + 1;
-                // combat.mobHealth = combat.mobMaxHealth; // REMOVED: Managed by GameManager with delay
-            }
+            combat.kills = (combat.kills || 0) + 1;
+            // combat.mobHealth = combat.mobMaxHealth; // REMOVED: Managed by GameManager with delay
         }
 
         if (combat.playerHealth <= 0) {

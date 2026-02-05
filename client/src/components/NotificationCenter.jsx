@@ -2,7 +2,7 @@ import React from 'react';
 import { Bell, X, Star, Info, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onClearAll, onClickTrigger }) => {
+const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onMarkAllAsRead, onClearAll, onClickTrigger }) => {
     const [activeTab, setActiveTab] = React.useState('LEVEL_UP');
     const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -81,16 +81,30 @@ const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onCl
                                 alignItems: 'center'
                             }}>
                                 <h3 style={{ margin: 0, fontSize: '0.9rem', color: '#fff', fontWeight: 'bold' }}>Notifications</h3>
-                                <div style={{ display: 'flex', gap: '10px' }}>
+                                <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                                     {notifications.length > 0 && (
-                                        <button
-                                            onClick={onClearAll}
-                                            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', cursor: 'pointer' }}
-                                        >
-                                            Clear All
-                                        </button>
+                                        <div style={{ display: 'flex', gap: '12px' }}>
+                                            {unreadCount > 0 && (
+                                                <button
+                                                    onClick={onMarkAllAsRead}
+                                                    style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: '0.7rem', cursor: 'pointer', fontWeight: 'bold', opacity: 0.8 }}
+                                                    onMouseEnter={(e) => e.target.style.opacity = '1'}
+                                                    onMouseLeave={(e) => e.target.style.opacity = '0.8'}
+                                                >
+                                                    Mark all read
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={onClearAll}
+                                                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', cursor: 'pointer' }}
+                                                onMouseEnter={(e) => e.target.style.color = '#ff4d4d'}
+                                                onMouseLeave={(e) => e.target.style.color = 'rgba(255,255,255,0.4)'}
+                                            >
+                                                Clear All
+                                            </button>
+                                        </div>
                                     )}
-                                    <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}>
+                                    <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                                         <X size={16} />
                                     </button>
                                 </div>

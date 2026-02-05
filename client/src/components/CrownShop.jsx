@@ -432,12 +432,17 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                     <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>List up to <strong style={{ color: 'var(--text-main)' }}>50 items</strong> (Base: 30).</div>
                                 </div>
 
+                                <div style={{ background: 'var(--slot-bg)', padding: '15px', borderRadius: '10px', borderLeft: '4px solid #ae00ff' }}>
+                                    <div style={{ fontWeight: 'bold', color: '#ae00ff', fontSize: '0.95rem', marginBottom: '4px' }}>Rune Automation</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Access to <strong style={{ color: 'var(--text-main)' }}>Auto Merge</strong> feature to instantly combine runes.</div>
+                                </div>
+
                                 <div style={{ background: 'var(--slot-bg)', padding: '15px', borderRadius: '10px', borderLeft: '4px solid #ec407a' }}>
                                     <div style={{ fontWeight: 'bold', color: '#ec407a', fontSize: '0.95rem', marginBottom: '4px' }}>Productive Inactivity</div>
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>IDLE limit increased from <strong style={{ color: 'var(--text-main)' }}>8h to 12h</strong>.</div>
                                 </div>
 
-                                <div style={{ background: 'var(--slot-bg)', padding: '15px', borderRadius: '10px', borderLeft: '4px solid var(--accent)', gridColumn: 'span 2' }}>
+                                <div style={{ background: 'var(--slot-bg)', padding: '15px', borderRadius: '10px', borderLeft: '4px solid var(--accent)' }}>
                                     <div style={{ fontWeight: 'bold', color: 'var(--accent)', fontSize: '0.95rem', marginBottom: '4px' }}>Global Efficiency</div>
                                     <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Gain an additional <strong style={{ color: 'var(--text-main)' }}>+10% Global Efficiency</strong> (Mining, Logging, Crafting speed, etc).</div>
                                 </div>

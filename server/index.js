@@ -517,7 +517,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('use_item', async ({ itemId, quantity = 1 }) => {
-        console.log(`[DEBUG-SOCKET] Received use_item for ${itemId}`);
+        console.log(`[DEBUG-SOCKET] Received use_item for ${itemId}`, quantity);
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
                 const result = await gameManager.consumeItem(socket.user.id, socket.data.characterId, itemId, quantity);
@@ -632,6 +632,18 @@ io.on('connection', (socket) => {
                 } else {
                     socket.emit('error', { message: result.error });
                 }
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('auto_merge_runes', async ({ filters = {} } = {}) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.autoMergeRunes(socket.user.id, socket.data.characterId, filters);
+                socket.emit('craft_rune_success', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
             });
         } catch (err) {
             socket.emit('error', { message: err.message });
@@ -767,6 +779,10 @@ io.on('connection', (socket) => {
                     if (notif) {
                         notif.read = true;
                         await gameManager.saveState(char.id, char.state);
+
+                        // Emit updated status immediately
+                        const status = await gameManager.getStatus(socket.user.id, false, char.id);
+                        socket.emit('game_status', status);
                     }
                 }
             });
@@ -782,10 +798,32 @@ io.on('connection', (socket) => {
                 if (char && char.state.notifications) {
                     char.state.notifications = [];
                     await gameManager.saveState(char.id, char.state);
+
+                    // Emit updated status immediately
+                    const status = await gameManager.getStatus(socket.user.id, false, char.id);
+                    socket.emit('game_status', status);
                 }
             });
         } catch (err) {
             console.error('Error clearing notifications:', err);
+        }
+    });
+
+    socket.on('mark_all_notifications_read', async () => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                if (char && char.state.notifications) {
+                    char.state.notifications.forEach(n => n.read = true);
+                    await gameManager.saveState(char.id, char.state);
+
+                    // Emit updated status immediately
+                    const status = await gameManager.getStatus(socket.user.id, false, char.id);
+                    socket.emit('game_status', status);
+                }
+            });
+        } catch (err) {
+            console.error('Error marking all notifications as read:', err);
         }
     });
 

@@ -49,6 +49,16 @@ const CharacterSelection = ({ onSelectCharacter }) => {
         } catch (err) {
             console.error(err);
             setError(err.message);
+            
+            // If it's an auth error, the session might be stale or from another project
+            if (err.message.includes('Invalid token') || err.message.includes('JWT')) {
+                console.warn('Authentication error detected. Clearing session...');
+                supabase.auth.signOut().then(() => {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    window.location.reload();
+                });
+            }
         } finally {
             setLoading(false);
         }

@@ -3,6 +3,7 @@ import { Play, CheckCircle, Clock, Square, Zap, Hammer, Pickaxe, Box, Loader, Ho
 import { motion, AnimatePresence } from 'framer-motion';
 import { resolveItem, formatItemId } from '@shared/items';
 import { MONSTERS } from '@shared/monsters';
+import { formatNumber } from '@utils/format';
 
 const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serverTimeOffset = 0, skillProgress = 0 }) => { // Added skillProgress prop
     const [isOpen, setIsOpen] = useState(false);
@@ -704,8 +705,8 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <span style={{ fontSize: '0.8rem', color: '#ae00ff', fontWeight: 'bold' }}>
                                                 {dungeonState.status === 'WALKING' ? "Walking..." :
-                                                    dungeonState.status === 'FIGHTING' ? "Fighting..." :
-                                                        dungeonState.status === 'BOSS_FIGHT' ? "BOSS FIGHT" :
+                                                    dungeonState.status === 'FIGHTING' ? `Fighting... (${formatNumber(dungeonState.activeMob?.health || 0)}/${formatNumber(dungeonState.activeMob?.maxHealth || 0)})` :
+                                                        dungeonState.status === 'BOSS_FIGHT' ? `BOSS FIGHT (${formatNumber(dungeonState.activeMob?.health || 0)}/${formatNumber(dungeonState.activeMob?.maxHealth || 0)})` :
                                                             dungeonState.status}
                                             </span>
                                             {dungeonState.repeatCount > 0 && (

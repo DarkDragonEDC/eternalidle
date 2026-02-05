@@ -196,29 +196,81 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
     }, [serverTimeOffset]);
 
     const getEstimatedTime = () => {
-        if (!dungeonState || !dungeonState.active) return null;
+        if (!dungeonState || !dungeonState.active || !gameState?.calculatedStats) return null;
 
-        const wavesRemaining = dungeonState.maxWaves - dungeonState.wave;
-        const waveDuration = 60 * 1000;
+        const stats = gameState.calculatedStats;
+        const playerDmg = stats.damage || 1;
+        const playerAtkSpeed = stats.attackSpeed || 1000;
+        const MIN_WAVE_DURATION = 60 * 1000; // 60s walk/prep time total minimum
 
-        let currentWaveElapsed = 0;
-        if (dungeonState.wave_started_at) {
-            currentWaveElapsed = now - dungeonState.wave_started_at;
+        const tier = dungeonState.tier;
+        const dungeon = Object.values(DUNGEONS).find(d => d.tier === tier);
+        if (!dungeon) return null;
+
+        // Helper to simulate time for a specific wave
+        const simulateWaveTime = (waveIndex, currentHp = null) => {
+            const isBoss = (waveIndex + 1) === dungeonState.maxWaves;
+            const mobId = isBoss ? dungeon.bossId : (dungeon.trashMobs[waveIndex] || dungeon.trashMobs[dungeon.trashMobs.length - 1]);
+            const mob = MONSTERS[tier]?.find(m => m.id === mobId);
+
+            if (!mob) return MIN_WAVE_DURATION;
+
+            const scaling = isBoss ? 1.5 : (1 + waveIndex * 0.1);
+            const mobDef = (mob.defense || 0) * scaling;
+            const mobHealth = currentHp !== null ? currentHp : Math.floor(mob.health * scaling);
+
+            const mobMitigation = mobDef / (mobDef + 2000);
+            const mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
+            const roundsToKill = Math.ceil(mobHealth / mitigatedPlayerDmg);
+            const fightTime = roundsToKill * playerAtkSpeed;
+
+            // The server ensures at least 60s total for the wave (fight + walking)
+            return Math.max(MIN_WAVE_DURATION, fightTime);
+        };
+
+        // 1. Current Run Remaining
+        let currentRunMs = 0;
+
+        // Time left in CURRENT wave
+        if (dungeonState.status === 'FIGHTING' || dungeonState.status === 'BOSS_FIGHT') {
+            const currentHp = dungeonState.activeMob?.health || 0;
+            const playerAtkSpeed = stats.attackSpeed || 1000;
+
+            // Re-calculate fight time for remaining HP
+            const mobConfig = MONSTERS[tier]?.find(m => m.id === dungeonState.activeMob?.id);
+            const mobDef = dungeonState.activeMob?.defense || (mobConfig?.defense || 0);
+            const mobMitigation = mobDef / (mobDef + 2000);
+            const mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
+            const roundsRemaining = Math.ceil(currentHp / mitigatedPlayerDmg);
+            const fightTimeLeft = roundsRemaining * playerAtkSpeed;
+
+            // Adjust based on how much was already spent in the wave (walking part)
+            const elapsedSinceStart = dungeonState.wave_started_at ? (now - dungeonState.wave_started_at) : 0;
+            // The dungeon expects at least 60s total. If we are still fighting at 61s, 
+            // the time left is simply the fight time left.
+            currentRunMs = fightTimeLeft;
+        } else {
+            // Walking or Waiting - assume standard wave duration remaining
+            const elapsed = dungeonState.wave_started_at ? (now - dungeonState.wave_started_at) : 0;
+            currentRunMs = Math.max(0, MIN_WAVE_DURATION - elapsed);
+        }
+
+        // Add remaining waves in THIS run
+        for (let i = dungeonState.wave; i < dungeonState.maxWaves; i++) {
+            currentRunMs += simulateWaveTime(i);
+        }
+
+        // 2. Future Runs in Queue
+        let fullRunMs = 0;
+        for (let i = 0; i < dungeonState.maxWaves; i++) {
+            fullRunMs += simulateWaveTime(i);
         }
 
         const repeats = dungeonState.repeatCount || 0;
-        const fullRunDuration = dungeonState.maxWaves * waveDuration;
-
-        // Time left in current wave (min 0)
-        const currentWaveLeft = Math.max(0, waveDuration - currentWaveElapsed);
-
-        // Current Run Remaining
-        const currentRunMs = currentWaveLeft + (wavesRemaining * waveDuration);
-
-        // Total Queue Remaining
-        const queueMs = currentRunMs + (repeats * fullRunDuration);
+        const queueMs = currentRunMs + (repeats * fullRunMs);
 
         const formatTime = (ms) => {
+            if (ms <= 0) return "0m 1s"; // Smallest displayable
             const h = Math.floor(ms / 3600000);
             const m = Math.floor((ms % 3600000) / 60000);
             const s = Math.floor((ms % 60000) / 1000);
@@ -298,6 +350,22 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                 >
                     <Skull size={48} strokeWidth={1.5} />
                 </motion.div>
+
+                {dungeonState.activeMob && (dungeonState.status === 'FIGHTING' || dungeonState.status === 'BOSS_FIGHT') && (
+                    <div style={{ width: '100%', maxWidth: '200px', zIndex: 1, marginTop: '-5px', marginBottom: '10px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.6rem', color: 'var(--text-dim)', marginBottom: '4px', fontWeight: 'bold' }}>
+                            <span style={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}>{dungeonState.activeMob.name}</span>
+                            <span>{formatNumber(dungeonState.activeMob.health)} / {formatNumber(dungeonState.activeMob.maxHealth || 100)} HP</span>
+                        </div>
+                        <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '3px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                            <motion.div
+                                initial={false}
+                                animate={{ width: `${Math.max(0, (dungeonState.activeMob.health / (dungeonState.activeMob.maxHealth || 1))) * 100}%` }}
+                                style={{ height: '100%', background: dungeonState.status === 'BOSS_FIGHT' ? 'linear-gradient(90deg, #ff0000, #ff4444)' : 'linear-gradient(90deg, #4caf50, #8bc34a)' }}
+                            />
+                        </div>
+                    </div>
+                )}
 
                 <div style={{ textAlign: 'center', zIndex: 1 }}>
                     <div style={{ color: '#ae00ff', fontSize: '0.9rem', fontWeight: '900', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '1px' }}>
@@ -383,7 +451,6 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                         (() => {
                             const totals = dungeonState.lootLog.reduce((acc, log) => {
                                 acc.xp += (log.xp || 0);
-                                acc.silver += (log.silver || 0);
                                 (log.items || []).forEach(itemStr => {
                                     const match = itemStr.match(/^(\d+)x\s+(.+)$/);
                                     if (match) {
@@ -395,18 +462,14 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                     }
                                 });
                                 return acc;
-                            }, { xp: 0, silver: 0, items: {} });
+                            }, { xp: 0, items: {} });
 
                             return (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                                        <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid var(--border)' }}>
-                                            <div style={{ color: 'var(--text-dim)', fontSize: '0.55rem', fontWeight: '900' }}>XP</div>
-                                            <div style={{ color: '#4caf50', fontWeight: '900', fontSize: '1rem' }}>+{formatNumber(totals.xp)}</div>
-                                        </div>
-                                        <div style={{ background: 'var(--accent-soft)', padding: '8px', borderRadius: '10px', textAlign: 'center', border: '1px solid var(--accent)' }}>
-                                            <div style={{ color: 'var(--accent)', fontSize: '0.55rem', fontWeight: '900' }}>SILVER</div>
-                                            <div style={{ color: 'var(--accent)', fontWeight: '900', fontSize: '1rem' }}>+{formatNumber(totals.silver)}</div>
+                                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                        <div style={{ background: 'var(--slot-bg)', padding: '8px 20px', borderRadius: '10px', textAlign: 'center', border: '1px solid var(--border)', minWidth: '120px' }}>
+                                            <div style={{ color: 'var(--text-dim)', fontSize: '0.55rem', fontWeight: '900' }}>TOTAL XP Gained</div>
+                                            <div style={{ color: '#4caf50', fontWeight: '900', fontSize: '1.2rem' }}>+{formatNumber(totals.xp)}</div>
                                         </div>
                                     </div>
 
@@ -629,7 +692,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                             {/* Silver Cost (if any, showing reward silver for now) */}
                                             <div style={{ position: 'relative', width: '52px', height: '52px', background: 'var(--bg-dark)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)' }}>
                                                 <div style={{ position: 'absolute', top: '-6px', right: '-6px', background: 'var(--slot-bg)', fontSize: '0.6rem', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border)', color: 'var(--accent)', fontWeight: 'bold', zIndex: 2 }}>
-                                                    {formatNumber(dungeon.rewards.silver)}
+                                                    {formatNumber(dungeon.entrySilver)}
                                                 </div>
                                                 <div style={{ fontSize: '1.2rem', opacity: 0.8 }}>
                                                     <Coins size={28} color="var(--accent)" />

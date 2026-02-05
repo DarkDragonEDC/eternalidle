@@ -95,14 +95,10 @@ const DungeonHistoryModal = ({ isOpen, onClose, history }) => {
                                             <span style={{ fontSize: '0.7rem', color: '#888' }}>{formatDate(run.occurred_at)}</span>
                                         </div>
 
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '10px' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#aaa' }}>
                                                 <Award size={14} color="#4caf50" />
                                                 <span>{run.xp_gained} XP</span>
-                                            </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#aaa' }}>
-                                                <Coins size={14} color="#ffd700" />
-                                                <span>{run.silver_gained}</span>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#aaa' }}>
                                                 <Clock size={14} color="#42a5f5" />

@@ -1,0 +1,23 @@
+[
+  {
+    "charName": "Brola",
+    "type": "NOTIFICATION",
+    "message": "You bought 1x Sickle for 5 Silver.",
+    "timestamp": 1770297657154
+  },
+  {
+    "charName": "Ana Maria",
+    "type": "NOTIFICATION",
+    "message": "You bought 1x Sickle for 4000000 Silver.",
+    "timestamp": 1770297893540
+  },
+  {
+    "charName": "Roflelf",
+    "type": "CLAIM",
+    "claimType": "SOLD_ITEM",
+    "itemId": "T3_SICKLE_Q3",
+    "amount": 1,
+    "timestamp": 1770297893734,
+    "silver": 3760000
+  }
+]

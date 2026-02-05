@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { resolveItem, calculateItemSellPrice, RUNE_GATHER_ACTIVITIES, RUNE_REFINE_ACTIVITIES, RUNE_CRAFT_ACTIVITIES, RUNES_BY_CATEGORY } from '@shared/items';
 import { formatNumber } from '@utils/format';
-import { Package, Info, Sparkles, ArrowRight, Hammer, Coins, Star, Search, Filter, X, ChevronDown, ListFilter } from 'lucide-react';
+import { Package, Info, Sparkles, ArrowRight, Hammer, Coins, Star, Search, Filter, X, ChevronDown, ListFilter, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ItemActionModal from './ItemActionModal';
 
@@ -39,6 +39,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
     const [sellModal, setSellModal] = useState(null);
     const [batchModal, setBatchModal] = useState(null);
     const [resultsModal, setResultsModal] = useState(null);
+    const [showPremiumModal, setShowPremiumModal] = useState(false);
 
     const inventory = gameState?.state?.inventory || {};
 
@@ -102,21 +103,94 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
 
             if (result.items && result.items.length > 1) {
                 // Bulk results - Aggregate by item ID
+                console.log('[RunePanel] Craft Result Input:', result.items);
+
                 const aggregated = result.items.reduce((acc, r) => {
                     const key = r.item;
                     if (!acc[key]) {
                         acc[key] = { id: key, ...resolveItem(key), ...r, qty: 0 };
                     }
-                    acc[key].qty += 1;
+                    acc[key].qty += (r.qty || 1);
                     return acc;
                 }, {});
 
-                const sortedResults = Object.values(aggregated).sort((a, b) => (b.stars || 0) - (a.stars || 0));
+                // Filter out intermediate items (consumed to create higher tiers)
+                const processingList = Object.values(aggregated);
+
+                // Store original quantities for calculation
+                processingList.forEach(item => {
+                    item.originalQty = item.qty;
+                });
+
+                const familyMap = {};
+
+                // 1. Group by "Family" using strict ID parsing
+                // Rank = (Tier-1)*3 + (Stars-1)
+                processingList.forEach(item => {
+                    const match = item.id.match(/^T(\d+)_RUNE_(.+)_(\d+)STAR$/);
+                    if (match) {
+                        const tier = parseInt(match[1]);
+                        const type = match[2]; // e.g. MINING_XP
+                        const stars = parseInt(match[3]);
+
+                        if (!familyMap[type]) familyMap[type] = [];
+
+                        // Calculate sequential rank
+                        // T1_1* -> 0, T1_2* -> 1, T1_3* -> 2, T2_1* -> 3...
+                        const rank = (tier - 1) * 3 + (stars - 1);
+
+                        familyMap[type].push({ rank, item });
+                    } else {
+                        // Fallback for non-standard items (shouldn't happen in auto-merge)
+                        if (!familyMap['MISC']) familyMap['MISC'] = [];
+                        familyMap['MISC'].push({ rank: 0, item });
+                    }
+                });
+
+                console.log('[RunePanel] Family Map:', familyMap);
+
+                // 2. Calculate net quantities
+                Object.values(familyMap).forEach(familyItems => {
+                    if (familyItems[0] && familyItems[0].item.id.includes('MISC')) return;
+
+                    // Sort by Rank descending (Highest first)
+                    familyItems.sort((a, b) => b.rank - a.rank);
+
+                    for (let i = 0; i < familyItems.length; i++) {
+                        const current = familyItems[i]; // Higher Rank
+
+                        // Find the item strictly one rank below
+                        // This handles T2_1* (Rank 3) looking for T1_3* (Rank 2) correctly
+                        const lowerRankItem = familyItems.find(f => f.rank === current.rank - 1);
+
+                        if (lowerRankItem) {
+                            // Use ORIGINAL quantity to calculate consumption
+                            // because "Total Created" determines "Total Consumed"
+                            const createdAmount = current.item.originalQty;
+
+                            if (createdAmount > 0) {
+                                const consumedAmount = createdAmount * 2;
+                                lowerRankItem.item.qty -= consumedAmount;
+                                console.log(`[RunePanel] Consumed ${consumedAmount} ${lowerRankItem.item.id} (Rank ${lowerRankItem.rank}) to make ${createdAmount} ${current.item.id} (Rank ${current.rank})`);
+                            }
+                        }
+                    }
+                });
+
+                // 3. Filter positive quantities and sort
+                const sortedResults = processingList
+                    .filter(item => item.qty > 0)
+                    .sort((a, b) => {
+                        const tierDiff = (b.tier || 0) - (a.tier || 0);
+                        if (tierDiff !== 0) return tierDiff;
+                        return (b.stars || 0) - (a.stars || 0);
+                    });
+
                 setResultsModal({
                     items: sortedResults,
                     count: result.count
                 });
-                setCraftResult(null); // Clear single result to avoid confusion
+                setCraftResult(null); // Clear craft result
 
                 // Auto-select for next merge if in runes tab
                 if (activeTab === 'runes' && sortedResults.length > 0) {
@@ -176,7 +250,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                 if (effectFilter !== 'ALL' && !id.includes(`_${effectFilter}_`)) return null;
                 if (tierFilter !== 'ALL' && item.tier !== parseInt(tierFilter)) return null;
                 if (starsFilter !== 'ALL' && item.stars !== parseInt(starsFilter)) return null;
-                if (showThreePlus && qty < 3) return null;
+                if (showThreePlus && qty < 2) return null;
 
                 return { ...item, id, qty };
             }
@@ -444,7 +518,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                         }}>
                                             {showThreePlus && '✓'}
                                         </div>
-                                        Show only 3+ Runes
+                                        Show only 2+ Runes
                                     </button>
                                 </div>
 
@@ -832,11 +906,59 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '8px',
-                                justifyContent: 'center'
+                                justifyContent: 'center',
+                                width: '100%'
                             }}
                         >
                             {isCrafting ? (activeTab === 'shards' ? 'Forging...' : 'Merging...') : (activeTab === 'shards' ? 'Forge Rune' : 'Merge Runes')}
                         </button>
+
+                        {activeTab === 'runes' && (
+                            <button
+                                onClick={() => {
+                                    const isMember = gameState?.state?.membership?.active && new Date(gameState.state.membership.expiresAt) > new Date();
+                                    if (!isMember) {
+                                        setShowPremiumModal(true);
+                                        return;
+                                    }
+
+                                    if (isCrafting || !socket) return;
+                                    setIsCrafting(true);
+                                    // Send current filters to backend
+                                    socket.emit('auto_merge_runes', {
+                                        filters: {
+                                            categoryFilter,
+                                            activityFilter,
+                                            effectFilter,
+                                            tierFilter,
+                                            starsFilter,
+                                            search
+                                        }
+                                    });
+                                }}
+                                disabled={isCrafting}
+                                style={{
+                                    marginTop: '8px',
+                                    padding: '10px 30px',
+                                    background: (gameState?.state?.membership?.active && new Date(gameState.state.membership.expiresAt) > new Date()) ? 'rgba(174, 0, 255, 0.05)' : 'var(--bg-dark)',
+                                    color: (gameState?.state?.membership?.active && new Date(gameState.state.membership.expiresAt) > new Date()) ? '#ae00ff' : 'var(--text-dim)',
+                                    border: (gameState?.state?.membership?.active && new Date(gameState.state.membership.expiresAt) > new Date()) ? '1px solid rgba(174, 0, 255, 0.2)' : '1px solid var(--border)',
+                                    borderRadius: '8px',
+                                    fontWeight: 'bold',
+                                    cursor: (gameState?.state?.membership?.active && new Date(gameState.state.membership.expiresAt) > new Date()) ? (isCrafting ? 'not-allowed' : 'pointer') : 'not-allowed',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    justifyContent: 'center',
+                                    width: '100%',
+                                    opacity: isCrafting ? 0.5 : 1,
+                                    transition: '0.2s'
+                                }}
+                            >
+                                {(gameState?.state?.membership?.active && new Date(gameState.state.membership.expiresAt) > new Date()) ? <Sparkles size={18} /> : <Lock size={16} />}
+                                Auto Merge All Runes
+                            </button>
+                        )}
                     </div>
                 )
             }
@@ -1043,6 +1165,8 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                         }}
                                         style={{
                                             width: '80px',
+                                            height: '40px',
+                                            padding: 0,
                                             background: 'rgba(255,255,255,0.05)',
                                             border: '1px solid rgba(255,255,255,0.1)',
                                             borderRadius: '6px',
@@ -1050,8 +1174,10 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                             fontSize: '1.2rem',
                                             fontWeight: 'bold',
                                             textAlign: 'center',
+                                            lineHeight: '40px',
                                             outline: 'none',
-                                            appearance: 'textfield'
+                                            appearance: 'textfield',
+                                            MozAppearance: 'textfield'
                                         }}
                                     />
                                     <button
@@ -1134,7 +1260,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                     border: `1px solid ${batchModal.item.rarityColor || 'var(--border)'}`,
                                     background: 'var(--slot-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center'
                                 }}>
-                                    {batchModal.item.id.includes('SHARD') ? <Package size={30} /> : <img src={batchModal.item.icon} alt="" style={{ width: '80%', height: '80%', objectFit: 'contain' }} />}
+                                    {batchModal.item.id.includes('SHARD') ? <Package size={30} /> : (batchModal.item.icon ? <img src={batchModal.item.icon} alt="" style={{ width: '80%', height: '80%', objectFit: 'contain' }} /> : <Package size={30} />)}
                                 </div>
                                 <div>
                                     <div style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>{batchModal.item.name}</div>
@@ -1170,6 +1296,8 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                         }}
                                         style={{
                                             width: '80px',
+                                            height: '40px',
+                                            padding: 0,
                                             background: 'rgba(255,255,255,0.05)',
                                             border: '1px solid rgba(255,255,255,0.1)',
                                             borderRadius: '6px',
@@ -1177,8 +1305,10 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                             fontSize: '1.2rem',
                                             fontWeight: 'bold',
                                             textAlign: 'center',
+                                            lineHeight: '40px',
                                             outline: 'none',
-                                            appearance: 'textfield'
+                                            appearance: 'textfield',
+                                            MozAppearance: 'textfield'
                                         }}
                                     />
                                     <button
@@ -1349,6 +1479,55 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                 AWESOME!
                             </button>
                         </motion.div>
+                    </div>
+                )
+            }
+            {/* PREMIUM REQUIRED MODAL */}
+            {
+                showPremiumModal && (
+                    <div style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(0,0,0,0.85)', zIndex: 1300,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        backdropFilter: 'blur(5px)'
+                    }} onClick={() => setShowPremiumModal(false)}>
+                        <div style={{
+                            background: 'var(--panel-bg)', border: '1px solid var(--accent)',
+                            borderRadius: '16px', padding: '30px', width: '90%', maxWidth: '360px',
+                            boxShadow: '0 20px 50px rgba(0,0,0,0.6)', position: 'relative',
+                            textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '20px'
+                        }} onClick={e => e.stopPropagation()}>
+
+                            <div style={{
+                                width: '60px', height: '60px', background: 'rgba(255, 215, 0, 0.1)',
+                                borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                margin: '0 auto', border: '1px solid rgba(255, 215, 0, 0.3)'
+                            }}>
+                                <Lock size={30} color="#FFD700" />
+                            </div>
+
+                            <div>
+                                <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--text-bright)', marginBottom: '10px' }}>
+                                    Premium Feature
+                                </div>
+                                <div style={{ fontSize: '0.95rem', color: 'var(--text-dim)', lineHeight: '1.5' }}>
+                                    Auto Merge is exclusive to <span style={{ color: '#FFD700', fontWeight: 'bold' }}>VIP Members</span>.
+                                    <br />
+                                    Active membership is required to use this feature.
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => setShowPremiumModal(false)}
+                                style={{
+                                    padding: '12px', background: 'var(--accent)', border: 'none',
+                                    color: 'var(--bg-dark)', borderRadius: '10px', fontWeight: 'bold',
+                                    cursor: 'pointer', fontSize: '1rem'
+                                }}
+                            >
+                                GOT IT
+                            </button>
+                        </div>
                     </div>
                 )
             }

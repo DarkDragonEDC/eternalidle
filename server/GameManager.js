@@ -591,39 +591,18 @@ export class GameManager {
             const result = await this.dungeonManager.processDungeonTick(char);
 
             if (!result) {
-                // No immediate change, check if we are in combat
-                if (char.state.combat) {
-                    // Process combat batch for this wave
-                    const combatReport = await this.processBatchCombat(char, 1000); // 1000 rounds should be plenty for one mob
-                    remainingSeconds -= combatReport.totalTime;
-
-                    // Merge gains
-                    for (const [id, qty] of Object.entries(combatReport.itemsGained)) {
-                        itemsGained[id] = (itemsGained[id] || 0) + qty;
-                    }
-                    for (const [skill, qty] of Object.entries(combatReport.xpGained)) {
-                        xpGained[skill] = (xpGained[skill] || 0) + qty;
-                    }
-
-                    if (combatReport.died) {
-                        died = true;
-                        break;
-                    }
-                } else {
-                    // Stuck or waiting? Skip a bit of time
-                    remainingSeconds -= 5;
-                }
+                // If no result and nothing happening, skip 5s to avoid infinite loop
+                remainingSeconds -= 5;
             } else {
-                // Tick produced a result (e.g. wave cleared, next wave started, completed)
+                // Tick produced a result (e.g. battle update, wave cleared, etc.)
                 if (result.dungeonUpdate) {
                     const status = result.dungeonUpdate.status;
                     if (status === 'COMPLETED') {
                         dungeonsTotalCleared++;
-                        // Add completion rewards
                         const rewards = result.dungeonUpdate.rewards;
                         if (rewards) {
                             xpGained['DUNGEONEERING'] = (xpGained['DUNGEONEERING'] || 0) + (rewards.xp || 0);
-                            xpGained['COMBAT'] = (xpGained['COMBAT'] || 0) + (rewards.xp || 0);
+                            // ELIMINATED: xpGained['COMBAT'] = ...
                             if (rewards.items) {
                                 rewards.items.forEach(itemStr => {
                                     const match = itemStr.match(/^(\d+)x (.+)$/);
@@ -639,19 +618,16 @@ export class GameManager {
                         }
                     } else if (status === 'FAILED') {
                         died = true;
+                    } else if (status === 'FIGHTING' || status === 'BOSS_FIGHT') {
+                        // Internal battle progress - consume 1s
+                        remainingSeconds -= 1;
                     } else if (status === 'WALKING') {
-                        // Consume walking time
-                        const walkTime = result.dungeonUpdate.timeLeft || 60;
-                        remainingSeconds -= Math.min(remainingSeconds, walkTime);
-                        // Force complete the walking step if we have time
-                        if (remainingSeconds > 0) {
-                            char.state.dungeon.wave_started_at = Date.now() - (60 * 1000); // Hack to make next tick advance
-                        }
+                        // Walking time - consume 1s
+                        remainingSeconds -= 1;
                     }
+                } else {
+                    remainingSeconds -= 1;
                 }
-
-                // If tick didn't consume time explicitly, consumer a small bit to avoid infinite loop
-                remainingSeconds -= 1;
             }
         }
 
@@ -865,33 +841,49 @@ export class GameManager {
 
         const now = Date.now();
         const IDLE_LIMIT_MS = this.getMaxIdleTime(char);
+        const limitHours = IDLE_LIMIT_MS / (60 * 60 * 1000);
+        let hasChanges = false;
 
-        // Real-time 12h Limit Check
-        let limitExceeded = false;
+        // Independent Activity Limit Check
         if (char.current_activity && char.activity_started_at) {
-            if (now - new Date(char.activity_started_at).getTime() > IDLE_LIMIT_MS) limitExceeded = true;
-        } else if (char.state.combat && char.state.combat.started_at) {
-            if (now - new Date(char.state.combat.started_at).getTime() > IDLE_LIMIT_MS) limitExceeded = true;
-        } else if (char.state.dungeon && char.state.dungeon.started_at) {
-            if (now - new Date(char.state.dungeon.started_at).getTime() > IDLE_LIMIT_MS) limitExceeded = true;
+            if (now - new Date(char.activity_started_at).getTime() > IDLE_LIMIT_MS) {
+                console.log(`[LIMIT] ${limitHours}h activity limit reached for ${char.name}. Stopping activity.`);
+                char.current_activity = null;
+                char.activity_started_at = null;
+                hasChanges = true;
+            }
         }
 
-        if (limitExceeded) {
-            const limitHours = IDLE_LIMIT_MS / (60 * 60 * 1000);
-            console.log(`[LIMIT] ${limitHours}h limit reached for ${char.name}. Stopping action.`);
-            char.current_activity = null;
-            char.activity_started_at = null;
-            if (char.state.combat) delete char.state.combat;
-            if (char.state.dungeon) delete char.state.dungeon;
+        // Independent Combat Limit Check
+        if (char.state.combat && char.state.combat.started_at) {
+            if (now - new Date(char.state.combat.started_at).getTime() > IDLE_LIMIT_MS) {
+                console.log(`[LIMIT] ${limitHours}h combat limit reached for ${char.name}. Stopping combat.`);
+                delete char.state.combat;
+                hasChanges = true;
+            }
+        }
 
+        // Independent Dungeon Limit Check
+        if (char.state.dungeon && char.state.dungeon.started_at) {
+            if (now - new Date(char.state.dungeon.started_at).getTime() > IDLE_LIMIT_MS) {
+                console.log(`[LIMIT] ${limitHours}h dungeon limit reached for ${char.name}. Stopping dungeon.`);
+                delete char.state.dungeon;
+                hasChanges = true;
+            }
+        }
+
+        if (hasChanges) {
             this.markDirty(char.id);
             await this.persistCharacter(char.id);
 
-            return {
-                success: false,
-                message: `${limitHours}-hour idle limit reached. Action stopped.`,
-                status: await this.getStatus(char.user_id, false, char.id)
-            };
+            // If everything was stopped by the limit check, return early
+            if (!char.current_activity && !char.state.combat && !char.state.dungeon) {
+                return {
+                    success: false,
+                    message: `${limitHours}-hour idle limit reached. All actions stopped.`,
+                    status: await this.getStatus(char.user_id, false, char.id)
+                };
+            }
         }
         let leveledUp = null;
         let itemsGained = 0;
@@ -1325,15 +1317,13 @@ export class GameManager {
     async consumeItem(userId, characterId, itemId, quantity = 1) {
         const char = await this.getCharacter(userId, characterId);
         const itemData = this.inventoryManager.resolveItem(itemId);
-        const safeQty = Math.max(1, parseInt(quantity) || 1);
+        const safeQty = Math.max(1, parseInt(typeof quantity === 'object' ? quantity.qty : quantity) || 1);
 
 
         if (!itemData) throw new Error("Item not found");
 
         const invQty = char.state.inventory?.[itemId] || 0;
         if (invQty < safeQty) throw new Error(`You don't have enough ${itemData.name}`);
-
-        this.inventoryManager.consumeItems(char, { [itemId]: safeQty });
 
         let message = ""; // Neutralized message for toast suppression
 
@@ -1345,117 +1335,145 @@ export class GameManager {
 
             char.state.health = newHp;
             // message += ` (Recovered ${healAmount} HP)`;
+            this.inventoryManager.consumeItems(char, { [itemId]: safeQty });
         } else if (itemData.type === 'POTION') {
             const effect = itemData.effect;
             const value = itemData.value;
-            const baseDuration = itemData.duration || itemData.time || 600;
+            const tier = itemData.tier || 1;
+            const baseDuration = itemData.duration || 3600;
             const totalDuration = baseDuration * safeQty;
 
-            this.applyBuff(char, effect, value, totalDuration);
+            // NEW: Tier Check and Confirmation Logic
+            if (!char.state.active_buffs) char.state.active_buffs = {};
+            const existing = char.state.active_buffs[effect];
+            const isExpired = !existing || existing.expiresAt <= Date.now();
+
+            // If trying to swap tiers and not forced, ask for confirmation
+            if (!isExpired && existing.tier !== tier && !quantity.force) {
+                return {
+                    requiresConfirmation: true,
+                    pendingItem: {
+                        itemId,
+                        name: itemData.name,
+                        oldTier: existing.tier,
+                        newTier: tier,
+                        quantity: safeQty
+                    }
+                };
+            }
+
+            // If we reach here, either it's same tier, expired, or forced
+            this.inventoryManager.consumeItems(char, { [itemId]: safeQty });
+            this.applyBuff(char, effect, value, totalDuration, tier);
             // message += ` (Buff Applied: +${Math.round(value * 100)}% for ${Math.round(totalDuration / 60)}m)`;
-        } else if (itemData.id === 'ETERNAL_MEMBERSHIP') {
-            const membershipItem = { duration: (itemData.duration || 30 * 24 * 60 * 60 * 1000) * safeQty };
-            const result = this.crownsManager.applyMembership(char, membershipItem);
-            if (result.success) {
-                // message = result.message;
-            } else {
-                throw new Error(result.error || "Failed to activate membership");
-            }
-        } else if (itemData.id === 'INVENTORY_SLOT_TICKET') {
-            // Permanent Inventory Expansion
-            char.state.extraInventorySlots = (parseInt(char.state.extraInventorySlots) || 0) + safeQty;
-            // message = `Used ${safeQty}x Inventory Expansion Tickets! Your inventory capacity permanently increased by ${safeQty} slots.`;
-        } else if (itemData.id === 'NAME_CHANGE_TOKEN') {
-            if (char.state.pendingNameChange) {
-                throw new Error("You already have a pending name change!");
-            }
-            char.state.pendingNameChange = true;
-            // message = "Name Change Unlocked! You can now change your name in the Profile panel.";
-        } else if (itemData.id.includes('CHEST')) {
-            // Chest Logic
-            const tier = itemData.tier || 1;
+        } else {
+            // General consumption for other items
+            this.inventoryManager.consumeItems(char, { [itemId]: safeQty });
 
-            // Simulate adding items to check for space (Approximation)
-            const tempInv = { ...char.state.inventory };
-            const simulatedMax = this.inventoryManager.getMaxSlots(char);
+            if (itemData.id === 'ETERNAL_MEMBERSHIP') {
+                const membershipItem = { duration: (itemData.duration || 30 * 24 * 60 * 60 * 1000) * safeQty };
+                const result = this.crownsManager.applyMembership(char, membershipItem);
+                if (result.success) {
+                    // message = result.message;
+                } else {
+                    throw new Error(result.error || "Failed to activate membership");
+                }
+            } else if (itemData.id === 'INVENTORY_SLOT_TICKET') {
+                // Permanent Inventory Expansion
+                char.state.extraInventorySlots = (parseInt(char.state.extraInventorySlots) || 0) + safeQty;
+                // message = `Used ${safeQty}x Inventory Expansion Tickets! Your inventory capacity permanently increased by ${safeQty} slots.`;
+            } else if (itemData.id === 'NAME_CHANGE_TOKEN') {
+                if (char.state.pendingNameChange) {
+                    throw new Error("You already have a pending name change!");
+                }
+                char.state.pendingNameChange = true;
+                // message = "Name Change Unlocked! You can now change your name in the Profile panel.";
+            } else if (itemData.id.includes('CHEST')) {
+                // Chest Logic
+                const tier = itemData.tier || 1;
 
-            const totalRewards = {
-                items: {}
-            };
+                // Simulate adding items to check for space (Approximation)
+                const tempInv = { ...char.state.inventory };
+                const simulatedMax = this.inventoryManager.getMaxSlots(char);
 
-            // 2. Loop for Quantity
-            const rarityConfig = CHEST_DROP_TABLE.RARITIES[itemData.rarity] || CHEST_DROP_TABLE.RARITIES.COMMON;
-            const crestChance = rarityConfig.crestChance;
+                const totalRewards = {
+                    items: {}
+                };
 
-            // New Shard Drop Formula: min = (tier-1)*10 + (rarity*2)+1, max = min + 1
-            const rarities = ['COMMON', 'UNCOMMON', 'RARE', 'EPIC', 'LEGENDARY'];
-            const rarityOffset = Math.max(0, rarities.indexOf(itemData.rarity));
-            const min = (tier - 1) * 10 + (rarityOffset * 2) + 1;
-            const max = min + 1;
-            const shardId = `T1_RUNE_SHARD`;
+                // 2. Loop for Quantity
+                const rarityConfig = CHEST_DROP_TABLE.RARITIES[itemData.rarity] || CHEST_DROP_TABLE.RARITIES.COMMON;
+                const crestChance = rarityConfig.crestChance;
 
-            for (let i = 0; i < safeQty; i++) {
-                // Collect all potential new items first
-                const potentialDrops = [];
+                // New Shard Drop Formula: min = (tier-1)*10 + (rarity*2)+1, max = min + 1
+                const rarities = ['COMMON', 'UNCOMMON', 'RARE', 'EPIC', 'LEGENDARY'];
+                const rarityOffset = Math.max(0, rarities.indexOf(itemData.rarity));
+                const min = (tier - 1) * 10 + (rarityOffset * 2) + 1;
+                const max = min + 1;
+                const shardId = `T1_RUNE_SHARD`;
 
-                if (Math.random() < crestChance) {
-                    const crestId = `T${tier}_CREST`;
-                    totalRewards.items[crestId] = (totalRewards.items[crestId] || 0) + 1;
+                for (let i = 0; i < safeQty; i++) {
+                    // Collect all potential new items first
+                    const potentialDrops = [];
+
+                    if (Math.random() < crestChance) {
+                        const crestId = `T${tier}_CREST`;
+                        totalRewards.items[crestId] = (totalRewards.items[crestId] || 0) + 1;
+                    }
+
+                    // Rune Shards (Guaranteed range per chest: 80% min, 20% max)
+                    const shardQty = Math.random() < 0.8 ? min : max;
+                    totalRewards.items[shardId] = (totalRewards.items[shardId] || 0) + shardQty;
                 }
 
-                // Rune Shards (Guaranteed range per chest: 80% min, 20% max)
-                const shardQty = Math.random() < 0.8 ? min : max;
-                totalRewards.items[shardId] = (totalRewards.items[shardId] || 0) + shardQty;
-            }
+                // 3. Check Space using TOTAL rewards list
+                // Calculate current used slots (excluding noInventorySpace items like Runes)
+                const currentUsedSlots = Object.keys(tempInv).filter(k => {
+                    const item = this.inventoryManager.resolveItem(k);
+                    return item && !item.noInventorySpace;
+                }).length;
 
-            // 3. Check Space using TOTAL rewards list
-            // Calculate current used slots (excluding noInventorySpace items like Runes)
-            const currentUsedSlots = Object.keys(tempInv).filter(k => {
-                const item = this.inventoryManager.resolveItem(k);
-                return item && !item.noInventorySpace;
-            }).length;
-
-            let newSlotsNeeded = 0;
-            for (const [rId, qty] of Object.entries(totalRewards.items)) {
-                if (!tempInv[rId]) {
-                    const item = this.inventoryManager.resolveItem(rId);
-                    if (item && !item.noInventorySpace) {
-                        newSlotsNeeded++;
+                let newSlotsNeeded = 0;
+                for (const [rId, qty] of Object.entries(totalRewards.items)) {
+                    if (!tempInv[rId]) {
+                        const item = this.inventoryManager.resolveItem(rId);
+                        if (item && !item.noInventorySpace) {
+                            newSlotsNeeded++;
+                        }
                     }
                 }
-            }
 
-            if (currentUsedSlots + newSlotsNeeded > simulatedMax) {
-                throw new Error("Inventory Full! Cannot open all chests.");
-            }
+                if (currentUsedSlots + newSlotsNeeded > simulatedMax) {
+                    throw new Error("Inventory Full! Cannot open all chests.");
+                }
 
-            // 4. Apply Rewards (Space Guaranteed)
-            let message = ""; // Neutralized for toast simplification
+                // 4. Apply Rewards (Space Guaranteed)
+                let message = ""; // Neutralized for toast simplification
 
-            const rewards = { items: [] }; // For the UI return
+                const rewards = { items: [] }; // For the UI return
 
-            for (const [rId, qty] of Object.entries(totalRewards.items)) {
-                this.inventoryManager.addItemToInventory(char, rId, qty);
-                message += `\n${qty}x ${rId.replace(/T\d+_/, '')}`;
-                rewards.items.push({ id: rId, qty });
+                for (const [rId, qty] of Object.entries(totalRewards.items)) {
+                    this.inventoryManager.addItemToInventory(char, rId, qty);
+                    message += `\n${qty}x ${rId.replace(/T\d+_/, '')}`;
+                    rewards.items.push({ id: rId, qty });
+                }
+
+                await this.saveState(char.id, char.state);
+                await this.persistCharacter(char.id);
+                return { success: true, message, itemId, rewards: rewards.items.length > 0 ? rewards : null };
+            } else if (false) { // Skip old block
+
+
+                await this.saveState(char.id, char.state);
+                return { success: true, message, itemId, rewards };
             }
 
             await this.saveState(char.id, char.state);
             await this.persistCharacter(char.id);
-            return { success: true, message, itemId, rewards: rewards.items.length > 0 ? rewards : null };
-        } else if (false) { // Skip old block
-
-
-            await this.saveState(char.id, char.state);
-            return { success: true, message, itemId, rewards };
+            return { success: true, message, itemId };
         }
-
-        await this.saveState(char.id, char.state);
-        await this.persistCharacter(char.id);
-        return { success: true, message, itemId };
     }
 
-    applyBuff(char, type, value, durationSeconds) {
+    applyBuff(char, type, value, durationSeconds, tier = 1) {
         if (!type) {
             console.error("[DEBUG-POTION] ERROR: applyBuff called with NO TYPE!");
             return;
@@ -1466,32 +1484,18 @@ export class GameManager {
         const existing = char.state.active_buffs[type];
         const durationMs = durationSeconds * 1000;
 
-        // Logic: Stacking identical buffs or overwriting with better ones
-        if (existing && existing.expiresAt > now) {
-            // Case 1: Same value (allow small float error) -> ADD time
-            if (Math.abs(existing.value - value) < 0.0001) {
-                existing.expiresAt += durationMs;
-                // console.log(`[DEBUG-POTION] Stacking ${type}: Added ${durationSeconds}s. New expiry: ${new Date(existing.expiresAt).toLocaleTimeString()}`);
-            }
-            // Case 2: New value is BETTER -> Overwrite (Reset time to new potion)
-            else if (value > existing.value) {
-                char.state.active_buffs[type] = {
-                    value: value,
-                    expiresAt: now + durationMs
-                };
-                // console.log(`[DEBUG-POTION] Upgraded ${type} value from ${existing.value} to ${value}. Resetting time.`);
-            }
-            // Case 3: New value is WORSE -> Ignore (we have a better one active)
-            else {
-                // console.log(`[DEBUG-POTION] Ignored weaker potion for ${type} (Active: ${existing.value}, New: ${value})`);
-            }
+        // Logic: Stacking identical buffs (same tier)
+        if (existing && existing.expiresAt > now && existing.tier === tier) {
+            existing.expiresAt += durationMs;
+            // Value might change if we ever have quality potions, but for now we follow tier
+            existing.value = value;
         } else {
-            // Case 4: No existing or expired -> Apply fresh
+            // Case: No existing, expired, or forced swap (different tier handled in consumeItem)
             char.state.active_buffs[type] = {
                 value: value,
+                tier: tier,
                 expiresAt: now + durationMs
             };
-            // console.log(`[DEBUG-POTION] Applied fresh ${type} buff: ${value} for ${durationSeconds}s`);
         }
     }
     async craftRune(userId, characterId, shardId, qty = 1, category = 'GATHERING') {
@@ -1614,5 +1618,116 @@ export class GameManager {
             stars: nextStars,
             type: type
         };
+    }
+
+    async autoMergeRunes(userId, characterId, filters = {}) {
+        console.log(`[GameManager] autoMergeRunes called for ${characterId} with filters:`, filters);
+        const char = await this.getCharacter(userId, characterId);
+        if (!char) throw new Error("Character not found");
+
+        const isMember = char.state.membership?.active && char.state.membership.expiresAt > Date.now();
+        if (!isMember) {
+            throw new Error("Auto Merge is a Premium feature. Active Membership required.");
+        }
+
+        let totalUpgrades = 0;
+        const finalProducts = {}; // Track all runes created for the summary
+
+        const {
+            categoryFilter = 'ALL',
+            activityFilter = 'ALL',
+            effectFilter = 'ALL',
+            tierFilter = 'ALL',
+            starsFilter = 'ALL',
+            search = ''
+        } = filters;
+
+        let changed = true;
+        while (changed) {
+            changed = false;
+            const inventory = char.state.inventory || {};
+
+            for (const [itemId, qty] of Object.entries(inventory)) {
+                if (qty < 2) continue;
+                if (!itemId.includes('_RUNE_') || itemId.includes('SHARD')) continue;
+
+                const itemData = this.inventoryManager.resolveItem(itemId);
+                if (!itemData) continue;
+
+                const match = itemId.match(/^T(\d+)_RUNE_(.+)_(\d+)STAR$/);
+                if (!match) continue;
+
+                const tier = parseInt(match[1]);
+                const type = match[2];
+                const stars = parseInt(match[3]);
+
+                // Max is T10 3-STAR
+                if (stars >= 3 && tier >= 10) continue;
+
+                // --- APPLY FILTERS ---
+                // 1. Search
+                if (search && !itemData.name.toLowerCase().includes(search.toLowerCase()) && !itemId.toLowerCase().includes(search.toLowerCase())) continue;
+
+                // 2. Category
+                if (categoryFilter !== 'ALL') {
+                    const isInCategory = RUNES_BY_CATEGORY[categoryFilter]?.some(catType => itemId.includes(`_RUNE_${catType}_`));
+                    if (!isInCategory) continue;
+                }
+
+                // 3. Activity
+                if (activityFilter !== 'ALL' && !itemId.includes(`_RUNE_${activityFilter}_`)) continue;
+
+                // 4. Effect
+                if (effectFilter !== 'ALL' && !itemId.includes(`_${effectFilter}_`)) continue;
+
+                // 5. Tier
+                if (tierFilter !== 'ALL' && tier !== parseInt(tierFilter)) continue;
+
+                // 6. Stars
+                if (starsFilter !== 'ALL' && stars !== parseInt(starsFilter)) continue;
+                // ---------------------
+
+                const pairs = Math.floor(qty / 2);
+                if (pairs > 0) {
+                    let nextStars = stars + 1;
+                    let nextTier = tier;
+
+                    if (stars >= 3) {
+                        nextStars = 1;
+                        nextTier = tier + 1;
+                    }
+
+                    const nextItemId = `T${nextTier}_RUNE_${type}_${nextStars}STAR`;
+
+                    // Consume and Add
+                    this.inventoryManager.consumeItems(char, { [itemId]: pairs * 2 });
+                    this.inventoryManager.addItemToInventory(char, nextItemId, pairs);
+
+                    finalProducts[nextItemId] = (finalProducts[nextItemId] || 0) + pairs;
+                    totalUpgrades += pairs;
+                    changed = true;
+                }
+            }
+        }
+
+        if (totalUpgrades > 0) {
+            this.markDirty(char.id);
+            await this.persistCharacter(char.id);
+
+            // Format items for the UI results modal
+            const items = Object.entries(finalProducts).map(([item, qty]) => ({
+                item,
+                qty
+            }));
+
+            return {
+                success: true,
+                count: totalUpgrades,
+                items: items,
+                message: `Successfully performed ${totalUpgrades} merges!`
+            };
+        } else {
+            throw new Error("No runes available to merge (need at least 2 of the same type/tier).");
+        }
     }
 }

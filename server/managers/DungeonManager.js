@@ -34,7 +34,6 @@ export class DungeonManager {
         }
 
         // Level Requirement Check
-        // Level Requirement Check
         const dungeonLevel = char.state.skills?.DUNGEONEERING?.level || 1;
         if (dungeonLevel < (dungeon.reqLevel || 1)) {
             throw new Error(`Dungeoneering level ${dungeon.reqLevel} required to enter this dungeon`);
@@ -51,7 +50,7 @@ export class DungeonManager {
             maxWaves: dungeon.waves,
             active: true,
             started_at: new Date().toISOString(),
-            status: 'PREPARING', // PREPARING -> FIGHTING -> WAITING_NEXT_WAVE -> WALKING -> BOSS -> COMPLETED
+            status: 'PREPARING',
             repeatCount: repeatCount,
             initialRepeats: repeatCount,
             wave_started_at: Date.now(),
@@ -66,7 +65,6 @@ export class DungeonManager {
     async processDungeonTick(char) {
         try {
             if (!char.state.dungeon) return;
-            // console.log(`[DUNGEON] Processing tick for ${char.name}. Status: ${char.state.dungeon.status}`);
 
             const dungeonState = char.state.dungeon;
             const dungeonConfig = Object.values(DUNGEONS).find(d => d.id === dungeonState.id);
@@ -87,19 +85,19 @@ export class DungeonManager {
                 return { dungeonUpdate: { status: 'FAILED', message: "Dungeon time limit reached!" } };
             }
 
+            const stats = this.gameManager.inventoryManager.calculateStats(char);
+
             // 2. WALKING Logic
             if (dungeonState.status === 'WALKING') {
                 const waveElapsed = now - (dungeonState.wave_started_at || now);
                 const timeLeft = Math.ceil((WAVE_DURATION - waveElapsed) / 1000);
 
                 if (waveElapsed >= WAVE_DURATION) {
-                    // Time up, proceed
                     if (dungeonState.wave < dungeonState.maxWaves) {
                         dungeonState.wave++;
                         dungeonState.status = 'WAITING_NEXT_WAVE';
                         return this.startNextWave(char, dungeonConfig);
                     } else {
-                        // It was the last wave (Boss), so we finish
                         return this.completeDungeon(char, dungeonConfig);
                     }
                 } else {
@@ -113,8 +111,109 @@ export class DungeonManager {
                 }
             }
 
-            // 3. Combat/Wave Logic
-            if (char.state.combat) return;
+            // 3. Combat Logic (FIGHTING or BOSS_FIGHT)
+            if (dungeonState.status === 'FIGHTING' || dungeonState.status === 'BOSS_FIGHT') {
+                if (dungeonState.activeMob) {
+                    const playerAtkSpeed = Math.max(200, stats.attackSpeed || 1000);
+
+                    // Initial setup if missing
+                    if (!dungeonState.activeMob.next_player_attack_at) {
+                        dungeonState.activeMob.next_player_attack_at = now;
+                        dungeonState.activeMob.next_mob_attack_at = now + 500;
+                    }
+
+                    // A. Player Attacks Mob (Burst Hits)
+                    let pIterations = 0;
+                    const MAX_BURST = 50;
+
+                    while (now >= dungeonState.activeMob.next_player_attack_at && dungeonState.activeMob.health > 0 && pIterations < MAX_BURST) {
+                        const playerDmg = Math.max(1, (stats.damage || 1));
+                        const mobDef = dungeonState.activeMob.defense || 0;
+                        const mobMitigation = mobDef / (mobDef + 2000);
+                        const finalPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
+
+                        dungeonState.activeMob.health -= finalPlayerDmg;
+                        dungeonState.activeMob.next_player_attack_at += playerAtkSpeed;
+                        pIterations++;
+
+                        if (dungeonState.activeMob.health <= 0) {
+                            dungeonState.activeMob.health = 0;
+                            break;
+                        }
+                    }
+
+                    // Safety catch-up
+                    if (dungeonState.activeMob.next_player_attack_at < now) {
+                        dungeonState.activeMob.next_player_attack_at = now + playerAtkSpeed;
+                    }
+
+                    if (dungeonState.activeMob.health <= 0) {
+                        // Mob Defeated!
+                        const mobConfig = MONSTERS[dungeonConfig.tier]?.find(m => m.id === dungeonState.activeMob.id);
+
+                        // Grant Dungeoneering XP only
+                        if (mobConfig && mobConfig.xp) {
+                            await this.gameManager.addXP(char, 'DUNGEONEERING', Math.floor(mobConfig.xp * 0.5));
+                        }
+
+                        // Advance to next state
+                        const waveElapsed = now - (dungeonState.wave_started_at || now);
+                        if (waveElapsed < WAVE_DURATION) {
+                            dungeonState.status = 'WALKING';
+                            const timeLeft = Math.ceil((WAVE_DURATION - waveElapsed) / 1000);
+                            return {
+                                dungeonUpdate: {
+                                    status: 'WALKING',
+                                    message: `Defeated ${dungeonState.activeMob.name}!`,
+                                    timeLeft: timeLeft
+                                }
+                            };
+                        } else {
+                            if (dungeonState.wave < dungeonState.maxWaves) {
+                                dungeonState.wave++;
+                                dungeonState.status = 'WAITING_NEXT_WAVE';
+                                return this.startNextWave(char, dungeonConfig);
+                            } else {
+                                return this.completeDungeon(char, dungeonConfig);
+                            }
+                        }
+                    }
+
+                    // B. Mob Attacks Player (Burst Hits)
+                    let mIterations = 0;
+                    const mobAtkSpeed = (dungeonState.activeMob.attackSpeed || 1000);
+                    while (now >= dungeonState.activeMob.next_mob_attack_at && dungeonState.activeMob.health > 0 && mIterations < MAX_BURST) {
+                        const mobDmg = dungeonState.activeMob.damage || 0;
+                        const playerDef = stats.defense || 0;
+                        const playerMitigation = Math.min(0.8, playerDef / (playerDef + 2000));
+                        const finalMobDmg = Math.max(1, Math.floor(mobDmg * (1 - playerMitigation)));
+
+                        char.state.health -= finalMobDmg;
+                        dungeonState.activeMob.next_mob_attack_at += mobAtkSpeed;
+                        mIterations++;
+
+                        if (char.state.health <= 0) {
+                            char.state.health = 0;
+                            await this.saveDungeonLog(char, dungeonConfig, 'FAILED');
+                            delete char.state.dungeon;
+                            return { dungeonUpdate: { status: 'FAILED', message: "You were defeated!" } };
+                        }
+                    }
+
+                    // Safety catch-up
+                    if (dungeonState.activeMob.next_mob_attack_at < now) {
+                        dungeonState.activeMob.next_mob_attack_at = now + mobAtkSpeed;
+                    }
+
+                    return {
+                        dungeonUpdate: {
+                            status: dungeonState.status,
+                            activeMob: dungeonState.activeMob,
+                            wave: dungeonState.wave
+                        }
+                    };
+                }
+            }
 
             if (char.state.health <= 0) {
                 await this.saveDungeonLog(char, dungeonConfig, 'FAILED');
@@ -124,35 +223,6 @@ export class DungeonManager {
 
             if (dungeonState.status === 'PREPARING' || dungeonState.status === 'WAITING_NEXT_WAVE') {
                 return this.startNextWave(char, dungeonConfig);
-            }
-
-            if (dungeonState.status === 'FIGHTING' || dungeonState.status === 'BOSS_FIGHT') {
-
-                // Check Wave Duration
-                const waveElapsed = now - (dungeonState.wave_started_at || now);
-
-                if (waveElapsed < WAVE_DURATION) {
-                    dungeonState.status = 'WALKING';
-                    // wave_started_at remains the same to track total time spent on this "step"
-                    // Effectively we are just pausing progress until WAVE_DURATION is met
-                    const timeLeft = Math.ceil((WAVE_DURATION - waveElapsed) / 1000);
-                    return {
-                        dungeonUpdate: {
-                            status: 'WALKING',
-                            message: null,
-                            timeLeft: timeLeft
-                        }
-                    };
-                }
-
-                // If we are here, duration is met (e.g. taken long enough to kill)
-                if (dungeonState.wave < dungeonState.maxWaves) {
-                    dungeonState.wave++;
-                    dungeonState.status = 'WAITING_NEXT_WAVE';
-                    return this.startNextWave(char, dungeonConfig);
-                } else {
-                    return this.completeDungeon(char, dungeonConfig);
-                }
             }
         } catch (error) {
             console.error(`[DUNGEON] Error in processDungeonTick:`, error);
@@ -164,11 +234,7 @@ export class DungeonManager {
         const isBoss = wave === char.state.dungeon.maxWaves;
         let mobId = null;
 
-        // Reset wave start time
         char.state.dungeon.wave_started_at = Date.now();
-
-        // Wave Scaling Multiplier (Always getting stronger)
-        // Wave 1: 1.0x, Wave 2: 1.1x, Wave 3: 1.2x, Wave 4: 1.3x, Boss: 1.5x (relative to base)
         const scalingFactor = isBoss ? 1.5 : (1 + (wave - 1) * 0.1);
 
         if (isBoss) {
@@ -176,7 +242,6 @@ export class DungeonManager {
             char.state.dungeon.status = 'BOSS_FIGHT';
         } else {
             const mobs = config.trashMobs;
-            // Sequential selection
             mobId = mobs[wave - 1] || mobs[mobs.length - 1];
             char.state.dungeon.status = 'FIGHTING';
         }
@@ -194,54 +259,44 @@ export class DungeonManager {
             defense: Math.floor(baseMob.defense * scalingFactor)
         };
 
-        try {
-            await this.gameManager.combatManager.startCombat(char.user_id, char.id, mobId, config.tier, char, true, scaledStats);
-        } catch (e) {
-            console.error(`[DUNGEON] Failed to start combat for ${char.name}:`, e.message);
-            char.state.dungeon.status = 'ERROR';
-            return { dungeonUpdate: { status: 'ERROR', message: e.message } };
-        }
-
-        if (char.state.combat) {
-            char.state.combat.isDungeon = true;
-        }
+        char.state.dungeon.activeMob = {
+            id: mobId,
+            name: baseMob.name,
+            health: scaledStats.health,
+            maxHealth: scaledStats.health,
+            damage: scaledStats.damage,
+            defense: scaledStats.defense,
+            attackSpeed: 1000,
+            next_player_attack_at: Date.now(),
+            next_mob_attack_at: Date.now() + 500
+        };
 
         return {
             dungeonUpdate: {
                 status: char.state.dungeon.status,
-                wave: char.state.dungeon.wave,
-                totalWaves: char.state.dungeon.maxWaves,
-                message: null
+                wave: wave,
+                activeMob: char.state.dungeon.activeMob
             }
         };
     }
 
     async completeDungeon(char, config) {
-        // Grant Rewards
         const rewards = config.rewards;
         const loot = [];
 
-        // XP
         let dungeonXp = rewards.xp || 100;
         if (dungeonXp > MAX_DUNGEON_XP) dungeonXp = MAX_DUNGEON_XP;
 
-        const leveledUpCombat = this.gameManager.addXP(char, 'COMBAT', dungeonXp);
-        const leveledUpDungeon = this.gameManager.addXP(char, 'DUNGEONEERING', dungeonXp);
-        const leveledUp = leveledUpCombat || leveledUpDungeon;
+        const leveledUp = this.gameManager.addXP(char, 'DUNGEONEERING', dungeonXp);
 
-        // Silver reward removed (now charged on entry)
-        // char.state.silver = (char.state.silver || 0) + rewards.silver;
-
-        // Guaranteed Chest Drop with Rarity
-        // Guaranteed Chest Drop with Rarity (5 Tiers)
         const roll = Math.random();
         let rarity = 'NORMAL';
 
-        if (roll < 0.01) rarity = 'MASTERPIECE';     // 1%
-        else if (roll < 0.05) rarity = 'EXCELLENT';  // 4% (0.01 to 0.05)
-        else if (roll < 0.20) rarity = 'OUTSTANDING';// 15% (0.05 to 0.20)
-        else if (roll < 0.50) rarity = 'GOOD';       // 30% (0.20 to 0.50)
-        else rarity = 'NORMAL';                      // 50% (0.50 to 1.00)
+        if (roll < 0.01) rarity = 'MASTERPIECE';
+        else if (roll < 0.05) rarity = 'EXCELLENT';
+        else if (roll < 0.20) rarity = 'OUTSTANDING';
+        else if (roll < 0.50) rarity = 'GOOD';
+        else rarity = 'NORMAL';
 
         const chestId = `T${config.tier}_CHEST_${rarity}`;
         const added = this.gameManager.inventoryManager.addItemToInventory(char, chestId, 1);
@@ -250,63 +305,44 @@ export class DungeonManager {
             loot.push(`1x ${chestId}`);
         } else {
             loot.push(`(Full) ${chestId} LOST`);
-            // this.gameManager.addNotification(char, 'WARNING', `Inventory Full! ${chestId} lost.`);
         }
 
-        // Removed old random drops (Crest/Resource) in favor of the Chest
-
-
-        // Track Persistent Stats (Dungeons)
         if (!char.state.stats) char.state.stats = {};
         char.state.stats.dungeonsCleared = (char.state.stats.dungeonsCleared || 0) + 1;
 
         const inventory = char.state.inventory || {};
         const mapId = config.reqItem;
 
-        // Create Log Entry
         const logEntry = {
             id: Date.now(),
             run: (char.state.dungeon.lootLog?.length || 0) + 1,
             xp: rewards.xp,
-            silver: rewards.silver,
             items: loot,
             timestamp: new Date().toISOString()
         };
 
         if (!char.state.dungeon.lootLog) char.state.dungeon.lootLog = [];
         char.state.dungeon.lootLog.unshift(logEntry);
-        // Keep last 50 entries
         if (char.state.dungeon.lootLog.length > 50) char.state.dungeon.lootLog.pop();
 
-        // Save to Persistent History (every individual run)
         await this.saveDungeonLog(char, config, 'COMPLETED', {
             xp: rewards.xp,
-            silver: rewards.silver,
             loot: loot
         });
 
-        // Auto-Repeat Logic
         if (char.state.dungeon.repeatCount > 0 && inventory[mapId] && inventory[mapId] >= 1) {
-            // Consume Map
             this.gameManager.inventoryManager.consumeItems(char, { [mapId]: 1 });
-
-            // Decrement Repeat Count
             char.state.dungeon.repeatCount--;
-
-            // Reset Dungeon State for Next Run
             char.state.dungeon.wave = 1;
             char.state.dungeon.status = 'PREPARING';
             char.state.dungeon.started_at = new Date().toISOString();
-            // Reset wave timer
             char.state.dungeon.wave_started_at = Date.now();
-
-            console.log(`[DUNGEON] Auto-repeating ${config.name} for ${char.name}. Remaining: ${char.state.dungeon.repeatCount}`);
 
             return {
                 dungeonUpdate: {
                     status: 'PREPARING',
                     message: null,
-                    rewards: { xp: rewards.xp, silver: rewards.silver, items: loot },
+                    rewards: { xp: rewards.xp, items: loot },
                     autoRepeat: true,
                     lootLog: char.state.dungeon.lootLog
                 },
@@ -314,14 +350,13 @@ export class DungeonManager {
             };
         }
 
-        // Normal Completion (No auto-repeat or out of maps/queue)
         char.state.dungeon.status = 'COMPLETED';
 
         return {
             dungeonUpdate: {
                 status: 'COMPLETED',
                 message: null,
-                rewards: { xp: rewards.xp, silver: rewards.silver, items: loot },
+                rewards: { xp: rewards.xp, items: loot },
                 lootLog: char.state.dungeon.lootLog
             },
             leveledUp
@@ -330,13 +365,13 @@ export class DungeonManager {
 
     async stopDungeon(userId, characterId) {
         const char = await this.gameManager.getCharacter(userId, characterId);
-        if (char.state.dungeon) {
+        if (char && char.state && char.state.dungeon) {
             const dungeonConfig = Object.values(DUNGEONS).find(d => d.id === char.state.dungeon.id);
             if (char.state.dungeon.status !== 'COMPLETED' && char.state.dungeon.status !== 'FAILED') {
                 await this.saveDungeonLog(char, dungeonConfig, 'ABANDONED');
             }
             delete char.state.dungeon;
-            if (char.state.combat) {
+            if (char.state.combat && char.state.combat.isDungeon) {
                 delete char.state.combat;
             }
             await this.gameManager.saveState(char.id, char.state);
@@ -352,14 +387,11 @@ export class DungeonManager {
             const duration = Math.floor((Date.now() - new Date(dungeon.started_at).getTime()) / 1000);
 
             let totalXp = runLoot ? runLoot.xp : 0;
-            let totalSilver = runLoot ? runLoot.silver : 0;
-            let formattedLoot = runLoot ? runLoot.loot : [];
+            let formattedLoot = runLoot ? (runLoot.loot || []) : [];
 
-            // If no explicit runLoot (e.g. death or abandonment), try to sum what was gained in the session
             if (!runLoot) {
                 (dungeon.lootLog || []).forEach(log => {
                     totalXp += (log.xp || 0);
-                    totalSilver += (log.silver || 0);
                     (log.items || []).forEach(item => formattedLoot.push(item));
                 });
             }
@@ -374,36 +406,12 @@ export class DungeonManager {
                 outcome: outcome,
                 duration_seconds: duration,
                 xp_gained: totalXp,
-                silver_gained: totalSilver,
                 loot_gained: formattedLoot
             });
 
             if (error) {
                 console.error("Failed to save dungeon history:", error.message);
             }
-
-            // Send System Notification
-            const itemsMap = {};
-            formattedLoot.forEach(itemStr => {
-                const match = itemStr.match(/^(\d+)x (.+)$/);
-                if (match) {
-                    const qty = parseInt(match[1]);
-                    const id = match[2];
-                    itemsMap[id] = (itemsMap[id] || 0) + qty;
-                } else {
-                    itemsMap[itemStr] = (itemsMap[itemStr] || 0) + 1;
-                }
-            });
-
-            /*
-            this.gameManager.addActionSummaryNotification(char, `Dungeon (${outcome})`, {
-                itemsGained: itemsMap,
-                xpGained: { DUNGEONEERING: totalXp },
-                totalTime: duration,
-                silverGained: totalSilver
-            });
-            */
-
         } catch (err) {
             console.error("Error saving dungeon history log:", err);
         }

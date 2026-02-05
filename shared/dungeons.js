@@ -10,7 +10,6 @@ export const DUNGEONS = {
         reqLevel: 1,
         rewards: {
             xp: 120,
-            silver: 200,
             resource: { id: 'T1_ORE', chance: 0.50, min: 5, max: 10 },
             crest: { id: 'T1_CREST', chance: 0.25 }
         },
@@ -27,7 +26,6 @@ export const DUNGEONS = {
         reqLevel: 10,
         rewards: {
             xp: 180,
-            silver: 500,
             resource: { id: 'T2_WOOD', chance: 0.50, min: 5, max: 10 },
             crest: { id: 'T2_CREST', chance: 0.25 }
         },
@@ -44,7 +42,6 @@ export const DUNGEONS = {
         reqLevel: 20,
         rewards: {
             xp: 240,
-            silver: 1000,
             resource: { id: 'T3_HIDE', chance: 0.50, min: 5, max: 10 },
             crest: { id: 'T3_CREST', chance: 0.25 }
         },
@@ -61,7 +58,6 @@ export const DUNGEONS = {
         reqLevel: 30,
         rewards: {
             xp: 315,
-            silver: 2500,
             resource: { id: 'T4_BAR', chance: 0.50, min: 3, max: 8 },
             crest: { id: 'T4_CREST', chance: 0.25 }
         },
@@ -78,7 +74,6 @@ export const DUNGEONS = {
         reqLevel: 40,
         rewards: {
             xp: 396,
-            silver: 5000,
             resource: { id: 'T5_HIDE', chance: 0.50, min: 3, max: 8 },
             crest: { id: 'T5_CREST', chance: 0.25 }
         },
@@ -95,7 +90,6 @@ export const DUNGEONS = {
         reqLevel: 50,
         rewards: {
             xp: 480,
-            silver: 10000,
             resource: { id: 'T6_ORE', chance: 0.50, min: 3, max: 8 },
             crest: { id: 'T6_CREST', chance: 0.25 }
         },
@@ -112,7 +106,6 @@ export const DUNGEONS = {
         reqLevel: 60,
         rewards: {
             xp: 565,
-            silver: 20000,
             resource: { id: 'T7_HIDE', chance: 0.50, min: 2, max: 6 },
             crest: { id: 'T7_CREST', chance: 0.25 }
         },
@@ -129,7 +122,6 @@ export const DUNGEONS = {
         reqLevel: 70,
         rewards: {
             xp: 652,
-            silver: 40000,
             resource: { id: 'T8_ORE', chance: 0.50, min: 2, max: 6 },
             crest: { id: 'T8_CREST', chance: 0.25 }
         },
@@ -146,7 +138,6 @@ export const DUNGEONS = {
         reqLevel: 80,
         rewards: {
             xp: 740,
-            silver: 100000,
             resource: { id: 'T9_BAR', chance: 0.50, min: 2, max: 5 },
             crest: { id: 'T9_CREST', chance: 0.25 }
         },
@@ -163,7 +154,6 @@ export const DUNGEONS = {
         reqLevel: 90,
         rewards: {
             xp: 829,
-            silver: 500000,
             resource: { id: 'T10_BAR', chance: 0.50, min: 2, max: 5 },
             crest: { id: 'T10_CREST', chance: 0.25 }
         },
