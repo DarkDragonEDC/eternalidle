@@ -278,13 +278,21 @@ export class MarketManager {
 
         const claim = char.state.claims[claimIndex];
 
+        // 1. Handle Item Claim (if applicable and not a SOLD_ITEM)
+        // Note: SOLD_ITEM claims might have itemId for UI/history, but should not add items back to seller.
+        if (claim.itemId && claim.type !== 'SOLD_ITEM') {
+            const success = this.gameManager.inventoryManager.addItemToInventory(char, claim.itemId, claim.amount);
+            if (!success) {
+                return { success: false, message: "Inventory full! Please make some space before claiming." };
+            }
+        }
+
+        // 2. Handle Silver Claim
         if (claim.silver) {
             char.state.silver = (char.state.silver || 0) + claim.silver;
         }
-        if (claim.itemId) {
-            this.gameManager.inventoryManager.addItemToInventory(char, claim.itemId, claim.amount);
-        }
 
+        // Success: Remove following successful additions
         char.state.claims.splice(claimIndex, 1);
         await this.gameManager.saveState(char.id, char.state);
         return { success: true, message: "Claimed successfully!" };
