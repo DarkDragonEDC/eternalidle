@@ -521,7 +521,7 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                     }}>
                         <div>
                             <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.4rem', fontWeight: '900', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                {name.toUpperCase()}
+                                {name}
                                 {state.pendingNameChange && (
                                     <button
                                         onClick={() => onOpenRenameModal && onOpenRenameModal()}
@@ -553,7 +553,6 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                     visibility: 'hidden',
                                     fontSize: '0.65rem',
                                     fontWeight: '900',
-                                    textTransform: 'uppercase',
                                     letterSpacing: '1.5px',
                                     paddingRight: '20px', // Space for Chevron
                                     whiteSpace: 'nowrap'
@@ -568,7 +567,6 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                         gridArea: '1 / 1',
                                         fontSize: '0.65rem',
                                         fontWeight: '900',
-                                        textTransform: 'uppercase',
                                         letterSpacing: '1.5px',
                                         background: !selectedTitle || selectedTitle === 'None'
                                             ? 'var(--text-dim)'

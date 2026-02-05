@@ -274,7 +274,6 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
                                             <div style={{
                                                 fontSize: '0.65rem',
                                                 fontWeight: '900',
-                                                textTransform: 'uppercase',
                                                 letterSpacing: '1.5px',
                                                 marginTop: '2px',
                                                 display: 'inline-block',
