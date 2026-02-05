@@ -25,17 +25,22 @@ export const isBetterItem = (candidate, current) => {
         return false;
     }
 
-    const cVal = candidate.ip || candidate.tier || 0;
-    const curVal = resolvedCurrent.ip || resolvedCurrent.tier || 0;
+    // 1. Tier - Dominant factor due to exponential scaling
+    const cTier = candidate.tier || 0;
+    const curTier = resolvedCurrent.tier || 0;
+    if (cTier > curTier) return true;
+    if (cTier < curTier) return false;
 
-    if (cVal > curVal) return true;
+    // 2. IP (Within same tier, higher quality usually means higher IP)
+    const cIp = candidate.ip || 0;
+    const curIp = resolvedCurrent.ip || 0;
+    if (cIp > curIp) return true;
+    if (cIp < curIp) return false;
 
-    // If IP/Tier is equal, check quality/stars
-    if (cVal === curVal) {
-        const cQuality = candidate.quality || candidate.stars || 0;
-        const curQuality = resolvedCurrent.quality || resolvedCurrent.stars || 0;
-        if (cQuality > curQuality) return true;
-    }
+    // 3. Quality/Stars (Fallback)
+    const cQual = candidate.quality || candidate.stars || 0;
+    const curQual = resolvedCurrent.quality || resolvedCurrent.stars || 0;
+    if (cQual > curQual) return true;
 
     return false;
 };
@@ -97,22 +102,21 @@ export const getBestItemForSlot = (slot, inventory) => {
 
     if (candidates.length === 0) return null;
 
-    // Sort by IP desc, then quality desc, then tier
+    // Sort by: Tier desc, IP desc, Quality desc
     candidates.sort((a, b) => {
         // Special sort for Runes using calculated bonus
         if (a.type === 'RUNE' && b.type === 'RUNE') {
             const bVal = calculateRuneBonus(b.tier || 1, b.stars || 1);
             const aVal = calculateRuneBonus(a.tier || 1, a.stars || 1);
             if (bVal !== aVal) return bVal - aVal;
-            // If bonus is same, prefer tier
             return (b.tier || 0) - (a.tier || 0);
         }
 
+        if ((b.tier || 0) !== (a.tier || 0)) return (b.tier || 0) - (a.tier || 0);
         if ((b.ip || 0) !== (a.ip || 0)) return (b.ip || 0) - (a.ip || 0);
         const bQual = b.quality || b.stars || 0;
         const aQual = a.quality || a.stars || 0;
-        if (bQual !== aQual) return bQual - aQual;
-        return (b.tier || 0) - (a.tier || 0);
+        return bQual - aQual;
     });
 
     return candidates[0];

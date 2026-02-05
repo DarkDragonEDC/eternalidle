@@ -67,11 +67,11 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                 return (b.tier || 0) - (a.tier || 0);
             }
 
+            if ((b.tier || 0) !== (a.tier || 0)) return (b.tier || 0) - (a.tier || 0);
             if ((b.ip || 0) !== (a.ip || 0)) return (b.ip || 0) - (a.ip || 0);
             const bQual = b.quality || b.stars || 0;
             const aQual = a.quality || a.stars || 0;
-            if (bQual !== aQual) return bQual - aQual;
-            return (b.tier || 0) - (a.tier || 0);
+            return bQual - aQual;
         });
 
         const best = itemArray.length > 0 ? itemArray[0] : null;
