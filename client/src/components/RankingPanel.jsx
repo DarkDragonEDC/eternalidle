@@ -267,8 +267,38 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
                                             color: char.state?.membership?.active && char.state?.membership?.expiresAt > Date.now()
                                                 ? 'var(--accent)'
                                                 : (index < 3 ? 'var(--text-main)' : 'var(--text-dim)')
-                                        }}>{char.name}</div>
-                                        <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>
+                                        }}>
+                                            {char.name}
+                                        </div>
+                                        {char.state?.selectedTitle && (
+                                            <div style={{
+                                                fontSize: '0.65rem',
+                                                fontWeight: '900',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '1.5px',
+                                                marginTop: '2px',
+                                                display: 'inline-block',
+                                                padding: '2px 8px',
+                                                borderRadius: '4px',
+                                                background: char.state.selectedTitle === 'Eternal Legend'
+                                                    ? 'linear-gradient(90deg, #ffd700, #ff8c00)'
+                                                    : char.state.selectedTitle === 'Dungeon Master'
+                                                        ? 'linear-gradient(90deg, #a855f7, #6366f1)'
+                                                        : char.state.selectedTitle === 'Resource Tycoon'
+                                                            ? 'linear-gradient(90deg, #22c55e, #10b981)'
+                                                            : 'linear-gradient(90deg, #60a5fa, #3b82f6)',
+                                                WebkitBackgroundClip: 'text',
+                                                WebkitTextFillColor: 'transparent',
+                                                textShadow: char.state.selectedTitle === 'Eternal Legend'
+                                                    ? '0 0 10px rgba(255, 215, 0, 0.5)'
+                                                    : '0 0 8px rgba(255, 255, 255, 0.2)',
+                                                border: '1px solid rgba(255,255,255,0.1)',
+                                                backgroundColor: 'rgba(0,0,0,0.3)'
+                                            }}>
+                                                {char.state.selectedTitle}
+                                            </div>
+                                        )}
+                                        <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px', opacity: 0.5 }}>
                                             {char.label}
                                         </div>
                                     </div>

@@ -198,6 +198,19 @@ export class GameManager {
                 updated = true;
             }
 
+            if (!data.state.unlockedTitles) {
+                data.state.unlockedTitles = [];
+                updated = true;
+            } else {
+                // Remove legacy hardcoded titles if present
+                const hardcoded = ['Lands Explorer', 'Rune Seeker', 'Dungeon Master', 'Resource Tycoon', 'Eternal Legend'];
+                const originalLength = data.state.unlockedTitles.length;
+                data.state.unlockedTitles = data.state.unlockedTitles.filter(t => !hardcoded.includes(t));
+                if (data.state.unlockedTitles.length !== originalLength) {
+                    updated = true;
+                }
+            }
+
             if (catchup && (data.current_activity || data.state.combat || data.state.dungeon) && data.last_saved) {
                 const now = new Date();
                 const lastSaved = new Date(data.last_saved).getTime();
@@ -663,7 +676,8 @@ export class GameManager {
             skills: { ...INITIAL_SKILLS },
             stats: { str: 0, agi: 0, int: 0 },
             silver: 0,
-            notifications: []
+            notifications: [],
+            unlockedTitles: []
         };
 
         // Calculate initial stats (HP) based on skills

@@ -439,6 +439,29 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('change_title', async ({ title }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                if (!char) throw new Error("Character not found");
+
+                // Validation
+                const unlocked = char.state.unlockedTitles || [];
+                if (title && title !== 'None' && !unlocked.includes(title)) {
+                    throw new Error("You haven't unlocked this title yet!");
+                }
+
+                char.state.selectedTitle = (title === 'None' || !title) ? null : title;
+                await gameManager.saveState(char.id, char.state);
+
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            });
+        } catch (err) {
+            console.error("Title Change Error:", err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
     socket.on('stop_dungeon', async () => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {

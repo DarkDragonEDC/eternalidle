@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { resolveItem, getTierColor } from '@shared/items';
 import { getBestItemForSlot, isBetterItem } from '../utils/equipment';
-import { ChevronUp } from 'lucide-react';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 import StatBreakdownModal from './StatBreakdownModal';
 import { supabase } from '../supabase';
 
@@ -20,7 +20,21 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
     const [breakdownModal, setBreakdownModal] = useState(null);
     const [activePlayers, setActivePlayers] = useState(0);
     const [activeProfileTab, setActiveProfileTab] = useState('EQUIPMENT'); // 'EQUIPMENT' or 'RUNES'
+    const [selectedTitle, setSelectedTitle] = useState(gameState?.state?.selectedTitle || 'Lands Explorer');
     const [activeRuneTab, setActiveRuneTab] = useState('GATHERING'); // 'GATHERING', 'REFINING', 'CRAFTING', 'COMBAT'
+
+    // Sync title from gameState when it updates
+    React.useEffect(() => {
+        if (gameState?.state?.selectedTitle) {
+            setSelectedTitle(gameState.state.selectedTitle);
+        }
+    }, [gameState?.state?.selectedTitle]);
+
+    const handleTitleChange = (newTitle) => {
+        setSelectedTitle(newTitle);
+        socket.emit('change_title', { title: newTitle });
+    };
+
     const isGoogleLinked = session?.user?.app_metadata?.providers?.includes('google') ||
         session?.user?.identities?.some(id => id.provider === 'google');
 
@@ -525,7 +539,55 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                     </button>
                                 )}
                             </h2>
-                            <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>Lands Explorer</div>
+                            {/* Title Dropdown */}
+                            <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer', marginTop: '4px' }}>
+                                <select
+                                    value={selectedTitle || 'None'}
+                                    onChange={(e) => handleTitleChange(e.target.value)}
+                                    style={{
+                                        fontSize: '0.65rem',
+                                        fontWeight: '900',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '1.5px',
+                                        background: !selectedTitle || selectedTitle === 'None'
+                                            ? 'var(--text-dim)'
+                                            : selectedTitle === 'Eternal Legend'
+                                                ? 'linear-gradient(90deg, #ffd700, #ff8c00)'
+                                                : selectedTitle === 'Dungeon Master'
+                                                    ? 'linear-gradient(90deg, #a855f7, #6366f1)'
+                                                    : selectedTitle === 'Resource Tycoon'
+                                                        ? 'linear-gradient(90deg, #22c55e, #10b981)'
+                                                        : 'linear-gradient(90deg, #60a5fa, #3b82f6)',
+                                        WebkitBackgroundClip: 'text',
+                                        WebkitTextFillColor: 'transparent',
+                                        border: 'none',
+                                        padding: '4px 20px 4px 0px',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        outline: 'none',
+                                        appearance: 'none',
+                                        width: 'auto',
+                                        textAlign: 'left',
+                                        opacity: (!selectedTitle || selectedTitle === 'None') ? 0.5 : 1
+                                    }}
+                                >
+                                    <option value="None" style={{ color: '#000', background: '#fff' }}>Sem Título</option>
+                                    {(gameState?.state?.unlockedTitles || []).map(title => (
+                                        <option key={title} value={title} style={{ color: '#000', background: '#fff' }}>
+                                            {title}
+                                        </option>
+                                    ))}
+                                </select>
+                                <ChevronDown size={14} style={{
+                                    position: 'absolute',
+                                    right: 0,
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    pointerEvents: 'none',
+                                    color: 'var(--text-dim)',
+                                    opacity: 0.5
+                                }} />
+                            </div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
                             {/* Item Power */}
