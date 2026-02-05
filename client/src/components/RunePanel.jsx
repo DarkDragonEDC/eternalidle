@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { resolveItem, calculateItemSellPrice, RUNE_GATHER_ACTIVITIES, RUNE_REFINE_ACTIVITIES, RUNE_CRAFT_ACTIVITIES, RUNES_BY_CATEGORY } from '@shared/items';
 import { formatNumber } from '@utils/format';
 import { Package, Info, Sparkles, ArrowRight, Hammer, Coins, Star, Search, Filter, X, ChevronDown, ListFilter, Lock } from 'lucide-react';
@@ -40,6 +40,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
     const [batchModal, setBatchModal] = useState(null);
     const [resultsModal, setResultsModal] = useState(null);
     const [showPremiumModal, setShowPremiumModal] = useState(false);
+    const [autoMergeConfirm, setAutoMergeConfirm] = useState(null);
 
     const inventory = gameState?.state?.inventory || {};
 
@@ -267,9 +268,73 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                 case 'STARS_ASC': return (a.stars || 0) - (b.stars || 0) || a.tier - b.tier;
                 case 'QTY_DESC': return b.qty - a.qty;
                 case 'NAME_ASC': return a.name.localeCompare(b.name);
-                default: return 0;
             }
         });
+
+    // Calculate Auto Merge potential stats for the confirmation modal
+    const autoMergeStats = useMemo(() => {
+        if (activeTab !== 'runes') return { totalUpgrades: 0, totalSilverCost: 0 };
+
+        let totalUpgrades = 0;
+        let totalSilverCost = 0;
+        const tempInv = {};
+
+        // Copy relevant items to temp inventory
+        Object.entries(inventory).forEach(([itemId, qty]) => {
+            if (qty < 2) return;
+            if (!itemId.includes('_RUNE_') || itemId.includes('SHARD')) return;
+            tempInv[itemId] = qty;
+        });
+
+        let changed = true;
+        while (changed) {
+            changed = false;
+            for (const [itemId, qty] of Object.entries(tempInv)) {
+                if (qty < 2) continue;
+
+                const match = itemId.match(/^T(\d+)_RUNE_(.+)_(\d+)STAR$/);
+                if (!match) continue;
+
+                const tier = parseInt(match[1]);
+                const stars = parseInt(match[3]);
+                if (stars >= 3 && tier >= 10) continue;
+
+                // Apply current filters
+                const itemData = resolveItem(itemId);
+                if (!itemData) continue;
+                if (search && !itemData.name.toLowerCase().includes(search.toLowerCase()) && !itemId.toLowerCase().includes(search.toLowerCase())) continue;
+                if (categoryFilter !== 'ALL') {
+                    const isInCategory = RUNES_BY_CATEGORY[categoryFilter]?.some(catType => itemId.includes(`_RUNE_${catType}_`));
+                    if (!isInCategory) continue;
+                }
+                if (activityFilter !== 'ALL' && !itemId.includes(`_RUNE_${activityFilter}_`)) continue;
+                if (effectFilter !== 'ALL' && !itemId.includes(`_${effectFilter}_`)) continue;
+                if (tierFilter !== 'ALL' && tier !== parseInt(tierFilter)) continue;
+                if (starsFilter !== 'ALL' && stars !== parseInt(starsFilter)) continue;
+
+                const pairs = Math.floor(qty / 2);
+                if (pairs > 0) {
+                    const costPerPair = 2500 * tier;
+                    totalSilverCost += costPerPair * pairs;
+                    totalUpgrades += pairs;
+
+                    let nextStars = stars + 1;
+                    let nextTier = tier;
+                    if (stars >= 3) {
+                        nextStars = 1;
+                        nextTier = tier + 1;
+                    }
+                    const nextItemId = `T${nextTier}_RUNE_${match[2]}_${nextStars}STAR`;
+
+                    tempInv[itemId] -= (pairs * 2);
+                    tempInv[nextItemId] = (tempInv[nextItemId] || 0) + pairs;
+                    changed = true;
+                }
+            }
+        }
+
+        return { totalUpgrades, totalSilverCost };
+    }, [inventory, activeTab, categoryFilter, activityFilter, effectFilter, tierFilter, starsFilter, search]);
 
     return (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px', padding: '10px' }}>
@@ -949,9 +1014,12 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                     }
 
                                     if (isCrafting || !socket) return;
-                                    setIsCrafting(true);
-                                    // Send current filters to backend
-                                    socket.emit('auto_merge_runes', {
+
+                                    if (autoMergeStats.totalUpgrades === 0) return;
+
+                                    setAutoMergeConfirm({
+                                        totalUpgrades: autoMergeStats.totalUpgrades,
+                                        totalSilverCost: autoMergeStats.totalSilverCost,
                                         filters: {
                                             categoryFilter,
                                             activityFilter,
@@ -1557,6 +1625,101 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                 GOT IT
                             </button>
                         </div>
+                    </div>
+                )
+            }
+            {/* AUTO MERGE CONFIRMATION MODAL */}
+            {
+                autoMergeConfirm && (
+                    <div style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(0,0,0,0.85)', zIndex: 1300,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        backdropFilter: 'blur(5px)'
+                    }} onClick={() => setAutoMergeConfirm(null)}>
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            style={{
+                                background: 'var(--panel-bg)', border: '1px solid var(--accent)',
+                                borderRadius: '16px', padding: '30px', width: '90%', maxWidth: '400px',
+                                boxShadow: '0 20px 50px rgba(0,0,0,0.6)', position: 'relative',
+                                display: 'flex', flexDirection: 'column', gap: '20px'
+                            }} onClick={e => e.stopPropagation()}>
+
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{
+                                    width: '60px', height: '60px', background: 'rgba(16, 185, 129, 0.1)',
+                                    borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    margin: '0 auto 15px', border: '1px solid rgba(16, 185, 129, 0.3)'
+                                }}>
+                                    <Sparkles size={30} color="var(--accent)" />
+                                </div>
+                                <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--text-bright)', marginBottom: '10px' }}>
+                                    Confirm Auto Merge
+                                </div>
+                                <div style={{ fontSize: '0.95rem', color: 'var(--text-dim)', lineHeight: '1.5' }}>
+                                    This will perform <span style={{ color: 'var(--text-bright)', fontWeight: 'bold' }}>{autoMergeConfirm.totalUpgrades} merges</span> based on your current filters.
+                                </div>
+                            </div>
+
+                            <div style={{
+                                background: 'rgba(0,0,0,0.2)', padding: '15px', borderRadius: '12px',
+                                border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '10px'
+                            }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Estimated Cost:</div>
+                                    <div style={{ fontSize: '1.2rem', fontWeight: '900', color: '#ffd700', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                        <Coins size={18} /> {formatNumber(autoMergeConfirm.totalSilverCost)}
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Your Silver:</div>
+                                    <div style={{ fontSize: '1rem', fontWeight: 'bold', color: (gameState?.state?.silver || 0) < autoMergeConfirm.totalSilverCost ? '#ef4444' : 'var(--text-main)' }}>
+                                        {formatNumber(gameState?.state?.silver || 0)}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {(gameState?.state?.silver || 0) < autoMergeConfirm.totalSilverCost && (
+                                <div style={{
+                                    fontSize: '0.85rem', color: '#ef4444', textAlign: 'center',
+                                    padding: '10px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px',
+                                    border: '1px solid rgba(239, 68, 68, 0.2)'
+                                }}>
+                                    You don't have enough Silver for this operation.
+                                </div>
+                            )}
+
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <button
+                                    onClick={() => setAutoMergeConfirm(null)}
+                                    style={{
+                                        flex: 1, padding: '12px', background: 'transparent', border: '1px solid var(--border)',
+                                        color: 'var(--text-dim)', borderRadius: '10px', fontWeight: 'bold',
+                                        cursor: 'pointer', fontSize: '1rem'
+                                    }}
+                                >
+                                    CANCEL
+                                </button>
+                                <button
+                                    disabled={(gameState?.state?.silver || 0) < autoMergeConfirm.totalSilverCost}
+                                    onClick={() => {
+                                        if (isCrafting || !socket) return;
+                                        setIsCrafting(true);
+                                        socket.emit('auto_merge_runes', { filters: autoMergeConfirm.filters });
+                                        setAutoMergeConfirm(null);
+                                    }}
+                                    style={{
+                                        flex: 2, padding: '12px', background: 'var(--accent)', border: 'none',
+                                        color: 'var(--bg-dark)', borderRadius: '10px', fontWeight: 'bold',
+                                        cursor: 'pointer', fontSize: '1rem', opacity: (gameState?.state?.silver || 0) < autoMergeConfirm.totalSilverCost ? 0.5 : 1
+                                    }}
+                                >
+                                    CONFIRM
+                                </button>
+                            </div>
+                        </motion.div>
                     </div>
                 )
             }
