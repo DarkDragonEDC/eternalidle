@@ -12,8 +12,7 @@ export const CROWN_STORE = {
             amount: 275,
             icon: '💎',
             category: 'PACKAGE',
-            currency: 'USD',
-            stripeLink: 'https://buy.stripe.com/dRm28r8Rx4OmciEdtY7kc02'
+            currency: 'USD'
         },
         CROWNS_500: {
             id: 'CROWNS_500',
@@ -25,8 +24,7 @@ export const CROWN_STORE = {
             icon: '💰',
             category: 'PACKAGE',
             currency: 'USD',
-            bestSeller: true,
-            stripeLink: 'https://buy.stripe.com/7sYeVdaZFcgO6Yk4Xs7kc03'
+            bestSeller: true
         },
         CROWNS_1000: {
             id: 'CROWNS_1000',
@@ -37,8 +35,7 @@ export const CROWN_STORE = {
             amount: 1100,
             icon: '📦',
             category: 'PACKAGE',
-            currency: 'USD',
-            stripeLink: 'https://buy.stripe.com/28E00j5Fl3Ki6YkblQ7kc04'
+            currency: 'USD'
         },
         CROWNS_2500: {
             id: 'CROWNS_2500',
@@ -50,8 +47,7 @@ export const CROWN_STORE = {
             icon: '👑',
             category: 'PACKAGE',
             currency: 'USD',
-            premium: true,
-            stripeLink: 'https://buy.stripe.com/bJefZhgjZ3Ki2I4gGa7kc05'
+            premium: true
         }
     },
     BOOSTS: {},
@@ -85,8 +81,7 @@ export const CROWN_STORE = {
             icon: '🏆',
             category: 'MEMBERSHIP',
             duration: 30 * 24 * 60 * 60 * 1000,
-            permanent: false,
-            stripeLink: 'https://buy.stripe.com/aFa3cvc3JeoWbeAdtY7kc01'
+            permanent: false
         }
     }
 };
