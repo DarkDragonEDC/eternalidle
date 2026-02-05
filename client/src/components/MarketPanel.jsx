@@ -18,6 +18,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
     const [confirmModal, setConfirmModal] = useState(null);
     const [marketListings, setMarketListings] = useState([]);
     const [notification, setNotification] = useState(null);
+    const [sellSearchQuery, setSellSearchQuery] = useState('');
 
 
     // Auto-dismiss notification
@@ -87,12 +88,20 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
         }
     };
 
-    const handleCancel = (listingId) => {
+    const handleCancel = (listing) => {
+        const createdAt = new Date(listing.created_at).getTime();
+        const elapsedMs = Date.now() - createdAt;
+        const ONE_HOUR_MS = 3600 * 1000;
+        const needsFee = elapsedMs < ONE_HOUR_MS;
+        const fee = Math.floor(listing.price * 0.10);
+
         setConfirmModal({
             message: 'Cancel this listing?',
-            subtext: 'The item will be returned to your Claim tab.',
+            subtext: needsFee
+                ? `A 10% cancellation fee (${formatSilver(fee)}) will be charged because the listing is less than 1 hour old.`
+                : 'The item will be returned to your Claim tab.',
             onConfirm: () => {
-                socket.emit('cancel_listing', { listingId });
+                socket.emit('cancel_listing', { listingId: listing.id });
                 setConfirmModal(null);
             }
         });
@@ -481,6 +490,33 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                     {currentListingsCount} / {maxListings}
                                 </div>
                             </div>
+
+                            {/* SEARCH FILTER FOR SELL TAB */}
+                            <div style={{ position: 'relative', width: '100%', marginBottom: '15px' }}>
+                                <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-dim)' }} />
+                                <input
+                                    placeholder="Search your inventory..."
+                                    type="text"
+                                    value={sellSearchQuery}
+                                    onChange={(e) => setSellSearchQuery(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        background: 'rgba(0, 0, 0, 0.3)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '8px',
+                                        padding: '10px 10px 10px 40px',
+                                        color: 'var(--text-main)',
+                                        fontSize: '0.9rem'
+                                    }}
+                                />
+                                {sellSearchQuery && (
+                                    <X
+                                        size={16}
+                                        onClick={() => setSellSearchQuery('')}
+                                        style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-dim)', cursor: 'pointer' }}
+                                    />
+                                )}
+                            </div>
                             <div className="scroll-container" style={{ flex: 1, paddingRight: '5px' }}>
                                 <div style={{
                                     display: 'grid',
@@ -493,6 +529,15 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                         if (!data) return false;
                                         // Exclude Quest items or explicit non-tradable items if any
                                         if (data.type === 'QUEST') return false;
+
+                                        // Apply Search Filter
+                                        if (sellSearchQuery) {
+                                            const searchLower = sellSearchQuery.toLowerCase();
+                                            const itemName = data.name?.toLowerCase() || '';
+                                            const itemId = id.toLowerCase();
+                                            if (!itemName.includes(searchLower) && !itemId.includes(searchLower)) return false;
+                                        }
+
                                         return true;
                                     }).map(([id, qty]) => {
                                         const data = resolveItem(id);
@@ -679,7 +724,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
                                                 <div style={{ marginLeft: '10px' }}>
                                                     <button
-                                                        onClick={() => handleCancel(l.id)}
+                                                        onClick={() => handleCancel(l)}
                                                         style={{
                                                             padding: '8px 16px',
                                                             borderRadius: '6px',

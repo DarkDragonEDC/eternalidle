@@ -241,6 +241,23 @@ export class MarketManager {
         if (fetchError || !listing) throw new Error("Listing not found");
         if (listing.seller_id !== userId) throw new Error("Permission denied");
 
+        const char = await this.gameManager.getCharacter(userId, characterId);
+
+        // Fee Calculation (10% if < 1 hour)
+        const createdAt = new Date(listing.created_at).getTime();
+        const elapsedMs = Date.now() - createdAt;
+        const ONE_HOUR_MS = 3600 * 1000;
+        let feeMsg = "";
+
+        if (elapsedMs < ONE_HOUR_MS) {
+            const fee = Math.floor(listing.price * 0.10);
+            if ((char.state.silver || 0) < fee) {
+                throw new Error(`Insufficient silver for cancellation fee (${fee.toLocaleString()} Silver required).`);
+            }
+            char.state.silver -= fee;
+            feeMsg = ` A fee of ${fee.toLocaleString()} Silver was charged.`;
+        }
+
         const { error: deleteError } = await this.gameManager.supabase
             .from('market_listings')
             .delete()
@@ -248,7 +265,6 @@ export class MarketManager {
 
         if (deleteError) throw deleteError;
 
-        const char = await this.gameManager.getCharacter(userId, characterId);
         this.addClaim(char, {
             type: 'CANCELLED_LISTING',
             itemId: listing.item_id,
@@ -258,7 +274,7 @@ export class MarketManager {
         });
 
         await this.gameManager.saveState(char.id, char.state);
-        return { success: true, message: "Listing cancelled. Item sent to Claim tab." };
+        return { success: true, message: `Listing cancelled. Item sent to Claim tab.${feeMsg}` };
     }
 
     addClaim(char, claimData) {
