@@ -539,12 +539,33 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                     </button>
                                 )}
                             </h2>
-                            {/* Title Dropdown */}
-                            <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer', marginTop: '4px' }}>
+                            {/* Title Dropdown with Auto-Width */}
+                            <div style={{
+                                display: 'grid',
+                                alignItems: 'center',
+                                marginTop: '4px',
+                                position: 'relative',
+                                width: 'fit-content'
+                            }}>
+                                {/* Ghost element to force width */}
+                                <div style={{
+                                    gridArea: '1 / 1',
+                                    visibility: 'hidden',
+                                    fontSize: '0.65rem',
+                                    fontWeight: '900',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '1.5px',
+                                    paddingRight: '20px', // Space for Chevron
+                                    whiteSpace: 'nowrap'
+                                }}>
+                                    {selectedTitle || 'Sem Título'}
+                                </div>
+
                                 <select
                                     value={selectedTitle || 'None'}
                                     onChange={(e) => handleTitleChange(e.target.value)}
                                     style={{
+                                        gridArea: '1 / 1',
                                         fontSize: '0.65rem',
                                         fontWeight: '900',
                                         textTransform: 'uppercase',
@@ -566,9 +587,10 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                         cursor: 'pointer',
                                         outline: 'none',
                                         appearance: 'none',
-                                        width: 'auto',
+                                        width: '100%',
                                         textAlign: 'left',
-                                        opacity: (!selectedTitle || selectedTitle === 'None') ? 0.5 : 1
+                                        opacity: (!selectedTitle || selectedTitle === 'None') ? 0.5 : 1,
+                                        zIndex: 2
                                     }}
                                 >
                                     <option value="None" style={{ color: '#000', background: '#fff' }}>Sem Título</option>
@@ -579,13 +601,12 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                     ))}
                                 </select>
                                 <ChevronDown size={14} style={{
-                                    position: 'absolute',
-                                    right: 0,
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
+                                    gridArea: '1 / 1',
+                                    justifySelf: 'end',
                                     pointerEvents: 'none',
                                     color: 'var(--text-dim)',
-                                    opacity: 0.5
+                                    opacity: 0.5,
+                                    zIndex: 1
                                 }} />
                             </div>
                         </div>
