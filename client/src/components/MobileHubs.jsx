@@ -1,46 +1,51 @@
 import React from 'react';
-import { Pickaxe, Box, Hammer, Sword, Castle, Trophy, ShoppingBag, Zap } from 'lucide-react';
+import { Pickaxe, Box, Hammer, Sword, Castle, Trophy, ShoppingBag, Zap, Coins } from 'lucide-react';
 
 const HubButton = ({ label, icon, onClick, color = 'var(--text-main)', level, progress }) => (
     <button
         onClick={onClick}
         style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            padding: '20px', background: 'var(--panel-bg)', border: '1px solid var(--border)',
-            borderRadius: '12px', width: '100%', aspectRatio: '1/1', gap: '8px',
+            display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start',
+            padding: '16px 20px', background: 'var(--panel-bg)', border: '1px solid var(--border)',
+            borderRadius: '12px', width: '100%', gap: '15px',
             cursor: 'pointer', transition: '0.2s', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
         }}
     >
-        <div style={{ color: color }}>{React.cloneElement(icon, { size: 32 })}</div>
-        <span style={{ fontWeight: 'bold', fontSize: '1rem', color: 'var(--text-main)' }}>{label}</span>
-        {level !== undefined && (
-            <div style={{ display: 'flex', gap: '4px', marginTop: '2px' }}>
-                <div style={{
-                    fontSize: '0.7rem',
-                    color: 'var(--accent)',
-                    background: 'rgba(0,0,0,0.3)',
-                    padding: '2px 8px',
-                    borderRadius: '4px',
-                    fontWeight: 'bold',
-                    border: '1px solid var(--accent-soft)'
-                }}>
-                    Lv {level}
-                </div>
-                {progress !== undefined && (
+        <div style={{ color: color, display: 'flex' }}>{React.cloneElement(icon, { size: 28 })}</div>
+        <div style={{ flex: 1, textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <span style={{ fontWeight: 'bold', fontSize: '1.1rem', color: 'var(--text-main)' }}>{label}</span>
+            {level !== undefined && (
+                <div style={{ display: 'flex', gap: '6px' }}>
                     <div style={{
                         fontSize: '0.7rem',
-                        color: 'var(--text-dim)',
-                        background: 'rgba(255,255,255,0.05)',
-                        padding: '2px 6px',
+                        color: 'var(--accent)',
+                        background: 'rgba(0,0,0,0.3)',
+                        padding: '1px 6px',
                         borderRadius: '4px',
-                        fontWeight: 'normal',
-                        border: '1px solid rgba(255,255,255,0.1)'
+                        fontWeight: 'bold',
+                        border: '1px solid var(--accent-soft)'
                     }}>
-                        {Math.floor(progress)}%
+                        Lv {level}
                     </div>
-                )}
-            </div>
-        )}
+                    {progress !== undefined && (
+                        <div style={{
+                            fontSize: '0.7rem',
+                            color: 'var(--text-dim)',
+                            background: 'rgba(255,255,255,0.05)',
+                            padding: '1px 6px',
+                            borderRadius: '4px',
+                            fontWeight: 'normal',
+                            border: '1px solid rgba(255,255,255,0.1)'
+                        }}>
+                            {Math.floor(progress)}%
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+        <div style={{ color: 'var(--text-dim)', opacity: 0.3 }}>
+            <Zap size={18} />
+        </div>
     </button>
 );
 
@@ -237,9 +242,10 @@ export const SkillsOverview = ({ onNavigate, gameState }) => {
 };
 
 export const TownOverview = ({ onNavigate }) => (
-    <div style={{ padding: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', alignContent: 'start' }}>
+    <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <HubButton label="Market" icon={<ShoppingBag />} color="#fbbf24" onClick={() => onNavigate('market')} />
         <HubButton label="Ranking" icon={<Trophy />} color="#a78bfa" onClick={() => onNavigate('ranking')} />
+        <HubButton label="Taxometer" icon={<Coins />} color="var(--accent)" onClick={() => onNavigate('taxometer')} />
     </div>
 );
 
@@ -256,7 +262,7 @@ export const CombatOverview = ({ onNavigate, gameState }) => {
     const dungeonProgress = (dungeonSkill.xp / dungeonNextXP) * 100;
 
     return (
-        <div style={{ padding: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', alignContent: 'start' }}>
+        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <HubButton
                 label="Adventure"
                 icon={<Sword />}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
-import { Trash2, LogOut } from 'lucide-react';
+import { Trash2, LogOut, Info } from 'lucide-react';
 import '../index.css';
 
 import { formatNumber, formatSilver } from '@utils/format';
@@ -12,6 +12,7 @@ const CharacterSelection = ({ onSelectCharacter }) => {
     const [newCharName, setNewCharName] = useState('');
     const [error, setError] = useState(null);
     const [confirmDelete, setConfirmDelete] = useState(null); // stores char.id if confirming
+    const [showIronmanTooltip, setShowIronmanTooltip] = useState(false);
 
     const handleLogout = async () => {
         try {
@@ -151,52 +152,88 @@ const CharacterSelection = ({ onSelectCharacter }) => {
             {error && <div className="error-message">{error}</div>}
 
             <div className="char-list">
-                {characters.map(char => (
-                    <div key={char.id} className="char-card" onClick={() => onSelectCharacter(char.id)}>
-                        <div style={{ position: 'relative' }}>
-                            {char.state?.isIronman && (
-                                <div className="ironman-badge">IRONMAN</div>
+                {[0, 1].map(index => {
+                    const char = characters[index];
+                    const isIronmanSlot = index === 1;
+
+                    return (
+                        <div key={index} className="slot-container">
+                            <div className="slot-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                {isIronmanSlot ? (
+                                    <>
+                                        IRONMAN MODE
+                                        <div className="info-icon-container"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setShowIronmanTooltip(!showIronmanTooltip);
+                                            }}
+                                        >
+                                            <Info size={14} style={{ cursor: 'help', opacity: 0.7 }} />
+                                            <div className={`info-tooltip ${showIronmanTooltip ? 'show' : ''}`}>
+                                                <b>Solo Challenge Mode:</b><br />
+                                                No Trading, No Market access,<br />
+                                                and no player interaction.
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : 'NORMAL MODE'}
+                            </div>
+
+                            {char ? (
+                                <div className="char-card" onClick={() => onSelectCharacter(char.id)}>
+                                    <div style={{ position: 'relative' }}>
+                                        {char.state?.isIronman && (
+                                            <div className="ironman-badge">IRONMAN</div>
+                                        )}
+                                        <h3 className="char-name">{char.name}</h3>
+                                        <button
+                                            className={`delete-btn ${confirmDelete === char.id ? 'confirming' : ''}`}
+                                            onClick={(e) => handleDelete(e, char.id)}
+                                            title={confirmDelete === char.id ? "Click again to confirm" : "Delete character"}
+                                        >
+                                            {confirmDelete === char.id ? '?' : <Trash2 size={16} />}
+                                        </button>
+                                    </div>
+                                    <div className="char-info">
+                                        <p>Total Level: {char.state && char.state.skills ? formatNumber(Object.values(char.state.skills).reduce((acc, s) => acc + (s.level || 0), 0)) : 0}</p>
+                                        <p>Silver: {char.state ? formatNumber(char.state.silver || 0) : 0}</p>
+                                        <p className="char-icons">{getEquipmentIcons(char)}</p>
+                                    </div>
+                                    <button className="play-btn">Play</button>
+                                </div>
+                            ) : (
+                                <>
+                                    {creating ? (
+                                        <div className="char-card create-form">
+                                            <input
+                                                type="text"
+                                                placeholder="Character Name"
+                                                value={newCharName}
+                                                onChange={(e) => setNewCharName(e.target.value)}
+                                                maxLength={12}
+                                                autoFocus
+                                            />
+                                            <div className="create-actions">
+                                                <button onClick={handleCreate}>Create</button>
+                                                <button className="cancel" onClick={() => setCreating(false)}>Cancel</button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        index === characters.length && (
+                                            <div className="char-card new-char" onClick={() => setCreating(true)}>
+                                                <div className="plus-icon">+</div>
+                                                <p>New Character</p>
+                                                {isIronmanSlot && (
+                                                    <p style={{ fontSize: '0.65rem', color: '#ff5252', marginTop: '-5px', fontWeight: 'bold' }}>Solo Mode Only</p>
+                                                )}
+                                            </div>
+                                        )
+                                    )}
+                                </>
                             )}
-                            <h3 className="char-name">{char.name}</h3>
-                            <button
-                                className={`delete-btn ${confirmDelete === char.id ? 'confirming' : ''}`}
-                                onClick={(e) => handleDelete(e, char.id)}
-                                title={confirmDelete === char.id ? "Click again to confirm" : "Delete character"}
-                            >
-                                {confirmDelete === char.id ? '?' : <Trash2 size={16} />}
-                            </button>
                         </div>
-                        <div className="char-info">
-                            <p>Total Level: {char.state && char.state.skills ? formatNumber(Object.values(char.state.skills).reduce((acc, s) => acc + (s.level || 0), 0)) : 0}</p>
-                            <p>Silver: {char.state ? formatNumber(char.state.silver || 0) : 0}</p>
-                            <p className="char-icons">{getEquipmentIcons(char)}</p>
-                        </div>
-                        <button className="play-btn">Play</button>
-                    </div>
-                ))}
-
-                {characters.length < 2 && !creating && (
-                    <div className="char-card new-char" onClick={() => setCreating(true)}>
-                        <div className="plus-icon">+</div>
-                        <p>New Character</p>
-                    </div>
-                )}
-
-                {creating && (
-                    <div className="char-card create-form">
-                        <input
-                            type="text"
-                            placeholder="Character Name"
-                            value={newCharName}
-                            onChange={(e) => setNewCharName(e.target.value)}
-                            maxLength={12}
-                        />
-                        <div className="create-actions">
-                            <button onClick={handleCreate}>Create</button>
-                            <button className="cancel" onClick={() => setCreating(false)}>Cancel</button>
-                        </div>
-                    </div>
-                )}
+                    );
+                })}
             </div>
             <style>{`
                 .char-select-container {
@@ -219,11 +256,71 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                 }
                 .char-list {
                     display: flex;
-                    gap: 20px;
-                    margin-top: 20px;
+                    gap: 30px;
+                    margin-top: 10px;
                     flex-wrap: wrap;
                     justify-content: center;
                     max-width: 100%;
+                }
+                .slot-container {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 12px;
+                }
+                .slot-title {
+                    font-size: 0.75rem;
+                    font-weight: 900;
+                    letter-spacing: 2px;
+                    color: #94a3b8;
+                    text-transform: uppercase;
+                    padding: 4px 12px;
+                    background: rgba(255,255,255,0.03);
+                    border-radius: 4px;
+                    border: 1px solid rgba(255,255,255,0.05);
+                }
+                .info-icon-container {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                }
+                .info-tooltip {
+                    visibility: hidden;
+                    opacity: 0;
+                    position: absolute;
+                    bottom: 125%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: #1a1f2e;
+                    color: #fff;
+                    text-align: center;
+                    padding: 8px 12px;
+                    border-radius: 6px;
+                    border: 1px solid #d4af37;
+                    font-size: 0.65rem;
+                    line-height: 1.4;
+                    white-space: nowrap;
+                    z-index: 100;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+                    text-transform: none;
+                    letter-spacing: normal;
+                    font-weight: normal;
+                    transition: opacity 0.2s, visibility 0.2s;
+                }
+                .info-tooltip::after {
+                    content: "";
+                    position: absolute;
+                    top: 100%;
+                    left: 50%;
+                    margin-left: -5px;
+                    border-width: 5px;
+                    border-style: solid;
+                    border-color: #d4af37 transparent transparent transparent;
+                }
+                .info-icon-container:hover .info-tooltip,
+                .info-tooltip.show {
+                    visibility: visible;
+                    opacity: 1;
                 }
                 .char-card {
                     background: #1a1f2e;
@@ -245,7 +342,7 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                 }
                 .char-name {
                     color: #d4af37;
-                    margin-bottom: 10px;
+                    margin: 15px 0 10px 0;
                     font-size: 1.1rem;
                     font-weight: 600;
                 }

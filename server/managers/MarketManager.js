@@ -209,10 +209,13 @@ export class MarketManager {
             const tax = Math.floor(totalCost * 0.20);
             const sellerProfit = totalCost - tax;
 
+            // Update Global Taxometer
+            this.gameManager.updateGlobalTax(tax);
+
             this.addClaim(seller, {
                 type: 'SOLD_ITEM',
                 silver: sellerProfit,
-                itemId: listing.item_id, // Added itemId for better claim resolution
+                itemId: listing.item_id,
                 amount: qtyNum,
                 timestamp: Date.now()
             });
@@ -272,6 +275,10 @@ export class MarketManager {
                 throw new Error(`Insufficient silver for cancellation fee (${fee.toLocaleString()} Silver required).`);
             }
             char.state.silver -= fee;
+
+            // Update Global Taxometer
+            this.gameManager.updateGlobalTax(fee);
+
             feeMsg = ` A fee of ${fee.toLocaleString()} Silver was charged.`;
         }
 

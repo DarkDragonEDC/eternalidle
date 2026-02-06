@@ -104,6 +104,7 @@ function App() {
   const [marketSellItem, setMarketSellItem] = useState(null);
   const [marketFilter, setMarketFilter] = useState('');
   const [notifications, setNotifications] = useState([]);
+  const [globalStats, setGlobalStats] = useState({ total_market_tax: 0 });
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCombatHistory, setShowCombatHistory] = useState(false);
@@ -414,8 +415,16 @@ function App() {
         return;
       }
 
+      if (status.globalStats) {
+        setGlobalStats(status.globalStats);
+      }
+
       setGameState(status);
       setIsConnecting(false);
+    });
+
+    newSocket.on('global_stats_update', (stats) => {
+      setGlobalStats(stats);
     });
 
 
@@ -1109,6 +1118,42 @@ function App() {
         return <InventoryPanel gameState={displayedGameState} socket={socket} onEquip={handleEquip} onShowInfo={setInfoItem} onListOnMarket={handleListOnMarket} onUse={handleUseItem} isMobile={isMobile} />;
       case 'ranking':
         return <RankingPanel socket={socket} isMobile={isMobile} />;
+      case 'taxometer':
+        return (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '20px' }}>
+            <div className="glass-panel" style={{ padding: '30px', borderRadius: '16px', background: 'var(--panel-bg)', border: '1px solid var(--border)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)', textAlign: 'center' }}>
+              <div style={{ marginBottom: '25px' }}>
+                <div style={{ color: 'var(--accent)', fontSize: '0.7rem', fontWeight: '900', letterSpacing: '3px', marginBottom: '10px' }}>GLOBAL ECONOMY</div>
+                <h2 style={{ color: 'var(--text-main)', fontSize: '1.8rem', fontWeight: '900', letterSpacing: '2px', margin: 0 }}>
+                  TAXOMETER
+                </h2>
+              </div>
+
+              <div style={{
+                background: 'rgba(0,0,0,0.2)',
+                padding: '40px 20px',
+                borderRadius: '12px',
+                border: '1px solid rgba(255, 215, 0, 0.1)',
+                marginBottom: '20px',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '10px', fontWeight: 'bold' }}>TOTAL TAXES COLLECTED</div>
+                <div style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--accent)', fontFamily: 'monospace', textShadow: '0 0 20px rgba(212, 175, 55, 0.3)' }}>
+                  {formatNumber(globalStats?.total_market_tax || 0)}
+                </div>
+                <div style={{ marginTop: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'rgba(74, 222, 128, 0.8)', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                  <div style={{ width: '6px', height: '6px', background: '#4ade80', borderRadius: '50%', boxShadow: '0 0 8px #4ade80' }}></div>
+                  LIVE COUNTER
+                </div>
+              </div>
+
+              <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.85rem', lineHeight: '1.6', maxWidth: '400px', margin: '0 auto' }}>
+                <p>Monitoring the global flow of Silver. 20% of every marketplace transaction is collected as tax to maintain the game's economy.</p>
+              </div>
+            </div>
+          </div>
+        );
       case 'combat':
         return (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>

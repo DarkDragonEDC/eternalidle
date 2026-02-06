@@ -138,6 +138,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
         { id: 'combat', label: 'Combat', icon: <Sword size={18} />, skill: 'COMBAT' },
         { id: 'dungeon', label: 'Dungeons', icon: <Castle size={18} />, skill: 'DUNGEONEERING' },
         { id: 'ranking', label: 'Ranking', icon: <Trophy size={18} /> },
+        { id: 'taxometer', label: 'Taxometer', icon: <Coins size={18} /> },
     ];
 
     return (

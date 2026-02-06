@@ -34,15 +34,67 @@ export class GameManager {
         this.userLocks = new Map(); // userId -> Promise (current task)
         this.cache = new Map(); // charId -> character object
         this.dirty = new Set(); // set of charIds that need persisting
+        this.globalStats = { total_market_tax: 0 };
+
+        // Load Global Stats initially
+        this.loadGlobalStats();
 
         // Periodic Persistence Loop (Every 60 seconds)
         setInterval(async () => {
             try {
                 await this.flushDirtyCharacters();
+                await this.loadGlobalStats(); // Keep global stats in sync
             } catch (err) {
                 console.error('[DB] Error in periodic flush loop:', err);
             }
         }, 60000);
+    }
+
+    async loadGlobalStats() {
+        try {
+            const { data, error } = await this.supabase
+                .from('global_stats')
+                .select('*')
+                .eq('id', 'global')
+                .single();
+
+            if (!error && data) {
+                this.globalStats = {
+                    total_market_tax: Number(data.total_market_tax) || 0
+                };
+            }
+        } catch (err) {
+            console.error('[DB] Error loading global stats:', err);
+        }
+    }
+
+    async updateGlobalTax(amount) {
+        if (!amount || amount <= 0) return;
+
+        try {
+            this.globalStats.total_market_tax += Math.floor(amount);
+
+            // Persist to DB
+            const { error } = await this.supabase.rpc('increment_global_tax', { amount: Math.floor(amount) });
+
+            // If RPC fails (not created), fallback to normal update (though less atomic)
+            if (error) {
+                await this.supabase
+                    .from('global_stats')
+                    .update({
+                        total_market_tax: this.globalStats.total_market_tax,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', 'global');
+            }
+
+            // Notify all clients via a callback if registered (we'll set this in index.js)
+            if (this.onGlobalStatsUpdate) {
+                this.onGlobalStatsUpdate(this.globalStats);
+            }
+        } catch (err) {
+            console.error('[DB] Error updating global tax:', err);
+        }
     }
 
     async flushDirtyCharacters() {
@@ -794,6 +846,7 @@ export class GameManager {
             activity_started_at: char.activity_started_at,
             dungeon_state: char.dungeon_state,
             offlineReport: char.offlineReport,
+            globalStats: this.globalStats,
             serverTime: Date.now()
         };
 

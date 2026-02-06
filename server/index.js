@@ -174,6 +174,11 @@ console.log('[SERVER] Supabase Key Role:', isServiceRole ? 'SERVICE_ROLE' : 'ANO
 import { GameManager } from './GameManager.js';
 const gameManager = new GameManager(supabase);
 
+// Register Global Stats Update Callback
+gameManager.onGlobalStatsUpdate = (stats) => {
+    io.emit('global_stats_update', stats);
+};
+
 import { characterRoutes } from './routes/characters.js';
 app.use('/api/characters', authMiddleware, characterRoutes(gameManager));
 
