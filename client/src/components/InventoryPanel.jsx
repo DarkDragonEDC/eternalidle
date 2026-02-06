@@ -376,7 +376,20 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                     )}
                                 </div>
 
-                                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 'bold', textAlign: 'center', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                <div style={{
+                                    fontSize: '0.65rem',
+                                    color: 'var(--text-dim)',
+                                    fontWeight: 'bold',
+                                    textAlign: 'center',
+                                    width: '100%',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    lineHeight: '1.2',
+                                    height: '1.55rem' // Ensure fixed height for 2 lines to keep grid consistent
+                                }}>
                                     {item.name}
                                 </div>
                             </div>
