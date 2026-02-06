@@ -228,7 +228,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
     // Filter items based on active tab and search/filters
     const filteredItems = Object.entries(inventory)
         .map(([id, entry]) => {
-            const qty = typeof entry === 'object' ? (entry.amount || 0) : (Number(entry) || 0);
+            const qty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
             const item = resolveItem(id);
             if (!item || qty <= 0) return null;
 
@@ -282,7 +282,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
 
         // Copy relevant items to temp inventory
         Object.entries(inventory).forEach(([itemId, entry]) => {
-            const qty = typeof entry === 'object' ? (entry.amount || 0) : (Number(entry) || 0);
+            const qty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
             if (qty < 2) return;
             if (!itemId.includes('_RUNE_') || itemId.includes('SHARD')) return;
             tempInv[itemId] = qty;
@@ -292,7 +292,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
         while (changed) {
             changed = false;
             for (const [itemId, entry] of Object.entries(tempInv)) {
-                const qty = typeof entry === 'object' ? (entry.amount || 0) : (Number(entry) || 0);
+                const qty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
                 if (qty < 2) continue;
 
                 const match = itemId.match(/^T(\d+)_RUNE_(.+)_(\d+)STAR$/);

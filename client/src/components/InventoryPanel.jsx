@@ -25,7 +25,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
         const unitPrice = calculateItemSellPrice(item, itemId);
 
         const entry = gameState?.state?.inventory?.[itemId];
-        const qty = typeof entry === 'object' ? (entry.amount || 0) : (Number(entry) || 0);
+        const qty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
 
         setSellModal({
             itemId,
@@ -43,12 +43,12 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
             return null;
         }
 
-        const qty = typeof entry === 'object' ? (entry.amount || 0) : (Number(entry) || 0);
+        const qty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
         if (qty <= 0) return null;
         if (item.noInventorySpace) return null; // Filter out items that don't take space
 
         // Merge metadata if entry is an object (for craftedBy, craftedAt, stars, etc.)
-        const metadata = typeof entry === 'object' ? entry : {};
+        const metadata = (entry && typeof entry === 'object') ? entry : {};
         return { ...item, ...metadata, qty, id }; // id is key
     }).filter(Boolean);
 
@@ -348,7 +348,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                             >
                                 <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: 'var(--text-main)', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>T{item.tier}</div>
                                 <div style={{ position: 'absolute', top: 6, right: 6, fontSize: '0.7rem', color: 'var(--text-main)', fontWeight: 'bold' }}>
-                                    x{typeof item.qty === 'object' ? (item.qty.amount || 1) : item.qty}
+                                    x{(item.qty && typeof item.qty === 'object') ? (item.qty.amount || 1) : item.qty}
                                 </div>
                                 <div
                                     onClick={(e) => { e.stopPropagation(); onShowInfo(item); }}

@@ -202,15 +202,15 @@ export class MarketManager {
         this.gameManager.addNotification(buyer, 'SUCCESS', `You bought ${qtyNum}x ${listing.item_data.name} for ${totalCost} Silver.`);
         await this.gameManager.saveState(buyer.id, buyer.state);
 
+        // Update Global Taxometer IMMEDIATELY after buyer pays
+        const tax = Math.floor(totalCost * 0.20);
+        this.gameManager.updateGlobalTax(tax);
+
         // Process Seller side
         // Note: Seller might be offline or playing another character.
         let seller = await this.gameManager.getCharacter(listing.seller_id, sellerCharId || null);
         if (seller) {
-            const tax = Math.floor(totalCost * 0.20);
             const sellerProfit = totalCost - tax;
-
-            // Update Global Taxometer
-            this.gameManager.updateGlobalTax(tax);
 
             this.addClaim(seller, {
                 type: 'SOLD_ITEM',

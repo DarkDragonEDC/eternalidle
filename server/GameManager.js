@@ -72,12 +72,20 @@ export class GameManager {
         if (!amount || amount <= 0) return;
 
         try {
+            if (!this.globalStats) {
+                this.globalStats = { total_market_tax: 0 };
+            }
             this.globalStats.total_market_tax += Math.floor(amount);
 
-            // Persist to DB
+            // Notify all clients IMMEDIATELY for real-time feel
+            if (this.onGlobalStatsUpdate) {
+                this.onGlobalStatsUpdate(this.globalStats);
+            }
+
+            // Persist to DB in the background (no need to await for UI feel, but we keep it for safety in this method)
+            // Or better yet, don't block the method return if possible, but since it's async we'll just move the broadcast up.
             const { error } = await this.supabase.rpc('increment_global_tax', { amount: Math.floor(amount) });
 
-            // If RPC fails (not created), fallback to normal update (though less atomic)
             if (error) {
                 await this.supabase
                     .from('global_stats')
@@ -86,11 +94,6 @@ export class GameManager {
                         updated_at: new Date().toISOString()
                     })
                     .eq('id', 'global');
-            }
-
-            // Notify all clients via a callback if registered (we'll set this in index.js)
-            if (this.onGlobalStatsUpdate) {
-                this.onGlobalStatsUpdate(this.globalStats);
             }
         } catch (err) {
             console.error('[DB] Error updating global tax:', err);

@@ -119,7 +119,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
         Object.entries(reqs).forEach(([reqId, reqQty]) => {
             hasReqs = true;
             const entry = gameState?.state?.inventory?.[reqId];
-            const userQty = typeof entry === 'object' ? (entry.amount || 0) : (Number(entry) || 0);
+            const userQty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
             const possible = Math.floor(userQty / reqQty);
             if (possible < maxByMaterials) {
                 maxByMaterials = possible;
@@ -266,7 +266,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
                                     {Object.entries(reqs).map(([reqId, reqQty]) => {
                                         const entry = gameState?.state?.inventory?.[reqId];
-                                        const userQty = typeof entry === 'object' ? (entry.amount || 0) : (Number(entry) || 0);
+                                        const userQty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
                                         const totalReq = reqQty * qtyNum;
                                         const hasEnough = userQty >= totalReq;
                                         // Resolver nome
@@ -414,7 +414,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
         let hasAllMaterials = true;
         Object.entries(reqs).forEach(([reqId, reqQty]) => {
             const entry = gameState?.state?.inventory?.[reqId];
-            const userQty = typeof entry === 'object' ? (entry.amount || 0) : (Number(entry) || 0);
+            const userQty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
             if (userQty < (reqQty * qtyNum)) hasAllMaterials = false;
         });
 
@@ -589,7 +589,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                                     {Object.entries(reqs).map(([reqId, reqQty]) => {
                                         const entry = gameState?.state?.inventory?.[reqId];
-                                        const userQty = typeof entry === 'object' ? (entry.amount || 0) : (Number(entry) || 0);
+                                        const userQty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
                                         const totalReq = reqQty * qtyNum;
                                         const hasEnough = userQty >= totalReq;
                                         // Resolver nome
