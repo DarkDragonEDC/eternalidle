@@ -410,7 +410,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                                         color: '#fff',
                                                         fontWeight: 'bold',
                                                         zIndex: 2
-                                                    }}>{item.qty}</div>
+                                                    }}>{typeof item.qty === 'object' ? (item.qty.amount || 1) : item.qty}</div>
                                                 </div>
                                                 <div>
                                                     <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>

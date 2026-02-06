@@ -126,7 +126,8 @@ export class InventoryManager {
         }
 
         const state = char.state;
-        const qty = typeof state.inventory[itemId] === 'object' ? (state.inventory[itemId]?.amount || 0) : (Number(state.inventory[itemId]) || 0);
+        const inventoryEntry = state.inventory[itemId];
+        const qty = typeof inventoryEntry === 'object' ? (inventoryEntry?.amount || 0) : (Number(inventoryEntry) || 0);
         if (qty < 1) {
             throw new Error("You do not have this item");
         }
@@ -161,26 +162,34 @@ export class InventoryManager {
         if (!state.equipment) state.equipment = {};
 
         if (slotName === 'food') {
-            const amount = state.inventory[itemId];
+            const entry = state.inventory[itemId];
+            const amount = typeof entry === 'object' ? (entry?.amount || 0) : (Number(entry) || 0);
             delete state.inventory[itemId];
 
-            const currentEquip = state.equipment.food;
-            if (currentEquip) {
+            if (!state.equipment.food) {
+                state.equipment.food = { ...item, amount: amount };
+            } else {
+                const currentEquip = state.equipment.food;
                 if (currentEquip.id === itemId) {
-                    currentEquip.amount = (currentEquip.amount || 0) + amount;
+                    currentEquip.amount = (Number(currentEquip.amount) || 0) + amount;
                 } else {
-                    // Fix: Use full ID to preserve quality
+                    // Refund current food to inventory
                     const oldId = currentEquip.id;
-                    const oldAmount = currentEquip.amount || 1;
-                    state.inventory[oldId] = (state.inventory[oldId] || 0) + oldAmount;
+                    const oldAmount = Number(currentEquip.amount) || 1;
+                    this.addItemToInventory(char, oldId, oldAmount);
                     state.equipment.food = { ...item, amount: amount };
                 }
-            } else {
-                state.equipment.food = { ...item, amount: amount };
             }
         } else {
-            state.inventory[itemId]--;
-            if (state.inventory[itemId] <= 0) delete state.inventory[itemId];
+            // Non-food items (decrement 1)
+            const entry = state.inventory[itemId];
+            if (typeof entry === 'object' && entry !== null) {
+                entry.amount--;
+                if (entry.amount <= 0) delete state.inventory[itemId];
+            } else {
+                state.inventory[itemId]--;
+                if (state.inventory[itemId] <= 0) delete state.inventory[itemId];
+            }
 
             const currentEquip = state.equipment[slotName];
             if (currentEquip && currentEquip.id) {
@@ -206,10 +215,10 @@ export class InventoryManager {
         }
 
         const item = state.equipment[slotName];
-        const amount = item.amount || 1;
+        const amount = Number(item.amount) || 1;
         // Fix: Use full ID to preserve quality
         const returnId = item.id;
-        state.inventory[returnId] = (state.inventory[returnId] || 0) + amount;
+        this.addItemToInventory(char, returnId, amount);
 
         delete state.equipment[slotName];
 

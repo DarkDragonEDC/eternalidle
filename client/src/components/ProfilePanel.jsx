@@ -299,7 +299,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                         <div style={{ color: tierColor, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                             <span style={{ fontSize: '0.6rem', fontWeight: 'bold', position: 'absolute', top: 2, left: 4 }}>T{item.tier}</span>
                             {/* Quantidade (especialmente para food) */}
-                            {item.amount > 1 && (
+                            {((typeof item.amount === 'object' ? item.amount.amount : item.amount) > 1) && (
                                 <span style={{
                                     position: 'absolute',
                                     bottom: 2,
@@ -309,7 +309,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                                     fontWeight: '900',
                                     textShadow: '0 1px 3px rgba(0,0,0,1)'
                                 }}>
-                                    {item.amount}
+                                    {typeof item.amount === 'object' ? item.amount.amount : item.amount}
                                 </span>
                             )}
                             {/* Se tiver qualidade ou estrelas, mostrar indicadores */}
