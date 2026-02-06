@@ -912,8 +912,7 @@ for (const t of TIERS) {
             name: `Rune Shard`,
             tier: 1,
             type: 'RESOURCE',
-            noInventorySpace: true,
-            icon: `/items/T1_RUNE_SHARD.png`
+            noInventorySpace: true
         };
     }
 

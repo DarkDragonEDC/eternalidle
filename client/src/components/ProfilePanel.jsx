@@ -557,7 +557,7 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                     paddingRight: '20px', // Space for Chevron
                                     whiteSpace: 'nowrap'
                                 }}>
-                                    {selectedTitle || 'Sem Título'}
+                                    {selectedTitle || 'No Title'}
                                 </div>
 
                                 <select
@@ -591,9 +591,9 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                         zIndex: 2
                                     }}
                                 >
-                                    <option value="None" style={{ color: '#000', background: '#fff' }}>Sem Título</option>
+                                    <option value="None">No Title</option>
                                     {(gameState?.state?.unlockedTitles || []).map(title => (
-                                        <option key={title} value={title} style={{ color: '#000', background: '#fff' }}>
+                                        <option key={title} value={title}>
                                             {title}
                                         </option>
                                     ))}
@@ -1054,8 +1054,8 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                         gap: '30px'
                                     }}>
                                         {[
-                                            { id: 'METAL', label: 'Bars (Metal)', icon: <Layers size={16} /> },
-                                            { id: 'PLANK', label: 'Planks (Wood)', icon: <Axe size={16} /> },
+                                            { id: 'METAL', label: 'Bars', icon: <Layers size={16} /> },
+                                            { id: 'PLANK', label: 'Planks', icon: <Axe size={16} /> },
                                             { id: 'LEATHER', label: 'Leather', icon: <Sword size={16} style={{ transform: 'rotate(45deg)' }} /> },
                                             { id: 'CLOTH', label: 'Cloth', icon: <Scissors size={16} /> },
                                             { id: 'EXTRACT', label: 'Extracts', icon: <Apple size={16} /> }
@@ -1390,7 +1390,7 @@ const RuneBuffSummary = ({ activeRuneBuffs }) => {
                                 .replace('ORE', 'Ore')
                                 .replace('FIBER', 'Fiber')
                                 .replace('FISH', 'Fish')
-                                .replace('METAL', 'Metal Bars')
+                                .replace('METAL', 'Bars')
                                 .replace('PLANK', 'Planks')
                                 .replace('LEATHER', 'Leather')
                                 .replace('CLOTH', 'Cloth')

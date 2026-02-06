@@ -28,7 +28,7 @@ const AnimatedCounter = ({ value, maxValue, triggerKey }) => {
             animate={{ opacity: 1 }}
             key={`${triggerKey}-${displayValue}`}
         >
-            {Math.round(displayValue)}
+            {formatNumber(Math.round(displayValue))}
         </motion.span>
     );
 };
@@ -655,7 +655,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                     )}
                                 </motion.div>
                                 <div style={{ fontSize: isMobile ? '0.6rem' : '0.9rem', fontWeight: '900', color: 'var(--text-main)' }}>{gameState?.name?.toUpperCase()}</div>
-                                <div style={{ fontSize: isMobile ? '0.9rem' : '1.3rem', fontWeight: '900', color: '#4caf50', marginTop: '2px' }}>{Math.round(combat.playerHealth)} HP</div>
+                                <div style={{ fontSize: isMobile ? '0.9rem' : '1.3rem', fontWeight: '900', color: '#4caf50', marginTop: '2px' }}>{formatNumber(Math.round(combat.playerHealth))} HP</div>
                             </div>
 
                             <div style={{ fontSize: isMobile ? '1rem' : '1.5rem', fontWeight: '900', color: 'var(--text-dim)', opacity: 0.2 }}>VS</div>
@@ -971,9 +971,9 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                     <div>
                                         <div style={{ color: 'var(--text-main)', fontWeight: 'bold', fontSize: isMobile ? '0.85rem' : '1rem' }}>{mob.name}</div>
                                         <div style={{ color: 'var(--text-dim)', fontSize: isMobile ? '0.6rem' : '0.7rem', display: 'flex', gap: '6px' }}>
-                                            <span style={{ color: '#ff4444' }}>HP:{mob.health}</span>
-                                            <span style={{ color: '#ff9800' }}>D:{mob.damage}</span>
-                                            <span style={{ color: '#4caf50' }}>XP:{mob.xp}</span>
+                                            <span style={{ color: '#ff4444' }}>HP:{formatNumber(mob.health)}</span>
+                                            <span style={{ color: '#ff9800' }}>D:{formatNumber(mob.damage)}</span>
+                                            <span style={{ color: '#4caf50' }}>XP:{formatNumber(mob.xp)}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1015,13 +1015,13 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)' }}>XP/H</div>
                                         <div style={{ fontSize: isMobile ? '0.75rem' : '0.85rem', fontWeight: 'bold', color: '#4caf50' }}>
-                                            {isMobile && xpHour > 1000 ? `${(xpHour / 1000).toFixed(1)}k` : formatNumber(xpHour)}
+                                            {formatNumber(xpHour)}
                                         </div>
                                     </div>
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)' }}>SILVER/H</div>
                                         <div style={{ fontSize: isMobile ? '0.75rem' : '0.85rem', fontWeight: 'bold', color: '#d4af37' }}>
-                                            {isMobile && silverHour > 1000 ? `${(silverHour / 1000).toFixed(1)}k` : formatNumber(silverHour)}
+                                            {formatNumber(silverHour)}
                                         </div>
                                     </div>
 
@@ -1044,8 +1044,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                             let survivalColor = "#4caf50";
 
                                             if (mobDmg > 0) {
-                                                const roundsToDie = totalEffectiveHp / mobDmg;
-                                                const secondsToDie = roundsToDie * (atkSpeed / 1000);
+                                                const secondsToDie = totalEffectiveHp / mobDmg;
 
                                                 if (secondsToDie > 43200) {
                                                     survivalText = "∞";
@@ -1074,7 +1073,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 {/* Drops (Compact) */}
                                 <div style={{ flex: isMobile ? '1 1 100%' : '1.5', display: 'flex', flexWrap: 'wrap', gap: '4px', order: 4 }}>
                                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(212, 175, 55, 0.1)', padding: '2px 6px', borderRadius: '4px', color: '#d4af37', fontSize: '0.65rem' }}>
-                                        <Coins size={10} /> {isMobile ? `${mob.silver[0]}-${mob.silver[1]}` : `${mob.silver[0]}-${mob.silver[1]} Silver`}
+                                        <Coins size={10} /> {isMobile ? `${formatNumber(mob.silver[0])}-${formatNumber(mob.silver[1])}` : `${formatNumber(mob.silver[0])}-${formatNumber(mob.silver[1])} Silver`}
                                     </span>
                                     {Object.entries(mob.loot).map(([id, chance]) => (
                                         <span key={id} style={{

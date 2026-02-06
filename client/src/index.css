@@ -171,3 +171,38 @@ button:active {
     z-index: 1001;
   }
 }
+
+/* Global Select & Option Styles */
+select {
+  background-color: var(--panel-bg);
+  color: var(--text-main);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  /* Uniform arrow styling is handled by components with Lucide icons */
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+select:hover {
+  border-color: var(--border-active);
+}
+
+option {
+  background-color: #1a1d23;
+  /* Solid dark background for consistency */
+  color: var(--text-main);
+  padding: 8px;
+}
+
+body.theme-light option {
+  background-color: #ffffff;
+  color: #001f3f;
+}

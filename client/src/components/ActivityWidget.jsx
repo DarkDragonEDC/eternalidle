@@ -32,7 +32,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
             setElapsed((now - start) / 1000);
         }, 100);
         return () => clearInterval(interval);
-    }, [activity, gameState?.activity_started_at, serverTimeOffset]);
+    }, [activity?.item_id, activity?.next_action_at, gameState?.activity_started_at, serverTimeOffset]);
 
     // Timer para Combate
 
@@ -93,7 +93,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
         updateTimer();
 
         return () => clearInterval(interval);
-    }, [activity, serverTimeOffset]);
+    }, [activity?.item_id, activity?.next_action_at, activity?.actions_remaining, serverTimeOffset]);
 
     // Smooth Progress Animation (60fps)
     useEffect(() => {

@@ -381,7 +381,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
-                                                border: `1px solid ${l.item_data.rarityColor || 'rgba(255, 255, 255, 0.1)'}`,
+                                                border: `1px solid ${resolveItem(l.item_id)?.rarityColor || l.item_data.rarityColor || 'rgba(255, 255, 255, 0.1)'}`,
                                                 flexShrink: 0,
                                                 position: 'relative',
                                                 overflow: 'hidden'
@@ -543,7 +543,9 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                         const data = resolveItem(id);
                                         // Simple rarity check for border color if needed, similar to Inventory
                                         let specificBorderColor = 'var(--border)';
-                                        if (data.rarity) {
+                                        if (data.rarityColor) {
+                                            specificBorderColor = data.rarityColor;
+                                        } else if (data.rarity) {
                                             switch (data.rarity) {
                                                 case 'COMMON': specificBorderColor = '#9CA3AF'; break;
                                                 case 'UNCOMMON': specificBorderColor = '#10B981'; break;
@@ -1021,11 +1023,8 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                 maxWidth: '450px',
                                 boxShadow: '0 8px 32px rgba(0,0,0,0.5)'
                             }}>
-                                <h3 style={{ margin: '0 0 4px 0', fontSize: '1.2rem', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span>Buy {buyModal.listing.item_data.qualityName && buyModal.listing.item_data.qualityName !== 'Normal' ? `${buyModal.listing.item_data.qualityName} ` : ''}{buyModal.listing.item_data.name}</span>
-                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 'normal' }}>
-                                        {buyModal.max} available
-                                    </span>
+                                <h3 style={{ margin: '0 0 4px 0', fontSize: '1.2rem', color: '#fff' }}>
+                                    Buy {buyModal.listing.item_data.qualityName && buyModal.listing.item_data.qualityName !== 'Normal' ? `${buyModal.listing.item_data.qualityName} ` : ''}{buyModal.listing.item_data.name}
                                 </h3>
                                 <p style={{ margin: '0 0 20px 0', color: 'var(--text-dim)', fontSize: '0.9rem' }}>
                                     Price per unit: <span style={{ color: 'var(--accent)' }}>
@@ -1088,11 +1087,16 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                     >+</button>
                                 </div>
 
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                                     <button
                                         onClick={() => setBuyModal(prev => ({ ...prev, quantity: 1 }))}
                                         style={{ fontSize: '0.8rem', padding: '4px 8px', background: 'transparent', border: '1px solid var(--border)', borderRadius: '4px', color: 'var(--text-dim)', cursor: 'pointer' }}
                                     >MIN (1)</button>
+
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 'bold' }}>
+                                        {buyModal.max} available
+                                    </span>
+
                                     <button
                                         onClick={() => {
                                             const affordable = Math.floor(silver / buyModal.pricePerUnit);

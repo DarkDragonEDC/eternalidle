@@ -138,7 +138,7 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                     <div>
                         <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.4rem', fontWeight: '900', letterSpacing: '2px' }}>HALL OF FAME</h2>
-                        <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>The best of Albion Lands</div>
+                        <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>The best of Eternal Lands</div>
                     </div>
                     <div style={{ padding: '10px 20px', background: 'rgba(212, 175, 55, 0.05)', borderRadius: '8px', border: '1px solid rgba(212, 175, 55, 0.1)', display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Trophy size={18} color="var(--accent)" />
@@ -202,7 +202,7 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
                         ))}
                     </div>
 
-                    <div style={{ position: 'relative' }}>
+                    <div style={{ position: 'relative', width: 'fit-content' }}>
                         <select
                             value={subCategory}
                             onChange={(e) => setSubCategory(e.target.value)}

@@ -308,32 +308,38 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                         <span style={{ color: 'var(--text-dim)', fontWeight: '600' }}>Efficiency</span>
-                                        <span style={{ color: 'var(--t2)', fontWeight: '800' }}>+{efficiency}%</span>
+                                        <span style={{ color: 'var(--t2)', fontWeight: '800', paddingRight: '4px' }}>+{efficiency}%</span>
                                     </div>
                                     {totalBonusPc > 0 && (
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                             <span style={{ color: 'var(--text-dim)', fontWeight: '600' }}>XP Bonus</span>
-                                            <span style={{ color: 'var(--t2)', fontWeight: '800' }}>+{totalBonusPc.toFixed(1)}%</span>
+                                            <span style={{ color: 'var(--t2)', fontWeight: '800', paddingRight: '4px' }}>+{totalBonusPc.toFixed(1)}%</span>
                                         </div>
                                     )}
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                         <span style={{ color: 'var(--text-dim)', fontWeight: '600' }}>Time per action</span>
-                                        <span style={{ color: 'var(--text-main)', fontWeight: '800' }}>{finalTime.toFixed(1)}s {finalTime < baseTime && <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textDecoration: 'line-through', marginLeft: '4px' }}>{baseTime}s</span>}</span>
+                                        <span style={{ color: 'var(--text-main)', fontWeight: '800', display: 'flex', alignItems: 'baseline', gap: '6px', paddingRight: '4px' }}>
+                                            {finalTime.toFixed(1)}s
+                                            {finalTime < baseTime && <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textDecoration: 'line-through' }}>{baseTime}s</span>}
+                                        </span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                         <span style={{ color: 'var(--text-dim)', fontWeight: '600' }}>XP per action</span>
-                                        <span style={{ color: 'var(--accent)', fontWeight: '800' }}>{xpPerAction} {xpPerAction > baseXp && <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textDecoration: 'line-through', marginLeft: '4px' }}>{baseXp}</span>}</span>
+                                        <span style={{ color: 'var(--accent)', fontWeight: '800', display: 'flex', alignItems: 'baseline', gap: '6px', paddingRight: '4px' }}>
+                                            {xpPerAction}
+                                            {xpPerAction > baseXp && <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textDecoration: 'line-through' }}>{baseXp}</span>}
+                                        </span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                         <span style={{ color: 'var(--text-dim)', fontWeight: '600' }}>Total Cost</span>
-                                        <span style={{ color: 'var(--accent)', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <span style={{ color: 'var(--accent)', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '4px', paddingRight: '4px' }}>
                                             <div style={{ width: 10, height: 10, borderRadius: '50%', border: '2px solid currentColor' }}></div>
                                             {totalCost}
                                         </span>
                                     </div>
                                     <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <span style={{ color: 'var(--text-main)', fontWeight: '900', fontSize: '0.85rem' }}>TOTAL XP</span>
-                                        <span style={{ color: 'var(--t2)', fontWeight: '900', fontSize: '1rem' }}>{totalXP}</span>
+                                        <span style={{ color: 'var(--t2)', fontWeight: '900', fontSize: '1rem', paddingRight: '4px' }}>{totalXP}</span>
                                     </div>
                                 </div>
                             </div>
@@ -614,32 +620,38 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                         <span style={{ color: 'var(--text-dim)', fontWeight: '600' }}>Efficiency</span>
-                                        <span style={{ color: 'var(--t2)', fontWeight: '800' }}>+{efficiency}%</span>
+                                        <span style={{ color: 'var(--t2)', fontWeight: '800', paddingRight: '4px' }}>+{efficiency}%</span>
                                     </div>
                                     {totalBonusPc > 0 && (
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                             <span style={{ color: 'var(--text-dim)', fontWeight: '600' }}>XP Bonus</span>
-                                            <span style={{ color: 'var(--t2)', fontWeight: '800' }}>+{totalBonusPc.toFixed(1)}%</span>
+                                            <span style={{ color: 'var(--t2)', fontWeight: '800', paddingRight: '4px' }}>+{totalBonusPc.toFixed(1)}%</span>
                                         </div>
                                     )}
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                         <span style={{ color: 'var(--text-dim)', fontWeight: '600' }}>Time per action</span>
-                                        <span style={{ color: 'var(--text-main)', fontWeight: '800' }}>{finalTime.toFixed(1)}s {finalTime < baseTime && <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textDecoration: 'line-through', marginLeft: '4px' }}>{baseTime}s</span>}</span>
+                                        <span style={{ color: 'var(--text-main)', fontWeight: '800', display: 'flex', alignItems: 'baseline', gap: '6px', paddingRight: '4px' }}>
+                                            {finalTime.toFixed(1)}s
+                                            {finalTime < baseTime && <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textDecoration: 'line-through' }}>{baseTime}s</span>}
+                                        </span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                         <span style={{ color: 'var(--text-dim)', fontWeight: '600' }}>XP per action</span>
-                                        <span style={{ color: 'var(--accent)', fontWeight: '800' }}>{xpPerAction} {xpPerAction > baseXp && <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textDecoration: 'line-through', marginLeft: '4px' }}>{baseXp}</span>}</span>
+                                        <span style={{ color: 'var(--accent)', fontWeight: '800', display: 'flex', alignItems: 'baseline', gap: '6px', paddingRight: '4px' }}>
+                                            {xpPerAction}
+                                            {xpPerAction > baseXp && <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textDecoration: 'line-through' }}>{baseXp}</span>}
+                                        </span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                         <span style={{ color: 'var(--text-dim)', fontWeight: '600' }}>Total Cost</span>
-                                        <span style={{ color: 'var(--accent)', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <span style={{ color: 'var(--accent)', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '4px', paddingRight: '4px' }}>
                                             <div style={{ width: 10, height: 10, borderRadius: '50%', border: '2px solid currentColor' }}></div>
                                             {totalCost}
                                         </span>
                                     </div>
                                     <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <span style={{ color: 'var(--text-main)', fontWeight: '900', fontSize: '0.85rem' }}>TOTAL XP</span>
-                                        <span style={{ color: 'var(--t2)', fontWeight: '900', fontSize: '1rem' }}>{totalXP}</span>
+                                        <span style={{ color: 'var(--t2)', fontWeight: '900', fontSize: '1rem', paddingRight: '4px' }}>{totalXP}</span>
                                     </div>
                                 </div>
                             </div>
@@ -876,25 +888,31 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                         <span style={{ color: 'var(--text-dim)', fontWeight: '600' }}>Efficiency</span>
-                                        <span style={{ color: 'var(--t2)', fontWeight: '800' }}>+{efficiency}%</span>
+                                        <span style={{ color: 'var(--t2)', fontWeight: '800', paddingRight: '4px' }}>+{efficiency}%</span>
                                     </div>
                                     {totalBonusPc > 0 && (
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                             <span style={{ color: 'var(--text-dim)', fontWeight: '600' }}>XP Bonus</span>
-                                            <span style={{ color: 'var(--t2)', fontWeight: '800' }}>+{totalBonusPc.toFixed(1)}%</span>
+                                            <span style={{ color: 'var(--t2)', fontWeight: '800', paddingRight: '4px' }}>+{totalBonusPc.toFixed(1)}%</span>
                                         </div>
                                     )}
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                         <span style={{ color: 'var(--text-dim)', fontWeight: '600' }}>Time per action</span>
-                                        <span style={{ color: 'var(--text-main)', fontWeight: '800' }}>{finalTime.toFixed(1)}s <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textDecoration: 'line-through' }}>{baseTime}s</span></span>
+                                        <span style={{ color: 'var(--text-main)', fontWeight: '800', display: 'flex', alignItems: 'baseline', gap: '6px', paddingRight: '4px' }}>
+                                            {finalTime.toFixed(1)}s
+                                            <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textDecoration: 'line-through' }}>{baseTime}s</span>
+                                        </span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                         <span style={{ color: 'var(--text-dim)', fontWeight: '600' }}>XP per action</span>
-                                        <span style={{ color: 'var(--accent)', fontWeight: '800' }}>{xpPerAction} {xpPerAction > baseXp && <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textDecoration: 'line-through', marginLeft: '4px' }}>{baseXp}</span>}</span>
+                                        <span style={{ color: 'var(--accent)', fontWeight: '800', display: 'flex', alignItems: 'baseline', gap: '6px', paddingRight: '4px' }}>
+                                            {xpPerAction}
+                                            {xpPerAction > baseXp && <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textDecoration: 'line-through' }}>{baseXp}</span>}
+                                        </span>
                                     </div>
                                     <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <span style={{ color: 'var(--text-main)', fontWeight: '900', fontSize: '0.85rem' }}>TOTAL XP</span>
-                                        <span style={{ color: 'var(--t2)', fontWeight: '900', fontSize: '1rem' }}>{totalXP}</span>
+                                        <span style={{ color: 'var(--t2)', fontWeight: '900', fontSize: '1rem', paddingRight: '4px' }}>{totalXP}</span>
                                     </div>
                                 </div>
                             </div>

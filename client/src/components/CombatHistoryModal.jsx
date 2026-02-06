@@ -128,7 +128,7 @@ const CombatHistoryModal = ({ isOpen, onClose, socket }) => {
 
                                         {/* Stats Grid */}
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', background: 'var(--border)' }}>
-                                            <StatBox label="KILLS" value={log.kills || 0} color="var(--text-main)" />
+                                            <StatBox label="KILLS" value={formatNumber(log.kills || 0)} color="var(--text-main)" />
                                             <StatBox label="DPS" value={dps.toFixed(1)} color="#ff4444" />
                                             <StatBox label="XP/H" value={formatNumber(Math.floor(xph))} color="#4caf50" />
                                             <StatBox label="SILVER/H" value={formatNumber(Math.floor(silverh))} color="var(--accent)" />

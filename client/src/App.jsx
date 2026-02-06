@@ -69,6 +69,9 @@ const mapTabCategoryToSkill = (tab, category) => {
     },
     merging: {
       RUNE: 'RUNE'
+    },
+    dungeon: {
+      DUNGEONEERING: 'DUNGEONEERING'
     }
   };
   return maps[tab.toLowerCase()]?.[category.toUpperCase()];
@@ -1114,7 +1117,12 @@ function App() {
           </div>
         );
       case 'dungeon':
-        return <DungeonPanel socket={socket} gameState={displayedGameState} isMobile={isMobile} serverTimeOffset={clockOffset.current} />;
+        return (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <SkillProgressHeader tab="dungeon" category="DUNGEONEERING" />
+            <DungeonPanel socket={socket} gameState={displayedGameState} isMobile={isMobile} serverTimeOffset={clockOffset.current} />
+          </div>
+        );
       case 'merging':
         return (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>

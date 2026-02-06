@@ -207,9 +207,9 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                         onClick={() => setShowFullNumbers(!showFullNumbers)}
                                         style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' }}
                                     >
-                                        <span style={{ fontSize: '0.5rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: '800' }}>Healing</span>
-                                        <span style={{ fontSize: '0.9rem', fontWeight: '900', color: '#49cc90' }}>
-                                            {showFullNumbers ? formatNumber(combat.foodConsumed || 0) : formatValue(combat.foodConsumed || 0)}
+                                        <span style={{ fontSize: '0.5rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: '800' }}>Combat XP</span>
+                                        <span style={{ fontSize: '0.9rem', fontWeight: '900', color: '#4caf50' }}>
+                                            {showFullNumbers ? formatNumber(xpGained?.COMBAT || 0) : formatValue(xpGained?.COMBAT || 0)}
                                         </span>
                                     </div>
                                 </div>
@@ -252,35 +252,37 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                     <Star size={12} color="var(--accent)" /> Experience
                                 </h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-                                    {Object.entries(xpGained).map(([skill, amount]) => (
-                                        <div
-                                            key={skill}
-                                            onClick={() => setShowFullNumbers(!showFullNumbers)}
-                                            style={{
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center',
-                                                background: 'var(--slot-bg)',
-                                                padding: '12px 15px',
-                                                borderRadius: '12px',
-                                                border: '1px solid var(--border)',
-                                                transition: '0.2s',
-                                                cursor: 'pointer'
-                                            }}
-                                        >
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                                <div style={{ opacity: 0.5, color: 'var(--accent)' }}>
-                                                    {SKILL_ICONS[skill] || <Star size={14} />}
+                                    {Object.entries(xpGained)
+                                        .filter(([skill]) => skill !== 'COMBAT')
+                                        .map(([skill, amount]) => (
+                                            <div
+                                                key={skill}
+                                                onClick={() => setShowFullNumbers(!showFullNumbers)}
+                                                style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                    background: 'var(--slot-bg)',
+                                                    padding: '12px 15px',
+                                                    borderRadius: '12px',
+                                                    border: '1px solid var(--border)',
+                                                    transition: '0.2s',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                                    <div style={{ opacity: 0.5, color: 'var(--accent)' }}>
+                                                        {SKILL_ICONS[skill] || <Star size={14} />}
+                                                    </div>
+                                                    <span style={{ fontWeight: '700', color: 'var(--text-main)', fontSize: '0.85rem' }}>
+                                                        {SKILL_NAMES[skill] || skill}
+                                                    </span>
                                                 </div>
-                                                <span style={{ fontWeight: '700', color: 'var(--text-main)', fontSize: '0.85rem' }}>
-                                                    {SKILL_NAMES[skill] || skill}
+                                                <span style={{ color: '#4caf50', fontWeight: '900', fontSize: '0.85rem' }}>
+                                                    +{showFullNumbers ? formatNumber(amount) : formatValue(amount)} <span style={{ fontSize: '0.55rem', opacity: 0.5 }}>XP</span>
                                                 </span>
                                             </div>
-                                            <span style={{ color: '#4caf50', fontWeight: '900', fontSize: '0.85rem' }}>
-                                                +{showFullNumbers ? formatNumber(amount) : formatValue(amount)} <span style={{ fontSize: '0.55rem', opacity: 0.5 }}>XP</span>
-                                            </span>
-                                        </div>
-                                    ))}
+                                        ))}
                                 </div>
                             </div>
                         )}

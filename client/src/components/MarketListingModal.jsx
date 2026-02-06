@@ -95,7 +95,17 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        border: `1px solid ${tierColor}`,
+                        border: `1px solid ${itemData?.rarityColor || (() => {
+                            switch (itemData?.rarity) {
+                                case 'COMMON': return '#9CA3AF';
+                                case 'UNCOMMON': return '#10B981';
+                                case 'RARE': return '#3B82F6';
+                                case 'EPIC': return '#F59E0B';
+                                case 'LEGENDARY': return '#EF4444';
+                                case 'MYTHIC': return '#A855F7';
+                                default: return tierColor;
+                            }
+                        })()}`,
                         position: 'relative' // relative for absolute stars
                     }}>
                         <span style={{ color: tierColor, fontWeight: 'bold' }}>T{itemData?.tier}</span>
@@ -237,7 +247,7 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                     Confirm Listing
                 </button>
             </div>
-        </div>
+        </div >
     );
 };
 

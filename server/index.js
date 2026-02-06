@@ -164,6 +164,9 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+console.log('[DEBUG] SUPABASE_URL:', SUPABASE_URL);
+console.log('[DEBUG] SUPABASE_KEY starts with:', SUPABASE_KEY?.substring(0, 10));
+console.log('[DEBUG] SUPABASE_KEY ends with:', SUPABASE_KEY?.substring(SUPABASE_KEY.length - 10));
 
 const isServiceRole = SUPABASE_KEY?.includes('NlcnZpY2Vfcm9sZ');
 console.log('[SERVER] Supabase Key Role:', isServiceRole ? 'SERVICE_ROLE' : 'ANON');

@@ -164,7 +164,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
 
         return {
             survives,
-            runsBeforeDeath: runsBeforeDeath === Infinity ? '∞' : runsBeforeDeath,
+            runsBeforeDeath: runsBeforeDeath === Infinity ? '∞' : formatNumber(runsBeforeDeath),
             totalDamagePerRun,
             totalEffectiveHp
         };
@@ -682,7 +682,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                             {/* Map Ticket */}
                                             <div style={{ position: 'relative', width: '52px', height: '52px', background: 'var(--bg-dark)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)' }}>
                                                 <div style={{ position: 'absolute', top: '-6px', right: '-6px', background: 'var(--slot-bg)', fontSize: '0.6rem', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border)', color: hasMap ? '#4caf50' : '#ff4444', fontWeight: 'bold', zIndex: 2 }}>
-                                                    {mapQty}/1
+                                                    {formatNumber(mapQty)}/1
                                                 </div>
                                                 <div style={{ fontSize: '1.2rem', opacity: 0.8 }}>
                                                     <MapIcon size={28} color="var(--text-dim)" />

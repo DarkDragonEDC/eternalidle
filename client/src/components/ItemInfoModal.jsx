@@ -63,7 +63,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
     });
 
     // Clean name: remove T{tier} from the name if we are going to append it manually
-    const cleanBaseName = (item.name || '').replace(new RegExp(` T${item.tier}$`), '');
+    // Base name cleanup is handled in the render for titles
 
     const getItemDescription = (itm) => {
         // Prioritize actual item description if it exists (for Runes and others)
@@ -145,8 +145,15 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                         background: item.rarityColor || 'var(--accent)',
                         borderRadius: '12px 12px 0 0'
                     }}></div>
-                    <h3 style={{ margin: 0, color: item.rarityColor || 'var(--accent)', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                        {cleanBaseName} T{item.tier}
+                    <h3 style={{ margin: 0, color: item.rarityColor || 'var(--accent)', fontSize: '1.2rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {item.name}
+                        {item.stars > 0 && (
+                            <span style={{ display: 'inline-flex', gap: '2px', marginLeft: '4px' }}>
+                                {Array.from({ length: item.stars }).map((_, i) => (
+                                    <Star key={i} size={14} color="#fbbf24" fill="#fbbf24" strokeWidth={3} />
+                                ))}
+                            </span>
+                        )}
                     </h3>
                     <button
                         onClick={onClose}
