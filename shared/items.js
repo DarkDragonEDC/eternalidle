@@ -230,7 +230,7 @@ for (const t of TIERS) {
     const foodItem = {
         id: `T${t}_FOOD`, name: 'Food', tier: t, type: 'FOOD',
         heal: HP_CURVE[t - 1], // Heals roughly 1 full HP bar of that tier
-        req: { [`T${t}_FISH`]: 2 },
+        req: { [`T${t}_FISH`]: 1 },
         xp: REFINE_DATA.xp[t - 1], // Use refining curve for food
         time: REFINE_DATA.time[t - 1]
     };
