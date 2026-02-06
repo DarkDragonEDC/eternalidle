@@ -79,199 +79,159 @@ const mapTabCategoryToSkill = (tab, category) => {
 };
 
 export const SkillsOverview = ({ onNavigate, gameState }) => {
-    const [expanded, setExpanded] = React.useState(null);
-
-    const toggleExpand = (id) => {
-        setExpanded(expanded === id ? null : id);
-    };
-
     const categories = [
         {
             id: 'gathering',
-            label: 'Gathering',
-            icon: <Pickaxe />,
+            label: 'Gather.',
+            icon: <Pickaxe size={14} />,
             color: '#4ade80',
             items: [
                 { id: 'WOOD', label: 'Lumberjack' },
                 { id: 'ORE', label: 'Mining' },
                 { id: 'HIDE', label: 'Skinning' },
-                { id: 'FIBER', label: 'Harvesting' },
-                { id: 'FISH', label: 'Fishing' },
-                { id: 'HERB', label: 'Herbalism' }
+                { id: 'FIBER', label: 'Harvasting' },
+                { id: 'HERB', label: 'Herbalism' },
+                { id: 'FISH', label: 'Fishing' }
             ]
         },
         {
             id: 'refining',
-            label: 'Refining',
-            icon: <Box />,
+            label: 'Refine',
+            icon: <Box size={14} />,
             color: '#60a5fa',
             items: [
                 { id: 'PLANK', label: 'Lumber Mill' },
                 { id: 'BAR', label: 'Smelting' },
                 { id: 'LEATHER', label: 'Tannery' },
                 { id: 'CLOTH', label: 'Loom' },
-                { id: 'EXTRACT', label: 'Distillation' }
+                { id: 'EXTRACT', label: 'Distillation' },
+                { id: 'RUNE_FORGE', label: 'Rune Forge', isSpecial: true }
             ]
         },
         {
             id: 'crafting',
-            label: 'Crafting',
-            icon: <Hammer />,
+            label: 'Craft',
+            icon: <Hammer size={14} />,
             color: '#f472b6',
             items: [
-                { id: 'WARRIORS_FORGE', label: "Warrior's Forge" },
-                { id: 'HUNTERS_LODGE', label: "Hunter's Lodge" },
-                { id: 'MAGES_TOWER', label: "Mage's Tower" },
                 { id: 'TOOLMAKER', label: 'Toolmaker' },
-                { id: 'COOKING_STATION', label: 'Kitchen' },
-                { id: 'ALCHEMY_LAB', label: 'Alchemy Lab' }
-            ]
-        },
-        {
-            id: 'merging',
-            label: 'Merging',
-            icon: <Zap size={18} />,
-            color: 'var(--accent)',
-            items: [
-                { id: 'RUNE', label: 'Rune' }
+                { id: 'WARRIORS_FORGE', label: 'Warrior' },
+                { id: 'HUNTERS_LODGE', label: 'Hunter' },
+                { id: 'MAGES_TOWER', label: 'Mage' },
+                { id: 'ALCHEMY_LAB', label: 'Alchemy' },
+                { id: 'COOKING_STATION', label: 'Kitchen' }
             ]
         }
     ];
 
     return (
-        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            {categories.map((cat) => {
-                const isExpanded = expanded === cat.id;
-                return (
-                    <div key={cat.id} style={{
-                        background: 'var(--panel-bg)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '12px',
-                        overflow: 'hidden',
-                        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
-                    }}>
-                        <button
-                            onClick={() => toggleExpand(cat.id)}
-                            style={{
-                                width: '100%',
-                                padding: '20px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '15px',
-                                background: isExpanded ? 'var(--accent-soft)' : 'transparent',
-                                border: 'none',
-                                cursor: 'pointer',
-                                transition: '0.2s',
-                                textAlign: 'left'
-                            }}
-                        >
-                            <div style={{
-                                color: cat.color,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                width: '40px',
-                                height: '40px',
-                                background: 'rgba(0,0,0,0.2)',
-                                borderRadius: '8px'
-                            }}>
-                                {React.cloneElement(cat.icon, { size: 24 })}
-                            </div>
+        <div style={{ padding: '10px 6px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '8px',
+                alignItems: 'start'
+            }}>
+                {categories.map((cat) => (
+                    <div key={cat.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {/* Compact Column Header */}
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '6px 2px',
+                            borderRadius: '8px',
+                            background: 'rgba(0,0,0,0.2)',
+                            border: `1px solid ${cat.color}33`
+                        }}>
+                            <div style={{ color: cat.color }}>{cat.icon}</div>
                             <span style={{
-                                flex: 1,
-                                fontSize: '1.1rem',
+                                fontSize: '0.6rem',
                                 fontWeight: 'bold',
-                                color: isExpanded ? 'var(--accent)' : 'var(--text-main)',
-                                letterSpacing: '1px'
+                                color: cat.color,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px'
                             }}>
                                 {cat.label}
                             </span>
-                            <div style={{
-                                color: isExpanded ? 'var(--accent)' : 'var(--text-dim)',
-                                transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                                transition: 'transform 0.3s'
-                            }}>
-                                ▼
-                            </div>
-                        </button>
+                        </div>
 
-                        <div style={{
-                            height: isExpanded ? 'auto' : '0',
-                            overflow: 'hidden',
-                            transition: 'height 0.3s ease'
-                        }}>
-                            <div style={{ padding: '5px 15px 15px 15px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                                {cat.items.map((item) => {
-                                    const skillKey = mapTabCategoryToSkill(cat.id, item.id);
-                                    const skill = gameState?.state?.skills?.[skillKey];
-                                    const level = skill?.level || 1;
-                                    const nextXP = calculateNextLevelXP(level);
-                                    const progress = Math.min(100, ((skill?.xp || 0) / nextXP) * 100);
+                        {/* Vertical Skill List */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            {cat.items.map((item) => {
+                                const skillKey = mapTabCategoryToSkill(cat.id, item.id);
+                                const skill = gameState?.state?.skills?.[skillKey];
+                                const level = skill?.level || 1;
+                                const nextXP = calculateNextLevelXP(level);
+                                const progress = Math.min(100, ((skill?.xp || 0) / nextXP) * 100);
 
-                                    return (
-                                        <button
-                                            key={item.id}
-                                            onClick={() => onNavigate(cat.id, item.id)}
-                                            style={{
-                                                padding: '12px',
-                                                background: 'rgba(255,255,255,0.03)',
-                                                border: '1px solid rgba(255,255,255,0.05)',
-                                                borderRadius: '8px',
-                                                color: 'var(--text-main)',
-                                                fontSize: '0.85rem',
-                                                fontWeight: '600',
-                                                cursor: 'pointer',
-                                                textAlign: 'center',
-                                                transition: '0.2s',
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                alignItems: 'center',
-                                                gap: '4px'
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
-                                                e.currentTarget.style.borderColor = 'var(--accent-soft)';
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                                                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
-                                            }}
-                                        >
-                                            <div style={{ color: 'var(--text-main)' }}>{item.label}</div>
-                                            {skillKey !== 'RUNE' && (
-                                                <div style={{ display: 'flex', gap: '4px' }}>
-                                                    <div style={{
-                                                        fontSize: '0.7rem',
-                                                        color: 'var(--accent)',
-                                                        background: 'rgba(0,0,0,0.3)',
-                                                        padding: '2px 8px',
-                                                        borderRadius: '4px',
-                                                        fontWeight: 'bold',
-                                                        border: '1px solid var(--accent-soft)'
-                                                    }}>
-                                                        Lv {level}
-                                                    </div>
-                                                    <div style={{
-                                                        fontSize: '0.7rem',
-                                                        color: 'var(--text-dim)',
-                                                        background: 'rgba(255,255,255,0.05)',
-                                                        padding: '2px 6px',
-                                                        borderRadius: '4px',
-                                                        fontWeight: 'normal',
-                                                        border: '1px solid rgba(255,255,255,0.1)'
-                                                    }}>
-                                                        {Math.floor(progress)}%
-                                                    </div>
+                                return (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => item.isSpecial ? onNavigate('merging', 'RUNE') : onNavigate(cat.id, item.id)}
+                                        style={{
+                                            position: 'relative',
+                                            padding: '6px 2px',
+                                            background: item.isSpecial ? 'var(--accent-soft)' : 'var(--panel-bg)',
+                                            border: item.isSpecial ? '1px solid var(--accent)' : '1px solid var(--border)',
+                                            borderRadius: '6px',
+                                            color: item.isSpecial ? 'var(--accent)' : 'var(--text-main)',
+                                            cursor: 'pointer',
+                                            textAlign: 'center',
+                                            transition: '0.2s',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            gap: '2px',
+                                            overflow: 'hidden',
+                                            minHeight: '45px',
+                                            justifyContent: 'center'
+                                        }}
+                                    >
+                                        <div style={{
+                                            fontSize: '0.6rem',
+                                            fontWeight: 'bold',
+                                            color: item.isSpecial ? 'var(--accent)' : 'var(--text-main)',
+                                            whiteSpace: 'nowrap',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            width: '100%',
+                                            lineHeight: '1.1'
+                                        }}>
+                                            {item.label}
+                                        </div>
+
+                                        {!item.isSpecial && (
+                                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center', justifyContent: 'center' }}>
+                                                <div style={{ fontSize: '0.55rem', color: cat.color, fontWeight: 'bold' }}>
+                                                    L{level}
                                                 </div>
-                                            )}
-                                        </button>
-                                    );
-                                })}
-                            </div>
+                                                <div style={{ fontSize: '0.5rem', color: 'var(--text-dim)', opacity: 0.7 }}>
+                                                    {Math.floor(progress)}%
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Background Progress Indicator */}
+                                        <div style={{
+                                            position: 'absolute',
+                                            bottom: 0,
+                                            left: 0,
+                                            height: '100%',
+                                            width: `${progress}%`,
+                                            background: cat.color,
+                                            opacity: 0.05,
+                                            pointerEvents: 'none'
+                                        }} />
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
-                );
-            })}
+                ))}
+            </div>
+
         </div>
     );
 };
