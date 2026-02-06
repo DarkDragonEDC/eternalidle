@@ -390,6 +390,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                 selectedItemForModal && (
                     <ItemActionModal
                         item={selectedItemForModal}
+                        isIronman={gameState?.state?.isIronman}
                         onClose={() => setSelectedItemForModal(null)}
                         onEquip={onEquip}
                         onUse={(id) => {

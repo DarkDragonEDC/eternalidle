@@ -11,6 +11,7 @@ create table if not exists combat_history (
   loot_gained jsonb,
   damage_dealt int,
   damage_taken int,
+  kills int default 0,
   occurred_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 

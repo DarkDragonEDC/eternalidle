@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Shield, Coins, Tag, Trash2, ArrowRight, Zap } from 'lucide-react';
 import { getTierColor, calculateItemSellPrice, resolveItem } from '@shared/items';
 
-const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUse, customAction }) => {
+const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUse, customAction, isIronman }) => {
     if (!rawItem) return null;
 
     // Robust resolution: ensure we have full details including qualityName
@@ -212,24 +212,26 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUs
                             </button>
                         )}
 
-                        <button
-                            onClick={() => { onList(item.id, item); onClose(); }}
-                            style={{
-                                padding: '12px',
-                                borderRadius: '8px',
-                                border: '1px solid var(--accent)',
-                                background: 'transparent',
-                                color: 'var(--accent)',
-                                fontWeight: 'bold',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '8px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            <Tag size={18} /> LIST ON MARKET
-                        </button>
+                        {!isIronman && (
+                            <button
+                                onClick={() => { onList(item.id, item); onClose(); }}
+                                style={{
+                                    padding: '12px',
+                                    borderRadius: '8px',
+                                    border: '1px solid var(--accent)',
+                                    background: 'transparent',
+                                    color: 'var(--accent)',
+                                    fontWeight: 'bold',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <Tag size={18} /> LIST ON MARKET
+                            </button>
+                        )}
 
                         <button
                             onClick={() => { onSell(item.id); onClose(); }}

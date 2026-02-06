@@ -175,7 +175,57 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
     const isPremium = gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > Date.now();
     const maxListings = isPremium ? 50 : 30;
     const currentListingsCount = myActiveListings.length;
+    const isIronman = gameState?.state?.isIronman;
 
+
+    if (isIronman) {
+        return (
+            <div className="panel" style={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '20px',
+                background: 'var(--panel-bg)',
+                borderRadius: '12px',
+                padding: '40px',
+                textAlign: 'center'
+            }}>
+                <div style={{
+                    width: '80px',
+                    height: '80px',
+                    borderRadius: '50%',
+                    background: 'rgba(212, 175, 55, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '10px',
+                    border: '2px solid rgba(212, 175, 55, 0.2)'
+                }}>
+                    <Shield size={40} color="var(--accent)" />
+                </div>
+                <h2 style={{ color: 'var(--accent)', margin: 0, fontSize: '1.8rem', letterSpacing: '2px' }}>IRONMAN MODE</h2>
+                <p style={{ color: 'var(--text-dim)', maxWidth: '400px', lineHeight: '1.6', fontSize: '1rem' }}>
+                    Ironman characters are self-sufficient and cannot use the Marketplace.
+                    <br /><br />
+                    All items must be gathered, crafted, or found through your own adventures!
+                </p>
+                <div style={{
+                    marginTop: '20px',
+                    padding: '15px 25px',
+                    background: 'rgba(255,255,255,0.03)',
+                    borderRadius: '12px',
+                    border: '1px solid var(--border)',
+                    fontSize: '0.9rem',
+                    color: 'var(--accent)',
+                    fontWeight: 'bold'
+                }}>
+                    STRICT SELF-SUFFICIENCY ACTIVE
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="content-area" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>

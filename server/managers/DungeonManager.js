@@ -390,14 +390,35 @@ export class DungeonManager {
             const duration = Math.floor((Date.now() - new Date(dungeon.started_at).getTime()) / 1000);
 
             let totalXp = runLoot ? runLoot.xp : 0;
-            let formattedLoot = runLoot ? (runLoot.loot || []) : [];
+            let rawLoot = runLoot ? (runLoot.loot || []) : [];
 
             if (!runLoot) {
                 (dungeon.lootLog || []).forEach(log => {
                     totalXp += (log.xp || 0);
-                    (log.items || []).forEach(item => formattedLoot.push(item));
+                    (log.items || []).forEach(item => rawLoot.push(item));
                 });
             }
+
+            // Aggregate loot: counts occurrences of the same item string
+            const lootCounts = {};
+            rawLoot.forEach(lootStr => {
+                // Check if it's already in "Nx ITEM" format
+                const match = lootStr.match(/^(\d+)x\s+(.+)$/);
+                if (match) {
+                    const qty = parseInt(match[1]);
+                    const itemId = match[2];
+                    lootCounts[itemId] = (lootCounts[itemId] || 0) + qty;
+                } else {
+                    lootCounts[lootStr] = (lootCounts[lootStr] || 0) + 1;
+                }
+            });
+
+            const formattedLoot = Object.entries(lootCounts).map(([itemId, qty]) => `${qty}x ${itemId}`);
+
+            const initialRepeats = dungeon.initialRepeats || 0;
+            const currentRepeatCount = dungeon.repeatCount || 0;
+            const total_runs = initialRepeats + 1;
+            const runs_completed = (initialRepeats - currentRepeatCount) + 1;
 
             const { error } = await this.gameManager.supabase.from('dungeon_history').insert({
                 character_id: char.id,
@@ -409,7 +430,10 @@ export class DungeonManager {
                 outcome: outcome,
                 duration_seconds: duration,
                 xp_gained: totalXp,
-                loot_gained: formattedLoot
+                silver_gained: 0, // Drop removed by user, saving 0 for consistency
+                loot_gained: formattedLoot,
+                runs_completed: runs_completed,
+                total_runs: total_runs
             });
 
             if (error) {

@@ -198,15 +198,27 @@ export class GameManager {
                 updated = true;
             }
 
-            if (!data.state.unlockedTitles) {
-                data.state.unlockedTitles = [];
-                updated = true;
-            } else {
+            if (data.state.unlockedTitles) {
                 // Remove legacy hardcoded titles if present
                 const hardcoded = ['Lands Explorer', 'Rune Seeker', 'Dungeon Master', 'Resource Tycoon', 'Eternal Legend'];
                 const originalLength = data.state.unlockedTitles.length;
                 data.state.unlockedTitles = data.state.unlockedTitles.filter(t => !hardcoded.includes(t));
                 if (data.state.unlockedTitles.length !== originalLength) {
+                    updated = true;
+                }
+            }
+
+            // --- IRONMAN MIGRATION ---
+            if (userId && !data.state.isIronman) {
+                const { data: allChars } = await this.supabase
+                    .from('characters')
+                    .select('id, created_at')
+                    .eq('user_id', userId)
+                    .order('created_at', { ascending: true });
+
+                if (allChars && allChars.length >= 2 && allChars[1].id === data.id) {
+                    console.log(`[IRONMAN] Migrating second character ${data.name} to Ironman mode.`);
+                    data.state.isIronman = true;
                     updated = true;
                 }
             }
@@ -693,7 +705,8 @@ export class GameManager {
             stats: { str: 0, agi: 0, int: 0 },
             silver: 0,
             notifications: [],
-            unlockedTitles: []
+            unlockedTitles: [],
+            isIronman: (chars && chars.length >= 1) // Forced Ironman for 2nd character
         };
 
         // Calculate initial stats (HP) based on skills
@@ -1353,10 +1366,24 @@ export class GameManager {
     async unequipItem(u, c, s) { return this.inventoryManager.unequipItem(u, c, s); }
 
     async getMarketListings(f) { return this.marketManager.getMarketListings(f); }
-    async sellItem(u, c, i, q) { return this.marketManager.sellItem(u, c, i, q); }
-    async listMarketItem(u, c, i, a, p) { return this.marketManager.listMarketItem(u, c, i, a, p); }
-    async buyMarketItem(b, c, l, q) { return this.marketManager.buyMarketItem(b, c, l, q); }
-    async cancelMarketListing(u, c, l) { return this.marketManager.cancelMarketListing(u, c, l); }
+    async sellItem(u, c, i, q) {
+        return this.marketManager.sellItem(u, c, i, q);
+    }
+    async listMarketItem(u, c, i, a, p) {
+        const char = await this.getCharacter(u, c);
+        if (char?.state?.isIronman) throw new Error("Ironman characters cannot use the Market.");
+        return this.marketManager.listMarketItem(u, c, i, a, p);
+    }
+    async buyMarketItem(b, c, l, q) {
+        const char = await this.getCharacter(b, c);
+        if (char?.state?.isIronman) throw new Error("Ironman characters cannot use the Market.");
+        return this.marketManager.buyMarketItem(b, c, l, q);
+    }
+    async cancelMarketListing(u, c, l) {
+        const char = await this.getCharacter(u, c);
+        if (char?.state?.isIronman) throw new Error("Ironman characters cannot use the Market.");
+        return this.marketManager.cancelMarketListing(u, c, l);
+    }
     async claimMarketItem(u, c, cl) { return this.marketManager.claimMarketItem(u, c, cl); }
 
     async startDungeon(u, c, d, r) { return this.dungeonManager.startDungeon(u, c, d, r); }

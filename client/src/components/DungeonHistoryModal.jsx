@@ -91,6 +91,11 @@ const DungeonHistoryModal = ({ isOpen, onClose, history }) => {
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                                             <span style={{ color: 'var(--text-main)', fontWeight: 'bold', fontSize: '0.9rem' }}>
                                                 {run.dungeon_name || 'Dungeon'} (T{run.tier})
+                                                {run.runs_completed && run.total_runs && (
+                                                    <span style={{ marginLeft: '8px', color: 'var(--accent)', fontSize: '0.8rem' }}>
+                                                        (Run {run.runs_completed}/{run.total_runs})
+                                                    </span>
+                                                )}
                                             </span>
                                             <span style={{ fontSize: '0.7rem', color: '#888' }}>{formatDate(run.occurred_at)}</span>
                                         </div>

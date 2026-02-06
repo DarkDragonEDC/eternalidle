@@ -150,7 +150,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                 display: 'flex',
                 flexDirection: 'column',
                 transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                position: isMobile ? 'fixed' : 'relative',
+                position: isMobile ? 'fixed' : 'sticky',
                 left: isMobile && !isOpen ? '-100%' : '0',
                 top: 0,
                 zIndex: (isMobile && isOpen) ? 10001 : 100,

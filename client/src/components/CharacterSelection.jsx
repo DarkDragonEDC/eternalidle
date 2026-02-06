@@ -49,7 +49,7 @@ const CharacterSelection = ({ onSelectCharacter }) => {
         } catch (err) {
             console.error(err);
             setError(err.message);
-            
+
             // If it's an auth error, the session might be stale or from another project
             if (err.message.includes('Invalid token') || err.message.includes('JWT')) {
                 console.warn('Authentication error detected. Clearing session...');
@@ -154,6 +154,9 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                 {characters.map(char => (
                     <div key={char.id} className="char-card" onClick={() => onSelectCharacter(char.id)}>
                         <div style={{ position: 'relative' }}>
+                            {char.state?.isIronman && (
+                                <div className="ironman-badge">IRONMAN</div>
+                            )}
                             <h3 className="char-name">{char.name}</h3>
                             <button
                                 className={`delete-btn ${confirmDelete === char.id ? 'confirming' : ''}`}
@@ -400,6 +403,23 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                 .error-message {
                     color: #ff6b6b;
                     margin-bottom: 20px;
+                }
+                .ironman-badge {
+                    position: absolute;
+                    top: -15px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: linear-gradient(135deg, #718096 0%, #2d3748 100%);
+                    color: white;
+                    padding: 2px 10px;
+                    border-radius: 10px;
+                    font-size: 0.65rem;
+                    font-weight: 900;
+                    letter-spacing: 1px;
+                    border: 1px solid #4a5568;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                    white-space: nowrap;
+                    z-index: 5;
                 }
             `}</style>
         </div>

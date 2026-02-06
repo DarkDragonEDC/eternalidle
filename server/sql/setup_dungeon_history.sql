@@ -12,6 +12,8 @@ create table if not exists dungeon_history (
   xp_gained int default 0,
   silver_gained int default 0,
   loot_gained jsonb, -- Array of strings: ["2x T1_IRON", "1x T2_SWORD"]
+  runs_completed int default 1,
+  total_runs int default 1,
   occurred_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
