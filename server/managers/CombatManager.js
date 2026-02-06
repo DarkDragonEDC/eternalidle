@@ -134,9 +134,18 @@ export class CombatManager {
             if (attackCount > 50) attackCount = 50;
 
             const singleHitDmg = Math.max(1, Math.floor(mobDmg * (1 - playerMitigation)));
-            mitigatedMobDmg = singleHitDmg * attackCount;
 
-            combat.playerHealth -= mitigatedMobDmg;
+            // Loop through each attack for reactive healing
+            for (let a = 0; a < attackCount; a++) {
+                combat.playerHealth -= singleHitDmg;
+                mitigatedMobDmg += singleHitDmg;
+
+                // REACTIVE HEALING: Check food after each hit to prevent burst deaths
+                this.gameManager.processFood(char);
+
+                if (combat.playerHealth <= 0) break;
+            }
+
             combat.totalMobDmg = (combat.totalMobDmg || 0) + mitigatedMobDmg;
 
             // Advance the timer by the EXACT amount of time covered by these attacks

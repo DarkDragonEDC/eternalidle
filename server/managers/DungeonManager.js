@@ -192,6 +192,9 @@ export class DungeonManager {
                         dungeonState.activeMob.next_mob_attack_at += mobAtkSpeed;
                         mIterations++;
 
+                        // COMIDA ONLINE (Dungeon): Consumir comida a cada hit tomado para garantir sobrevivência
+                        this.gameManager.processFood(char);
+
                         if (char.state.health <= 0) {
                             char.state.health = 0;
                             await this.saveDungeonLog(char, dungeonConfig, 'FAILED');

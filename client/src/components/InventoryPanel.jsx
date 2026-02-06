@@ -24,24 +24,32 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
 
         const unitPrice = calculateItemSellPrice(item, itemId);
 
+        const entry = gameState?.state?.inventory?.[itemId];
+        const qty = typeof entry === 'object' ? (entry.amount || 0) : (Number(entry) || 0);
+
         setSellModal({
             itemId,
             item,
-            max: gameState?.state?.inventory?.[itemId] || 0,
-            quantity: gameState?.state?.inventory?.[itemId] || 1,
+            max: qty || 0,
+            quantity: qty || 1,
             unitPrice
         });
     };
 
-    const inventoryItems = Object.entries(gameState?.state?.inventory || {}).map(([id, qty]) => {
+    const inventoryItems = Object.entries(gameState?.state?.inventory || {}).map(([id, entry]) => {
         const item = resolveItem(id);
         if (!item) {
             console.warn(`[INVENTORY] Failed to resolve item: ${id}`);
             return null;
         }
+
+        const qty = typeof entry === 'object' ? (entry.amount || 0) : (Number(entry) || 0);
         if (qty <= 0) return null;
         if (item.noInventorySpace) return null; // Filter out items that don't take space
-        return { ...item, qty, id }; // id is key
+
+        // Merge metadata if entry is an object (for craftedBy, craftedAt, stars, etc.)
+        const metadata = typeof entry === 'object' ? entry : {};
+        return { ...item, ...metadata, qty, id }; // id is key
     }).filter(Boolean);
 
     const filteredItems = inventoryItems.filter(item => {

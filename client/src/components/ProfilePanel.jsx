@@ -221,19 +221,20 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
     }, [equipment]);
 
     const avgIP = useMemo(() => {
-        const combatSlots = ['head', 'chest', 'shoes', 'gloves', 'cape', 'mainHand', 'offHand'];
+        const combatSlots = ['helmet', 'chest', 'boots', 'gloves', 'cape', 'mainHand', 'offHand'];
         let totalIP = 0;
-        let count = 0;
 
         combatSlots.forEach(slot => {
-            const item = equipment[slot];
-            if (item) {
+            const rawItem = equipment[slot];
+            if (rawItem) {
+                // Resolve item to ensure we have the 'ip' field even if it's missing in the cached raw state
+                const item = { ...rawItem, ...resolveItem(rawItem.id || rawItem.item_id) };
                 totalIP += item.ip || 0;
-                count++;
             }
         });
 
-        return count > 0 ? Math.floor(totalIP / count) : 0;
+        // Always divide by 7 (the number of combat slots) to ensure removing items lowers the score
+        return Math.floor(totalIP / 7);
     }, [equipment]);
 
     const EquipmentSlot = ({ slot, icon, label, item: rawItem, onClick, onShowInfo }) => {

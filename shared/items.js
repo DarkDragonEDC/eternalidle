@@ -624,8 +624,8 @@ for (const t of TIERS) {
 }
 
 ITEMS.SPECIAL.MEMBERSHIP = {
-    id: 'ETERNAL_MEMBERSHIP',
-    name: 'Eternal Membership',
+    id: 'MEMBERSHIP',
+    name: 'Membership',
     description: 'Use to activate 30 days of VIP status and exclusive benefits.',
     type: 'CONSUMABLE',
     tier: 1,

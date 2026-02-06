@@ -56,7 +56,7 @@ export const CROWN_STORE = {
             id: 'INVENTORY_SLOT_TICKET',
             name: 'Inventory Slot expansion',
             description: 'Permanently increases your inventory by 1 slot.',
-            cost: 25,
+            cost: 50,
             category: 'CONVENIENCE',
             permanent: true
         },
@@ -71,9 +71,9 @@ export const CROWN_STORE = {
     },
     COSMETICS: {},
     MEMBERSHIP: {
-        ETERNAL_MEMBERSHIP: {
-            id: 'ETERNAL_MEMBERSHIP',
-            name: 'Eternal Membership',
+        MEMBERSHIP: {
+            id: 'MEMBERSHIP',
+            name: 'Membership',
             description: 'Activate to receive 30 days of VIP status and exclusive benefits.',
             price: 6.99,
             priceBRL: 39.90,

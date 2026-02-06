@@ -92,18 +92,18 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
                 let result;
                 let deliveryMessage = '';
 
-                if (packageId === 'ETERNAL_MEMBERSHIP') {
-                    // Purchase is ETERNAL_MEMBERSHIP
-                    const added = gameManager.inventoryManager.addItemToInventory(char, 'ETERNAL_MEMBERSHIP', 1);
+                if (packageId === 'MEMBERSHIP') {
+                    // Purchase is MEMBERSHIP
+                    const added = gameManager.inventoryManager.addItemToInventory(char, 'MEMBERSHIP', 1);
                     if (added) {
                         result = { success: true, message: 'Membership item added to inventory!' };
                     } else {
                         // Inventory Full - Add to Claims instead
                         gameManager.marketManager.addClaim(char, {
                             type: 'PURCHASED_ITEM',
-                            itemId: 'ETERNAL_MEMBERSHIP',
+                            itemId: 'MEMBERSHIP',
                             amount: 1,
-                            name: 'Eternal Membership',
+                            name: 'Membership',
                             timestamp: Date.now()
                         });
                         result = { success: true, message: 'Inventory full! Membership item sent to Market -> Claims tab.' };
@@ -575,10 +575,10 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('list_market_item', async ({ itemId, amount, price }) => {
+    socket.on('list_market_item', async ({ itemId, amount, price, metadata }) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
-                const result = await gameManager.listMarketItem(socket.user.id, socket.data.characterId, itemId, amount, price);
+                const result = await gameManager.listMarketItem(socket.user.id, socket.data.characterId, itemId, amount, price, metadata);
                 socket.emit('market_action_success', result);
                 socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
                 // Broadcast update to all

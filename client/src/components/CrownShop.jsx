@@ -313,7 +313,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                                                 ? (item.currency === 'BRL' ? `R$ ${item.price.toFixed(2).replace('.', ',')}` : `$${item.price.toFixed(2)}`)
                                                                 : item.cost}
                                                         </span>
-                                                        {item.id === 'ETERNAL_MEMBERSHIP' && (
+                                                        {item.id === 'MEMBERSHIP' && (
                                                             <button
                                                                 onClick={(e) => { e.stopPropagation(); setShowMSInfo(true); }}
                                                                 style={{

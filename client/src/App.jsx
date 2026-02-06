@@ -1277,7 +1277,7 @@ function App() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 12 : 20 }}>
             {/* Currency Display with Dropdown */}
-            <div style={{ position: 'relative' }} data-currency-dropdown>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }} data-currency-dropdown>
               <button
                 onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
                 style={{
@@ -1287,20 +1287,19 @@ function App() {
                   padding: '6px 12px',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px',
+                  gap: '10px',
                   cursor: 'pointer',
-                  marginRight: isMobile ? '4px' : '8px',
-                  transition: '0.2s'
+                  transition: '0.2s',
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(144, 213, 255, 0.25)'}
                 onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent-soft)'}
               >
-                <Coins size={16} color="var(--accent)" />
-                <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--accent)', fontFamily: 'monospace' }}>
-                  {showFullNumbers
-                    ? formatNumber(displayedGameState?.state?.silver || 0)
-                    : formatSilver(displayedGameState?.state?.silver || 0)}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Coins size={16} color="var(--accent)" />
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--accent)', fontFamily: 'monospace' }}>
+                    {formatSilver(displayedGameState?.state?.silver || 0)}
+                  </span>
+                </div>
                 <ChevronDown
                   size={14}
                   color="var(--accent)"
@@ -1331,11 +1330,8 @@ function App() {
                   }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {/* Silver Row */}
+                  {/* Silver Row - Display Only */}
                   <div
-                    onClick={() => {
-                      setShowFullNumbers(!showFullNumbers);
-                    }}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -1344,8 +1340,8 @@ function App() {
                       background: 'var(--accent-soft)',
                       borderRadius: '8px',
                       marginBottom: '8px',
-                      cursor: 'pointer',
-                      border: '1px solid var(--border-active)'
+                      border: '1px solid var(--border-active)',
+                      transition: '0.2s'
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -1359,7 +1355,7 @@ function App() {
                     </div>
                   </div>
 
-                  {/* Crowns Row */}
+                  {/* Orbs/Crowns Row - Opens Shop */}
                   <div
                     onClick={() => {
                       setShowCurrencyDropdown(false);
@@ -1384,7 +1380,7 @@ function App() {
                       <div>
                         <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>ORBS</div>
                         <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--accent)', fontFamily: 'monospace' }}>
-                          {displayedGameState?.state?.crowns || 0}
+                          {formatNumber(displayedGameState?.state?.crowns || 0)}
                         </div>
                       </div>
                     </div>
@@ -1393,6 +1389,9 @@ function App() {
                 </div>
               )}
             </div>
+
+
+
 
             <NotificationCenter
               notifications={notifications}
@@ -1428,7 +1427,7 @@ function App() {
 
           {renderContent()}
         </main>
-      </div>
+      </div >
 
       <ChatWidget socket={socket} user={session.user} characterName={displayedGameState?.name} isMobile={isMobile} />
       <BuffsDrawer gameState={displayedGameState} isMobile={isMobile} />
@@ -1442,27 +1441,31 @@ function App() {
         skillProgress={gameState?.current_activity && displayedGameState?.state?.skills ? (displayedGameState.state.skills[getSkillForItem(gameState.current_activity.item_id, gameState.current_activity.type)]?.xp / calculateNextLevelXP(displayedGameState.state.skills[getSkillForItem(gameState.current_activity.item_id, gameState.current_activity.type)]?.level || 1)) * 100 : 0}
       />
       <ToastContainer socket={socket} />
-      {modalItem && (
-        <ActivityModal
-          isOpen={!!modalItem}
-          onClose={() => setModalItem(null)}
-          item={modalItem}
-          type={modalType}
-          gameState={displayedGameState}
-          onStart={startActivity}
-          onNavigate={handleNavigate}
-          onSearchInMarket={handleSearchInMarket}
-        />
-      )}
+      {
+        modalItem && (
+          <ActivityModal
+            isOpen={!!modalItem}
+            onClose={() => setModalItem(null)}
+            item={modalItem}
+            type={modalType}
+            gameState={displayedGameState}
+            onStart={startActivity}
+            onNavigate={handleNavigate}
+            onSearchInMarket={handleSearchInMarket}
+          />
+        )
+      }
 
       <ItemInfoModal item={infoItem} onClose={() => setInfoItem(null)} />
-      {marketSellItem && (
-        <MarketListingModal
-          listingItem={marketSellItem}
-          onClose={() => setMarketSellItem(null)}
-          socket={socket}
-        />
-      )}
+      {
+        marketSellItem && (
+          <MarketListingModal
+            listingItem={marketSellItem}
+            onClose={() => setMarketSellItem(null)}
+            socket={socket}
+          />
+        )
+      }
       <OfflineGainsModal
         isOpen={!!offlineReport}
         data={offlineReport}
@@ -1485,13 +1488,15 @@ function App() {
         rewards={lootModalData}
       />
 
-      {showCrownShop && (
-        <CrownShop
-          socket={socket}
-          gameState={displayedGameState}
-          onClose={() => setShowCrownShop(false)}
-        />
-      )}
+      {
+        showCrownShop && (
+          <CrownShop
+            socket={socket}
+            gameState={displayedGameState}
+            onClose={() => setShowCrownShop(false)}
+          />
+        )
+      }
 
       <AnimatePresence>
         {serverError && (
@@ -1637,7 +1642,7 @@ function App() {
         )}
       </AnimatePresence>
 
-    </div>
+    </div >
   );
 }
 

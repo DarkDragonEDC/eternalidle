@@ -36,7 +36,7 @@ export class InventoryManager {
         }).length;
     }
 
-    addItemToInventory(char, itemId, amount) {
+    addItemToInventory(char, itemId, amount, metadata = null) {
         if (!char.state.inventory) char.state.inventory = {};
         const inv = char.state.inventory;
 
@@ -50,12 +50,28 @@ export class InventoryManager {
         }
 
         const safeAmount = Number(amount) || 0;
-        if (typeof inv[itemId] === 'object' && inv[itemId] !== null) {
+
+        // If we have metadata, we MUST store it as an object
+        if (metadata) {
+            if (typeof inv[itemId] !== 'object' || inv[itemId] === null) {
+                // Convert simple numeric amount to object if it wasn't already
+                const currentAmount = Number(inv[itemId]) || 0;
+                inv[itemId] = { amount: currentAmount };
+            }
+            // Merge metadata (craftedBy, craftedAt, etc.)
+            const cleanMetadata = { ...metadata };
+            delete cleanMetadata.amount; // Critical: preventing balance pollution from metadata
+            Object.assign(inv[itemId], cleanMetadata);
             inv[itemId].amount = (inv[itemId].amount || 0) + safeAmount;
-            if (inv[itemId].amount <= 0) delete inv[itemId];
         } else {
-            inv[itemId] = (Number(inv[itemId]) || 0) + safeAmount;
-            if (inv[itemId] <= 0) delete inv[itemId];
+            // Standard behavior for items without metadata
+            if (typeof inv[itemId] === 'object' && inv[itemId] !== null) {
+                inv[itemId].amount = (inv[itemId].amount || 0) + safeAmount;
+                if (inv[itemId].amount <= 0) delete inv[itemId];
+            } else {
+                inv[itemId] = (Number(inv[itemId]) || 0) + safeAmount;
+                if (inv[itemId] <= 0) delete inv[itemId];
+            }
         }
         return true;
     }

@@ -63,7 +63,7 @@ export class MarketManager {
         return { success: true, message: `Sold ${quantity}x ${itemData.name} for ${totalSilver} Silver`, unitPrice: pricePerUnit, total: totalSilver };
     }
 
-    async listMarketItem(userId, characterId, itemId, amount, price) {
+    async listMarketItem(userId, characterId, itemId, amount, price, metadata = {}) {
         // Robust numeric parsing for both arguments
         let parsedAmount = Math.floor(Number(amount));
         let parsedPrice = Math.floor(Number(price));
@@ -109,10 +109,13 @@ export class MarketManager {
         const itemData = this.gameManager.inventoryManager.resolveItem(itemId, quality);
         if (!itemData) throw new Error("Invalid item");
 
-        // Use metadata if present
-        if (stars) {
-            itemData.stars = stars;
-        }
+        // Clean metadata from server's entry
+        const sourceMetadata = typeof entry === 'object' ? { ...entry } : {};
+        delete sourceMetadata.amount; // Never store current balance in listing metadata
+
+        // Merge stars/quality if they exist on server (already extracted above)
+        if (stars) sourceMetadata.stars = stars;
+        if (quality) sourceMetadata.quality = quality;
 
         const { error: insertError } = await this.gameManager.supabase
             .from('market_listings')
@@ -120,7 +123,7 @@ export class MarketManager {
                 seller_id: userId,
                 seller_name: char.name,
                 item_id: itemId,
-                item_data: { ...itemData, seller_character_id: char.id, stars, quality },
+                item_data: { ...itemData, ...sourceMetadata, seller_character_id: char.id },
                 amount: parsedAmount,
                 price: parsedPrice
             });
@@ -175,10 +178,24 @@ export class MarketManager {
 
         console.log(`[MarketManager] Adding claim for buyer ${buyerId}:`, { itemId: listing.item_id, amount: qtyNum });
 
+        // Extract instance-specific metadata from listing.item_data
+        const listingMetadata = { ...listing.item_data };
+        // Remove search/static fields which aren't needed in inventory entry
+        delete listingMetadata.name;
+        delete listingMetadata.type;
+        delete listingMetadata.description;
+        delete listingMetadata.icon;
+        delete listingMetadata.tier;
+        delete listingMetadata.stats;
+        delete listingMetadata.rarity;
+        delete listingMetadata.rarityColor;
+        delete listingMetadata.seller_character_id;
+
         this.addClaim(buyer, {
             type: 'BOUGHT_ITEM',
             itemId: listing.item_id,
             amount: qtyNum,
+            metadata: listingMetadata,
             timestamp: Date.now(),
             cost: totalCost
         });
@@ -265,10 +282,23 @@ export class MarketManager {
 
         if (deleteError) throw deleteError;
 
+        // Extract instance-specific metadata
+        const listingMetadata = { ...listing.item_data };
+        delete listingMetadata.name;
+        delete listingMetadata.type;
+        delete listingMetadata.description;
+        delete listingMetadata.icon;
+        delete listingMetadata.tier;
+        delete listingMetadata.stats;
+        delete listingMetadata.rarity;
+        delete listingMetadata.rarityColor;
+        delete listingMetadata.seller_character_id;
+
         this.addClaim(char, {
             type: 'CANCELLED_LISTING',
             itemId: listing.item_id,
             amount: listing.amount,
+            metadata: listingMetadata,
             name: listing.item_data.name,
             timestamp: Date.now()
         });
@@ -297,7 +327,7 @@ export class MarketManager {
         // 1. Handle Item Claim (if applicable and not a SOLD_ITEM)
         // Note: SOLD_ITEM claims might have itemId for UI/history, but should not add items back to seller.
         if (claim.itemId && claim.type !== 'SOLD_ITEM') {
-            const success = this.gameManager.inventoryManager.addItemToInventory(char, claim.itemId, claim.amount);
+            const success = this.gameManager.inventoryManager.addItemToInventory(char, claim.itemId, claim.amount, claim.metadata || null);
             if (!success) {
                 return { success: false, message: "Inventory full! Please make some space before claiming." };
             }

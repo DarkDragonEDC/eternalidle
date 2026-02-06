@@ -192,41 +192,87 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                         "{getItemDescription(item)}"
                     </div>
 
-                    {/* Basic Info Grid */}
+                    {/* Compact Info Badges */}
                     <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: '1fr 1fr',
-                        gap: '12px',
-                        fontSize: '0.9rem',
-                        background: 'var(--slot-bg)',
-                        padding: '15px',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '8px',
+                        background: 'rgba(0,0,0,0.2)',
+                        padding: '10px 12px',
                         borderRadius: '8px',
-                        border: '1px solid var(--border)'
+                        border: '1px solid var(--border)',
+                        justifyContent: 'center'
                     }}>
-                        <div><span style={{ color: '#888' }}>Tier:</span> T{item.tier}</div>
-                        <div><span style={{ color: '#888' }}>Type:</span> {item.type}</div>
-                        <div><span style={{ color: '#888' }}>IP:</span> {item.ip || 0}</div>
-
-
-                        {/* Stats List */}
-                        <div style={{ gridColumn: '1 / -1', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid var(--border)' }}>
-                            <div style={{ color: '#888', marginBottom: '8px', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Attributes</div>
-                            <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                                {baseStats.damage && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#ff4444' }}><Sword size={14} /> {item.stats.damage} Dmg</div>}
-                                {baseStats.hp && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#ff4d4d' }}><Heart size={14} /> {item.stats.hp} HP</div>}
-                                {baseStats.defense && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#4caf50' }}><Shield size={14} /> {item.stats.defense} Def</div>}
-                                {baseStats.attackSpeed && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--accent)' }}><Zap size={14} /> {(1000 / item.stats.attackSpeed).toFixed(1)}/s Spd</div>}
-                                {baseStats.speed && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--accent)' }}><Zap size={14} /> {item.stats.speed} Spd</div>}
-                                {baseStats.str && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#ff4444' }}>STR +{item.stats.str}</div>}
-                                {baseStats.agi && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#4caf50' }}>AGI +{item.stats.agi}</div>}
-                                {baseStats.int && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#2196f3' }}>INT +{item.stats.int}</div>}
-                                {item.heal && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#4caf50' }}><Heart size={14} /> Heals {item.heal}</div>}
-                                {item.type === 'POTION' && item.desc && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--accent)' }}><Zap size={14} /> Effect: {item.desc}</div>}
-                                {baseStats.efficiency && typeof baseStats.efficiency === 'number' && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--accent)' }}><Star size={14} /> Efficiency +{item.stats.efficiency}%</div>}
-                                {baseStats.efficiency && typeof baseStats.efficiency === 'object' && baseStats.efficiency.GLOBAL && <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--accent)' }}><Star size={14} /> Global Eff +{item.stats.efficiency.GLOBAL}%</div>}
-                            </div>
+                        <div style={{ padding: '4px 10px', background: 'var(--accent-soft)', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid var(--border-active)' }}>
+                            <span style={{ color: '#888', marginRight: '4px' }}>T</span>{item.tier}
+                        </div>
+                        <div style={{ padding: '4px 10px', background: 'var(--accent-soft)', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid var(--border-active)', textTransform: 'uppercase' }}>
+                            {item.type}
+                        </div>
+                        <div style={{ padding: '4px 10px', background: 'var(--accent-soft)', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid var(--border-active)' }}>
+                            <span style={{ color: '#888', marginRight: '4px' }}>IP</span>{item.ip || 0}
                         </div>
                     </div>
+
+                    {/* Refined Attributes List */}
+                    {statKeys.length > 0 && (
+                        <div style={{
+                            background: 'var(--slot-bg)',
+                            padding: '12px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '8px'
+                        }}>
+                            <div style={{ color: '#666', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 'bold', textAlign: 'center' }}>Attributes</div>
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+                                gap: '8px',
+                                alignItems: 'center'
+                            }}>
+                                {baseStats.damage && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ff4444', fontSize: '0.85rem', fontWeight: 'bold' }}><Sword size={14} /> {item.stats.damage} <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>DMG</span></div>}
+                                {baseStats.hp && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ff4d4d', fontSize: '0.85rem', fontWeight: 'bold' }}><Heart size={14} /> {item.stats.hp} <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>HP</span></div>}
+                                {baseStats.defense && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#4caf50', fontSize: '0.85rem', fontWeight: 'bold' }}><Shield size={14} /> {item.stats.defense} <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>DEF</span></div>}
+                                {baseStats.attackSpeed && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent)', fontSize: '0.85rem', fontWeight: 'bold' }}><Zap size={14} /> {(1000 / item.stats.attackSpeed).toFixed(1)} <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>/s</span></div>}
+                                {baseStats.speed && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent)', fontSize: '0.85rem', fontWeight: 'bold' }}><Zap size={14} /> {item.stats.speed} <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>SPD</span></div>}
+                                {baseStats.str && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ff8888', fontSize: '0.85rem', fontWeight: 'bold' }}>STR <span style={{ marginLeft: 'auto' }}>+{item.stats.str}</span></div>}
+                                {baseStats.agi && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#88ff88', fontSize: '0.85rem', fontWeight: 'bold' }}>AGI <span style={{ marginLeft: 'auto' }}>+{item.stats.agi}</span></div>}
+                                {baseStats.int && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#8888ff', fontSize: '0.85rem', fontWeight: 'bold' }}>INT <span style={{ marginLeft: 'auto' }}>+{item.stats.int}</span></div>}
+                                {item.heal && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#4caf50', fontSize: '0.85rem', fontWeight: 'bold' }}><Heart size={14} /> <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>HEAL</span> {item.heal}</div>}
+                                {item.type === 'POTION' && item.desc && <div style={{ gridColumn: '1 / -1', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '6px', color: 'var(--accent)', fontSize: '0.8rem', fontStyle: 'italic' }}>{item.desc}</div>}
+                                {baseStats.efficiency && typeof baseStats.efficiency === 'number' && <div style={{ gridColumn: '1 / -1', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '6px', color: 'var(--accent)', fontSize: '0.8rem', fontWeight: 'bold', textAlign: 'center' }}>Efficiency +{item.stats.efficiency}%</div>}
+                                {baseStats.efficiency && typeof baseStats.efficiency === 'object' && baseStats.efficiency.GLOBAL && <div style={{ gridColumn: '1 / -1', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '6px', color: 'var(--accent)', fontSize: '0.8rem', fontWeight: 'bold', textAlign: 'center' }}>Global Efficiency +{item.stats.efficiency.GLOBAL}%</div>}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Crafting Metadata (New) */}
+                    {item.craftedBy && (
+                        <div style={{
+                            padding: '10px 15px',
+                            background: 'rgba(255, 215, 0, 0.03)',
+                            borderRadius: '8px',
+                            border: '1px solid rgba(255, 215, 0, 0.1)',
+                            fontSize: '0.75rem',
+                            color: '#aaa',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '2px'
+                        }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ color: '#888', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px', fontSize: '0.65rem' }}>Crafted By</span>
+                                <span style={{ color: 'var(--accent)', fontWeight: '900' }}>{item.craftedBy}</span>
+                            </div>
+                            {item.craftedAt && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ color: '#666' }}>Date</span>
+                                    <span style={{ color: '#888' }}>{new Date(item.craftedAt).toLocaleDateString('pt-BR')}</span>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Chest Drop Table */}
                     {item.id.includes('CHEST') && (

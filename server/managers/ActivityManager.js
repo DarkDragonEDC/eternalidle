@@ -365,7 +365,10 @@ export class ActivityManager {
             }
         }
 
-        const added = this.gameManager.inventoryManager.addItemToInventory(char, finalItemId, amountGained);
+        const added = this.gameManager.inventoryManager.addItemToInventory(char, finalItemId, amountGained, {
+            craftedBy: char.name,
+            craftedAt: Date.now()
+        });
         if (!added) return { error: "Inventory Full" };
 
         this.gameManager.inventoryManager.consumeItems(char, item.req);

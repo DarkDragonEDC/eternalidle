@@ -524,7 +524,10 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                     gap: isMobile ? '8px' : '12px',
                                     paddingBottom: '20px'
                                 }}>
-                                    {Object.entries(gameState?.state?.inventory || {}).filter(([id, qty]) => {
+                                    {Object.entries(gameState?.state?.inventory || {}).filter(([id, entry]) => {
+                                        const qty = typeof entry === 'object' ? (entry.amount || 0) : (Number(entry) || 0);
+                                        if (qty <= 0) return false;
+
                                         const data = resolveItem(id);
                                         if (!data) return false;
                                         // Exclude Quest items or explicit non-tradable items if any
@@ -539,7 +542,8 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                         }
 
                                         return true;
-                                    }).map(([id, qty]) => {
+                                    }).map(([id, entry]) => {
+                                        const qty = typeof entry === 'object' ? (entry.amount || 0) : (Number(entry) || 0);
                                         const data = resolveItem(id);
                                         // Simple rarity check for border color if needed, similar to Inventory
                                         let specificBorderColor = 'var(--border)';

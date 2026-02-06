@@ -331,6 +331,15 @@ export class GameManager {
                     }
                 });
 
+                // Membership Migration: Convert ETERNAL_MEMBERSHIP to MEMBERSHIP
+                if (data.state.inventory['ETERNAL_MEMBERSHIP']) {
+                    const qty = data.state.inventory['ETERNAL_MEMBERSHIP'];
+                    data.state.inventory['MEMBERSHIP'] = (data.state.inventory['MEMBERSHIP'] || 0) + qty;
+                    delete data.state.inventory['ETERNAL_MEMBERSHIP'];
+                    migrationHappened = true;
+                    console.log(`[MIGRATION] Converted ${qty} ETERNAL_MEMBERSHIP to MEMBERSHIP for ${data.name}`);
+                }
+
                 if (migrationHappened) {
                     updated = true;
                 }
@@ -602,6 +611,13 @@ export class GameManager {
             if (remainingSeconds < 1) break;
 
             const result = await this.dungeonManager.processDungeonTick(char);
+
+            // COMIDA OFFLINE: Consumir comida a cada tick de masmorra
+            const foodResult = this.processFood(char);
+            if (foodResult && foodResult.used) {
+                // Se usou comida, podemos registrar no relatório offline se necessário
+                // Mas por enquanto vamos apenas garantir a cura
+            }
 
             if (!result) {
                 // If no result and nothing happening, skip 5s to avoid infinite loop
@@ -1051,6 +1067,9 @@ export class GameManager {
                         combatRounds.push(roundResult);
                         // We take the last one as the primary combatResult for basic compatibility
                         combatResult = roundResult;
+
+                        // COMIDA ONLINE: Consumir comida ENTRE os rounds de uma única tick para evitar morte por burst
+                        this.processFood(char);
                     }
 
                     // Advance the timer by exactly one interval
@@ -1252,12 +1271,17 @@ export class GameManager {
         // STRICT RULE: Only eat if the heal fits entirely (No Waste)
         while (food.amount > 0 && eatenCount < MAX_EATS_PER_TICK) {
             const missing = maxHp - currentHp;
+            const hpPercent = (currentHp / maxHp) * 100;
 
-            if (missing >= food.heal) {
-                currentHp = currentHp + food.heal;
+            // SAFETY RULE: Eat if the heal fits entirely OR if HP is dangerously low (< 40%)
+            if (missing >= food.heal || hpPercent < 40) {
+                const actualHeal = Math.min(food.heal, missing);
+                if (actualHeal <= 0 && hpPercent >= 40) break; // Safety break
+
+                currentHp = currentHp + actualHeal;
                 food.amount--;
                 eatenCount++;
-                totalHealed += food.heal;
+                totalHealed += actualHeal;
 
                 // Update instantly to recalculate 'missing' for next loop iteration
                 char.state.health = currentHp;
@@ -1277,13 +1301,22 @@ export class GameManager {
     }
 
     async getLeaderboard(type = 'COMBAT') {
+        // console.log(`[RANKING] Fetching leaderboard for type: ${type}`);
         let query = this.supabase
             .from('characters')
             .select('id, name, state')
             .or('is_admin.is.null,is_admin.eq.false'); // Exclude admins
 
-        const { data, error } = await query.limit(100);
-        if (error) return [];
+        // Increased limit to 1000 to ensure we don't miss players when the DB grows
+        const { data, error } = await query.limit(1000);
+        if (error) {
+            console.error("[RANKING] DB Error:", error);
+            return [];
+        }
+
+        if (!data) return [];
+
+        const sortKey = type || 'COMBAT';
 
         return data
             .filter(c => c && c.state)
@@ -1301,8 +1334,8 @@ export class GameManager {
                     return (skill.level * 1000000000) + skill.xp;
                 };
 
-                const valA = getVal(a, type);
-                const valB = getVal(b, type);
+                const valA = getVal(a, sortKey);
+                const valB = getVal(b, sortKey);
 
                 return valB - valA; // DESC
             })
@@ -1384,7 +1417,7 @@ export class GameManager {
             // General consumption for other items
             this.inventoryManager.consumeItems(char, { [itemId]: safeQty });
 
-            if (itemData.id === 'ETERNAL_MEMBERSHIP') {
+            if (itemData.id === 'MEMBERSHIP' || itemData.id === 'ETERNAL_MEMBERSHIP') {
                 const membershipItem = { duration: (itemData.duration || 30 * 24 * 60 * 60 * 1000) * safeQty };
                 const result = this.crownsManager.applyMembership(char, membershipItem);
                 if (result.success) {
