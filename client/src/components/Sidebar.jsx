@@ -289,7 +289,22 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                                 cursor: 'pointer'
                             }}
                         >
-                            {item.icon}
+                            <div style={{ position: 'relative' }}>
+                                {item.icon}
+                                {item.id === 'market' && gameState?.state?.claims?.length > 0 && (
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '-4px',
+                                        right: '-4px',
+                                        width: '8px',
+                                        height: '8px',
+                                        background: '#ff4444',
+                                        borderRadius: '50%',
+                                        border: '1.5px solid var(--panel-bg)',
+                                        boxShadow: '0 0 5px rgba(255, 68, 68, 0.5)'
+                                    }}></div>
+                                )}
+                            </div>
                             <span style={{ fontSize: '0.55rem', fontWeight: '900', marginTop: '4px', letterSpacing: '1px' }}>{item.label}</span>
                         </button>
                     ))}

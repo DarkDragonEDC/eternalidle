@@ -61,7 +61,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                 const scaling = 1 + (index * 0.1);
                 const mobDef = (mob.defense || 0) * scaling;
                 const mobHealth = mob.health * scaling;
-                const mobMitigation = mobDef / (mobDef + 2000);
+                const mobMitigation = mobDef / (mobDef + 36000);
                 const mitigatedDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
                 const killTime = Math.ceil(mobHealth / mitigatedDmg) * attackSpeed;
                 totalDungeonTime += Math.max(60000, killTime);
@@ -73,7 +73,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
             const scaling = 1.5;
             const bossDef = (boss.defense || 0) * scaling;
             const bossHealth = boss.health * scaling;
-            const bossMitigation = bossDef / (bossDef + 2000);
+            const bossMitigation = bossDef / (bossDef + 36000);
             const mitigatedBossDmg = Math.max(1, Math.floor(playerDmg * (1 - bossMitigation)));
             const bossKillTime = Math.ceil(bossHealth / mitigatedBossDmg) * attackSpeed;
             totalDungeonTime += Math.max(60000, bossKillTime);
@@ -107,7 +107,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
 
         const stats = gameState.calculatedStats;
         const playerDefense = stats.defense || 0;
-        const playerMitigation = Math.min(0.60, playerDefense / (playerDefense + 2000));
+        const playerMitigation = Math.min(0.60, playerDefense / (playerDefense + 36000));
         const attackSpeed = stats.attackSpeed || 1000;
         const playerDmg = stats.damage || 1;
 
@@ -133,7 +133,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                 const mobHealth = mob.health * scaling;
 
                 // Calculate how many rounds to kill this mob
-                const mobMitigation = mobDef / (mobDef + 2000);
+                const mobMitigation = mobDef / (mobDef + 36000);
                 const mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
                 const roundsToKill = Math.ceil(mobHealth / mitigatedPlayerDmg);
 
@@ -150,7 +150,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
             const bossDef = (boss.defense || 0) * scaling;
             const bossHealth = boss.health * scaling;
 
-            const bossMitigation = bossDef / (bossDef + 2000);
+            const bossMitigation = bossDef / (bossDef + 36000);
             const mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - bossMitigation)));
             const roundsToKill = Math.ceil(bossHealth / mitigatedPlayerDmg);
 
@@ -219,7 +219,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
             const mobDef = (mob.defense || 0) * scaling;
             const mobHealth = currentHp !== null ? currentHp : Math.floor(mob.health * scaling);
 
-            const mobMitigation = mobDef / (mobDef + 2000);
+            const mobMitigation = mobDef / (mobDef + 36000);
             const mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
             const roundsToKill = Math.ceil(mobHealth / mitigatedPlayerDmg);
             const fightTime = roundsToKill * playerAtkSpeed;
@@ -239,7 +239,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
             // Re-calculate fight time for remaining HP
             const mobConfig = MONSTERS[tier]?.find(m => m.id === dungeonState.activeMob?.id);
             const mobDef = dungeonState.activeMob?.defense || (mobConfig?.defense || 0);
-            const mobMitigation = mobDef / (mobDef + 2000);
+            const mobMitigation = mobDef / (mobDef + 36000);
             const mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
             const roundsRemaining = Math.ceil(currentHp / mitigatedPlayerDmg);
             const fightTimeLeft = roundsRemaining * playerAtkSpeed;
@@ -594,7 +594,8 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                     .map(dungeon => {
                         const tier = dungeon.tier;
                         const mapId = dungeon.reqItem;
-                        const mapQty = inventory[mapId] || 0;
+                        const mapEntry = inventory[mapId];
+                        const mapQty = (mapEntry && typeof mapEntry === 'object') ? (mapEntry.amount || 0) : (Number(mapEntry) || 0);
                         const hasMap = mapQty > 0;
 
                         const dungeonLevel = gameState?.state?.skills?.DUNGEONEERING?.level || 1;
@@ -794,7 +795,8 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                         {(() => {
                             const dungeon = Object.values(DUNGEONS).find(d => d.tier === pendingTier);
                             const mapId = dungeon?.reqItem;
-                            const availableMaps = inventory[mapId] || 0;
+                            const mapEntry = inventory[mapId];
+                            const availableMaps = (mapEntry && typeof mapEntry === 'object') ? (mapEntry.amount || 0) : (Number(mapEntry) || 0);
 
                             // Calculate max runs based on 12h limit
                             const maxRunsIn12h = calculateMaxRunsIn12Hours(pendingTier);

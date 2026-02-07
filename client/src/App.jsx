@@ -713,7 +713,7 @@ function App() {
       case 'skills_overview':
         return <SkillsOverview gameState={displayedGameState} onNavigate={(tab, cat) => { setActiveTab(tab); if (cat) setActiveCategory(cat); }} />;
       case 'town_overview':
-        return <TownOverview onNavigate={(tab) => setActiveTab(tab)} />;
+        return <TownOverview onNavigate={(tab) => setActiveTab(tab)} gameState={displayedGameState} />;
       case 'combat_overview':
         return <CombatOverview gameState={displayedGameState} onNavigate={(tab) => setActiveTab(tab)} />;
       case 'gathering':
@@ -1276,7 +1276,7 @@ function App() {
         />
       )}
 
-      {isMobile && <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} onNavigate={(tab) => setActiveTab(tab)} />}
+      {isMobile && <BottomNav gameState={displayedGameState} activeTab={activeTab} setActiveTab={setActiveTab} onNavigate={(tab) => setActiveTab(tab)} />}
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', minHeight: 0 }}>
         <header style={{

@@ -483,7 +483,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                             </div>
 
                                             <div style={{ flex: '1 1 0%', textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '120px' }}>
-                                                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '2px' }}>{l.amount}x units</div>
+                                                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '2px' }}>{typeof l.amount === 'object' ? (l.amount.amount || 0) : l.amount}x units</div>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--accent)' }}>
                                                     <Coins size={16} /> {(l.price / l.amount) < 1 ? (l.price / l.amount).toFixed(2) : formatSilver(l.price / l.amount)}
                                                 </div>
@@ -772,7 +772,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                 </div>
 
                                                 <div style={{ flex: '1 1 0%', textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '120px' }}>
-                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '2px' }}>{l.amount}x units</div>
+                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '2px' }}>{typeof l.amount === 'object' ? (l.amount.amount || 0) : l.amount}x units</div>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--accent)' }}>
                                                         <Coins size={16} /> {formatSilver(l.price)}
                                                     </div>
@@ -909,9 +909,9 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
                                                 <div style={{ flex: '1 1 0%', textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '120px' }}>
                                                     <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '2px' }}>
-                                                        {c.type === 'SOLD_ITEM' && `Quantity: ${c.amount}`}
-                                                        {c.type === 'BOUGHT_ITEM' && `Bought x${c.amount}`}
-                                                        {c.type === 'CANCELLED_LISTING' && `Retrieved x${c.amount}`}
+                                                        {c.type === 'SOLD_ITEM' && `Quantity: ${typeof c.amount === 'object' ? (c.amount.amount || 0) : c.amount}`}
+                                                        {c.type === 'BOUGHT_ITEM' && `Bought x${typeof c.amount === 'object' ? (c.amount.amount || 0) : c.amount}`}
+                                                        {c.type === 'CANCELLED_LISTING' && `Retrieved x${typeof c.amount === 'object' ? (c.amount.amount || 0) : c.amount}`}
                                                     </div>
                                                     {c.silver ? (
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--accent)' }}>

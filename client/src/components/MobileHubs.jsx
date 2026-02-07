@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pickaxe, Box, Hammer, Sword, Castle, Trophy, ShoppingBag, Zap, Coins } from 'lucide-react';
 
-const HubButton = ({ label, icon, onClick, color = 'var(--text-main)', level, progress }) => (
+const HubButton = ({ label, icon, onClick, color = 'var(--text-main)', level, progress, showBadge }) => (
     <button
         onClick={onClick}
         style={{
@@ -11,7 +11,22 @@ const HubButton = ({ label, icon, onClick, color = 'var(--text-main)', level, pr
             cursor: 'pointer', transition: '0.2s', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
         }}
     >
-        <div style={{ color: color, display: 'flex' }}>{React.cloneElement(icon, { size: 28 })}</div>
+        <div style={{ color: color, display: 'flex', position: 'relative' }}>
+            {React.cloneElement(icon, { size: 28 })}
+            {showBadge && (
+                <div style={{
+                    position: 'absolute',
+                    top: '-4px',
+                    right: '-4px',
+                    width: '10px',
+                    height: '10px',
+                    background: '#ff4444',
+                    borderRadius: '50%',
+                    border: '1.5px solid var(--panel-bg)',
+                    boxShadow: '0 0 5px rgba(255, 68, 68, 0.5)'
+                }} />
+            )}
+        </div>
         <div style={{ flex: 1, textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '2px' }}>
             <span style={{ fontWeight: 'bold', fontSize: '1.1rem', color: 'var(--text-main)' }}>{label}</span>
             {level !== undefined && (
@@ -241,13 +256,16 @@ export const SkillsOverview = ({ onNavigate, gameState }) => {
     );
 };
 
-export const TownOverview = ({ onNavigate }) => (
-    <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        <HubButton label="Market" icon={<ShoppingBag />} color="#fbbf24" onClick={() => onNavigate('market')} />
-        <HubButton label="Ranking" icon={<Trophy />} color="#a78bfa" onClick={() => onNavigate('ranking')} />
-        <HubButton label="Taxometer" icon={<Coins />} color="var(--accent)" onClick={() => onNavigate('taxometer')} />
-    </div>
-);
+export const TownOverview = ({ onNavigate, gameState }) => {
+    const hasClaims = gameState?.state?.claims?.length > 0;
+    return (
+        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <HubButton label="Market" icon={<ShoppingBag />} color="#fbbf24" onClick={() => onNavigate('market')} showBadge={hasClaims} />
+            <HubButton label="Ranking" icon={<Trophy />} color="#a78bfa" onClick={() => onNavigate('ranking')} />
+            <HubButton label="Taxometer" icon={<Coins />} color="var(--accent)" onClick={() => onNavigate('taxometer')} />
+        </div>
+    );
+};
 
 export const CombatOverview = ({ onNavigate, gameState }) => {
     const combatSkill = gameState?.state?.skills?.COMBAT || { level: 1, xp: 0 };

@@ -18,7 +18,10 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
 
     const itemData = resolveItem(listingItem.itemId);
     const tierColor = getTierColor(itemData?.tier || 1);
-    const maxQty = listingItem.max || listingItem.qty || 0;
+    const maxQty = (() => {
+        const raw = listingItem.max || listingItem.qty || 0;
+        return typeof raw === 'object' ? (raw.amount || 0) : (Number(raw) || 0);
+    })();
 
     const handleConfirm = () => {
         const parsedAmount = parseInt(amount);

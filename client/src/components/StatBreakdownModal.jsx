@@ -39,9 +39,9 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
             // Percentage Reduction display
             // Use Total Defense (stats.defense) not just Gear Defense
             const totalDef = stats.defense || 0;
-            const mitigation = Math.min(0.60, totalDef / (totalDef + 2000));
+            const mitigation = Math.min(0.60, totalDef / (totalDef + 36000));
             const reductionPercent = (mitigation * 100).toFixed(1);
-            breakdown.push({ label: 'Est. Dmg Reduction', value: `${reductionPercent}%`, sub: 'Based on Def / (Def + 2000) (Max 60%)', isTotal: true });
+            breakdown.push({ label: 'Est. Dmg Reduction', value: `${reductionPercent}%`, sub: 'Based on Def / (Def + 36000) (Max 60%)', isTotal: true });
         } else if (statType === 'SPEED') {
             // Formula: GlobalBase(2000) - WeaponSpeed - (AGI * 2) - GearSpeed
             // Everything converted to seconds for display (2 decimal places)

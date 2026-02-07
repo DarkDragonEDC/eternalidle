@@ -38,6 +38,7 @@ const REFINE_DATA = {
     xp: [2, 4, 8, 14, 22, 32, 44, 58, 74, 92],
     time: [15, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 };
+const POTION_XP_CURVE = [10, 20, 40, 70, 110, 160, 220, 290, 370, 460];
 const CRAFT_DATA = {
     xp: [40, 80, 160, 280, 440, 640, 880, 1160, 1480, 1840],
     time: [240, 320, 480, 640, 800, 960, 1120, 1280, 1440, 1520]
@@ -231,7 +232,7 @@ for (const t of TIERS) {
         id: `T${t}_FOOD`, name: 'Food', tier: t, type: 'FOOD',
         heal: HP_CURVE[t - 1], // Heals roughly 1 full HP bar of that tier
         req: { [`T${t}_FISH`]: 1 },
-        xp: REFINE_DATA.xp[t - 1], // Use refining curve for food
+        xp: Math.floor(REFINE_DATA.xp[t - 1] / 2), // Halved XP gain for food
         time: REFINE_DATA.time[t - 1]
     };
     ITEMS.CONSUMABLE.FOOD[t] = foodItem;
@@ -291,9 +292,9 @@ const genPotions = () => {
                 desc: `${data.desc} by ${Math.round(val * 100)}%`,
                 duration: 3600, // 1 Hour Duration
                 req: {
-                    [`T${t}_EXTRACT`]: 2
+                    [`T${t}_EXTRACT`]: 5
                 },
-                xp: CRAFT_DATA.xp[t - 1], // Craft XP
+                xp: POTION_XP_CURVE[t - 1], // New balanced Potion XP
                 time: CRAFT_DATA.time[t - 1] // Original Craft Time
             };
 
@@ -905,7 +906,17 @@ RUNE_CRAFT_ACTIVITIES.forEach(act => {
 });
 
 for (const t of TIERS) {
-    // Rune Shards (T1 Only)
+    // Rune Shards (All Tiers)
+    ITEMS.SPECIAL.RUNE_SHARD[`T${t}_SHARD`] = {
+        id: `T${t}_SHARD`,
+        name: `T${t} Runic Shard`,
+        tier: t,
+        type: 'RESOURCE',
+        description: `A fragment of magical power from Tier ${t}.`,
+        noInventorySpace: true
+    };
+
+    // Legacy Support for T1_RUNE_SHARD if needed
     if (t === 1) {
         ITEMS.SPECIAL.RUNE_SHARD[`T1_RUNE_SHARD`] = {
             id: `T1_RUNE_SHARD`,

@@ -465,7 +465,10 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                                         fontWeight: '900', padding: '1px 3px', borderRadius: '3px',
                                                         border: '1px solid rgba(255,255,255,0.2)'
                                                     }}>
-                                                        x{gameState.state.equipment.food.amount}
+                                                        x{(() => {
+                                                            const amt = gameState.state.equipment.food.amount;
+                                                            return typeof amt === 'object' ? (amt.amount || 0) : (Number(amt) || 0);
+                                                        })()}
                                                     </div>
                                                 )}
                                             </div>
@@ -487,7 +490,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                                         if (!activeMob) return <span>-</span>;
 
                                                         const defense = gameState?.calculatedStats?.defense || 0;
-                                                        const mitigation = defense / (defense + 2000);
+                                                        const mitigation = defense / (defense + 36000);
                                                         const mobDmg = Math.max(1, Math.floor(activeMob.damage * (1 - mitigation)));
 
                                                         // Food Logic

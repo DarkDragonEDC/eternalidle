@@ -103,13 +103,13 @@ export class CombatManager {
             mobDmg = mobData ? mobData.damage : 5;
         }
 
-        const playerMitigation = Math.min(0.60, playerStats.defense / (playerStats.defense + 2000));
+        const playerMitigation = Math.min(0.60, playerStats.defense / (playerStats.defense + 36000));
 
         let mobDef = combat.mobDefense;
         if (typeof mobDef === 'undefined') {
             mobDef = mobData ? (mobData.defense || 0) : 0;
         }
-        const mobMitigation = mobDef / (mobDef + 2000);
+        const mobMitigation = mobDef / (mobDef + 36000);
         const mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
 
         // Apply Player Damage
