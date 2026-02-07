@@ -175,7 +175,7 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, tradeInvites }) => {
                                         borderRadius: '10px', border: '1px solid var(--border)',
                                         display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                                     }}>
-                                        <span style={{ fontSize: '0.85rem', color: '#fff' }}>Trade Request #{trade.id.slice(0, 4)}</span>
+                                        <span style={{ fontSize: '0.85rem', color: '#fff' }}>Trade with <span style={{ color: 'var(--accent)', fontWeight: '900' }}>{trade.partner_name || 'Unknown'}</span></span>
                                         <button
                                             onClick={() => onInvite(trade.id)} // Reuse onInvite or handle specifically
                                             style={{

@@ -195,7 +195,7 @@ export class TradeManager {
                 this.gameManager.markDirty(sender.id);
                 this.gameManager.markDirty(receiver.id);
 
-                return { success: true, status: 'COMPLETED' };
+                return { success: true, status: 'COMPLETED', sender_id: trade.sender_id, receiver_id: trade.receiver_id };
             });
         });
     }

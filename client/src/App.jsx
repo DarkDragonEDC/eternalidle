@@ -226,6 +226,8 @@ function App() {
 
     if (activeTab === 'trade') {
       setShowSocialModal(true);
+      // Refresh trade list when opening
+      if (socket) socket.emit('trade_get_active');
       // Restore to previous tab instead of forcing inventory
       setActiveTab(prevTabRef.current || 'inventory');
     } else {

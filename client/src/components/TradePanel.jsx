@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Coins, CheckCircle, Clock, X, ArrowLeftRight, ChevronRight, Search } from 'lucide-react';
+import { Package, Coins, CheckCircle, Clock, X, ArrowLeftRight, ChevronRight, Search, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { resolveItem } from '@shared/items';
 
@@ -97,14 +97,14 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
             <div style={{
                 position: 'fixed',
                 zIndex: 12000,
-                inset: isMobile ? '15% 10%' : '10% 20%',
+                inset: isMobile ? '3% 2%' : '10% 20%',
                 background: isMobile ? '#121212' : 'rgba(18,18,18,0.95)',
                 backdropFilter: isMobile ? 'none' : 'blur(10px)',
                 display: 'flex', flexDirection: 'column',
-                padding: isMobile ? '10px' : '15px',
-                fontSize: isMobile ? '0.8rem' : '0.9rem',
-                borderRadius: isMobile ? '16px' : '20px',
-                border: isMobile ? '1px solid var(--border)' : '1px solid var(--border)',
+                padding: isMobile ? '8px' : '15px',
+                fontSize: isMobile ? '0.7rem' : '0.9rem',
+                borderRadius: isMobile ? '12px' : '20px',
+                border: '1px solid var(--border)',
                 boxShadow: isMobile ? '0 10px 40px rgba(0,0,0,0.8)' : '0 20px 60px rgba(0,0,0,0.8)'
             }}>
                 {/* Header */}
@@ -166,11 +166,11 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                 <div style={{
                     maxWidth: '1200px', width: '100%', margin: '10px auto',
                     flex: 1,
-                    display: isMobile ? 'flex' : 'grid',
-                    flexDirection: isMobile ? 'column' : undefined,
-                    gridTemplateColumns: isMobile ? undefined : 'minmax(250px, 1fr) 300px minmax(250px, 1fr)',
-                    gap: isMobile ? '10px' : '15px',
-                    overflow: 'hidden'
+                    display: 'grid',
+                    gridTemplateColumns: isMobile ? (mobileTab === 'OFFER' ? '1fr 1fr' : '1fr') : 'minmax(250px, 1fr) 300px minmax(250px, 1fr)',
+                    gap: isMobile ? '8px' : '15px',
+                    overflowY: 'auto',
+                    overflowX: 'hidden'
                 }}>
                     {/* YOUR SIDE */}
                     {(!isMobile || mobileTab === 'OFFER') && (
@@ -203,7 +203,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                                         typeof Icon === 'string' ? <img src={Icon} alt={def?.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <Icon size={isMobile ? 16 : 18} color={def.rarityColor || "var(--text-dim)"} />
                                                     ) : <Package size={isMobile ? 16 : 18} color="var(--text-dim)" />}
                                                 </div>
-                                                <span style={{ color: def?.rarityColor || '#fff', fontSize: isMobile ? '0.8rem' : '0.9rem', fontWeight: '600' }}>{item.amount}x {def?.name || item.name || 'Unknown Item'}</span>
+                                                <span style={{ color: def?.rarityColor || '#fff', fontSize: isMobile ? '0.8rem' : '0.9rem', fontWeight: '600' }}>{item.amount}x {def?.tier ? `T${def.tier} ` : ''}{def?.name || item.name || 'Unknown Item'}</span>
                                             </div>
                                             <button onClick={() => removeItem(item.id)} style={{ color: '#ff4444', background: 'transparent', border: 'none', cursor: 'pointer' }}><X size={isMobile ? 14 : 16} /></button>
                                         </div>
@@ -302,24 +302,52 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
 
                                             if (amount <= 0) return null;
 
-                                            return (
-                                                <div
-                                                    key={id}
-                                                    onClick={() => handleItemClick(id, item, amount)}
-                                                    style={{
-                                                        aspectRatio: '1', background: 'rgba(255,255,255,0.03)', borderRadius: '8px',
-                                                        border: `1px solid ${item.rarityColor || 'rgba(255,255,255,0.05)'}`,
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                        cursor: 'pointer', transition: '0.2s', position: 'relative', overflow: 'hidden'
-                                                    }}
-                                                    title={item.name}
-                                                >
-                                                    {item.icon ? (
-                                                        typeof item.icon === 'string' ? <img src={item.icon} alt={item.name} style={{ width: '70%', height: '70%', objectFit: 'contain' }} /> : <item.icon size={20} color={item.rarityColor || "var(--text-dim)"} />
-                                                    ) : <Package size={20} color="var(--text-dim)" />}
-                                                    <div style={{ position: 'absolute', bottom: '2px', right: '4px', fontSize: '0.6rem', fontWeight: 'bold', color: '#fff' }}>{amount}</div>
-                                                </div>
-                                            );
+                                            return (() => {
+                                                // Extract stars from rune ID (e.g., T1_RUNE_MINING_XP_2STAR)
+                                                const starsMatch = id.match(/_(\d+)STAR$/);
+                                                const stars = starsMatch ? parseInt(starsMatch[1]) : 0;
+                                                const isRune = id.includes('_RUNE_') && !id.includes('SHARD');
+
+                                                return (
+                                                    <div
+                                                        key={id}
+                                                        onClick={() => handleItemClick(id, item, amount)}
+                                                        style={{
+                                                            aspectRatio: '1', background: 'rgba(255,255,255,0.03)', borderRadius: '8px',
+                                                            border: `1px solid ${item.rarityColor || 'rgba(255,255,255,0.1)'}`,
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                            cursor: 'pointer', transition: '0.2s', position: 'relative', overflow: 'hidden',
+                                                            flexDirection: 'column', padding: '4px'
+                                                        }}
+                                                        title={`${item.tier ? `T${item.tier} ` : ''}${item.name}${stars ? ` (${stars}★)` : ''}`}
+                                                    >
+                                                        {/* Tier Badge */}
+                                                        {item.tier && <div style={{ position: 'absolute', top: '2px', left: '4px', fontSize: '0.5rem', fontWeight: '900', color: '#fff', textShadow: '0 0 3px #000' }}>T{item.tier}</div>}
+
+                                                        {/* Star Rating for Runes */}
+                                                        {isRune && stars > 0 && (
+                                                            <div style={{ position: 'absolute', top: '2px', right: '4px', display: 'flex', gap: '0px' }}>
+                                                                {Array.from({ length: stars }).map((_, i) => (
+                                                                    <Star key={i} size={6} fill="#FFD700" color="#FFD700" style={{ filter: 'drop-shadow(0 0 1px #000)' }} />
+                                                                ))}
+                                                            </div>
+                                                        )}
+
+                                                        {/* Icon */}
+                                                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                                                            {item.icon ? (
+                                                                typeof item.icon === 'string' ? <img src={item.icon} alt={item.name} style={{ width: '70%', height: '70%', objectFit: 'contain' }} /> : <item.icon size={20} color={item.rarityColor || "var(--text-dim)"} />
+                                                            ) : <Package size={20} color="var(--text-dim)" />}
+                                                        </div>
+
+                                                        {/* Quantity */}
+                                                        <div style={{ position: 'absolute', bottom: '2px', right: '4px', fontSize: '0.55rem', fontWeight: 'bold', color: '#fff', textShadow: '0 0 3px #000' }}>{amount}</div>
+
+                                                        {/* Item Name */}
+                                                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textAlign: 'center', width: '100%', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', fontWeight: '600', lineHeight: '1.2' }}>{item.name}</div>
+                                                    </div>
+                                                )
+                                            })();
                                         })}
                                 </div>
                             </div>
@@ -358,7 +386,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                                     typeof Icon === 'string' ? <img src={Icon} alt={def?.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <Icon size={isMobile ? 16 : 18} color={def.rarityColor || "var(--text-dim)"} />
                                                 ) : <Package size={isMobile ? 16 : 18} color="var(--text-dim)" />}
                                             </div>
-                                            <span style={{ color: def?.rarityColor || '#fff', fontSize: isMobile ? '0.8rem' : '0.9rem', fontWeight: '600' }}>{item.amount}x {def?.name || item.name || 'Unknown Item'}</span>
+                                            <span style={{ color: def?.rarityColor || '#fff', fontSize: isMobile ? '0.8rem' : '0.9rem', fontWeight: '600' }}>{item.amount}x {def?.tier ? `T${def.tier} ` : ''}{def?.name || item.name || 'Unknown Item'}</span>
                                         </div>
                                     );
                                 })}

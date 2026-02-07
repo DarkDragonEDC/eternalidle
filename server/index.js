@@ -902,7 +902,23 @@ io.on('connection', (socket) => {
                 .or(`sender_id.eq.${charId},receiver_id.eq.${charId}`);
 
             if (error) throw error;
-            socket.emit('trade_list', data);
+
+            // Fetch partner names for each trade
+            const enriched = await Promise.all((data || []).map(async (trade) => {
+                const partnerId = trade.sender_id === charId ? trade.receiver_id : trade.sender_id;
+                const { data: partnerData } = await supabase
+                    .from('characters')
+                    .select('name')
+                    .eq('id', partnerId)
+                    .single();
+
+                return {
+                    ...trade,
+                    partner_name: partnerData?.name || 'Unknown'
+                };
+            }));
+
+            socket.emit('trade_list', enriched);
         } catch (err) {
             socket.emit('error', { message: err.message });
         }

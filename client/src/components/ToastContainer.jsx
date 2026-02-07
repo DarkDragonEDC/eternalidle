@@ -33,12 +33,18 @@ const ToastContainer = ({ socket }) => {
             // For now, stick to action_result
         };
 
+        const handleTradeSuccess = (data) => {
+            addToast(data.message || 'Trade completed!', 'success');
+        };
+
         socket.on('action_result', handleActionResult);
         socket.on('error', handleError);
+        socket.on('trade_success', handleTradeSuccess);
 
         return () => {
             socket.off('action_result', handleActionResult);
             socket.off('error', handleError);
+            socket.off('trade_success', handleTradeSuccess);
         };
     }, [socket]);
 
