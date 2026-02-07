@@ -112,7 +112,7 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
                 } else {
                     // Standard crowns package
                     result = gameManager.crownsManager.addCrowns(char, parseInt(crownAmount), `STRIPE_${packageId}`);
-                    deliveryMessage = `Payment confirmed! Added ${crownAmount} Crowns.`;
+                    deliveryMessage = `Payment confirmed! Added ${crownAmount} Orbs.`;
                 }
 
                 console.log(`[STRIPE] Delivery result: ${JSON.stringify(result)}`);

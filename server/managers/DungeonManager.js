@@ -62,7 +62,7 @@ export class DungeonManager {
         return { success: true };
     }
 
-    async processDungeonTick(char) {
+    async processDungeonTick(char, virtualTime = null) {
         try {
             if (!char.state.dungeon) return;
 
@@ -74,7 +74,7 @@ export class DungeonManager {
                 return;
             }
 
-            const now = Date.now();
+            const now = virtualTime || Date.now();
             const totalElapsed = now - new Date(dungeonState.started_at).getTime();
 
             // 1. Max Time Check (Safety)
@@ -96,9 +96,9 @@ export class DungeonManager {
                     if (dungeonState.wave < dungeonState.maxWaves) {
                         dungeonState.wave++;
                         dungeonState.status = 'WAITING_NEXT_WAVE';
-                        return this.startNextWave(char, dungeonConfig);
+                        return this.startNextWave(char, dungeonConfig, now);
                     } else {
-                        return this.completeDungeon(char, dungeonConfig);
+                        return this.completeDungeon(char, dungeonConfig, now);
                     }
                 } else {
                     return {
@@ -225,19 +225,20 @@ export class DungeonManager {
             }
 
             if (dungeonState.status === 'PREPARING' || dungeonState.status === 'WAITING_NEXT_WAVE') {
-                return this.startNextWave(char, dungeonConfig);
+                return this.startNextWave(char, dungeonConfig, now);
             }
         } catch (error) {
             console.error(`[DUNGEON] Error in processDungeonTick:`, error);
         }
     }
 
-    async startNextWave(char, config) {
+    async startNextWave(char, config, virtualNow = null) {
+        const now = virtualNow || Date.now();
         const wave = char.state.dungeon.wave;
         const isBoss = wave === char.state.dungeon.maxWaves;
         let mobId = null;
 
-        char.state.dungeon.wave_started_at = Date.now();
+        char.state.dungeon.wave_started_at = now;
         const scalingFactor = isBoss ? 1.5 : (1 + (wave - 1) * 0.1);
 
         if (isBoss) {
@@ -270,8 +271,8 @@ export class DungeonManager {
             damage: scaledStats.damage,
             defense: scaledStats.defense,
             attackSpeed: 1000,
-            next_player_attack_at: Date.now(),
-            next_mob_attack_at: Date.now() + 500
+            next_player_attack_at: now,
+            next_mob_attack_at: now + 500
         };
 
         return {
@@ -283,7 +284,8 @@ export class DungeonManager {
         };
     }
 
-    async completeDungeon(char, config) {
+    async completeDungeon(char, config, virtualNow = null) {
+        const now = virtualNow || Date.now();
         const rewards = config.rewards;
         const loot = [];
 
@@ -317,11 +319,11 @@ export class DungeonManager {
         const mapId = config.reqItem;
 
         const logEntry = {
-            id: Date.now(),
+            id: now,
             run: (char.state.dungeon.lootLog?.length || 0) + 1,
             xp: rewards.xp,
             items: loot,
-            timestamp: new Date().toISOString()
+            timestamp: new Date(now).toISOString()
         };
 
         if (!char.state.dungeon.lootLog) char.state.dungeon.lootLog = [];
@@ -338,8 +340,8 @@ export class DungeonManager {
             char.state.dungeon.repeatCount--;
             char.state.dungeon.wave = 1;
             char.state.dungeon.status = 'PREPARING';
-            char.state.dungeon.started_at = new Date().toISOString();
-            char.state.dungeon.wave_started_at = Date.now();
+            char.state.dungeon.started_at = new Date(now).toISOString();
+            char.state.dungeon.wave_started_at = now;
 
             return {
                 dungeonUpdate: {

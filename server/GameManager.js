@@ -198,6 +198,19 @@ export class GameManager {
             data.dbHash = this.calculateHash(data.state);
 
             let updated = false;
+            // Time variables for catchup logic
+            const now = new Date();
+            let lastSaved = data.last_saved ? new Date(data.last_saved).getTime() : now.getTime();
+            let elapsedSeconds = (now.getTime() - lastSaved) / 1000;
+
+            // Simplified report structure for potential offline gains
+            let finalReport = {
+                elapsedTime: elapsedSeconds,
+                totalTime: 0,
+                itemsGained: {},
+                xpGained: {},
+                combat: null
+            };
 
             if (!data.state.skills) {
                 data.state.skills = { ...INITIAL_SKILLS };
@@ -267,7 +280,8 @@ export class GameManager {
                 }
             }
 
-            // --- IRONMAN MIGRATION ---
+            // --- IRONMAN MIGRATION (DEPRECATED/HEAVY) ---
+            /* 
             if (userId && !data.state.isIronman) {
                 const { data: allChars } = await this.supabase
                     .from('characters')
@@ -281,22 +295,10 @@ export class GameManager {
                     updated = true;
                 }
             }
+            */
 
             if (catchup && (data.current_activity || data.state.combat || data.state.dungeon) && data.last_saved) {
-                const now = new Date();
-                const lastSaved = new Date(data.last_saved).getTime();
-                const elapsedSeconds = (now.getTime() - lastSaved) / 1000;
-
                 console.log(`[CATCHUP] ${data.name}: last_saved=${data.last_saved}, elapsed=${elapsedSeconds.toFixed(1)}s, hasActivity=${!!data.current_activity}, hasCombat=${!!data.state.combat}`);
-
-                // Unified report structure
-                let finalReport = {
-                    elapsedTime: elapsedSeconds, // Wall-clock time passed
-                    totalTime: 0, // Productive time used
-                    itemsGained: {},
-                    xpGained: {},
-                    combat: null
-                };
 
                 if (data.current_activity && data.activity_started_at) {
                     const timePerAction = data.current_activity.time_per_action || 3;
@@ -329,9 +331,7 @@ export class GameManager {
                             }
                         }
                     }
-                }
-
-                if (data.state.combat) {
+                } else if (data.state.combat) {
                     const stats = this.inventoryManager.calculateStats(data);
                     const atkSpeed = Number(stats.attackSpeed) || 1000;
                     const secondsPerRound = atkSpeed / 1000;
@@ -365,90 +365,85 @@ export class GameManager {
                             }
                         }
                     }
-                }
+                } else if (data.state.dungeon) {
+                    const dungeonReport = await this.processBatchDungeon(data, elapsedSeconds);
+                    if (dungeonReport && dungeonReport.totalTime > 0) {
+                        finalReport.totalTime += dungeonReport.totalTime;
+                        finalReport.dungeon = dungeonReport;
 
-                if (data.state.dungeon && !data.state.combat) {
-                    // Dungeons take at least 1 min per wave (WAVE_DURATION)
-                    if (elapsedSeconds >= 60) {
-                        const dungeonReport = await this.processBatchDungeon(data, elapsedSeconds);
-                        if (dungeonReport && dungeonReport.totalTime > 0) {
-                            finalReport.totalTime += dungeonReport.totalTime;
-                            finalReport.dungeon = dungeonReport;
-
-                            // Merge items
-                            for (const [id, qty] of Object.entries(dungeonReport.itemsGained)) {
-                                finalReport.itemsGained[id] = (finalReport.itemsGained[id] || 0) + qty;
-                            }
-                            // Merge XP
-                            for (const [skill, qty] of Object.entries(dungeonReport.xpGained)) {
-                                finalReport.xpGained[skill] = (finalReport.xpGained[skill] || 0) + qty;
-                            }
-                            updated = true;
+                        // Merge items
+                        for (const [id, qty] of Object.entries(dungeonReport.itemsGained)) {
+                            finalReport.itemsGained[id] = (finalReport.itemsGained[id] || 0) + qty;
                         }
+                        // Merge XP
+                        for (const [skill, qty] of Object.entries(dungeonReport.xpGained)) {
+                            finalReport.xpGained[skill] = (finalReport.xpGained[skill] || 0) + qty;
+                        }
+                        updated = true;
                     }
                 }
 
-                // Shard Migration Logic: Convert any T2+ shards to T1
-                let migrationHappened = false;
-                Object.keys(data.state.inventory).forEach(itemId => {
-                    if (itemId.includes('_RUNE_SHARD') && !itemId.startsWith('T1_')) {
-                        const qty = data.state.inventory[itemId];
-                        if (qty > 0) {
-                            data.state.inventory['T1_RUNE_SHARD'] = (data.state.inventory['T1_RUNE_SHARD'] || 0) + qty;
-                            delete data.state.inventory[itemId];
-                            migrationHappened = true;
-                            console.log(`[MIGRATION] Converted ${qty} of ${itemId} to T1_RUNE_SHARD for ${data.name}`);
-                        }
-                    }
-                });
+                // Update last_saved based on ACTUAL time processed, not wall-clock time
+                // This preserves "fragments" of time (e.g. if you have 40s but need 60s for a tick)
+                // Protection: totalTime must not exceed elapsedSeconds
+                finalReport.totalTime = Math.min(finalReport.totalTime, elapsedSeconds);
+                const processedMs = Math.floor(finalReport.totalTime * 1000);
+                const nextSavedDate = new Date(lastSaved + processedMs);
+                data.last_saved = nextSavedDate.toISOString();
 
-                // Membership Migration: Convert ETERNAL_MEMBERSHIP to MEMBERSHIP
-                if (data.state.inventory['ETERNAL_MEMBERSHIP']) {
-                    const qty = data.state.inventory['ETERNAL_MEMBERSHIP'];
-                    data.state.inventory['MEMBERSHIP'] = (data.state.inventory['MEMBERSHIP'] || 0) + qty;
-                    delete data.state.inventory['ETERNAL_MEMBERSHIP'];
-                    migrationHappened = true;
-                    console.log(`[MIGRATION] Converted ${qty} ETERNAL_MEMBERSHIP to MEMBERSHIP for ${data.name}`);
-                }
+                console.log(`[CATCHUP] ${data.name} finished. Processed: ${finalReport.totalTime.toFixed(1)}s, Remaining in buffer: ${(elapsedSeconds - finalReport.totalTime).toFixed(1)}s. New last_saved: ${data.last_saved}`);
 
-                if (migrationHappened) {
-                    updated = true;
-                }
-
-                // Only show the modal if total catchup was significant
-                const hasNotableGains = finalReport.totalTime > 120 || Object.keys(finalReport.itemsGained).length > 0;
-                if (hasNotableGains) {
-                    data.offlineReport = finalReport;
-
-                    // Trigger a system notification for the offline gain
-                    this.addActionSummaryNotification(data, 'Offline Progress', {
-                        itemsGained: finalReport.itemsGained,
-                        xpGained: finalReport.xpGained,
-                        totalTime: finalReport.totalTime,
-                        elapsedTime: elapsedSeconds,
-                        kills: finalReport.combat?.kills || 0,
-                        silverGained: finalReport.combat?.silverGained || 0
-                    });
-                }
-
-                data.last_saved = now.toISOString();
                 // Update the local dbHash to current state since we just processed it
                 data.dbHash = this.calculateHash(data.state);
+            }
 
-                // Hard limit cleanup: Stop activities that exceeded the idle limit
-                if (elapsedSeconds > 43200) {
-                    console.log(`[CATCHUP] Hard limit reached for ${data.name}. Clearing activities.`);
-                    data.current_activity = null;
-                    if (data.state.combat) delete data.state.combat;
-                    if (data.state.dungeon) delete data.state.dungeon;
-                    updated = true;
+            // Shard Migration Logic: Convert any T2+ shards to T1
+            let migrationHappened = false;
+            Object.keys(data.state.inventory).forEach(itemId => {
+                if (itemId.includes('_RUNE_SHARD') && !itemId.startsWith('T1_')) {
+                    const qty = data.state.inventory[itemId];
+                    if (qty > 0) {
+                        data.state.inventory['T1_RUNE_SHARD'] = (data.state.inventory['T1_RUNE_SHARD'] || 0) + qty;
+                        delete data.state.inventory[itemId];
+                        migrationHappened = true;
+                        console.log(`[MIGRATION] Converted ${qty} of ${itemId} to T1_RUNE_SHARD for ${data.name}`);
+                    }
                 }
-                if (updated) {
-                    this.markDirty(data.id);
-                }
+            });
+
+            // Membership Migration: Convert ETERNAL_MEMBERSHIP to MEMBERSHIP
+            if (data.state.inventory['ETERNAL_MEMBERSHIP']) {
+                const qty = data.state.inventory['ETERNAL_MEMBERSHIP'];
+                data.state.inventory['MEMBERSHIP'] = (data.state.inventory['MEMBERSHIP'] || 0) + qty;
+                delete data.state.inventory['ETERNAL_MEMBERSHIP'];
+                migrationHappened = true;
+                console.log(`[MIGRATION] Converted ${qty} ETERNAL_MEMBERSHIP to MEMBERSHIP for ${data.name}`);
+            }
+
+            if (migrationHappened) {
+                updated = true;
+            }
+
+            // Only show the modal if total catchup was significant
+            const hasNotableGains = finalReport.totalTime > 120 || Object.keys(finalReport.itemsGained).length > 0;
+            if (hasNotableGains) {
+                data.offlineReport = finalReport;
+
+                // Trigger a system notification for the offline gain
+                this.addActionSummaryNotification(data, 'Offline Progress', {
+                    itemsGained: finalReport.itemsGained,
+                    xpGained: finalReport.xpGained,
+                    totalTime: finalReport.totalTime,
+                    elapsedTime: elapsedSeconds,
+                    kills: finalReport.combat?.kills || 0,
+                    silverGained: finalReport.combat?.silverGained || 0
+                });
+            }
+
+            if (updated) {
+                this.markDirty(data.id);
             }
         }
-
         return data;
     }
 
@@ -587,15 +582,25 @@ export class GameManager {
         }
 
         if (processed > 0) {
+            const timePerAction = char.current_activity?.time_per_action || 3;
             char.current_activity.actions_remaining -= processed;
+            // Advance next_action_at to be in sync with the end of processed time
+            if (char.current_activity) {
+                const timeProcessedMs = processed * timePerAction * 1000;
+                char.current_activity.next_action_at = (char.current_activity.next_action_at || Date.now()) + timeProcessedMs;
+            }
+
             if (char.current_activity.actions_remaining <= 0) {
                 char.current_activity = null;
                 char.activity_started_at = null;
             }
+
+            const invAfter = char.state.inventory[item.id] || 0;
+            console.log(`[BATCH] Finished ${processed}/${quantity} ${type}. Inv after: ${invAfter}`);
+            return { processed, leveledUp, itemsGained, xpGained, totalTime: processed * timePerAction };
         }
-        const invAfter = char.state.inventory[item.id] || 0;
-        console.log(`[BATCH] Finished ${processed}/${quantity} ${type}. Inv after: ${invAfter}`);
-        return { processed, leveledUp, itemsGained, xpGained, totalTime: processed * (char.current_activity?.time_per_action || 3) };
+
+        return { processed: 0, leveledUp: false, itemsGained: {}, xpGained: {}, totalTime: 0 };
     }
 
     async processBatchCombat(char, rounds) {
@@ -653,6 +658,23 @@ export class GameManager {
             }
         }
 
+        // Hard limit cleanup
+        const maxIdleMs = this.getMaxIdleTime(char);
+        if ((roundsProcessed * atkSpeed) > maxIdleMs) {
+            console.log(`[CATCHUP] Hard limit reached for ${char.name} in Combat. Clearing combat.`);
+            delete char.state.combat;
+        }
+
+        // Sync next_attack_at and mob_next_attack_at to avoid instant attacks on login
+        if (char.state.combat) {
+            const totalTimeMs = roundsProcessed * atkSpeed;
+            char.state.combat.next_attack_at = startTime + totalTimeMs;
+            // Ensure mob is also synced
+            if (char.state.combat.mob_next_attack_at < char.state.combat.next_attack_at) {
+                char.state.combat.mob_next_attack_at = char.state.combat.next_attack_at + 500;
+            }
+        }
+
         return {
             processedRounds: roundsProcessed,
             kills,
@@ -670,63 +692,62 @@ export class GameManager {
         let remainingSeconds = seconds;
         const itemsGained = {};
         const xpGained = {};
-        let wavesCleared = 0;
         let dungeonsTotalCleared = 0;
         let died = false;
 
-        // console.log(`[DUNGEON-BATCH] Starting batch for ${char.name}, ${seconds}s available.`);
+        let virtualNow = Date.now() - (seconds * 1000);
 
-        while (remainingSeconds >= 5 && char.state.dungeon && !died) {
+        while (remainingSeconds >= 1 && char.state.dungeon && !died) {
             const dungeonState = char.state.dungeon;
-            // 60 seconds per wave (WAVE_DURATION)
-            if (remainingSeconds < 1) break;
 
-            const result = await this.dungeonManager.processDungeonTick(char);
+            // Optimization: If WALKING, skip as much as possible
+            if (dungeonState.status === 'WALKING' && dungeonState.wave_started_at) {
+                const waveDuration = 60 * 1000;
+                const waveElapsed = virtualNow - new Date(dungeonState.wave_started_at).getTime();
+                const msLeft = waveDuration - waveElapsed;
+                const secondsLeftInWave = Math.ceil(msLeft / 1000);
 
-            // COMIDA OFFLINE: Consumir comida a cada tick de masmorra
-            const foodResult = this.processFood(char);
-            if (foodResult && foodResult.used) {
-                // Se usou comida, podemos registrar no relatório offline se necessário
-                // Mas por enquanto vamos apenas garantir a cura
+                if (secondsLeftInWave > 0) {
+                    const skip = Math.min(remainingSeconds, secondsLeftInWave, 10); // Skip up to 10s or wave end
+                    if (skip > 1) {
+                        virtualNow += (skip * 1000);
+                        remainingSeconds -= skip;
+                        // We don't call processDungeonTick here, but we need to let it trigger the next wave if skip hits the end
+                        if (skip < secondsLeftInWave) continue;
+                    }
+                }
             }
 
-            if (!result) {
-                // If no result and nothing happening, skip 5s to avoid infinite loop
-                remainingSeconds -= 5;
-            } else {
-                // Tick produced a result (e.g. battle update, wave cleared, etc.)
-                if (result.dungeonUpdate) {
-                    const status = result.dungeonUpdate.status;
-                    if (status === 'COMPLETED') {
-                        dungeonsTotalCleared++;
-                        const rewards = result.dungeonUpdate.rewards;
-                        if (rewards) {
-                            xpGained['DUNGEONEERING'] = (xpGained['DUNGEONEERING'] || 0) + (rewards.xp || 0);
-                            // ELIMINATED: xpGained['COMBAT'] = ...
-                            if (rewards.items) {
-                                rewards.items.forEach(itemStr => {
-                                    const match = itemStr.match(/^(\d+)x (.+)$/);
-                                    if (match) {
-                                        const qty = parseInt(match[1]);
-                                        const id = match[2];
-                                        itemsGained[id] = (itemsGained[id] || 0) + qty;
-                                    } else {
-                                        itemsGained[itemStr] = (itemsGained[itemStr] || 0) + 1;
-                                    }
-                                });
-                            }
+            const result = await this.dungeonManager.processDungeonTick(char, virtualNow);
+
+            // Time consumption
+            virtualNow += 1000;
+            remainingSeconds -= 1;
+
+            const foodResult = this.processFood(char);
+
+            if (result && result.dungeonUpdate) {
+                const status = result.dungeonUpdate.status;
+                if (status === 'COMPLETED') {
+                    dungeonsTotalCleared++;
+                    const rewards = result.dungeonUpdate.rewards;
+                    if (rewards) {
+                        xpGained['DUNGEONEERING'] = (xpGained['DUNGEONEERING'] || 0) + (rewards.xp || 0);
+                        if (rewards.items) {
+                            rewards.items.forEach(itemStr => {
+                                const match = itemStr.match(/^(\d+)x (.+)$/);
+                                if (match) {
+                                    const qty = parseInt(match[1]);
+                                    const id = match[2];
+                                    itemsGained[id] = (itemsGained[id] || 0) + qty;
+                                } else {
+                                    itemsGained[itemStr] = (itemsGained[itemStr] || 0) + 1;
+                                }
+                            });
                         }
-                    } else if (status === 'FAILED') {
-                        died = true;
-                    } else if (status === 'FIGHTING' || status === 'BOSS_FIGHT') {
-                        // Internal battle progress - consume 1s
-                        remainingSeconds -= 1;
-                    } else if (status === 'WALKING') {
-                        // Walking time - consume 1s
-                        remainingSeconds -= 1;
                     }
-                } else {
-                    remainingSeconds -= 1;
+                } else if (status === 'FAILED') {
+                    died = true;
                 }
             }
         }
@@ -934,8 +955,11 @@ export class GameManager {
         const char = await this.getCharacter(userId, characterId);
         if (!char) return null;
 
-        // Keep last_saved in sync while online to avoid double-processing if server crashes
-        char.last_saved = new Date().toISOString();
+        // Only sync last_saved if we aren't currently waiting for a persistence sync or a catchup just happened
+        // If we set it here inconditionally, we might stomp over the catchup leftovers
+        if (!this.isLocked(userId)) {
+            char.last_saved = new Date().toISOString();
+        }
 
         const foodResult = this.processFood(char);
         const foodUsed = foodResult.used;

@@ -74,7 +74,7 @@ export class DailyRewardManager {
             message = `Won ${reward.qty}x ${friendlyName}`;
         } else if (reward.type === 'CURRENCY') {
             this.gameManager.crownsManager.addCrowns(char, reward.qty, 'DAILY_SPIN');
-            message = `Won ${reward.qty} Crowns`;
+            message = `Won ${reward.qty} Orbs`;
         } else if (reward.type === 'STORE_ITEM') {
             // Give Membership Item
             this.gameManager.inventoryManager.addItemToInventory(char, reward.id, reward.qty);

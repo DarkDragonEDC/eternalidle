@@ -123,6 +123,7 @@ export class AdminManager {
             amount = parseInt(args[1]);
         } else {
             return { success: false, error: "Usage: /add_crowns [player?] [amount]" };
+            return { success: false, error: "Usage: /add_orbs [player?] [amount]" };
         }
 
         if (isNaN(amount)) return { success: false, error: "Invalid amount." };
@@ -130,7 +131,7 @@ export class AdminManager {
         const char = await this.resolveTarget(socket, targetName);
         this.gameManager.crownsManager.addCrowns(char, amount, 'ADMIN_CMD');
         await this.saveAndNotify(char);
-        return { success: true, message: `Added ${amount} Crowns to ${char.name}.` };
+        return { success: true, message: `Added ${amount} Orbs to ${char.name}.` };
     }
 
     async cmdHeal(socket, args) {

@@ -9,8 +9,8 @@ const SEGMENTS = [
     { id: 'T3_POTION_QUALITY', label: 'Quality Pot', color: '#4299e1', icon: '⚗️' }, // Uncommon
     { id: 'T3_POTION_LUCK', label: 'Luck Pot', color: '#ed8936', icon: '🍀' }, // Uncommon
     { id: 'T3_POTION_XP', label: 'XP Pot', color: '#9f7aea', icon: '✨' }, // Uncommon
-    { id: 'CROWNS_25', label: '25 Crowns', color: '#ecc94b', icon: '👑' }, // Rare
-    { id: 'CROWNS_100', label: '100 Crowns!', color: '#d69e2e', icon: '👑' }, // Legendary
+    { id: 'CROWNS_25', label: '25 Orbs', color: '#ecc94b', icon: '🔮' }, // Rare
+    { id: 'CROWNS_100', label: '100 Orbs!', color: '#d69e2e', icon: '🔮' }, // Legendary
     { id: 'MEMBERSHIP', label: 'Membership', color: '#805ad5', icon: '🎖️' }  // Legendary
 ];
 
