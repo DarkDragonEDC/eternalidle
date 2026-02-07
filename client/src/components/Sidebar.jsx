@@ -243,11 +243,12 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
             </div>
 
             <div style={{ padding: '20px 10px 10px 10px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
                     {[
                         { id: 'profile', label: 'PROFILE', icon: <User size={14} /> },
                         { id: 'inventory', label: 'BAG', icon: <Package size={14} /> },
-                        { id: 'market', label: 'MARKET', icon: <Tag size={14} /> }
+                        { id: 'market', label: 'MARKET', icon: <Tag size={14} /> },
+                        { id: 'trade', label: 'TRADE', icon: <Users size={14} /> }
                     ].map(item => (
                         <button
                             key={item.id}

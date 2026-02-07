@@ -28,6 +28,8 @@ import NotificationCenter from './components/NotificationCenter';
 import ToastContainer from './components/ToastContainer';
 import CrownShop from './components/CrownShop';
 import DailySpinModal from './components/DailySpinModal';
+import SocialPanel from './components/SocialPanel';
+import TradePanel from './components/TradePanel';
 import {
   Zap, Package, User, Trophy, Coins,
   Axe, Pickaxe, Target, Shield, Sword,
@@ -94,6 +96,7 @@ function App() {
 
   // Navigation State
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('activeTab') || 'inventory');
+  const prevTabRef = React.useRef(localStorage.getItem('activeTab') || 'inventory');
   const [activeCategory, setActiveCategory] = useState(() => localStorage.getItem('activeCategory') || 'WOOD');
   const [activeTier, setActiveTier] = useState(() => parseInt(localStorage.getItem('activeTier')) || 1);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
@@ -128,6 +131,11 @@ function App() {
 
   const [dailySpinOpen, setDailySpinOpen] = useState(false);
   const [canSpin, setCanSpin] = useState(false);
+
+  // Trade State
+  const [activeTrade, setActiveTrade] = useState(null);
+  const [tradeInvites, setTradeInvites] = useState([]);
+  const [showSocialModal, setShowSocialModal] = useState(false);
 
   const handleRenameSubmit = (newName) => {
     socket.emit('change_name', { newName });
@@ -215,6 +223,15 @@ function App() {
     localStorage.setItem('activeTab', activeTab);
     localStorage.setItem('activeCategory', activeCategory);
     localStorage.setItem('activeTier', activeTier);
+
+    if (activeTab === 'trade') {
+      setShowSocialModal(true);
+      // Restore to previous tab instead of forcing inventory
+      setActiveTab(prevTabRef.current || 'inventory');
+    } else {
+      // Track the previous tab (only if not 'trade')
+      prevTabRef.current = activeTab;
+    }
   }, [activeTab, activeCategory, activeTier]);
 
   // Monitor Offline Report from GameState
@@ -336,6 +353,7 @@ function App() {
       // Join Character Room
       newSocket.emit('join_character', { characterId });
       newSocket.emit('request_daily_status');
+      newSocket.emit('trade_get_active'); // Fetch pending trades
     });
 
     newSocket.on('daily_status', ({ canSpin }) => {
@@ -458,7 +476,6 @@ function App() {
         setIsRenameModalOpen(true);
       }
 
-      // Always show message if present
       if (result.message) {
         addNotification({
           type: 'SYSTEM',
@@ -467,7 +484,32 @@ function App() {
       }
     });
 
-    // Attach other listeners if needed here or rely on the main socket instance updating
+    newSocket.on('trade_invite', (trade) => {
+      setTradeInvites(prev => [...prev, trade]);
+      addNotification({
+        type: 'SYSTEM',
+        message: `New trade request received!`
+      });
+      setShowSocialModal(false); // Close search/invite panel so user sees the notification
+    });
+
+    newSocket.on('trade_update', (trade) => {
+      if (trade.status === 'COMPLETED' || trade.status === 'CANCELLED') {
+        setActiveTrade(null);
+      } else {
+        setActiveTrade(prev => (prev?.id === trade.id || !prev) ? trade : prev);
+      }
+    });
+
+    newSocket.on('trade_list', (list) => {
+      setTradeInvites(list);
+    });
+
+    newSocket.on('trade_success', (data) => {
+      addNotification({ type: 'SYSTEM', message: data.message });
+      setActiveTrade(null);
+    });
+
     setSocket(newSocket);
   };
 
@@ -1196,6 +1238,10 @@ function App() {
       setActiveTab('combat');
       return;
     }
+    if (itemId === 'trade') {
+      setShowSocialModal(true);
+      return;
+    }
     if (itemId === 'dungeon') {
       setActiveTab('dungeon');
       return;
@@ -1648,6 +1694,37 @@ function App() {
 
       {/* Potion Replacement Confirmation Modal */}
       <AnimatePresence>
+        {showSocialModal && (
+          <SocialPanel
+            socket={socket}
+            isOpen={showSocialModal}
+            onClose={() => setShowSocialModal(false)}
+            onInvite={(target) => {
+              const isId = target.includes('-'); // Simple UUID check
+              if (isId) {
+                const trade = tradeInvites.find(t => t.id === target);
+                if (trade) setActiveTrade(trade);
+              } else {
+                socket.emit('trade_create', { receiverName: target });
+              }
+              setShowSocialModal(false);
+            }}
+            tradeInvites={tradeInvites}
+          />
+        )}
+
+        {activeTrade && (
+          <TradePanel
+            socket={socket}
+            trade={activeTrade}
+            charId={selectedCharacter}
+            inventory={displayedGameState.state.inventory}
+            currentSilver={displayedGameState.state.silver}
+            onClose={() => setActiveTrade(null)}
+            isMobile={isMobile}
+          />
+        )}
+
         {pendingPotion && (
           <div style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,

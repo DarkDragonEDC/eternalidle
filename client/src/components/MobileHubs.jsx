@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pickaxe, Box, Hammer, Sword, Castle, Trophy, ShoppingBag, Zap, Coins, Gift } from 'lucide-react';
+import { Pickaxe, Box, Hammer, Sword, Castle, Trophy, ShoppingBag, Zap, Coins, Gift, ArrowLeftRight } from 'lucide-react';
 
 const HubButton = ({ label, icon, onClick, color = 'var(--text-main)', level, progress, showBadge, customStyle = {} }) => (
     <button
@@ -276,6 +276,7 @@ export const TownOverview = ({ onNavigate, gameState, canSpin, onOpenDailySpin }
                 />
             )}
             <HubButton label="Market" icon={<ShoppingBag />} color="#fbbf24" onClick={() => onNavigate('market')} showBadge={hasClaims} />
+            <HubButton label="Trade" icon={<ArrowLeftRight />} color="#8b5cf6" onClick={() => onNavigate('trade')} />
             <HubButton label="Ranking" icon={<Trophy />} color="#a78bfa" onClick={() => onNavigate('ranking')} />
             <HubButton label="Taxometer" icon={<Coins />} color="var(--accent)" onClick={() => onNavigate('taxometer')} />
         </div>

@@ -1,0 +1,200 @@
+import React, { useState, useEffect } from 'react';
+import { Search, Users, Send, X, User } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const SocialPanel = ({ socket, isOpen, onClose, onInvite, tradeInvites }) => {
+    const [searchNick, setSearchNick] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [searching, setSearching] = useState(false);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleResult = (results) => {
+            setSearchResults(results || []);
+            setSearching(false);
+            setError('');
+        };
+
+        const handleError = (err) => {
+            if (searching) {
+                setError(err.message);
+                setSearching(false);
+                setSearchResults([]);
+            }
+        };
+
+        socket.on('trade_search_result', handleResult);
+        socket.on('error', handleError);
+
+        return () => {
+            socket.off('trade_search_result', handleResult);
+            socket.off('error', handleError);
+        };
+    }, [socket, searching]);
+
+    const handleSearch = () => {
+        if (!searchNick.trim()) return;
+        setSearching(true);
+        setError('');
+        socket.emit('trade_search_player', { nickname: searchNick });
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div style={{
+            position: 'fixed', inset: 0, zIndex: 11000,
+            background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
+        }}>
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                style={{
+                    width: '100%', maxWidth: '500px', background: 'var(--panel-bg)',
+                    borderRadius: '16px', border: '1px solid var(--border-active)',
+                    overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+                }}
+            >
+                {/* Header */}
+                <div style={{
+                    padding: '20px', background: 'var(--accent-soft)',
+                    borderBottom: '1px solid var(--border-active)',
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <Users color="var(--accent)" size={20} />
+                        <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '900', letterSpacing: '1px', color: '#fff' }}>TRADE CENTER</h2>
+                    </div>
+                    <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }}>
+                        <X size={20} />
+                    </button>
+                </div>
+
+                <div style={{ padding: '20px' }}>
+                    {/* Search Box */}
+                    <div style={{ marginBottom: '25px' }}>
+                        <div style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--text-dim)', marginBottom: '8px', letterSpacing: '1px' }}>SEARCH PLAYER</div>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <div style={{ flex: 1, position: 'relative' }}>
+                                <input
+                                    type="text"
+                                    value={searchNick}
+                                    onChange={(e) => setSearchNick(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                                    placeholder="Enter player's name"
+                                    style={{
+                                        width: '100%', padding: '12px 15px', borderRadius: '10px',
+                                        background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border)',
+                                        color: '#fff', outline: 'none', transition: '0.2s'
+                                    }}
+                                />
+                                <Search size={18} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.3 }} />
+                            </div>
+                            <button
+                                onClick={handleSearch}
+                                disabled={searching}
+                                style={{
+                                    padding: '0 20px', borderRadius: '10px', background: 'var(--accent)',
+                                    color: '#000', fontWeight: '800', border: 'none', cursor: 'pointer'
+                                }}
+                            >
+                                {searching ? '...' : 'FIND'}
+                            </button>
+                        </div>
+                        {error && <div style={{ color: '#ff4444', fontSize: '0.8rem', marginTop: '8px', fontWeight: 'bold' }}>{error}</div>}
+                    </div>
+
+                    {/* Search Results */}
+                    <AnimatePresence>
+                        {searchResults.length > 0 && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                style={{
+                                    display: 'flex', flexDirection: 'column', gap: '8px',
+                                    marginBottom: '25px', maxHeight: '200px', overflowY: 'auto',
+                                    paddingRight: '5px'
+                                }}
+                            >
+                                <div style={{ fontSize: '0.65rem', fontWeight: 'bold', color: 'var(--text-dim)', marginBottom: '4px' }}>MATCHING PLAYERS:</div>
+                                {searchResults.map(result => (
+                                    <div
+                                        key={result.id}
+                                        style={{
+                                            padding: '12px', background: 'rgba(255,255,255,0.02)',
+                                            borderRadius: '12px', border: '1px solid var(--border)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <div style={{
+                                                width: '32px', height: '32px', borderRadius: '8px',
+                                                background: 'var(--accent-soft)', display: 'flex',
+                                                alignItems: 'center', justifyContent: 'center'
+                                            }}>
+                                                <User size={16} color="var(--accent)" />
+                                            </div>
+                                            <div>
+                                                <div style={{ fontSize: '0.85rem', fontWeight: '900', color: '#fff' }}>{result.name}</div>
+                                                <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>Level {result.level}</div>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => onInvite(result.name)}
+                                            style={{
+                                                padding: '6px 12px', borderRadius: '8px', background: 'var(--accent)',
+                                                color: '#000', fontWeight: '800', fontSize: '0.7rem', border: 'none',
+                                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
+                                            }}
+                                        >
+                                            <Send size={12} />
+                                            INVITE
+                                        </button>
+                                    </div>
+                                ))}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Incoming Invites */}
+                    <div>
+                        <div style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--text-dim)', marginBottom: '12px', letterSpacing: '1px' }}>PENDING OFFERS</div>
+                        {(tradeInvites || []).length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-dim)', fontSize: '0.8rem', fontStyle: 'italic' }}>
+                                No pending trade offers.
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflowY: 'auto' }}>
+                                {tradeInvites.map(trade => (
+                                    <div key={trade.id} style={{
+                                        padding: '12px', background: 'rgba(0,0,0,0.2)',
+                                        borderRadius: '10px', border: '1px solid var(--border)',
+                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                                    }}>
+                                        <span style={{ fontSize: '0.85rem', color: '#fff' }}>Trade Request #{trade.id.slice(0, 4)}</span>
+                                        <button
+                                            onClick={() => onInvite(trade.id)} // Reuse onInvite or handle specifically
+                                            style={{
+                                                padding: '6px 12px', borderRadius: '6px', background: 'rgba(255,255,255,0.05)',
+                                                color: 'var(--accent)', fontWeight: '800', fontSize: '0.75rem',
+                                                border: '1px solid var(--border-active)', cursor: 'pointer'
+                                            }}
+                                        >
+                                            OPEN
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </motion.div>
+        </div>
+    );
+};
+
+export default SocialPanel;

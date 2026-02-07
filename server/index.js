@@ -844,6 +844,130 @@ io.on('connection', (socket) => {
         }
     });
 
+    // --- TRADE EVENTS ---
+    socket.on('trade_search_player', async ({ nickname }) => {
+        try {
+            const { data, error } = await supabase
+                .from('characters')
+                .select('id, name, state')
+                .ilike('name', `%${nickname}%`)
+                .limit(10);
+
+            if (error) throw error;
+            if (!data || data.length === 0) {
+                socket.emit('error', { message: "No players found matching that name." });
+                return;
+            }
+
+            const results = data.map(char => {
+                const skills = char.state?.skills || {};
+                const level = Object.values(skills).reduce((acc, s) => acc + (s.level || 1), 0);
+                return {
+                    id: char.id,
+                    name: char.name,
+                    level: level
+                };
+            });
+
+            socket.emit('trade_search_result', results);
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('trade_create', async ({ receiverName }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                const trade = await gameManager.tradeManager.createTrade(char, receiverName);
+                socket.emit('trade_update', trade);
+
+                // Notify receiver if online
+                const receiverSockets = Array.from(connectedSockets.values())
+                    .filter(s => s.data.characterId === trade.receiver_id);
+                receiverSockets.forEach(s => s.emit('trade_invite', trade));
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('trade_get_active', async () => {
+        try {
+            const charId = socket.data.characterId;
+            const { data, error } = await supabase
+                .from('trade_sessions')
+                .select('*')
+                .eq('status', 'PENDING')
+                .or(`sender_id.eq.${charId},receiver_id.eq.${charId}`);
+
+            if (error) throw error;
+            socket.emit('trade_list', data);
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('trade_update_offer', async ({ tradeId, items, silver }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                const trade = await gameManager.tradeManager.updateOffer(char, tradeId, items, silver);
+
+                // Notify both if online
+                const affectedIds = [trade.sender_id, trade.receiver_id];
+                Array.from(connectedSockets.values())
+                    .filter(s => affectedIds.includes(s.data.characterId))
+                    .forEach(s => s.emit('trade_update', trade));
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('trade_accept', async ({ tradeId }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                const result = await gameManager.tradeManager.acceptTrade(char, tradeId);
+
+                // Notify both if online
+                const affectedIds = [result.sender_id, result.receiver_id];
+                const socketsToNotify = Array.from(connectedSockets.values())
+                    .filter(s => affectedIds.includes(s.data.characterId));
+
+                socketsToNotify.forEach(s => {
+                    s.emit('trade_update', result);
+                    if (result.status === 'COMPLETED') {
+                        s.emit('trade_success', { message: 'Trade completed successfully!' });
+                        // Push full status update to refresh inventory/silver
+                        gameManager.getStatus(s.user.id, true, s.data.characterId).then(status => {
+                            s.emit('status_update', status);
+                        });
+                    }
+                });
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('trade_cancel', async ({ tradeId }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                const result = await gameManager.tradeManager.cancelTrade(char, tradeId);
+
+                // Notify both if online
+                // Since cancelTrade doesn't return the trade object with IDs easily, we should handle it better, 
+                // but for now we trust the tradeId and status CANCELLED.
+                socket.emit('trade_update', { id: tradeId, status: 'CANCELLED' });
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
 
 
     socket.on('acknowledge_offline_report', async () => {
