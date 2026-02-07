@@ -1,11 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import {
     Package, User, Pickaxe, Hammer, Sword,
     ChevronDown, ChevronRight, Coins, Castle,
-    Trophy, Tag, Zap, Box, Axe, Shield, Users, MessageSquare, Sun, Moon
+    Trophy, Tag, Zap, Box, Axe, Shield, Users, MessageSquare, Sun, Moon, Gift
 } from 'lucide-react';
+import DailySpinModal from './DailySpinModal';
 
-const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActiveCategory, isMobile, isOpen, onClose, onSwitchCharacter, theme, toggleTheme }) => {
+const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActiveCategory, isMobile, isOpen, onClose, onSwitchCharacter, theme, toggleTheme, socket, canSpin, onOpenDailySpin }) => {
     const [expanded, setExpanded] = useState({
         gathering: true,
         refining: false,
@@ -14,6 +16,8 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
         combat: false
     });
     const [activePlayers, setActivePlayers] = useState(0);
+
+    // Removed internal Daily Spin logic (lifted to App.jsx)
 
     useEffect(() => {
         const fetchActivePlayers = async () => {
@@ -36,6 +40,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
 
     const toggleExpand = (id) => {
         setExpanded(prev => ({
+            ...prev,
             gathering: false,
             refining: false,
             crafting: false,
@@ -46,25 +51,8 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
     };
 
     const skills = gameState?.state?.skills || {};
-    const silver = gameState?.state?.silver || 0;
 
-    const skillMap = {
-        'WOOD': 'LUMBERJACK',
-        'ORE': 'ORE_MINER',
-        'HIDE': 'ANIMAL_SKINNER',
-        'FIBER': 'FIBER_HARVESTER',
-        'FISH': 'FISHING',
-        'PLANK': 'PLANK_REFINER',
-        'BAR': 'METAL_BAR_REFINER',
-        'LEATHER': 'LEATHER_REFINER',
-        'CLOTH': 'CLOTH_REFINER',
-        'WARRIORS_FORGE': 'WARRIOR_CRAFTER',
-        'HUNTERS_LODGE': 'HUNTER_CRAFTER',
-        'MAGES_TOWER': 'MAGE_CRAFTER',
-        'TOOLMAKER': 'TOOL_CRAFTER',
-        'COOKING_STATION': 'COOKING'
-    };
-
+    // Skill Level/Progress Component
     const SkillInfo = ({ skillKey }) => {
         if (skillKey === 'RUNE') return null;
         const skill = skills[skillKey] || { level: 1, xp: 0 };
@@ -178,6 +166,9 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
 
             {/* Active Players at Sidebar Top */}
             <div style={{ padding: '20px 10px 0 10px', display: 'flex', gap: '6px' }}>
+
+
+
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -224,19 +215,11 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                         boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
                     }}
                     title="Join our Discord"
-                    onMouseEnter={(e) => { e.currentTarget.style.background = '#4752C4'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = '#5865F2'; e.currentTarget.style.transform = 'translateY(0)'; }}
                 >
-                    <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 127.14 96.36"
-                        fill="currentColor"
-                    >
+                    <svg width="20" height="20" viewBox="0 0 127.14 96.36" fill="currentColor">
                         <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.71,32.65-1.82,56.6.4,80.21a105.73,105.73,0,0,0,32.17,16.15,77.7,77.7,0,0,0,6.89-11.11,68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c3.39-28.32-5.42-52.09-23.75-72.13ZM42.45,65.69C36.18,65.69,31,60,31,53s5.07-12.72,11.41-12.72S54,46,53.86,53,48.81,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.72,11.44-12.72S96.11,46,96,53,91,65.69,84.69,65.69Z" />
                     </svg>
                 </a>
-
 
                 {/* Theme Toggle Button */}
                 <button
@@ -254,9 +237,6 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                         cursor: 'pointer',
                         boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
                     }}
-                    title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'; }}
                 >
                     {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
@@ -311,14 +291,40 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                 </div>
             </div>
 
+            {canSpin && (
+                <div style={{ padding: '0 10px 10px 10px' }}>
+                    <button
+                        onClick={onOpenDailySpin}
+                        style={{
+                            width: '100%',
+                            padding: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '10px',
+                            background: 'linear-gradient(135deg, var(--accent) 0%, #b8860b 100%)',
+                            borderRadius: '10px',
+                            border: '1px solid #ffd700',
+                            color: '#000',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 15px rgba(255, 215, 0, 0.2)',
+                            animation: 'pulse 2s infinite',
+                            fontSize: '0.9rem'
+                        }}
+                    >
+                        <Gift size={18} />
+                        <span>CLAIM REWARD</span>
+                    </button>
+                </div>
+            )}
+
             <div className="scroll-container" style={{ padding: '0 10px', flex: 1 }}>
                 <div style={{ color: 'var(--text-dim)', fontSize: '0.55rem', fontWeight: '900', letterSpacing: '2px', padding: '15px 0 8px 10px', borderBottom: '1px solid var(--border)', marginBottom: '10px' }}>ACTIVITIES</div>
 
                 {menuItems.slice(2).map(item => {
                     const isMainItemActive = activeTab === item.id;
                     const isGroupHeader = !!item.children;
-
-                    // Header para separar o Combate/Adventure do resto se necessário
                     const showAdventureHeader = item.id === 'combat';
 
                     return (
@@ -400,13 +406,9 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                     );
                 })}
 
-                {/* Membership Status */}
-
             </div>
 
-            {/* Footer Buttons */}
             <div style={{ padding: '15px 10px', borderTop: '1px solid var(--border)' }}>
-                {/* Membership Status - Moved to Footer */}
                 {gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > Date.now() && (
                     <div style={{
                         marginBottom: '15px',
@@ -422,31 +424,22 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                             justifyContent: 'space-between',
                             marginBottom: '6px'
                         }}>
-                            <span style={{
-                                fontSize: '0.8rem',
-                                fontWeight: '600',
-                                color: '#4ade80'
-                            }}>Premium Member</span>
-                            <span style={{
-                                fontSize: '0.65rem',
-                                background: 'rgba(34, 197, 94, 0.2)',
-                                color: '#4ade80',
-                                padding: '1px 6px',
-                                borderRadius: '4px',
-                                fontWeight: 'bold'
-                            }}>Active</span>
+                            <span style={{ fontSize: '0.8rem', fontWeight: '600', color: '#4ade80' }}>Premium Member</span>
+                            <span style={{ fontSize: '0.65rem', background: 'rgba(34, 197, 94, 0.2)', color: '#4ade80', padding: '1px 6px', borderRadius: '4px', fontWeight: 'bold' }}>Active</span>
                         </div>
-                        <div style={{
-                            fontSize: '0.7rem',
-                            color: 'var(--text-dim)'
-                        }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>
                             Expires: {new Date(gameState.state.membership.expiresAt).toLocaleDateString('pt-BR')}
                         </div>
                     </div>
                 )}
-
-
             </div>
+            <style>{`
+                @keyframes pulse {
+                    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+                    70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
+                    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+                }
+            `}</style>
         </div>
     );
 };

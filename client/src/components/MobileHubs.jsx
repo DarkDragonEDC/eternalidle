@@ -1,14 +1,15 @@
 import React from 'react';
-import { Pickaxe, Box, Hammer, Sword, Castle, Trophy, ShoppingBag, Zap, Coins } from 'lucide-react';
+import { Pickaxe, Box, Hammer, Sword, Castle, Trophy, ShoppingBag, Zap, Coins, Gift } from 'lucide-react';
 
-const HubButton = ({ label, icon, onClick, color = 'var(--text-main)', level, progress, showBadge }) => (
+const HubButton = ({ label, icon, onClick, color = 'var(--text-main)', level, progress, showBadge, customStyle = {} }) => (
     <button
         onClick={onClick}
         style={{
             display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start',
             padding: '16px 20px', background: 'var(--panel-bg)', border: '1px solid var(--border)',
             borderRadius: '12px', width: '100%', gap: '15px',
-            cursor: 'pointer', transition: '0.2s', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            cursor: 'pointer', transition: '0.2s', boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+            ...customStyle
         }}
     >
         <div style={{ color: color, display: 'flex', position: 'relative' }}>
@@ -256,10 +257,24 @@ export const SkillsOverview = ({ onNavigate, gameState }) => {
     );
 };
 
-export const TownOverview = ({ onNavigate, gameState }) => {
+export const TownOverview = ({ onNavigate, gameState, canSpin, onOpenDailySpin }) => {
     const hasClaims = gameState?.state?.claims?.length > 0;
     return (
         <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {canSpin && (
+                <HubButton
+                    label="Daily Gift"
+                    icon={<Gift />}
+                    color="#fff"
+                    onClick={onOpenDailySpin}
+                    showBadge={true}
+                    customStyle={{
+                        background: 'linear-gradient(135deg, var(--accent) 0%, #b8860b 100%)',
+                        border: '1px solid #ffd700',
+                        boxShadow: '0 0 15px rgba(255, 215, 0, 0.3)'
+                    }}
+                />
+            )}
             <HubButton label="Market" icon={<ShoppingBag />} color="#fbbf24" onClick={() => onNavigate('market')} showBadge={hasClaims} />
             <HubButton label="Ranking" icon={<Trophy />} color="#a78bfa" onClick={() => onNavigate('ranking')} />
             <HubButton label="Taxometer" icon={<Coins />} color="var(--accent)" onClick={() => onNavigate('taxometer')} />

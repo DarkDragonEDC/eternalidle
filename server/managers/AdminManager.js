@@ -19,6 +19,7 @@ export class AdminManager {
                 case 'heal': return await this.cmdHeal(socket, args);
                 case 'add_crowns': return await this.cmdAddCrowns(socket, args);
                 case 'xp': return await this.cmdAddXp(socket, args);
+                case 'resetdaily': return await this.cmdResetDaily(socket, args);
                 case 'help': return await this.cmdHelp(socket);
                 default: return { success: false, error: "Unknown command. Type /help." };
             }
@@ -167,6 +168,28 @@ export class AdminManager {
         this.gameManager.inventoryManager.addXP(char, skill, amount);
         await this.saveAndNotify(char);
         return { success: true, message: `Added ${amount} XP to ${skill} for ${char.name}.` };
+    }
+
+    async cmdResetDaily(socket, args) {
+        // Usage: /resetdaily [target?]
+        let targetName = args[0] || 'me';
+        const char = await this.resolveTarget(socket, targetName);
+
+        if (char.state.daily_spin) {
+            // Set to yesterday
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            char.state.daily_spin.last_spin_date = yesterday.toISOString();
+        } else {
+            // Initialize if not exists (so it's ready to spin anyway)
+            char.state.daily_spin = {
+                last_spin_date: "2000-01-01T00:00:00.000Z",
+                total_spins: 0
+            };
+        }
+
+        await this.saveAndNotify(char);
+        return { success: true, message: `Reset Daily Spin cooldown for ${char.name}.` };
     }
 
     async cmdHelp(socket) {

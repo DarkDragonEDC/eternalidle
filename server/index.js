@@ -737,13 +737,40 @@ io.on('connection', (socket) => {
                 .select('*')
                 .eq('character_id', charId)
                 .order('occurred_at', { ascending: false })
-                .limit(20);
-
             if (error) throw error;
             socket.emit('dungeon_history_update', data);
         } catch (err) {
             console.error('Error fetching dungeon history:', err);
             socket.emit('error', { message: `Failed to fetch dungeon history: ${err.message}` });
+        }
+    });
+
+    // --- DAILY SPIN EVENTS ---
+    socket.on('request_daily_status', async () => {
+        const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+        if (!char) return;
+
+        const canSpin = gameManager.dailyRewardManager.canSpin(char);
+        socket.emit('daily_status', { canSpin });
+    });
+
+    socket.on('spin_daily', async () => {
+        const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+        if (!char) return;
+
+        try {
+            const result = await gameManager.dailyRewardManager.spin(char);
+            if (result.success) {
+                // Return result to client
+                socket.emit('daily_spin_result', result);
+                // Also update status immediately
+                socket.emit('daily_status', { canSpin: false });
+            } else {
+                socket.emit('error', { message: result.error });
+            }
+        } catch (err) {
+            console.error('Daily spin error:', err);
+            socket.emit('error', { message: "Failed to process daily spin." });
         }
     });
 

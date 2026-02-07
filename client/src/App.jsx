@@ -27,10 +27,11 @@ import BuffsDrawer from './components/BuffsDrawer';
 import NotificationCenter from './components/NotificationCenter';
 import ToastContainer from './components/ToastContainer';
 import CrownShop from './components/CrownShop';
+import DailySpinModal from './components/DailySpinModal';
 import {
   Zap, Package, User, Trophy, Coins,
   Axe, Pickaxe, Target, Shield, Sword,
-  Star, Layers, Box, Castle, Lock, Menu, X, Tag, Clock, Heart, LogOut, ChevronDown, Crown, Circle, Users
+  Star, Layers, Box, Castle, Lock, Menu, X, Tag, Clock, Heart, LogOut, ChevronDown, Crown, Circle, Users, Gift
 } from 'lucide-react';
 import { ITEMS, resolveItem, getSkillForItem, getLevelRequirement, formatItemId } from '@shared/items';
 import { calculateNextLevelXP, XP_TABLE } from '@shared/skills';
@@ -124,6 +125,9 @@ function App() {
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [pendingPotion, setPendingPotion] = useState(null);
+
+  const [dailySpinOpen, setDailySpinOpen] = useState(false);
+  const [canSpin, setCanSpin] = useState(false);
 
   const handleRenameSubmit = (newName) => {
     socket.emit('change_name', { newName });
@@ -331,6 +335,11 @@ function App() {
       setIsConnecting(false);
       // Join Character Room
       newSocket.emit('join_character', { characterId });
+      newSocket.emit('request_daily_status');
+    });
+
+    newSocket.on('daily_status', ({ canSpin }) => {
+      setCanSpin(canSpin);
     });
 
     newSocket.on('disconnect', () => {
@@ -713,7 +722,7 @@ function App() {
       case 'skills_overview':
         return <SkillsOverview gameState={displayedGameState} onNavigate={(tab, cat) => { setActiveTab(tab); if (cat) setActiveCategory(cat); }} />;
       case 'town_overview':
-        return <TownOverview onNavigate={(tab) => setActiveTab(tab)} gameState={displayedGameState} />;
+        return <TownOverview onNavigate={(tab) => setActiveTab(tab)} gameState={displayedGameState} canSpin={canSpin} onOpenDailySpin={() => setDailySpinOpen(true)} />;
       case 'combat_overview':
         return <CombatOverview gameState={displayedGameState} onNavigate={(tab) => setActiveTab(tab)} />;
       case 'gathering':
@@ -1273,10 +1282,13 @@ function App() {
           theme={theme}
           toggleTheme={toggleTheme}
           onSwitchCharacter={handleSwitchCharacter}
+          socket={socket}
+          canSpin={canSpin}
+          onOpenDailySpin={() => setDailySpinOpen(true)}
         />
       )}
 
-      {isMobile && <BottomNav gameState={displayedGameState} activeTab={activeTab} setActiveTab={setActiveTab} onNavigate={(tab) => setActiveTab(tab)} />}
+      {isMobile && <BottomNav gameState={displayedGameState} activeTab={activeTab} setActiveTab={setActiveTab} onNavigate={(tab) => setActiveTab(tab)} canSpin={canSpin} />}
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', minHeight: 0 }}>
         <header style={{
@@ -1293,8 +1305,15 @@ function App() {
           flexWrap: 'nowrap',
           gap: '10px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 20, minWidth: 0 }}>
-            {isMobile && <div style={{ width: 24 }}></div>}
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : 20, minWidth: 0 }}>
+            {/* Mobile Sidebar Toggle */}
+            {isMobile && (
+              <button onClick={() => setSidebarOpen(true)} style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', marginRight: '10px' }}>
+                <Menu size={24} />
+              </button>
+            )}
+
+
 
             {/* Active Players Indicator - Header Left - Mobile Only */}
             {isMobile && (
@@ -1619,6 +1638,12 @@ function App() {
         isOpen={isRenameModalOpen}
         onClose={() => setIsRenameModalOpen(false)}
         onSubmit={handleRenameSubmit}
+      />
+
+      <DailySpinModal
+        isOpen={dailySpinOpen}
+        onClose={() => setDailySpinOpen(false)}
+        socket={socket}
       />
 
       {/* Potion Replacement Confirmation Modal */}

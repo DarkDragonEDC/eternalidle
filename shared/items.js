@@ -783,7 +783,7 @@ export const resolveItem = (itemId, overrideQuality = null) => {
     return finalItem;
 };
 
-export const formatItemId = (itemId) => itemId ? itemId.replace(/_/g, ' ') : '';
+
 export const getTierColor = (tier) => {
     const colors = {
         1: '#9e9e9e', 2: '#ffffff', 3: '#4caf50', 4: '#42a5f5', 5: '#ab47bc',
@@ -980,5 +980,15 @@ for (const t of TIERS) {
     });
 }
 
+
 // Index items AFTER generation
 indexItems(ITEMS);
+
+// Format item ID for display (replace underscores with spaces and capitalize)
+export const formatItemId = (itemId) => {
+    if (!itemId) return '';
+    return itemId
+        .replace(/_/g, ' ')
+        .toLowerCase()
+        .replace(/\b\w/g, char => char.toUpperCase());
+};
