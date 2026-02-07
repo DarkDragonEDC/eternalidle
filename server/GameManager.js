@@ -329,6 +329,10 @@ export class GameManager {
                                     for (const [skill, qty] of Object.entries(activityReport.xpGained)) {
                                         finalReport.xpGained[skill] = (finalReport.xpGained[skill] || 0) + qty;
                                     }
+
+                                    if (activityReport.stopReason) {
+                                        finalReport.stopReason = activityReport.stopReason;
+                                    }
                                 }
                             }
                         }
@@ -575,6 +579,8 @@ export class GameManager {
         const itemsGained = {};
         const xpGained = {};
 
+        let stopReason = null;
+
         for (let i = 0; i < quantity; i++) {
             let result = null;
             switch (type) {
@@ -598,6 +604,7 @@ export class GameManager {
                     xpGained[result.skillKey] = (xpGained[result.skillKey] || 0) + finalXp;
                 }
             } else {
+                stopReason = result?.error || "Stopped Early";
                 break;
             }
         }
@@ -618,10 +625,10 @@ export class GameManager {
 
             const invAfter = char.state.inventory[item.id] || 0;
             console.log(`[BATCH] Finished ${processed}/${quantity} ${type}. Inv after: ${invAfter}`);
-            return { processed, leveledUp, itemsGained, xpGained, totalTime: processed * timePerAction };
+            return { processed, leveledUp, itemsGained, xpGained, totalTime: processed * timePerAction, stopReason };
         }
 
-        return { processed: 0, leveledUp: false, itemsGained: {}, xpGained: {}, totalTime: 0 };
+        return { processed: 0, leveledUp: false, itemsGained: {}, xpGained: {}, totalTime: 0, stopReason };
     }
 
     async processBatchCombat(char, rounds) {

@@ -125,6 +125,26 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                             <Clock size={12} color="var(--accent)" />
                             <span>Away for <strong style={{ color: 'var(--text-main)' }}>{formatTime(elapsedTime || totalTime || 0)}</strong></span>
                         </div>
+
+                        {data.stopReason && (
+                            <div style={{
+                                marginTop: '10px',
+                                padding: '8px 12px',
+                                background: 'rgba(255, 68, 68, 0.1)',
+                                borderRadius: '8px',
+                                border: '1px solid rgba(255, 68, 68, 0.2)',
+                                color: '#ff4444',
+                                fontSize: '0.75rem',
+                                fontWeight: 'bold',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px'
+                            }}>
+                                <AlertCircle size={14} />
+                                <span>Activity Stopped: {data.stopReason}</span>
+                            </div>
+                        )}
                     </div>
 
                     {/* Scrollable Body */}
