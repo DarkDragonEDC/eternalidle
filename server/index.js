@@ -323,7 +323,6 @@ io.on('connection', (socket) => {
             // Immediately send status for this character (with catchup=true for offline progress)
             await gameManager.executeLocked(userId, async () => {
                 const status = await gameManager.getStatus(socket.user.id, true, characterId, true);
-                console.log(`[SOCKET-DEBUG] Sending status to ${socket.user.email}. Actions Remaining: ${status.current_activity?.actions_remaining}`);
                 socket.emit('status_update', status);
             });
         } catch (err) {

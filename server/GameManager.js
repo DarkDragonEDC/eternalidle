@@ -314,7 +314,6 @@ export class GameManager {
                         if (actionsToProcess > 0) {
                             const activityReport = await this.processBatchActions(data, actionsToProcess);
                             console.log(`[CATCHUP] ${data.name}: processed=${activityReport.processed}, items=${JSON.stringify(activityReport.itemsGained)}`);
-                            console.log(`[CATCHUP-DEBUG] Remaining after batch: ${data.current_activity?.actions_remaining}`);
                             if (activityReport.processed > 0) {
                                 // Always update state if anything happened
                                 updated = true;
@@ -395,6 +394,21 @@ export class GameManager {
                 data.last_saved = nextSavedDate.toISOString();
 
                 console.log(`[CATCHUP] ${data.name} finished. Processed: ${finalReport.totalTime.toFixed(1)}s, Remaining in buffer: ${(elapsedSeconds - finalReport.totalTime).toFixed(1)}s. New last_saved: ${data.last_saved}`);
+
+                // Sync activity_started_at with actual progress to prevent timer drift in UI
+                if (data.current_activity && data.current_activity.initial_quantity && data.activity_started_at) {
+                    const { initial_quantity, actions_remaining, time_per_action } = data.current_activity;
+                    // Calculate how much work has been done in terms of time
+                    const doneQty = Math.max(0, initial_quantity - actions_remaining);
+                    const tpa = time_per_action || 3;
+                    const elapsedVirtual = doneQty * tpa;
+
+                    // Reset start time so client timer (Now - Start) matches progress (ElapsedVirtual)
+                    // NewStart = Now - WorkDoneTime
+                    const newStart = new Date(Date.now() - (elapsedVirtual * 1000));
+                    data.activity_started_at = newStart.toISOString();
+                    // console.log(`[CATCHUP] Adjusted activity_started_at to ${data.activity_started_at} (Elapsed: ${elapsedVirtual}s)`);
+                }
 
                 // Update the local dbHash to current state since we just processed it
                 data.dbHash = this.calculateHash(data.state);
