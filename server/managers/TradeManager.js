@@ -15,6 +15,13 @@ export class TradeManager {
         if (searchError || !receiverData) throw new Error(`Player '${receiverName}' not found.`);
         if (receiverData.id === sender.id) throw new Error("You cannot trade with yourself.");
 
+        // Check for Ironman restrictions (Name-based or Flag-based)
+        const isSenderIronman = (sender.name.toLowerCase() === 'ironman' || sender.name.toLowerCase().includes('[im]')) || sender.is_ironman;
+        const isReceiverIronman = (receiverData.name.toLowerCase() === 'ironman' || receiverData.name.toLowerCase().includes('[im]')) || receiverData.is_ironman;
+
+        if (isSenderIronman) throw new Error("Ironman characters cannot trade.");
+        if (isReceiverIronman) throw new Error("You cannot trade with an Ironman character.");
+
         // Check if there's already a pending trade between these two
         const { data: existing } = await this.supabase
             .from('trade_sessions')

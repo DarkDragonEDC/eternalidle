@@ -249,7 +249,14 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                         { id: 'inventory', label: 'BAG', icon: <Package size={14} /> },
                         { id: 'market', label: 'MARKET', icon: <Tag size={14} /> },
                         { id: 'trade', label: 'TRADE', icon: <Users size={14} /> }
-                    ].map(item => (
+                    ].filter(item => {
+                        if (item.id === 'trade') {
+                            const name = gameState?.name || '';
+                            const isIronman = name.toLowerCase() === 'ironman' || name.toLowerCase().includes('[im]') || gameState?.is_ironman;
+                            return !isIronman;
+                        }
+                        return true;
+                    }).map(item => (
                         <button
                             key={item.id}
                             onClick={() => {
