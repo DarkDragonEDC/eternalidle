@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import DailySpinModal from './DailySpinModal';
 
-const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActiveCategory, isMobile, isOpen, onClose, onSwitchCharacter, theme, toggleTheme, socket, canSpin, onOpenDailySpin }) => {
+const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActiveCategory, isMobile, isOpen, onClose, onSwitchCharacter, theme, toggleTheme, socket, canSpin, onOpenDailySpin, hasActiveTrade }) => {
     const [expanded, setExpanded] = useState({
         gathering: true,
         refining: false,
@@ -249,14 +249,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                         { id: 'inventory', label: 'BAG', icon: <Package size={14} /> },
                         { id: 'market', label: 'MARKET', icon: <Tag size={14} /> },
                         { id: 'trade', label: 'TRADE', icon: <Users size={14} /> }
-                    ].filter(item => {
-                        if (item.id === 'trade') {
-                            const name = gameState?.name || '';
-                            const isIronman = name.toLowerCase() === 'ironman' || name.toLowerCase().includes('[im]') || gameState?.is_ironman;
-                            return !isIronman;
-                        }
-                        return true;
-                    }).map(item => (
+                    ].map(item => (
                         <button
                             key={item.id}
                             onClick={() => {
@@ -280,6 +273,19 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                             <div style={{ position: 'relative' }}>
                                 {item.icon}
                                 {item.id === 'market' && gameState?.state?.claims?.length > 0 && (
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '-4px',
+                                        right: '-4px',
+                                        width: '8px',
+                                        height: '8px',
+                                        background: '#ff4444',
+                                        borderRadius: '50%',
+                                        border: '1.5px solid var(--panel-bg)',
+                                        boxShadow: '0 0 5px rgba(255, 68, 68, 0.5)'
+                                    }}></div>
+                                )}
+                                {item.id === 'trade' && hasActiveTrade && (
                                     <div style={{
                                         position: 'absolute',
                                         top: '-4px',

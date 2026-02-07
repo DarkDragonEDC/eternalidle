@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Users, Send, X, User } from 'lucide-react';
+import { Search, Users, Send, X, User, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const SocialPanel = ({ socket, isOpen, onClose, onInvite, tradeInvites }) => {
+const SocialPanel = ({ socket, isOpen, onClose, onInvite, tradeInvites, gameState }) => {
     const [searchNick, setSearchNick] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [searching, setSearching] = useState(false);
@@ -42,6 +42,75 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, tradeInvites }) => {
     };
 
     if (!isOpen) return null;
+
+    const isIronman = gameState?.state?.isIronman || gameState?.name?.toLowerCase() === 'ironman' || gameState?.name?.toLowerCase().includes('[im]');
+
+    if (isIronman) {
+        return (
+            <div style={{
+                position: 'fixed', inset: 0, zIndex: 11000,
+                background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
+            }}>
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    style={{
+                        width: '100%', maxWidth: '500px', background: 'var(--panel-bg)',
+                        borderRadius: '16px', border: '1px solid var(--border-active)',
+                        overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+                        position: 'relative'
+                    }}
+                >
+                    <button onClick={onClose} style={{ position: 'absolute', top: '15px', right: '15px', background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', zIndex: 10 }}>
+                        <X size={24} />
+                    </button>
+
+                    <div style={{
+                        padding: '40px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '20px',
+                        textAlign: 'center'
+                    }}>
+                        <div style={{
+                            width: '80px',
+                            height: '80px',
+                            borderRadius: '50%',
+                            background: 'rgba(212, 175, 55, 0.1)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginBottom: '10px',
+                            border: '2px solid rgba(212, 175, 55, 0.2)'
+                        }}>
+                            <Shield size={40} color="var(--accent)" />
+                        </div>
+                        <h2 style={{ color: 'var(--accent)', margin: 0, fontSize: '1.8rem', letterSpacing: '2px' }}>IRONMAN MODE</h2>
+                        <p style={{ color: 'var(--text-dim)', maxWidth: '400px', lineHeight: '1.6', fontSize: '1rem' }}>
+                            Ironman characters are self-sufficient and cannot Trade with other players.
+                            <br /><br />
+                            All items must be gathered, crafted, or found through your own adventures!
+                        </p>
+                        <div style={{
+                            marginTop: '20px',
+                            padding: '15px 25px',
+                            background: 'rgba(255,255,255,0.03)',
+                            borderRadius: '12px',
+                            border: '1px solid var(--border)',
+                            fontSize: '0.9rem',
+                            color: 'var(--accent)',
+                            fontWeight: 'bold'
+                        }}>
+                            STRICT SELF-SUFFICIENCY ACTIVE
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
+        );
+    }
 
     return (
         <div style={{

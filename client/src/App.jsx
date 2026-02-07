@@ -86,6 +86,7 @@ function App() {
   const [session, setSession] = useState(null);
   const [socket, setSocket] = useState(null);
   const [gameState, setGameState] = useState(null);
+  console.log('[App] Version 1.0.1 loaded');
   const [connectionError, setConnectionError] = useState(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const clockOffset = useRef(0);
@@ -359,6 +360,7 @@ function App() {
     });
 
     newSocket.on('daily_status', ({ canSpin }) => {
+      console.log(`[App] Received daily_status: canSpin=${canSpin}`);
       setCanSpin(canSpin);
     });
 
@@ -529,6 +531,7 @@ function App() {
   }, [socket]);
 
   const handleCharacterSelect = (charId) => {
+    setCanSpin(false); // Reset to false while loading new char
     setSelectedCharacter(charId);
     localStorage.setItem('selectedCharacterId', charId);
     if (session?.access_token) {
@@ -540,6 +543,7 @@ function App() {
 
   const handleSwitchCharacter = () => {
     if (socket) socket.disconnect();
+    setCanSpin(false); // Reset state
     setSelectedCharacter(null);
     localStorage.removeItem('selectedCharacterId');
     setGameState(null);
@@ -772,7 +776,7 @@ function App() {
       case 'skills_overview':
         return <SkillsOverview gameState={displayedGameState} onNavigate={(tab, cat) => { setActiveTab(tab); if (cat) setActiveCategory(cat); }} />;
       case 'town_overview':
-        return <TownOverview onNavigate={(tab) => setActiveTab(tab)} gameState={displayedGameState} canSpin={canSpin} onOpenDailySpin={() => setDailySpinOpen(true)} />;
+        return <TownOverview onNavigate={(tab) => setActiveTab(tab)} gameState={displayedGameState} canSpin={canSpin} onOpenDailySpin={() => setDailySpinOpen(true)} hasActiveTrade={tradeInvites?.length > 0 || !!activeTrade} />;
       case 'combat_overview':
         return <CombatOverview gameState={displayedGameState} onNavigate={(tab) => setActiveTab(tab)} />;
       case 'gathering':
@@ -1339,10 +1343,11 @@ function App() {
           socket={socket}
           canSpin={canSpin}
           onOpenDailySpin={() => setDailySpinOpen(true)}
+          hasActiveTrade={tradeInvites?.length > 0 || !!activeTrade}
         />
       )}
 
-      {isMobile && <BottomNav gameState={displayedGameState} activeTab={activeTab} setActiveTab={setActiveTab} onNavigate={(tab) => setActiveTab(tab)} canSpin={canSpin} />}
+      {isMobile && <BottomNav gameState={displayedGameState} activeTab={activeTab} setActiveTab={setActiveTab} onNavigate={(tab) => setActiveTab(tab)} canSpin={canSpin} hasActiveTrade={tradeInvites?.length > 0 || !!activeTrade} />}
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', minHeight: 0 }}>
         <header style={{
@@ -1360,15 +1365,6 @@ function App() {
           gap: '10px'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : 20, minWidth: 0 }}>
-            {/* Mobile Sidebar Toggle */}
-            {isMobile && (
-              <button onClick={() => setSidebarOpen(true)} style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', marginRight: '10px' }}>
-                <Menu size={24} />
-              </button>
-            )}
-
-
-
             {/* Active Players Indicator - Header Left - Mobile Only */}
             {isMobile && (
               <div style={{
@@ -1704,6 +1700,7 @@ function App() {
       <AnimatePresence>
         {showSocialModal && (
           <SocialPanel
+            gameState={displayedGameState}
             socket={socket}
             isOpen={showSocialModal}
             onClose={() => setShowSocialModal(false)}

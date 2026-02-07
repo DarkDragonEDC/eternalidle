@@ -29,7 +29,7 @@ export class DungeonManager {
 
         const inventory = char.state.inventory || {};
         const mapId = dungeon.reqItem;
-        if (!inventory[mapId] || inventory[mapId] < 1) {
+        if (!this.gameManager.inventoryManager.hasItems(char, { [mapId]: 1 })) {
             throw new Error(`Missing required item: ${mapId}`);
         }
 
@@ -335,7 +335,7 @@ export class DungeonManager {
             loot: loot
         });
 
-        if (char.state.dungeon.repeatCount > 0 && inventory[mapId] && inventory[mapId] >= 1) {
+        if (char.state.dungeon.repeatCount > 0 && this.gameManager.inventoryManager.hasItems(char, { [mapId]: 1 })) {
             this.gameManager.inventoryManager.consumeItems(char, { [mapId]: 1 });
             char.state.dungeon.repeatCount--;
             char.state.dungeon.wave = 1;

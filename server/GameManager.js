@@ -789,14 +789,24 @@ export class GameManager {
         };
     }
 
-    async createCharacter(userId, name) {
+    async createCharacter(userId, name, isIronman = false) {
+        console.log(`[SERVER] GameManager.createCharacter: "${name}", isIronman=${isIronman}`);
         // Check character limit
         const { data: chars, error: countError } = await this.supabase
             .from('characters')
-            .select('id')
+            .select('id, state')
             .eq('user_id', userId);
 
         if (chars && chars.length >= 2) throw new Error("Character limit reached (max 2)");
+
+        // Ensure only one of each mode
+        if (chars) {
+            const hasIronman = chars.some(c => c.state?.isIronman);
+            const hasNormal = chars.some(c => !c.state?.isIronman);
+
+            if (isIronman && hasIronman) throw new Error("You already have an Ironman character.");
+            if (!isIronman && hasNormal) throw new Error("You already have a Normal character.");
+        }
 
         // Check if name exists (case-insensitive)
         const { data: existingChar, error: nameError } = await this.supabase
@@ -814,7 +824,7 @@ export class GameManager {
             silver: 0,
             notifications: [],
             unlockedTitles: [],
-            isIronman: (chars && chars.length >= 1) // Forced Ironman for 2nd character
+            isIronman: !!isIronman // USE THE FLAG PROVIDED
         };
 
         // Calculate initial stats (HP) based on skills
@@ -823,6 +833,8 @@ export class GameManager {
 
         initialState.health = stats.maxHP || 100;
         initialState.maxHealth = stats.maxHP || 100;
+
+        console.log(`[SERVER] Final initialState.isIronman: ${initialState.isIronman}`);
 
         const { data, error } = await this.supabase
             .from('characters')

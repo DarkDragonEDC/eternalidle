@@ -224,7 +224,7 @@ app.get('/api/last_active', authMiddleware, async (req, res) => {
     }
 });
 
-// Public route for active players count (characters with actions)
+// Public route for active accounts count (unique users with active characters)
 app.get('/api/active_players', async (req, res) => {
     // Persistent log for debugging
     const logMsg = `[${new Date().toISOString()}] Counter accessed. Origin: ${req.headers.origin}\n`;
@@ -234,13 +234,18 @@ app.get('/api/active_players', async (req, res) => {
     } catch (e) { }
 
     try {
-        const { count, error } = await supabase
+        // Fetch user_id for all characters that have an active activity
+        const { data, error } = await supabase
             .from('characters')
-            .select('*', { count: 'exact', head: true })
-            .or('current_activity.not.is.null');
-        // Simplified for now to prevent 500 while we investigate the JSONB path syntax for .or
+            .select('user_id')
+            .not('current_activity', 'is', null);
 
-        res.json({ count: count || 0 });
+        if (error) throw error;
+
+        // Count unique user_ids to get "active accounts"
+        const uniqueUsers = new Set((data || []).map(c => c.user_id)).size;
+
+        res.json({ count: uniqueUsers });
     } catch (err) {
         console.error('[SERVER] Error:', err);
         res.status(500).json({ count: 0, error: err.message });
@@ -353,10 +358,10 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('create_character', async ({ name }) => {
-        console.log(`[SERVER] Received create_character request: "${name}" from user ${socket.user.email} `);
+    socket.on('create_character', async ({ name, isIronman }) => {
+        console.log(`[SERVER] Received create_character request: "${name}" (Ironman: ${isIronman}) from user ${socket.user.email} `);
         try {
-            const char = await gameManager.createCharacter(socket.user.id, name);
+            const char = await gameManager.createCharacter(socket.user.id, name, isIronman);
             console.log(`[SERVER] Character created successfully: "${name}"`);
             socket.emit('character_created', char);
             socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, char.id));
@@ -763,7 +768,8 @@ io.on('connection', (socket) => {
         const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
         if (!char) return;
 
-        const canSpin = gameManager.dailyRewardManager.canSpin(char);
+        const canSpin = await gameManager.dailyRewardManager.canSpin(char);
+        console.log(`[SOCKET] Daily status requested for user ${socket.user.email} (char ${socket.data.characterId}): canSpin=${canSpin}`);
         socket.emit('daily_status', { canSpin });
     });
 

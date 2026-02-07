@@ -257,8 +257,9 @@ export const SkillsOverview = ({ onNavigate, gameState }) => {
     );
 };
 
-export const TownOverview = ({ onNavigate, gameState, canSpin, onOpenDailySpin }) => {
+export const TownOverview = ({ onNavigate, gameState, canSpin, onOpenDailySpin, hasActiveTrade }) => {
     const hasClaims = gameState?.state?.claims?.length > 0;
+
     return (
         <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {canSpin && (
@@ -276,7 +277,7 @@ export const TownOverview = ({ onNavigate, gameState, canSpin, onOpenDailySpin }
                 />
             )}
             <HubButton label="Market" icon={<ShoppingBag />} color="#fbbf24" onClick={() => onNavigate('market')} showBadge={hasClaims} />
-            <HubButton label="Trade" icon={<ArrowLeftRight />} color="#8b5cf6" onClick={() => onNavigate('trade')} />
+            <HubButton label="Trade" icon={<ArrowLeftRight />} color="#8b5cf6" onClick={() => onNavigate('trade')} showBadge={hasActiveTrade} />
             <HubButton label="Ranking" icon={<Trophy />} color="#a78bfa" onClick={() => onNavigate('ranking')} />
             <HubButton label="Taxometer" icon={<Coins />} color="var(--accent)" onClick={() => onNavigate('taxometer')} />
         </div>

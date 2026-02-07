@@ -25,22 +25,33 @@ export class DailyRewardManager {
         this.gameManager = gameManager;
     }
 
-    canSpin(char) {
-        if (!char.state.daily_spin) return true;
+    async canSpin(char) {
+        if (!char.user_id) return false;
 
-        const lastSpin = new Date(char.state.daily_spin.last_spin_date);
-        const now = new Date();
+        const { data, error } = await this.gameManager.supabase
+            .from('daily_rewards')
+            .select('last_spin')
+            .eq('user_id', char.user_id)
+            .single();
 
-        // Reset at 00:00 UTC
-        // We compare the ISO Date String part (YYYY-MM-DD)
+        if (error && error.code !== 'PGRST116') {
+            console.error('[DAILY] Error checking spin status:', error);
+            return false; // Fail safe? Or true? Let's assume false to prevent exploit on error
+        }
+
+        if (!data) return true; // No record means never spun
+
+        const lastSpin = new Date(data.last_spin);
         const lastDate = lastSpin.toISOString().split('T')[0];
         const nowDate = now.toISOString().split('T')[0];
-
-        return lastDate !== nowDate;
+        const canSpin = lastDate !== nowDate;
+        console.log(`[DAILY] User ${char.user_id} spin check: lastDate=${lastDate}, nowDate=${nowDate}, canSpin=${canSpin}`);
+        return canSpin;
     }
 
     async spin(char) {
-        if (!this.canSpin(char)) {
+        const canSpin = await this.canSpin(char);
+        if (!canSpin) {
             return { success: false, error: "Already spun today. Come back tomorrow!" };
         }
 
@@ -81,12 +92,21 @@ export class DailyRewardManager {
             message = `Won ${reward.qty}x Membership!`;
         }
 
-        // Update State
-        char.state.daily_spin = {
-            last_spin_date: new Date().toISOString(),
-            total_spins: (char.state.daily_spin?.total_spins || 0) + 1
-        };
+        // Update DB - Account Level
+        const { error } = await this.gameManager.supabase
+            .from('daily_rewards')
+            .upsert({
+                user_id: char.user_id,
+                last_spin: new Date().toISOString()
+            });
 
+        if (error) {
+            console.error('[DAILY] Error saving spin state:', error);
+            // We still return success because the player got the item, but they might get to spin again if DB fails.
+            // Ideally we'd transact this but we can't easily here.
+        }
+
+        // Save char state for the item changes
         await this.gameManager.saveState(char.id, char.state);
 
         return {

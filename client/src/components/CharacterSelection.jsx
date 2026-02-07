@@ -8,7 +8,7 @@ import { formatNumber, formatSilver } from '@utils/format';
 const CharacterSelection = ({ onSelectCharacter }) => {
     const [characters, setCharacters] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [creating, setCreating] = useState(false);
+    const [creating, setCreating] = useState(null); // 'normal' or 'ironman' or null
     const [newCharName, setNewCharName] = useState('');
     const [error, setError] = useState(null);
     const [confirmDelete, setConfirmDelete] = useState(null); // stores char.id if confirming
@@ -78,7 +78,10 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ name: newCharName })
+                body: JSON.stringify({
+                    name: newCharName,
+                    isIronman: creating === 'ironman'
+                })
             });
 
             if (!res.ok) {
@@ -88,7 +91,7 @@ const CharacterSelection = ({ onSelectCharacter }) => {
 
             const newChar = await res.json();
             setCharacters([...characters, newChar]);
-            setCreating(false);
+            setCreating(null);
             setNewCharName('');
             setError(null);
         } catch (err) {
@@ -152,88 +155,108 @@ const CharacterSelection = ({ onSelectCharacter }) => {
             {error && <div className="error-message">{error}</div>}
 
             <div className="char-list">
-                {[0, 1].map(index => {
-                    const char = characters[index];
-                    const isIronmanSlot = index === 1;
+                {(() => {
+                    const normalChar = characters.find(c => !c.state?.isIronman);
+                    const ironmanChar = characters.find(c => !!c.state?.isIronman);
+                    const orphanedChar = (characters.length === 2 && (!normalChar || !ironmanChar))
+                        ? characters.find(c => c.id !== (normalChar?.id || ironmanChar?.id))
+                        : null;
 
-                    return (
-                        <div key={index} className="slot-container">
-                            <div className="slot-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                {isIronmanSlot ? (
-                                    <>
-                                        IRONMAN MODE
-                                        <div className="info-icon-container"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setShowIronmanTooltip(!showIronmanTooltip);
-                                            }}
-                                        >
-                                            <Info size={14} style={{ cursor: 'help', opacity: 0.7 }} />
-                                            <div className={`info-tooltip ${showIronmanTooltip ? 'show' : ''}`}>
-                                                <b>Solo Challenge Mode:</b><br />
-                                                No Trading, No Market access,<br />
-                                                and no player interaction.
+                    return [0, 1].map(index => {
+                        const isIronmanSlot = index === 1;
+                        let char = isIronmanSlot ? ironmanChar : normalChar;
+
+                        // If this slot is empty but we have an orphaned character, show it here?
+                        // Or only show it if it's the only one left and its slot is "taken" (unlikely for 2 chars)
+                        // Actually, if we have two of one mode, show the second one in the 'wrong' slot with a warning
+                        if (!char && orphanedChar) {
+                            char = orphanedChar;
+                        }
+
+                        return (
+                            <div key={index} className="slot-container">
+                                <div className="slot-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    {isIronmanSlot ? (
+                                        <>
+                                            IRONMAN MODE
+                                            <div className="info-icon-container"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setShowIronmanTooltip(!showIronmanTooltip);
+                                                }}
+                                            >
+                                                <Info size={14} style={{ cursor: 'help', opacity: 0.7 }} />
+                                                <div className={`info-tooltip ${showIronmanTooltip ? 'show' : ''}`}>
+                                                    <b>Solo Challenge Mode:</b><br />
+                                                    No Trading, No Market access,<br />
+                                                    and no player interaction.
+                                                </div>
                                             </div>
-                                        </div>
-                                    </>
-                                ) : 'NORMAL MODE'}
-                            </div>
-
-                            {char ? (
-                                <div className="char-card" onClick={() => onSelectCharacter(char.id)}>
-                                    <div style={{ position: 'relative' }}>
-                                        {char.state?.isIronman && (
-                                            <div className="ironman-badge">IRONMAN</div>
-                                        )}
-                                        <h3 className="char-name">{char.name}</h3>
-                                        <button
-                                            className={`delete-btn ${confirmDelete === char.id ? 'confirming' : ''}`}
-                                            onClick={(e) => handleDelete(e, char.id)}
-                                            title={confirmDelete === char.id ? "Click again to confirm" : "Delete character"}
-                                        >
-                                            {confirmDelete === char.id ? '?' : <Trash2 size={16} />}
-                                        </button>
-                                    </div>
-                                    <div className="char-info">
-                                        <p>Total Level: {char.state && char.state.skills ? formatNumber(Object.values(char.state.skills).reduce((acc, s) => acc + (s.level || 0), 0)) : 0}</p>
-                                        <p>Silver: {char.state ? formatNumber(char.state.silver || 0) : 0}</p>
-                                        <p className="char-icons">{getEquipmentIcons(char)}</p>
-                                    </div>
-                                    <button className="play-btn">Play</button>
+                                        </>
+                                    ) : 'NORMAL MODE'}
                                 </div>
-                            ) : (
-                                <>
-                                    {creating ? (
-                                        <div className="char-card create-form">
-                                            <input
-                                                type="text"
-                                                placeholder="Character Name"
-                                                value={newCharName}
-                                                onChange={(e) => setNewCharName(e.target.value)}
-                                                maxLength={12}
-                                                autoFocus
-                                            />
-                                            <div className="create-actions">
-                                                <button onClick={handleCreate}>Create</button>
-                                                <button className="cancel" onClick={() => setCreating(false)}>Cancel</button>
-                                            </div>
+
+                                {char ? (
+                                    <div className="char-card" onClick={() => onSelectCharacter(char.id)}>
+                                        <div style={{ position: 'relative' }}>
+                                            {char.state?.isIronman && (
+                                                <div className="ironman-badge">IRONMAN</div>
+                                            )}
+                                            {((isIronmanSlot && !char.state?.isIronman) || (!isIronmanSlot && char.state?.isIronman)) && (
+                                                <div style={{ position: 'absolute', top: '-25px', left: '50%', transform: 'translateX(-50%)', background: '#ff4444', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold', zIndex: 6, whiteSpace: 'nowrap' }}>
+                                                    WRONG SLOT
+                                                </div>
+                                            )}
+                                            <h3 className="char-name">{char.name}</h3>
+                                            <button
+                                                className={`delete-btn ${confirmDelete === char.id ? 'confirming' : ''}`}
+                                                onClick={(e) => handleDelete(e, char.id)}
+                                                title={confirmDelete === char.id ? "Click again to confirm" : "Delete character"}
+                                            >
+                                                {confirmDelete === char.id ? '?' : <Trash2 size={16} />}
+                                            </button>
                                         </div>
-                                    ) : (
-                                        index === characters.length && (
-                                            <div className="char-card new-char" onClick={() => setCreating(true)}>
-                                                <div className="plus-icon">+</div>
-                                                <p>New Character</p>
-                                                {isIronmanSlot && (
-                                                    <p style={{ fontSize: '0.65rem', color: '#ff5252', marginTop: '-5px', fontWeight: 'bold' }}>Solo Mode Only</p>
-                                                )}
+                                        <div className="char-info">
+                                            <p>Total Level: {char.state && char.state.skills ? formatNumber(Object.values(char.state.skills).reduce((acc, s) => acc + (s.level || 0), 0)) : 0}</p>
+                                            <p>Silver: {char.state ? formatNumber(char.state.silver || 0) : 0}</p>
+                                            <p className="char-icons">{getEquipmentIcons(char)}</p>
+                                        </div>
+                                        <button className="play-btn">Play</button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        {creating === (isIronmanSlot ? 'ironman' : 'normal') ? (
+                                            <div className="char-card create-form version-marker-v2">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Character Name"
+                                                    value={newCharName}
+                                                    onChange={(e) => setNewCharName(e.target.value)}
+                                                    maxLength={12}
+                                                    autoFocus
+                                                />
+                                                <div className="create-actions">
+                                                    <button onClick={handleCreate}>Create</button>
+                                                    <button className="cancel" onClick={() => setCreating(null)}>Cancel</button>
+                                                </div>
                                             </div>
-                                        )
-                                    )}
-                                </>
-                            )}
-                        </div>
-                    );
-                })}
+                                        ) : (
+                                            !char && (
+                                                <div className="char-card new-char" onClick={() => setCreating(isIronmanSlot ? 'ironman' : 'normal')}>
+                                                    <div className="plus-icon">+</div>
+                                                    <p>New Character</p>
+                                                    {isIronmanSlot && (
+                                                        <p style={{ fontSize: '0.65rem', color: '#ff5252', marginTop: '-5px', fontWeight: 'bold' }}>Solo Mode Only</p>
+                                                    )}
+                                                </div>
+                                            )
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        );
+                    });
+                })()}
             </div>
             <style>{`
                 .char-select-container {
@@ -519,7 +542,7 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                     z-index: 5;
                 }
             `}</style>
-        </div>
+        </div >
     );
 };
 

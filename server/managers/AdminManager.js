@@ -176,21 +176,17 @@ export class AdminManager {
         let targetName = args[0] || 'me';
         const char = await this.resolveTarget(socket, targetName);
 
-        if (char.state.daily_spin) {
-            // Set to yesterday
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            char.state.daily_spin.last_spin_date = yesterday.toISOString();
-        } else {
-            // Initialize if not exists (so it's ready to spin anyway)
-            char.state.daily_spin = {
-                last_spin_date: "2000-01-01T00:00:00.000Z",
-                total_spins: 0
-            };
+        // Delete from DB to allow re-spin
+        const { error } = await this.gameManager.supabase
+            .from('daily_rewards')
+            .delete()
+            .eq('user_id', char.user_id);
+
+        if (error) {
+            return { success: false, error: "Failed to reset daily spin: " + error.message };
         }
 
-        await this.saveAndNotify(char);
-        return { success: true, message: `Reset Daily Spin cooldown for ${char.name}.` };
+        return { success: true, message: `Reset Daily Spin cooldown for ${char.name} (Account-wide).` };
     }
 
     async cmdHelp(socket) {

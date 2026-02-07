@@ -1,7 +1,7 @@
 import React from 'react';
 import { Home, User, Package, Zap, Castle, Map, Skull, Trophy, ShoppingBag } from 'lucide-react';
 
-const BottomNav = ({ gameState, activeTab, setActiveTab, onNavigate, canSpin }) => {
+const BottomNav = ({ gameState, activeTab, setActiveTab, onNavigate, canSpin, hasActiveTrade }) => {
     const navItems = [
         { id: 'profile', label: 'Profile', icon: <User size={20} /> }, // Using Profile as Home/Dashboard
         { id: 'inventory', label: 'Inventory', icon: <Package size={20} /> },
@@ -69,7 +69,7 @@ const BottomNav = ({ gameState, activeTab, setActiveTab, onNavigate, canSpin }) 
                     >
                         <div style={{ position: 'relative' }}>
                             {item.icon}
-                            {item.id === 'town' && (gameState?.state?.claims?.length > 0 || canSpin) && (
+                            {item.id === 'town' && (gameState?.state?.claims?.length > 0 || canSpin || hasActiveTrade) && (
                                 <div style={{
                                     position: 'absolute',
                                     top: '-4px',

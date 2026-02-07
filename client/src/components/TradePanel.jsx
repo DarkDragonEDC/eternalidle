@@ -97,7 +97,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
             <div style={{
                 position: 'fixed',
                 zIndex: 12000,
-                inset: isMobile ? '3% 2%' : '10% 20%',
+                inset: isMobile ? '3% 2%' : '5% 10%',
                 background: isMobile ? '#121212' : 'rgba(18,18,18,0.95)',
                 backdropFilter: isMobile ? 'none' : 'blur(10px)',
                 display: 'flex', flexDirection: 'column',
@@ -167,9 +167,9 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                     maxWidth: '1200px', width: '100%', margin: '10px auto',
                     flex: 1,
                     display: 'grid',
-                    gridTemplateColumns: isMobile ? (mobileTab === 'OFFER' ? '1fr 1fr' : '1fr') : 'minmax(250px, 1fr) 300px minmax(250px, 1fr)',
+                    gridTemplateColumns: isMobile ? (mobileTab === 'OFFER' ? '1fr 1fr' : '1fr') : '1fr 1.4fr 1fr',
                     gap: isMobile ? '8px' : '15px',
-                    overflowY: 'auto',
+                    overflowY: 'hidden',
                     overflowX: 'hidden'
                 }}>
                     {/* YOUR SIDE */}
@@ -243,7 +243,15 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                     {(!isMobile || mobileTab === 'INVENTORY') && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '10px' : '15px', overflow: 'hidden' }}>
                             <div className="glass-panel" style={{ padding: isMobile ? '10px' : '15px', borderRadius: '16px', border: '1px solid var(--border)', background: 'rgba(0,0,0,0.3)' }}>
-                                <div style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--text-dim)', marginBottom: isMobile ? '5px' : '10px', letterSpacing: '1px' }}>ADD SILVER</div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? '5px' : '10px' }}>
+                                    <div style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--text-dim)', letterSpacing: '1px' }}>ADD SILVER</div>
+                                    <div
+                                        onClick={() => setSilverInput(Math.max(0, currentSilver - localOffer.silver).toString())}
+                                        style={{ fontSize: '0.7rem', color: 'var(--accent)', cursor: 'pointer', fontWeight: 'bold' }}
+                                    >
+                                        MAX: {Math.max(0, currentSilver - localOffer.silver).toLocaleString()}
+                                    </div>
+                                </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <input
                                         type="number"
@@ -262,7 +270,6 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                     >
                                         ADD
                                     </button>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>max: {Math.max(0, currentSilver - localOffer.silver).toLocaleString()}</div>
                                 </div>
                             </div>
 

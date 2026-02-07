@@ -26,12 +26,12 @@ export const characterRoutes = (gameManager) => {
     // Create Character
     router.post('/', async (req, res) => {
         try {
-            const { name } = req.body;
+            const { name, isIronman } = req.body;
             if (!name || name.length < 3) {
                 return res.status(400).json({ error: 'Name must be at least 3 characters long.' });
             }
 
-            const data = await gameManager.createCharacter(req.user.id, name);
+            const data = await gameManager.createCharacter(req.user.id, name, isIronman);
             res.json(data);
         } catch (err) {
             console.error('Error creating character:', err);
