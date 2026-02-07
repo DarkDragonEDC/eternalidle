@@ -366,6 +366,12 @@ function App() {
       setIsConnecting(true);
     });
 
+    // Handle forced disconnect (duplicate session)
+    newSocket.on('force_disconnect', ({ reason }) => {
+      alert(reason || 'You have been disconnected.');
+      window.location.reload();
+    });
+
     newSocket.on('connect_error', async (err) => {
       console.error('Connection error:', err);
 

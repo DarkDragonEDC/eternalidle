@@ -297,6 +297,19 @@ io.on('connection', (socket) => {
         if (!characterId) return;
         const userId = socket.user.id;
 
+        // === SINGLE SESSION ENFORCEMENT ===
+        // Disconnect any existing sessions for this character
+        for (const [existingSocketId, existingSocket] of connectedSockets.entries()) {
+            if (existingSocket.data.characterId === characterId && existingSocketId !== socket.id) {
+                console.log(`[SESSION] Kicking previous session ${existingSocketId} for character ${characterId}`);
+                existingSocket.emit('force_disconnect', {
+                    reason: 'You have been disconnected because you logged in from another device or browser tab.'
+                });
+                existingSocket.disconnect(true);
+            }
+        }
+        // ===================================
+
         socket.join(`user:${userId}`);
         socket.data.characterId = characterId;
 
