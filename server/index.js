@@ -754,9 +754,40 @@ io.on('connection', (socket) => {
             const lastChat = socket.data.lastChatTime || 0;
             const now = Date.now();
             if (now - lastChat < 10000) {
-                const remaining = Math.ceil((10000 - (now - lastChat)) / 1000);
-                socket.emit('error', { message: `Chat cooldown: Wait ${remaining}s` });
-                return;
+                // Allow commands to bypass cooldown
+                if (!content.startsWith('/')) {
+                    const remaining = Math.ceil((10000 - (now - lastChat)) / 1000);
+                    socket.emit('error', { message: `Chat cooldown: Wait ${remaining}s` });
+                    return;
+                }
+            }
+
+            // check for commands
+            if (content.startsWith('/')) {
+                const parts = content.slice(1).trim().split(/\s+/);
+                const command = parts[0].toLowerCase();
+                const args = parts.slice(1);
+
+                const result = await gameManager.adminManager.handleCommand(socket, command, args);
+
+                if (result.success) {
+                    // Send feedback as a system message in chat
+                    socket.emit('new_message', {
+                        id: 'sys-' + Date.now(),
+                        sender_name: '[SYSTEM]',
+                        content: result.message || 'Command executed successfully.',
+                        created_at: new Date().toISOString()
+                    });
+                } else {
+                    // Send error as a system message in chat
+                    socket.emit('new_message', {
+                        id: 'err-' + Date.now(),
+                        sender_name: '[ERROR]',
+                        content: result.error || 'Command failed.',
+                        created_at: new Date().toISOString()
+                    });
+                }
+                return; // Do not broadcast commands to global chat
             }
 
             const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);

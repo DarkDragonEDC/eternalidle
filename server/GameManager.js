@@ -8,6 +8,7 @@ import { CombatManager } from './managers/CombatManager.js';
 import { MarketManager } from './managers/MarketManager.js';
 import { DungeonManager } from './managers/DungeonManager.js';
 import { CrownsManager } from './managers/CrownsManager.js';
+import { AdminManager } from './managers/AdminManager.js';
 import { pruneState, hydrateState } from './utils/statePruner.js';
 
 const ITEM_LOOKUP = {};
@@ -31,6 +32,7 @@ export class GameManager {
         this.marketManager = new MarketManager(this);
         this.dungeonManager = new DungeonManager(this);
         this.crownsManager = new CrownsManager(this);
+        this.adminManager = new AdminManager(this);
         this.userLocks = new Map(); // userId -> Promise (current task)
         this.cache = new Map(); // charId -> character object
         this.dirty = new Set(); // set of charIds that need persisting
