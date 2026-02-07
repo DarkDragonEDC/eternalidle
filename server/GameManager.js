@@ -314,6 +314,7 @@ export class GameManager {
                         if (actionsToProcess > 0) {
                             const activityReport = await this.processBatchActions(data, actionsToProcess);
                             console.log(`[CATCHUP] ${data.name}: processed=${activityReport.processed}, items=${JSON.stringify(activityReport.itemsGained)}`);
+                            console.log(`[CATCHUP-DEBUG] Remaining after batch: ${data.current_activity?.actions_remaining}`);
                             if (activityReport.processed > 0) {
                                 // Always update state if anything happened
                                 updated = true;
