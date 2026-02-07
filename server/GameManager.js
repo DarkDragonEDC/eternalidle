@@ -410,8 +410,12 @@ export class GameManager {
                     // console.log(`[CATCHUP] Adjusted activity_started_at to ${data.activity_started_at} (Elapsed: ${elapsedVirtual}s)`);
                 }
 
+                // Add wall-clock elapsed time to report for UI accuracy
+                finalReport.elapsedTime = elapsedSeconds;
+
                 // Update the local dbHash to current state since we just processed it
-                data.dbHash = this.calculateHash(data.state);
+                // REMOVED: saveCharacter handles hash update to ensure consistency
+                // data.dbHash = this.calculateHash(data.state);
             }
 
             // Shard Migration Logic: Convert any T2+ shards to T1
