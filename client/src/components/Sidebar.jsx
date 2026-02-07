@@ -197,7 +197,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
 
                 {/* Discord Button */}
                 <a
-                    href="https://discord.gg/wgcEvkfCt2"
+                    href="https://discord.gg/mMrBuBHW5q"
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{

@@ -476,7 +476,7 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                 </button>
 
                                 {/* Discord */}
-                                <a href="https://discord.gg/YNHtx5xStV" target="_blank" rel="noopener noreferrer" style={{
+                                <a href="https://discord.gg/mMrBuBHW5q" target="_blank" rel="noopener noreferrer" style={{
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     width: '40px', height: '40px', background: '#5865F2',
                                     borderRadius: '12px', color: '#fff'
