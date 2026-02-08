@@ -764,32 +764,38 @@ io.on('connection', (socket) => {
 
     // --- DAILY SPIN EVENTS ---
     socket.on('request_daily_status', async () => {
-        const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
-        if (!char) return;
+        // FIX: Use executeLocked to prevent race condition with join_character catchup
+        await gameManager.executeLocked(socket.user.id, async () => {
+            const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+            if (!char) return;
 
-        const canSpin = await gameManager.dailyRewardManager.canSpin(char);
-        console.log(`[SOCKET] Daily status requested for user ${socket.user.email} (char ${socket.data.characterId}): canSpin=${canSpin}`);
-        socket.emit('daily_status', { canSpin });
+            const canSpin = await gameManager.dailyRewardManager.canSpin(char);
+            console.log(`[SOCKET] Daily status requested for user ${socket.user.email} (char ${socket.data.characterId}): canSpin=${canSpin}`);
+            socket.emit('daily_status', { canSpin });
+        });
     });
 
     socket.on('spin_daily', async () => {
-        const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
-        if (!char) return;
+        // FIX: Use executeLocked to prevent race condition
+        await gameManager.executeLocked(socket.user.id, async () => {
+            const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+            if (!char) return;
 
-        try {
-            const result = await gameManager.dailyRewardManager.spin(char);
-            if (result.success) {
-                // Return result to client
-                socket.emit('daily_spin_result', result);
-                // Also update status immediately
-                socket.emit('daily_status', { canSpin: false });
-            } else {
-                socket.emit('error', { message: result.error });
+            try {
+                const result = await gameManager.dailyRewardManager.spin(char);
+                if (result.success) {
+                    // Return result to client
+                    socket.emit('daily_spin_result', result);
+                    // Also update status immediately
+                    socket.emit('daily_status', { canSpin: false });
+                } else {
+                    socket.emit('error', { message: result.error });
+                }
+            } catch (err) {
+                console.error('Daily spin error:', err);
+                socket.emit('error', { message: "Failed to process daily spin." });
             }
-        } catch (err) {
-            console.error('Daily spin error:', err);
-            socket.emit('error', { message: "Failed to process daily spin." });
-        }
+        });
     });
 
 
