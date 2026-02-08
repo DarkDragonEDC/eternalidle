@@ -512,9 +512,10 @@ export class GameManager {
             const cacheTime = new Date(char.last_saved).getTime();
 
             if (dbTime > cacheTime) {
-                console.warn(`[DB] PERSISTENCE CONFLICT for ${char.name}! DB has newer data (${remote.last_saved}) than Cache (${char.last_saved}). Aborting save to prevent rolling back progress.`);
-                // Force cache to mark as clean to prevent further attempts until re-synced
+                console.warn(`[DB] PERSISTENCE CONFLICT for ${char.name}! DB has newer data (${remote.last_saved}) than Cache (${char.last_saved}). Aborting save and clearing stale cache.`);
+                // Force cache to mark as clean and delete from cache to force reload on next access
                 this.dirty.delete(charId);
+                this.cache.delete(charId);
                 return;
             }
         }
