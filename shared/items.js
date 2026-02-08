@@ -645,7 +645,8 @@ const indexItems = (obj) => {
         }
     });
 };
-// indexItems(ITEMS); // Moved to end of file
+indexItems(ITEMS); // Populate it immediately
+
 
 export const resolveItem = (itemId, overrideQuality = null) => {
     if (!itemId) return null;

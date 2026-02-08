@@ -1,16 +1,7 @@
-import { ITEMS, QUALITIES, resolveItem } from '../../shared/items.js';
+import { ITEMS, QUALITIES, resolveItem, ITEM_LOOKUP } from '../../shared/items.js';
 
-const ITEM_LOOKUP = {};
-const flattenItems = (obj) => {
-    for (const key in obj) {
-        if (obj[key] && obj[key].id) {
-            ITEM_LOOKUP[obj[key].id] = obj[key];
-        } else if (typeof obj[key] === 'object') {
-            flattenItems(obj[key]);
-        }
-    }
-};
-flattenItems(ITEMS);
+// Removed local ITEM_LOOKUP generation in favor of shared source of truth
+
 
 export class InventoryManager {
     constructor(gameManager) {

@@ -1,0 +1,15 @@
+{
+  "processedRounds": 3600,
+  "kills": 327,
+  "xpGained": {
+    "COMBAT": 8175
+  },
+  "silverGained": 3171,
+  "itemsGained": {
+    "T1_DUNGEON_MAP": 3
+  },
+  "died": false,
+  "foodConsumed": 0,
+  "totalTime": 3600,
+  "monsterName": "Rabbit"
+}

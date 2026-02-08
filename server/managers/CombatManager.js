@@ -78,6 +78,16 @@ export class CombatManager {
         const combat = char.state.combat;
         if (!combat) return null;
 
+        // FIX: Sanitize Combat State (handle NaN/Undefined health)
+        if (!combat.mobMaxHealth || isNaN(combat.mobMaxHealth)) {
+            // console.log(`[COMBAT-FIX] Resetting invalid mobMaxHealth for ${char.name}`);
+            combat.mobMaxHealth = 100; // Fallback
+        }
+        if (typeof combat.mobHealth !== 'number' || isNaN(combat.mobHealth)) {
+            // console.log(`[COMBAT-FIX] Resetting invalid mobHealth for ${char.name}`);
+            combat.mobHealth = combat.mobMaxHealth;
+        }
+
         // Use simulated time if provided, otherwise real time
         const now = currentTime || Date.now();
 

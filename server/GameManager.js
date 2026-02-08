@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { ITEMS, ALL_RUNE_TYPES, RUNES_BY_CATEGORY } from '../shared/items.js';
+import { ITEMS, ALL_RUNE_TYPES, RUNES_BY_CATEGORY, ITEM_LOOKUP } from '../shared/items.js';
 import { CHEST_DROP_TABLE } from '../shared/chest_drops.js';
 import { INITIAL_SKILLS, calculateNextLevelXP } from '../shared/skills.js';
 import { InventoryManager } from './managers/InventoryManager.js';
@@ -13,17 +13,8 @@ import { DailyRewardManager } from './managers/DailyRewardManager.js';
 import { TradeManager } from './managers/TradeManager.js';
 import { pruneState, hydrateState } from './utils/statePruner.js';
 
-const ITEM_LOOKUP = {};
-const flattenItems = (obj) => {
-    for (const key in obj) {
-        if (obj[key] && obj[key].id) {
-            ITEM_LOOKUP[obj[key].id] = obj[key];
-        } else if (typeof obj[key] === 'object') {
-            flattenItems(obj[key]);
-        }
-    }
-};
-flattenItems(ITEMS);
+// Removed local ITEM_LOOKUP generation in favor of shared source of truth
+
 
 export class GameManager {
     constructor(supabase) {
@@ -481,8 +472,12 @@ export class GameManager {
             }
 
             if (updated) {
+                // FIX: Must mark dirty so persistCharacter actually does the work
                 this.markDirty(data.id);
+                // FIX: Persist immediately after catchup to ensure gains aren't lost if server shuts down
+                await this.persistCharacter(data.id);
             }
+
         }
         return data;
     }
@@ -497,7 +492,10 @@ export class GameManager {
     }
 
     async persistCharacter(charId) {
-        if (!this.dirty.has(charId)) return;
+        if (!this.dirty.has(charId)) {
+            // console.log(`[DB] Skipping persistence for ${charId} (not dirty)`);
+            return;
+        }
         const char = this.cache.get(charId);
         if (!char) return;
 
@@ -584,7 +582,10 @@ export class GameManager {
     async processBatchActions(char, quantity) {
         const { type } = char.current_activity;
         const item = ITEM_LOOKUP[char.current_activity.item_id];
-        if (!item) return { processed: 0, itemsGained: {}, xpGained: {} };
+        if (!item) {
+            console.warn(`[OFFLINE-FAIL] Item lookup failed for ${char.current_activity.item_id} during batch processing. Qty: ${quantity}`);
+            return { processed: 0, itemsGained: {}, xpGained: {} };
+        }
 
         const invBefore = char.state.inventory[item.id] || 0;
         console.log(`[BATCH] Starting ${quantity}x ${type} for ${item.id}. Inv before: ${invBefore}`);
@@ -658,7 +659,9 @@ export class GameManager {
         const atkSpeed = Number(stats.attackSpeed) || 1000;
         const monsterName = char.state.combat?.mobName || "Unknown Monster";
 
-        const startTime = char.state.combat?.started_at ? new Date(char.state.combat.started_at).getTime() : Date.now();
+        // FIX: Start simulation from the time the character was last saved (logout time), 
+        // not from the beginning of the entire combat session.
+        const startTime = char.last_saved ? new Date(char.last_saved).getTime() : Date.now();
 
         let roundsProcessed = 0;
         for (let i = 0; i < rounds; i++) {

@@ -9,7 +9,7 @@ async function findCharacterActivity() {
     const { data, error } = await supabase
         .from('characters')
         .select('*')
-        .ilike('name', '%myu%');
+        .ilike('name', '%eternoiron%'); // Searching for T3RNO or Eterno items
 
     const result = {
         success: !error,
