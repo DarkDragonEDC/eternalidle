@@ -163,7 +163,15 @@ export class GameManager {
         // Try Cache first
         if (characterId && this.cache.has(characterId) && !bypassCache) {
             // console.log(`[CACHE] Hit for ${characterId}`);
-            return this.cache.get(characterId);
+            const cachedChar = this.cache.get(characterId);
+
+            // CRITICAL: Even if it's a cache hit, if catchup is requested, we MUST run it
+            // if the character has been 'idle' in the cache.
+            if (catchup && (cachedChar.current_activity || cachedChar.state?.combat || cachedChar.state?.dungeon)) {
+                // Continue to catchup logic below instead of returning immediately
+            } else {
+                return cachedChar;
+            }
         }
 
         let query = this.supabase
@@ -400,18 +408,25 @@ export class GameManager {
                 console.log(`[CATCHUP] ${data.name} finished. Processed: ${finalReport.totalTime.toFixed(1)}s, Remaining in buffer: ${(elapsedSeconds - finalReport.totalTime).toFixed(1)}s. New last_saved: ${data.last_saved}`);
 
                 // Sync activity_started_at with actual progress to prevent timer drift in UI
-                if (data.current_activity && data.current_activity.initial_quantity && data.activity_started_at) {
+                if (data.current_activity && data.activity_started_at) {
                     const { initial_quantity, actions_remaining, time_per_action } = data.current_activity;
-                    // Calculate how much work has been done in terms of time
-                    const doneQty = Math.max(0, initial_quantity - actions_remaining);
                     const tpa = time_per_action || 3;
+
+                    // Defensive: if initial_quantity is missing, we use a sensible fallback
+                    // to avoid resetting the visual timer to 0.
+                    const iqty = initial_quantity || (actions_remaining + Math.floor(finalReport.totalTime / tpa));
+                    const doneQty = Math.max(0, iqty - actions_remaining);
                     const elapsedVirtual = doneQty * tpa;
 
                     // Reset start time so client timer (Now - Start) matches progress (ElapsedVirtual)
                     // NewStart = Now - WorkDoneTime
                     const newStart = new Date(Date.now() - (elapsedVirtual * 1000));
                     data.activity_started_at = newStart.toISOString();
-                    // console.log(`[CATCHUP] Adjusted activity_started_at to ${data.activity_started_at} (Elapsed: ${elapsedVirtual}s)`);
+
+                    // Ensure initial_quantity is persisted if it was missing
+                    if (!data.current_activity.initial_quantity) {
+                        data.current_activity.initial_quantity = iqty;
+                    }
                 }
 
                 // Add wall-clock elapsed time to report for UI accuracy
@@ -1437,46 +1452,89 @@ export class GameManager {
         return { used: eatenCount > 0, amount: totalHealed };
     }
 
-    async getLeaderboard(type = 'COMBAT') {
-        // console.log(`[RANKING] Fetching leaderboard for type: ${type}`);
+    async getLeaderboard(type = 'COMBAT', requesterId = null, mode = 'NORMAL') {
+        // console.log(`[RANKING] Fetching leaderboard for type: ${type}, mode: ${mode}`);
         let query = this.supabase
             .from('characters')
             .select('id, name, state')
             .or('is_admin.is.null,is_admin.eq.false'); // Exclude admins
 
-        // Increased limit to 1000 to ensure we don't miss players when the DB grows
-        const { data, error } = await query.limit(1000);
-        if (error) {
-            console.error("[RANKING] DB Error:", error);
-            return [];
+        // Mode Filtering
+        if (mode === 'IRONMAN') {
+            // Check if isIronman is true in the state JSON
+            // Postgres JSONB query for boolean true
+            query = query.contains('state', { isIronman: true });
+        } else {
+            // NORMAL mode: isIronman is false OR null/undefined
+            // We use 'not' contains { isIronman: true } to cover both false and missing
+            // But Supabase/PostgREST 'not.cs' might be tricky.
+            // Alternative: Filter in memory if dataset is small, but for 1000 limit, better DB side.
+            // Let's rely on filter-in-memory for "NORMAL" to ensure we handle 'undefined' correctly without complex JSONB queries,
+            // OR use a raw filter if needed.
+            // For now, let's fetch slightly more and filter in memory for robustness, 
+            // as 'isIronman' might be missing on old chars.
         }
 
-        if (!data) return [];
+        // Increased limit to 2000 to allow in-memory filtering effectively
+        const { data, error } = await query.limit(2000);
+        if (error) {
+            console.error("[RANKING] DB Error:", error);
+            return { type, top100: [], userRank: null };
+        }
+
+        if (!data) return { type, top100: [], userRank: null };
 
         const sortKey = type || 'COMBAT';
 
-        return data
-            .filter(c => c && c.state)
-            .sort((a, b) => {
-                const getVal = (char, key) => {
-                    if (key === 'SILVER') return char.state.silver || 0;
-                    if (key === 'LEVEL') {
-                        // Total Level
-                        return Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.level || 1), 0);
-                    }
-                    // Specific Skill
-                    const skill = char.state.skills?.[key] || { level: 1, xp: 0 };
-                    // Return a composite value for sorting: Level * 1Billion + XP
-                    // This ensures Level is primary, XP is secondary
-                    return (skill.level * 1000000000) + skill.xp;
-                };
+        const getVal = (char, key) => {
+            if (key === 'SILVER') return char.state.silver || 0;
+            if (key === 'LEVEL') {
+                // Total Level
+                return Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.level || 1), 0);
+            }
+            // Specific Skill
+            const skill = char.state.skills?.[key] || { level: 1, xp: 0 };
+            // Return a composite value for sorting: Level * 1Billion + XP
+            // This ensures Level is primary, XP is secondary
+            return (skill.level * 1000000000) + skill.xp;
+        };
 
+        const sorted = data
+            .filter(c => {
+                if (!c || !c.state) return false;
+
+                // In-Memory Mode Filtering
+                if (mode === 'IRONMAN') {
+                    // Double check (though DB query should have handled it)
+                    return c.state.isIronman === true;
+                } else {
+                    // NORMAL: isIronman must be falsy or false
+                    return !c.state.isIronman;
+                }
+            })
+            .sort((a, b) => {
                 const valA = getVal(a, sortKey);
                 const valB = getVal(b, sortKey);
-
                 return valB - valA; // DESC
-            })
-            .slice(0, 50);
+            });
+
+        let userRank = null;
+        if (requesterId) {
+            const index = sorted.findIndex(c => c.id === requesterId);
+            if (index !== -1) {
+                userRank = {
+                    rank: index + 1,
+                    character: sorted[index]
+                };
+            }
+        }
+
+        return {
+            type,
+            mode,
+            top100: sorted.slice(0, 100),
+            userRank
+        };
     }
 
     // Delegation Methods

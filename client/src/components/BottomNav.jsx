@@ -40,13 +40,13 @@ const BottomNav = ({ gameState, activeTab, setActiveTab, onNavigate, canSpin, ha
             bottom: 0,
             left: 0,
             width: '100%',
-            background: '#1a1f2e', // Dark theme consistent with user image
-            borderTop: '1px solid #2d3748',
+            background: 'var(--panel-bg)',
+            borderTop: '1px solid var(--border)',
             display: 'flex',
             justifyContent: 'space-around',
             padding: '10px 5px',
             zIndex: 1000,
-            boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.1)'
+            boxShadow: 'var(--panel-shadow)'
         }}>
             {navItems.map(item => {
                 const isActive = currentNav === item.id;
@@ -61,7 +61,7 @@ const BottomNav = ({ gameState, activeTab, setActiveTab, onNavigate, canSpin, ha
                             flexDirection: 'column',
                             alignItems: 'center',
                             gap: '4px',
-                            color: isActive ? '#d4af37' : '#718096', // Gold accent
+                            color: isActive ? 'var(--accent)' : 'var(--text-dim)',
                             cursor: 'pointer',
                             flex: 1,
                             position: 'relative'
@@ -78,7 +78,7 @@ const BottomNav = ({ gameState, activeTab, setActiveTab, onNavigate, canSpin, ha
                                     height: '8px',
                                     background: '#ff4444',
                                     borderRadius: '50%',
-                                    border: '1.5px solid #1a1f2e',
+                                    border: '1.5px solid var(--panel-bg)',
                                     boxShadow: '0 0 5px rgba(255, 68, 68, 0.5)'
                                 }}></div>
                             )}

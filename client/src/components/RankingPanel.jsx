@@ -59,9 +59,11 @@ const CATEGORIES = {
 
 const RankingPanel = ({ gameState, isMobile, socket }) => {
     const [characters, setCharacters] = useState([]);
+    const [userRankData, setUserRankData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [mainCategory, setMainCategory] = useState('GENERAL');
     const [subCategory, setSubCategory] = useState('LEVEL');
+    const [rankMode, setRankMode] = useState('NORMAL');
 
     useEffect(() => {
         if (!socket) return;
@@ -71,17 +73,19 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
         const type = subCategory;
 
         setLoading(true);
-        socket.emit('get_leaderboard', type);
+        // Pass object with type and mode
+        socket.emit('get_leaderboard', { type, mode: rankMode });
 
         const handleLeaderboard = (response) => {
-            const data = Array.isArray(response) ? response : (response.data || []);
+            const data = response.top100 || [];
             setCharacters(data);
+            setUserRankData(response.userRank || null);
             setLoading(false);
         };
 
         socket.on('leaderboard_update', handleLeaderboard);
         return () => socket.off('leaderboard_update', handleLeaderboard);
-    }, [socket, mainCategory, subCategory]);
+    }, [socket, mainCategory, subCategory, rankMode]);
 
     const handleMainCategoryChange = (key) => {
         setMainCategory(key);
@@ -117,7 +121,7 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
         }).sort((a, b) => {
             if (b.value !== a.value) return b.value - a.value;
             return b.subValue - a.subValue;
-        }).slice(0, 50);
+        });
     };
 
     const sortedData = getSortedData();
@@ -135,15 +139,38 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
         }}>
             <div style={{ padding: isMobile ? '20px' : '30px', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                 {/* Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                     <div>
                         <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.4rem', fontWeight: '900', letterSpacing: '2px' }}>HALL OF FAME</h2>
                         <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>The best of Eternal Lands</div>
                     </div>
-                    <div style={{ padding: '10px 20px', background: 'rgba(212, 175, 55, 0.05)', borderRadius: '8px', border: '1px solid rgba(212, 175, 55, 0.1)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <Trophy size={18} color="var(--accent)" />
-                        <span style={{ color: 'var(--accent)', fontWeight: '900', fontSize: '0.8rem' }}>RANKINGS</span>
-                    </div>
+                </div>
+
+                {/* Mode Toggles */}
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                    {['NORMAL', 'IRONMAN'].map(mode => (
+                        <button
+                            key={mode}
+                            onClick={() => setRankMode(mode)}
+                            style={{
+                                flex: 1,
+                                padding: '12px',
+                                borderRadius: '8px',
+                                border: '1px solid',
+                                borderColor: rankMode === mode ? 'var(--accent)' : 'var(--border)',
+                                background: rankMode === mode ? 'var(--accent)' : 'var(--glass-bg)',
+                                color: rankMode === mode ? 'var(--panel-bg)' : 'var(--text-dim)',
+                                fontSize: '0.8rem',
+                                fontWeight: '900',
+                                cursor: 'pointer',
+                                transition: '0.2s',
+                                textTransform: 'uppercase',
+                                letterSpacing: '1px'
+                            }}
+                        >
+                            {mode}
+                        </button>
+                    ))}
                 </div>
 
                 {/* Filtros */}
@@ -181,9 +208,9 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
                                     padding: '10px 18px',
                                     borderRadius: '8px',
                                     border: '1px solid',
-                                    borderColor: mainCategory === key ? 'var(--accent)' : 'rgba(255,255,255,0.1)',
-                                    background: mainCategory === key ? 'rgba(212, 175, 55, 0.1)' : 'rgba(0,0,0,0.2)',
-                                    color: mainCategory === key ? 'var(--accent)' : 'var(--text-dim)',
+                                    borderColor: mainCategory === key ? 'var(--accent)' : 'var(--border)',
+                                    background: mainCategory === key ? 'var(--accent)' : 'var(--glass-bg)',
+                                    color: mainCategory === key ? 'var(--panel-bg)' : 'var(--text-dim)',
                                     fontSize: '0.75rem',
                                     fontWeight: '900',
                                     cursor: 'pointer',
@@ -246,16 +273,16 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
                                         display: 'flex',
                                         alignItems: 'center',
                                         padding: '15px 20px',
-                                        background: index === 0 ? 'linear-gradient(90deg, rgba(212, 175, 55, 0.1) 0%, rgba(212, 175, 55, 0.02) 100%)' : 'rgba(255,255,255,0.01)',
+                                        background: index === 0 ? 'linear-gradient(90deg, var(--accent-soft) 0%, transparent 100%)' : 'var(--glass-bg)',
                                         borderRadius: '10px',
                                         border: '1px solid',
-                                        borderColor: index === 0 ? 'rgba(212, 175, 55, 0.2)' : 'rgba(255,255,255,0.02)',
+                                        borderColor: index === 0 ? 'var(--accent)' : 'var(--border)',
                                         position: 'relative',
                                         overflow: 'hidden'
                                     }}
                                 >
                                     {/* Medalha / Numero */}
-                                    <div style={{ width: '40px', fontSize: '1.2rem', fontWeight: '900', color: index === 0 ? '#d4af37' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : '#222' }}>
+                                    <div style={{ width: '40px', fontSize: '1.2rem', fontWeight: '900', color: index === 0 ? '#d4af37' : index === 1 ? '#94a3b8' : index === 2 ? '#cd7f32' : 'var(--text-dim)' }}>
                                         {index === 0 ? <Circle size={20} /> : index + 1}
                                     </div>
 
@@ -313,6 +340,69 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
                                     </div>
                                 </motion.div>
                             ))}
+
+                            {/* User Position if not in Top 100 */}
+                            {!loading && userRankData && !sortedData.some(c => c.id === userRankData.character.id) && (
+                                <>
+                                    <div style={{ padding: '10px 0', textAlign: 'center', opacity: 0.3, fontSize: '0.8rem', fontWeight: 'bold' }}>
+                                        ...
+                                    </div>
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            padding: '15px 20px',
+                                            background: 'var(--accent-soft)',
+                                            borderRadius: '10px',
+                                            border: '1px solid var(--accent)',
+                                            position: 'relative',
+                                            overflow: 'hidden',
+                                            marginTop: '8px',
+                                            boxShadow: 'var(--panel-shadow)'
+                                        }}
+                                    >
+                                        <div style={{ width: '40px', fontSize: '1.2rem', fontWeight: '900', color: 'var(--accent)' }}>
+                                            {userRankData.rank}
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ fontSize: '0.9rem', fontWeight: '900', color: 'var(--accent)' }}>
+                                                {userRankData.character.name} (YOU)
+                                            </div>
+                                            {userRankData.character.state?.selectedTitle && (
+                                                <div style={{
+                                                    fontSize: '0.65rem',
+                                                    fontWeight: '900',
+                                                    letterSpacing: '1.5px',
+                                                    marginTop: '2px',
+                                                    display: 'inline-block',
+                                                    padding: '2px 8px',
+                                                    borderRadius: '4px',
+                                                    background: 'rgba(0,0,0,0.3)',
+                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                    color: 'var(--text-main)'
+                                                }}>
+                                                    {userRankData.character.state.selectedTitle}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ fontSize: '1.1rem', fontWeight: '900', color: 'var(--accent)' }}>
+                                                {(() => {
+                                                    const char = userRankData.character;
+                                                    let val = 0;
+                                                    if (subCategory === 'SILVER') val = char.state.silver || 0;
+                                                    else if (subCategory === 'LEVEL') val = Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.level || 1), 0);
+                                                    else val = (char.state.skills?.[subCategory]?.level || 1);
+
+                                                    return subCategory === 'SILVER' ? formatSilver(val) : formatNumber(val);
+                                                })()}
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                </>
+                            )}
                         </div>
                     )}
                 </div>

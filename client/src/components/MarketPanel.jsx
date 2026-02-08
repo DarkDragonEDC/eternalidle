@@ -78,12 +78,17 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                 }
             });
         } else {
+            // Normalize potential object amount to a number
+            const numericAmount = (typeof listing.amount === 'object' && listing.amount !== null)
+                ? (listing.amount.amount || 0)
+                : (Number(listing.amount) || 0);
+
             // Open partial buy modal
             setBuyModal({
                 listing: listing,
-                quantity: listing.amount, // Default to MAX
-                max: listing.amount,
-                pricePerUnit: listing.price / listing.amount
+                quantity: numericAmount, // Default to MAX
+                max: numericAmount,
+                pricePerUnit: listing.price / numericAmount
             });
         }
     };
@@ -214,7 +219,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                 <div style={{
                     marginTop: '20px',
                     padding: '15px 25px',
-                    background: 'rgba(255,255,255,0.03)',
+                    background: 'var(--accent-soft)',
                     borderRadius: '12px',
                     border: '1px solid var(--border)',
                     fontSize: '0.9rem',
@@ -250,7 +255,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                     </div>
 
                     {/* TOP TABS */}
-                    <div style={{ display: 'flex', background: 'rgba(0, 0, 0, 0.3)', borderRadius: '12px', padding: '4px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', background: 'var(--glass-bg)', borderRadius: '12px', padding: '4px', flexWrap: 'wrap', justifyContent: 'center' }}>
                         <button
                             onClick={() => setActiveTab('BUY')}
                             style={{
@@ -260,9 +265,9 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                 cursor: 'pointer',
                                 fontSize: '0.85rem',
                                 fontWeight: 'bold',
-                                background: activeTab === 'BUY' ? 'rgba(212, 175, 55, 0.15)' : 'transparent',
+                                background: activeTab === 'BUY' ? 'var(--accent-soft)' : 'transparent',
                                 color: activeTab === 'BUY' ? 'var(--accent)' : 'var(--text-dim)',
-                                border: activeTab === 'BUY' ? '1px solid rgba(212, 175, 55, 0.2)' : '1px solid transparent',
+                                border: activeTab === 'BUY' ? '1px solid var(--accent)' : '1px solid transparent',
                                 transition: '0.2s'
                             }}>
                             Browse
@@ -276,9 +281,9 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                 cursor: 'pointer',
                                 fontSize: '0.85rem',
                                 fontWeight: 'bold',
-                                background: activeTab === 'MY_ORDERS' ? 'rgba(212, 175, 55, 0.15)' : 'transparent',
+                                background: activeTab === 'MY_ORDERS' ? 'var(--accent-soft)' : 'transparent',
                                 color: activeTab === 'MY_ORDERS' ? 'var(--accent)' : 'var(--text-dim)',
-                                border: activeTab === 'MY_ORDERS' ? '1px solid rgba(212, 175, 55, 0.2)' : '1px solid transparent',
+                                border: activeTab === 'MY_ORDERS' ? '1px solid var(--accent)' : '1px solid transparent',
                                 transition: '0.2s'
                             }}>
                             My Listings
@@ -292,9 +297,9 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                 cursor: 'pointer',
                                 fontSize: '0.85rem',
                                 fontWeight: 'bold',
-                                background: activeTab === 'SELL' ? 'rgba(212, 175, 55, 0.15)' : 'transparent',
+                                background: activeTab === 'SELL' ? 'var(--accent-soft)' : 'transparent',
                                 color: activeTab === 'SELL' ? 'var(--accent)' : 'var(--text-dim)',
-                                border: activeTab === 'SELL' ? '1px solid rgba(212, 175, 55, 0.2)' : '1px solid transparent',
+                                border: activeTab === 'SELL' ? '1px solid var(--accent)' : '1px solid transparent',
                                 transition: '0.2s'
                             }}>
                             Sell
@@ -309,9 +314,9 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                 fontSize: '0.85rem',
                                 fontWeight: 'bold',
                                 position: 'relative',
-                                background: activeTab === 'CLAIM' ? 'rgba(212, 175, 55, 0.15)' : 'transparent',
+                                background: activeTab === 'CLAIM' ? 'var(--accent-soft)' : 'transparent',
                                 color: activeTab === 'CLAIM' ? 'var(--accent)' : 'var(--text-dim)',
-                                border: activeTab === 'CLAIM' ? '1px solid rgba(212, 175, 55, 0.2)' : '1px solid transparent',
+                                border: activeTab === 'CLAIM' ? '1px solid var(--accent)' : '1px solid transparent',
                                 transition: '0.2s'
                             }}>
                             Claim
@@ -383,7 +388,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                             fontSize: '0.8rem',
                                             fontWeight: '500',
                                             cursor: 'pointer',
-                                            background: selectedCategory === cat.id ? 'rgba(212, 175, 55, 0.1)' : 'rgba(0, 0, 0, 0.2)',
+                                            background: selectedCategory === cat.id ? 'var(--accent-soft)' : 'var(--glass-bg)',
                                             color: selectedCategory === cat.id ? 'var(--accent)' : 'var(--text-dim)'
                                         }}
                                     >
@@ -410,8 +415,8 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
                                     {activeBuyListings.map(l => (
                                         <div key={l.id} style={{
-                                            background: 'rgba(255, 255, 255, 0.02)',
-                                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                                            background: 'var(--glass-bg)',
+                                            borderColor: 'var(--border)',
                                             borderWidth: '1px',
                                             borderStyle: 'solid',
                                             padding: '12px 20px',
@@ -431,7 +436,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
-                                                border: `1px solid ${resolveItem(l.item_id)?.rarityColor || l.item_data.rarityColor || 'rgba(255, 255, 255, 0.1)'}`,
+                                                border: `1px solid ${resolveItem(l.item_id)?.rarityColor || l.item_data.rarityColor || 'var(--border)'}`,
                                                 flexShrink: 0,
                                                 position: 'relative',
                                                 overflow: 'hidden'
@@ -483,9 +488,17 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                             </div>
 
                                             <div style={{ flex: '1 1 0%', textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '120px' }}>
-                                                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '2px' }}>{typeof l.amount === 'object' ? (l.amount.amount || 0) : l.amount}x units</div>
+                                                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '2px' }}>
+                                                    {((typeof l.amount === 'object' && l.amount !== null) ? l.amount.amount : l.amount) || 0}x units
+                                                </div>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--accent)' }}>
-                                                    <Coins size={16} /> {(l.price / l.amount) < 1 ? (l.price / l.amount).toFixed(2) : formatSilver(l.price / l.amount)}
+                                                    <Coins size={16} /> {
+                                                        (() => {
+                                                            const nAmt = ((typeof l.amount === 'object' && l.amount !== null) ? l.amount.amount : l.amount) || 1;
+                                                            const unitPrice = l.price / nAmt;
+                                                            return unitPrice < 1 ? unitPrice.toFixed(2) : formatSilver(unitPrice);
+                                                        })()
+                                                    }
                                                 </div>
                                             </div>
 
@@ -498,15 +511,27 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                         borderRadius: '6px',
                                                         border: 'none',
                                                         cursor: silver < (l.price / l.amount) ? 'not-allowed' : 'pointer',
-                                                        background: silver < (l.price / l.amount) ? 'rgba(255, 255, 255, 0.05)' : 'rgba(76, 175, 80, 0.15)',
-                                                        color: silver < (l.price / l.amount) ? 'var(--text-dim)' : '#4caf50',
+                                                        background: silver < (() => {
+                                                            const nAmt = ((typeof l.amount === 'object' && l.amount !== null) ? l.amount.amount : l.amount) || 1;
+                                                            return l.price / nAmt;
+                                                        })() ? 'var(--accent-soft)' : 'rgba(76, 175, 80, 0.15)',
+                                                        color: silver < (() => {
+                                                            const nAmt = ((typeof l.amount === 'object' && l.amount !== null) ? l.amount.amount : l.amount) || 1;
+                                                            return l.price / nAmt;
+                                                        })() ? 'var(--text-dim)' : '#4caf50',
                                                         fontWeight: 'bold',
                                                         fontSize: '0.8rem',
                                                         minWidth: '100px',
-                                                        border: `1px solid ${silver < (l.price / l.amount) ? 'transparent' : 'rgba(76, 175, 80, 0.3)'}`
+                                                        border: `1px solid ${silver < (() => {
+                                                            const nAmt = ((typeof l.amount === 'object' && l.amount !== null) ? l.amount.amount : l.amount) || 1;
+                                                            return l.price / nAmt;
+                                                        })() ? 'transparent' : 'rgba(76, 175, 80, 0.3)'}`
                                                     }}
                                                 >
-                                                    {silver < (l.price / l.amount) ? 'No Funds' : 'BUY'}
+                                                    {silver < (() => {
+                                                        const nAmt = ((typeof l.amount === 'object' && l.amount !== null) ? l.amount.amount : l.amount) || 1;
+                                                        return l.price / nAmt;
+                                                    })() ? 'No Funds' : 'BUY'}
                                                 </button>
                                             </div>
                                         </div>
@@ -726,7 +751,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
-                                                    border: `1px solid ${l.item_data.rarityColor || 'rgba(255, 255, 255, 0.1)'}`,
+                                                    border: `1px solid ${l.item_data.rarityColor || 'var(--border)'}`,
                                                     flexShrink: 0,
                                                     position: 'relative',
                                                     overflow: 'hidden'
@@ -772,7 +797,9 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                 </div>
 
                                                 <div style={{ flex: '1 1 0%', textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '120px' }}>
-                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '2px' }}>{typeof l.amount === 'object' ? (l.amount.amount || 0) : l.amount}x units</div>
+                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '2px' }}>
+                                                        {((typeof l.amount === 'object' && l.amount !== null) ? l.amount.amount : l.amount) || 0}x units
+                                                    </div>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--accent)' }}>
                                                         <Coins size={16} /> {formatSilver(l.price)}
                                                     </div>
@@ -909,9 +936,9 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
                                                 <div style={{ flex: '1 1 0%', textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '120px' }}>
                                                     <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '2px' }}>
-                                                        {c.type === 'SOLD_ITEM' && `Quantity: ${typeof c.amount === 'object' ? (c.amount.amount || 0) : c.amount}`}
-                                                        {c.type === 'BOUGHT_ITEM' && `Bought x${typeof c.amount === 'object' ? (c.amount.amount || 0) : c.amount}`}
-                                                        {c.type === 'CANCELLED_LISTING' && `Retrieved x${typeof c.amount === 'object' ? (c.amount.amount || 0) : c.amount}`}
+                                                        {c.type === 'SOLD_ITEM' && `Quantity: ${(typeof c.amount === 'object' && c.amount !== null) ? (c.amount.amount || 0) : c.amount}`}
+                                                        {c.type === 'BOUGHT_ITEM' && `Bought x${(typeof c.amount === 'object' && c.amount !== null) ? (c.amount.amount || 0) : c.amount}`}
+                                                        {c.type === 'CANCELLED_LISTING' && `Retrieved x${(typeof c.amount === 'object' && c.amount !== null) ? (c.amount.amount || 0) : c.amount}`}
                                                     </div>
                                                     {c.silver ? (
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--accent)' }}>

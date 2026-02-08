@@ -20,7 +20,12 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
     // Derived stats
     const initialQty = activity?.initial_quantity || activity?.actions_remaining || 1;
     const remainingQty = activity?.actions_remaining || 0;
-    const doneQty = Math.max(0, initialQty - remainingQty);
+
+    // Defensive: If initial_quantity is 0 or missing but we have progress in syncedElapsed,
+    // don't let initialQty be smaller than what's already done.
+    const effectiveInitialQty = Math.max(initialQty, remainingQty + Math.floor(syncedElapsed / (activity?.time_per_action || 3)));
+
+    const doneQty = Math.max(0, effectiveInitialQty - remainingQty);
     const timePerAction = activity?.time_per_action || 3;
 
     // Timer para Atividade (Legacy/Fallback)
@@ -129,7 +134,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
     const isRefining = activity?.type === 'REFINING';
     const isCrafting = activity?.type === 'CRAFTING';
 
-    const totalDuration = initialQty * timePerAction;
+    const totalDuration = effectiveInitialQty * timePerAction;
     const totalProgress = Math.min(100, (syncedElapsed / totalDuration) * 100);
     const remainingSeconds = Math.max(0, totalDuration - syncedElapsed);
 
@@ -187,7 +192,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                    boxShadow: 'var(--panel-shadow)',
                     zIndex: 1000,
                     transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                     backdropFilter: 'blur(10px)',
@@ -244,8 +249,8 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                             justifyContent: 'center',
                             fontSize: '0.6rem',
                             fontWeight: 'bold',
-                            color: '#000',
-                            border: '2px solid rgba(15, 20, 30, 1)'
+                            color: 'var(--panel-bg)',
+                            border: '2px solid var(--panel-bg)'
                         }}>
                             2
                         </div>
@@ -287,7 +292,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                         border: '1px solid var(--border-active)',
                                         borderRadius: '12px',
                                         padding: '12px',
-                                        boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                                        boxShadow: 'var(--panel-shadow)',
                                         overflow: 'hidden',
                                         cursor: 'pointer'
                                     }}
@@ -350,10 +355,10 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                                     return formatItemId(activity.item_id) || 'Unknown Item';
                                                 })()}
                                             </span>
-                                            <span style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '0.8rem' }}>{doneQty} <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)' }}>/ {initialQty}</span></span>
+                                            <span style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '0.8rem' }}>{doneQty} <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)' }}>/ {effectiveInitialQty}</span></span>
                                         </div>
 
-                                        <div style={{ height: '8px', background: 'rgba(0,0,0,0.5)', borderRadius: '4px', overflow: 'hidden', position: 'relative', marginBottom: '8px' }}>
+                                        <div style={{ height: '8px', background: 'var(--accent-soft)', borderRadius: '4px', overflow: 'hidden', position: 'relative', marginBottom: '8px' }}>
                                             <div style={{
                                                 width: `${totalProgress}%`,
                                                 height: '100%',
@@ -369,7 +374,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                                 <span>Action Progress</span>
                                                 <span>{Math.round(smoothProgress)}%</span>
                                             </div>
-                                            <div style={{ height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+                                            <div style={{ height: '4px', background: 'var(--slot-bg)', borderRadius: '2px', overflow: 'hidden' }}>
                                                 <div style={{
                                                     width: `${smoothProgress}%`,
                                                     height: '100%',
@@ -395,23 +400,23 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                         }}
                                         style={{
                                             width: '100%',
-                                            background: 'var(--accent-soft)',
-                                            border: '1px solid var(--border-active)',
-                                            color: 'var(--accent)',
-                                            padding: '8px',
-                                            borderRadius: '6px',
+                                            background: 'var(--accent)',
+                                            color: 'var(--panel-bg)',
+                                            padding: '10px',
+                                            borderRadius: '8px',
                                             cursor: 'pointer',
                                             fontWeight: '900',
-                                            fontSize: '0.7rem',
+                                            fontSize: '0.8rem',
                                             letterSpacing: '1px',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            gap: '6px',
-                                            transition: '0.2s'
+                                            gap: '8px',
+                                            transition: '0.2s',
+                                            boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
                                         }}
                                     >
-                                        <Square size={14} fill="var(--accent)" />
+                                        <Square size={14} fill="currentColor" />
                                         STOP
                                     </button>
                                 </motion.div>
@@ -618,20 +623,21 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                         onClick={stopCombat}
                                         style={{
                                             width: '100%',
-                                            background: 'rgba(255, 68, 68, 0.1)',
-                                            border: '1px solid rgba(255, 68, 68, 0.5)',
-                                            color: '#ff4444',
-                                            padding: '8px',
-                                            borderRadius: '6px',
+                                            background: '#ff4444',
+                                            border: 'none',
+                                            color: '#fff',
+                                            padding: '10px',
+                                            borderRadius: '8px',
                                             cursor: 'pointer',
                                             fontWeight: '900',
-                                            fontSize: '0.7rem',
+                                            fontSize: '0.8rem',
                                             letterSpacing: '1px',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            gap: '6px',
-                                            transition: '0.2s'
+                                            gap: '8px',
+                                            transition: '0.2s',
+                                            boxShadow: '0 4px 12px rgba(255, 68, 68, 0.3)'
                                         }}
                                     >
                                         <Skull size={14} />
@@ -741,21 +747,21 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                         }}
                                         style={{
                                             width: '100%',
-                                            background: dungeonState.status === 'COMPLETED' ? 'rgba(76, 175, 80, 0.1)' : 'rgba(255, 59, 48, 0.1)',
-                                            border: '1px solid',
-                                            borderColor: dungeonState.status === 'COMPLETED' ? 'rgba(76, 175, 80, 0.5)' : 'rgba(255, 59, 48, 0.5)',
-                                            color: dungeonState.status === 'COMPLETED' ? '#4caf50' : '#ff3b30',
-                                            padding: '8px',
-                                            borderRadius: '6px',
+                                            background: dungeonState.status === 'COMPLETED' ? '#4caf50' : '#ff4444',
+                                            border: 'none',
+                                            color: '#fff',
+                                            padding: '10px',
+                                            borderRadius: '8px',
                                             cursor: 'pointer',
                                             fontWeight: '900',
-                                            fontSize: '0.7rem',
+                                            fontSize: '0.8rem',
                                             letterSpacing: '1px',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            gap: '6px',
-                                            transition: '0.2s'
+                                            gap: '8px',
+                                            transition: '0.2s',
+                                            boxShadow: dungeonState.status === 'COMPLETED' ? '0 4px 12px rgba(76, 175, 80, 0.3)' : '0 4px 12px rgba(255, 68, 68, 0.3)'
                                         }}
                                     >
                                         <Skull size={14} />
@@ -765,7 +771,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                             )}
                         </div>
 
-                        {/* --- CAIXA INFORMATIVA MULTITAREFA (Ao lado do botão) --- */}
+                        {/* --- CAIXA INFORMATIVA MULTITAREFA (Posicionamento Fixo Exato) --- */}
                         <motion.div
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -774,7 +780,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                 position: 'fixed',
                                 bottom: isMobile ? '80px' : '30px',
                                 right: isMobile ? '95px' : '105px',
-                                width: isMobile ? '205px' : '205px', // Alinhado com a esquerda dos cards (30+280=310, 105+205=310)
+                                width: '205px',
                                 background: 'var(--panel-bg)',
                                 backdropFilter: 'blur(20px)',
                                 border: '1px solid var(--border-active)',
@@ -783,7 +789,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                 color: 'var(--text-main)',
                                 fontSize: '0.75rem',
                                 zIndex: 1001,
-                                boxShadow: '0 10px 40px rgba(0,0,0,0.7)',
+                                boxShadow: 'rgba(0, 0, 0, 0.7) 0px 10px 40px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '10px'
@@ -800,10 +806,11 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                 color: 'var(--accent)',
                                 fontWeight: 'bold'
                             }}>i</div>
-                            <div style={{ lineHeight: '1.4', flex: 1 }}>
+                            <div style={{ lineHeight: '1.4', flex: '1 1 0%' }}>
                                 You can perform a <b>gathering</b> and a <b>combat</b> action at the same time.
                             </div>
                         </motion.div>
+
                     </>
                 )}
             </AnimatePresence >

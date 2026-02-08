@@ -1,0 +1,332 @@
+{
+  "success": true,
+  "error": null,
+  "characters": [
+    {
+      "id": "a7722d31-0758-4392-a7a8-37ae4ceb6f0b",
+      "user_id": "a8b3d0f0-f2b8-40f8-928d-3acec9617292",
+      "name": "Myu2",
+      "state": {
+        "stats": {
+          "agi": 0,
+          "int": 0,
+          "str": 0
+        },
+        "claims": [],
+        "health": 0,
+        "silver": 0,
+        "skills": {
+          "RUNE": {
+            "xp": 0,
+            "level": 1
+          },
+          "COMBAT": {
+            "xp": 0,
+            "level": 1
+          },
+          "ALCHEMY": {
+            "xp": 0,
+            "level": 1
+          },
+          "COOKING": {
+            "xp": 0,
+            "level": 1
+          },
+          "FISHING": {
+            "xp": 0,
+            "level": 1
+          },
+          "HERBALISM": {
+            "xp": 0,
+            "level": 1
+          },
+          "ORE_MINER": {
+            "xp": 0,
+            "level": 1
+          },
+          "LUMBERJACK": {
+            "xp": 0,
+            "level": 1
+          },
+          "BOW_MASTERY": {
+            "xp": 0,
+            "level": 1
+          },
+          "DISTILLATION": {
+            "xp": 0,
+            "level": 1
+          },
+          "MAGE_CRAFTER": {
+            "xp": 0,
+            "level": 1
+          },
+          "TOOL_CRAFTER": {
+            "xp": 0,
+            "level": 1
+          },
+          "CLOTH_REFINER": {
+            "xp": 0,
+            "level": 1
+          },
+          "DUNGEONEERING": {
+            "xp": 0,
+            "level": 1
+          },
+          "PLANK_REFINER": {
+            "xp": 0,
+            "level": 1
+          },
+          "SWORD_MASTERY": {
+            "xp": 0,
+            "level": 1
+          },
+          "ANIMAL_SKINNER": {
+            "xp": 188,
+            "level": 11
+          },
+          "HUNTER_CRAFTER": {
+            "xp": 0,
+            "level": 1
+          },
+          "FIBER_HARVESTER": {
+            "xp": 0,
+            "level": 1
+          },
+          "LEATHER_REFINER": {
+            "xp": 0,
+            "level": 1
+          },
+          "WARRIOR_CRAFTER": {
+            "xp": 0,
+            "level": 1
+          },
+          "METAL_BAR_REFINER": {
+            "xp": 0,
+            "level": 1
+          },
+          "FIRE_STAFF_MASTERY": {
+            "xp": 0,
+            "level": 1
+          }
+        },
+        "inventory": {
+          "T1_HIDE": 1923,
+          "T1_RUNE_SHARD": 3000
+        },
+        "isIronman": true,
+        "daily_spin": {
+          "total_spins": 1,
+          "last_spin_date": "2026-02-07T15:04:26.898Z"
+        },
+        "notifications": [],
+        "unlockedTitles": []
+      },
+      "current_activity": null,
+      "activity_started_at": null,
+      "dungeon_state": null,
+      "last_saved": "2026-02-07T15:04:26.973+00:00",
+      "is_admin": false,
+      "created_at": "2026-02-06T20:25:30.06623+00:00"
+    },
+    {
+      "id": "d2da6118-b6a1-49fa-a8b2-768abc3d9328",
+      "user_id": "a8b3d0f0-f2b8-40f8-928d-3acec9617292",
+      "name": "Myu",
+      "state": {
+        "stats": {
+          "agi": 0,
+          "int": 0,
+          "str": 0,
+          "totalKills": 1047
+        },
+        "claims": [],
+        "health": 0,
+        "silver": 209,
+        "skills": {
+          "RUNE": {
+            "xp": 0,
+            "level": 1
+          },
+          "COMBAT": {
+            "xp": 560,
+            "level": 34
+          },
+          "ALCHEMY": {
+            "xp": 0,
+            "level": 1
+          },
+          "COOKING": {
+            "xp": 109,
+            "level": 5
+          },
+          "FISHING": {
+            "xp": 106,
+            "level": 7
+          },
+          "HERBALISM": {
+            "xp": 0,
+            "level": 1
+          },
+          "ORE_MINER": {
+            "xp": 202,
+            "level": 11
+          },
+          "LUMBERJACK": {
+            "xp": 47,
+            "level": 1
+          },
+          "BOW_MASTERY": {
+            "xp": 0,
+            "level": 1
+          },
+          "DISTILLATION": {
+            "xp": 0,
+            "level": 1
+          },
+          "MAGE_CRAFTER": {
+            "xp": 0,
+            "level": 1
+          },
+          "TOOL_CRAFTER": {
+            "xp": 0,
+            "level": 1
+          },
+          "CLOTH_REFINER": {
+            "xp": 0,
+            "level": 1
+          },
+          "DUNGEONEERING": {
+            "xp": 0,
+            "level": 1
+          },
+          "PLANK_REFINER": {
+            "xp": 40,
+            "level": 1
+          },
+          "SWORD_MASTERY": {
+            "xp": 0,
+            "level": 1
+          },
+          "ANIMAL_SKINNER": {
+            "xp": 150,
+            "level": 8
+          },
+          "HUNTER_CRAFTER": {
+            "xp": 8,
+            "level": 3
+          },
+          "FIBER_HARVESTER": {
+            "xp": 0,
+            "level": 1
+          },
+          "LEATHER_REFINER": {
+            "xp": 102,
+            "level": 2
+          },
+          "WARRIOR_CRAFTER": {
+            "xp": 0,
+            "level": 1
+          },
+          "METAL_BAR_REFINER": {
+            "xp": 92,
+            "level": 2
+          },
+          "FIRE_STAFF_MASTERY": {
+            "xp": 0,
+            "level": 1
+          }
+        },
+        "equipment": {
+          "boots": {
+            "id": "T1_LEATHER_BOOTS",
+            "stars": 0,
+            "amount": 1,
+            "quality": 0
+          },
+          "chest": {
+            "id": "T1_LEATHER_ARMOR_Q2",
+            "stars": 0,
+            "amount": 1,
+            "quality": 2
+          },
+          "gloves": {
+            "id": "T1_LEATHER_GLOVES_Q2",
+            "stars": 0,
+            "amount": 1,
+            "quality": 2
+          },
+          "helmet": {
+            "id": "T1_LEATHER_HELMET",
+            "stars": 0,
+            "amount": 1,
+            "quality": 0
+          },
+          "mainHand": {
+            "id": "T1_BOW",
+            "stars": 0,
+            "amount": 1,
+            "quality": 0
+          }
+        },
+        "inventory": {
+          "T1_BAR": 88,
+          "T1_ORE": 1747,
+          "T1_FISH": 337,
+          "T1_HIDE": 969,
+          "T1_WOOD": 7,
+          "T1_PLANK": {
+            "stars": 0,
+            "amount": 20,
+            "quality": 0
+          },
+          "T1_LEATHER": 13,
+          "T1_RUNE_SHARD": 2960,
+          "T1_DUNGEON_MAP": 12,
+          "T3_POTION_LUCK": 1,
+          "T1_RUNE_HERB_XP_1STAR": 1,
+          "T1_RUNE_WOOD_XP_1STAR": 1,
+          "T1_RUNE_FISH_COPY_1STAR": 1,
+          "T1_RUNE_HERB_COPY_1STAR": 1,
+          "T1_RUNE_HIDE_COPY_1STAR": 1,
+          "T1_RUNE_FISH_SPEED_1STAR": 2,
+          "T1_RUNE_HIDE_SPEED_1STAR": 1
+        },
+        "isIronman": false,
+        "daily_spin": {
+          "total_spins": 1,
+          "last_spin_date": "2026-02-07T04:18:03.611Z"
+        },
+        "notifications": [
+          {
+            "id": 1770511015117.9104,
+            "read": false,
+            "type": "LEVEL_UP",
+            "message": "Your METAL BAR REFINER skill raised to level 2!",
+            "timestamp": 1770511015117
+          }
+        ],
+        "unlockedTitles": []
+      },
+      "current_activity": {
+        "req": {
+          "T1_ORE": 2
+        },
+        "type": "REFINING",
+        "item_id": "T1_BAR",
+        "sessionXp": 156,
+        "sessionItems": {
+          "T1_BAR": 78
+        },
+        "next_action_at": 1770511779760,
+        "time_per_action": 14.97,
+        "initial_quantity": 961,
+        "actions_remaining": 873
+      },
+      "activity_started_at": "2026-02-08T00:27:32.302+00:00",
+      "dungeon_state": null,
+      "last_saved": "2026-02-08T00:49:26.515+00:00",
+      "is_admin": false,
+      "created_at": "2026-02-06T20:15:15.243876+00:00"
+    }
+  ]
+}

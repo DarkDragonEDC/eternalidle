@@ -29,22 +29,24 @@ body.theme-dark {
 
 body.theme-light {
   --bg-dark: #d7dee5;
-  --panel-bg: #ffffff;
+  --panel-bg: #f0f4f8;
   --accent: #003366;
   --accent-soft: rgba(179, 206, 229, 0.4);
-  /* #b3cee5 with transparency */
+  /* Based on #b3cee5 */
   --text-main: #001f3f;
-  --text-dim: #2a3d54;
-  --border: #a1bcd6;
+  --text-dim: #425e83;
+  --border: #b3cee5;
   --border-active: #003366;
-  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-bg: rgba(220, 255, 255, 0.85);
+  /* Based on #dcffff */
   --glass-border: #b3cee5;
   --glass-blur: blur(0px);
   --scrollbar-track: #d7dee5;
-  --slot-bg: #e5f1fc;
+  --slot-bg: #dcffff;
+  /* Light secondary highlight */
   --panel-shadow: 0 4px 15px rgba(0, 31, 63, 0.12);
-  /* Dark blue shadow */
   --contrast: #ccb4a1;
+  --highlight: #90d5ff;
 }
 
 * {

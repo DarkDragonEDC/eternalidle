@@ -35,7 +35,7 @@ const HubButton = ({ label, icon, onClick, color = 'var(--text-main)', level, pr
                     <div style={{
                         fontSize: '0.7rem',
                         color: 'var(--accent)',
-                        background: 'rgba(0,0,0,0.3)',
+                        background: 'var(--glass-bg)',
                         padding: '1px 6px',
                         borderRadius: '4px',
                         fontWeight: 'bold',
@@ -163,7 +163,7 @@ export const SkillsOverview = ({ onNavigate, gameState }) => {
                             gap: '4px',
                             padding: '6px 2px',
                             borderRadius: '8px',
-                            background: 'rgba(0,0,0,0.2)',
+                            background: 'var(--glass-bg)',
                             border: `1px solid ${cat.color}33`
                         }}>
                             <div style={{ color: cat.color }}>{cat.icon}</div>

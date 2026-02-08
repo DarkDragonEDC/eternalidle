@@ -25,7 +25,7 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUs
                 style={{
                     position: 'fixed',
                     top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0,0,0,0.7)',
+                    background: 'rgba(0,0,0,0.4)',
                     zIndex: 2000,
                     display: 'flex',
                     alignItems: 'center',
@@ -70,7 +70,7 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUs
                         <div style={{
                             fontSize: '1.2rem',
                             fontWeight: 'bold',
-                            color: item.rarityColor || '#fff',
+                            color: item.rarityColor || 'var(--text-main)',
                             marginBottom: '4px'
                         }}>
                             {cleanBaseName}

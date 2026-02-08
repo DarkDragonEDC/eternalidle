@@ -241,11 +241,11 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         // Resolve item to ensure we have latest stats and rarity color (even for Normal items if logic changes, but mostly for _Q items)
         const item = rawItem ? { ...rawItem, ...resolveItem(rawItem.id || rawItem.item_id) } : null;
 
-        const tierColor = item ? '#666' : 'rgba(255,255,255,0.05)';
+        const tierColor = item ? '#666' : 'var(--glass-bg)';
 
         // Logic: STRICTLY use rarity color. Tier color does NOT affect border.
         // Normal items (Quality 0) will use their defined rarity color (usually White/#fff).
-        const borderColor = item && item.rarityColor ? item.rarityColor : 'rgba(255,255,255,0.1)';
+        const borderColor = item && item.rarityColor ? item.rarityColor : 'var(--border)';
         const hasQuality = (item && item.quality > 0) || (item && item.stars > 0);
 
         // Upgrade Detection
@@ -334,7 +334,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                                     onShowInfo(item);
                                 }}
                             >
-                                <Info size={12} color="#fff" />
+                                <Info size={12} color="var(--text-dim)" />
                             </div>
                             <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 {item.icon ? (
@@ -345,7 +345,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                             </div>
                         </div>
                     ) : (
-                        <div style={{ opacity: 0.3, color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <div style={{ opacity: 0.3, color: 'var(--text-dim)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                             {icon}
                             <span style={{ fontSize: '0.5rem', fontWeight: 'bold', marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</span>
                         </div>
@@ -464,7 +464,7 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                 {/* Theme Toggle */}
                                 <button onClick={toggleTheme} style={{
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                    flex: 1, height: '40px', background: 'rgba(255,255,255,0.05)',
+                                    flex: 1, height: '40px', background: 'var(--accent-soft)',
                                     borderRadius: '12px', border: '1px solid var(--border)', color: 'var(--accent)',
                                     fontSize: '0.75rem', fontWeight: 'bold'
                                 }}>
@@ -748,7 +748,7 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                             <div style={{
                                 display: 'flex',
                                 justifyContent: 'space-around',
-                                background: 'rgba(255,255,255,0.02)',
+                                background: 'var(--accent-soft)',
                                 padding: '20px',
                                 borderRadius: '12px',
                                 marginBottom: '30px',

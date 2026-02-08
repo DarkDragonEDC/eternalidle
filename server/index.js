@@ -302,19 +302,6 @@ io.on('connection', (socket) => {
         if (!characterId) return;
         const userId = socket.user.id;
 
-        // === SINGLE SESSION ENFORCEMENT ===
-        // Disconnect any existing sessions for this character
-        for (const [existingSocketId, existingSocket] of connectedSockets.entries()) {
-            if (existingSocket.data.characterId === characterId && existingSocketId !== socket.id) {
-                console.log(`[SESSION] Kicking previous session ${existingSocketId} for character ${characterId}`);
-                existingSocket.emit('force_disconnect', {
-                    reason: 'You have been disconnected because you logged in from another device or browser tab.'
-                });
-                existingSocket.disconnect(true);
-            }
-        }
-        // ===================================
-
         socket.join(`user:${userId}`);
         socket.data.characterId = characterId;
 
@@ -349,10 +336,22 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('get_leaderboard', async (type) => {
+    socket.on('get_leaderboard', async (payload) => {
         try {
-            const leaderboard = await gameManager.getLeaderboard(type);
-            socket.emit('leaderboard_update', { type, data: leaderboard });
+            const charId = socket.data.characterId;
+            // Support both old (string) and new (object) formats for backward compatibility
+            let type = 'COMBAT';
+            let mode = 'NORMAL';
+
+            if (typeof payload === 'string') {
+                type = payload;
+            } else if (typeof payload === 'object') {
+                type = payload.type || 'COMBAT';
+                mode = payload.mode || 'NORMAL';
+            }
+
+            const response = await gameManager.getLeaderboard(type, charId, mode);
+            socket.emit('leaderboard_update', response);
         } catch (err) {
             socket.emit('error', { message: err.message });
         }

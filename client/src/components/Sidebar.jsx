@@ -67,8 +67,8 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                     <span style={{ opacity: 0.6, fontSize: '0.45rem' }}>LV</span>
                     {level}
                 </div>
-                <div style={{ width: '40px', height: '2px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
-                    <div style={{ width: `${progress}%`, height: '100%', background: 'linear-gradient(90deg, var(--accent), var(--t2))', boxShadow: '0 0 5px rgba(212, 175, 55, 0.3)' }} />
+                <div style={{ width: '40px', height: '2px', background: 'var(--slot-bg)', borderRadius: '10px', overflow: 'hidden' }}>
+                    <div style={{ width: `${progress}%`, height: '100%', background: 'var(--accent)', boxShadow: '0 0 5px var(--accent-soft)' }} />
                 </div>
             </div>
         );
@@ -134,7 +134,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
             style={{
                 width: isMobile ? '75vw' : '330px',
                 height: isMobile ? '100%' : '100vh',
-                background: theme === 'light' ? '#ffffff' : 'var(--panel-bg)',
+                background: 'var(--panel-bg)',
                 borderRight: '1px solid var(--border)',
                 display: 'flex',
                 flexDirection: 'column',
@@ -143,7 +143,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                 left: isMobile && !isOpen ? '-100%' : '0',
                 top: 0,
                 zIndex: (isMobile && isOpen) ? 10001 : 100,
-                boxShadow: theme === 'light' ? '4px 0 15px rgba(0,0,0,0.05)' : 'var(--panel-shadow)',
+                boxShadow: 'var(--panel-shadow)',
                 flexShrink: 0
             }}
         >
@@ -173,12 +173,11 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px',
-                    background: 'rgba(144, 213, 255, 0.05)',
+                    background: 'var(--accent-soft)',
                     padding: '8px 12px',
                     borderRadius: '12px',
                     border: '1px solid var(--border)',
                     color: 'var(--accent)',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
                     flex: 1
                 }}>
                     <span style={{
@@ -229,13 +228,12 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                         alignItems: 'center',
                         justifyContent: 'center',
                         width: '40px',
-                        background: 'rgba(255, 255, 255, 0.05)',
+                        background: 'var(--accent-soft)',
                         borderRadius: '12px',
                         color: 'var(--accent)',
                         transition: '0.2s',
                         border: '1px solid var(--border)',
-                        cursor: 'pointer',
-                        boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+                        cursor: 'pointer'
                     }}
                 >
                     {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
@@ -263,8 +261,8 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                                 padding: '10px 0',
                                 borderRadius: '10px',
                                 border: '1px solid',
-                                borderColor: activeTab === item.id ? 'rgba(144, 213, 255, 0.3)' : 'rgba(240, 240, 240, 0.05)',
-                                background: activeTab === item.id ? 'rgba(144, 213, 255, 0.1)' : 'rgba(240, 240, 240, 0.02)',
+                                borderColor: activeTab === item.id ? 'var(--accent)' : 'var(--border)',
+                                background: activeTab === item.id ? 'var(--accent-soft)' : 'var(--glass-bg)',
                                 color: activeTab === item.id ? 'var(--accent)' : 'var(--text-dim)',
                                 transition: '0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                                 cursor: 'pointer'
@@ -363,12 +361,12 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '12px',
-                                        background: isMainItemActive ? 'linear-gradient(90deg, rgba(144, 213, 255, 0.1), transparent)' : 'transparent',
+                                        background: isMainItemActive ? 'linear-gradient(90deg, var(--accent-soft), transparent)' : 'transparent',
                                         borderRadius: '8px',
                                         color: isMainItemActive ? 'var(--text-main)' : 'var(--text-dim)',
                                         textAlign: 'left',
                                         border: '1px solid',
-                                        borderColor: isMainItemActive ? 'rgba(144, 213, 255, 0.2)' : 'transparent',
+                                        borderColor: isMainItemActive ? 'var(--accent)' : 'transparent',
                                         transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
                                     }}
                                 >
@@ -401,7 +399,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                                                         display: 'flex',
                                                         alignItems: 'center',
                                                         justifyContent: 'space-between',
-                                                        background: isChildActive ? 'rgba(144, 213, 255, 0.05)' : 'transparent',
+                                                        background: isChildActive ? 'var(--accent-soft)' : 'transparent',
                                                         borderRadius: '6px',
                                                         color: isChildActive ? 'var(--accent)' : 'var(--text-dim)',
                                                         fontSize: '0.8rem',

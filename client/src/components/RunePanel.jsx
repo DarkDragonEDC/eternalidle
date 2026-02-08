@@ -77,7 +77,6 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
     };
 
     const handleCraft = (qty = 1) => {
-        console.log('[RunePanel] Craft/Merge request', { selectedShard, qty, socketConnected: !!socket });
         if (!selectedShard || !socket) return;
 
         setIsCrafting(true);
@@ -86,10 +85,8 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
         // Simulate animation delay then call server
         setTimeout(() => {
             if (activeTab === 'shards') {
-                console.log('[RunePanel] Emitting craft_rune', { shardId: 'T1_RUNE_SHARD', qty, category: forgeCategory });
                 socket.emit('craft_rune', { shardId: 'T1_RUNE_SHARD', qty, category: forgeCategory });
             } else {
-                console.log('[RunePanel] Emitting upgrade_rune', { runeId: selectedShard.id, qty });
                 socket.emit('upgrade_rune', { runeId: selectedShard.id, qty });
             }
         }, 1500);
@@ -104,7 +101,6 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
 
             if (result.items && result.items.length > 1) {
                 // Bulk results - Aggregate by item ID
-                console.log('[RunePanel] Craft Result Input:', result.items);
 
                 const aggregated = result.items.reduce((acc, r) => {
                     const key = r.item;
@@ -148,8 +144,6 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                     }
                 });
 
-                console.log('[RunePanel] Family Map:', familyMap);
-
                 // 2. Calculate net quantities
                 Object.values(familyMap).forEach(familyItems => {
                     if (familyItems[0] && familyItems[0].item.id.includes('MISC')) return;
@@ -172,7 +166,6 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                             if (createdAmount > 0) {
                                 const consumedAmount = createdAmount * 2;
                                 lowerRankItem.item.qty -= consumedAmount;
-                                console.log(`[RunePanel] Consumed ${consumedAmount} ${lowerRankItem.item.id} (Rank ${lowerRankItem.rank}) to make ${createdAmount} ${current.item.id} (Rank ${current.rank})`);
                             }
                         }
                     }

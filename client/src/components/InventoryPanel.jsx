@@ -356,9 +356,10 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                         position: 'absolute',
                                         bottom: 22,
                                         right: 6,
-                                        color: 'rgba(255,255,255,0.7)',
+                                        color: 'var(--text-main)',
+                                        opacity: 0.7,
                                         cursor: 'pointer',
-                                        background: 'rgba(0,0,0,0.5)',
+                                        background: 'var(--accent-soft)',
                                         borderRadius: '50%',
                                         padding: '2px',
                                         display: 'flex',
@@ -420,7 +421,6 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                     quantity: 1
                                 });
                             } else {
-                                console.log('[DEBUG-CLIENT] Calling app level onUse for:', id);
                                 onUse(id);
                             }
                         }}
@@ -436,7 +436,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                     <div style={{
                         position: 'fixed',
                         top: 0, left: 0, right: 0, bottom: 0,
-                        background: 'rgba(0,0,0,0.7)',
+                        background: 'rgba(0,0,0,0.4)',
                         zIndex: 2000,
                         display: 'flex',
                         alignItems: 'center',
@@ -462,13 +462,13 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                             <div style={{ marginBottom: '20px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.75rem' }}>
                                     <span style={{ color: 'var(--text-dim)' }}>Quantity:</span>
-                                    <span style={{ color: '#fff', fontWeight: 'bold' }}>Max: {sellModal.max}</span>
+                                    <span style={{ color: 'var(--text-main)', fontWeight: 'bold' }}>Max: {sellModal.max}</span>
                                 </div>
 
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <button
                                         onClick={() => setSellModal({ ...sellModal, quantity: 1 })}
-                                        style={{ padding: '8px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#ccc', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}
+                                        style={{ padding: '8px 12px', background: 'var(--accent-soft)', border: '1px solid var(--border)', color: 'var(--text-main)', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}
                                     >
                                         MIN
                                     </button>
@@ -525,7 +525,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
 
                                     <button
                                         onClick={() => setSellModal({ ...sellModal, quantity: sellModal.max })}
-                                        style={{ padding: '8px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#ccc', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}
+                                        style={{ padding: '8px 12px', background: 'var(--accent-soft)', border: '1px solid var(--border)', color: 'var(--text-main)', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}
                                     >
                                         MAX
                                     </button>
@@ -623,11 +623,11 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                         <Package size={32} color="#d4af37" />
                                     )}
                                 </div>
-                                <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: '900', letterSpacing: '1px' }}>
+                                <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-main)', fontWeight: '900', letterSpacing: '1px' }}>
                                     {usePotionModal.item.type === 'POTION' ? 'Drink' : usePotionModal.item.type === 'CHEST' || usePotionModal.itemId.includes('CHEST') ? 'Open' : 'Use'} {usePotionModal.item.name}
                                 </h3>
-                                <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginTop: '4px' }}>
-                                    Available: <span style={{ color: '#d4af37', fontWeight: 'bold' }}>{usePotionModal.max}</span>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '4px' }}>
+                                    Available: <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{usePotionModal.max}</span>
                                 </div>
                             </div>
 
@@ -638,10 +638,10 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                         style={{ padding: '8px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#ccc', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem', transition: '0.2s' }}
                                     >MIN</button>
 
-                                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'rgba(0,0,0,0.3)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', padding: '4px' }}>
+                                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'var(--slot-bg)', borderRadius: '12px', border: '1px solid var(--border)', padding: '4px' }}>
                                         <button
                                             onClick={() => setUsePotionModal({ ...usePotionModal, quantity: Math.max(1, usePotionModal.quantity - 1) })}
-                                            style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '1.2rem' }}
+                                            style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '1.2rem' }}
                                         >-</button>
                                         <input
                                             type="number"
@@ -663,11 +663,11 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                                     setUsePotionModal({ ...usePotionModal, quantity: 1 });
                                                 }
                                             }}
-                                            style={{ flex: 1, background: 'transparent', border: 'none', color: '#fff', textAlign: 'center', fontSize: '1.1rem', fontWeight: '900', outline: 'none', width: '40px' }}
+                                            style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--text-main)', textAlign: 'center', fontSize: '1.1rem', fontWeight: '900', outline: 'none', width: '40px' }}
                                         />
                                         <button
                                             onClick={() => setUsePotionModal({ ...usePotionModal, quantity: Math.min(usePotionModal.max, usePotionModal.quantity + 1) })}
-                                            style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '1.2rem' }}
+                                            style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '1.2rem' }}
                                         >+</button>
                                     </div>
 
@@ -686,8 +686,8 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                         border: '1px solid rgba(255,255,255,0.05)'
                                     }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem' }}>Duration per potion:</span>
-                                            <span style={{ color: '#fff', fontSize: '0.75rem', fontWeight: 'bold' }}>{Math.round((usePotionModal.item.duration || 3600) / 60)} min</span>
+                                            <span style={{ color: 'var(--text-dim)', fontSize: '0.75rem' }}>Duration per potion:</span>
+                                            <span style={{ color: 'var(--text-main)', fontSize: '0.75rem', fontWeight: 'bold' }}>{Math.round((usePotionModal.item.duration || 3600) / 60)} min</span>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem' }}>Total Added Time:</span>

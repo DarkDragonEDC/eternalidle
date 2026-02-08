@@ -86,7 +86,6 @@ function App() {
   const [session, setSession] = useState(null);
   const [socket, setSocket] = useState(null);
   const [gameState, setGameState] = useState(null);
-  console.log('[App] Version 1.0.1 loaded');
   const [connectionError, setConnectionError] = useState(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const clockOffset = useRef(0);
@@ -360,7 +359,6 @@ function App() {
     });
 
     newSocket.on('daily_status', ({ canSpin }) => {
-      console.log(`[App] Received daily_status: canSpin=${canSpin}`);
       setCanSpin(canSpin);
     });
 
@@ -368,11 +366,7 @@ function App() {
       setIsConnecting(true);
     });
 
-    // Handle forced disconnect (duplicate session)
-    newSocket.on('force_disconnect', ({ reason }) => {
-      alert(reason || 'You have been disconnected.');
-      window.location.reload();
-    });
+
 
     newSocket.on('connect_error', async (err) => {
       console.error('Connection error:', err);
@@ -565,7 +559,6 @@ function App() {
   };
 
   const handleUseItem = (itemId, quantity = 1) => {
-    console.log('[DEBUG-APP] handleUseItem called for:', itemId, 'Socket:', !!socket, 'Connected:', socket?.connected);
     if (socket) {
       socket.emit('use_item', { itemId, quantity });
     }
@@ -578,7 +571,6 @@ function App() {
   };
 
   const startActivity = (type, itemId, quantity = 1) => {
-    console.log(`[CLIENT] Requesting Start Activity: ${type}, Item: ${itemId}, Qty: ${quantity}`);
     socket.emit('start_activity', { actionType: type, itemId, quantity });
   };
 
@@ -617,7 +609,7 @@ function App() {
           border: '1px solid var(--border-active)',
           borderRadius: '10px'
         }}>
-          <div style={{ fontSize: '1rem', fontWeight: '900', color: '#fff', letterSpacing: '1px', textTransform: 'uppercase' }}>
+          <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)', letterSpacing: '1px', textTransform: 'uppercase' }}>
             {category}
           </div>
         </div>
@@ -638,7 +630,7 @@ function App() {
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <div style={{ fontSize: '1rem', fontWeight: '900', color: '#fff', letterSpacing: '1px', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)', letterSpacing: '1px', textTransform: 'uppercase' }}>
               {category}
             </div>
           </div>
@@ -646,12 +638,12 @@ function App() {
             <div style={{ fontSize: '0.85rem', fontWeight: '900', color: 'var(--text-main)' }}>
               Lv {skill.level} <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: 'normal' }}>({Math.floor(progress)}%)</span>
             </div>
-            <div style={{ fontSize: '0.55rem', color: '#5b5d61', fontWeight: 'bold' }}>
+            <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: 'bold' }}>
               {formatNumber((XP_TABLE[skill.level - 1] || 0) + skill.xp)} / {XP_TABLE[skill.level] ? formatNumber(XP_TABLE[skill.level]) : 'MAX'} XP
             </div>
           </div>
         </div>
-        <div style={{ height: '3px', background: 'rgba(0,0,0,0.3)', borderRadius: '2px', overflow: 'hidden', marginTop: '10px' }}>
+        <div style={{ height: '3px', background: 'var(--slot-bg)', borderRadius: '2px', overflow: 'hidden', marginTop: '10px' }}>
           <div
             style={{
               width: `${progress}%`,
@@ -674,20 +666,20 @@ function App() {
         gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(5, 1fr)',
         gap: '10px',
         marginBottom: '20px',
-        background: 'rgba(0,0,0,0.15)',
+        background: 'var(--accent-soft)',
         padding: '15px',
         borderRadius: '12px',
-        border: '1px solid rgba(255,255,255,0.02)'
+        border: '1px solid var(--border)'
       }}>
         {tiersList.map(t => (
           <button
             key={t}
             onClick={() => setActiveTier(t)}
             style={{
-              background: activeTier === t ? 'var(--accent-soft)' : 'rgba(255,255,255,0.02)',
+              background: activeTier === t ? 'var(--accent)' : 'var(--glass-bg)',
               border: '1px solid',
-              borderColor: activeTier === t ? 'var(--border-active)' : 'rgba(255,255,255,0.03)',
-              color: activeTier === t ? 'var(--accent)' : 'var(--text-dim)',
+              borderColor: activeTier === t ? 'var(--accent)' : 'var(--border)',
+              color: activeTier === t ? 'var(--panel-bg)' : 'var(--text-dim)',
               padding: '12px',
               borderRadius: '6px',
               cursor: 'pointer',
@@ -731,10 +723,10 @@ function App() {
           cursor: locked ? 'not-allowed' : 'pointer',
           borderRadius: '8px',
           padding: '8px 20px',
-          background: locked ? 'rgba(255,255,255,0.05)' : 'rgba(76, 175, 80, 0.1)', // Greenish for action
+          background: locked ? 'var(--accent-soft)' : 'rgba(76, 175, 80, 0.12)', // Greenish for action
           border: '1px solid',
-          borderColor: locked ? 'rgba(255,255,255,0.1)' : 'rgba(76, 175, 80, 0.3)',
-          color: locked ? '#888' : '#4caf50',
+          borderColor: locked ? 'var(--border)' : 'rgba(76, 175, 80, 0.4)',
+          color: locked ? 'var(--text-dim)' : '#2e7d32',
           fontWeight: '900',
           fontSize: '0.75rem',
           letterSpacing: '1px',
@@ -930,7 +922,8 @@ function App() {
 
                             {/* Ingredients Badge (Refining only) */}
                             {!isGathering && reqs && Object.entries(reqs).map(([reqId, reqQty]) => {
-                              const userQty = (displayedGameState?.state?.inventory?.[reqId] || 0);
+                              const entry = displayedGameState?.state?.inventory?.[reqId];
+                              const userQty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
                               const hasEnough = userQty >= reqQty;
                               return (
                                 <div key={reqId} style={{
@@ -1138,7 +1131,8 @@ function App() {
 
                             {/* Requirements Badges */}
                             {Object.entries(reqs).map(([reqId, reqQty]) => {
-                              const userQty = (displayedGameState?.state?.inventory?.[reqId] || 0);
+                              const entry = displayedGameState?.state?.inventory?.[reqId];
+                              const userQty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
                               const hasEnough = userQty >= reqQty;
                               return (
                                 <div key={reqId} style={{
