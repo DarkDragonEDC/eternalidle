@@ -485,6 +485,10 @@ export class GameManager {
                 this.markDirty(data.id);
                 // FIX: Persist immediately after catchup to ensure gains aren't lost if server shuts down
                 await this.persistCharacter(data.id);
+
+                // FIX: Explicitly update the cache with the modified data after persist
+                // This ensures any subsequent getStatus calls use the fresh data, not stale cache
+                this.cache.set(data.id, data);
             }
 
         }
