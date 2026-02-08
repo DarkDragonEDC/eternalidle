@@ -588,7 +588,9 @@ export class GameManager {
         }
 
         const invBefore = char.state.inventory[item.id] || 0;
-        console.log(`[BATCH] Starting ${quantity}x ${type} for ${item.id}. Inv before: ${invBefore}`);
+        // FIX: Robust logging for inventory values to detect [object Object] issues
+        const logInvAfter = (invBefore && typeof invBefore === 'object') ? JSON.stringify(invBefore) : invBefore;
+        console.log(`[BATCH] Starting ${quantity}x ${type} for ${item.id}. Inv before: ${logInvAfter}`);
 
         let processed = 0;
         let leveledUp = false;

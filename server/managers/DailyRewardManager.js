@@ -42,6 +42,7 @@ export class DailyRewardManager {
         if (!data) return true; // No record means never spun
 
         const lastSpin = new Date(data.last_spin);
+        const now = new Date();
         const lastDate = lastSpin.toISOString().split('T')[0];
         const nowDate = now.toISOString().split('T')[0];
         const canSpin = lastDate !== nowDate;
