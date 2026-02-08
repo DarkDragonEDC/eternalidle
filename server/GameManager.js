@@ -336,7 +336,11 @@ export class GameManager {
                             }
                         }
                     }
-                } else if (data.state.combat) {
+                }
+
+                // FIX: Process combat INDEPENDENTLY (not else if) so both activity and combat can be processed
+                if (data.state.combat) {
+                    console.log(`[CATCHUP] ${data.name}: Processing combat offline...`);
                     const stats = this.inventoryManager.calculateStats(data);
                     const atkSpeed = Number(stats.attackSpeed) || 1000;
                     const secondsPerRound = atkSpeed / 1000;
@@ -345,9 +349,11 @@ export class GameManager {
                         const maxIdleMs = this.getMaxIdleTime(data);
                         const maxEffectSeconds = Math.min(elapsedSeconds, maxIdleMs / 1000);
                         const maxRounds = Math.floor(maxEffectSeconds / secondsPerRound);
+                        console.log(`[CATCHUP] ${data.name}: Combat maxRounds=${maxRounds}, atkSpeed=${atkSpeed}ms`);
 
                         if (maxRounds > 0) {
                             const combatReport = await this.processBatchCombat(data, maxRounds);
+                            console.log(`[CATCHUP] ${data.name}: Combat processed=${combatReport.processedRounds}, kills=${combatReport.kills}`);
                             if (combatReport.processedRounds > 0) {
                                 updated = true;
 
@@ -370,7 +376,10 @@ export class GameManager {
                             }
                         }
                     }
-                } else if (data.state.dungeon) {
+                }
+
+                // Process dungeon independently as well
+                if (data.state.dungeon) {
                     const dungeonReport = await this.processBatchDungeon(data, elapsedSeconds);
                     if (dungeonReport && dungeonReport.totalTime > 0) {
                         finalReport.totalTime += dungeonReport.totalTime;
