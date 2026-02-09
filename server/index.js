@@ -638,12 +638,16 @@ io.on('connection', (socket) => {
     // Get lowest market price for a specific item
     socket.on('get_item_market_price', async ({ itemId }) => {
         try {
+            // Strip signature to find all identical items regardless of creator
+            const baseId = itemId.split('::')[0];
+
             const { data, error } = await supabase
                 .from('market_listings')
                 .select('price, amount, item_id')
-                .eq('item_id', itemId);
+                .or(`item_id.eq.${baseId},item_id.like.${baseId}::%`);
 
-            console.log(`[MARKET PRICE] itemId: "${itemId}", results:`, data);
+            console.log(`[MARKET PRICE] baseId: "${baseId}", results:`, data?.length || 0);
+
 
             if (data && data.length > 0) {
                 // Calculate unit price for each listing and find the lowest
