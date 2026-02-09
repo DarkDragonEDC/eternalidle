@@ -22,7 +22,7 @@ async function finalizeAll() {
     const { data: characters, error } = await supabase
         .from('characters')
         .select('id, user_id, name')
-        .or('current_activity.not.is.null,state->combat.not.is.null,state->dungeon.not.is.null');
+        .or('current_activity.not.is.null,combat.not.is.null,dungeon.not.is.null');
 
     if (error) {
         console.error("Erro ao buscar personagens:", error);

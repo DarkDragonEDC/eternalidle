@@ -1113,8 +1113,8 @@ export class GameManager {
             // Find all characters with any active activity
             const { data: allActive, error } = await this.supabase
                 .from('characters')
-                .select('id, user_id, name, current_activity, state, activity_started_at')
-                .or('current_activity.not.is.null,state->combat.not.is.null,state->dungeon.not.is.null');
+                .select('id, user_id, name, current_activity, state, activity_started_at, combat, dungeon')
+                .or('current_activity.not.is.null,combat.not.is.null,dungeon.not.is.null');
 
             if (error) throw error;
 
@@ -1122,6 +1122,12 @@ export class GameManager {
                 console.log("[MAINTENANCE] No active characters found.");
                 return;
             }
+
+            // Inject combat/dungeon back into state for compatibility
+            allActive.forEach(char => {
+                if (char.combat && char.state) char.state.combat = char.combat;
+                if (char.dungeon && char.state) char.state.dungeon = char.dungeon;
+            });
 
             const toCleanup = allActive.filter(char => {
                 const limitMs = this.getMaxIdleTime(char);
