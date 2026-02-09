@@ -224,10 +224,23 @@ app.get('/api/last_active', authMiddleware, async (req, res) => {
     }
 });
 
+// Cache for active players count
+let activePlayersCache = {
+    count: 0,
+    timestamp: 0
+};
+
 // Public route for active accounts count (unique users with active characters)
 app.get('/api/active_players', async (req, res) => {
+    const now = Date.now();
+
+    // Return cached value if it's less than 60 seconds old
+    if (now - activePlayersCache.timestamp < 60000) {
+        return res.json({ count: activePlayersCache.count, cached: true });
+    }
+
     // Persistent log for debugging
-    const logMsg = `[${new Date().toISOString()}] Counter accessed. Origin: ${req.headers.origin}\n`;
+    const logMsg = `[${new Date().toISOString()}] Counter refreshed. Origin: ${req.headers.origin}\n`;
     try {
         if (!fs.existsSync('logs')) fs.mkdirSync('logs');
         fs.appendFileSync('logs/access.log', logMsg);
@@ -235,6 +248,7 @@ app.get('/api/active_players', async (req, res) => {
 
     try {
         // Fetch user_id for all characters that have an active activity
+        // Optimization: We could also check combat/dungeon columns if they are separate now
         const { data, error } = await supabase
             .from('characters')
             .select('user_id')
@@ -245,10 +259,16 @@ app.get('/api/active_players', async (req, res) => {
         // Count unique user_ids to get "active accounts"
         const uniqueUsers = new Set((data || []).map(c => c.user_id)).size;
 
+        // Update cache
+        activePlayersCache = {
+            count: uniqueUsers,
+            timestamp: now
+        };
+
         res.json({ count: uniqueUsers });
     } catch (err) {
         console.error('[SERVER] Error:', err);
-        res.status(500).json({ count: 0, error: err.message });
+        res.status(500).json({ count: activePlayersCache.count || 0, error: err.message });
     }
 });
 

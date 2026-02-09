@@ -38,7 +38,8 @@ export class GameManager {
         // Load Global Stats initially
         this.loadGlobalStats();
 
-        // Periodic Persistence Loop (Every 60 seconds)
+        // Periodic Persistence Loop (Every 60 seconds) - REDUNDANT (Handled by index.js every 15s)
+        /*
         setInterval(async () => {
             try {
                 await this.flushDirtyCharacters();
@@ -47,6 +48,10 @@ export class GameManager {
                 console.error('[DB] Error in periodic flush loop:', err);
             }
         }, 60000);
+        */
+
+        // At least keep loadGlobalStats in sync
+        setInterval(() => this.loadGlobalStats(), 600000); // 10 mins is enough for tax stats
     }
 
     async loadGlobalStats() {
@@ -566,8 +571,10 @@ export class GameManager {
         const char = this.cache.get(charId);
         if (!char) return;
 
-        // --- Optimistic Locking Check ---
-        // Fetch current last_saved from DB to verify we aren't overwriting someone else's newer data
+        // --- Optimistic Locking Check (DISABLED for Performance) ---
+        // This was calling a SELECT before every UPDATE. 
+        // With executeLocked handling concurrency, this is usually redundant.
+        /*
         const { data: remote, error: fetchError } = await this.supabase
             .from('characters')
             .select('last_saved')
@@ -580,12 +587,12 @@ export class GameManager {
 
             if (dbTime > cacheTime) {
                 console.warn(`[DB] PERSISTENCE CONFLICT for ${char.name}! DB has newer data (${remote.last_saved}) than Cache (${char.last_saved}). Aborting save and clearing stale cache.`);
-                // Force cache to mark as clean and delete from cache to force reload on next access
                 this.dirty.delete(charId);
                 this.cache.delete(charId);
                 return;
             }
         }
+        */
 
         // Create a pruned version of the state for storage
         const prunedState = JSON.parse(JSON.stringify(char.state));
