@@ -380,6 +380,7 @@ io.on('connection', (socket) => {
 
     socket.on('start_activity', async ({ actionType, itemId, quantity }) => {
         try {
+            if (!socket.data.characterId) return;
             await gameManager.executeLocked(socket.user.id, async () => {
                 const result = await gameManager.startActivity(socket.user.id, socket.data.characterId, actionType, itemId, quantity);
                 socket.emit('activity_started', result);
@@ -393,6 +394,7 @@ io.on('connection', (socket) => {
 
     socket.on('claim_reward', async () => {
         try {
+            if (!socket.data.characterId) return;
             await gameManager.executeLocked(socket.user.id, async () => {
                 const result = await gameManager.claimReward(socket.user.id, socket.data.characterId);
                 socket.emit('reward_claimed', result);
@@ -406,6 +408,7 @@ io.on('connection', (socket) => {
 
     socket.on('start_dungeon', async ({ tier, dungeonId, repeatCount }) => {
         try {
+            if (!socket.data.characterId) return;
             await gameManager.executeLocked(socket.user.id, async () => {
                 const result = await gameManager.startDungeon(socket.user.id, socket.data.characterId, dungeonId, repeatCount);
                 socket.emit('dungeon_started', result);
@@ -419,6 +422,7 @@ io.on('connection', (socket) => {
 
     socket.on('change_name', async ({ newName }) => {
         try {
+            if (!socket.data.characterId) return;
             await gameManager.executeLocked(socket.user.id, async () => {
                 const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
                 if (!char) throw new Error("Character not found");
@@ -469,6 +473,7 @@ io.on('connection', (socket) => {
 
     socket.on('change_title', async ({ title }) => {
         try {
+            if (!socket.data.characterId) return;
             await gameManager.executeLocked(socket.user.id, async () => {
                 const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
                 if (!char) throw new Error("Character not found");
@@ -492,6 +497,7 @@ io.on('connection', (socket) => {
 
     socket.on('stop_dungeon', async () => {
         try {
+            if (!socket.data.characterId) return;
             await gameManager.executeLocked(socket.user.id, async () => {
                 const result = await gameManager.stopDungeon(socket.user.id, socket.data.characterId);
                 socket.emit('dungeon_stopped', result);
@@ -504,6 +510,7 @@ io.on('connection', (socket) => {
 
     socket.on('start_combat', async ({ tier, mobId }) => {
         try {
+            if (!socket.data.characterId) return;
             await gameManager.executeLocked(socket.user.id, async () => {
                 const result = await gameManager.startCombat(socket.user.id, socket.data.characterId, mobId, tier);
                 socket.emit('combat_started', result);
@@ -517,6 +524,7 @@ io.on('connection', (socket) => {
 
     socket.on('stop_combat', async () => {
         try {
+            if (!socket.data.characterId) return;
             await gameManager.executeLocked(socket.user.id, async () => {
                 const userId = socket.user.id;
                 const result = await gameManager.stopCombat(userId, socket.data.characterId);
@@ -532,6 +540,7 @@ io.on('connection', (socket) => {
 
     socket.on('equip_item', async ({ itemId }) => {
         try {
+            if (!socket.data.characterId) return;
             await gameManager.executeLocked(socket.user.id, async () => {
                 const result = await gameManager.equipItem(socket.user.id, socket.data.characterId, itemId);
                 socket.emit('item_equipped', result);
@@ -544,6 +553,7 @@ io.on('connection', (socket) => {
 
     socket.on('unequip_item', async ({ slot }) => {
         try {
+            if (!socket.data.characterId) return;
             await gameManager.executeLocked(socket.user.id, async () => {
                 const result = await gameManager.unequipItem(socket.user.id, socket.data.characterId, slot);
                 socket.emit('item_unequipped', result);
@@ -557,6 +567,7 @@ io.on('connection', (socket) => {
 
     socket.on('sell_item', async ({ itemId, quantity }) => {
         try {
+            if (!socket.data.characterId) return;
             await gameManager.executeLocked(socket.user.id, async () => {
                 const result = await gameManager.sellItem(socket.user.id, socket.data.characterId, itemId, quantity);
                 socket.emit('item_sold', result);
@@ -570,6 +581,7 @@ io.on('connection', (socket) => {
     socket.on('use_item', async ({ itemId, quantity = 1 }) => {
         console.log(`[DEBUG-SOCKET] Received use_item for ${itemId}`, quantity);
         try {
+            if (!socket.data.characterId) return;
             await gameManager.executeLocked(socket.user.id, async () => {
                 const result = await gameManager.consumeItem(socket.user.id, socket.data.characterId, itemId, quantity);
                 socket.emit('item_used', result);
@@ -582,6 +594,7 @@ io.on('connection', (socket) => {
 
     socket.on('stop_activity', async () => {
         try {
+            if (!socket.data.characterId) return;
             await gameManager.executeLocked(socket.user.id, async () => {
                 await gameManager.stopActivity(socket.user.id, socket.data.characterId);
                 socket.emit('activity_stopped');
@@ -594,6 +607,7 @@ io.on('connection', (socket) => {
 
     socket.on('get_market_listings', async (filters) => {
         try {
+            // Note: getMarketListings does NOT require a characterId.
             const listings = await gameManager.getMarketListings(filters);
             socket.emit('market_listings_update', listings);
         } catch (err) {
