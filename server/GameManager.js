@@ -1631,7 +1631,7 @@ export class GameManager {
         // console.log(`[RANKING] Fetching fresh leaderboard for type: ${type}, mode: ${mode}`);
         let query = this.supabase
             .from('characters')
-            .select('id, name, state, skills') // Fetch skills directly
+            .select('id, name, state, skills, info') // Fetch skills and info for membership
             .or('is_admin.is.null,is_admin.eq.false'); // Exclude admins
 
         // Mode Filtering
@@ -1653,10 +1653,14 @@ export class GameManager {
 
         if (!data) return { type, top100: [], userRank: null };
 
-        // Inject skills into state for backward compatibility and sorting
+        // Inject skills and info into state for backward compatibility and sorting
         data.forEach(char => {
             if (char.skills && char.state) {
                 char.state.skills = char.skills;
+            }
+            // Inject membership from info column for ranking display
+            if (char.info?.membership && char.state) {
+                char.state.membership = char.info.membership;
             }
         });
 

@@ -6,13 +6,37 @@ import { resolveItem, getTierColor, formatItemId } from '@shared/items';
 const MarketListingModal = ({ listingItem, onClose, socket }) => {
     const [amount, setAmount] = useState('1');
     const [unitPrice, setUnitPrice] = useState('');
+    const [currentMarketPrice, setCurrentMarketPrice] = useState(null);
+    const [loadingPrice, setLoadingPrice] = useState(false);
 
     useEffect(() => {
         if (listingItem) {
             setAmount('1');
             setUnitPrice('');
+            setCurrentMarketPrice(null);
+
+            // Request current market price for this item
+            if (socket) {
+                setLoadingPrice(true);
+                socket.emit('get_item_market_price', { itemId: listingItem.itemId });
+            }
         }
-    }, [listingItem]);
+    }, [listingItem, socket]);
+
+    // Listen for market price response
+    useEffect(() => {
+        if (!socket) return;
+
+        const handlePriceResponse = (response) => {
+            if (response.itemId === listingItem?.itemId) {
+                setCurrentMarketPrice(response.lowestPrice);
+                setLoadingPrice(false);
+            }
+        };
+
+        socket.on('item_market_price', handlePriceResponse);
+        return () => socket.off('item_market_price', handlePriceResponse);
+    }, [socket, listingItem?.itemId]);
 
     if (!listingItem) return null;
 
@@ -185,7 +209,29 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
 
                     {/* Unit Price Input */}
                     <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '8px' }}>Price per Unit (Silver):</label>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <label style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Price per Unit (Silver):</label>
+                            {/* Market Price Helper */}
+                            <div
+                                style={{
+                                    fontSize: '0.75rem',
+                                    color: currentMarketPrice ? 'var(--accent)' : 'var(--text-dim)',
+                                    cursor: currentMarketPrice ? 'pointer' : 'default',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px'
+                                }}
+                                onClick={() => {
+                                    if (currentMarketPrice) setUnitPrice(String(currentMarketPrice));
+                                }}
+                            >
+                                {loadingPrice ? 'Checking...' : (
+                                    currentMarketPrice
+                                        ? <>Lowest: <b>{formatNumber(currentMarketPrice)}</b></>
+                                        : 'No listings'
+                                )}
+                            </div>
+                        </div>
                         <input
                             type="text"
                             inputMode="numeric"

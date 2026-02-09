@@ -615,6 +615,30 @@ io.on('connection', (socket) => {
         }
     });
 
+    // Get lowest market price for a specific item
+    socket.on('get_item_market_price', async ({ itemId }) => {
+        try {
+            const { data, error } = await supabase
+                .from('market_listings')
+                .select('price, amount, item_id')
+                .eq('item_id', itemId);
+
+            console.log(`[MARKET PRICE] itemId: "${itemId}", results:`, data);
+
+            if (data && data.length > 0) {
+                // Calculate unit price for each listing and find the lowest
+                const unitPrices = data.map(l => Math.floor(l.price / l.amount));
+                const lowestPrice = Math.min(...unitPrices);
+                socket.emit('item_market_price', { itemId, lowestPrice });
+            } else {
+                socket.emit('item_market_price', { itemId, lowestPrice: null });
+            }
+        } catch (err) {
+            console.error('[MARKET PRICE] Error:', err);
+            socket.emit('item_market_price', { itemId, lowestPrice: null });
+        }
+    });
+
     socket.on('list_market_item', async ({ itemId, amount, price, metadata }) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
