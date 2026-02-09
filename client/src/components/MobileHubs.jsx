@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pickaxe, Box, Hammer, Sword, Castle, Trophy, ShoppingBag, Zap, Coins, Gift, ArrowLeftRight } from 'lucide-react';
+import { Pickaxe, Box, Hammer, Sword, Castle, Trophy, ShoppingBag, Zap, Coins, Gift, ArrowLeftRight, Skull } from 'lucide-react';
 
 const HubButton = ({ label, icon, onClick, color = 'var(--text-main)', level, progress, showBadge, customStyle = {} }) => (
     <button
@@ -313,6 +313,13 @@ export const CombatOverview = ({ onNavigate, gameState }) => {
                 onClick={() => onNavigate('dungeon')}
                 level={dungeonLevel}
                 progress={dungeonProgress}
+            />
+            <HubButton
+                label="World Boss"
+                icon={<Skull />}
+                color="#a855f7"
+                onClick={() => onNavigate('world_boss')}
+                customStyle={{ border: '1px solid #a855f7', background: 'rgba(168, 85, 247, 0.05)' }}
             />
         </div>
     );

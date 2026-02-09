@@ -32,7 +32,7 @@ import SocialPanel from './components/SocialPanel';
 import TradePanel from './components/TradePanel';
 import {
   Zap, Package, User, Trophy, Coins,
-  Axe, Pickaxe, Target, Shield, Sword,
+  Axe, Pickaxe, Target, Shield, Sword, Skull,
   Star, Layers, Box, Castle, Lock, Menu, X, Tag, Clock, Heart, LogOut, ChevronDown, Crown, Circle, Users, Gift
 } from 'lucide-react';
 import { ITEMS, resolveItem, getSkillForItem, getLevelRequirement, formatItemId } from '@shared/items';
@@ -98,6 +98,14 @@ function App() {
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('activeTab') || 'inventory');
   const prevTabRef = React.useRef(localStorage.getItem('activeTab') || 'inventory');
   const [activeCategory, setActiveCategory] = useState(() => localStorage.getItem('activeCategory') || 'WOOD');
+
+  // Helper for safe inventory access
+  const getSafeAmount = (entry) => {
+    if (!entry) return 0;
+    if (typeof entry === 'number') return entry;
+    if (typeof entry === 'object') return entry.amount || 0;
+    return 0;
+  };
   const [activeTier, setActiveTier] = useState(() => parseInt(localStorage.getItem('activeTier')) || 1);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -920,10 +928,12 @@ function App() {
                               </div>
                             )}
 
+
+
                             {/* Ingredients Badge (Refining only) */}
                             {!isGathering && reqs && Object.entries(reqs).map(([reqId, reqQty]) => {
                               const entry = displayedGameState?.state?.inventory?.[reqId];
-                              const userQty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
+                              const userQty = getSafeAmount(entry);
                               const hasEnough = userQty >= reqQty;
                               return (
                                 <div key={reqId} style={{
@@ -965,8 +975,6 @@ function App() {
 
       case 'crafting': {
         const craftingItems = ITEMS.GEAR[activeCategory] || {};
-        // ITEMS.GEAR[Category] returns { SWORD: {1:.., 2:..}, SHIELD: {1:..} }
-        // We need to flatten this to get all items of the selected tier
         const allItemsInCategory = [];
         Object.values(craftingItems).forEach(itemTypeGroup => {
           Object.values(itemTypeGroup).forEach(item => {
@@ -980,22 +988,23 @@ function App() {
           return (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
               <SkillProgressHeader tab={activeTab} category={activeCategory} />
-              <div className="glass-panel" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '16px', background: 'rgba(15, 20, 30, 0.4)' }}>
+              <div className="glass-panel" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '16px', background: 'var(--panel-bg)' }}>
                 <div style={{ textAlign: 'center', opacity: 0.5 }}>
                   <div style={{ fontSize: '3rem', marginBottom: '10px' }}>⚗️</div>
                   <h2 style={{ color: 'var(--accent)', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '2px' }}>COMING SOON</h2>
-                  <p style={{ color: '#888' }}>Alchemy Lab under construction.</p>
+                  <p style={{ color: 'var(--text-dim)' }}>Alchemy Lab under construction.</p>
                 </div>
               </div>
             </div>
           );
         }
+
         return (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <SkillProgressHeader tab={activeTab} category={activeCategory} />
-            <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRadius: '16px', background: 'rgba(15, 20, 30, 0.4)' }}>
+            <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRadius: '16px', background: 'var(--panel-bg)' }}>
               <div style={{ padding: isMobile ? '20px' : '30px 40px', borderBottom: '1px solid var(--border)' }}>
-                <h2 style={{ margin: 0, color: '#fff', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '2px' }}>
+                <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '2px' }}>
                   {activeCategory} CRAFTING
                 </h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', marginTop: '15px' }}>
@@ -1012,19 +1021,17 @@ function App() {
                     const mainStat = item.heal ? { icon: <Heart size={12} />, val: `${item.heal} Heal`, color: '#4caf50' }
                       : stats.damage ? { icon: <Sword size={12} />, val: `${stats.damage} Damage`, color: '#ff4444' }
                         : stats.defense ? { icon: <Shield size={12} />, val: `${stats.defense} Def`, color: '#4caf50' }
-                          : stats.hp ? { icon: <Heart size={12} />, val: `${stats.hp} HP`, color: '#ff4444' } // Fallback HP
+                          : stats.hp ? { icon: <Heart size={12} />, val: `${stats.hp} HP`, color: '#ff4444' }
                             : null;
 
                     const type = activeTab.toUpperCase();
                     const locked = isLocked(type, item);
                     const reqLevel = getLevelRequirement(item.tier);
                     const isActive = displayedGameState?.current_activity?.item_id === item.id;
-                    const duration = (item.time || 3.0) * 1000;
 
                     const skillKey = mapTabCategoryToSkill(activeTab, activeCategory);
                     const skill = displayedGameState?.state?.skills?.[skillKey] || { level: 1, xp: 0 };
                     const nextXP = calculateNextLevelXP(skill.level);
-                    const skillProgress = (skill.xp / nextXP) * 100;
 
                     return (
                       <button
@@ -1033,7 +1040,6 @@ function App() {
                           setModalItem(item);
                           setModalType('CRAFTING');
                         }}
-
                         className="resource-card"
                         style={{
                           borderLeft: isActive ? '4px solid var(--accent)' : 'none',
@@ -1043,7 +1049,6 @@ function App() {
                           padding: '12px',
                           opacity: locked ? 0.7 : 1,
                           cursor: 'pointer',
-                          filter: 'none',
                           background: isActive ? 'var(--accent-soft)' : 'rgba(0,0,0,0.2)',
                           width: '100%',
                           textAlign: 'left',
@@ -1054,8 +1059,6 @@ function App() {
                           position: 'relative',
                           overflow: 'hidden'
                         }}
-                        onMouseEnter={(e) => { if (!locked && !isActive) e.currentTarget.style.background = 'var(--accent-soft)'; }}
-                        onMouseLeave={(e) => { if (!locked && !isActive) e.currentTarget.style.background = 'var(--slot-bg)'; }}
                       >
                         {/* Icon Container */}
                         <div style={{
@@ -1071,16 +1074,7 @@ function App() {
                           overflow: 'hidden'
                         }}>
                           {item.icon ? (
-                            <img
-                              src={item.icon}
-                              alt={item.name}
-                              style={{
-                                width: '130%',
-                                height: '130%',
-                                objectFit: 'contain',
-                                filter: locked ? 'grayscale(100%) opacity(0.5)' : 'none'
-                              }}
-                            />
+                            <img src={item.icon} alt={item.name} style={{ width: '130%', height: '130%', objectFit: 'contain', filter: locked ? 'grayscale(100%) opacity(0.5)' : 'none' }} />
                           ) : (
                             locked ? <Lock size={20} color="#555" /> : <Layers size={20} style={{ opacity: 0.7 }} color="var(--accent)" />
                           )}
@@ -1089,50 +1083,33 @@ function App() {
                         {/* Content */}
                         <div style={{ flex: '1 1 0%' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                            <span style={{ fontWeight: 'bold', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px', color: locked ? '#888' : (isActive ? 'var(--accent)' : '#eee') }}>
+                            <span style={{ fontWeight: 'bold', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px', color: locked ? 'var(--text-dim)' : (isActive ? 'var(--accent)' : 'var(--text-main)') }}>
                               {item.name}
-                              {isActive && <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 2 }} style={{ fontSize: '0.6rem', background: 'var(--accent)', color: 'var(--panel-bg)', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>ACTIVE</motion.span>}
+                              {isActive && <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 2 }} style={{ fontSize: '0.6rem', background: 'var(--accent)', color: 'var(--bg-dark)', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>ACTIVE</motion.span>}
                             </span>
                           </div>
 
                           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                            {/* Tier Badge */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--slot-bg)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--accent)', border: '1px solid var(--border)' }}>
                               <span>T{item.tier}</span>
                             </div>
-
-                            {/* Time Badge */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--slot-bg)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--text-dim)', border: '1px solid var(--border)' }}>
                               <Clock size={12} />
                               <span>{item.time || 3.0}s</span>
                             </div>
-
-                            {/* XP Badge */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--slot-bg)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--text-dim)', border: '1px solid var(--border)' }}>
                               <Star size={12} />
                               <span>{item.xp} XP</span>
                             </div>
-
-                            {/* Main Stat Badge */}
                             {mainStat && (
                               <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--slot-bg)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: locked ? '#555' : mainStat.color, border: '1px solid var(--border)' }}>
                                 {React.cloneElement(mainStat.icon, { size: 12, color: locked ? '#555' : mainStat.color })}
                                 <span>{mainStat.val}</span>
                               </div>
                             )}
-
-                            {/* Potion Description Badge */}
-                            {item.desc && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--accent-soft)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--accent)', border: '1px solid var(--border-active)' }}>
-                                <Zap size={12} />
-                                <span>{item.desc}</span>
-                              </div>
-                            )}
-
-                            {/* Requirements Badges */}
                             {Object.entries(reqs).map(([reqId, reqQty]) => {
                               const entry = displayedGameState?.state?.inventory?.[reqId];
-                              const userQty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
+                              const userQty = getSafeAmount(entry);
                               const hasEnough = userQty >= reqQty;
                               return (
                                 <div key={reqId} style={{
@@ -1146,20 +1123,11 @@ function App() {
                                 }}>
                                   <span>{userQty}/{reqQty} {formatItemId(reqId)}</span>
                                 </div>
-                              )
+                              );
                             })}
                           </div>
-
                           {isActive && (
-                            <ActivityProgressBar
-                              activity={displayedGameState.current_activity}
-                              serverTimeOffset={clockOffset.current}
-                            />
-                          )}
-                          {isActive && (
-                            <div style={{ fontSize: '0.6rem', color: 'var(--accent)', marginTop: '4px', textAlign: 'right', fontWeight: 'bold' }}>
-                              {displayedGameState.current_activity.initial_quantity - displayedGameState.current_activity.actions_remaining}/{displayedGameState.current_activity.initial_quantity}
-                            </div>
+                            <ActivityProgressBar activity={displayedGameState.current_activity} serverTimeOffset={clockOffset.current} />
                           )}
                         </div>
                       </button>
@@ -1225,6 +1193,81 @@ function App() {
             <DungeonPanel socket={socket} gameState={displayedGameState} isMobile={isMobile} serverTimeOffset={clockOffset.current} />
           </div>
         );
+      case 'world_boss':
+        // Reuse logic or create simple view
+        return (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px', padding: '40px', background: 'var(--bg-dark)' }}>
+            <div style={{
+              padding: '40px',
+              background: 'rgba(168, 85, 247, 0.03)',
+              borderRadius: '24px',
+              border: '1px solid rgba(168, 85, 247, 0.15)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '20px',
+              boxShadow: '0 0 40px rgba(168, 85, 247, 0.05)',
+              width: isMobile ? '100%' : '400px',
+              maxWidth: '320px',
+              textAlign: 'center'
+            }}>
+              <motion.div
+                animate={{
+                  scale: [1, 1.05, 1],
+                  opacity: [0.6, 0.9, 0.6]
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                <Skull size={80} color="#a855f7" />
+              </motion.div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <div style={{
+                  fontSize: '2.2rem',
+                  fontWeight: '900',
+                  color: '#a855f7',
+                  letterSpacing: '4px',
+                  lineHeight: '1.1',
+                  textShadow: '0 0 20px rgba(168, 85, 247, 0.4)'
+                }}>
+                  WORLD BOSS
+                </div>
+                <div style={{
+                  fontSize: '1rem',
+                  color: 'var(--text-dim)',
+                  fontWeight: 'bold',
+                  letterSpacing: '3px',
+                  marginTop: '10px',
+                  opacity: 0.6
+                }}>
+                  COMING SOON
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => setActiveTab('combat_overview')}
+              style={{
+                marginTop: '10px',
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-dim)',
+                padding: '12px 24px',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                fontWeight: 'bold',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'; e.currentTarget.style.color = '#fff'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'; e.currentTarget.style.color = 'var(--text-dim)'; }}
+            >
+              ← Back to Combat
+            </button>
+          </div>
+        );
       case 'merging':
         return (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -1240,6 +1283,10 @@ function App() {
   };
 
   const handleNavigate = (itemId) => {
+    if (itemId === 'world_boss') {
+      setActiveTab('world_boss');
+      return;
+    }
     if (itemId === 'combat') {
       setActiveTab('combat');
       return;

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import {
     Package, User, Pickaxe, Hammer, Sword,
     ChevronDown, ChevronRight, Coins, Castle,
-    Trophy, Tag, Zap, Box, Axe, Shield, Users, MessageSquare, Sun, Moon, Gift
+    Trophy, Tag, Zap, Box, Axe, Shield, Users, MessageSquare, Sun, Moon, Gift, Skull
 } from 'lucide-react';
 import DailySpinModal from './DailySpinModal';
 
@@ -125,6 +125,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
         },
         { id: 'combat', label: 'Combat', icon: <Sword size={18} />, skill: 'COMBAT' },
         { id: 'dungeon', label: 'Dungeons', icon: <Castle size={18} />, skill: 'DUNGEONEERING' },
+        { id: 'world_boss', label: 'World Boss', icon: <Skull size={18} /> },
         { id: 'ranking', label: 'Ranking', icon: <Trophy size={18} /> },
         { id: 'taxometer', label: 'Taxometer', icon: <Coins size={18} /> },
     ];

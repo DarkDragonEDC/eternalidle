@@ -120,6 +120,12 @@ const genRefined = (type, idPrefix, rawId) => {
 // Generate Materials
 genRaw('WOOD', 'WOOD'); genRaw('ORE', 'ORE'); genRaw('HIDE', 'HIDE'); genRaw('FIBER', 'FIBER');
 genRaw('FISH', 'FISH'); // Fish is special, but for now standard
+// Override Fishing Time (50% faster)
+for (const t of TIERS) {
+    if (ITEMS.RAW.FISH[t]) {
+        ITEMS.RAW.FISH[t].time = Math.ceil(ITEMS.RAW.FISH[t].time / 2);
+    }
+}
 genRaw('HERB', 'HERB');
 
 // Override Icon for T1 Wood (Test)
@@ -233,7 +239,7 @@ for (const t of TIERS) {
         heal: HP_CURVE[t - 1], // Heals roughly 1 full HP bar of that tier
         req: { [`T${t}_FISH`]: 1 },
         xp: Math.floor(REFINE_DATA.xp[t - 1] / 2), // Halved XP gain for food
-        time: REFINE_DATA.time[t - 1]
+        time: Math.ceil(REFINE_DATA.time[t - 1] / 2)
     };
     ITEMS.CONSUMABLE.FOOD[t] = foodItem;
     ITEMS.GEAR.COOKING_STATION.FOOD[t] = foodItem;
