@@ -147,6 +147,7 @@ export class MarketManager {
 
 
     async buyMarketItem(buyerId, characterId, listingId, quantity = 1) {
+        if (!listingId || listingId === 'undefined' || listingId === 'null') throw new Error("Invalid Listing ID");
         const qtyNum = parseInt(quantity) || 1;
         console.log(`[MarketManager] buyMarketItem: buyerId=${buyerId}, listingId=${listingId}, qtyNum=${qtyNum}`);
 
@@ -252,6 +253,8 @@ export class MarketManager {
     }
 
     async cancelMarketListing(userId, characterId, listingId) {
+        if (!listingId || listingId === 'undefined' || listingId === 'null') throw new Error("Invalid Listing ID");
+
         const { data: listing, error: fetchError } = await this.gameManager.supabase
             .from('market_listings')
             .select('*')

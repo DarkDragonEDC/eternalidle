@@ -47,6 +47,7 @@ export class TradeManager {
     }
 
     async getTrade(tradeId) {
+        if (!tradeId || tradeId === 'undefined' || tradeId === 'null') throw new Error("Invalid Trade ID");
         const { data, error } = await this.supabase
             .from('trade_sessions')
             .select('*')
@@ -208,6 +209,7 @@ export class TradeManager {
     }
 
     async cancelTrade(char, tradeId) {
+        if (!tradeId || tradeId === 'undefined' || tradeId === 'null') throw new Error("Invalid Trade ID");
         const { error } = await this.supabase
             .from('trade_sessions')
             .update({ status: 'CANCELLED', updated_at: new Date().toISOString() })

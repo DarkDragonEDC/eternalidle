@@ -151,6 +151,9 @@ export class GameManager {
     }
 
     async getCharacter(userId, characterId = null, catchup = false, bypassCache = false) {
+        // Guard Clause invalid IDs (undefined string, null, etc)
+        if (!characterId || characterId === 'undefined' || characterId === 'null') return null;
+
         // Try Cache first
         if (characterId && this.cache.has(characterId) && !bypassCache) {
             // console.log(`[CACHE] Hit for ${characterId}`);
@@ -190,9 +193,6 @@ export class GameManager {
 
 
         if (data) {
-            // Rehydrate the state after loading from database
-            data.state = hydrateState(data.state || {});
-
             // INVENTORY MIGRATION: Inject the separate inventory column back into state for runtime
             if (data.inventory) {
                 data.state.inventory = data.inventory;
@@ -209,6 +209,9 @@ export class GameManager {
             if (data.equipment) {
                 data.state.equipment = data.equipment;
             }
+
+            // Rehydrate the state after loading from database (AFTER injecting columns)
+            data.state = hydrateState(data.state || {});
 
             // Attach a snapshot hash of the DB state to detect external changes
             data.dbHash = this.calculateHash(data.state);
@@ -516,10 +519,12 @@ export class GameManager {
     }
 
     markDirty(charId) {
+        if (!charId || charId === 'undefined' || charId === 'null') return;
         this.dirty.add(charId);
     }
 
     async persistCharacter(charId) {
+        if (!charId || charId === 'undefined' || charId === 'null') return;
         if (!this.dirty.has(charId)) {
             // console.log(`[DB] Skipping persistence for ${charId} (not dirty)`);
             return;
@@ -591,6 +596,7 @@ export class GameManager {
     }
 
     async syncWithDatabase(charId, userId = null) {
+        if (!charId || charId === 'undefined' || charId === 'null') return false;
         const char = this.cache.get(charId);
         if (!char) return await this.getCharacter(userId, charId, false, true);
 
@@ -958,6 +964,7 @@ export class GameManager {
     }
 
     async deleteCharacter(userId, characterId) {
+        if (!characterId || characterId === 'undefined' || characterId === 'null') return;
         // 1. Verify existence and ownership
         const { data: char, error: fetchError } = await this.supabase
             .from('characters')

@@ -25,9 +25,17 @@ const BuffsDisplay = ({ activeBuffs }) => {
     };
 
     const formatTime = (ms) => {
-        const s = Math.ceil(ms / 1000);
-        if (s > 60) return `${Math.ceil(s / 60)}m`;
-        return `${s}s`;
+        if (ms <= 0) return '00:00:00';
+        const totalSecs = Math.floor(ms / 1000);
+        const h = Math.floor(totalSecs / 3600);
+        const m = Math.floor((totalSecs % 3600) / 60);
+        const s = totalSecs % 60;
+
+        const hStr = h.toString().padStart(2, '0');
+        const mStr = m.toString().padStart(2, '0');
+        const sStr = s.toString().padStart(2, '0');
+
+        return `${hStr}:${mStr}:${sStr}`;
     };
 
     return (

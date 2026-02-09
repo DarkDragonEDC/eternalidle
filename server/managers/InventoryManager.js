@@ -12,8 +12,9 @@ export class InventoryManager {
         return resolveItem(id);
     }
 
-    getMaxSlots(char) {
-        const isPremium = char.state?.membership?.active && char.state?.membership?.expiresAt > Date.now();
+    getMaxSlots(char, nowOverride = null) {
+        const now = nowOverride || Date.now();
+        const isPremium = char.state?.membership?.active && char.state?.membership?.expiresAt > now;
         const baseSlots = isPremium ? 50 : 30;
         const extraSlots = parseInt(char.state?.extraInventorySlots) || 0;
         return baseSlots + extraSlots;
@@ -217,7 +218,7 @@ export class InventoryManager {
         return { success: true, state };
     }
 
-    calculateStats(char) {
+    calculateStats(char, nowOverride = null) {
         if (!char?.state?.skills) return { str: 0, agi: 0, int: 0, maxHP: 100, damage: 5, defense: 0, dmgBonus: 0 };
         const skills = char.state.skills;
         const equipment = char.state.equipment || {};
@@ -408,7 +409,7 @@ export class InventoryManager {
 
         // 6. Active Buffs Process
         if (char.state.active_buffs) {
-            const now = Date.now();
+            const now = nowOverride || Date.now();
             const activeBuffs = typeof char.state.active_buffs === 'string'
                 ? JSON.parse(char.state.active_buffs)
                 : char.state.active_buffs;

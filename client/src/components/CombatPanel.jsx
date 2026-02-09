@@ -416,6 +416,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
 
     // Active Combat View
     if (combat) {
+        const activeMob = (MONSTERS[combat.tier] || []).find(m => m.id === combat.mobId);
         // Preferencialmente usar o startTime do servidor para consistência absoluta
         const actualStartTime = combat.started_at ? new Date(combat.started_at).getTime() : Date.now();
         const duration = Math.max(1, Math.floor((currentTime - actualStartTime) / 1000));
@@ -445,8 +446,12 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                     gap: isMobile ? '10px' : '0'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ background: '#ff4444', padding: '6px', borderRadius: '6px', display: 'flex' }}>
-                            <Sword color="#fff" size={16} />
+                        <div style={{ background: '#ff4444', padding: '6px', borderRadius: '6px', display: 'flex', overflow: 'hidden' }}>
+                            {activeMob && activeMob.image ? (
+                                <img src={`/monsters/${activeMob.image}`} alt={activeMob.name} style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
+                            ) : (
+                                <Sword color="#fff" size={16} />
+                            )}
                         </div>
                         <div>
                             <div style={{ fontSize: '0.55rem', color: '#ff4444', fontWeight: '900', letterSpacing: '1px' }}>IN COMBAT</div>
@@ -676,7 +681,11 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                         position: 'relative',
                                         zIndex: 2
                                     }}>
-                                    <Skull size={isMobile ? 25 : 50} color="#ff4444" />
+                                    {activeMob && activeMob.image ? (
+                                        <img src={`/monsters/${activeMob.image}`} alt={activeMob.name} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '50%', transform: activeMob.flipCombat ? 'scaleX(-1)' : 'none' }} />
+                                    ) : (
+                                        <Skull size={isMobile ? 25 : 50} color="#ff4444" />
+                                    )}
                                 </motion.div>
                                 <div style={{ fontSize: isMobile ? '0.6rem' : '0.9rem', fontWeight: '900', color: 'var(--text-main)' }}>{combat.mobName.toUpperCase()}</div>
                                 <div style={{ fontSize: isMobile ? '0.9rem' : '1.3rem', fontWeight: '900', color: '#ff4444', marginTop: '2px' }}>
@@ -966,10 +975,14 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 {/* Mob Basic Info */}
                                 <div style={{ flex: isMobile ? '1 1 auto' : '1.2', display: 'flex', gap: '8px', alignItems: 'center', minWidth: isMobile ? '50%' : 'auto' }}>
                                     <div style={{
-                                        width: isMobile ? '32px' : '40px', height: isMobile ? '32px' : '40px', background: 'var(--slot-bg)', borderRadius: '8px',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', flexShrink: 0
+                                        width: isMobile ? '40px' : '50px', height: isMobile ? '40px' : '50px', background: 'var(--slot-bg)', borderRadius: '8px',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', flexShrink: 0, overflow: 'hidden'
                                     }}>
-                                        <Skull size={isMobile ? 16 : 20} color={isLocked ? '#555' : '#ff4444'} />
+                                        {mob.image ? (
+                                            <img src={`/monsters/${mob.image}`} alt={mob.name} style={{ width: '100%', height: '100%', objectFit: 'contain', transform: mob.flipList ? 'scaleX(-1)' : 'none' }} />
+                                        ) : (
+                                            <Skull size={isMobile ? 16 : 20} color={isLocked ? '#555' : '#ff4444'} />
+                                        )}
                                     </div>
                                     <div>
                                         <div style={{ color: 'var(--text-main)', fontWeight: 'bold', fontSize: isMobile ? '0.85rem' : '1rem' }}>{mob.name}</div>

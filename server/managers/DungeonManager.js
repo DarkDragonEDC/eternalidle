@@ -193,7 +193,7 @@ export class DungeonManager {
                         mIterations++;
 
                         // COMIDA ONLINE (Dungeon): Consumir comida a cada hit tomado para garantir sobrevivência
-                        this.gameManager.processFood(char);
+                        this.gameManager.processFood(char, virtualTime);
 
                         if (char.state.health <= 0) {
                             char.state.health = 0;

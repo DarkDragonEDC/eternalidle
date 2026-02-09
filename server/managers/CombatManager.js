@@ -139,6 +139,7 @@ export class CombatManager {
             // Calculate how many attacks fit in the elapsed time
             // +1 because the current due attack counts
             let attackCount = 1 + Math.floor((now - combat.mob_next_attack_at) / mobSpeed);
+            let foodEaten = 0;
 
             // Safety Cap to prevent infinite loops or millions of damage on lag spike
             if (attackCount > 50) attackCount = 50;
@@ -151,12 +152,14 @@ export class CombatManager {
                 mitigatedMobDmg += singleHitDmg;
 
                 // REACTIVE HEALING: Check food after each hit to prevent burst deaths
-                this.gameManager.processFood(char);
+                const result = this.gameManager.processFood(char);
+                if (result.used) foodEaten += (result.eaten || 0);
 
                 if (combat.playerHealth <= 0) break;
             }
 
             combat.totalMobDmg = (combat.totalMobDmg || 0) + mitigatedMobDmg;
+            combat.foodEatenInRound = (combat.foodEatenInRound || 0) + foodEaten;
 
             // Advance the timer by the EXACT amount of time covered by these attacks
             // This maintains the rhythm/average DPS
@@ -178,8 +181,12 @@ export class CombatManager {
             xpGained: 0,
             victory: false,
             defeat: false,
-            mobName: combat.mobName
+            mobName: combat.mobName,
+            foodEaten: combat.foodEatenInRound || 0
         };
+
+        // Reset the counter for next round
+        combat.foodEatenInRound = 0;
 
         let message = `Dmg: ${mitigatedPlayerDmg} | Recv: ${mitigatedMobDmg}`;
         let leveledUp = false;

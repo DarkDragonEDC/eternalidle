@@ -1,7 +1,7 @@
 export const MONSTERS = {
     1: [
-        { id: 'RABBIT', name: 'Rabbit', health: 120, damage: 6, defense: 2, xp: 25, loot: { 'T1_DUNGEON_MAP': 0.01 }, silver: [5, 15], tier: 1 },
-        { id: 'GOBLIN_SCOUT', name: 'Goblin Scout', health: 180, damage: 8, defense: 4, xp: 45, loot: { 'T1_DUNGEON_MAP': 0.02 }, silver: [12, 25], tier: 1 },
+        { id: 'RABBIT', name: 'Rabbit', health: 120, damage: 6, defense: 2, xp: 25, loot: { 'T1_DUNGEON_MAP': 0.01 }, silver: [5, 15], tier: 1, image: 'rabbit.png', flipCombat: true },
+        { id: 'GOBLIN_SCOUT', name: 'Goblin Scout', health: 180, damage: 8, defense: 4, xp: 45, loot: { 'T1_DUNGEON_MAP': 0.02 }, silver: [12, 25], tier: 1, image: 'goblin_scout.png', flipList: true },
         { id: 'ROCK_ELEMENTAL_T1', name: 'Small Rock Elemental', health: 80, damage: 8, defense: 2, xp: 30, loot: { 'T1_ORE': 0.6, 'T1_DUNGEON_MAP': 0.005 }, silver: [10, 20], tier: 1, dungeonOnly: true },
         { id: 'GIANT_SPIDER_T1', name: 'Forest Spider', health: 100, damage: 12, defense: 3, xp: 40, loot: { 'T1_FIBER': 0.5 }, silver: [15, 25], tier: 1, dungeonOnly: true },
         { id: 'BOSS_GOBLIN_KING', name: 'Goblin King', health: 500, damage: 25, defense: 10, xp: 500, loot: { 'T1_CREST': 0.2 }, silver: [100, 200], tier: 1, dungeonOnly: true },
