@@ -144,6 +144,15 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
                         <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.4rem', fontWeight: '900', letterSpacing: '2px' }}>HALL OF FAME</h2>
                         <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>The best of Eternal Lands</div>
                     </div>
+                    <div style={{
+                        fontSize: '0.6rem',
+                        color: 'var(--text-dim)',
+                        fontWeight: 'bold',
+                        textAlign: 'right',
+                        opacity: 0.7
+                    }}>
+                        Updates every 30 min
+                    </div>
                 </div>
 
                 {/* Mode Toggles */}

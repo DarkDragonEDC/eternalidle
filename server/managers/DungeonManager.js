@@ -440,6 +440,15 @@ export class DungeonManager {
 
             if (error) {
                 console.error("Failed to save dungeon history:", error.message);
+            } else {
+                // Cleanup: Keep only the 10 most recent records per character
+                const { error: cleanupError } = await this.gameManager.supabase.rpc('cleanup_dungeon_history', {
+                    p_character_id: char.id,
+                    p_keep_count: 10
+                });
+                if (cleanupError) {
+                    console.error("Failed to cleanup old dungeon history:", cleanupError.message);
+                }
             }
         } catch (err) {
             console.error("Error saving dungeon history log:", err);

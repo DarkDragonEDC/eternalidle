@@ -32,6 +32,8 @@ export class GameManager {
         this.cache = new Map(); // charId -> character object
         this.dirty = new Set(); // set of charIds that need persisting
         this.globalStats = { total_market_tax: 0 };
+        this.leaderboardCache = new Map(); // type+mode -> { data, timestamp }
+        this.LEADERBOARD_CACHE_TTL = 30 * 60 * 1000; // 30 minutes in ms
 
         // Load Global Stats initially
         this.loadGlobalStats();
@@ -222,6 +224,16 @@ export class GameManager {
                 if (data.info.inventorySlots !== undefined) data.state.inventorySlots = data.info.inventorySlots;
                 if (data.info.extraInventorySlots !== undefined) data.state.extraInventorySlots = data.info.extraInventorySlots;
                 if (data.info.unlockedTitles) data.state.unlockedTitles = data.info.unlockedTitles;
+            }
+
+            // COMBAT MIGRATION: Inject the separate combat column back into state for runtime
+            if (data.combat) {
+                data.state.combat = data.combat;
+            }
+
+            // DUNGEON MIGRATION: Inject the separate dungeon column back into state for runtime
+            if (data.dungeon) {
+                data.state.dungeon = data.dungeon;
             }
 
             // Rehydrate the state after loading from database (AFTER injecting columns)
@@ -612,6 +624,14 @@ export class GameManager {
         delete prunedState.extraInventorySlots;
         delete prunedState.unlockedTitles;
 
+        // COMBAT MIGRATION: Extract combat to its own column and remove from state JSON
+        const combatToSave = prunedState.combat || null;
+        delete prunedState.combat;
+
+        // DUNGEON MIGRATION: Extract dungeon to its own column and remove from state JSON
+        const dungeonToSave = prunedState.dungeon || null;
+        delete prunedState.dungeon;
+
         const finalPrunedState = pruneState(prunedState);
 
         // console.log(`[DB] Persisting character ${char.name} (${charId})`);
@@ -623,6 +643,8 @@ export class GameManager {
                 skills: skillsToSave,
                 equipment: equipmentToSave,
                 info: infoToSave,
+                combat: combatToSave,
+                dungeon: dungeonToSave,
                 state: finalPrunedState,
                 current_activity: char.current_activity,
                 activity_started_at: char.activity_started_at,
@@ -1587,7 +1609,26 @@ export class GameManager {
     }
 
     async getLeaderboard(type = 'COMBAT', requesterId = null, mode = 'NORMAL') {
-        // console.log(`[RANKING] Fetching leaderboard for type: ${type}, mode: ${mode}`);
+        const cacheKey = `${type}_${mode}`;
+        const now = Date.now();
+        const cached = this.leaderboardCache.get(cacheKey);
+
+        // Check if we have valid cached data (within TTL)
+        if (cached && (now - cached.timestamp) < this.LEADERBOARD_CACHE_TTL) {
+            // console.log(`[RANKING] Using cached data for ${cacheKey}`);
+            // Still need to calculate userRank for the requester
+            const sorted = cached.data;
+            let userRank = null;
+            if (requesterId) {
+                const index = sorted.findIndex(c => c.id === requesterId);
+                if (index !== -1) {
+                    userRank = { rank: index + 1, character: sorted[index] };
+                }
+            }
+            return { type, mode, top100: sorted.slice(0, 100), userRank };
+        }
+
+        // console.log(`[RANKING] Fetching fresh leaderboard for type: ${type}, mode: ${mode}`);
         let query = this.supabase
             .from('characters')
             .select('id, name, state, skills') // Fetch skills directly
@@ -1663,6 +1704,9 @@ export class GameManager {
                 };
             }
         }
+
+        // Cache the sorted data for future requests
+        this.leaderboardCache.set(cacheKey, { data: sorted, timestamp: now });
 
         return {
             type,
