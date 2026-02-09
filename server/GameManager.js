@@ -210,6 +210,20 @@ export class GameManager {
                 data.state.equipment = data.equipment;
             }
 
+            // INFO MIGRATION: Inject the separate info column back into state for runtime
+            if (data.info) {
+                // Inject each info field into state for runtime compatibility
+                if (data.info.stats) data.state.stats = data.info.stats;
+                if (data.info.health !== undefined) data.state.health = data.info.health;
+                if (data.info.silver !== undefined) data.state.silver = data.info.silver;
+                if (data.info.crowns !== undefined) data.state.crowns = data.info.crowns;
+                if (data.info.membership) data.state.membership = data.info.membership;
+                if (data.info.active_buffs) data.state.active_buffs = data.info.active_buffs;
+                if (data.info.inventorySlots !== undefined) data.state.inventorySlots = data.info.inventorySlots;
+                if (data.info.extraInventorySlots !== undefined) data.state.extraInventorySlots = data.info.extraInventorySlots;
+                if (data.info.unlockedTitles) data.state.unlockedTitles = data.info.unlockedTitles;
+            }
+
             // Rehydrate the state after loading from database (AFTER injecting columns)
             data.state = hydrateState(data.state || {});
 
@@ -246,8 +260,16 @@ export class GameManager {
             }
 
             if (!data.state.stats) {
-                data.state.stats = { str: 0, agi: 0, int: 0 };
+                data.state.stats = {};
                 updated = true;
+            } else {
+                // Remove legacy str/agi/int fields if present (they are calculated dynamically now)
+                if ('str' in data.state.stats || 'agi' in data.state.stats || 'int' in data.state.stats) {
+                    delete data.state.stats.str;
+                    delete data.state.stats.agi;
+                    delete data.state.stats.int;
+                    updated = true;
+                }
             }
 
             // --- RUNTIME MIGRATION: CHESTS ---
@@ -568,6 +590,28 @@ export class GameManager {
         const equipmentToSave = prunedState.equipment || {};
         delete prunedState.equipment;
 
+        // INFO MIGRATION: Extract info fields to their own column and remove from state JSON
+        const infoToSave = {
+            stats: prunedState.stats || {},
+            health: prunedState.health || 0,
+            silver: prunedState.silver || 0,
+            crowns: prunedState.crowns || 0,
+            membership: prunedState.membership || null,
+            active_buffs: prunedState.active_buffs || {},
+            inventorySlots: prunedState.inventorySlots || 30,
+            extraInventorySlots: prunedState.extraInventorySlots || 0,
+            unlockedTitles: prunedState.unlockedTitles || []
+        };
+        delete prunedState.stats;
+        delete prunedState.health;
+        delete prunedState.silver;
+        delete prunedState.crowns;
+        delete prunedState.membership;
+        delete prunedState.active_buffs;
+        delete prunedState.inventorySlots;
+        delete prunedState.extraInventorySlots;
+        delete prunedState.unlockedTitles;
+
         const finalPrunedState = pruneState(prunedState);
 
         // console.log(`[DB] Persisting character ${char.name} (${charId})`);
@@ -578,6 +622,7 @@ export class GameManager {
                 inventory: inventoryToSave,
                 skills: skillsToSave,
                 equipment: equipmentToSave,
+                info: infoToSave,
                 state: finalPrunedState,
                 current_activity: char.current_activity,
                 activity_started_at: char.activity_started_at,
