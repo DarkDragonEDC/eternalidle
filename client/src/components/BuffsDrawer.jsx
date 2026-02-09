@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FlaskConical, ChevronUp, Star, Coins, Sprout, Hammer, ArrowUpCircle, Clover, Diamond, Clock } from 'lucide-react';
+import { FlaskConical, ChevronUp, Star, Coins, Sprout, Hammer, ArrowUpCircle, Clover, Diamond, Clock, X } from 'lucide-react';
 import { resolveItem } from '@shared/items';
 
 const POTION_METADATA = {
@@ -47,10 +47,16 @@ const BuffsDrawer = ({ gameState, isMobile }) => {
 
     const formatTime = (ms) => {
         if (ms <= 0) return null;
-        const secs = Math.floor(ms / 1000);
-        const m = Math.floor(secs / 60);
-        const s = secs % 60;
-        return `${m}m ${s}s`;
+        const totalSecs = Math.floor(ms / 1000);
+        const h = Math.floor(totalSecs / 3600);
+        const m = Math.floor((totalSecs % 3600) / 60);
+        const s = totalSecs % 60;
+
+        const hStr = h.toString().padStart(2, '0');
+        const mStr = m.toString().padStart(2, '0');
+        const sStr = s.toString().padStart(2, '0');
+
+        return `${hStr}:${mStr}:${sStr}`;
     };
 
     return (
@@ -65,126 +71,207 @@ const BuffsDrawer = ({ gameState, isMobile }) => {
         }}
             ref={drawerRef}
         >
-            {/* Drawer Content */}
+            {/* Modal Overlay and Content */}
             <AnimatePresence>
                 {isOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        style={{
-                            width: '240px',
-                            background: 'rgba(15, 20, 30, 0.95)',
-                            backdropFilter: 'blur(10px)',
-                            border: '1px solid rgba(212, 175, 55, 0.2)',
-                            borderRadius: '12px',
-                            padding: '12px',
-                            marginBottom: '10px',
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '8px'
-                        }}
-                    >
-                        <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: '900', letterSpacing: '1px', marginBottom: '4px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '4px' }}>
-                            ACTIVE BONUSES
-                        </div>
+                    <div style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        zIndex: 2000,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '20px'
+                    }}>
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsOpen(false)}
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                background: 'rgba(0, 0, 0, 0.8)',
+                                backdropFilter: 'blur(4px)'
+                            }}
+                        />
 
-                        {Object.entries(POTION_METADATA).map(([key, meta]) => {
-                            const rawActive = activeBuffs[key];
-                            const active = (rawActive && rawActive.expiresAt > now) ? rawActive : null;
-                            const timeRemaining = active ? active.expiresAt - now : 0;
-
-                            // Pegar valor do bônus total para o badge principal
-                            let totalBonus = 0;
-                            if (key === 'GLOBAL_XP') totalBonus = stats.globals?.xpYield || 0;
-                            else if (key === 'GOLD') totalBonus = stats.globals?.silverYield || 0;
-                            else if (key === 'DROP') totalBonus = stats.globals?.dropRate || 0;
-                            else if (key === 'QUALITY') totalBonus = stats.globals?.qualityChance || 0;
-                            else if (key === 'GATHER_XP') totalBonus = stats.xpBonus?.GATHERING || 0;
-                            else if (key === 'REFINE_XP') totalBonus = stats.xpBonus?.REFINING || 0;
-                            else if (key === 'CRAFT_XP') totalBonus = stats.xpBonus?.CRAFTING || 0;
-                            else if (key === 'GLOBAL_EFF') {
-                                // For Global Efficiency, we sum MS (10) + Cape
-                                const isPremium = gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > now;
-                                const msBonus = isPremium ? 10 : 0;
-
-                                const capeSource = Object.values(equipment).find(item => {
-                                    if (!item) return false;
-                                    const fresh = resolveItem(item.id || item.item_id);
-                                    return fresh?.stats?.efficiency?.GLOBAL > 0;
-                                });
-                                const capeBonus = capeSource ? (resolveItem(capeSource.id || capeSource.item_id)?.stats?.efficiency?.GLOBAL || 0) : 0;
-
-                                totalBonus = msBonus + capeBonus;
-                            }
-
-                            // Calcular bônus específico da poção (se houver)
-                            const potionBonusPercent = active ? Math.round(active.value * 100) : 0;
-
-                            // Calcular bônus base (INT ou outros)
-                            // XP e Silver agora usam 0.5% por INT
-                            let baseBonus = totalBonus - potionBonusPercent;
-
-                            // Visual Fix: Remove negative noise
-                            if (baseBonus < 0) baseBonus = 0;
-
-                            const isPremium = gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > now;
-
-                            return (
-                                <div key={key} style={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    padding: '5px 8px',
-                                    background: (active || totalBonus > 0) ? 'var(--accent-soft)' : 'rgba(255,255,255,0.02)',
-                                    borderRadius: '6px',
-                                    border: `1px solid ${active ? 'var(--border-active)' : 'rgba(255,255,255,0.05)'}`,
-                                    opacity: (active || totalBonus > 0) ? 1 : 0.4,
-                                    transition: 'all 0.2s'
+                        {/* Modal Body */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            style={{
+                                position: 'relative',
+                                width: '100%',
+                                maxWidth: '300px',
+                                maxHeight: '85vh',
+                                background: 'rgba(15, 20, 30, 0.98)',
+                                border: '1px solid rgba(212, 175, 55, 0.3)',
+                                borderRadius: '16px',
+                                boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                overflow: 'hidden'
+                            }}
+                        >
+                            {/* Header */}
+                            <div style={{
+                                padding: '16px',
+                                borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                            }}>
+                                <div style={{
+                                    fontSize: '0.75rem',
+                                    color: 'var(--accent)',
+                                    fontWeight: '900',
+                                    letterSpacing: '1.5px',
+                                    textTransform: 'uppercase'
                                 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '18px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            {React.cloneElement(meta.icon, { size: 14 })}
-                                            <span style={{ fontSize: '0.7rem', color: '#fff', fontWeight: '800' }}>{meta.label}</span>
-                                        </div>
-                                        <div style={{ color: (active || totalBonus > 0) ? meta.color : '#666', fontWeight: '900', fontSize: '0.75rem' }}>
-                                            +{totalBonus.toFixed(1)}%
-                                        </div>
-                                    </div>
-
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '12px' }}>
-                                        <div style={{ fontSize: '0.55rem', color: '#555', fontWeight: 'bold', display: 'flex', gap: '4px' }}>
-                                            {active && (
-                                                <>POTION: <span style={{ color: 'var(--accent)' }}>+{potionBonusPercent}%</span> | </>
-                                            )}
-                                            {key === 'GLOBAL_XP' && isPremium && (
-                                                <>MS: <span style={{ color: 'var(--accent)' }}>+10.0%</span> | </>
-                                            )}
-                                            {key === 'GOLD' && isPremium && (
-                                                <>MS: <span style={{ color: 'var(--accent)' }}>+10.0%</span> | </>
-                                            )}
-                                            {key === 'GLOBAL_EFF' ? (
-                                                <>
-                                                    {isPremium && <>MS: <span style={{ color: 'var(--accent)' }}>+10.0%</span></>}
-                                                    {isPremium && (totalBonus - 10 > 0) && <> | </>}
-                                                    {(totalBonus - (isPremium ? 10 : 0) > 0) && (
-                                                        <>CAPE: <span style={{ color: 'var(--accent)' }}>+{(totalBonus - (isPremium ? 10 : 0)).toFixed(1)}%</span></>
-                                                    )}
-                                                </>
-                                            ) : (
-                                                <>INT: +{(baseBonus - ((isPremium && (key === 'GLOBAL_XP' || key === 'GOLD')) ? 10 : 0)).toFixed(1)}%</>
-                                            )}
-                                        </div>
-                                        {active && (
-                                            <span style={{ fontSize: '0.55rem', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '2px' }}>
-                                                <Clock size={8} /> {formatTime(timeRemaining)}
-                                            </span>
-                                        )}
-                                    </div>
+                                    Active Bonuses
                                 </div>
-                            );
-                        })}
-                    </motion.div>
+                                <X
+                                    size={18}
+                                    style={{ color: '#555', cursor: 'pointer' }}
+                                    onClick={() => setIsOpen(false)}
+                                />
+                            </div>
+
+                            {/* Buffs List - Scrollable */}
+                            <div style={{
+                                padding: '12px',
+                                overflowY: 'auto',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '10px',
+                                scrollbarWidth: 'thin',
+                                scrollbarColor: 'var(--accent) transparent'
+                            }}>
+                                {Object.entries(POTION_METADATA).map(([key, meta]) => {
+                                    const rawActive = activeBuffs[key];
+                                    const active = (rawActive && rawActive.expiresAt > now) ? rawActive : null;
+                                    const timeRemaining = active ? active.expiresAt - now : 0;
+
+                                    // Pegar valor do bônus total para o badge principal
+                                    let totalBonus = 0;
+                                    if (key === 'GLOBAL_XP') totalBonus = stats.globals?.xpYield || 0;
+                                    else if (key === 'GOLD') totalBonus = stats.globals?.silverYield || 0;
+                                    else if (key === 'DROP') totalBonus = stats.globals?.dropRate || 0;
+                                    else if (key === 'QUALITY') totalBonus = stats.globals?.qualityChance || 0;
+                                    else if (key === 'GATHER_XP') totalBonus = stats.xpBonus?.GATHERING || 0;
+                                    else if (key === 'REFINE_XP') totalBonus = stats.xpBonus?.REFINING || 0;
+                                    else if (key === 'CRAFT_XP') totalBonus = stats.xpBonus?.CRAFTING || 0;
+                                    else if (key === 'GLOBAL_EFF') {
+                                        // For Global Efficiency, we sum MS (10) + Cape
+                                        const isPremium = gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > now;
+                                        const msBonus = isPremium ? 10 : 0;
+
+                                        const capeSource = Object.values(equipment).find(item => {
+                                            if (!item) return false;
+                                            const fresh = resolveItem(item.id || item.item_id);
+                                            return fresh?.stats?.efficiency?.GLOBAL > 0;
+                                        });
+                                        const capeBonus = capeSource ? (resolveItem(capeSource.id || capeSource.item_id)?.stats?.efficiency?.GLOBAL || 0) : 0;
+
+                                        totalBonus = msBonus + capeBonus;
+                                    }
+
+                                    // Calcular bônus específico da poção (se houver)
+                                    const potionBonusPercent = active ? Math.round(active.value * 100) : 0;
+
+                                    // Calcular bônus base (INT ou outros)
+                                    let baseBonus = totalBonus - potionBonusPercent;
+                                    if (baseBonus < 0) baseBonus = 0;
+
+                                    const isPremium = gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > now;
+
+                                    return (
+                                        <div key={key} style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            padding: '10px 12px',
+                                            background: (active || totalBonus > 0) ? 'rgba(212, 175, 55, 0.05)' : 'rgba(255,255,255,0.02)',
+                                            borderRadius: '8px',
+                                            border: `1px solid ${active ? 'var(--accent)' : 'rgba(255,255,255,0.05)'}`,
+                                            opacity: (active || totalBonus > 0) ? 1 : 0.4,
+                                            transition: 'all 0.2s'
+                                        }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '18px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    {React.cloneElement(meta.icon, { size: 14 })}
+                                                    <span style={{ fontSize: '0.7rem', color: '#fff', fontWeight: '800' }}>{meta.label}</span>
+                                                </div>
+                                                <div style={{ color: (active || totalBonus > 0) ? meta.color : '#666', fontWeight: '900', fontSize: '0.75rem' }}>
+                                                    +{totalBonus.toFixed(1)}%
+                                                </div>
+                                            </div>
+
+                                            <div style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'flex-start',
+                                                marginTop: '4px',
+                                                minHeight: '12px'
+                                            }}>
+                                                <div style={{
+                                                    fontSize: '0.55rem',
+                                                    color: '#555',
+                                                    fontWeight: 'bold',
+                                                    display: 'flex',
+                                                    flexWrap: 'wrap',
+                                                    gap: '4px',
+                                                    flex: 1
+                                                }}>
+                                                    {active && (
+                                                        <><span style={{ whiteSpace: 'nowrap' }}>POTION: <span style={{ color: 'var(--accent)' }}>+{potionBonusPercent}%</span></span> | </>
+                                                    )}
+                                                    {key === 'GLOBAL_XP' && isPremium && (
+                                                        <><span style={{ whiteSpace: 'nowrap' }}>MS: <span style={{ color: 'var(--accent)' }}>+10.0%</span></span> | </>
+                                                    )}
+                                                    {key === 'GOLD' && isPremium && (
+                                                        <><span style={{ whiteSpace: 'nowrap' }}>MS: <span style={{ color: 'var(--accent)' }}>+10.0%</span></span> | </>
+                                                    )}
+                                                    {key === 'GLOBAL_EFF' ? (
+                                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                                            {isPremium && <span style={{ whiteSpace: 'nowrap' }}>MS: <span style={{ color: 'var(--accent)' }}>+10.0%</span></span>}
+                                                            {isPremium && (totalBonus - 10 > 0) && <> | </>}
+                                                            {(totalBonus - (isPremium ? 10 : 0) > 0) && (
+                                                                <span style={{ whiteSpace: 'nowrap' }}>CAPE: <span style={{ color: 'var(--accent)' }}>+{(totalBonus - (isPremium ? 10 : 0)).toFixed(1)}%</span></span>
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <span style={{ whiteSpace: 'nowrap' }}>INT: <span style={{ color: 'var(--accent)' }}>+{(baseBonus - ((isPremium && (key === 'GLOBAL_XP' || key === 'GOLD')) ? 10 : 0)).toFixed(1)}%</span></span>
+                                                    )}
+                                                </div>
+                                                {active && (
+                                                    <span style={{
+                                                        fontSize: '0.55rem',
+                                                        color: 'var(--accent)',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '2px',
+                                                        marginLeft: '8px',
+                                                        whiteSpace: 'nowrap'
+                                                    }}>
+                                                        <Clock size={8} /> {formatTime(timeRemaining)}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
 
