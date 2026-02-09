@@ -878,7 +878,7 @@ export const getLevelRequirement = (tier) => {
 };
 
 export const calculateRuneBonus = (tier, stars, effType = null) => {
-    const starBonusMap = { 1: 1, 2: 3, 3: 5, 4: 7, 5: 10 };
+    const starBonusMap = { 1: 1, 2: 3, 3: 5 }; // Max 3 stars
     let bonus = (tier - 1) * 5 + (starBonusMap[stars] || stars);
 
     // SPEED (Auto-Refine) runes give half bonus (max ~25% instead of ~50%)
@@ -954,7 +954,7 @@ for (const t of TIERS) {
     ALL_RUNE_TYPES.forEach(typeKey => {
         const [act, eff] = typeKey.split('_');
 
-        for (let s = 1; s <= 5; s++) {
+        for (let s = 1; s <= 3; s++) {
             const id = `T${t}_RUNE_${act}_${eff}_${s}STAR`;
 
             // Map nice display names
@@ -983,8 +983,8 @@ for (const t of TIERS) {
 
             if (!ITEMS.SPECIAL.RUNE) ITEMS.SPECIAL.RUNE = {};
 
-            const rarityMap = { 1: 'COMMON', 2: 'RARE', 3: 'LEGENDARY', 4: 'EPIC', 5: 'MYTHIC' };
-            const qualityIdMap = { 1: 0, 2: 2, 3: 4, 4: 3, 5: 5 };
+            const rarityMap = { 1: 'COMMON', 2: 'RARE', 3: 'LEGENDARY' };
+            const qualityIdMap = { 1: 0, 2: 2, 3: 4 };
 
             ITEMS.SPECIAL.RUNE[id] = {
                 id: id,
