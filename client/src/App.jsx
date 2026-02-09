@@ -474,6 +474,7 @@ function App() {
     });
 
     newSocket.on('item_used', (result) => {
+      if (!result) return;
       if (result.requiresConfirmation) {
         setPendingPotion(result.pendingItem);
         return;

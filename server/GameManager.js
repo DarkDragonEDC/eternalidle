@@ -1751,11 +1751,11 @@ export class GameManager {
                 await this.saveState(char.id, char.state);
                 return { success: true, message, itemId, rewards };
             }
-
-            await this.saveState(char.id, char.state);
-            await this.persistCharacter(char.id);
-            return { success: true, message, itemId };
         }
+
+        await this.saveState(char.id, char.state);
+        await this.persistCharacter(char.id);
+        return { success: true, message, itemId };
     }
 
     applyBuff(char, type, value, durationSeconds, tier = 1) {
