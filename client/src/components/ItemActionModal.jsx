@@ -8,7 +8,8 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUs
 
     // Robust resolution: ensure we have full details including qualityName
     const resolved = resolveItem(rawItem.id);
-    const item = { ...rawItem, ...resolved };
+    const item = { ...rawItem, ...resolved, id: rawItem.id };
+
 
     const tierColor = getTierColor(item.tier);
     const borderColor = item.rarityColor || tierColor;

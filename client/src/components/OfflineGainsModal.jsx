@@ -280,27 +280,52 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                                 onClick={() => setShowFullNumbers(!showFullNumbers)}
                                                 style={{
                                                     display: 'flex',
-                                                    justifyContent: 'space-between',
                                                     alignItems: 'center',
-                                                    background: 'var(--slot-bg)',
-                                                    padding: '12px 15px',
+                                                    justifyContent: 'space-between',
+                                                    background: 'rgba(255, 255, 255, 0.03)',
+                                                    padding: '10px 14px',
                                                     borderRadius: '12px',
-                                                    border: '1px solid var(--border)',
-                                                    transition: '0.2s',
-                                                    cursor: 'pointer'
+                                                    border: '1px solid rgba(255, 255, 255, 0.05)',
+                                                    cursor: 'pointer',
+                                                    gap: '8px'
                                                 }}
                                             >
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                                    <div style={{ opacity: 0.5, color: 'var(--accent)' }}>
-                                                        {SKILL_ICONS[skill] || <Star size={14} />}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
+                                                    <div style={{
+                                                        width: '24px',
+                                                        height: '24px',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        background: 'var(--accent-soft)',
+                                                        borderRadius: '6px',
+                                                        color: 'var(--accent)',
+                                                        flexShrink: 0
+                                                    }}>
+                                                        {SKILL_ICONS[skill] || <Star size={12} />}
                                                     </div>
-                                                    <span style={{ fontWeight: '700', color: 'var(--text-main)', fontSize: '0.85rem' }}>
+                                                    <span style={{
+                                                        fontWeight: '600',
+                                                        color: 'var(--text-main)',
+                                                        fontSize: '0.75rem',
+                                                        whiteSpace: 'nowrap',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis'
+                                                    }}>
                                                         {SKILL_NAMES[skill] || skill}
                                                     </span>
                                                 </div>
-                                                <span style={{ color: '#4caf50', fontWeight: '900', fontSize: '0.85rem' }}>
-                                                    +{showFullNumbers ? formatNumber(amount) : formatValue(amount)} <span style={{ fontSize: '0.55rem', opacity: 0.5 }}>XP</span>
-                                                </span>
+                                                <div style={{
+                                                    display: 'flex',
+                                                    alignItems: 'baseline',
+                                                    gap: '3px',
+                                                    flexShrink: 0
+                                                }}>
+                                                    <span style={{ color: '#4caf50', fontWeight: '900', fontSize: '0.8rem' }}>
+                                                        +{showFullNumbers ? formatNumber(amount) : formatValue(amount)}
+                                                    </span>
+                                                    <span style={{ fontSize: '0.55rem', color: '#4caf50', opacity: 0.7, fontWeight: 'bold' }}>XP</span>
+                                                </div>
                                             </div>
                                         ))}
                                 </div>
