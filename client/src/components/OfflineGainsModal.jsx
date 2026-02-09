@@ -419,11 +419,12 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                                 </div>
 
                                                 <div style={{ textAlign: 'center' }}>
-                                                    <div style={{ fontSize: '0.6rem', color: '#666', fontWeight: '900', marginBottom: '1px' }}>T{item?.tier || '?'}</div>
+                                                    <div style={{ fontSize: '0.6rem', color: tierColor, fontWeight: '900', marginBottom: '1px', opacity: 0.8 }}>T{item?.tier || '?'}</div>
                                                     <div style={{
                                                         fontSize: '0.65rem',
-                                                        color: '#aaa',
+                                                        color: specificBorderColor !== 'var(--border)' ? specificBorderColor : '#aaa',
                                                         fontWeight: 'bold',
+
                                                         width: '100%',
                                                         maxWidth: '80px',
                                                         display: 'flex',
@@ -431,9 +432,16 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                                         alignItems: 'center',
                                                         gap: '1px'
                                                     }}>
-                                                        <span style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', width: '100%' }}>
+                                                        <span style={{
+                                                            overflow: 'hidden',
+                                                            whiteSpace: 'nowrap',
+                                                            textOverflow: 'ellipsis',
+                                                            width: '100%',
+                                                            color: specificBorderColor !== 'var(--border)' ? specificBorderColor : '#aaa'
+                                                        }}>
                                                             {item?.name || formatItemId(itemId)}
                                                         </span>
+
                                                         {itemId.includes('::') && (
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'var(--accent)', opacity: 0.8, fontSize: '0.55rem' }}>
                                                                 <Hammer size={8} />
