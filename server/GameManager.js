@@ -200,6 +200,11 @@ export class GameManager {
                 data.state.inventory = {};
             }
 
+            // SKILLS MIGRATION: Inject the separate skills column back into state for runtime
+            if (data.skills) {
+                data.state.skills = data.skills;
+            }
+
             // Attach a snapshot hash of the DB state to detect external changes
             data.dbHash = this.calculateHash(data.state);
 
@@ -545,6 +550,10 @@ export class GameManager {
         const inventoryToSave = prunedState.inventory || {};
         delete prunedState.inventory;
 
+        // SKILLS MIGRATION: Extract skills to its own column and remove from state JSON
+        const skillsToSave = prunedState.skills || {};
+        delete prunedState.skills;
+
         const finalPrunedState = pruneState(prunedState);
 
         // console.log(`[DB] Persisting character ${char.name} (${charId})`);
@@ -553,6 +562,7 @@ export class GameManager {
             .from('characters')
             .update({
                 inventory: inventoryToSave,
+                skills: skillsToSave,
                 state: finalPrunedState,
                 current_activity: char.current_activity,
                 activity_started_at: char.activity_started_at,
@@ -595,6 +605,11 @@ export class GameManager {
                     dbChar.state.inventory = dbChar.inventory;
                 } else if (!dbChar.state.inventory) {
                     dbChar.state.inventory = {};
+                }
+
+                // SKILLS MIGRATION: Inject the separate skills column back into state for runtime
+                if (dbChar.skills) {
+                    dbChar.state.skills = dbChar.skills;
                 }
 
                 Object.assign(char, dbChar);
