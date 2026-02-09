@@ -330,6 +330,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                 }}>
                                     {Object.entries(itemsGained).map(([itemId, amount]) => {
                                         const item = resolveItem(itemId);
+                                        const tierColor = getTierColor(item?.tier || 1);
 
                                         let specificBorderColor = 'var(--border)';
                                         if (item?.rarityColor) {

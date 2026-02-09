@@ -164,8 +164,8 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                                         overflow: 'hidden',
                                         padding: '5px'
                                     }}>
-                                        {iconUrl ? (
-                                            <img src={iconUrl} alt={item.id} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                        {resolvedItem?.icon ? (
+                                            <img src={resolvedItem.icon} alt={item.id} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                                         ) : (
                                             <Box size={24} color={tierColor} />
                                         )}
