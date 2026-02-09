@@ -32,8 +32,16 @@ export class InventoryManager {
         if (!char.state.inventory) char.state.inventory = {};
         const inv = char.state.inventory;
 
-        if (!inv[itemId]) {
-            const item = this.resolveItem(itemId);
+        // Determine storage key: BaseID::CreatorName if signature exists
+        let storageKey = itemId;
+        if (metadata && metadata.craftedBy) {
+            if (!storageKey.includes('::')) {
+                storageKey += `::${metadata.craftedBy}`;
+            }
+        }
+
+        if (!inv[storageKey]) {
+            const item = this.resolveItem(storageKey);
             if (!item?.noInventorySpace) {
                 if (this.getUsedSlots(char) >= this.getMaxSlots(char)) {
                     return false;
@@ -45,24 +53,21 @@ export class InventoryManager {
 
         // If we have metadata, we MUST store it as an object
         if (metadata) {
-            if (typeof inv[itemId] !== 'object' || inv[itemId] === null) {
-                // Convert simple numeric amount to object if it wasn't already
-                const currentAmount = Number(inv[itemId]) || 0;
-                inv[itemId] = { amount: currentAmount };
+            if (typeof inv[storageKey] !== 'object' || inv[storageKey] === null) {
+                const currentAmount = Number(inv[storageKey]) || 0;
+                inv[storageKey] = { amount: currentAmount };
             }
-            // Merge metadata (craftedBy, craftedAt, etc.)
             const cleanMetadata = { ...metadata };
-            delete cleanMetadata.amount; // Critical: preventing balance pollution from metadata
-            Object.assign(inv[itemId], cleanMetadata);
-            inv[itemId].amount = (inv[itemId].amount || 0) + safeAmount;
+            delete cleanMetadata.amount;
+            Object.assign(inv[storageKey], cleanMetadata);
+            inv[storageKey].amount = (inv[storageKey].amount || 0) + safeAmount;
         } else {
-            // Standard behavior for items without metadata
-            if (typeof inv[itemId] === 'object' && inv[itemId] !== null) {
-                inv[itemId].amount = (inv[itemId].amount || 0) + safeAmount;
-                if (inv[itemId].amount <= 0) delete inv[itemId];
+            if (typeof inv[storageKey] === 'object' && inv[storageKey] !== null) {
+                inv[storageKey].amount = (inv[storageKey].amount || 0) + safeAmount;
+                if (inv[storageKey].amount <= 0) delete inv[storageKey];
             } else {
-                inv[itemId] = (Number(inv[itemId]) || 0) + safeAmount;
-                if (inv[itemId] <= 0) delete inv[itemId];
+                inv[storageKey] = (Number(inv[storageKey]) || 0) + safeAmount;
+                if (inv[storageKey] <= 0) delete inv[storageKey];
             }
         }
         return true;
@@ -86,23 +91,43 @@ export class InventoryManager {
         if (!req) return true;
         const inv = char.state.inventory;
         if (!inv) return false;
-        return Object.entries(req).every(([id, amount]) => {
-            const entry = inv[id];
+
+        // Aggregate by base ID (ignoring signature suffix)
+        const totals = {};
+        Object.entries(inv).forEach(([key, entry]) => {
+            const baseId = key.split('::')[0];
             const qty = typeof entry === 'object' ? (entry?.amount || 0) : (Number(entry) || 0);
-            return qty >= amount;
+            totals[baseId] = (totals[baseId] || 0) + qty;
+        });
+
+        return Object.entries(req).every(([id, amount]) => {
+            return (totals[id] || 0) >= amount;
         });
     }
 
     consumeItems(char, req) {
         if (!req) return;
         const inv = char.state.inventory;
-        Object.entries(req).forEach(([id, amount]) => {
-            if (typeof inv[id] === 'object' && inv[id] !== null) {
-                inv[id].amount -= amount;
-                if (inv[id].amount <= 0) delete inv[id];
-            } else {
-                inv[id] -= amount;
-                if (inv[id] <= 0) delete inv[id];
+        Object.entries(req).forEach(([targetId, amountToConsume]) => {
+            let remaining = amountToConsume;
+
+            // Find all keys that match this targetId (base ID)
+            const matchingKeys = Object.keys(inv).filter(key => key.split('::')[0] === targetId);
+
+            for (const key of matchingKeys) {
+                if (remaining <= 0) break;
+                const entry = inv[key];
+                const available = typeof entry === 'object' ? (entry?.amount || 0) : (Number(entry) || 0);
+                const toTake = Math.min(available, remaining);
+
+                if (typeof entry === 'object' && entry !== null) {
+                    entry.amount -= toTake;
+                    if (entry.amount <= 0) delete inv[key];
+                } else {
+                    inv[key] -= toTake;
+                    if (inv[key] <= 0) delete inv[key];
+                }
+                remaining -= toTake;
             }
         });
     }

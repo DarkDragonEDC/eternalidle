@@ -658,7 +658,16 @@ export const resolveItem = (itemId, overrideQuality = null) => {
     if (!itemId) return null;
 
     // Normalize ID
-    const rawId = String(itemId).trim();
+    let rawId = String(itemId).trim();
+
+    // Check for creator signature (e.g. T1_AXE::PlayerOne)
+    let creatorName = null;
+    if (rawId.includes('::')) {
+        const signatureParts = rawId.split('::');
+        rawId = signatureParts[0];
+        creatorName = signatureParts[1];
+    }
+
     const upperId = rawId.toUpperCase();
 
     // 1. Precise Lookup

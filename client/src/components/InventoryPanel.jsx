@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { formatNumber, formatSilver } from '@utils/format';
 import { resolveItem, getTierColor, calculateItemSellPrice } from '@shared/items';
-import { Package, Shield, Coins, Tag, Trash2, Info, ChevronDown, ChevronUp, ArrowUpAZ, ArrowDownZA, Search } from 'lucide-react';
+import { Package, Shield, Coins, Tag, Trash2, Info, ChevronDown, ChevronUp, ArrowUpAZ, ArrowDownZA, Search, Hammer } from 'lucide-react';
 import ItemActionModal from './ItemActionModal';
 
 const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo, onUse, isMobile }) => {

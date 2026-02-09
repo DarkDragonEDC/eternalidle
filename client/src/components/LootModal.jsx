@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Coins, Box } from 'lucide-react';
+import { X, Coins, Box, Hammer } from 'lucide-react';
 import { getTierColor, resolveItem, formatItemId } from '@shared/items';
 
 const LootModal = ({ isOpen, onClose, rewards }) => {
@@ -123,18 +123,18 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                             const resolvedItem = resolveItem(item.id);
                             const tierColor = getTierColor(item.id.split('_')[0].replace('T', ''));
 
-                            // Determine Icon
-                            let IconComponent = Box;
-                            if (item.id.includes('PLANK') || item.id.includes('LOG')) IconComponent = 'LOG';
-                            if (item.id.includes('BAR') || item.id.includes('ORE')) IconComponent = 'ORE';
-                            if (item.id.includes('LEATHER') || item.id.includes('HIDE')) IconComponent = 'HIDE';
-                            if (item.id.includes('CLOTH') || item.id.includes('FIBER')) IconComponent = 'FIBER';
-                            if (item.id.includes('CREST')) IconComponent = 'CREST';
-
-                            // Map custom strings to Lucide (for now, or SVG paths)
-                            // Better: Just use generic Box if no image, but color it well.
-                            // BUT wait, does resolvedItem have .icon?
-                            const iconUrl = resolvedItem?.icon;
+                            let specificBorderColor = `${tierColor}44`;
+                            if (resolvedItem?.rarityColor) {
+                                specificBorderColor = resolvedItem.rarityColor;
+                            } else if (resolvedItem?.rarity && resolvedItem.rarity !== 'COMMON') {
+                                switch (resolvedItem.rarity) {
+                                    case 'UNCOMMON': specificBorderColor = '#10B981'; break;
+                                    case 'RARE': specificBorderColor = '#3B82F6'; break;
+                                    case 'EPIC': specificBorderColor = '#F59E0B'; break;
+                                    case 'LEGENDARY': specificBorderColor = '#EF4444'; break;
+                                    case 'MYTHIC': specificBorderColor = '#A855F7'; break;
+                                }
+                            }
 
                             return (
                                 <motion.div
@@ -149,7 +149,8 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                                         background: 'var(--slot-bg)',
                                         padding: '15px 20px',
                                         borderRadius: '12px',
-                                        border: `1px solid ${tierColor}44`
+                                        border: `1px solid ${specificBorderColor}`,
+                                        boxShadow: (resolvedItem?.rarity && resolvedItem.rarity !== 'COMMON') ? `0 0 8px ${specificBorderColor}40` : 'none'
                                     }}
                                 >
                                     <div style={{
@@ -169,9 +170,15 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                                             <Box size={24} color={tierColor} />
                                         )}
                                     </div>
-                                    <div style={{ textAlign: 'left' }}>
-                                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>
-                                            {item.qty}x <span style={{ color: tierColor }}>{resolvedItem ? (resolvedItem.tier ? `T${resolvedItem.tier} ${resolvedItem.name}` : resolvedItem.name) : formatItemId(item.id)}</span>
+                                    <div style={{ textAlign: 'left', flex: 1, overflow: 'hidden' }}>
+                                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                            {item.qty}x <span style={{ color: resolvedItem?.rarityColor || tierColor }}>{resolvedItem ? (resolvedItem.tier ? `T${resolvedItem.tier} ${resolvedItem.name}` : resolvedItem.name) : formatItemId(item.id)}</span>
+                                            {item.id.includes('::') && (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'var(--accent)', opacity: 0.8, fontSize: '0.6rem', border: '1px solid var(--accent)', padding: '1px 4px', borderRadius: '4px' }}>
+                                                    <Hammer size={10} />
+                                                    {item.id.split('::')[1]}
+                                                </div>
+                                            )}
                                         </div>
                                         <div style={{ fontSize: '0.8rem', color: '#888' }}>{resolvedItem?.type || 'Resource'}</div>
                                     </div>

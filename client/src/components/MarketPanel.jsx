@@ -3,7 +3,7 @@ import { formatNumber, formatSilver } from '@utils/format';
 import {
     Tag, ShoppingBag, Package, Search,
     Coins, ArrowRight, User, Info, Trash2,
-    Shield, Zap, Apple, Box, Clock, Check, AlertTriangle, X, Star
+    Shield, Zap, Apple, Box, Clock, Check, AlertTriangle, X, Star, Hammer
 } from 'lucide-react';
 import { resolveItem, getTierColor, formatItemId } from '@shared/items';
 
@@ -568,6 +568,11 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                         <Clock size={12} /> {new Date(l.created_at).toLocaleString()}
                                                     </span>
+                                                    {l.item_data.craftedBy && (
+                                                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)', opacity: 0.9 }}>
+                                                            <Hammer size={12} /> {l.item_data.craftedBy}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -1010,6 +1015,11 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                 <div style={{ flex: '2 1 0%', minWidth: '150px' }}>
                                                     <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                                         <span>{name}</span>
+                                                        {c.metadata?.craftedBy && (
+                                                            <span style={{ fontSize: '0.7rem', color: 'var(--accent)', opacity: 0.8, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                <Hammer size={10} /> {c.metadata.craftedBy}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '2px', display: 'flex', gap: '15px' }}>
                                                         <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>

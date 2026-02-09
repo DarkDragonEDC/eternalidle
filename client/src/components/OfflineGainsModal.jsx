@@ -330,12 +330,27 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                 }}>
                                     {Object.entries(itemsGained).map(([itemId, amount]) => {
                                         const item = resolveItem(itemId);
-                                        const tierColor = item ? getTierColor(item.tier) : 'rgba(255,255,255,0.1)';
+
+                                        let specificBorderColor = 'var(--border)';
+                                        if (item?.rarityColor) {
+                                            specificBorderColor = item.rarityColor;
+                                        } else if (item?.rarity) {
+                                            switch (item.rarity) {
+                                                case 'COMMON': specificBorderColor = '#9CA3AF'; break;
+                                                case 'UNCOMMON': specificBorderColor = '#10B981'; break;
+                                                case 'RARE': specificBorderColor = '#3B82F6'; break;
+                                                case 'EPIC': specificBorderColor = '#F59E0B'; break;
+                                                case 'LEGENDARY': specificBorderColor = '#EF4444'; break;
+                                                case 'MYTHIC': specificBorderColor = '#A855F7'; break;
+                                                default: specificBorderColor = 'var(--border)';
+                                            }
+                                        }
 
                                         return (
                                             <div key={itemId} style={{
                                                 background: 'var(--slot-bg)',
-                                                border: '1px solid var(--border)',
+                                                border: `1px solid ${specificBorderColor}`,
+                                                boxShadow: (item?.rarity && item?.rarity !== 'COMMON') ? `0 0 6px ${specificBorderColor}40` : 'none',
                                                 borderRadius: '16px',
                                                 padding: '15px 10px',
                                                 display: 'flex',
@@ -384,12 +399,21 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                                         color: '#aaa',
                                                         fontWeight: 'bold',
                                                         width: '100%',
-                                                        maxWidth: '70px',
-                                                        overflow: 'hidden',
-                                                        whiteSpace: 'nowrap',
-                                                        textOverflow: 'ellipsis'
+                                                        maxWidth: '80px',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        alignItems: 'center',
+                                                        gap: '1px'
                                                     }}>
-                                                        {item?.name || formatItemId(itemId)}
+                                                        <span style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', width: '100%' }}>
+                                                            {item?.name || formatItemId(itemId)}
+                                                        </span>
+                                                        {itemId.includes('::') && (
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'var(--accent)', opacity: 0.8, fontSize: '0.55rem' }}>
+                                                                <Hammer size={8} />
+                                                                <span style={{ maxWidth: '50px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{itemId.split('::')[1]}</span>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
