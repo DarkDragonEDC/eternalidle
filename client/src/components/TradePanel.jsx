@@ -301,7 +301,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                         .map(([id, entry]) => {
                                             const item = resolveItem(id);
                                             if (!item) return null;
-                                            const totalAmount = typeof entry === 'object' ? entry.amount : entry;
+                                            const totalAmount = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
 
                                             const offeredItem = localOffer.items.find(it => it.id === id);
                                             const offeredAmount = offeredItem ? offeredItem.amount : 0;
