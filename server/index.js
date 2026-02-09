@@ -303,9 +303,8 @@ io.on('connection', (socket) => {
         const userId = socket.user.id;
 
         socket.join(`user:${userId}`);
-        socket.data.characterId = characterId;
 
-        console.log(`[SOCKET] User ${socket.user.email} joined character ${characterId}`);
+        console.log(`[SOCKET] User ${socket.user.email} attempting to join character ${characterId}`);
 
         try {
             // Note: Removed syncWithDatabase here - it was preventing catchup from working
@@ -315,7 +314,14 @@ io.on('connection', (socket) => {
             // Immediately send status for this character (with catchup=true for offline progress)
             await gameManager.executeLocked(userId, async () => {
                 const status = await gameManager.getStatus(socket.user.id, true, characterId, true);
+
+                // CRITICAL FIX: Only assign characterId to socket AFTER catchup ensures state is valid.
+                // Previous race condition: assigning before lock allowed Ticker Loop to processTick() 
+                // on a raw DB loaded char (catchup=false), resetting last_saved and erasing offline progress.
+                socket.data.characterId = characterId;
+
                 socket.emit('status_update', status);
+                console.log(`[SOCKET] User ${socket.user.email} successfully joined character ${characterId}`);
             });
         } catch (err) {
             console.error(`[SOCKET] Error joining character ${characterId}:`, err);
