@@ -685,14 +685,19 @@ export class GameManager {
             // Simulated current time for this round
             const currentTime = startTime + (i * atkSpeed);
 
-            // Check food before each round
-            const foodResult = this.processFood(char);
-            if (foodResult.used) foodConsumed += foodResult.amount;
+            // Check food before each round (reactive healing)
+            const foodResult = this.processFood(char, currentTime);
+            foodConsumed += foodResult.eaten || 0;
 
             const result = await this.combatManager.processCombatRound(char, currentTime);
             if (!result || !char.state.combat) {
                 if (!char.state.combat && char.state.health <= 0) died = true;
                 break;
+            }
+
+            // Also track food consumed DURING the round (between hits)
+            if (result.details && result.details.foodEaten) {
+                foodConsumed += result.details.foodEaten;
             }
 
             if (result.details) {
@@ -786,7 +791,11 @@ export class GameManager {
             virtualNow += 1000;
             remainingSeconds -= 1;
 
-            const foodResult = this.processFood(char);
+            // Reactive Healing
+            const foodResult = this.processFood(char, virtualNow);
+            if (foodResult.used) {
+                // Dungeon reports don't currently track food, but we should update it if it did
+            }
 
             if (result && result.dungeonUpdate) {
                 const status = result.dungeonUpdate.status;
@@ -1426,14 +1435,15 @@ export class GameManager {
         // this.addNotification(char, 'SYSTEM', message);
     }
 
-    processFood(char) {
+    processFood(char, nowOverride = null) {
         if (!char.state.equipment || !char.state.equipment.food) return { used: false, amount: 0 };
         const food = char.state.equipment.food;
         if (!food.heal || !food.amount) return { used: false, amount: 0 };
 
-        const stats = this.inventoryManager.calculateStats(char);
+        const inCombat = !!char.state.combat;
+        const stats = this.inventoryManager.calculateStats(char, nowOverride);
         const maxHp = stats.maxHP;
-        let currentHp = char.state.health || 0;
+        let currentHp = inCombat ? (char.state.combat.playerHealth || 0) : (char.state.health || 0);
         let eatenCount = 0;
         let totalHealed = 0;
         const MAX_EATS_PER_TICK = 50;
@@ -1456,7 +1466,7 @@ export class GameManager {
 
                 // Update instantly to recalculate 'missing' for next loop iteration
                 char.state.health = currentHp;
-                if (char.state.combat) {
+                if (inCombat) {
                     char.state.combat.playerHealth = currentHp;
                 }
             } else {
@@ -1468,7 +1478,7 @@ export class GameManager {
             delete char.state.equipment.food;
         }
 
-        return { used: eatenCount > 0, amount: totalHealed };
+        return { used: eatenCount > 0, amount: totalHealed, eaten: eatenCount };
     }
 
     async getLeaderboard(type = 'COMBAT', requesterId = null, mode = 'NORMAL') {
@@ -1590,11 +1600,11 @@ export class GameManager {
     async startDungeon(u, c, d, r) { return this.dungeonManager.startDungeon(u, c, d, r); }
     async stopDungeon(u, c) { return this.dungeonManager.stopDungeon(u, c); }
     async consumeItem(userId, characterId, itemId, quantity = 1) {
+        console.log(`[DEBUG-POTION] consumeItem called for ${characterId}, item: ${itemId}, qty:`, quantity);
         const char = await this.getCharacter(userId, characterId);
         const itemData = this.inventoryManager.resolveItem(itemId);
+        // Note: No current_activity or combat restrictions are enforced here to allow potion usage anytime.
         const safeQty = Math.max(1, parseInt(typeof quantity === 'object' ? quantity.qty : quantity) || 1);
-
-
         if (!itemData) throw new Error("Item not found");
 
         const invQty = char.state.inventory?.[itemId] || 0;
