@@ -1538,7 +1538,7 @@ export class GameManager {
         // console.log(`[RANKING] Fetching leaderboard for type: ${type}, mode: ${mode}`);
         let query = this.supabase
             .from('characters')
-            .select('id, name, state')
+            .select('id, name, state, skills') // Fetch skills directly
             .or('is_admin.is.null,is_admin.eq.false'); // Exclude admins
 
         // Mode Filtering
@@ -1549,12 +1549,6 @@ export class GameManager {
         } else {
             // NORMAL mode: isIronman is false OR null/undefined
             // We use 'not' contains { isIronman: true } to cover both false and missing
-            // But Supabase/PostgREST 'not.cs' might be tricky.
-            // Alternative: Filter in memory if dataset is small, but for 1000 limit, better DB side.
-            // Let's rely on filter-in-memory for "NORMAL" to ensure we handle 'undefined' correctly without complex JSONB queries,
-            // OR use a raw filter if needed.
-            // For now, let's fetch slightly more and filter in memory for robustness, 
-            // as 'isIronman' might be missing on old chars.
         }
 
         // Increased limit to 2000 to allow in-memory filtering effectively
@@ -1565,6 +1559,13 @@ export class GameManager {
         }
 
         if (!data) return { type, top100: [], userRank: null };
+
+        // Inject skills into state for backward compatibility and sorting
+        data.forEach(char => {
+            if (char.skills && char.state) {
+                char.state.skills = char.skills;
+            }
+        });
 
         const sortKey = type || 'COMBAT';
 

@@ -332,6 +332,8 @@ io.on('connection', (socket) => {
     socket.on('get_status', async () => {
         try {
             const charId = socket.data.characterId;
+            if (!charId) return; // Prevent crash if not joined yet
+
             await gameManager.executeLocked(socket.user.id, async () => {
                 const status = await gameManager.getStatus(socket.user.id, true, charId, true);
                 socket.emit('status_update', status);
