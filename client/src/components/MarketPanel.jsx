@@ -18,6 +18,9 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
     const [confirmModal, setConfirmModal] = useState(null);
     const [marketListings, setMarketListings] = useState([]);
     const [notification, setNotification] = useState(null);
+    const [selectedTier, setSelectedTier] = useState('ALL');
+    const [selectedQuality, setSelectedQuality] = useState('ALL');
+    const [selectedSortOrder, setSelectedSortOrder] = useState('PRICE_ASC');
     const [sellSearchQuery, setSellSearchQuery] = useState('');
 
 
@@ -145,35 +148,52 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
 
     // Filter Logic for BUY tab
-    const activeBuyListings = activeListingsForValues.filter(l => {
+    let activeBuyListings = activeListingsForValues.filter(l => {
         if (isOwnListing(l)) return false; // Hide current character's listings
 
         const currentItem = resolveItem(l.item_id);
-        const itemName = currentItem?.name || l.item_data?.name || formatItemId(l.item_id);
+        const itemName = (currentItem?.name || l.item_data?.name || formatItemId(l.item_id)).toLowerCase();
         const itemTier = currentItem?.tier || l.item_data?.tier;
-        const fullDisplay = itemTier ? `T${itemTier} ${itemName}` : itemName;
-        const itemIdSpaces = l.item_id.replace(/_/g, ' ');
+        const itemQuality = currentItem?.quality ?? l.item_data?.quality ?? 0;
 
-        const searchStr = `${fullDisplay} ${itemName} ${l.item_id} ${itemIdSpaces}`.toLowerCase();
+        // 1. Keyword search (Name/ID)
         const keywords = searchQuery.trim().toLowerCase().split(/\s+/);
+        const matchesKeywords = keywords.every(word => {
+            return itemName.includes(word) || l.item_id.toLowerCase().includes(word);
+        });
+        if (!matchesKeywords && searchQuery.trim() !== "") return false;
 
-        const matchesSearch = keywords.every(word => searchStr.includes(word));
+        // 2. Tier Filter
+        if (selectedTier !== 'ALL' && itemTier !== parseInt(selectedTier)) return false;
 
-        let matchesCategory = true;
+        // 3. Quality Filter
+        if (selectedQuality !== 'ALL' && itemQuality !== parseInt(selectedQuality)) return false;
+
+        // 4. Category Filter
         if (selectedCategory !== 'ALL') {
             if (selectedCategory === 'EQUIPMENT') {
-                matchesCategory = ['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'OFF_HAND', 'GLOVES', 'CAPE', 'TOOL'].includes(l.item_data?.type);
+                if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'OFF_HAND', 'GLOVES', 'CAPE', 'TOOL'].includes(l.item_data?.type)) return false;
             } else if (selectedCategory === 'RESOURCE') {
-                matchesCategory = l.item_data?.type === 'RESOURCE' || l.item_data?.type === 'RAW' || l.item_data?.type === 'REFINED'; // 'REFINED' was separate in old code?
-            } else if (selectedCategory === 'REFINED') { // Adding REFINED as per old code
-                matchesCategory = l.item_data?.type === 'REFINED';
+                if (!['RESOURCE', 'RAW', 'REFINED'].includes(l.item_data?.type)) return false;
+            } else if (selectedCategory === 'REFINED') {
+                if (l.item_data?.type !== 'REFINED') return false;
             } else if (selectedCategory === 'CONSUMABLE') {
-                matchesCategory = l.item_data?.type === 'FOOD' || l.item_data?.type === 'POTION';
+                if (!['FOOD', 'POTION'].includes(l.item_data?.type)) return false;
             }
         }
 
-        return matchesSearch && matchesCategory;
+        return true;
     });
+
+    // Handle Sorting
+    if (selectedSortOrder === 'PRICE_ASC') {
+        activeBuyListings.sort((a, b) => a.price - b.price);
+    } else if (selectedSortOrder === 'PRICE_DESC') {
+        activeBuyListings.sort((a, b) => b.price - a.price);
+    } else if (selectedSortOrder === 'NEWEST') {
+        activeBuyListings.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    }
+
 
     const myActiveListings = activeListingsForValues.filter(l => isOwnListing(l));
 
@@ -362,6 +382,70 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                         fontSize: '0.9rem'
                                     }}
                                 />
+                            </div>
+
+                            {/* Advanced Filters Row */}
+                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                <select
+                                    value={selectedTier}
+                                    onChange={(e) => setSelectedTier(e.target.value)}
+                                    style={{
+                                        flex: '1',
+                                        minWidth: '100px',
+                                        background: 'rgba(0, 0, 0, 0.3)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '8px',
+                                        padding: '5px 10px',
+                                        color: 'var(--text-main)',
+                                        fontSize: '0.8rem'
+                                    }}
+                                >
+                                    <option value="ALL">All Tiers</option>
+                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(t => (
+                                        <option key={t} value={t}>Tier {t}</option>
+                                    ))}
+                                </select>
+
+                                <select
+                                    value={selectedQuality}
+                                    onChange={(e) => setSelectedQuality(e.target.value)}
+                                    style={{
+                                        flex: '1',
+                                        minWidth: '100px',
+                                        background: 'rgba(0, 0, 0, 0.3)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '8px',
+                                        padding: '5px 10px',
+                                        color: 'var(--text-main)',
+                                        fontSize: '0.8rem'
+                                    }}
+                                >
+                                    <option value="ALL">All Qualities</option>
+                                    <option value="0">Normal</option>
+                                    <option value="1">Good</option>
+                                    <option value="2">Outstanding</option>
+                                    <option value="3">Excellent</option>
+                                    <option value="4">Masterpiece</option>
+                                </select>
+
+                                <select
+                                    value={selectedSortOrder}
+                                    onChange={(e) => setSelectedSortOrder(e.target.value)}
+                                    style={{
+                                        flex: '1',
+                                        minWidth: '120px',
+                                        background: 'rgba(0, 0, 0, 0.3)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '8px',
+                                        padding: '5px 10px',
+                                        color: 'var(--text-main)',
+                                        fontSize: '0.8rem'
+                                    }}
+                                >
+                                    <option value="PRICE_ASC">Price: Low to High</option>
+                                    <option value="PRICE_DESC">Price: High to Low</option>
+                                    <option value="NEWEST">Newest Listings</option>
+                                </select>
                             </div>
 
                             {/* Filter Buttons */}
