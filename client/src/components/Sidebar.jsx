@@ -303,7 +303,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                 </div>
             </div>
 
-            {canSpin && (
+            {canSpin && !gameState?.state?.isIronman && (
                 <div style={{ padding: '0 10px 10px 10px' }}>
                     <button
                         onClick={onOpenDailySpin}

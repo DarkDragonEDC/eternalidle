@@ -288,7 +288,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                 const qty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
                 if (qty < 2) continue;
 
-                const match = itemId.match(/^T(\d+)_RUNE_(.+)_(\d+)STAR$/);
+                const match = itemId.match(/^T(\d+)_RUNE_(.+)_(\d+)STAR/);
                 if (!match) continue;
 
                 const tier = parseInt(match[1]);
@@ -981,24 +981,24 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                 }
                             }}
                             disabled={isCrafting || !selectedShard || (activeTab === 'shards' ?
-                                ((typeof inventory['T1_RUNE_SHARD'] === 'object' ? inventory['T1_RUNE_SHARD'].amount : Number(inventory['T1_RUNE_SHARD'])) || 0) < 5 :
-                                ((typeof inventory[selectedShard.id] === 'object' ? inventory[selectedShard.id].amount : Number(inventory[selectedShard.id])) || 0) < 2)}
+                                getQty('T1_RUNE_SHARD') < 5 :
+                                getQty(selectedShard.id) < 2)}
                             style={{
                                 marginTop: '10px',
                                 padding: '10px 30px',
                                 background: (!selectedShard || (activeTab === 'shards' ?
-                                    ((typeof inventory['T1_RUNE_SHARD'] === 'object' ? inventory['T1_RUNE_SHARD'].amount : Number(inventory['T1_RUNE_SHARD'])) || 0) < 5 :
-                                    ((typeof inventory[selectedShard.id] === 'object' ? inventory[selectedShard.id].amount : Number(inventory[selectedShard.id])) || 0) < 2)) ? 'var(--bg-dark)' : 'var(--accent)',
+                                    getQty('T1_RUNE_SHARD') < 5 :
+                                    getQty(selectedShard.id) < 2)) ? 'var(--bg-dark)' : 'var(--accent)',
                                 color: '#fff',
                                 border: 'none',
                                 borderRadius: '8px',
                                 fontWeight: 'bold',
                                 cursor: (!selectedShard || (activeTab === 'shards' ?
-                                    ((typeof inventory['T1_RUNE_SHARD'] === 'object' ? inventory['T1_RUNE_SHARD'].amount : Number(inventory['T1_RUNE_SHARD'])) || 0) < 5 :
-                                    ((typeof inventory[selectedShard.id] === 'object' ? inventory[selectedShard.id].amount : Number(inventory[selectedShard.id])) || 0) < 2)) ? 'not-allowed' : 'pointer',
+                                    getQty('T1_RUNE_SHARD') < 5 :
+                                    getQty(selectedShard.id) < 2)) ? 'not-allowed' : 'pointer',
                                 opacity: (!selectedShard || (activeTab === 'shards' ?
-                                    ((typeof inventory['T1_RUNE_SHARD'] === 'object' ? inventory['T1_RUNE_SHARD'].amount : Number(inventory['T1_RUNE_SHARD'])) || 0) < 5 :
-                                    ((typeof inventory[selectedShard.id] === 'object' ? inventory[selectedShard.id].amount : Number(inventory[selectedShard.id])) || 0) < 2)) ? 0.5 : 1,
+                                    getQty('T1_RUNE_SHARD') < 5 :
+                                    getQty(selectedShard.id) < 2)) ? 0.5 : 1,
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '8px',

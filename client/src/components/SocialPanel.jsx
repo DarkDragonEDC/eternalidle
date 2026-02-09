@@ -203,7 +203,8 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, tradeInvites, gameStat
                                             <div style={{
                                                 width: '32px', height: '32px', borderRadius: '8px',
                                                 background: 'var(--accent-soft)', display: 'flex',
-                                                alignItems: 'center', justifyContent: 'center'
+                                                alignItems: 'center', justifyContent: 'center',
+                                                position: 'relative'
                                             }}>
                                                 <User size={16} color="var(--accent)" />
                                             </div>
@@ -213,15 +214,21 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, tradeInvites, gameStat
                                             </div>
                                         </div>
                                         <button
-                                            onClick={() => onInvite(result.name)}
+                                            onClick={() => !result.isIronman && onInvite(result.name)}
+                                            disabled={result.isIronman}
                                             style={{
-                                                padding: '6px 12px', borderRadius: '8px', background: 'var(--accent)',
-                                                color: '#000', fontWeight: '800', fontSize: '0.7rem', border: 'none',
-                                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
+                                                padding: '6px 12px', borderRadius: '8px',
+                                                background: result.isIronman ? 'rgba(255,255,255,0.05)' : 'var(--accent)',
+                                                color: result.isIronman ? 'var(--text-dim)' : '#000',
+                                                fontWeight: '800', fontSize: '0.7rem', border: 'none',
+                                                cursor: result.isIronman ? 'not-allowed' : 'pointer',
+                                                display: 'flex', alignItems: 'center', gap: '6px',
+                                                opacity: result.isIronman ? 0.5 : 1
                                             }}
+                                            title={result.isIronman ? "Cannot trade with Ironman players" : "Invite to Trade"}
                                         >
-                                            <Send size={12} />
-                                            INVITE
+                                            {result.isIronman ? <Shield size={12} /> : <Send size={12} />}
+                                            {result.isIronman ? 'IRONMAN' : 'INVITE'}
                                         </button>
                                     </div>
                                 ))}

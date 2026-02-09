@@ -27,6 +27,7 @@ export class DailyRewardManager {
 
     async canSpin(char) {
         if (!char.user_id) return false;
+        if (char.state?.isIronman) return false;
 
         const { data, error } = await this.gameManager.supabase
             .from('daily_rewards')

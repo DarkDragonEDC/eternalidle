@@ -1385,9 +1385,9 @@ export class GameManager {
             timestamp: Date.now(),
             read: false
         });
-        // Keep only last 50
-        if (char.state.notifications.length > 50) {
-            char.state.notifications = char.state.notifications.slice(0, 50);
+        // Keep only last 10
+        if (char.state.notifications.length > 10) {
+            char.state.notifications = char.state.notifications.slice(0, 10);
         }
     }
 
@@ -1940,7 +1940,7 @@ export class GameManager {
                 if (qty < 2) continue;
                 if (!itemId.includes('_RUNE_') || itemId.includes('SHARD')) continue;
 
-                const match = itemId.match(/^T(\d+)_RUNE_(.+)_(\d+)STAR$/);
+                const match = itemId.match(/^T(\d+)_RUNE_(.+)_(\d+)STAR/);
                 if (!match) continue;
 
                 const tier = parseInt(match[1]);
@@ -2005,7 +2005,7 @@ export class GameManager {
                 if (qty < 2) continue;
                 if (!itemId.includes('_RUNE_') || itemId.includes('SHARD')) continue;
 
-                const match = itemId.match(/^T(\d+)_RUNE_(.+)_(\d+)STAR$/);
+                const match = itemId.match(/^T(\d+)_RUNE_(.+)_(\d+)STAR/);
                 if (!match) continue;
 
                 const tier = parseInt(match[1]);

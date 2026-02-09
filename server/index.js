@@ -889,7 +889,8 @@ io.on('connection', (socket) => {
                 return {
                     id: char.id,
                     name: char.name,
-                    level: level
+                    level: level,
+                    isIronman: !!(char.state?.isIronman || char.name?.toLowerCase().includes('[im]'))
                 };
             });
 

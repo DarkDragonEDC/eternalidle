@@ -154,7 +154,7 @@ function App() {
       timestamp: Date.now(),
       read: false,
       ...notif
-    }, ...prev].slice(0, 50));
+    }, ...prev].slice(0, 10));
   };
 
   const markAsRead = (id) => {
