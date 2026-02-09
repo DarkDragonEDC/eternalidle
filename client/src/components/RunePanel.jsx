@@ -43,6 +43,11 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
     const [autoMergeConfirm, setAutoMergeConfirm] = useState(null);
 
     const inventory = gameState?.state?.inventory || {};
+    function getQty(itemId) {
+        const entry = inventory[itemId];
+        if (!entry) return 0;
+        return (typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
+    }
 
     const handleQuickSell = (itemId) => {
         const item = resolveItem(itemId);
