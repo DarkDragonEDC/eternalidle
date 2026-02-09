@@ -877,9 +877,16 @@ export const getLevelRequirement = (tier) => {
     return (t - 1) * 10;
 };
 
-export const calculateRuneBonus = (tier, stars) => {
-    const starBonus = { 1: 1, 2: 3, 3: 5, 4: 7, 5: 10 };
-    return (tier - 1) * 5 + (starBonus[stars] || stars);
+export const calculateRuneBonus = (tier, stars, effType = null) => {
+    const starBonusMap = { 1: 1, 2: 3, 3: 5, 4: 7, 5: 10 };
+    let bonus = (tier - 1) * 5 + (starBonusMap[stars] || stars);
+
+    // SPEED (Auto-Refine) runes give half bonus (max ~25% instead of ~50%)
+    if (effType === 'SPEED') {
+        bonus = Math.max(1, Math.floor(bonus / 2));
+    }
+
+    return bonus;
 };
 
 // Generate Runes & Shards
@@ -963,8 +970,7 @@ for (const t of TIERS) {
             const effName = EFF_NAME_MAP[eff] || eff;
             const effectLabel = EFF_LABEL_MAP[eff] || eff;
 
-            const starBonus = { 1: 1, 2: 3, 3: 5, 4: 7, 5: 10 };
-            const bonusValue = (t - 1) * 5 + (starBonus[s] || s);
+            const bonusValue = calculateRuneBonus(t, s, eff);
 
             let description = '';
             if (eff === 'SPEED') {

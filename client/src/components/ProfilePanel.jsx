@@ -6,7 +6,7 @@ import {
     User, Target, Star, Layers,
     Axe, Pickaxe, Scissors, Anchor, Apple, Info, ShoppingBag, Edit
 } from 'lucide-react';
-import { resolveItem, getTierColor } from '@shared/items';
+import { resolveItem, getTierColor, calculateRuneBonus } from '@shared/items';
 import { getBestItemForSlot, isBetterItem } from '../utils/equipment';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import StatBreakdownModal from './StatBreakdownModal';
@@ -210,8 +210,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
 
                 const freshItem = resolveItem(item.id || item.item_id);
                 if (freshItem) {
-                    const starBonus = { 1: 1, 2: 3, 3: 5, 4: 7, 5: 10 };
-                    const bonusValue = (freshItem.tier - 1) * 5 + (starBonus[freshItem.stars] || freshItem.stars);
+                    const bonusValue = calculateRuneBonus(freshItem.tier, freshItem.stars, eff);
                     if (!summary[act]) summary[act] = {};
                     summary[act][eff] = (summary[act][eff] || 0) + bonusValue;
                 }

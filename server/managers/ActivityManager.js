@@ -170,25 +170,33 @@ export class ActivityManager {
         // 2. Auto-Refine Logic
         let isAutoRefine = false;
         let refinedItemGained = null;
+        let isAutoCook = false;
         if (actKey && stats.autoRefine && stats.autoRefine[actKey]) {
             const refineChance = stats.autoRefine[actKey];
             if (Math.random() * 100 < refineChance) {
-                // Try to find a refined version
+                // Try to find a refined version or food (for fishing)
                 const refinedId = this.findRefinedItem(item.id);
                 if (refinedId) {
-                    // Check if we have raw material (consume 2 to make 1 refined)
-                    if (this.gameManager.inventoryManager.hasItems(char, { [item.id]: 2 })) {
-                        this.gameManager.inventoryManager.consumeItems(char, { [item.id]: 2 });
+                    const refinedItem = ITEM_LOOKUP[refinedId];
+                    // Dynamic consumption based on requirements (defaults to 2 if not found)
+                    const reqAmount = (refinedItem && refinedItem.req && refinedItem.req[item.id]) ? refinedItem.req[item.id] : 2;
+
+                    if (this.gameManager.inventoryManager.hasItems(char, { [item.id]: reqAmount })) {
+                        this.gameManager.inventoryManager.consumeItems(char, { [item.id]: reqAmount });
                         this.gameManager.inventoryManager.addItemToInventory(char, refinedId, 1);
                         isAutoRefine = true;
                         refinedItemGained = refinedId;
+                        if (refinedItem?.type === 'FOOD') isAutoCook = true;
                     }
                 }
             }
         }
 
         let message = null;
-        if (isAutoRefine) {
+        if (isAutoCook) {
+            const refinedItem = ITEM_LOOKUP[refinedItemGained];
+            message = `- Auto-Cooked into ${refinedItem?.name || 'Food'}!`;
+        } else if (isAutoRefine) {
             const refinedItem = ITEM_LOOKUP[refinedItemGained];
             message = `- Auto-Refined into ${refinedItem?.name || 'Refined Item'}!`;
         } else if (isDuplication) {
@@ -210,11 +218,19 @@ export class ActivityManager {
     }
 
     findRefinedItem(rawId) {
-        // Search through ITEMS.REFINING for a recipe that uses this raw material
+        // 1. Search in Refined Materials
         for (const cat of Object.values(ITEMS.REFINED || {})) {
             for (const res of Object.values(cat)) {
                 if (res.req && res.req[rawId]) {
                     return res.id;
+                }
+            }
+        }
+        // 2. Search in Food (for Fishing/Auto-Cook)
+        if (rawId.includes('FISH')) {
+            for (const food of Object.values(ITEMS.CONSUMABLE.FOOD || {})) {
+                if (food.req && food.req[rawId]) {
+                    return food.id;
                 }
             }
         }

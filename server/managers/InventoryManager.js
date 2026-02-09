@@ -1,4 +1,4 @@
-import { ITEMS, QUALITIES, resolveItem, ITEM_LOOKUP } from '../../shared/items.js';
+import { ITEMS, QUALITIES, resolveItem, ITEM_LOOKUP, calculateRuneBonus } from '../../shared/items.js';
 
 // Removed local ITEM_LOOKUP generation in favor of shared source of truth
 
@@ -416,8 +416,7 @@ export class InventoryManager {
 
                 const freshItem = this.resolveItem(item.id);
                 if (freshItem) {
-                    const starBonus = { 1: 1, 2: 3, 3: 5, 4: 7, 5: 10 };
-                    const bonusValue = (freshItem.tier - 1) * 5 + (starBonus[freshItem.stars] || freshItem.stars);
+                    const bonusValue = calculateRuneBonus(freshItem.tier, freshItem.stars, eff);
 
                     if (eff === 'XP') {
                         if (xpBonus[act] !== undefined) xpBonus[act] += bonusValue;
