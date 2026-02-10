@@ -155,7 +155,10 @@ export class CombatManager {
 
                 // REACTIVE HEALING: Check food after each hit to prevent burst deaths
                 const result = this.gameManager.processFood(char);
-                if (result.used) foodEaten += (result.eaten || 0);
+                if (result.used) {
+                    foodEaten += (result.eaten || 0);
+                    combat.savedFoodCount = (combat.savedFoodCount || 0) + (result.savedCount || 0);
+                }
 
                 if (combat.playerHealth <= 0) break;
             }

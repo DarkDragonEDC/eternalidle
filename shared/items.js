@@ -95,7 +95,8 @@ const genRaw = (type, idPrefix) => {
             tier: t,
             type: 'RESOURCE',
             xp: GATHER_DATA.xp[t - 1],
-            time: GATHER_DATA.time[t - 1]
+            time: GATHER_DATA.time[t - 1],
+            description: `A raw resource of Tier ${t}. Used for refining.`
         };
     }
 };
@@ -112,7 +113,8 @@ const genRefined = (type, idPrefix, rawId) => {
             type: 'RESOURCE',
             req,
             xp: REFINE_DATA.xp[t - 1],
-            time: REFINE_DATA.time[t - 1]
+            time: REFINE_DATA.time[t - 1],
+            description: `A refined material of Tier ${t}. Used for crafting.`
         };
     }
 };
@@ -239,7 +241,8 @@ for (const t of TIERS) {
         heal: HP_CURVE[t - 1], // Heals roughly 1 full HP bar of that tier
         req: { [`T${t}_FISH`]: 1 },
         xp: Math.floor(REFINE_DATA.xp[t - 1] / 2), // Halved XP gain for food
-        time: Math.ceil(REFINE_DATA.time[t - 1] / 2)
+        time: Math.ceil(REFINE_DATA.time[t - 1] / 2),
+        description: `A cooked meal. Restores health when eaten.`
     };
     ITEMS.CONSUMABLE.FOOD[t] = foodItem;
     ITEMS.GEAR.COOKING_STATION.FOOD[t] = foodItem;
@@ -384,7 +387,7 @@ if (ITEMS.REFINED.CLOTH[10]) { ITEMS.REFINED.CLOTH[10].icon = '/items/T10_CLOTH.
 
 // Generate Maps
 for (const t of TIERS) {
-    ITEMS.MAPS[t] = { id: `T${t}_DUNGEON_MAP`, name: 'Dungeon Map', tier: t, type: 'MAP' };
+    ITEMS.MAPS[t] = { id: `T${t}_DUNGEON_MAP`, name: 'Dungeon Map', tier: t, type: 'MAP', description: `A map to a Tier ${t} dungeon. Use to enter.` };
 }
 
 // Override Icons for Potions (Reuse generic for now)
@@ -405,7 +408,7 @@ for (const [key, data] of Object.entries(POTION_TYPES)) {
 
 // Generate Crests
 for (const t of TIERS) {
-    ITEMS.SPECIAL.CREST[t] = { id: `T${t}_CREST`, name: 'Boss Crest', tier: t, type: 'CRAFTING_MATERIAL' };
+    ITEMS.SPECIAL.CREST[t] = { id: `T${t}_CREST`, name: 'Boss Crest', tier: t, type: 'CRAFTING_MATERIAL', description: `A crest dropped by a Tier ${t} boss. Used for crafting Capes.` };
 }
 
 // Generate T1 Rune Shards (Unified system)
@@ -539,7 +542,8 @@ const genGear = (category, slot, type, idSuffix, matType, statMultipliers = {}) 
             ip: getBaseIP(t),
             type: type,
             isTool: !!statMultipliers.eff,
-            stats
+            stats,
+            description: `A Tier ${t} ${idSuffix.replace(/_/g, ' ').toLowerCase()}. Equip to increase stats.`
         };
 
         // Assign to ITEMS structure

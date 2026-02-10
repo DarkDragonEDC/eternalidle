@@ -427,6 +427,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
         const silverGained = combat.sessionSilver || 0;
         const kills = combat.kills || 0;
         const savedFoodCount = combat.savedFoodCount || 0;
+        const foodConsumed = combat.foodConsumed || 0;
 
         const dps = totalDmgDealt / duration;
         const xph = (xpGained / duration) * 3600;
@@ -746,9 +747,9 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                             </div>
                             <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
                                 <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <Heart size={10} /> FOOD SAVED
+                                    <Heart size={10} /> FOOD USE / SAVED
                                 </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#ff4444' }}>{savedFoodCount}</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#ff4444' }}>{foodConsumed} / {savedFoodCount}</div>
                             </div>
                             <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 3' : 'span 1' }}>
                                 <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>

@@ -855,6 +855,12 @@ export class GameManager {
             // Check food before each round (reactive healing)
             const foodResult = this.processFood(char, currentTime);
             foodConsumed += foodResult.eaten || 0;
+            if (foodResult.savedCount && char.state.combat) {
+                char.state.combat.savedFoodCount = (char.state.combat.savedFoodCount || 0) + foodResult.savedCount;
+            }
+            if (foodResult.eaten && char.state.combat) {
+                char.state.combat.foodConsumed = (char.state.combat.foodConsumed || 0) + foodResult.eaten;
+            }
 
             const result = await this.combatManager.processCombatRound(char, currentTime);
             if (!result || !char.state.combat) {
@@ -864,7 +870,11 @@ export class GameManager {
 
             // Also track food consumed DURING the round (between hits)
             if (result.details && result.details.foodEaten) {
-                foodConsumed += result.details.foodEaten;
+                const eaten = result.details.foodEaten;
+                foodConsumed += eaten;
+                if (char.state.combat) {
+                    char.state.combat.foodConsumed = (char.state.combat.foodConsumed || 0) + eaten;
+                }
             }
 
             if (result.details) {
@@ -1442,6 +1452,10 @@ export class GameManager {
                         const foodRes = this.processFood(char);
                         if (foodRes.savedCount > 0) {
                             combat.savedFoodCount = (combat.savedFoodCount || 0) + foodRes.savedCount;
+                            stateChanged = true;
+                        }
+                        if (foodRes.eaten > 0) {
+                            combat.foodConsumed = (combat.foodConsumed || 0) + foodRes.eaten;
                             stateChanged = true;
                         }
                     }
