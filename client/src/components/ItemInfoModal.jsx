@@ -66,9 +66,10 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
     // Base name cleanup is handled in the render for titles
 
     const getItemDescription = (itm) => {
-        // Prioritize actual item description if it exists (for Runes and others)
-        if (itm.description && itm.description !== "A useful item for your journey.") {
-            return itm.description;
+        // Prioritize actual item description if it exists (for Runes, Chests, Potions)
+        const desc = itm.description || itm.desc;
+        if (desc && desc !== "A useful item for your journey.") {
+            return desc;
         }
 
         if (['WEAPON'].includes(itm.type)) return "Offensive equipment. Increases your Damage.";
@@ -80,7 +81,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
         if (itm.type === 'CAPE') return "Special cape. Offers passive bonuses and global efficiency.";
         if (itm.type.startsWith('TOOL')) return "Gathering tool. Required to gather higher TIER resources.";
 
-        if (itm.type === 'FOOD') return "Consumable. Restores Health over time.";
+        if (itm.type === 'FOOD') return `Consumable. Restores ${itm.heal || 'Health'} Health over time.`;
         if (itm.type === 'MAP') return "Dungeon Map. Use to access dangerous areas with valuable rewards.";
         if (itm.type === 'CRAFTING_MATERIAL' && itm.id.includes('CREST')) return "Rare boss material. Used to craft prestige items.";
 
@@ -209,9 +210,15 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                         <div style={{ padding: '4px 10px', background: 'var(--accent-soft)', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid var(--border-active)', textTransform: 'uppercase' }}>
                             {item.type}
                         </div>
-                        <div style={{ padding: '4px 10px', background: 'var(--accent-soft)', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid var(--border-active)' }}>
-                            <span style={{ color: '#888', marginRight: '4px' }}>IP</span>{item.ip || 0}
-                        </div>
+                        {(item.type === 'FOOD' || item.ip > 0) && (
+                            <div style={{ padding: '4px 10px', background: 'var(--accent-soft)', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid var(--border-active)' }}>
+                                {item.type === 'FOOD' ? (
+                                    <><span style={{ color: '#4caf50', marginRight: '4px' }}>HEAL</span>{item.heal || 0}</>
+                                ) : (
+                                    <><span style={{ color: '#888', marginRight: '4px' }}>IP</span>{item.ip}</>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {/* Refined Attributes List */}
