@@ -376,6 +376,28 @@ export class GameManager {
                                 // Always update state if anything happened
                                 updated = true;
 
+                                // FIX: Merge gains into the active session stats so "Stopped" reports are accurate
+                                if (data.current_activity) {
+                                    if (!data.current_activity.sessionItems) data.current_activity.sessionItems = {};
+                                    if (typeof data.current_activity.sessionXp === 'undefined') data.current_activity.sessionXp = 0;
+
+                                    // Merge Items
+                                    for (const [id, qty] of Object.entries(activityReport.itemsGained)) {
+                                        data.current_activity.sessionItems[id] = (data.current_activity.sessionItems[id] || 0) + qty;
+                                    }
+
+                                    // Merge XP (sum all skills for session total)
+                                    let totalXp = 0;
+                                    for (const xp of Object.values(activityReport.xpGained)) {
+                                        totalXp += xp;
+                                    }
+                                    data.current_activity.sessionXp += totalXp;
+
+                                    // Merge Counters
+                                    data.current_activity.duplicationCount = (data.current_activity.duplicationCount || 0) + (activityReport.duplicationCount || 0);
+                                    data.current_activity.autoRefineCount = (data.current_activity.autoRefineCount || 0) + (activityReport.autoRefineCount || 0);
+                                }
+
                                 // Only populate the visual report if it's significant (> 10s or gains items)
                                 if (activityReport.totalTime > 10 || Object.keys(activityReport.itemsGained).length > 0) {
                                     finalReport.totalTime += activityReport.totalTime;
@@ -527,7 +549,7 @@ export class GameManager {
             }
 
             // Only show the modal if total catchup was significant
-            const hasNotableGains = finalReport.totalTime > 120 || Object.keys(finalReport.itemsGained).length > 0;
+            const hasNotableGains = finalReport.totalTime > 300;
             if (hasNotableGains) {
                 data.offlineReport = finalReport;
 
