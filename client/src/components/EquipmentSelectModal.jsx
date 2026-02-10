@@ -18,7 +18,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
             if (slot.startsWith('rune_')) {
                 const parts = slot.split('_');
                 const targetAct = parts[1];
-                const targetEff = parts[2];
+                const targetEff = parts.slice(2).join('_');
 
                 if (item.type === 'RUNE') {
                     const itemMatch = itemId.match(/^T\d+_RUNE_(.+)_(\d+)STAR$/);

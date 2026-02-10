@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Sword, Shield, Zap, Heart } from 'lucide-react';
-import { resolveItem } from '@shared/items';
+import { resolveItem, calculateRuneBonus } from '@shared/items';
 
 const StatBreakdownModal = ({ statType, statId, value, stats, equipment, membership, onClose }) => {
     // Calculate breakdowns based on known formulas
@@ -17,18 +17,32 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
             const weapon = equipment.mainHand;
             const gearDmgBonus = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.dmgBonus || 0), 0);
 
+            const damageRuneBonus = Object.entries(equipment).reduce((acc, [slot, item]) => {
+                if (slot.startsWith('rune_') && item) {
+                    const parts = slot.split('_');
+                    const act = parts[1];
+                    const eff = parts[2];
+                    if (act === 'ATTACK' && eff === 'ATTACK') {
+                        const freshRune = resolveItem(item.id || item.item_id);
+                        return acc + calculateRuneBonus(freshRune.tier, freshRune.stars, eff);
+                    }
+                }
+                return acc;
+            }, 0);
+
             breakdown.push({ label: 'Base', value: 5 });
             if (str > 0) breakdown.push({ label: 'Strength Bonus', value: str, sub: '(Max 100, 0.2 per Skill Lvl)' });
             if (agi > 0) breakdown.push({ label: 'Agility Bonus', value: agi, sub: '(Max 100, 0.2 per Skill Lvl)' });
-            if (int > 0) breakdown.push({ label: 'Intelligence Bonus', value: int, sub: '(Max 100, ~0.166 per Skill Lvl)' });
+            if (int > 0) breakdown.push({ label: 'Intelligence Bonus', value: int.toFixed(2), sub: '(Max 100, ~0.166 per Skill Lvl)' });
 
             breakdown.push({ label: 'Gear Damage', value: gearDamage });
 
             const rawTotal = 5 + str + agi + int + gearDamage;
 
-            if (gearDmgBonus > 0) {
+            if (gearDmgBonus > 0 || damageRuneBonus > 0) {
                 breakdown.push({ label: 'Raw Total', value: rawTotal.toFixed(1), isTotal: true });
-                breakdown.push({ label: 'Bonus Modifier', value: `+${(gearDmgBonus * 100).toFixed(0)}%` });
+                if (gearDmgBonus > 0) breakdown.push({ label: 'Gear Modifier', value: `+${(gearDmgBonus * 100).toFixed(0)}%` });
+                if (damageRuneBonus > 0) breakdown.push({ label: 'Rune Modifier', value: `+${damageRuneBonus}%` });
             }
         } else if (statType === 'DEFENSE') {
             // Formula: GearDefense
@@ -154,6 +168,23 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                         const toolEff = freshTool?.stats?.efficiency || 0;
                         breakdown.push({ label: 'Tool Bonus', value: `+${toolEff}%` });
                     }
+
+                    // Rune Bonus
+                    Object.entries(equipment).forEach(([slot, item]) => {
+                        if (slot.startsWith('rune_') && item) {
+                            const parts = slot.split('_');
+                            const act = parts[1];
+                            const eff = parts[2];
+
+                            if (act === effId && eff === 'EFF') {
+                                const freshRune = resolveItem(item.id || item.item_id);
+                                if (freshRune) {
+                                    const bonus = calculateRuneBonus(freshRune.tier, freshRune.stars, eff);
+                                    breakdown.push({ label: 'Rune Bonus', value: `+${bonus}%`, sub: `${freshRune.name}` });
+                                }
+                            }
+                        }
+                    });
                 }
 
                 // Global Bonuses (Membership + Items)

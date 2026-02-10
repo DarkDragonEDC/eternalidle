@@ -463,13 +463,18 @@ export class InventoryManager {
             WOOD: 0, ORE: 0, HIDE: 0, FIBER: 0, FISH: 0, HERB: 0
         };
 
+        const combatRunes = {
+            ATTACK: 0,
+            SAVE_FOOD: 0
+        };
+
         // 5. Rune Bonuses
         Object.entries(equipment).forEach(([slot, item]) => {
             if (slot.startsWith('rune_') && item) {
                 // slot format: rune_{ACT}_{EFF}
                 const parts = slot.split('_');
-                const act = parts[1]; // WOOD, METAL, etc.
-                const eff = parts[2]; // XP, COPY, SPEED, EFF
+                const act = parts[1];
+                const eff = parts.slice(2).join('_');
 
                 const freshItem = this.resolveItem(item.id);
                 if (freshItem) {
@@ -483,6 +488,8 @@ export class InventoryManager {
                         if (autoRefine[act] !== undefined) autoRefine[act] += bonusValue;
                     } else if (eff === 'EFF') {
                         if (efficiency[act] !== undefined) efficiency[act] += bonusValue;
+                    } else if (eff === 'ATTACK' || eff === 'SAVE_FOOD') {
+                        if (combatRunes[eff] !== undefined) combatRunes[eff] += bonusValue;
                     }
                 }
             }
@@ -562,10 +569,12 @@ export class InventoryManager {
         return {
             str, agi, int,
             maxHP: parseFloat((100 + (str * 10) + gearHP).toFixed(1)),
-            damage: parseFloat(((5 + (str * 1) + (agi * 1) + (int * 1) + gearDamage) * (1 + gearDmgBonus)).toFixed(1)),
+            damage: parseFloat(((5 + (str * 1) + (agi * 1) + (int * 1) + gearDamage) * (1 + gearDmgBonus) * (1 + (combatRunes.ATTACK / 100))).toFixed(1)),
             defense: parseFloat(gearDefense.toFixed(1)),
             attackSpeed: finalAttackSpeed,
             dmgBonus: gearDmgBonus,
+            runeAttackBonus: combatRunes.ATTACK,
+            foodSaver: combatRunes.SAVE_FOOD,
             efficiency,
             duplication,
             autoRefine,

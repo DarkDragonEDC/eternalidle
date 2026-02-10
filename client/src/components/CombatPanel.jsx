@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { formatNumber, formatSilver } from '@utils/format';
-import { Sword, Shield, Skull, Coins, Zap, Clock, Trophy, ChevronRight, User, Terminal, Activity, TrendingUp, Star, Apple } from 'lucide-react';
+import { Sword, Shield, Skull, Coins, Zap, Clock, Trophy, ChevronRight, User, Terminal, Activity, TrendingUp, Star, Apple, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MONSTERS } from '@shared/monsters';
 import { resolveItem } from '@shared/items';
@@ -426,6 +426,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
         const xpGained = combat.sessionXp || 0;
         const silverGained = combat.sessionSilver || 0;
         const kills = combat.kills || 0;
+        const savedFoodCount = combat.savedFoodCount || 0;
 
         const dps = totalDmgDealt / duration;
         const xph = (xpGained / duration) * 3600;
@@ -727,41 +728,47 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                         <div className="glass-panel" style={{
                             padding: '8px',
                             display: 'grid',
-                            gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(2, 1fr)',
+                            gridTemplateColumns: isMobile ? 'repeat(6, 1fr)' : 'repeat(3, 1fr)',
                             gap: '5px',
                             flexShrink: 0
                         }}>
-                            <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)' }}>
+                            <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
                                 <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Activity size={10} /> DPS
                                 </div>
                                 <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4a90e2' }}>{dps.toFixed(1)}</div>
                             </div>
-                            <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)' }}>
+                            <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
                                 <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Trophy size={10} /> KILLS
                                 </div>
                                 <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4caf50' }}>{kills}</div>
                             </div>
-                            <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)' }}>
+                            <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
+                                <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <Heart size={10} /> FOOD SAVED
+                                </div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#ff4444' }}>{savedFoodCount}</div>
+                            </div>
+                            <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 3' : 'span 1' }}>
                                 <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <TrendingUp size={10} /> DAMAGE
                                 </div>
                                 <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{formatNumber(totalDmgDealt)}</div>
                             </div>
-                            <div style={{ background: 'var(--accent-soft)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-active)' }}>
+                            <div style={{ background: 'var(--accent-soft)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-active)', gridColumn: isMobile ? 'span 3' : 'span 1' }}>
                                 <div style={{ fontSize: '0.55rem', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Coins size={10} /> SILVER
                                 </div>
                                 <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--accent)' }}>{formatNumber(silverGained)}</div>
                             </div>
-                            <div style={{ background: 'rgba(76, 175, 80, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(76, 175, 80, 0.2)' }}>
+                            <div style={{ background: 'rgba(76, 175, 80, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(76, 175, 80, 0.2)', gridColumn: isMobile ? 'span 3' : 'span 1' }}>
                                 <div style={{ fontSize: '0.55rem', color: '#4caf50', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Star size={10} /> TOTAL XP
                                 </div>
                                 <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{formatNumber(xpGained)}</div>
                             </div>
-                            <div style={{ background: 'rgba(76, 175, 80, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(76, 175, 80, 0.2)' }}>
+                            <div style={{ background: 'rgba(76, 175, 80, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(76, 175, 80, 0.2)', gridColumn: isMobile ? 'span 3' : 'span 1' }}>
                                 <div style={{ fontSize: '0.55rem', color: '#4caf50', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Activity size={10} /> XP/H
                                 </div>

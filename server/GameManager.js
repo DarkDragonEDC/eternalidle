@@ -1439,7 +1439,11 @@ export class GameManager {
                         combatResult = roundResult;
 
                         // COMIDA ONLINE: Consumir comida ENTRE os rounds de uma Ãºnica tick para evitar morte por burst
-                        this.processFood(char);
+                        const foodRes = this.processFood(char);
+                        if (foodRes.savedCount > 0) {
+                            combat.savedFoodCount = (combat.savedFoodCount || 0) + foodRes.savedCount;
+                            stateChanged = true;
+                        }
                     }
 
                     // Advance the timer by exactly one interval
@@ -1540,9 +1544,6 @@ export class GameManager {
                     serverTime: Date.now()
                 }
             };
-            if (char.state.combat) {
-                // console.log(`[DEBUG-TICK] Sending Status. Kills: ${char.state.combat.kills}`);
-            }
             return returnObj;
         }
         return lastActivityResult || combatResult;
@@ -1638,8 +1639,12 @@ export class GameManager {
         const maxHp = stats.maxHP;
         let currentHp = inCombat ? (char.state.combat.playerHealth || 0) : (char.state.health || 0);
         let eatenCount = 0;
+        let savedCount = 0;
         let totalHealed = 0;
         const MAX_EATS_PER_TICK = 50;
+
+        const foodSaver = stats.foodSaver || 0;
+
 
         // Eat while HP is missing and we haven't hit the massive limit
         // STRICT RULE: Only eat if the heal fits entirely (No Waste)
@@ -1653,7 +1658,15 @@ export class GameManager {
                 if (actualHeal <= 0 && hpPercent >= 40) break; // Safety break
 
                 currentHp = currentHp + actualHeal;
-                food.amount--;
+
+                // Roll for food saving
+                const savedFood = foodSaver > 0 && Math.random() * 100 < foodSaver;
+                if (!savedFood) {
+                    food.amount--;
+                } else {
+                    savedCount++;
+                }
+
                 eatenCount++;
                 totalHealed += actualHeal;
 
@@ -1671,7 +1684,7 @@ export class GameManager {
             delete char.state.equipment.food;
         }
 
-        return { used: eatenCount > 0, amount: totalHealed, eaten: eatenCount };
+        return { used: eatenCount > 0, amount: totalHealed, eaten: eatenCount, savedCount };
     }
 
     async getLeaderboard(type = 'COMBAT', requesterId = null, mode = 'NORMAL') {
@@ -1733,7 +1746,6 @@ export class GameManager {
         const sortKey = type || 'COMBAT';
 
         const getVal = (char, key) => {
-            if (key === 'SILVER') return char.state.silver || 0;
             if (key === 'LEVEL') {
                 // Total Level
                 return Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.level || 1), 0);

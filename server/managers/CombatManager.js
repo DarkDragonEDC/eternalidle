@@ -54,6 +54,7 @@ export class CombatManager {
             sessionXp: 0,
             sessionSilver: 0,
             sessionLoot: {},
+            savedFoodCount: 0,
             started_at: new Date().toISOString()
         };
         char.last_saved = new Date().toISOString();
@@ -97,6 +98,7 @@ export class CombatManager {
         if (typeof combat.sessionSilver === 'undefined') combat.sessionSilver = 0;
         if (typeof combat.totalPlayerDmg === 'undefined') combat.totalPlayerDmg = 0;
         if (typeof combat.totalMobDmg === 'undefined') combat.totalMobDmg = 0;
+        if (typeof combat.savedFoodCount === 'undefined') combat.savedFoodCount = 0;
 
         const playerStats = this.gameManager.inventoryManager.calculateStats(char);
         const playerDmg = playerStats.damage;

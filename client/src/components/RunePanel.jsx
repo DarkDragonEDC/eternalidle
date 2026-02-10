@@ -1582,7 +1582,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                             wordBreak: 'break-word'
                                         }}>
                                             {item.id && item.id.includes('RUNE_') && !item.id.includes('SHARD')
-                                                ? (item.name || 'Rune').replace(/^T\d+\s/, '').replace(/\sRune\sof\s/i, ' ')
+                                                ? (item.name || 'Rune').replace(/^T\d+\s+/i, '').replace(/\s+Rune\s+of\s+/i, ' ').trim()
                                                 : (item.name || 'Unknown Item')}
                                         </div>
                                     </motion.div>

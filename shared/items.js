@@ -931,9 +931,14 @@ export const calculateRuneBonus = (tier, stars, effType = null) => {
     const starBonusMap = { 1: 1, 2: 3, 3: 5 }; // Max 3 stars
     let bonus = (tier - 1) * 5 + (starBonusMap[stars] || stars);
 
-    // SPEED (Auto-Refine) runes give half bonus (max ~25% instead of ~50%)
-    if (effType === 'SPEED') {
+    // SPEED (Auto-Refine) and ATTACK (Combat) runes give half bonus (max ~25% instead of ~50%)
+    if (effType === 'SPEED' || effType === 'ATTACK') {
         bonus = Math.max(1, Math.floor(bonus / 2));
+    }
+
+    // Food Saving runes give 30% bonus (max ~15% instead of ~50%)
+    if (effType === 'SAVE_FOOD') {
+        bonus = Math.max(1, Math.floor(bonus * 0.3));
     }
 
     return bonus;
@@ -943,7 +948,8 @@ export const calculateRuneBonus = (tier, stars, effType = null) => {
 export const RUNE_GATHER_ACTIVITIES = ['WOOD', 'ORE', 'HIDE', 'FIBER', 'HERB', 'FISH'];
 export const RUNE_REFINE_ACTIVITIES = ['METAL', 'PLANK', 'LEATHER', 'CLOTH', 'EXTRACT'];
 export const RUNE_CRAFT_ACTIVITIES = ['WARRIOR', 'HUNTER', 'MAGE', 'TOOLS', 'COOKING', 'ALCHEMY'];
-const RUNE_EFFECTS = ['XP', 'COPY', 'SPEED', 'EFF'];
+export const RUNE_COMBAT_ACTIVITIES = ['ATTACK'];
+const RUNE_EFFECTS = ['XP', 'COPY', 'SPEED', 'EFF', 'BOOST'];
 
 // Export for server usage
 export const ALL_RUNE_TYPES = [];
@@ -978,6 +984,14 @@ RUNE_CRAFT_ACTIVITIES.forEach(act => {
     });
 });
 
+RUNE_COMBAT_ACTIVITIES.forEach(act => {
+    ['ATTACK', 'SAVE_FOOD'].forEach(eff => {
+        const type = `${act}_${eff}`;
+        ALL_RUNE_TYPES.push(type);
+        RUNES_BY_CATEGORY.COMBAT.push(type);
+    });
+});
+
 for (const t of TIERS) {
     // Rune Shards (All Tiers)
     ITEMS.SPECIAL.RUNE_SHARD[`T${t}_SHARD`] = {
@@ -1002,7 +1016,9 @@ for (const t of TIERS) {
 
     // Runes (Hidden from main inventory)
     ALL_RUNE_TYPES.forEach(typeKey => {
-        const [act, eff] = typeKey.split('_');
+        const parts = typeKey.split('_');
+        const act = parts[0];
+        const eff = parts.slice(1).join('_');
 
         for (let s = 1; s <= 3; s++) {
             const id = `T${t}_RUNE_${act}_${eff}_${s}STAR`;
@@ -1011,10 +1027,11 @@ for (const t of TIERS) {
             const ACT_NAME_MAP = {
                 WOOD: 'Woodcutting', ORE: 'Mining', HIDE: 'Skinning', FIBER: 'Fiber', FISH: 'Fishing', HERB: 'Herbalism',
                 METAL: 'Metal', PLANK: 'Plank', LEATHER: 'Leather', CLOTH: 'Cloth', EXTRACT: 'Extract',
-                WARRIOR: 'Warrior', HUNTER: 'Hunter', MAGE: 'Mage', TOOLS: 'Tools', COOKING: 'Cooking', ALCHEMY: 'Alchemy'
+                WARRIOR: 'Warrior', HUNTER: 'Hunter', MAGE: 'Mage', TOOLS: 'Tools', COOKING: 'Cooking', ALCHEMY: 'Alchemy',
+                ATTACK: 'Combat'
             };
-            const EFF_NAME_MAP = { XP: 'XP', COPY: 'Duplication', SPEED: 'Auto-Refine', EFF: 'Efficiency' };
-            const EFF_LABEL_MAP = { XP: 'Experience', COPY: 'Duplication', SPEED: 'Auto-Refine Chance', EFF: 'Speed' };
+            const EFF_NAME_MAP = { XP: 'XP', COPY: 'Duplication', SPEED: 'Auto-Refine', EFF: 'Efficiency', ATTACK: 'Attack', SAVE_FOOD: 'Food Saving' };
+            const EFF_LABEL_MAP = { XP: 'Experience', COPY: 'Duplication', SPEED: 'Auto-Refine Chance', EFF: 'Speed', ATTACK: 'Damage', SAVE_FOOD: 'Conservation' };
 
             const actName = ACT_NAME_MAP[act] || act;
             const effName = EFF_NAME_MAP[eff] || eff;
@@ -1025,8 +1042,10 @@ for (const t of TIERS) {
             let description = '';
             if (eff === 'SPEED') {
                 description = `Chance to automatically refine gathered materials by ${bonusValue}%.`;
-            } else if (eff === 'EFF') {
-                description = `Increases speed by ${bonusValue}%.`;
+            } else if (eff === 'EFF' || eff === 'ATTACK') {
+                description = `Increases ${eff === 'EFF' ? 'speed' : 'damage'} by ${bonusValue}%.`;
+            } else if (eff === 'SAVE_FOOD') {
+                description = `Chance to consume no food when healing by ${bonusValue}%.`;
             } else {
                 description = `Increases ${actName} ${effectLabel} by ${bonusValue}%.`;
             }

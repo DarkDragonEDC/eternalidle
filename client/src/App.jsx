@@ -499,18 +499,14 @@ function App() {
 
     newSocket.on('trade_invite', (trade) => {
       setTradeInvites(prev => [...prev, trade]);
-      addNotification({
-        type: 'SYSTEM',
-        message: `New trade request received!`
-      });
-      setShowSocialModal(false); // Close search/invite panel so user sees the notification
     });
 
     newSocket.on('trade_update', (trade) => {
       if (trade.status === 'COMPLETED' || trade.status === 'CANCELLED') {
         setActiveTrade(null);
       } else {
-        setActiveTrade(prev => (prev?.id === trade.id || !prev) ? trade : prev);
+        // Only update if it's the current active trade. Do not auto-open if none is active.
+        setActiveTrade(prev => (prev?.id === trade.id) ? trade : prev);
       }
     });
 

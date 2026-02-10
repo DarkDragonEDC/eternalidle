@@ -125,6 +125,25 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         return { str, agi, int };
     }, [skills, equipment]);
 
+    const activeRuneBuffs = useMemo(() => {
+        const summary = {};
+        Object.entries(equipment).forEach(([slot, item]) => {
+            if (slot.startsWith('rune_') && item) {
+                const parts = slot.split('_');
+                const act = parts[1];
+                const eff = parts.slice(2).join('_');
+
+                const freshItem = resolveItem(item.id || item.item_id);
+                if (freshItem) {
+                    const bonusValue = calculateRuneBonus(freshItem.tier, freshItem.stars, eff);
+                    if (!summary[act]) summary[act] = {};
+                    summary[act][eff] = (summary[act][eff] || 0) + bonusValue;
+                }
+            }
+        });
+        return summary;
+    }, [equipment]);
+
     const stats = useMemo(() => {
         // Fallback para cálculo local (útil para updates otimistas antes do servidor responder)
         const gearDamage = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.damage || 0), 0);
@@ -167,57 +186,45 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
             globalEff += 10; // Add 10% (or 10 points, assuming 10 means 10%)
         }
 
+        const efficiency = {
+            WOOD: (skills.LUMBERJACK?.level || 1) * 0.2 + getToolEff('tool_axe') + globalEff,
+            ORE: (skills.ORE_MINER?.level || 1) * 0.2 + getToolEff('tool_pickaxe') + globalEff,
+            HIDE: (skills.ANIMAL_SKINNER?.level || 1) * 0.2 + getToolEff('tool_knife') + globalEff,
+            FIBER: (skills.FIBER_HARVESTER?.level || 1) * 0.2 + getToolEff('tool_sickle') + globalEff,
+            HERB: (skills.HERBALISM?.level || 1) * 0.2 + globalEff, // No tool for now? Or maybe sickle?
+            FISH: (skills.FISHING?.level || 1) * 0.2 + getToolEff('tool_rod') + globalEff,
+            PLANK: (skills.PLANK_REFINER?.level || 1) * 0.2 + globalEff,
+            METAL: (skills.METAL_BAR_REFINER?.level || 1) * 0.2 + globalEff,
+            LEATHER: (skills.LEATHER_REFINER?.level || 1) * 0.2 + globalEff,
+            CLOTH: (skills.CLOTH_REFINER?.level || 1) * 0.2 + globalEff,
+            EXTRACT: (skills.DISTILLATION?.level || 1) * 0.2 + globalEff,
+            WARRIOR: (skills.WARRIOR_CRAFTER?.level || 1) * 0.2 + globalEff,
+            HUNTER: (skills.HUNTER_CRAFTER?.level || 1) * 0.2 + globalEff,
+            MAGE: (skills.MAGE_CRAFTER?.level || 1) * 0.2 + globalEff,
+            ALCHEMY: (skills.ALCHEMY?.level || 1) * 0.2 + globalEff,
+            TOOLS: (skills.TOOL_CRAFTER?.level || 1) * 0.2 + globalEff,
+            COOKING: (skills.COOKING?.level || 1) * 0.2 + globalEff,
+            GLOBAL: globalEff
+        };
+
+        const damageRuneBonus = activeRuneBuffs.ATTACK?.ATTACK || 0;
+        const foodSaver = activeRuneBuffs.ATTACK?.SAVE_FOOD || 0;
+
         return {
             hp: health !== undefined ? health : (100 + (calculatedStats.str * 10) + gearHP),
             maxHp: 100 + (calculatedStats.str * 10) + gearHP,
-            damage: Math.floor((5 + (calculatedStats.str * 1) + (calculatedStats.agi * 1) + (calculatedStats.int * 1) + gearDamage) * (1 + gearDmgBonus)),
+            damage: Math.floor((5 + (calculatedStats.str * 1) + (calculatedStats.agi * 1) + (calculatedStats.int * 1) + gearDamage) * (1 + gearDmgBonus) * (1 + (damageRuneBonus / 100))),
             defense: gearDefense,
             attackSpeed: finalAttackSpeed,
             str: calculatedStats.str,
             agi: calculatedStats.agi,
             int: calculatedStats.int,
-            efficiency: {
-                WOOD: (skills.LUMBERJACK?.level || 1) * 0.2 + getToolEff('tool_axe') + globalEff,
-                ORE: (skills.ORE_MINER?.level || 1) * 0.2 + getToolEff('tool_pickaxe') + globalEff,
-                HIDE: (skills.ANIMAL_SKINNER?.level || 1) * 0.2 + getToolEff('tool_knife') + globalEff,
-                FIBER: (skills.FIBER_HARVESTER?.level || 1) * 0.2 + getToolEff('tool_sickle') + globalEff,
-                HERB: (skills.HERBALISM?.level || 1) * 0.2 + globalEff, // No tool for now? Or maybe sickle?
-                FISH: (skills.FISHING?.level || 1) * 0.2 + getToolEff('tool_rod') + globalEff,
-                PLANK: (skills.PLANK_REFINER?.level || 1) * 0.2 + globalEff,
-                METAL: (skills.METAL_BAR_REFINER?.level || 1) * 0.2 + globalEff,
-                LEATHER: (skills.LEATHER_REFINER?.level || 1) * 0.2 + globalEff,
-                CLOTH: (skills.CLOTH_REFINER?.level || 1) * 0.2 + globalEff,
-                EXTRACT: (skills.DISTILLATION?.level || 1) * 0.2 + globalEff,
-                WARRIOR: (skills.WARRIOR_CRAFTER?.level || 1) * 0.2 + globalEff,
-                HUNTER: (skills.HUNTER_CRAFTER?.level || 1) * 0.2 + globalEff,
-                MAGE: (skills.MAGE_CRAFTER?.level || 1) * 0.2 + globalEff,
-                ALCHEMY: (skills.ALCHEMY?.level || 1) * 0.2 + globalEff,
-                TOOLS: (skills.TOOL_CRAFTER?.level || 1) * 0.2 + globalEff,
-                COOKING: (skills.COOKING?.level || 1) * 0.2 + globalEff,
-                GLOBAL: globalEff
-            },
+            efficiency,
+            runeAttackBonus: damageRuneBonus,
+            foodSaver,
             silverMultiplier: 1.0 + (calculatedStats.int * 0.005) + (isPremium ? 0.10 : 0)
         };
-    }, [gameState?.calculatedStats, calculatedStats, health, skills, equipment, isPremium]);
-
-    const activeRuneBuffs = useMemo(() => {
-        const summary = {};
-        Object.entries(equipment).forEach(([slot, item]) => {
-            if (slot.startsWith('rune_') && item) {
-                const parts = slot.split('_');
-                const act = parts[1];
-                const eff = parts[2];
-
-                const freshItem = resolveItem(item.id || item.item_id);
-                if (freshItem) {
-                    const bonusValue = calculateRuneBonus(freshItem.tier, freshItem.stars, eff);
-                    if (!summary[act]) summary[act] = {};
-                    summary[act][eff] = (summary[act][eff] || 0) + bonusValue;
-                }
-            }
-        });
-        return summary;
-    }, [equipment]);
+    }, [gameState?.calculatedStats, calculatedStats, health, skills, equipment, isPremium, activeRuneBuffs]);
 
     const avgIP = useMemo(() => {
         const combatSlots = ['helmet', 'chest', 'boots', 'gloves', 'cape', 'mainHand', 'offHand'];
@@ -1209,6 +1216,78 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                         )} />
                                     </div>
                                 </>
+                            ) : activeRuneTab === 'COMBAT' ? (
+                                <>
+                                    <h3 style={{
+                                        color: 'var(--accent)',
+                                        fontSize: '1.2rem',
+                                        fontWeight: '900',
+                                        letterSpacing: '2px',
+                                        textTransform: 'uppercase',
+                                        marginBottom: '25px',
+                                        textAlign: 'center',
+                                        borderBottom: '1px solid var(--border)',
+                                        paddingBottom: '10px'
+                                    }}>
+                                        Combat Runes
+                                    </h3>
+
+                                    <div style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '30px'
+                                    }}>
+                                        <div style={{
+                                            background: 'rgba(255,255,255,0.03)',
+                                            borderRadius: '16px',
+                                            padding: '20px',
+                                            border: '1px solid var(--border)'
+                                        }}>
+                                            <div style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '10px',
+                                                marginBottom: '15px',
+                                                color: '#888',
+                                                fontSize: '0.75rem',
+                                                fontWeight: 'bold',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '1px'
+                                            }}>
+                                                <Sword size={16} /> Attack
+                                            </div>
+                                            <div style={{
+                                                display: 'grid',
+                                                gridTemplateColumns: 'repeat(3, 1fr)',
+                                                gap: '15px'
+                                            }}>
+                                                <EquipmentSlot
+                                                    slot={`rune_ATTACK_ATTACK`}
+                                                    icon={<Sword size={20} />}
+                                                    label="DAMAGE"
+                                                    item={equipment[`rune_ATTACK_ATTACK`]}
+                                                    onClick={() => setSelectedSlot(`rune_ATTACK_ATTACK`)}
+                                                    onShowInfo={onShowInfo}
+                                                />
+                                                <EquipmentSlot
+                                                    slot={`rune_ATTACK_SAVE_FOOD`}
+                                                    icon={<Heart size={20} />}
+                                                    label="CONSERV."
+                                                    item={equipment[`rune_ATTACK_SAVE_FOOD`]}
+                                                    onClick={() => setSelectedSlot(`rune_ATTACK_SAVE_FOOD`)}
+                                                    onShowInfo={onShowInfo}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Rune Buff Summary */}
+                                        <RuneBuffSummary activeRuneBuffs={Object.fromEntries(
+                                            Object.entries(activeRuneBuffs).filter(([act]) =>
+                                                ['ATTACK'].includes(act)
+                                            )
+                                        )} />
+                                    </div>
+                                </>
                             ) : (
                                 <div style={{
                                     display: 'flex',
@@ -1400,7 +1479,8 @@ const RuneBuffSummary = ({ activeRuneBuffs }) => {
                                 .replace('MAGE', 'Mage Gear')
                                 .replace('TOOLS', 'Tools')
                                 .replace('COOKING', 'Cooking')
-                                .replace('ALCHEMY', 'Alchemy')}
+                                .replace('ALCHEMY', 'Alchemy')
+                                .replace('ATTACK', 'Combat')}
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                             {buffs.XP && (
@@ -1425,6 +1505,18 @@ const RuneBuffSummary = ({ activeRuneBuffs }) => {
                                 <div style={{ fontSize: '0.75rem', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
                                     <span style={{ color: '#aaa' }}>Efficiency:</span>
                                     <span style={{ color: '#2196f3', fontWeight: 'bold' }}>+{buffs.EFF}%</span>
+                                </div>
+                            )}
+                            {buffs.ATTACK && (
+                                <div style={{ fontSize: '0.75rem', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ color: '#aaa' }}>Attack:</span>
+                                    <span style={{ color: '#ff4444', fontWeight: 'bold' }}>+{buffs.ATTACK}%</span>
+                                </div>
+                            )}
+                            {buffs.SAVE_FOOD && (
+                                <div style={{ fontSize: '0.75rem', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ color: '#aaa' }}>Food Saving:</span>
+                                    <span style={{ color: '#ff4444', fontWeight: 'bold' }}>+{buffs.SAVE_FOOD}%</span>
                                 </div>
                             )}
                         </div>

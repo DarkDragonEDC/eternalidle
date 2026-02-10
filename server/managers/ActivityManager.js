@@ -299,6 +299,7 @@ export class ActivityManager {
             leveledUp,
             itemGained: item.id,
             amountGained,
+            isDuplication,
             skillKey,
             xpGained: xpAmount
         };
@@ -414,6 +415,7 @@ export class ActivityManager {
             leveledUp,
             itemGained: finalItemId,
             amountGained,
+            isDuplication,
             skillKey,
             xpGained: xpAmount
         };

@@ -7,8 +7,7 @@ const CATEGORIES = {
     GENERAL: {
         label: 'GENERAL',
         options: [
-            { key: 'LEVEL', label: 'Total Level' },
-            { key: 'SILVER', label: 'Total Silver' }
+            { key: 'LEVEL', label: 'Total Level' }
         ]
     },
     COMBAT: {
@@ -101,10 +100,7 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
             let subValue = 0;
             let label = 'LEVEL';
 
-            if (subCategory === 'SILVER') {
-                value = state.silver || 0;
-                label = 'SILVER';
-            } else if (subCategory === 'LEVEL') {
+            if (subCategory === 'LEVEL') {
                 const skills = state.skills || {};
                 value = Object.values(skills).reduce((acc, s) => acc + (s.level || 1), 0);
                 subValue = Object.values(skills).reduce((acc, s) => acc + (s.xp || 0), 0);
@@ -341,7 +337,7 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
                                     {/* Valor */}
                                     <div style={{ textAlign: 'right' }}>
                                         <div style={{ fontSize: '1.1rem', fontWeight: '900', color: index === 0 ? 'var(--accent)' : 'var(--text-main)' }}>
-                                            {subCategory === 'SILVER' ? formatSilver(char.value) : formatNumber(char.value)}
+                                            {formatNumber(char.value)}
                                         </div>
                                         <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: 'bold' }}>
                                             {char.label}
@@ -401,11 +397,10 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
                                                 {(() => {
                                                     const char = userRankData.character;
                                                     let val = 0;
-                                                    if (subCategory === 'SILVER') val = char.state.silver || 0;
-                                                    else if (subCategory === 'LEVEL') val = Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.level || 1), 0);
+                                                    if (subCategory === 'LEVEL') val = Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.level || 1), 0);
                                                     else val = (char.state.skills?.[subCategory]?.level || 1);
 
-                                                    return subCategory === 'SILVER' ? formatSilver(val) : formatNumber(val);
+                                                    return formatNumber(val);
                                                 })()}
                                             </div>
                                         </div>
