@@ -259,7 +259,9 @@ export class GameManager {
                 totalTime: 0,
                 itemsGained: {},
                 xpGained: {},
-                combat: null
+                combat: null,
+                duplicationCount: 0,
+                autoRefineCount: 0
             };
 
             if (!data.state.skills) {
@@ -385,6 +387,9 @@ export class GameManager {
                                     for (const [skill, qty] of Object.entries(activityReport.xpGained)) {
                                         finalReport.xpGained[skill] = (finalReport.xpGained[skill] || 0) + qty;
                                     }
+
+                                    finalReport.duplicationCount = (finalReport.duplicationCount || 0) + (activityReport.duplicationCount || 0);
+                                    finalReport.autoRefineCount = (finalReport.autoRefineCount || 0) + (activityReport.autoRefineCount || 0);
 
                                     if (activityReport.stopReason) {
                                         finalReport.stopReason = activityReport.stopReason;
@@ -533,7 +538,9 @@ export class GameManager {
                     totalTime: finalReport.totalTime,
                     elapsedTime: elapsedSeconds,
                     kills: finalReport.combat?.kills || 0,
-                    silverGained: finalReport.combat?.silverGained || 0
+                    silverGained: finalReport.combat?.silverGained || 0,
+                    duplicationCount: finalReport.duplicationCount,
+                    autoRefineCount: finalReport.autoRefineCount
                 });
             }
 
@@ -652,7 +659,8 @@ export class GameManager {
                 info: infoToSave,
                 combat: combatToSave,
                 dungeon: dungeonToSave,
-                state: finalPrunedState,
+                // Fix for double nesting: ensure we don't save { state: { ... } } into the state column
+                state: (finalPrunedState && finalPrunedState.state) ? finalPrunedState.state : finalPrunedState,
                 current_activity: char.current_activity,
                 activity_started_at: char.activity_started_at,
                 last_saved: saveTime
@@ -739,6 +747,8 @@ export class GameManager {
         let leveledUp = false;
         const itemsGained = {};
         const xpGained = {};
+        let duplicationCount = 0;
+        let autoRefineCount = 0;
 
         let stopReason = null;
 
@@ -756,6 +766,9 @@ export class GameManager {
                 if (result.itemGained) {
                     itemsGained[result.itemGained] = (itemsGained[result.itemGained] || 0) + (result.amountGained || 1);
                 }
+                if (result.refinedItemGained) {
+                    itemsGained[result.refinedItemGained] = (itemsGained[result.refinedItemGained] || 0) + 1;
+                }
                 if (result.xpGained) {
                     const stats = this.inventoryManager.calculateStats(char);
                     const globalBonus = stats.globals?.xpYield || 0;
@@ -764,6 +777,9 @@ export class GameManager {
                     const finalXp = Math.floor(result.xpGained * (1 + (globalBonus + catBonus) / 100));
                     xpGained[result.skillKey] = (xpGained[result.skillKey] || 0) + finalXp;
                 }
+
+                if (result.isDuplication) duplicationCount++;
+                if (result.isAutoRefine || result.refinedItemGained) autoRefineCount++;
             } else {
                 stopReason = result?.error || "Stopped Early";
                 break;
@@ -786,7 +802,7 @@ export class GameManager {
 
             const invAfter = char.state.inventory[item.id] || 0;
             console.log(`[BATCH] Finished ${processed}/${quantity} ${type}. Inv after: ${invAfter}`);
-            return { processed, leveledUp, itemsGained, xpGained, totalTime: processed * timePerAction, stopReason };
+            return { processed, leveledUp, itemsGained, xpGained, totalTime: processed * timePerAction, stopReason, duplicationCount, autoRefineCount };
         }
 
         return { processed: 0, leveledUp: false, itemsGained: {}, xpGained: {}, totalTime: 0, stopReason };
@@ -1296,6 +1312,9 @@ export class GameManager {
                             if (result.itemGained) {
                                 activity.sessionItems[result.itemGained] = (activity.sessionItems[result.itemGained] || 0) + (result.amountGained || 1);
                             }
+                            if (result.refinedItemGained) {
+                                activity.sessionItems[result.refinedItemGained] = (activity.sessionItems[result.refinedItemGained] || 0) + 1;
+                            }
                             if (result.xpGained) {
                                 const stats = this.inventoryManager.calculateStats(char);
                                 const xpBonus = stats.globals?.xpYield || 0;
@@ -1305,8 +1324,13 @@ export class GameManager {
                         }
 
                         const newActionsRemaining = actions_remaining - 1;
+                        // activity is already declared above
                         if (result.isDuplication) {
+                            if (activity) activity.duplicationCount = (activity.duplicationCount || 0) + 1;
                             console.log(`[ACTIVITY-LOG] Duplication Hit! User=${char.name}, Item=${result.itemGained}, RemBefore=${actions_remaining}, RemAfter=${newActionsRemaining}`);
+                        }
+                        if (result.isAutoRefine || result.refinedItemGained) {
+                            if (activity) activity.autoRefineCount = (activity.autoRefineCount || 0) + 1;
                         }
 
                         activityFinished = newActionsRemaining <= 0;
@@ -1316,8 +1340,10 @@ export class GameManager {
                             this.addActionSummaryNotification(char, activity.type, {
                                 itemsGained: activity.sessionItems,
                                 xpGained: { [result.skillKey]: activity.sessionXp },
-                                totalTime: elapsedSeconds
-                            });
+                                totalTime: elapsedSeconds,
+                                duplicationCount: activity.duplicationCount,
+                                autoRefineCount: activity.autoRefineCount
+                            }, 'Summary');
 
                             char.current_activity = null;
                             char.activity_started_at = null;
@@ -1333,8 +1359,10 @@ export class GameManager {
                             this.addActionSummaryNotification(char, activity.type, {
                                 itemsGained: activity.sessionItems,
                                 xpGained: { [activity.type]: activity.sessionXp }, // Simplified key
-                                totalTime: elapsedSeconds
-                            });
+                                totalTime: elapsedSeconds,
+                                duplicationCount: activity.duplicationCount,
+                                autoRefineCount: activity.autoRefineCount
+                            }, 'Stopped');
                         }
                         char.current_activity = null;
                         char.activity_started_at = null;
@@ -1540,11 +1568,11 @@ export class GameManager {
         }
     }
 
-    addActionSummaryNotification(char, actionType, stats) {
+    addActionSummaryNotification(char, actionType, stats, itemSuffix = 'Summary') {
         // console.log(`[DEBUG] addActionSummaryNotification for ${char.name}. Type: ${actionType}`);
         // stats can be offlineReport or a simple gains object
         // { itemsGained: {}, xpGained: {}, totalTime: seconds, kills?: number, silverGained?: number, elapsedTime?: number }
-        const { itemsGained, xpGained, totalTime, kills, silverGained, elapsedTime } = stats;
+        const { itemsGained, xpGained, totalTime, kills, silverGained, elapsedTime, duplicationCount, autoRefineCount } = stats;
 
         let timeVal = totalTime || elapsedTime || 0;
         let timeStr = "";
@@ -1552,27 +1580,30 @@ export class GameManager {
         else if (timeVal < 3600) timeStr = `${Math.floor(timeVal / 60)}m ${Math.floor(timeVal % 60)}s`;
         else timeStr = `${Math.floor(timeVal / 3600)}h ${Math.floor((timeVal % 3600) / 60)}m`;
 
-        let message = `ðŸ“œ ${actionType} Summary\n`;
-        message += `â±ï¸ ${timeStr}`;
+        let message = `📜 ${actionType} ${itemSuffix}\n`;
+        message += `⌛ ${timeStr}`;
 
-        if (kills) message += `\nðŸ’€ ${kills} Kills`;
+        if (duplicationCount) message += `\n🍀 x${duplicationCount} Duplication`;
+        if (autoRefineCount) message += `\n⚒️ x${autoRefineCount} Auto-Refine`;
+
+        if (kills) message += `\n💀 ${kills} Kills`;
 
         for (const [skill, xp] of Object.entries(xpGained || {})) {
-            if (xp > 0) message += `\nâœ¨ +${xp} ${skill.replace(/_/g, ' ')}`;
+            if (xp > 0) message += `\n✨ +${xp} ${skill.replace(/_/g, ' ')}`;
         }
 
-        if (silverGained) message += `\nðŸ’° +${silverGained.toLocaleString()} Silver`;
+        if (silverGained) message += `\n💰 +${silverGained.toLocaleString()} Silver`;
 
         const itemEntries = Object.entries(itemsGained || {});
         if (itemEntries.length > 0) {
-            message += `\nðŸ“¦ Loot:`;
+            message += `\n📦 Loot:`;
             for (const [id, qty] of itemEntries) {
-                message += `\n â€¢ ${qty}x ${id.replace(/_/g, ' ')}`;
+                message += `\n • ${qty}x ${id.replace(/_/g, ' ')}`;
             }
         }
 
         // console.log(`[NOTIF] Adding system notif for ${char.name}: ${message}`);
-        // this.addNotification(char, 'SYSTEM', message);
+        this.addNotification(char, 'SYSTEM', message);
     }
 
     processFood(char, nowOverride = null) {

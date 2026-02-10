@@ -40,7 +40,7 @@ const BottomNav = ({ gameState, activeTab, setActiveTab, onNavigate, canSpin, ha
             bottom: 0,
             left: 0,
             width: '100%',
-            background: 'var(--panel-bg)',
+            background: '#161b22', // Solid background to remove transparency
             borderTop: '1px solid var(--border)',
             display: 'flex',
             justifyContent: 'space-around',

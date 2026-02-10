@@ -166,6 +166,12 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                         const isIronmanSlot = index === 1;
                         let char = isIronmanSlot ? ironmanChar : normalChar;
 
+                        // Normalize state (Handle double nesting bug: state.state)
+                        if (char && char.state && char.state.state) {
+                            char = { ...char, state: char.state.state };
+                        }
+
+
                         // If this slot is empty but we have an orphaned character, show it here?
                         // Or only show it if it's the only one left and its slot is "taken" (unlikely for 2 chars)
                         // Actually, if we have two of one mode, show the second one in the 'wrong' slot with a warning

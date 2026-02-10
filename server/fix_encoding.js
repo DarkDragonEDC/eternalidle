@@ -1,0 +1,12 @@
+const fs = require('fs');
+const path = 'c:/Users/Cliente/Desktop/projetinho/eternalidle/server/GameManager.js';
+let content = fs.readFileSync(path, 'utf8');
+content = content.replace(/â ±ï¸ /g, '⌛');
+content = content.replace(/ðŸ’€/g, '💀');
+content = content.replace(/âœ¨/g, '✨');
+content = content.replace(/ðŸ’°/g, '💰');
+content = content.replace(/ðŸ“¦/g, '📦');
+content = content.replace(/â€¢/g, '•');
+content = content.replace(/ðŸ“œ/g, '📜');
+fs.writeFileSync(path, content, 'utf8');
+console.log('Encoding fixed.');

@@ -16,7 +16,39 @@ export const characterRoutes = (gameManager) => {
                 .order('created_at', { ascending: true });
 
             if (error) throw error;
-            res.json(data);
+
+            // Rehydrate state for frontend compatibility (matches GameManager logic)
+            const processedData = data.map(char => {
+                if (!char.state) char.state = {};
+
+                // Normalize state (Handle potential double nesting)
+                if (char.state.state) {
+                    char.state = char.state.state;
+                }
+
+                // Inject separate columns back into state
+                if (char.inventory) char.state.inventory = char.inventory;
+                if (char.skills) char.state.skills = char.skills;
+                if (char.equipment) char.state.equipment = char.equipment;
+                if (char.combat) char.state.combat = char.combat;
+                if (char.dungeon) char.state.dungeon = char.dungeon;
+
+                if (char.info) {
+                    if (char.info.stats) char.state.stats = char.info.stats;
+                    if (char.info.health !== undefined) char.state.health = char.info.health;
+                    if (char.info.silver !== undefined) char.state.silver = char.info.silver;
+                    if (char.info.crowns !== undefined) char.state.crowns = char.info.crowns;
+                    if (char.info.membership) char.state.membership = char.info.membership;
+                    if (char.info.active_buffs) char.state.active_buffs = char.info.active_buffs;
+                    if (char.info.inventorySlots !== undefined) char.state.inventorySlots = char.info.inventorySlots;
+                    if (char.info.extraInventorySlots !== undefined) char.state.extraInventorySlots = char.info.extraInventorySlots;
+                    if (char.info.unlockedTitles) char.state.unlockedTitles = char.info.unlockedTitles;
+                }
+
+                return char;
+            });
+
+            res.json(processedData);
         } catch (err) {
             console.error('Error fetching characters:', err);
             res.status(500).json({ error: err.message });

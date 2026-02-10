@@ -84,7 +84,9 @@ export class ActivityManager {
             next_action_at: Date.now() + (timePerAction * 1000),
             req: item.req || null,
             sessionItems: {},
-            sessionXp: 0
+            sessionXp: 0,
+            duplicationCount: 0,
+            autoRefineCount: 0
         };
         char.activity_started_at = new Date().toISOString();
         char.last_saved = new Date().toISOString();
@@ -110,8 +112,10 @@ export class ActivityManager {
             this.gameManager.addActionSummaryNotification(char, activity.type, {
                 itemsGained: activity.sessionItems,
                 xpGained: { [activity.type]: activity.sessionXp },
-                totalTime: elapsedSeconds
-            });
+                totalTime: elapsedSeconds,
+                duplicationCount: activity.duplicationCount,
+                autoRefineCount: activity.autoRefineCount
+            }, 'Stopped');
         }
 
         // Update Character Object (Cache)

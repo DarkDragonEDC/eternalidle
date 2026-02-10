@@ -168,7 +168,7 @@ export const SkillsOverview = ({ onNavigate, gameState }) => {
                         }}>
                             <div style={{ color: cat.color }}>{cat.icon}</div>
                             <span style={{
-                                fontSize: '0.6rem',
+                                fontSize: '0.8rem',
                                 fontWeight: 'bold',
                                 color: cat.color,
                                 textTransform: 'uppercase',
@@ -211,14 +211,14 @@ export const SkillsOverview = ({ onNavigate, gameState }) => {
                                         }}
                                     >
                                         <div style={{
-                                            fontSize: '0.6rem',
+                                            fontSize: '0.85rem',
                                             fontWeight: 'bold',
                                             color: item.isSpecial ? 'var(--accent)' : 'var(--text-main)',
                                             whiteSpace: 'nowrap',
                                             overflow: 'hidden',
                                             textOverflow: 'ellipsis',
                                             width: '100%',
-                                            lineHeight: '1.1'
+                                            lineHeight: '1.2'
                                         }}>
                                             {item.label}
                                         </div>
@@ -284,6 +284,9 @@ export const TownOverview = ({ onNavigate, gameState, canSpin, onOpenDailySpin, 
     );
 };
 
+import { MONSTERS } from '@shared/monsters';
+import { formatNumber } from '@utils/format';
+
 export const CombatOverview = ({ onNavigate, gameState }) => {
     const combatSkill = gameState?.state?.skills?.COMBAT || { level: 1, xp: 0 };
     const dungeonSkill = gameState?.state?.skills?.DUNGEONEERING || { level: 1, xp: 0 };
@@ -296,16 +299,55 @@ export const CombatOverview = ({ onNavigate, gameState }) => {
     const dungeonNextXP = calculateNextLevelXP(dungeonLevel);
     const dungeonProgress = (dungeonSkill.xp / dungeonNextXP) * 100;
 
+    // Determine Adventure Button Icon
+    let adventureIcon = <Sword />;
+    let adventureLabel = "Adventure";
+
+    // Determine Floating Icon (Simpler Logic)
+    let floatingIcon = <Skull size={24} color="#ff4444" strokeWidth={2} />;
+
+    const combatState = gameState?.state?.combat;
+
+    if (combatState && combatState.mobId) {
+        // More robust lookup
+        const tier = Number(combatState.tier) || 1;
+        const mobId = combatState.mobId;
+
+        const mobList = MONSTERS[tier];
+        const mob = mobList?.find(m => m.id === mobId);
+
+        if (mob) {
+            adventureLabel = `Fight: ${mob.name}`;
+
+            // Revert Adventure Button Icon (as per user request) to default Sword
+            // But we can keep the label change to show who we are fighting.
+
+            // Explicit Floating Icon Logic
+            if (mob.image) {
+                floatingIcon = (
+                    <img
+                        src={`/monsters/${mob.image}?v=2`}
+                        alt={mob.name}
+                        style={{ width: '40px', height: '40px', objectFit: 'contain' }}
+                    />
+                );
+            }
+        }
+    }
+
     return (
         <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <HubButton
-                label="Adventure"
-                icon={<Sword />}
+                label={adventureLabel}
+                icon={adventureIcon}
                 color="#ef4444"
                 onClick={() => onNavigate('combat')}
                 level={combatLevel}
                 progress={combatProgress}
             />
+
+            {/* Floating Combat Button (User Request) - REMOVED (Now handled globally by ActivityWidget) */}
+
             <HubButton
                 label="Dungeons"
                 icon={<Castle />}
