@@ -386,10 +386,15 @@ export class ActivityManager {
             }
         }
 
-        const added = this.gameManager.inventoryManager.addItemToInventory(char, finalItemId, amountGained, {
-            craftedBy: char.name,
-            craftedAt: Date.now()
-        });
+        const metadata = {};
+        // Only assign signature for Equippable Items (Weapons, Armor, Tools, etc.)
+        // This excludes Food, Potions, Runes, Resources, etc.
+        if (equippableTypes.includes(item.type)) {
+            metadata.craftedBy = char.name;
+            metadata.craftedAt = Date.now();
+        }
+
+        const added = this.gameManager.inventoryManager.addItemToInventory(char, finalItemId, amountGained, metadata);
         if (!added) return { error: "Inventory Full" };
 
         this.gameManager.inventoryManager.consumeItems(char, item.req);
