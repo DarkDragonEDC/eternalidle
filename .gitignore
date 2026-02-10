@@ -1,9 +1,39 @@
-node_modules
-.env
-dist
-.DS_Store
+# Dependencies
+node_modules/
 
-migration/.env.migration
-migration/backup
+# Environment variables (NEVER commit these!)
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Build output
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
 *.log
 server/logs/
+
+# Migration
+migration/.env.migration
+migration/backup
+
+# Prevent debug/inspect scripts with hardcoded credentials
+server/deep_inspect*.js
+server/surgical_inspect*.js
+server/inspect_*.js
+server/dump_*.js
+server/test_hardcoded*.js
+server/test_trimmed*.js
+server/test_anon*.js
+server/generate_jwt*.js
+server/fix_db_*.js
