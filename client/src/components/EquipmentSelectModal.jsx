@@ -25,7 +25,10 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                     if (itemMatch) {
                         const runeKey = itemMatch[1];
                         const runeParts = runeKey.split('_');
-                        if (runeParts[0] === targetAct && runeParts[1] === targetEff) {
+                        const act = runeParts[0];
+                        const eff = runeParts.slice(1).join('_'); // Fix for multi-part effects (e.g. SAVE_FOOD)
+
+                        if (act === targetAct && eff === targetEff) {
                             matches = true;
                         }
                     }
