@@ -870,11 +870,7 @@ export class GameManager {
 
             // Also track food consumed DURING the round (between hits)
             if (result.details && result.details.foodEaten) {
-                const eaten = result.details.foodEaten;
-                foodConsumed += eaten;
-                if (char.state.combat) {
-                    char.state.combat.foodConsumed = (char.state.combat.foodConsumed || 0) + eaten;
-                }
+                foodConsumed += result.details.foodEaten;
             }
 
             if (result.details) {
