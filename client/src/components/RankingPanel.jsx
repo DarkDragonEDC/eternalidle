@@ -7,7 +7,8 @@ const CATEGORIES = {
     GENERAL: {
         label: 'GENERAL',
         options: [
-            { key: 'LEVEL', label: 'Total Level' }
+            { key: 'LEVEL', label: 'Total Level' },
+            { key: 'TOTAL_XP', label: 'Total XP' }
         ]
     },
     COMBAT: {
@@ -105,6 +106,13 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
                 value = Object.values(skills).reduce((acc, s) => acc + (s.level || 1), 0);
                 subValue = Object.values(skills).reduce((acc, s) => acc + (s.xp || 0), 0);
                 label = 'TOTAL LEVEL';
+            } else if (subCategory === 'TOTAL_XP') {
+                const skills = state.skills || {};
+                // Value is Total XP
+                value = Object.values(skills).reduce((acc, s) => acc + (s.xp || 0), 0);
+                // SubValue is Total Level (tiebreaker)
+                subValue = Object.values(skills).reduce((acc, s) => acc + (s.level || 1), 0);
+                label = 'TOTAL XP';
             } else {
                 // Generic Skill Handler
                 const skill = (state.skills || {})[subCategory] || { level: 1, xp: 0 };
@@ -398,6 +406,7 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
                                                     const char = userRankData.character;
                                                     let val = 0;
                                                     if (subCategory === 'LEVEL') val = Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.level || 1), 0);
+                                                    else if (subCategory === 'TOTAL_XP') val = Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.xp || 0), 0);
                                                     else val = (char.state.skills?.[subCategory]?.level || 1);
 
                                                     return formatNumber(val);

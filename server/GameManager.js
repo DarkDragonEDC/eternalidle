@@ -1750,6 +1750,9 @@ export class GameManager {
                 // Total Level
                 return Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.level || 1), 0);
             }
+            if (key === 'TOTAL_XP') {
+                return Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.xp || 0), 0);
+            }
             // Specific Skill
             const skill = char.state.skills?.[key] || { level: 1, xp: 0 };
             // Return a composite value for sorting: Level * 1Billion + XP
