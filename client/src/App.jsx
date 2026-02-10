@@ -39,6 +39,7 @@ import { ITEMS, resolveItem, getSkillForItem, getLevelRequirement, formatItemId 
 import { calculateNextLevelXP, XP_TABLE } from '@shared/skills';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOptimisticState } from './hooks/useOptimisticState';
+import ResponsiveText from './components/ResponsiveText';
 
 
 
@@ -1161,9 +1162,17 @@ function App() {
                 overflow: 'hidden'
               }}>
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '10px', fontWeight: 'bold' }}>TOTAL TAXES COLLECTED</div>
-                <div style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--accent)', fontFamily: 'monospace', textShadow: '0 0 20px rgba(212, 175, 55, 0.3)' }}>
+                <ResponsiveText
+                  maxFontSize={40}
+                  minFontSize={12}
+                  color='var(--accent)'
+                  fontWeight='900'
+                  fontFamily='monospace'
+                  textShadow='0 0 20px rgba(212, 175, 55, 0.3)'
+                  style={{ marginBottom: '5px' }}
+                >
                   {formatNumber(globalStats?.total_market_tax || 0)}
-                </div>
+                </ResponsiveText>
                 <div style={{ marginTop: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'rgba(74, 222, 128, 0.8)', fontSize: '0.75rem', fontWeight: 'bold' }}>
                   <div style={{ width: '6px', height: '6px', background: '#4ade80', borderRadius: '50%', boxShadow: '0 0 8px #4ade80' }}></div>
                   LIVE COUNTER
