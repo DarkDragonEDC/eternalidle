@@ -6,6 +6,15 @@ import { ITEMS, QUALITIES, resolveItem, ITEM_LOOKUP, calculateRuneBonus } from '
 export class InventoryManager {
     constructor(gameManager) {
         this.gameManager = gameManager;
+        this._statsCache = new Map();
+    }
+
+    invalidateStatsCache(charId) {
+        if (charId) {
+            this._statsCache.delete(charId);
+        } else {
+            this._statsCache.clear();
+        }
     }
 
     resolveItem(id) {
@@ -275,6 +284,7 @@ export class InventoryManager {
             state.equipment[slotName] = item;
         }
 
+        this.invalidateStatsCache(char.id);
         await this.gameManager.saveState(char.id, state);
         return { success: true };
     }
@@ -296,12 +306,19 @@ export class InventoryManager {
 
         delete state.equipment[slotName];
 
+        this.invalidateStatsCache(char.id);
         await this.gameManager.saveState(char.id, state);
         return { success: true, state };
     }
 
     calculateStats(char, nowOverride = null) {
         if (!char?.state?.skills) return { str: 0, agi: 0, int: 0, maxHP: 100, damage: 5, defense: 0, dmgBonus: 0 };
+
+        const charId = char.id;
+        if (charId && !nowOverride) {
+            const cached = this._statsCache.get(charId);
+            if (cached) return cached;
+        }
         const skills = char.state.skills;
         const equipment = char.state.equipment || {};
 
@@ -559,7 +576,7 @@ export class InventoryManager {
 
         const finalAttackSpeed = Math.max(200, 2000 - totalSpeed - (agi * 2));
 
-        return {
+        const result = {
             str, agi, int,
             maxHP: parseFloat((100 + (str * 10) + gearHP).toFixed(1)),
             damage: parseFloat(((5 + (str * 1) + (agi * 1) + (int * 1) + gearDamage) * (1 + gearDmgBonus)).toFixed(1)),
@@ -569,8 +586,14 @@ export class InventoryManager {
             efficiency,
             duplication,
             autoRefine,
-            globals, // Return globals so we can use them in GameManager/CombatManager
-            xpBonus // Return detailed XP bonuses
+            globals,
+            xpBonus
         };
+
+        if (charId && !nowOverride) {
+            this._statsCache.set(charId, result);
+        }
+
+        return result;
     }
 }

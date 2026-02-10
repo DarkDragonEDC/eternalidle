@@ -1194,6 +1194,8 @@ export class GameManager {
         const char = await this.getCharacter(userId, characterId);
         if (!char) return null;
 
+        this.inventoryManager.invalidateStatsCache(char.id);
+
         // Only sync last_saved if we aren't currently waiting for a persistence sync or a catchup just happened
         // If we set it here inconditionally, we might stomp over the catchup leftovers
         if (!this.isLocked(userId)) {
@@ -1962,6 +1964,7 @@ export class GameManager {
             return;
         }
         if (!char.state.active_buffs) char.state.active_buffs = {};
+        this.inventoryManager.invalidateStatsCache(char.id);
 
         const now = Date.now();
         const existing = char.state.active_buffs[type];
