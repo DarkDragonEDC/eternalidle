@@ -809,8 +809,8 @@ export const getTierColor = (tier) => {
 };
 export const calculateItemSellPrice = (item, itemId) => {
     if (!item) return 0;
-    const tierPrices = { 1: 5, 2: 15, 3: 40, 4: 100, 5: 250, 6: 600, 7: 1500, 8: 4000, 9: 10000, 10: 25000 };
-    return tierPrices[item.tier] || 5;
+    const tierPrices = { 1: 1, 2: 2, 3: 4, 4: 7, 5: 11, 6: 22, 7: 29, 8: 37, 9: 46, 10: 57 };
+    return tierPrices[item.tier] || 1;
 };
 
 /**

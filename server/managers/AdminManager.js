@@ -1,4 +1,4 @@
-import { ITEMS } from '../../shared/items.js';
+import { ITEMS, resolveItem } from '../../shared/items.js';
 import { getStoreItem } from '../../shared/crownStore.js';
 
 export class AdminManager {
@@ -104,11 +104,12 @@ export class AdminManager {
             return { success: true, message: `Gave ${qty}x ${storeItem.name} (Store Item) to ${char.name}.` };
         }
 
-        if (!ITEMS[itemId]) return { success: false, error: `Invalid item ID: ${itemId}` };
+        const itemData = resolveItem(itemId);
+        if (!itemData) return { success: false, error: `Invalid item ID: ${itemId}` };
 
         this.gameManager.inventoryManager.addItemToInventory(char, itemId, qty);
         await this.saveAndNotify(char);
-        return { success: true, message: `Gave ${qty}x ${ITEMS[itemId].name} to ${char.name}.` };
+        return { success: true, message: `Gave ${qty}x ${itemData.name} to ${char.name}.` };
     }
 
     async cmdAddCrowns(socket, args) {
