@@ -73,6 +73,63 @@ export class InventoryManager {
         return true;
     }
 
+    dismantleItem(char, storageKey, quantity = 1) {
+        if (!char.state.inventory) return { success: false, error: "Inventory Empty" };
+        const inv = char.state.inventory;
+
+        const entry = inv[storageKey];
+        if (!entry) return { success: false, error: "Item not found in inventory" };
+
+        const currentQty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
+        if (currentQty < quantity) return { success: false, error: "Not enough items" };
+
+        const baseId = storageKey.split('::')[0];
+        const item = this.resolveItem(baseId);
+
+        if (!item) return { success: false, error: "Item definition not found" };
+
+        // Validation: Only Weapons, Armor, and Tools (excluding food/potions)
+        const allowedTypes = ['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFF_HAND'];
+        const isTool = item.type?.startsWith('TOOL_');
+        if (!allowedTypes.includes(item.type) && !isTool) {
+            return { success: false, error: "This item cannot be dismantled" };
+        }
+
+        const tier = item.tier || 1;
+        const quality = (typeof entry === 'object' ? (entry.quality || 0) : 0);
+
+        // Rewards Table Logic (per unit)
+        let shardAmountPerUnit = 0;
+        switch (quality) {
+            case 0: shardAmountPerUnit = tier * 10; break;
+            case 1: shardAmountPerUnit = Math.ceil(tier * 12.5); break;
+            case 2: shardAmountPerUnit = tier * 15; break;
+            case 3: shardAmountPerUnit = Math.ceil(tier * 17.5); break;
+            case 4: shardAmountPerUnit = tier * 20; break;
+            default: shardAmountPerUnit = tier * 10;
+        }
+
+        const totalShards = shardAmountPerUnit * quantity;
+
+        // Remove units from inventory
+        if (typeof inv[storageKey] === 'object') {
+            inv[storageKey].amount -= quantity;
+            if (inv[storageKey].amount <= 0) delete inv[storageKey];
+        } else {
+            inv[storageKey] -= quantity;
+            if (inv[storageKey] <= 0) delete inv[storageKey];
+        }
+
+        // Add Rune Shards T1
+        this.addItemToInventory(char, 'T1_RUNE_SHARD', totalShards);
+
+        return {
+            success: true,
+            message: `Dismantled ${quantity}x ${item.name} for ${totalShards} Rune Shards T1`,
+            shardsGained: totalShards
+        };
+    }
+
     canAddItem(char, itemId) {
         if (!char.state.inventory) return true;
         const inv = char.state.inventory;

@@ -598,6 +598,19 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('dismantle_item', async ({ itemId, quantity = 1 }) => {
+        try {
+            if (!socket.data.characterId || socket.data.characterId === 'undefined') return;
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.dismantleItem(socket.user.id, socket.data.characterId, itemId, quantity);
+                socket.emit('item_dismantled', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
     socket.on('use_item', async ({ itemId, quantity = 1 }) => {
         console.log(`[DEBUG-SOCKET] Received use_item for ${itemId}`, quantity);
         try {

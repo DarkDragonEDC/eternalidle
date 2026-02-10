@@ -1453,7 +1453,7 @@ function App() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Coins size={16} color="var(--accent)" />
                   <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--accent)', fontFamily: 'monospace' }}>
-                    {formatSilver(displayedGameState?.state?.silver || 0)}
+                    {formatSilver(displayedGameState?.state?.silver || 0, true)}
                   </span>
                 </div>
                 <ChevronDown
@@ -1505,7 +1505,7 @@ function App() {
                       <div>
                         <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>SILVER</div>
                         <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--accent)', fontFamily: 'monospace' }}>
-                          {formatNumber(displayedGameState?.state?.silver || 0)}
+                          {formatSilver(displayedGameState?.state?.silver || 0, true)}
                         </div>
                       </div>
                     </div>

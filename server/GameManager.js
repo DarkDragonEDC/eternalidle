@@ -2086,6 +2086,18 @@ export class GameManager {
         };
     }
 
+    async dismantleItem(userId, characterId, itemId, quantity = 1) {
+        const char = await this.getCharacter(userId, characterId);
+        if (!char) throw new Error("Character not found");
+
+        const result = this.inventoryManager.dismantleItem(char, itemId, quantity);
+        if (result.success) {
+            this.markDirty(char.id);
+            await this.persistCharacter(char.id);
+        }
+        return result;
+    }
+
     async autoMergeRunes(userId, characterId, filters = {}) {
         console.log(`[GameManager] autoMergeRunes called for ${characterId} with filters:`, filters);
         const char = await this.getCharacter(userId, characterId);

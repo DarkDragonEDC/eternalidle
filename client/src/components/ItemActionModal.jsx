@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Shield, Coins, Tag, Trash2, ArrowRight, Zap } from 'lucide-react';
 import { getTierColor, calculateItemSellPrice, resolveItem } from '@shared/items';
 
-const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUse, customAction, isIronman }) => {
+const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUse, onDismantle, customAction, isIronman }) => {
     if (!rawItem) return null;
 
     // Robust resolution: ensure we have full details including qualityName
@@ -210,6 +210,28 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUs
                                 }}
                             >
                                 <Zap size={18} /> {item.type === 'POTION' ? 'DRINK' : 'USE/OPEN'}
+                            </button>
+                        )}
+
+                        {(['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFF_HAND'].includes(item.type) || item.type.startsWith('TOOL_')) && (
+                            <button
+                                onClick={() => { onDismantle(item.id); onClose(); }}
+                                style={{
+                                    padding: '12px',
+                                    borderRadius: '8px',
+                                    border: 'none',
+                                    background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
+                                    color: '#fff',
+                                    fontWeight: 'bold',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 4px 10px rgba(139, 92, 246, 0.2)'
+                                }}
+                            >
+                                <Trash2 size={18} /> DISMANTLE
                             </button>
                         )}
 

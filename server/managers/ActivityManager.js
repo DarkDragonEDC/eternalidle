@@ -138,10 +138,35 @@ export class ActivityManager {
         };
         const actKey = efficiencyMap[skillKey];
 
-        // 1. Duplication Logic
+        // 1. Auto-Refine / Auto-Cook Logic (PRIORITY 1)
+        let isAutoRefine = false;
+        let refinedItemGained = null;
+        let isAutoCook = false;
+
+        if (actKey && stats.autoRefine && stats.autoRefine[actKey]) {
+            const refineChance = stats.autoRefine[actKey];
+            if (Math.random() * 100 < refineChance) {
+                const refinedId = this.findRefinedItem(item.id);
+                if (refinedId) {
+                    const refinedItem = ITEM_LOOKUP[refinedId];
+                    const reqAmount = (refinedItem && refinedItem.req && refinedItem.req[item.id]) ? refinedItem.req[item.id] : 2;
+
+                    if (this.gameManager.inventoryManager.hasItems(char, { [item.id]: reqAmount })) {
+                        this.gameManager.inventoryManager.consumeItems(char, { [item.id]: reqAmount });
+                        this.gameManager.inventoryManager.addItemToInventory(char, refinedId, 1);
+                        isAutoRefine = true;
+                        refinedItemGained = refinedId;
+                        if (refinedItem?.type === 'FOOD') isAutoCook = true;
+                    }
+                }
+            }
+        }
+
+        // 2. Duplication Logic (PRIORITY 2 - Only if Auto-Refine didn't trigger)
         let amountGained = 1;
         let isDuplication = false;
-        if (actKey && stats.duplication && stats.duplication[actKey]) {
+
+        if (!isAutoRefine && actKey && stats.duplication && stats.duplication[actKey]) {
             const chance = stats.duplication[actKey];
             if (Math.random() * 100 < chance) {
                 amountGained = 2;
@@ -166,31 +191,6 @@ export class ActivityManager {
         if (xpAmount > MAX_ACTIVITY_XP) xpAmount = MAX_ACTIVITY_XP;
 
         const leveledUp = this.gameManager.addXP(char, skillKey, xpAmount);
-
-        // 2. Auto-Refine Logic
-        let isAutoRefine = false;
-        let refinedItemGained = null;
-        let isAutoCook = false;
-        if (actKey && stats.autoRefine && stats.autoRefine[actKey]) {
-            const refineChance = stats.autoRefine[actKey];
-            if (Math.random() * 100 < refineChance) {
-                // Try to find a refined version or food (for fishing)
-                const refinedId = this.findRefinedItem(item.id);
-                if (refinedId) {
-                    const refinedItem = ITEM_LOOKUP[refinedId];
-                    // Dynamic consumption based on requirements (defaults to 2 if not found)
-                    const reqAmount = (refinedItem && refinedItem.req && refinedItem.req[item.id]) ? refinedItem.req[item.id] : 2;
-
-                    if (this.gameManager.inventoryManager.hasItems(char, { [item.id]: reqAmount })) {
-                        this.gameManager.inventoryManager.consumeItems(char, { [item.id]: reqAmount });
-                        this.gameManager.inventoryManager.addItemToInventory(char, refinedId, 1);
-                        isAutoRefine = true;
-                        refinedItemGained = refinedId;
-                        if (refinedItem?.type === 'FOOD') isAutoCook = true;
-                    }
-                }
-            }
-        }
 
         let message = null;
         if (isAutoCook) {

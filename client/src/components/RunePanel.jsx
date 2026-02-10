@@ -748,31 +748,6 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                             <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <Hammer size={18} /> {activeTab === 'shards' ? 'Rune Forge' : 'Rune Merge'}
                             </div>
-
-                            {activeTab === 'shards' && (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <label style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 'bold' }}>Type:</label>
-                                    <select
-                                        value={forgeCategory}
-                                        onChange={(e) => setForgeCategory(e.target.value)}
-                                        style={{
-                                            background: 'var(--bg-dark)',
-                                            color: 'var(--text-main)',
-                                            border: '1px solid var(--border)',
-                                            padding: '4px 8px',
-                                            borderRadius: '6px',
-                                            fontSize: '0.8rem',
-                                            cursor: 'pointer',
-                                            outline: 'none'
-                                        }}
-                                    >
-                                        <option value="GATHERING">Gathering</option>
-                                        <option value="REFINING">Refining</option>
-                                        <option value="CRAFTING">Crafting</option>
-                                        <option value="COMBAT">Combat</option>
-                                    </select>
-                                </div>
-                            )}
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', justifyContent: 'center' }}>
@@ -1431,6 +1406,46 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                     style={{ width: '100%', accentColor: 'var(--accent)', cursor: 'pointer' }}
                                 />
                             </div>
+
+                            {/* Rune Category Selection (FORGE ONLY) */}
+                            {batchModal.type === 'FORGE' && (
+                                <div style={{ marginBottom: '20px' }}>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '8px', textAlign: 'center' }}>
+                                        Select Rune Category
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                                        {[
+                                            { id: 'GATHERING', label: 'Gathering', icon: <Search size={14} /> },
+                                            { id: 'REFINING', label: 'Refining', icon: <ArrowRight size={14} /> },
+                                            { id: 'CRAFTING', label: 'Crafting', icon: <Hammer size={14} /> },
+                                            { id: 'COMBAT', label: 'Combat', icon: <Sparkles size={14} /> }
+                                        ].map(cat => (
+                                            <button
+                                                key={cat.id}
+                                                onClick={() => setForgeCategory(cat.id)}
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '6px',
+                                                    padding: '10px 5px',
+                                                    borderRadius: '8px',
+                                                    border: forgeCategory === cat.id ? '2px solid var(--accent)' : '1px solid var(--border)',
+                                                    background: forgeCategory === cat.id ? 'rgba(var(--accent-rgb), 0.15)' : 'var(--bg-dark)',
+                                                    color: forgeCategory === cat.id ? 'var(--text-bright)' : 'var(--text-dim)',
+                                                    fontSize: '0.8rem',
+                                                    fontWeight: 'bold',
+                                                    cursor: 'pointer',
+                                                    transition: '0.2s'
+                                                }}
+                                            >
+                                                {cat.icon}
+                                                {cat.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             <div style={{ textAlign: 'center', marginBottom: '20px', padding: '10px', background: 'rgba(255, 215, 0, 0.05)', borderRadius: '8px', border: '1px solid rgba(255, 215, 0, 0.1)' }}>
                                 <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Total Requirement</div>

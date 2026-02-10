@@ -4,18 +4,18 @@ export const formatNumber = (num) => {
     return Math.floor(num).toLocaleString('pt-BR');
 };
 
-export const formatSilver = (num) => {
-    if (num === null || num === undefined) return '0';
+export const formatSilver = (num, abbreviate = false) => {
+    if (!num) return '0';
+    if (!abbreviate) return formatNumber(num);
 
-    if (num >= 1_000_000_000) {
-        return (num / 1_000_000_000).toFixed(2).replace(/\.00$/, '') + 'B';
+    if (num >= 1000000000) {
+        return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
     }
-    if (num >= 1_000_000) {
-        return (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
     }
     if (num >= 1000) {
         return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
     }
-
     return formatNumber(num);
 };

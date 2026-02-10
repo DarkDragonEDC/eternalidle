@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { formatNumber, formatSilver } from '@utils/format';
 import { resolveItem, getTierColor, calculateItemSellPrice } from '@shared/items';
-import { Package, Shield, Coins, Tag, Trash2, Info, ChevronDown, ChevronUp, ArrowUpAZ, ArrowDownZA, Search, Hammer } from 'lucide-react';
+import { Package, Shield, Coins, Tag, Trash2, Info, ChevronDown, ChevronUp, ArrowUpAZ, ArrowDownZA, Search, Hammer, Zap } from 'lucide-react';
 import ItemActionModal from './ItemActionModal';
 
 const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo, onUse, isMobile }) => {
@@ -13,6 +13,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
     const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [usePotionModal, setUsePotionModal] = useState(null);
+    const [dismantleModal, setDismantleModal] = useState(null);
 
     const handleItemClick = (item) => {
         setSelectedItemForModal(item);
@@ -33,6 +34,21 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
             max: qty || 0,
             quantity: qty || 1,
             unitPrice
+        });
+    };
+
+    const handleDismantle = (itemId) => {
+        const item = resolveItem(itemId);
+        if (!item) return;
+
+        const entry = gameState?.state?.inventory?.[itemId];
+        const qty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
+
+        setDismantleModal({
+            itemId,
+            item,
+            max: qty || 0,
+            quantity: 1
         });
     };
 
@@ -426,6 +442,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                         }}
                         onSell={(id) => { setSelectedItemForModal(null); handleQuickSell(id); }}
                         onList={(id, item) => { setSelectedItemForModal(null); onListOnMarket({ itemId: id, max: item.qty }); }}
+                        onDismantle={(id) => { setSelectedItemForModal(null); handleDismantle(id); }}
                     />
                 )
             }
@@ -739,6 +756,165 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                         transition: '0.2s'
                                     }}
                                 >CONFIRM</button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+            {/* Dismantle Confirmation Modal */}
+            {
+                dismantleModal && (
+                    <div style={{
+                        position: 'fixed',
+                        top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(0,0,0,0.85)',
+                        zIndex: 3000,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backdropFilter: 'blur(10px)'
+                    }} onClick={() => setDismantleModal(null)}>
+                        <div style={{
+                            background: 'var(--panel-bg)',
+                            border: '1px solid var(--border)',
+                            borderRadius: '20px',
+                            padding: '24px',
+                            width: '90%',
+                            maxWidth: '340px',
+                            boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+                            position: 'relative',
+                            overflow: 'hidden'
+                        }} onClick={e => e.stopPropagation()}>
+                            {/* Decorative Background */}
+                            <div style={{ position: 'absolute', top: '-10%', right: '-10%', width: '150px', height: '150px', background: 'radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%)', zIndex: 0 }} />
+
+                            <div style={{ textAlign: 'center', marginBottom: '25px', position: 'relative', zIndex: 1 }}>
+                                <div style={{
+                                    width: '64px',
+                                    height: '64px',
+                                    margin: '0 auto 15px',
+                                    background: 'rgba(139, 92, 246, 0.1)',
+                                    borderRadius: '16px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    border: '1px solid var(--border)'
+                                }}>
+                                    {dismantleModal.item.icon ? (
+                                        <img src={dismantleModal.item.icon} alt="" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+                                    ) : (
+                                        <Package size={32} color="#8b5cf6" />
+                                    )}
+                                </div>
+                                <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-main)', fontWeight: '900', letterSpacing: '1px' }}>
+                                    Dismantle {dismantleModal.item.name}
+                                </h3>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '4px' }}>
+                                    Available: <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{dismantleModal.max}</span>
+                                </div>
+                            </div>
+
+                            <div style={{ marginBottom: '25px', position: 'relative', zIndex: 1 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                                    <button
+                                        onClick={() => setDismantleModal({ ...dismantleModal, quantity: 1 })}
+                                        style={{ padding: '8px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#ccc', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem', transition: '0.2s' }}
+                                    >MIN</button>
+
+                                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'var(--slot-bg)', borderRadius: '12px', border: '1px solid var(--border)', padding: '4px' }}>
+                                        <button
+                                            onClick={() => setDismantleModal({ ...dismantleModal, quantity: Math.max(1, dismantleModal.quantity - 1) })}
+                                            style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '1.2rem' }}
+                                        >-</button>
+                                        <input
+                                            type="number"
+                                            value={dismantleModal.quantity}
+                                            onChange={(e) => {
+                                                const rawVal = e.target.value;
+                                                if (rawVal === '') {
+                                                    setDismantleModal({ ...dismantleModal, quantity: '' });
+                                                    return;
+                                                }
+                                                let val = parseInt(rawVal);
+                                                if (isNaN(val)) return;
+                                                if (val < 1) val = 1;
+                                                if (val > dismantleModal.max) val = dismantleModal.max;
+                                                setDismantleModal({ ...dismantleModal, quantity: val });
+                                            }}
+                                            onBlur={() => {
+                                                if (dismantleModal.quantity === '' || dismantleModal.quantity < 1) {
+                                                    setDismantleModal({ ...dismantleModal, quantity: 1 });
+                                                }
+                                            }}
+                                            style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--text-main)', textAlign: 'center', fontSize: '1.1rem', fontWeight: '900', outline: 'none', width: '40px' }}
+                                        />
+                                        <button
+                                            onClick={() => setDismantleModal({ ...dismantleModal, quantity: Math.min(dismantleModal.max, dismantleModal.quantity + 1) })}
+                                            style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '1.2rem' }}
+                                        >+</button>
+                                    </div>
+
+                                    <button
+                                        onClick={() => setDismantleModal({ ...dismantleModal, quantity: dismantleModal.max })}
+                                        style={{ padding: '8px 12px', background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.3)', color: '#8b5cf6', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem', transition: '0.2s' }}
+                                    >MAX</button>
+                                </div>
+
+                                {/* Reward Preview */}
+                                <div style={{
+                                    background: 'rgba(139, 92, 246, 0.05)',
+                                    border: '1px solid rgba(139, 92, 246, 0.15)',
+                                    borderRadius: '12px',
+                                    padding: '15px',
+                                    textAlign: 'center'
+                                }}>
+                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '5px' }}>Estimated Reward</div>
+                                    <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#a78bfa', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                        <Zap size={18} fill="#a78bfa" />
+                                        {(() => {
+                                            const tier = dismantleModal.item.tier || 1;
+                                            const quality = dismantleModal.item.quality || 0;
+                                            let shardPerUnit = 0;
+                                            switch (quality) {
+                                                case 0: shardPerUnit = tier * 10; break;
+                                                case 1: shardPerUnit = Math.ceil(tier * 12.5); break;
+                                                case 2: shardPerUnit = tier * 15; break;
+                                                case 3: shardPerUnit = Math.ceil(tier * 17.5); break;
+                                                case 4: shardPerUnit = tier * 20; break;
+                                                default: shardPerUnit = tier * 10;
+                                            }
+                                            return formatNumber(shardPerUnit * (parseInt(dismantleModal.quantity) || 0));
+                                        })()}
+                                        <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--text-dim)' }}>Rune Shards T1</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '12px', position: 'relative', zIndex: 1 }}>
+                                <button
+                                    onClick={() => setDismantleModal(null)}
+                                    style={{ flex: 1, padding: '14px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#888', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+                                >CANCEL</button>
+                                <button
+                                    onClick={() => {
+                                        const qty = parseInt(dismantleModal.quantity) || 1;
+                                        if (socket) {
+                                            socket.emit('dismantle_item', { itemId: dismantleModal.itemId, quantity: qty });
+                                        }
+                                        setDismantleModal(null);
+                                    }}
+                                    style={{
+                                        flex: 2,
+                                        padding: '14px',
+                                        background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
+                                        border: 'none',
+                                        color: '#fff',
+                                        borderRadius: '12px',
+                                        fontWeight: '900',
+                                        cursor: 'pointer',
+                                        boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)'
+                                    }}
+                                >DISMANTLE NOW</button>
                             </div>
                         </div>
                     </div>

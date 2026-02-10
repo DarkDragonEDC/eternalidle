@@ -810,17 +810,57 @@ export const getTierColor = (tier) => {
 export const calculateItemSellPrice = (item, itemId) => {
     if (!item) return 0;
 
-    // Resources (Gathering materials/refined) use the new requested low-price table
-    const resourcePrices = { 1: 1, 2: 2, 3: 4, 4: 7, 5: 11, 6: 16, 7: 22, 8: 29, 9: 37, 10: 46 };
+    const tier = item.tier || 1;
+    const rarity = (item.rarity || 'COMMON').toUpperCase();
 
-    // Other items (Equipment, Runes, etc.) use the original higher prices
+    // 1. Raw Resources (Gathering materials like Wood, Ore, etc. - no 'req' property)
+    const rawResourcePrices = { 1: 1, 2: 2, 3: 4, 4: 7, 5: 11, 6: 16, 7: 22, 8: 29, 9: 37, 10: 46 };
+
+    // 2. Refined Resources (Planks, Bars, Leather, etc. - have 'req' property)
+    const refinedResourcePrices = { 1: 4, 2: 8, 3: 15, 4: 25, 5: 38, 6: 54, 7: 73, 8: 95, 9: 120, 10: 148 };
+
+    // 3. Potions
+    const potionPrices = { 1: 22, 2: 44, 3: 83, 4: 138, 5: 209, 6: 297, 7: 402, 8: 523, 9: 660, 10: 814 };
+
+    // 4. Crafted Items (Equipment/Weapons) - Based on Tier and Rarity
+    const craftedPrices = {
+        1: { COMMON: 88, UNCOMMON: 114, RARE: 150, EPIC: 202, LEGENDARY: 282, MYTHIC: 423 },
+        2: { COMMON: 176, UNCOMMON: 229, RARE: 299, EPIC: 405, LEGENDARY: 563, MYTHIC: 844 },
+        3: { COMMON: 330, UNCOMMON: 429, RARE: 561, EPIC: 759, LEGENDARY: 1056, MYTHIC: 1584 },
+        4: { COMMON: 550, UNCOMMON: 715, RARE: 935, EPIC: 1265, LEGENDARY: 1760, MYTHIC: 2640 },
+        5: { COMMON: 836, UNCOMMON: 1087, RARE: 1421, EPIC: 1923, LEGENDARY: 2675, MYTHIC: 4012 },
+        6: { COMMON: 1188, UNCOMMON: 1544, RARE: 2020, EPIC: 2732, LEGENDARY: 3802, MYTHIC: 5703 },
+        7: { COMMON: 1606, UNCOMMON: 2088, RARE: 2730, EPIC: 3694, LEGENDARY: 5139, MYTHIC: 7708 },
+        8: { COMMON: 2090, UNCOMMON: 2717, RARE: 3553, EPIC: 4807, LEGENDARY: 6688, MYTHIC: 10032 },
+        9: { COMMON: 2640, UNCOMMON: 3432, RARE: 4488, EPIC: 6072, LEGENDARY: 8448, MYTHIC: 12672 },
+        10: { COMMON: 3256, UNCOMMON: 4233, RARE: 5535, EPIC: 7489, LEGENDARY: 10419, MYTHIC: 15628 }
+    };
+
+    // 5. Default Base Prices (Original fallback)
     const defaultPrices = { 1: 5, 2: 15, 3: 40, 4: 100, 5: 250, 6: 600, 7: 1500, 8: 4000, 9: 10000, 10: 25000 };
 
     if (item.type === 'RESOURCE') {
-        return resourcePrices[item.tier] || 1;
+        const isRefined = item.req && Object.keys(item.req).length > 0;
+        if (isRefined) {
+            return refinedResourcePrices[tier] || 4;
+        }
+        return rawResourcePrices[tier] || 1;
     }
 
-    return defaultPrices[item.tier] || 5;
+    if (item.type === 'POTION') {
+        return potionPrices[tier] || 22;
+    }
+
+    if (item.type === 'FOOD') {
+        const foodPrices = { 1: 1, 2: 2, 3: 5, 4: 8, 5: 13, 6: 19, 7: 26, 8: 35, 9: 44, 10: 55 };
+        return foodPrices[tier] || 1;
+    }
+
+    if (craftedPrices[tier]) {
+        return craftedPrices[tier][rarity] || craftedPrices[tier]['COMMON'] || defaultPrices[tier] || 5;
+    }
+
+    return defaultPrices[tier] || 5;
 };
 
 /**

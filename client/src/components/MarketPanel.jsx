@@ -20,7 +20,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
     const [notification, setNotification] = useState(null);
     const [selectedTier, setSelectedTier] = useState('ALL');
     const [selectedQuality, setSelectedQuality] = useState('ALL');
-    const [selectedSortOrder, setSelectedSortOrder] = useState('PRICE_ASC');
+    const [selectedSortOrder, setSelectedSortOrder] = useState('NEWEST');
     const [sellSearchQuery, setSellSearchQuery] = useState('');
 
 
@@ -185,11 +185,16 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
         return true;
     });
 
-    // Handle Sorting
+    // Handle Sorting by UNIT PRICE
+    const getUnitPrice = (l) => {
+        const nAmt = ((typeof l.amount === 'object' && l.amount !== null) ? l.amount.amount : l.amount) || 1;
+        return l.price / nAmt;
+    };
+
     if (selectedSortOrder === 'PRICE_ASC') {
-        activeBuyListings.sort((a, b) => a.price - b.price);
+        activeBuyListings.sort((a, b) => getUnitPrice(a) - getUnitPrice(b));
     } else if (selectedSortOrder === 'PRICE_DESC') {
-        activeBuyListings.sort((a, b) => b.price - a.price);
+        activeBuyListings.sort((a, b) => getUnitPrice(b) - getUnitPrice(a));
     } else if (selectedSortOrder === 'NEWEST') {
         activeBuyListings.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     }
