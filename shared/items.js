@@ -809,8 +809,18 @@ export const getTierColor = (tier) => {
 };
 export const calculateItemSellPrice = (item, itemId) => {
     if (!item) return 0;
-    const tierPrices = { 1: 1, 2: 2, 3: 4, 4: 7, 5: 11, 6: 22, 7: 29, 8: 37, 9: 46, 10: 57 };
-    return tierPrices[item.tier] || 1;
+
+    // Resources (Gathering materials/refined) use the new requested low-price table
+    const resourcePrices = { 1: 1, 2: 2, 3: 4, 4: 7, 5: 11, 6: 16, 7: 22, 8: 29, 9: 37, 10: 46 };
+
+    // Other items (Equipment, Runes, etc.) use the original higher prices
+    const defaultPrices = { 1: 5, 2: 15, 3: 40, 4: 100, 5: 250, 6: 600, 7: 1500, 8: 4000, 9: 10000, 10: 25000 };
+
+    if (item.type === 'RESOURCE') {
+        return resourcePrices[item.tier] || 1;
+    }
+
+    return defaultPrices[item.tier] || 5;
 };
 
 /**
