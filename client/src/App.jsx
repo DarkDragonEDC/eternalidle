@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 console.log("[App.jsx] Initializing App component...");
 import { io } from 'socket.io-client';
 import { supabase } from './supabase';
@@ -159,11 +159,14 @@ function App() {
   const [showSocialModal, setShowSocialModal] = useState(false);
   const [inspectData, setInspectData] = useState(null);
 
-  const handleInspectPlayer = (name) => {
+  const handleInspectPlayer = useCallback((name) => {
     if (socket && name) {
       socket.emit('get_public_profile', { characterName: name });
     }
-  };
+  }, [socket]);
+
+  const handleCloseInspect = useCallback(() => setInspectData(null), []);
+  const handleItemClick = useCallback((item) => setInfoItem(item), []);
 
   const handleRenameSubmit = (newName) => {
     socket.emit('change_name', { newName });
@@ -576,8 +579,11 @@ function App() {
     });
 
     newSocket.on('public_profile_data', (data) => {
-      console.log('[SOCKET] public_profile_data received:', data);
-      setInspectData(data);
+      // Capture snapshot - only update if not already inspecting this player
+      setInspectData(prev => {
+        if (!prev || prev.name !== data.name) return data;
+        return prev;
+      });
     });
 
     setSocket(newSocket);
@@ -1203,14 +1209,16 @@ function App() {
         return <RankingPanel gameState={displayedGameState} isMobile={isMobile} socket={socket} onInspect={handleInspectPlayer} />;
       case 'world_boss':
         return (
-          <WorldBossPanel
-            gameState={displayedGameState}
-            isMobile={isMobile}
-            socket={socket}
-            onChallenge={() => {
-              socket.emit('challenge_world_boss');
-            }}
-          />
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <SkillProgressHeader tab="world_boss" category="WORLD_BOSS" />
+            <WorldBossPanel
+              socket={socket}
+              gameState={displayedGameState}
+              isMobile={isMobile}
+              onChallenge={handleStartWorldBoss}
+              onInspect={handleInspectPlayer}
+            />
+          </div>
         );
       case 'trade':
         return null; // TradePanel is a modal, handled separately
@@ -1279,19 +1287,6 @@ function App() {
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <SkillProgressHeader tab="dungeon" category="DUNGEONEERING" />
             <DungeonPanel socket={socket} gameState={displayedGameState} isMobile={isMobile} serverTimeOffset={clockOffset.current} />
-          </div>
-        );
-      case 'world_boss':
-        // Reuse logic or create simple view
-        return (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <SkillProgressHeader tab="world_boss" category="WORLD_BOSS" />
-            <WorldBossPanel
-              socket={socket}
-              gameState={displayedGameState}
-              onChallenge={handleStartWorldBoss}
-              onInspect={handleInspectPlayer}
-            />
           </div>
         );
       case 'merging':
@@ -1894,13 +1889,16 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* Inspect Modal */}
-      <InspectModal
-        isOpen={!!inspectData}
-        onClose={() => setInspectData(null)}
-        data={inspectData}
-        onItemClick={(item) => setInfoItem(item)}
-      />
+      <AnimatePresence>
+        {inspectData && (
+          <InspectModal
+            key="inspect-player-modal"
+            onClose={handleCloseInspect}
+            data={inspectData}
+            onItemClick={handleItemClick}
+          />
+        )}
+      </AnimatePresence>
     </div >
   );
 }

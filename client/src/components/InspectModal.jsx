@@ -4,11 +4,9 @@ import { X, Sword, Shield, Heart, Zap, User, Star, Layers, Info, Award, Crosshai
 import { resolveItem, calculateRuneBonus } from '@shared/items';
 import { calculateNextLevelXP } from '@shared/skills';
 
-const InspectModal = ({ isOpen, onClose, data, onItemClick }) => {
+const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
     const [activeTab, setActiveTab] = useState('EQUIPMENT'); // EQUIPMENT | SKILLS
     const [expandedCategory, setExpandedCategory] = useState(null);
-
-    if (!isOpen || !data) return null;
 
     const { name, level, selectedTitle, health = 0, equipment = {}, skills = {}, stats = {}, isPremium, guildName } = data;
 
@@ -16,6 +14,8 @@ const InspectModal = ({ isOpen, onClose, data, onItemClick }) => {
         if (!item) return acc;
         return acc + (resolveItem(item.id || item.item_id)?.ip || 0);
     }, 0) / 7);
+
+    const totalLevel = Object.values(skills).reduce((acc, s) => acc + (s.level || 0), 0);
 
     const EquipmentSlot = ({ slot, icon, label, item: rawItem, delay = 0 }) => {
         const item = rawItem ? { ...rawItem, ...resolveItem(rawItem.id || rawItem.item_id) } : null;
@@ -159,8 +159,11 @@ const InspectModal = ({ isOpen, onClose, data, onItemClick }) => {
     };
 
     return (
-        <AnimatePresence>
-            <div style={{
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
                 position: 'fixed',
                 top: 0, left: 0, width: '100%', height: '100%',
                 background: 'rgba(0,0,0,0.85)',
@@ -171,254 +174,253 @@ const InspectModal = ({ isOpen, onClose, data, onItemClick }) => {
                 justifyContent: 'center',
                 padding: '20px'
             }}>
-                {/* Background Decor */}
-                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '600px', height: '600px', background: 'radial-gradient(circle, var(--accent-soft) 0%, transparent 70%)', opacity: 0.1, pointerEvents: 'none' }} />
+            {/* Background Decor */}
+            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '600px', height: '600px', background: 'radial-gradient(circle, var(--accent-soft) 0%, transparent 70%)', opacity: 0.1, pointerEvents: 'none' }} />
 
-                <motion.div
-                    initial={{ scale: 0.9, opacity: 0, y: 30 }}
-                    animate={{ scale: 1, opacity: 1, y: 0 }}
-                    exit={{ scale: 0.9, opacity: 0, y: 30 }}
-                    style={{
-                        background: 'rgba(18, 18, 22, 0.95)',
-                        border: isPremium ? '1px solid #d4af37' : '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '32px',
-                        width: '100%',
-                        maxWidth: '480px',
-                        maxHeight: '85vh',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        overflow: 'hidden',
-                        boxShadow: isPremium ? '0 0 50px rgba(212, 175, 55, 0.2)' : '0 30px 60px rgba(0,0,0,0.6)',
-                        position: 'relative'
-                    }}
-                >
-                    {/* Header Banner */}
-                    <div style={{
-                        padding: '25px 25px 15px 25px',
-                        background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%)',
-                        textAlign: 'center',
-                        position: 'relative'
-                    }}>
-                        <button
-                            onClick={onClose}
-                            style={{ position: 'absolute', top: 15, right: 15, background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s', zIndex: 10 }}
-                            onMouseOver={e => e.currentTarget.style.background = 'rgba(255,0,0,0.2)'}
-                            onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-                        >
-                            <X size={18} />
-                        </button>
+            <motion.div
+                initial={{ scale: 0.9, opacity: 0, y: 30 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 30 }}
+                style={{
+                    background: 'rgba(18, 18, 22, 0.95)',
+                    border: isPremium ? '1px solid #d4af37' : '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '32px',
+                    width: '100%',
+                    maxWidth: '480px',
+                    maxHeight: '85vh',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                    boxShadow: isPremium ? '0 0 50px rgba(212, 175, 55, 0.2)' : '0 30px 60px rgba(0,0,0,0.6)',
+                    position: 'relative'
+                }}
+            >
+                {/* Header Banner */}
+                <div style={{
+                    padding: '25px 25px 15px 25px',
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%)',
+                    textAlign: 'center',
+                    position: 'relative'
+                }}>
+                    <button
+                        onClick={onClose}
+                        style={{ position: 'absolute', top: 15, right: 15, background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s', zIndex: 10 }}
+                        onMouseOver={e => e.currentTarget.style.background = 'rgba(255,0,0,0.2)'}
+                        onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                    >
+                        <X size={18} />
+                    </button>
 
-                        <motion.div
-                            initial={{ y: -10, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            style={{
-                                fontSize: '0.65rem',
-                                fontWeight: '950',
-                                letterSpacing: '3px',
-                                textTransform: 'uppercase',
-                                color: isPremium ? '#d4af37' : 'var(--accent)',
-                                marginBottom: '4px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '6px'
-                            }}
-                        >
-                            {isPremium && <Award size={12} />}
-                            {selectedTitle || 'GLORIOUS EXPLORER'}
-                            {isPremium && <Award size={12} />}
-                        </motion.div>
-
-                        <div style={{
+                    <motion.div
+                        initial={{ y: -10, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        style={{
+                            fontSize: '0.65rem',
+                            fontWeight: '950',
+                            letterSpacing: '3px',
+                            textTransform: 'uppercase',
+                            color: isPremium ? '#d4af37' : 'var(--accent)',
+                            marginBottom: '4px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            gap: '20px',
-                            marginTop: '10px'
+                            gap: '6px'
+                        }}
+                    >
+                        {isPremium && <Award size={12} />}
+                        {selectedTitle || 'GLORIOUS EXPLORER'}
+                        {isPremium && <Award size={12} />}
+                    </motion.div>
+
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '20px',
+                        marginTop: '10px'
+                    }}>
+                        {/* Level Indicator (Left) */}
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '60px' }}>
+                            <div style={{ fontSize: '1.2rem', fontWeight: '950', color: '#fff', lineHeight: 1 }}>{totalLevel}</div>
+                            <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>LVL</div>
+                        </div>
+
+                        <h2 style={{ margin: 0, fontSize: '2.2rem', fontWeight: '900', color: '#fff', textShadow: '0 0 20px rgba(255,255,255,0.1)', letterSpacing: '-0.5px', lineHeight: 1 }}>{name}</h2>
+
+                        {/* Power Indicator (Right) */}
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '60px' }}>
+                            <div style={{ fontSize: '1.2rem', fontWeight: '950', color: isPremium ? '#d4af37' : 'var(--accent)', lineHeight: 1 }}>{totalIP}</div>
+                            <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>PWR</div>
+                        </div>
+                    </div>
+
+                    {guildName && (
+                        <div style={{
+                            fontSize: '0.8rem',
+                            color: '#4ade80',
+                            fontWeight: 'bold',
+                            marginTop: '4px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '4px'
                         }}>
-                            {/* Level Indicator (Left) */}
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '60px' }}>
-                                <div style={{ fontSize: '1.2rem', fontWeight: '950', color: '#fff', lineHeight: 1 }}>{level}</div>
-                                <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>LVL</div>
-                            </div>
-
-                            <h2 style={{ margin: 0, fontSize: '2.2rem', fontWeight: '900', color: '#fff', textShadow: '0 0 20px rgba(255,255,255,0.1)', letterSpacing: '-0.5px', lineHeight: 1 }}>{name}</h2>
-
-                            {/* Power Indicator (Right) */}
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: '60px' }}>
-                                <div style={{ fontSize: '1.2rem', fontWeight: '950', color: isPremium ? '#d4af37' : 'var(--accent)', lineHeight: 1 }}>{totalIP}</div>
-                                <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>PWR</div>
-                            </div>
+                            <span style={{ opacity: 0.4 }}>‹</span>
+                            {guildName}
+                            <span style={{ opacity: 0.4 }}>›</span>
                         </div>
+                    )}
+                </div>
 
-                        {guildName && (
+                {/* Navigation */}
+                <div style={{ display: 'flex', padding: '0 30px', gap: '8px', marginTop: '10px', justifyContent: 'center' }}>
+                    {['EQUIPMENT', 'SKILLS'].map(tab => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            style={{
+                                padding: '8px 20px', border: 'none',
+                                background: activeTab === tab ? 'rgba(255,255,255,0.06)' : 'transparent',
+                                borderRadius: '10px',
+                                color: activeTab === tab ? '#fff' : 'rgba(255,255,255,0.4)',
+                                fontWeight: '900', fontSize: '0.7rem', cursor: 'pointer',
+                                letterSpacing: '1.5px',
+                                transition: '0.3s',
+                                border: activeTab === tab ? '1px solid rgba(255,255,255,0.1)' : '1px solid transparent',
+                                minWidth: '110px'
+                            }}
+                        >
+                            {tab}
+                        </button>
+                    ))}
+                </div>
+
+                <div style={{ flex: 1, overflowY: 'auto', padding: '20px 25px', position: 'relative' }}>
+                    {activeTab === 'EQUIPMENT' ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+                            {/* HP Bar */}
+                            <div style={{ marginBottom: '5px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', marginBottom: '8px', fontWeight: '900', letterSpacing: '1px', color: '#888' }}>
+                                    <span>VITALITY</span>
+                                    <span style={{ color: '#fff' }}>{Math.floor(health)} / {Math.floor(stats.maxHP || 100)} HP</span>
+                                </div>
+                                <div style={{ background: 'rgba(255, 0, 0, 0.05)', height: '6px', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255, 0, 0, 0.1)' }}>
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${Math.min(100, (health / (stats.maxHP || 100)) * 100)}%` }}
+                                        style={{ height: '100%', background: 'linear-gradient(90deg, #ff4d4d, #b30000)' }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Compact Grid Layout */}
                             <div style={{
-                                fontSize: '0.8rem',
-                                color: '#4ade80',
-                                fontWeight: 'bold',
-                                marginTop: '4px',
-                                display: 'flex',
-                                alignItems: 'center',
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(3, auto)',
+                                gap: '15px',
                                 justifyContent: 'center',
-                                gap: '4px'
+                                padding: '10px 0'
                             }}>
-                                <span style={{ opacity: 0.4 }}>‹</span>
-                                {guildName}
-                                <span style={{ opacity: 0.4 }}>›</span>
-                            </div>
-                        )}
-                    </div>
+                                <EquipmentSlot slot="cape" icon={<Layers size={20} />} label="CAPE" item={equipment.cape} delay={0.05} />
+                                <EquipmentSlot slot="helmet" icon={<User size={20} />} label="HEAD" item={equipment.helmet} delay={0.1} />
+                                <EquipmentSlot slot="food" icon={<Apple size={20} />} label="FOOD" item={equipment.food} delay={0.15} />
 
-                    {/* Navigation */}
-                    <div style={{ display: 'flex', padding: '0 30px', gap: '8px', marginTop: '10px', justifyContent: 'center' }}>
-                        {['EQUIPMENT', 'SKILLS'].map(tab => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                style={{
-                                    padding: '8px 20px', border: 'none',
-                                    background: activeTab === tab ? 'rgba(255,255,255,0.06)' : 'transparent',
-                                    borderRadius: '10px',
-                                    color: activeTab === tab ? '#fff' : 'rgba(255,255,255,0.4)',
-                                    fontWeight: '900', fontSize: '0.7rem', cursor: 'pointer',
-                                    letterSpacing: '1.5px',
-                                    transition: '0.3s',
-                                    border: activeTab === tab ? '1px solid rgba(255,255,255,0.1)' : '1px solid transparent',
-                                    minWidth: '110px'
-                                }}
-                            >
-                                {tab}
-                            </button>
-                        ))}
-                    </div>
+                                <EquipmentSlot slot="gloves" icon={<Shield size={20} />} label="HANDS" item={equipment.gloves} delay={0.2} />
+                                <EquipmentSlot slot="chest" icon={<Shield size={20} />} label="CHEST" item={equipment.chest} delay={0.25} />
+                                <EquipmentSlot slot="offHand" icon={<Target size={20} />} label="OFF-HAND" item={equipment.offHand} delay={0.3} />
 
-                    <div style={{ flex: 1, overflowY: 'auto', padding: '20px 25px', position: 'relative' }}>
-                        {activeTab === 'EQUIPMENT' ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-                                {/* HP Bar */}
-                                <div style={{ marginBottom: '5px' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', marginBottom: '8px', fontWeight: '900', letterSpacing: '1px', color: '#888' }}>
-                                        <span>VITALITY</span>
-                                        <span style={{ color: '#fff' }}>{Math.floor(health)} / {Math.floor(stats.maxHP || 100)} HP</span>
-                                    </div>
-                                    <div style={{ background: 'rgba(255, 0, 0, 0.05)', height: '6px', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255, 0, 0, 0.1)' }}>
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            animate={{ width: `${Math.min(100, (health / (stats.maxHP || 100)) * 100)}%` }}
-                                            style={{ height: '100%', background: 'linear-gradient(90deg, #ff4d4d, #b30000)' }}
-                                        />
-                                    </div>
-                                </div>
+                                <EquipmentSlot slot="mainHand" icon={<Sword size={20} />} label="WEAPON" item={equipment.mainHand} delay={0.35} />
+                                <EquipmentSlot slot="boots" icon={<Target size={20} />} label="FEET" item={equipment.boots} delay={0.4} />
 
-                                {/* Compact Grid Layout */}
                                 <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(3, auto)',
-                                    gap: '15px',
+                                    width: '64px',
+                                    height: '64px',
+                                    border: '2px dashed rgba(255,255,255,0.05)',
+                                    borderRadius: '12px',
+                                    background: 'rgba(0,0,0,0.2)',
+                                    display: 'flex',
+                                    alignItems: 'center',
                                     justifyContent: 'center',
-                                    padding: '10px 0'
+                                    color: 'rgba(255,255,255,0.1)'
                                 }}>
-                                    <EquipmentSlot slot="cape" icon={<Layers size={20} />} label="CAPE" item={equipment.cape} delay={0.05} />
-                                    <EquipmentSlot slot="helmet" icon={<User size={20} />} label="HEAD" item={equipment.helmet} delay={0.1} />
-                                    <EquipmentSlot slot="food" icon={<Apple size={20} />} label="FOOD" item={equipment.food} delay={0.15} />
-
-                                    <EquipmentSlot slot="gloves" icon={<Shield size={20} />} label="HANDS" item={equipment.gloves} delay={0.2} />
-                                    <EquipmentSlot slot="chest" icon={<Shield size={20} />} label="CHEST" item={equipment.chest} delay={0.25} />
-                                    <EquipmentSlot slot="offHand" icon={<Target size={20} />} label="OFF-HAND" item={equipment.offHand} delay={0.3} />
-
-                                    <EquipmentSlot slot="mainHand" icon={<Sword size={20} />} label="WEAPON" item={equipment.mainHand} delay={0.35} />
-                                    <EquipmentSlot slot="boots" icon={<Target size={20} />} label="FEET" item={equipment.boots} delay={0.4} />
-
-                                    <div style={{
-                                        width: '64px',
-                                        height: '64px',
-                                        border: '2px dashed rgba(255,255,255,0.05)',
-                                        borderRadius: '12px',
-                                        background: 'rgba(0,0,0,0.2)',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        color: 'rgba(255,255,255,0.1)'
-                                    }}>
-                                        <div style={{ fontSize: '0.6rem', fontWeight: 'bold' }}>LOCKED</div>
-                                    </div>
-                                </div>
-
-                                {/* Tools Section */}
-                                <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '20px' }}>
-                                    <h4 style={{ color: 'var(--accent)', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '15px', textAlign: 'center', letterSpacing: '2px', fontWeight: '900', opacity: 0.6 }}>Gathering Tools</h4>
-                                    <div style={{
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        gap: '12px',
-                                        flexWrap: 'wrap'
-                                    }}>
-                                        <EquipmentSlot slot="tool_axe" icon={<Pickaxe size={18} />} label="AXE" item={equipment.tool_axe} delay={0.45} />
-                                        <EquipmentSlot slot="tool_pickaxe" icon={<Pickaxe size={18} />} label="PICK" item={equipment.tool_pickaxe} delay={0.5} />
-                                        <EquipmentSlot slot="tool_sickle" icon={<Scissors size={18} />} label="SICKLE" item={equipment.tool_sickle} delay={0.55} />
-                                        <EquipmentSlot slot="tool_knife" icon={<Sword size={18} style={{ transform: 'rotate(45deg)' }} />} label="KNIFE" item={equipment.tool_knife} delay={0.6} />
-                                        <EquipmentSlot slot="tool_rod" icon={<Anchor size={18} />} label="ROD" item={equipment.tool_rod} delay={0.65} />
-                                        <EquipmentSlot slot="tool_pouch" icon={<ShoppingBag size={18} />} label="POUCH" item={equipment.tool_pouch} delay={0.7} />
-                                    </div>
+                                    <div style={{ fontSize: '0.6rem', fontWeight: 'bold' }}>LOCKED</div>
                                 </div>
                             </div>
-                        ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                                <SkillCategory
-                                    title="Gathering"
-                                    icon={<Pickaxe />}
-                                    color="#4ade80"
-                                    skillsList={['LUMBERJACK', 'ORE_MINER', 'ANIMAL_SKINNER', 'FIBER_HARVESTER', 'FISHING', 'HERBALISM']}
-                                    isExpanded={expandedCategory === 'gathering'}
-                                    onToggle={() => setExpandedCategory(expandedCategory === 'gathering' ? null : 'gathering')}
-                                />
-                                <SkillCategory
-                                    title="Refining"
-                                    icon={<Flame />}
-                                    color="#60a5fa"
-                                    skillsList={['PLANK_REFINER', 'METAL_BAR_REFINER', 'LEATHER_REFINER', 'CLOTH_REFINER', 'DISTILLATION']}
-                                    isExpanded={expandedCategory === 'refining'}
-                                    onToggle={() => setExpandedCategory(expandedCategory === 'refining' ? null : 'refining')}
-                                />
-                                <SkillCategory
-                                    title="Crafting"
-                                    icon={<Hammer />}
-                                    color="#f472b6"
-                                    skillsList={['WARRIOR_CRAFTER', 'MAGE_CRAFTER', 'TOOL_CRAFTER', 'COOKING', 'ALCHEMY']}
-                                    isExpanded={expandedCategory === 'crafting'}
-                                    onToggle={() => setExpandedCategory(expandedCategory === 'crafting' ? null : 'crafting')}
-                                />
-                                <SkillCategory
-                                    title="Adventure"
-                                    icon={<Sword />}
-                                    color="#ef4444"
-                                    skillsList={['COMBAT', 'DUNGEONEERING']}
-                                    isExpanded={expandedCategory === 'adventure'}
-                                    onToggle={() => setExpandedCategory(expandedCategory === 'adventure' ? null : 'adventure')}
-                                />
-                            </div>
-                        )}
-                    </div>
 
-                    {/* Footer Info */}
-                    <div style={{ padding: '20px', background: 'rgba(0,0,0,0.3)', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Crosshair size={14} style={{ color: '#ef4444' }} />
-                            <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)' }}>DMG <span style={{ color: '#fff' }}>{stats.damage || 0}</span></span>
+                            {/* Tools Section */}
+                            <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '20px' }}>
+                                <h4 style={{ color: 'var(--accent)', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '15px', textAlign: 'center', letterSpacing: '2px', fontWeight: '900', opacity: 0.6 }}>Gathering Tools</h4>
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    gap: '12px',
+                                    flexWrap: 'wrap'
+                                }}>
+                                    <EquipmentSlot slot="tool_axe" icon={<Pickaxe size={18} />} label="AXE" item={equipment.tool_axe} delay={0.45} />
+                                    <EquipmentSlot slot="tool_pickaxe" icon={<Pickaxe size={18} />} label="PICK" item={equipment.tool_pickaxe} delay={0.5} />
+                                    <EquipmentSlot slot="tool_sickle" icon={<Scissors size={18} />} label="SICKLE" item={equipment.tool_sickle} delay={0.55} />
+                                    <EquipmentSlot slot="tool_knife" icon={<Sword size={18} style={{ transform: 'rotate(45deg)' }} />} label="KNIFE" item={equipment.tool_knife} delay={0.6} />
+                                    <EquipmentSlot slot="tool_rod" icon={<Anchor size={18} />} label="ROD" item={equipment.tool_rod} delay={0.65} />
+                                    <EquipmentSlot slot="tool_pouch" icon={<ShoppingBag size={18} />} label="POUCH" item={equipment.tool_pouch} delay={0.7} />
+                                </div>
+                            </div>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Shield size={14} style={{ color: '#60a5fa' }} />
-                            <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)' }}>DEF <span style={{ color: '#fff' }}>{stats.defense || 0}</span></span>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                            <SkillCategory
+                                title="Gathering"
+                                icon={<Pickaxe />}
+                                color="#4ade80"
+                                skillsList={['LUMBERJACK', 'ORE_MINER', 'ANIMAL_SKINNER', 'FIBER_HARVESTER', 'FISHING', 'HERBALISM']}
+                                isExpanded={expandedCategory === 'gathering'}
+                                onToggle={() => setExpandedCategory(expandedCategory === 'gathering' ? null : 'gathering')}
+                            />
+                            <SkillCategory
+                                title="Refining"
+                                icon={<Flame />}
+                                color="#60a5fa"
+                                skillsList={['PLANK_REFINER', 'METAL_BAR_REFINER', 'LEATHER_REFINER', 'CLOTH_REFINER', 'DISTILLATION']}
+                                isExpanded={expandedCategory === 'refining'}
+                                onToggle={() => setExpandedCategory(expandedCategory === 'refining' ? null : 'refining')}
+                            />
+                            <SkillCategory
+                                title="Crafting"
+                                icon={<Hammer />}
+                                color="#f472b6"
+                                skillsList={['WARRIOR_CRAFTER', 'MAGE_CRAFTER', 'TOOL_CRAFTER', 'COOKING', 'ALCHEMY']}
+                                isExpanded={expandedCategory === 'crafting'}
+                                onToggle={() => setExpandedCategory(expandedCategory === 'crafting' ? null : 'crafting')}
+                            />
+                            <SkillCategory
+                                title="Adventure"
+                                icon={<Sword />}
+                                color="#ef4444"
+                                skillsList={['COMBAT', 'DUNGEONEERING']}
+                                isExpanded={expandedCategory === 'adventure'}
+                                onToggle={() => setExpandedCategory(expandedCategory === 'adventure' ? null : 'adventure')}
+                            />
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Zap size={14} style={{ color: '#facc15' }} />
-                            <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)' }}>SPD <span style={{ color: '#fff' }}>{stats.attackSpeed ? `${(stats.attackSpeed / 1000).toFixed(1)}s` : '1.0s'}</span></span>
-                        </div>
+                    )}
+                </div>
+
+                {/* Footer Info */}
+                <div style={{ padding: '20px', background: 'rgba(0,0,0,0.3)', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Crosshair size={14} style={{ color: '#ef4444' }} />
+                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)' }}>DMG <span style={{ color: '#fff' }}>{stats.damage || 0}</span></span>
                     </div>
-                </motion.div>
-            </div>
-        </AnimatePresence>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Shield size={14} style={{ color: '#60a5fa' }} />
+                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)' }}>DEF <span style={{ color: '#fff' }}>{stats.defense || 0}</span></span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Zap size={14} style={{ color: '#facc15' }} />
+                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)' }}>SPD <span style={{ color: '#fff' }}>{stats.attackSpeed ? `${(stats.attackSpeed / 1000).toFixed(1)}s` : '1.0s'}</span></span>
+                    </div>
+                </div>
+            </motion.div>
+        </motion.div>
     );
-};
+});
 
 export default InspectModal;
