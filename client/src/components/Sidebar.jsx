@@ -8,7 +8,7 @@ import {
 import DailySpinModal from './DailySpinModal';
 import { calculateNextLevelXP } from '@shared/skills';
 
-const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActiveCategory, isMobile, isOpen, onClose, onSwitchCharacter, theme, toggleTheme, socket, canSpin, onOpenDailySpin, hasActiveTrade }) => {
+const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategory, setActiveCategory, isMobile, isOpen, onClose, onSwitchCharacter, theme, toggleTheme, socket, canSpin, onOpenDailySpin, hasActiveTrade }) => {
     const [expanded, setExpanded] = useState({
         gathering: true,
         refining: false,
@@ -253,7 +253,11 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
                         <button
                             key={item.id}
                             onClick={() => {
-                                setActiveTab(item.id);
+                                if (item.id === 'trade' && onNavigate) {
+                                    onNavigate('trade');
+                                } else {
+                                    setActiveTab(item.id);
+                                }
                                 if (isMobile) onClose();
                             }}
                             style={{

@@ -301,6 +301,10 @@ io.on('connection', (socket) => {
     console.log(`[SOCKET] User connected: ${socket.user?.email || 'Unknown'} (Socket: ${socket.id})`);
     connectedSockets.set(socket.id, socket);
 
+    // Version Handshake for Auto-Refresh
+    const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
+    socket.emit('server_version', { version: pkg.version });
+
     socket.on('disconnect', async (reason) => {
         console.log(`[SOCKET] User disconnected: ${socket.id}. Reason: ${reason}`);
         connectedSockets.delete(socket.id);
@@ -342,6 +346,7 @@ io.on('connection', (socket) => {
                 socket.data.characterId = characterId;
 
                 socket.emit('status_update', status);
+                socket.emit('global_stats_update', gameManager.globalStats);
                 console.log(`[SOCKET] User ${socket.user.email} successfully joined character ${characterId}`);
             });
         } catch (err) {

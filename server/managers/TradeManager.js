@@ -1,4 +1,4 @@
-import { calculateItemSellPrice } from '../../shared/items.js';
+import { ITEMS, resolveItem, calculateItemSellPrice } from '../../shared/items.js';
 
 export class TradeManager {
     constructor(gameManager) {
@@ -12,13 +12,16 @@ export class TradeManager {
 
         if (offer.items && offer.items.length > 0) {
             offer.items.forEach(it => {
-                // it is already enriched with metadata in updateOffer
-                const pricePerUnit = calculateItemSellPrice(it, it.id);
+                const def = ITEMS[it.id] || resolveItem(it.id);
+                const itemData = { ...def, ...it };
+                const pricePerUnit = calculateItemSellPrice(itemData, it.id);
                 totalValue += (pricePerUnit * it.amount);
             });
         }
 
-        return Math.floor(totalValue * 0.15);
+        const tax = Math.floor(totalValue * 0.15);
+        console.log(`[TRADE-TAX] Calculated tax for offer: ${tax} (Items+Silver Value: ${totalValue})`);
+        return tax;
     }
 
     async createTrade(sender, receiverName) {
@@ -194,10 +197,14 @@ export class TradeManager {
                 const sTax = this.calculateOfferTax(sOffer);
                 const rTax = this.calculateOfferTax(rOffer);
 
+                console.log(`[TRADE-EXECUTE] ${sender.name} offer: ${sOffer.silver} silver, ${sOffer.items.length} items. Tax: ${sTax}`);
+                console.log(`[TRADE-EXECUTE] ${receiver.name} offer: ${rOffer.silver} silver, ${rOffer.items.length} items. Tax: ${rTax}`);
+
                 // Validate Silver (Price + Tax)
                 if ((sOffer.silver + sTax) > (sender.state.silver || 0)) throw new Error(`${sender.name} has insufficient silver to cover offer + 15% tax (${sTax.toLocaleString()} Silver tax).`);
                 if ((rOffer.silver + rTax) > (receiver.state.silver || 0)) throw new Error(`${receiver.name} has insufficient silver to cover offer + 15% tax (${rTax.toLocaleString()} Silver tax).`);
 
+                // ... item validation ...
                 const sItemsReq = {};
                 sOffer.items.forEach(it => {
                     const baseId = it.id.split('::')[0];
@@ -213,12 +220,17 @@ export class TradeManager {
                 if (!this.gameManager.inventoryManager.hasItems(receiver, rItemsReq)) throw new Error(`${receiver.name} has insufficient items.`);
 
                 // TRANSFER SILVER & CHARGE TAX
+                console.log(`[TRADE-SILVER] Before - ${sender.name}: ${sender.state.silver}, ${receiver.name}: ${receiver.state.silver}`);
                 sender.state.silver = (sender.state.silver || 0) - (sOffer.silver + sTax) + rOffer.silver;
                 receiver.state.silver = (receiver.state.silver || 0) - (rOffer.silver + rTax) + sOffer.silver;
+                console.log(`[TRADE-SILVER] After - ${sender.name}: ${sender.state.silver}, ${receiver.name}: ${receiver.state.silver}`);
 
                 // Update Global Taxometer
                 if (sTax + rTax > 0) {
+                    console.log(`[TRADE-TAX] Updating global tax with: ${sTax + rTax}`);
                     this.gameManager.updateGlobalTax(sTax + rTax);
+                } else {
+                    console.log(`[TRADE-TAX] No tax to update (sTax: ${sTax}, rTax: ${rTax})`);
                 }
 
                 // CONSUME ITEMS

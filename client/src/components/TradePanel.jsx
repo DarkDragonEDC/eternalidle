@@ -13,6 +13,8 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
     const [silverInput, setSilverInput] = useState('');
     const [mobileTab, setMobileTab] = useState('OFFER'); // 'OFFER' or 'INVENTORY'
 
+    if (!trade) return null;
+
     const isSender = trade.sender_id === charId;
     const myOffer = isSender ? trade.sender_offer : trade.receiver_offer;
     const partnerOffer = isSender ? trade.receiver_offer : trade.sender_offer;

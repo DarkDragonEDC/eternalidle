@@ -129,9 +129,11 @@ export class GameManager {
                 this.globalStats = { total_market_tax: 0 };
             }
             this.globalStats.total_market_tax += Math.floor(amount);
+            console.log(`[GameManager] Global stats updated. New total_market_tax: ${this.globalStats.total_market_tax}`);
 
             // Notify all clients IMMEDIATELY for real-time feel
             if (this.onGlobalStatsUpdate) {
+                console.log(`[GameManager] Broadcasting global_stats_update via onGlobalStatsUpdate callback`);
                 this.onGlobalStatsUpdate(this.globalStats);
             }
 

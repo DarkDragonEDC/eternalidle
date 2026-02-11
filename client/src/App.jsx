@@ -474,7 +474,20 @@ function App() {
     });
 
     newSocket.on('global_stats_update', (stats) => {
+      console.log('[DEBUG-CLIENT] global_stats_update received:', stats);
       setGlobalStats(stats);
+    });
+
+    newSocket.on('server_version', ({ version }) => {
+      // client version is 1.0.0
+      const CLIENT_VERSION = '1.0.0';
+      if (version && version !== CLIENT_VERSION) {
+        console.warn(`[VERSION] Version mismatch: Server ${version} vs Client ${CLIENT_VERSION}. Reloading...`);
+        // Add a small delay for better user experience
+        setTimeout(() => {
+          window.location.reload(true);
+        }, 2000);
+      }
     });
 
 
@@ -506,6 +519,10 @@ function App() {
           message: result.message
         });
       }
+    });
+
+    newSocket.on('global_stats_update', (stats) => {
+      setGlobalStats(stats);
     });
 
     newSocket.on('trade_invite', (trade) => {
@@ -1181,30 +1198,39 @@ function App() {
           />
         );
       case 'trade':
-        return <TradePanel gameState={displayedGameState} isMobile={isMobile} socket={socket} theme={theme} />;
+        return null; // TradePanel is a modal, handled separately
       case 'taxometer':
         return (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '20px' }}>
-            <div className="glass-panel" style={{ padding: '30px', borderRadius: '16px', background: 'var(--panel-bg)', border: '1px solid var(--border)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)', textAlign: 'center' }}>
-              <div style={{ marginBottom: '25px' }}>
-                <div style={{ color: 'var(--accent)', fontSize: '0.7rem', fontWeight: '900', letterSpacing: '3px', marginBottom: '10px' }}>GLOBAL ECONOMY</div>
-                <h2 style={{ color: 'var(--text-main)', fontSize: '1.8rem', fontWeight: '900', letterSpacing: '2px', margin: 0 }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: isMobile ? '10px' : '20px', justifyContent: 'center', height: '100%' }}>
+            <div className="glass-panel" style={{
+              padding: isMobile ? '20px' : '30px',
+              borderRadius: '16px',
+              background: 'var(--panel-bg)',
+              border: '1px solid var(--border)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: isMobile ? '15px' : '20px'
+            }}>
+              <div>
+                <div style={{ color: 'var(--accent)', fontSize: '0.65rem', fontWeight: '900', letterSpacing: '3px', marginBottom: '8px' }}>GLOBAL ECONOMY</div>
+                <h2 style={{ color: 'var(--text-main)', fontSize: isMobile ? '1.4rem' : '1.8rem', fontWeight: '900', letterSpacing: '2px', margin: 0 }}>
                   TAXOMETER
                 </h2>
               </div>
 
               <div style={{
                 background: 'rgba(0,0,0,0.2)',
-                padding: '40px 20px',
+                padding: isMobile ? '20px 10px' : '40px 20px',
                 borderRadius: '12px',
                 border: '1px solid rgba(255, 215, 0, 0.1)',
-                marginBottom: '20px',
                 position: 'relative',
                 overflow: 'hidden'
               }}>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '10px', fontWeight: 'bold' }}>TOTAL TAXES COLLECTED</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '10px', fontWeight: 'bold' }}>TOTAL TAXES COLLECTED</div>
                 <ResponsiveText
-                  maxFontSize={40}
+                  maxFontSize={isMobile ? 32 : 40}
                   minFontSize={12}
                   color='var(--accent)'
                   fontWeight='900'
@@ -1214,14 +1240,14 @@ function App() {
                 >
                   {formatNumber(globalStats?.total_market_tax || 0)}
                 </ResponsiveText>
-                <div style={{ marginTop: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'rgba(74, 222, 128, 0.8)', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                <div style={{ marginTop: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'rgba(74, 222, 128, 0.8)', fontSize: '0.7rem', fontWeight: 'bold' }}>
                   <div style={{ width: '6px', height: '6px', background: '#4ade80', borderRadius: '50%', boxShadow: '0 0 8px #4ade80' }}></div>
                   LIVE COUNTER
                 </div>
               </div>
 
-              <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.85rem', lineHeight: '1.6', maxWidth: '400px', margin: '0 auto' }}>
-                <p>Monitoring the global flow of Silver. 20% of every marketplace transaction is collected as tax to maintain the game's economy.</p>
+              <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: isMobile ? '0.75rem' : '0.85rem', lineHeight: '1.5', maxWidth: '400px', margin: '0 auto' }}>
+                <p style={{ margin: 0 }}>Monitoring the global flow of Silver. 20% of marketplace transactions and 15% of player trades are collected as tax to maintain the economy.</p>
               </div>
             </div>
           </div>
@@ -1363,6 +1389,7 @@ function App() {
           gameState={displayedGameState}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
+          onNavigate={handleNavigate}
           activeCategory={activeCategory}
           setActiveCategory={setActiveCategory}
           isMobile={isMobile}
@@ -1378,7 +1405,7 @@ function App() {
         />
       )}
 
-      {isMobile && <BottomNav gameState={displayedGameState} activeTab={activeTab} setActiveTab={setActiveTab} onNavigate={(tab) => setActiveTab(tab)} canSpin={canSpin} hasActiveTrade={tradeInvites?.length > 0 || !!activeTrade} />}
+      {isMobile && <BottomNav gameState={displayedGameState} activeTab={activeTab} setActiveTab={setActiveTab} onNavigate={handleNavigate} canSpin={canSpin} hasActiveTrade={tradeInvites?.length > 0 || !!activeTrade} />}
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', minHeight: 0 }}>
         <header style={{
