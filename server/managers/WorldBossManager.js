@@ -5,7 +5,8 @@ export class WorldBossManager {
     constructor(gameManager) {
         this.gameManager = gameManager;
         this.currentBoss = null;
-        this.rankings = []; // Last 24h ranking cache
+        this.rankings = []; // Last 24h ranking cache from DB
+        this.liveRankings = []; // Merged real-time rankings (DB + Active Fights)
         this.activeFights = new Map(); // characterId -> { startedAt, damage, lastLog }
     }
 
@@ -14,8 +15,11 @@ export class WorldBossManager {
         await this.checkBossCycle();
         await this.refreshRankings();
 
-        // Refresh rankings every 5 minutes from DB to catch up with other shards (if any)
+        // Refresh DB rankings every 5 minutes
         setInterval(() => this.refreshRankings(), 300000);
+
+        // Refresh Live Rankings (Memory Merge) every 1 second
+        setInterval(() => this.updateLiveRankings(), 1000);
     }
 
     async refreshRankings() {
@@ -38,9 +42,48 @@ export class WorldBossManager {
             }));
 
             console.log(`[WORLD_BOSS] Cached ${this.rankings.length} ranking entries.`);
+            this.updateLiveRankings(); // Update live immediately after DB refresh
         } catch (err) {
             console.error('[WORLD_BOSS] Error refreshing rankings:', err);
         }
+    }
+
+    updateLiveRankings() {
+        const merged = new Map();
+
+        // 1. Load from DB Cache first
+        this.rankings.forEach(r => {
+            merged.set(r.character_id, { ...r });
+        });
+
+        // 2. Overlay Active Fights (Real-time damage)
+        this.activeFights.forEach((fight, charId) => {
+            const existing = merged.get(charId);
+            if (existing) {
+                // Update damage if current fight is higher (it should be, unless logic error)
+                if (fight.damage > existing.damage) {
+                    existing.damage = fight.damage;
+                }
+            } else {
+                // New challenger not yet in DB
+                merged.set(charId, {
+                    character_id: charId,
+                    name: fight.name,
+                    damage: fight.damage,
+                    pos: 0 // Will be calculated below
+                });
+            }
+        });
+
+        // 3. Convert to Array and Sort
+        const sorted = Array.from(merged.values())
+            .sort((a, b) => b.damage - a.damage);
+
+        // 4. Assign Positions
+        this.liveRankings = sorted.map((r, index) => ({
+            ...r,
+            pos: index + 1
+        }));
     }
 
     async checkBossCycle() {
@@ -71,16 +114,16 @@ export class WorldBossManager {
     async getStatus(charId) {
         await this.checkBossCycle();
 
-        // Find player's current rank
-        const myRankIndex = this.rankings.findIndex(r => r.character_id === charId);
-        const myRank = myRankIndex !== -1 ? { ...this.rankings[myRankIndex], rank: myRankIndex + 1 } : null;
+        // Find player's current rank in LIVE rankings
+        const myRankIndex = this.liveRankings.findIndex(r => r.character_id === charId);
+        const myRank = myRankIndex !== -1 ? { ...this.liveRankings[myRankIndex] } : null;
 
         // TODO: Check if player has rewards to claim
         const pendingReward = await this.getPendingReward(charId);
 
         return {
             boss: this.currentBoss,
-            rankings: this.rankings.slice(0, 50), // Send top 50
+            rankings: this.liveRankings.slice(0, 50), // Send top 50 active
             myRank: myRank,
             pendingReward: pendingReward
         };
@@ -113,6 +156,8 @@ export class WorldBossManager {
         const now = virtualTime || Date.now();
         const elapsed = now - fight.startedAt;
 
+        // console.log(`[WB_DEBUG] Tick for ${char.name}. Elapsed: ${elapsed}, Active: ${this.activeFights.has(char.id)}`);
+
         if (elapsed >= 60000) {
             console.log(`[WORLD_BOSS] Time limit reached for ${char.name}. Ending fight.`);
             return await this.endFight(char);
@@ -124,10 +169,14 @@ export class WorldBossManager {
         // Process damage (allowing multiple hits if tick skipped)
         const atkSpeed = Math.max(200, stats.attackSpeed || 1000);
         let rounds = 0;
+        const hits = []; // Collect hits for this tick
+
         while (fight.lastTick + atkSpeed <= now && rounds < 10) {
             const damage = Math.max(1, stats.damage || 1);
+            // TODO: Add crit logic here if needed later
             fight.damage += damage;
             fight.lastTick += atkSpeed;
+            hits.push({ damage: damage, timestamp: fight.lastTick });
             rounds++;
         }
 
@@ -143,15 +192,16 @@ export class WorldBossManager {
                 elapsed: elapsed,
                 rankingPos: fight.lastBroadcastPos || this.predictRankingPos(char.id, fight.damage),
                 rounds: rounds, // Might be 0
+                hits: hits, // Send individual hits
                 status: 'ACTIVE'
             }
         };
     }
 
     predictRankingPos(charId, currentDamage) {
-        // Find where this damage would sit in the current cached rankings
+        // Find where this damage would sit in the current LIVE rankings
         let pos = 1;
-        for (const entry of this.rankings) {
+        for (const entry of this.liveRankings) {
             if (entry.character_id === charId) continue; // Ignore my previous record
             if (currentDamage > entry.damage) break;
             pos++;
@@ -173,7 +223,7 @@ export class WorldBossManager {
         // Save to DB
         console.log(`[WORLD_BOSS] Attempting to save participation...`);
         try {
-            await this.saveParticipation(char.id, fight.damage);
+            await this.saveParticipation(char.id, fight.damage, char.name);
             console.log(`[WORLD_BOSS] Save successful.`);
         } catch (dbErr) {
             console.error(`[WORLD_BOSS] CRITICAL: Failed to save participation!`, dbErr);
@@ -216,7 +266,7 @@ export class WorldBossManager {
         return !!data;
     }
 
-    async saveParticipation(characterId, damage) {
+    async saveParticipation(characterId, damage, playerName) {
         const todayStr = new Date().toISOString().split('T')[0];
         const { error } = await this.gameManager.supabase
             .from('world_boss_attempts')
@@ -224,6 +274,7 @@ export class WorldBossManager {
                 character_id: characterId,
                 date: todayStr,
                 damage: Math.floor(damage),
+                player_name: playerName,
                 claimed: false
             }, { onConflict: 'character_id,date' });
 

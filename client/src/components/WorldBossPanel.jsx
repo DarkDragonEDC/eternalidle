@@ -73,11 +73,22 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge }) => {
             setLoading(false);
         };
         socket.on('world_boss_status', handleStatus);
+
+        // Initial fetch
         socket.emit('get_world_boss_status');
+
+        // Auto-refresh every 5 seconds for live rankings
+        const interval = setInterval(() => {
+            if (activeTab === 'RANKING') {
+                socket.emit('get_world_boss_status');
+            }
+        }, 5000);
+
         return () => {
             socket.off('world_boss_status', handleStatus);
+            clearInterval(interval);
         };
-    }, [socket]);
+    }, [socket, activeTab]);
 
     if (loading) {
         return (

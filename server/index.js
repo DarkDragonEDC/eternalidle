@@ -1329,6 +1329,56 @@ io.on('connection', (socket) => {
             socket.emit('error', { message: err.message });
         }
     });
+    // World Boss Fight Start
+    socket.on('start_world_boss_fight', async () => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+
+                // 1. Initialize logic in Manager
+                const result = await gameManager.worldBossManager.startFight(char);
+
+                // 2. Set Activity to 'world_boss' so processTick picks it up
+                if (result.success) {
+                    char.current_activity = 'world_boss';
+                    char.activity_started_at = new Date().toISOString();
+                    await gameManager.saveState(char.id, char.state);
+
+                    // Trigger client UI transition
+                    socket.emit('world_boss_started', { success: true });
+                }
+
+                // Initial data send
+                socket.emit('action_result', {
+                    success: result.success,
+                    message: "You challenge the World Boss!",
+                    worldBossUpdate: await gameManager.worldBossManager.getStatus(char.id)
+                });
+            });
+        } catch (err) {
+            console.error('[WORLD_BOSS] Start Fight Error:', err);
+            socket.emit('action_result', { success: false, message: err.message });
+        }
+    });
+
+    // World Boss Reward Claim
+    socket.on('claim_world_boss_reward', async () => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                const result = await gameManager.worldBossManager.claimReward(char);
+
+                socket.emit('action_result', {
+                    success: result.success,
+                    message: result.message,
+                    worldBossUpdate: await gameManager.worldBossManager.getStatus(char.id)
+                });
+            });
+        } catch (err) {
+            console.error('[WORLD_BOSS] Claim Error:', err);
+            socket.emit('action_result', { success: false, message: err.message });
+        }
+    });
 });
 
 // --- GLOBAL TICKER LOOP (1s) ---
@@ -1363,8 +1413,8 @@ setInterval(async () => {
                     if (result) {
                         // console.log(`[TICKER] Emitting update for ${user.email} (Status change: ${!!result.status})`);
                         sockets.forEach(s => {
-                            // Fix: Emit if message OR combatUpdate OR dungeonUpdate exists
-                            const shouldEmit = result.message || result.combatUpdate || (result.dungeonUpdate && result.dungeonUpdate.message) || result.healingUpdate;
+                            // Fix: Emit if message OR combatUpdate OR dungeonUpdate OR worldBossUpdate exists
+                            const shouldEmit = result.message || result.combatUpdate || (result.dungeonUpdate && result.dungeonUpdate.message) || result.healingUpdate || result.worldBossUpdate;
 
                             if (shouldEmit) {
                                 try {
@@ -1377,6 +1427,9 @@ setInterval(async () => {
                                         worldBossUpdate: result.worldBossUpdate,
                                         healingUpdate: result.healingUpdate
                                     });
+
+
+
                                 } catch (e) { console.error("[EMIT-ERROR] action_result failed:", e); }
                             }
                             if (result.status) {

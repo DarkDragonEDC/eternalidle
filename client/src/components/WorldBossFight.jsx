@@ -12,6 +12,9 @@ const WorldBossFight = ({ gameState, socket, onFinish }) => {
         status: 'ACTIVE'
     });
 
+    const [logs, setLogs] = useState([]);
+    const logsEndRef = React.useRef(null);
+
     useEffect(() => {
         if (!socket) return;
         const handleUpdate = (result) => {
@@ -24,6 +27,21 @@ const WorldBossFight = ({ gameState, socket, onFinish }) => {
                     rankingPos: update.rankingPos !== undefined ? update.rankingPos : prev.rankingPos,
                     status: update.status || prev.status
                 }));
+
+                // Process Hits for Log
+                if (update.hits && update.hits.length > 0) {
+                    const newLogs = update.hits.map(hit => ({
+                        id: Date.now() + Math.random(),
+                        damage: hit.damage,
+                        crit: false // Placeholder
+                    }));
+
+                    setLogs(prev => {
+                        const updated = [...prev, ...newLogs];
+                        return updated.slice(-20); // Keep last 20
+                    });
+                }
+
                 if (update.status === 'FINISHED') {
                     setTimeout(() => onFinish(update), 3000);
                 }
@@ -32,6 +50,10 @@ const WorldBossFight = ({ gameState, socket, onFinish }) => {
         socket.on('action_result', handleUpdate);
         return () => socket.off('action_result', handleUpdate);
     }, [socket]);
+
+    useEffect(() => {
+        logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [logs]);
 
     const timeLeft = Math.max(0, 60 - Math.floor(fightData.elapsed / 1000));
     const progress = Math.min(100, (fightData.elapsed / 60000) * 100);
@@ -184,12 +206,12 @@ const WorldBossFight = ({ gameState, socket, onFinish }) => {
                 <motion.div
                     key={fightData.damage}
                     initial={{ scale: 1 }}
-                    animate={{ scale: [1, 1.04, 1] }}
-                    transition={{ duration: 0.08 }}
+                    animate={{ scale: [1, 1.008, 1] }}
+                    transition={{ duration: 0.15, ease: "easeOut" }}
                     style={{ width: '100%' }}
                 >
                     <ResponsiveText
-                        maxFontSize={120}
+                        maxFontSize={80}
                         minFontSize={24}
                         fontWeight="950"
                         color="white"
@@ -208,6 +230,41 @@ const WorldBossFight = ({ gameState, socket, onFinish }) => {
                     textTransform: 'uppercase'
                 }}>
                     Total Damage
+                </div>
+
+                {/* Damage Log Scroll */}
+                <div style={{
+                    height: '100px',
+                    width: '200px',
+                    marginTop: '20px',
+                    overflow: 'hidden',
+                    position: 'relative',
+                    maskImage: 'linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)'
+                }}>
+                    <div style={{
+                        position: 'absolute', bottom: 0, left: 0, right: 0,
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px'
+                    }}>
+                        <AnimatePresence>
+                            {logs.map((log) => (
+                                <motion.div
+                                    key={log.id}
+                                    initial={{ opacity: 0, y: 10, scale: 0.8 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    style={{
+                                        fontSize: '0.9rem',
+                                        fontWeight: 'bold',
+                                        color: 'rgba(255, 255, 255, 0.6)',
+                                        textShadow: '0 0 5px rgba(255, 77, 77, 0.5)'
+                                    }}
+                                >
+                                    +{formatNumber(log.damage)}
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+                        <div ref={logsEndRef} />
+                    </div>
                 </div>
             </div>
 

@@ -144,7 +144,7 @@ const ResponsiveTextFinal = ({
     const hiddenTextRef = useRef(null);
     const [fontSize, setFontSize] = useState(maxFontSize);
 
-    useEffect(() => {
+    React.useLayoutEffect(() => {
         const adjust = () => {
             const container = containerRef.current;
             const hiddenText = hiddenTextRef.current;
@@ -158,7 +158,7 @@ const ResponsiveTextFinal = ({
             let newSize = maxFontSize;
             if (textWidth > containerWidth) {
                 const ratio = containerWidth / textWidth;
-                newSize = Math.max(minFontSize, Math.floor(maxFontSize * ratio * 0.95)); // 0.95 for padding safety
+                newSize = Math.max(minFontSize, Math.floor(maxFontSize * ratio * 0.90)); // 0.90 for extra padding safety
             }
 
             setFontSize(newSize);

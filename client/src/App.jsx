@@ -86,6 +86,11 @@ const mapTabCategoryToSkill = (tab, category) => {
 
 import { formatNumber, formatSilver } from '@utils/format';
 
+const SkillProgressHeader = ({ tab, category }) => {
+  // Placeholder to avoid crash
+  return null;
+};
+
 function App() {
   const [session, setSession] = useState(null);
   const [socket, setSocket] = useState(null);
@@ -1238,76 +1243,13 @@ function App() {
       case 'world_boss':
         // Reuse logic or create simple view
         return (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px', padding: '40px', background: 'var(--bg-dark)' }}>
-            <div style={{
-              padding: '40px',
-              background: 'rgba(168, 85, 247, 0.03)',
-              borderRadius: '24px',
-              border: '1px solid rgba(168, 85, 247, 0.15)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '20px',
-              boxShadow: '0 0 40px rgba(168, 85, 247, 0.05)',
-              width: isMobile ? '100%' : '400px',
-              maxWidth: '320px',
-              textAlign: 'center'
-            }}>
-              <motion.div
-                animate={{
-                  scale: [1, 1.05, 1],
-                  opacity: [0.6, 0.9, 0.6]
-                }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              >
-                <Skull size={80} color="#a855f7" />
-              </motion.div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <div style={{
-                  fontSize: '2.2rem',
-                  fontWeight: '900',
-                  color: '#a855f7',
-                  letterSpacing: '4px',
-                  lineHeight: '1.1',
-                  textShadow: '0 0 20px rgba(168, 85, 247, 0.4)'
-                }}>
-                  WORLD BOSS
-                </div>
-                <div style={{
-                  fontSize: '1rem',
-                  color: 'var(--text-dim)',
-                  fontWeight: 'bold',
-                  letterSpacing: '3px',
-                  marginTop: '10px',
-                  opacity: 0.6
-                }}>
-                  COMING SOON
-                </div>
-              </div>
-            </div>
-            <button
-              onClick={() => setActiveTab('combat_overview')}
-              style={{
-                marginTop: '10px',
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid var(--border)',
-                color: 'var(--text-dim)',
-                padding: '12px 24px',
-                borderRadius: '12px',
-                cursor: 'pointer',
-                fontSize: '0.9rem',
-                fontWeight: 'bold',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'; e.currentTarget.style.color = '#fff'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'; e.currentTarget.style.color = 'var(--text-dim)'; }}
-            >
-              ← Back to Combat
-            </button>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <SkillProgressHeader tab="world_boss" category="WORLD_BOSS" />
+            <WorldBossPanel
+              socket={socket}
+              gameState={displayedGameState}
+              onChallenge={handleStartWorldBoss}
+            />
           </div>
         );
       case 'merging':
@@ -1386,6 +1328,12 @@ function App() {
     setMarketFilter(itemName);
     setActiveTab('market');
     setModalItem(null);
+  };
+
+  const handleStartWorldBoss = () => {
+    if (socket) {
+      socket.emit('start_world_boss_fight');
+    }
   };
 
 
