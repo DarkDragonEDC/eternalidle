@@ -387,7 +387,7 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
                                 title="Crafting"
                                 icon={<Hammer />}
                                 color="#f472b6"
-                                skillsList={['WARRIOR_CRAFTER', 'MAGE_CRAFTER', 'TOOL_CRAFTER', 'COOKING', 'ALCHEMY']}
+                                skillsList={['WARRIOR_CRAFTER', 'HUNTER_CRAFTER', 'MAGE_CRAFTER', 'TOOL_CRAFTER', 'COOKING', 'ALCHEMY']}
                                 isExpanded={expandedCategory === 'crafting'}
                                 onToggle={() => setExpandedCategory(expandedCategory === 'crafting' ? null : 'crafting')}
                             />

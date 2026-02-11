@@ -94,6 +94,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         agi += getLvl('LEATHER_REFINER');
         agi += getLvl('LUMBERJACK');
         agi += getLvl('PLANK_REFINER');
+        agi += getLvl('HUNTER_CRAFTER');
 
         // INT: Mage Class (Harvesting, Woodcutting, Weaving, Woodworking, Mage Crafting, Herbalism, Distillation, Alchemy)
         int += getLvl('FIBER_HARVESTER');
@@ -403,8 +404,9 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
 
 Sources:
 ${fmtSkill('Animal Skinner', 'ANIMAL_SKINNER', 0.2)}
-${fmtSkill('Warrior Crafter', 'WARRIOR_CRAFTER', 0.2)}
-${fmtSkill('Mage Crafter', 'MAGE_CRAFTER', 0.2)}
+${fmtSkill('Leather Refiner', 'LEATHER_REFINER', 0.2)}
+${fmtSkill('Hunter Crafter', 'HUNTER_CRAFTER', 0.2)}
+${fmtSkill('Lumberjack', 'LUMBERJACK', 0.2)}
 ${fmtSkill('Plank Refiner', 'PLANK_REFINER', 0.2)}
 
 Multiplier: 0.2 per Level (Max 100 Total)`;

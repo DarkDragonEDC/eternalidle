@@ -1611,7 +1611,14 @@ export class GameManager {
     }
 
     addXP(char, skillKey, amount) {
-        if (!skillKey || !char.state.skills[skillKey]) return null;
+        if (!skillKey) return null;
+        if (!char.state.skills[skillKey]) {
+            if (INITIAL_SKILLS[skillKey]) {
+                char.state.skills[skillKey] = JSON.parse(JSON.stringify(INITIAL_SKILLS[skillKey]));
+            } else {
+                return null;
+            }
+        }
         const skill = char.state.skills[skillKey];
 
         // Safety Cap & Type check

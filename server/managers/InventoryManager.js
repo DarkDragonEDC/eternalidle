@@ -327,6 +327,9 @@ export class InventoryManager {
         str += getLvl('FISHING');
         str = Math.min(100, str * 0.2);
 
+        agi += getLvl('ANIMAL_SKINNER');
+        agi += getLvl('LEATHER_REFINER');
+        agi += getLvl('HUNTER_CRAFTER');
         agi += getLvl('LUMBERJACK');
         agi += getLvl('PLANK_REFINER');
         agi = Math.min(100, agi * 0.2);
@@ -374,7 +377,7 @@ export class InventoryManager {
         const efficiency = {
             WOOD: 0, ORE: 0, HIDE: 0, FIBER: 0, FISH: 0, HERB: 0,
             PLANK: 0, METAL: 0, LEATHER: 0, CLOTH: 0, EXTRACT: 0,
-            WARRIOR: 0, MAGE: 0, COOKING: 0, ALCHEMY: 0, TOOLS: 0,
+            WARRIOR: 0, HUNTER: 0, MAGE: 0, COOKING: 0, ALCHEMY: 0, TOOLS: 0,
             GLOBAL: 0
         };
 
@@ -423,6 +426,7 @@ export class InventoryManager {
         efficiency.EXTRACT += getLvl('DISTILLATION') * 0.2;
 
         efficiency.WARRIOR += getLvl('WARRIOR_CRAFTER') * 0.2;
+        efficiency.HUNTER += getLvl('HUNTER_CRAFTER') * 0.2;
         efficiency.MAGE += getLvl('MAGE_CRAFTER') * 0.2;
         efficiency.COOKING += getLvl('COOKING') * 0.2;
         efficiency.ALCHEMY += getLvl('ALCHEMY') * 0.2;
@@ -455,13 +459,13 @@ export class InventoryManager {
             // Skill specific
             WOOD: 0, ORE: 0, HIDE: 0, FIBER: 0, FISH: 0, HERB: 0,
             PLANK: 0, METAL: 0, LEATHER: 0, CLOTH: 0, EXTRACT: 0,
-            WARRIOR: 0, MAGE: 0, ALCHEMY: 0, TOOLS: 0, COOKING: 0
+            WARRIOR: 0, HUNTER: 0, MAGE: 0, ALCHEMY: 0, TOOLS: 0, COOKING: 0
         };
 
         const duplication = {
             WOOD: 0, ORE: 0, HIDE: 0, FIBER: 0, FISH: 0, HERB: 0,
             PLANK: 0, METAL: 0, LEATHER: 0, CLOTH: 0, EXTRACT: 0,
-            WARRIOR: 0, MAGE: 0, ALCHEMY: 0, TOOLS: 0, COOKING: 0
+            WARRIOR: 0, HUNTER: 0, MAGE: 0, ALCHEMY: 0, TOOLS: 0, COOKING: 0
         };
 
         const autoRefine = {

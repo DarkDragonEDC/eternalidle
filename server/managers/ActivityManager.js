@@ -55,6 +55,7 @@ export class ActivityManager {
             'CLOTH_REFINER': 'CLOTH',
             'DISTILLATION': 'EXTRACT',
             'WARRIOR_CRAFTER': 'WARRIOR',
+            'HUNTER_CRAFTER': 'HUNTER',
             'MAGE_CRAFTER': 'MAGE',
             'ALCHEMY': 'ALCHEMY',
             'COOKING': 'COOKING',

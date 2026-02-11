@@ -48,6 +48,7 @@ const CATEGORIES = {
         label: 'CRAFTING',
         options: [
             { key: 'WARRIOR_CRAFTER', label: 'Warrior' },
+            { key: 'HUNTER_CRAFTER', label: 'Hunter' },
             { key: 'MAGE_CRAFTER', label: 'Mage' },
             { key: 'TOOL_CRAFTER', label: 'Toolmaker' },
             { key: 'COOKING', label: 'Cooking' },

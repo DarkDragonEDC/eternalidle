@@ -973,7 +973,7 @@ export const getSkillForItem = (itemId, actionType) => {
         }
         // Hunter - Includes LEATHER (Armor, Boots, Helm, Gloves), BOW, TORCH
         if (id.includes('BOW') || id.includes('LEATHER') || id.includes('TORCH') || id.includes('HUNTER_CAPE')) {
-            return 'WARRIOR_CRAFTER';
+            return 'HUNTER_CRAFTER';
         }
         // Mage - Includes CLOTH (Armor, Boots, Helm, Gloves), STAFF, TOME
         if (id.includes('STAFF') || id.includes('CLOTH') || id.includes('TOME') || id.includes('MAGE_CAPE')) {

@@ -73,6 +73,7 @@ export const INITIAL_SKILLS = {
     WARRIOR_CRAFTER: { level: 1, xp: 0, nextLevelXp: 84 },
     MAGE_CRAFTER: { level: 1, xp: 0, nextLevelXp: 84 },
     TOOL_CRAFTER: { level: 1, xp: 0, nextLevelXp: 84 },
+    HUNTER_CRAFTER: { level: 1, xp: 0, nextLevelXp: 84 },
 
     // Combat
     COMBAT: { level: 1, xp: 0, nextLevelXp: 84 },
