@@ -69,7 +69,10 @@ export class TradeManager {
         if (silver > (char.state.silver || 0)) throw new Error("Insufficient silver.");
         if (items && items.length > 0) {
             const req = {};
-            items.forEach(it => req[it.id] = (req[it.id] || 0) + it.amount);
+            items.forEach(it => {
+                const baseId = it.id.split('::')[0];
+                req[baseId] = (req[baseId] || 0) + it.amount;
+            });
             if (!this.gameManager.inventoryManager.hasItems(char, req)) {
                 throw new Error("Insufficient items in inventory.");
             }
@@ -153,11 +156,17 @@ export class TradeManager {
                 if (rOffer.silver > (receiver.state.silver || 0)) throw new Error(`${receiver.name} has insufficient silver.`);
 
                 const sItemsReq = {};
-                sOffer.items.forEach(it => sItemsReq[it.id] = (sItemsReq[it.id] || 0) + it.amount);
+                sOffer.items.forEach(it => {
+                    const baseId = it.id.split('::')[0];
+                    sItemsReq[baseId] = (sItemsReq[baseId] || 0) + it.amount;
+                });
                 if (!this.gameManager.inventoryManager.hasItems(sender, sItemsReq)) throw new Error(`${sender.name} has insufficient items.`);
 
                 const rItemsReq = {};
-                rOffer.items.forEach(it => rItemsReq[it.id] = (rItemsReq[it.id] || 0) + it.amount);
+                rOffer.items.forEach(it => {
+                    const baseId = it.id.split('::')[0];
+                    rItemsReq[baseId] = (rItemsReq[baseId] || 0) + it.amount;
+                });
                 if (!this.gameManager.inventoryManager.hasItems(receiver, rItemsReq)) throw new Error(`${receiver.name} has insufficient items.`);
 
                 // TRANSFER SILVER
