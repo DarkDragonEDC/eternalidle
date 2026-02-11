@@ -57,19 +57,36 @@ export class GameManager {
 
         this.worldBossManager.initialize();
 
-        // SPECIAL: One-time check for all cached characters to grant "Pré-alpha player" title
+        // SPECIAL: One-time check for all cached characters to grant "Pre-Alpha Player" title
         // ONLY for existing characters (Created before Feb 11, 2026)
         setTimeout(() => {
             const CUTOFF_DATE = new Date('2026-02-11T15:10:00Z'); // 12:10 BRT
-            console.log('[GameManager] Running auto-grant title for online characters...');
+            const NEW_TITLE = 'Pre-Alpha Player';
+            const OLD_TITLE = 'Pré-alpha player';
+
+            console.log('[GameManager] Running title migration/grant for online characters...');
             this.cache.forEach((char, charId) => {
                 const charCreatedAt = char.created_at ? new Date(char.created_at) : null;
-                if (char.state && charCreatedAt && charCreatedAt < CUTOFF_DATE) {
+                if (char.state) {
                     if (!char.state.unlockedTitles) char.state.unlockedTitles = [];
-                    if (!char.state.unlockedTitles.includes('Pré-alpha player')) {
-                        char.state.unlockedTitles.push('Pré-alpha player');
+
+                    const before = JSON.stringify(char.state.unlockedTitles);
+
+                    // 1. Convert old title to new
+                    char.state.unlockedTitles = char.state.unlockedTitles.map(t => t === OLD_TITLE ? NEW_TITLE : t);
+
+                    // 2. Grant new title if missing and eligible
+                    if (charCreatedAt && charCreatedAt < CUTOFF_DATE && !char.state.unlockedTitles.includes(NEW_TITLE)) {
+                        char.state.unlockedTitles.push(NEW_TITLE);
+                    }
+
+                    // 3. De-duplicate
+                    char.state.unlockedTitles = [...new Set(char.state.unlockedTitles)];
+
+                    const after = JSON.stringify(char.state.unlockedTitles);
+                    if (before !== after) {
                         this.dirty.add(charId);
-                        console.log(`[GameManager] Auto-granted title to online character: ${charId}`);
+                        console.log(`[GameManager] Title cleaned up for online character: ${charId}`);
                     }
                 }
             });
@@ -276,14 +293,30 @@ export class GameManager {
             // Rehydrate the state after loading from database (AFTER injecting columns)
             data.state = hydrateState(data.state || {});
 
-            // SPECIAL: Auto-grant "Pré-alpha player" title ONLY for existing characters (Created before Feb 11, 2026)
+            // SPECIAL: Auto-grant "Pre-Alpha Player" title ONLY for existing characters (Created before Feb 11, 2026)
             const CUTOFF_DATE = new Date('2026-02-11T15:10:00Z'); // 12:10 BRT
             const charCreatedAt = new Date(data.created_at);
+            const NEW_TITLE = 'Pre-Alpha Player';
+            const OLD_TITLE = 'Pré-alpha player';
 
-            if (data.state && charCreatedAt < CUTOFF_DATE) {
+            if (data.state) {
                 if (!data.state.unlockedTitles) data.state.unlockedTitles = [];
-                if (!data.state.unlockedTitles.includes('Pré-alpha player')) {
-                    data.state.unlockedTitles.push('Pré-alpha player');
+
+                const before = JSON.stringify(data.state.unlockedTitles);
+
+                // 1. Migration: Rename old title if present (and handle multiple)
+                data.state.unlockedTitles = data.state.unlockedTitles.map(t => t === OLD_TITLE ? NEW_TITLE : t);
+
+                // 2. Auto-grant: If eligible and missing
+                if (charCreatedAt < CUTOFF_DATE && !data.state.unlockedTitles.includes(NEW_TITLE)) {
+                    data.state.unlockedTitles.push(NEW_TITLE);
+                }
+
+                // 3. Unique Cleanup
+                data.state.unlockedTitles = [...new Set(data.state.unlockedTitles)];
+
+                const after = JSON.stringify(data.state.unlockedTitles);
+                if (before !== after) {
                     this.dirty.add(data.id); // Mark for saving to DB
                 }
             }
