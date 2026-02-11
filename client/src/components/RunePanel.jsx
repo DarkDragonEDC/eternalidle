@@ -90,7 +90,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
         // Simulate animation delay then call server
         setTimeout(() => {
             if (activeTab === 'shards') {
-                socket.emit('craft_rune', { shardId: 'T1_RUNE_SHARD', qty, category: forgeCategory });
+                socket.emit('craft_rune', { shardId: selectedShard.id, qty, category: forgeCategory });
             } else {
                 socket.emit('upgrade_rune', { runeId: selectedShard.id, qty });
             }
@@ -942,7 +942,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                         <button
                             onClick={() => {
                                 if (!selectedShard || isCrafting) return;
-                                const shardId = activeTab === 'shards' ? 'T1_RUNE_SHARD' : selectedShard.id;
+                                const shardId = activeTab === 'shards' ? selectedShard.id : selectedShard.id;
                                 const entry = inventory[shardId];
                                 const currentQty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
                                 const maxBatch = Math.floor(activeTab === 'shards' ? currentQty / 5 : currentQty / 2);
@@ -961,23 +961,23 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                 }
                             }}
                             disabled={isCrafting || !selectedShard || (activeTab === 'shards' ?
-                                getQty('T1_RUNE_SHARD') < 5 :
+                                getQty(selectedShard.id) < 5 :
                                 getQty(selectedShard.id) < 2)}
                             style={{
                                 marginTop: '10px',
                                 padding: '10px 30px',
                                 background: (!selectedShard || (activeTab === 'shards' ?
-                                    getQty('T1_RUNE_SHARD') < 5 :
+                                    getQty(selectedShard.id) < 5 :
                                     getQty(selectedShard.id) < 2)) ? 'var(--bg-dark)' : 'var(--accent)',
                                 color: '#fff',
                                 border: 'none',
                                 borderRadius: '8px',
                                 fontWeight: 'bold',
                                 cursor: (!selectedShard || (activeTab === 'shards' ?
-                                    getQty('T1_RUNE_SHARD') < 5 :
+                                    getQty(selectedShard.id) < 5 :
                                     getQty(selectedShard.id) < 2)) ? 'not-allowed' : 'pointer',
                                 opacity: (!selectedShard || (activeTab === 'shards' ?
-                                    getQty('T1_RUNE_SHARD') < 5 :
+                                    getQty(selectedShard.id) < 5 :
                                     getQty(selectedShard.id) < 2)) ? 0.5 : 1,
                                 display: 'flex',
                                 alignItems: 'center',
@@ -1419,7 +1419,11 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                             { id: 'REFINING', label: 'Refining', icon: <ArrowRight size={14} /> },
                                             { id: 'CRAFTING', label: 'Crafting', icon: <Hammer size={14} /> },
                                             { id: 'COMBAT', label: 'Combat', icon: <Sparkles size={14} /> }
-                                        ].map(cat => (
+                                        ].filter(cat => {
+                                            if (batchModal.item.id === 'T1_RUNE_SHARD') return cat.id !== 'COMBAT';
+                                            if (batchModal.item.id.includes('BATTLE')) return cat.id === 'COMBAT';
+                                            return true;
+                                        }).map(cat => (
                                             <button
                                                 key={cat.id}
                                                 onClick={() => setForgeCategory(cat.id)}
@@ -1436,7 +1440,8 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                                     fontSize: '0.8rem',
                                                     fontWeight: 'bold',
                                                     cursor: 'pointer',
-                                                    transition: '0.2s'
+                                                    transition: '0.2s',
+                                                    gridColumn: ((cat.id === 'CRAFTING' && batchModal.item.id === 'T1_RUNE_SHARD') || (cat.id === 'COMBAT' && batchModal.item.id.includes('BATTLE'))) ? '1 / -1' : 'auto'
                                                 }}
                                             >
                                                 {cat.icon}

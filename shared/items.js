@@ -422,6 +422,16 @@ ITEMS.SPECIAL.RUNE_SHARD[1] = {
     description: 'A mysterious shard from a shattered rune. Used in rune crafting.'
 };
 
+ITEMS.SPECIAL.RUNE_SHARD['BATTLE'] = {
+    id: `T1_BATTLE_RUNE_SHARD`,
+    name: 'Battle Rune Shard',
+    tier: 1,
+    type: 'CRAFTING_MATERIAL',
+    rarity: 'UNCOMMON', // Or RARE? Keeping UNCOMMON for now as per plan logic discussion, or maybe RARE to distinguish? Plan said UNCOMMON/RARE. Let's stick to UNCOMMON but distinctive ID.
+    noInventorySpace: true,
+    description: 'A shard forged in the heat of battle. Used for advanced rune crafting.'
+};
+
 // Generate Dungeon Chests
 for (const t of TIERS) {
     // Normal (White)
@@ -492,6 +502,61 @@ for (const t of TIERS) {
     ITEMS.SPECIAL.CHEST[`${t}_GOLD`] = { ...ITEMS.SPECIAL.CHEST[`${t}_EXCELLENT`], id: `T${t}_CHEST_GOLD` };
     ITEMS.SPECIAL.CHEST[`${t}_MYTHIC`] = { ...ITEMS.SPECIAL.CHEST[`${t}_MASTERPIECE`], id: `T${t}_CHEST_MYTHIC` };
 
+}
+
+// Generate WorldBoss Chests
+for (const t of TIERS) {
+    // Normal (White)
+    ITEMS.SPECIAL.CHEST[`${t}_WORLDBOSS_NORMAL`] = {
+        id: `T${t}_WORLDBOSS_CHEST_NORMAL`,
+        name: `WorldBoss Chest (Normal)`,
+        tier: t,
+        rarity: 'COMMON',
+        type: 'CONSUMABLE',
+        rarityColor: '#ffffff',
+        desc: 'An ordinary chest dropped by a World Boss.'
+    };
+    // Good (Green)
+    ITEMS.SPECIAL.CHEST[`${t}_WORLDBOSS_GOOD`] = {
+        id: `T${t}_WORLDBOSS_CHEST_GOOD`,
+        name: `WorldBoss Chest (Good)`,
+        tier: t,
+        rarity: 'UNCOMMON',
+        type: 'CONSUMABLE',
+        rarityColor: '#10b981', // Green
+        desc: 'A good chest dropped by a World Boss.'
+    };
+
+    // Outstanding (Blue)
+    ITEMS.SPECIAL.CHEST[`${t}_WORLDBOSS_OUTSTANDING`] = {
+        id: `T${t}_WORLDBOSS_CHEST_OUTSTANDING`,
+        name: `WorldBoss Chest (Outstanding)`,
+        tier: t,
+        rarity: 'RARE',
+        type: 'CONSUMABLE',
+        rarityColor: '#4a90e2',
+        desc: 'An outstanding chest dropped by a World Boss.'
+    };
+    // Excellent (Purple)
+    ITEMS.SPECIAL.CHEST[`${t}_WORLDBOSS_EXCELLENT`] = {
+        id: `T${t}_WORLDBOSS_CHEST_EXCELLENT`,
+        name: `WorldBoss Chest (Excellent)`,
+        tier: t,
+        rarity: 'EPIC',
+        type: 'CONSUMABLE',
+        rarityColor: '#9013fe', // Purple
+        desc: 'An excellent chest dropped by a World Boss.'
+    };
+    // Masterpiece (Orange)
+    ITEMS.SPECIAL.CHEST[`${t}_WORLDBOSS_MASTERPIECE`] = {
+        id: `T${t}_WORLDBOSS_CHEST_MASTERPIECE`,
+        name: `WorldBoss Chest (Masterpiece)`,
+        tier: t,
+        rarity: 'LEGENDARY',
+        type: 'CONSUMABLE',
+        rarityColor: '#f5a623', // Orange/Gold
+        desc: 'A masterpiece chest dropped by a World Boss.'
+    };
 }
 
 // Helper for Gear Generation

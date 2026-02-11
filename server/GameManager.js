@@ -1,6 +1,6 @@
 ﻿import crypto from 'crypto';
 import { ITEMS, ALL_RUNE_TYPES, RUNES_BY_CATEGORY, ITEM_LOOKUP } from '../shared/items.js';
-import { CHEST_DROP_TABLE } from '../shared/chest_drops.js';
+import { CHEST_DROP_TABLE, WORLDBOSS_DROP_TABLE } from '../shared/chest_drops.js';
 import { INITIAL_SKILLS, calculateNextLevelXP } from '../shared/skills.js';
 import { InventoryManager } from './managers/InventoryManager.js';
 import { ActivityManager } from './managers/ActivityManager.js';
@@ -1939,7 +1939,9 @@ export class GameManager {
                 const rarityOffset = Math.max(0, rarities.indexOf(itemData.rarity));
                 const min = (tier - 1) * 10 + (rarityOffset * 2) + 1;
                 const max = min + 1;
-                const shardId = `T1_RUNE_SHARD`;
+
+                // Determine Shard Type: WorldBoss Chests drop Battle Rune Shards
+                const shardId = itemData.id.includes('WORLDBOSS') ? `T1_BATTLE_RUNE_SHARD` : `T1_RUNE_SHARD`;
 
                 for (let i = 0; i < safeQty; i++) {
                     // Collect all potential new items first
@@ -1950,8 +1952,14 @@ export class GameManager {
                         totalRewards.items[crestId] = (totalRewards.items[crestId] || 0) + 1;
                     }
 
-                    // Rune Shards (Guaranteed range per chest: 80% min, 20% max)
-                    const shardQty = Math.random() < 0.8 ? min : max;
+                    // Rune Shards
+                    let shardQty;
+                    if (itemData.id.includes('WORLDBOSS') && WORLDBOSS_DROP_TABLE[itemData.id]) {
+                        shardQty = WORLDBOSS_DROP_TABLE[itemData.id];
+                    } else {
+                        // Standard Formula (Guaranteed range per chest: 80% min, 20% max)
+                        shardQty = Math.random() < 0.8 ? min : max;
+                    }
                     totalRewards.items[shardId] = (totalRewards.items[shardId] || 0) + shardQty;
                 }
 
@@ -2040,8 +2048,19 @@ export class GameManager {
             return { success: false, error: `Rune type '${category}' is currently under development!` };
         }
 
-        // 2. Validate Shard ID (Always T1 now)
-        const activeShardId = 'T1_RUNE_SHARD';
+        // 2. Validate Shard ID & Category Compatibility
+        const activeShardId = shardId || 'T1_RUNE_SHARD';
+
+        if (category === 'COMBAT') {
+            if (activeShardId !== 'T1_BATTLE_RUNE_SHARD') {
+                return { success: false, error: "Combat runes require Battle Rune Shards!" };
+            }
+        } else {
+            // Gathering, Refining, Crafting
+            if (activeShardId !== 'T1_RUNE_SHARD') {
+                return { success: false, error: `${category.charAt(0) + category.slice(1).toLowerCase()} runes require standard Rune Shards!` };
+            }
+        }
 
         // 3. Check Quantity and Silver (Need 5 * qty and 1000 * qty)
         const totalNeeded = 5 * count;

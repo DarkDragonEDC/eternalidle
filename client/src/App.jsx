@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+console.log("[App.jsx] Initializing App component...");
 import { io } from 'socket.io-client';
 import { supabase } from './supabase';
 import Auth from './components/Auth';

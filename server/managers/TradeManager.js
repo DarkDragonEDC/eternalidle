@@ -66,25 +66,46 @@ export class TradeManager {
         if (!isSender && !isReceiver) throw new Error("Not authorized.");
 
         // Validate items and silver in player's inventory
+        // Validate items and silver in player's inventory
         if (silver > (char.state.silver || 0)) throw new Error("Insufficient silver.");
+
+        let enrichedItems = [];
         if (items && items.length > 0) {
             const req = {};
-            items.forEach(it => {
+            enrichedItems = items.map(it => {
                 const baseId = it.id.split('::')[0];
                 req[baseId] = (req[baseId] || 0) + it.amount;
+
+                // Enrich with Metadata from Inventory
+                // The client sends { id, amount }, but we want { id, amount, craftedAt, ... }
+                // We trust the client's ID to find the inventory slot.
+                const inventoryItem = char.state.inventory[it.id];
+
+                if (inventoryItem && typeof inventoryItem === 'object') {
+                    // It's a metadata object in inventory. Merge it.
+                    // We must preserve the transaction amount, but take other metadata.
+                    // Avoid overwriting 'amount' from the trade offer with 'amount' from inventory (total stock).
+                    const { amount: stockAmount, ...metadata } = inventoryItem;
+                    return { ...metadata, ...it };
+                }
+
+                return it;
             });
+
             if (!this.gameManager.inventoryManager.hasItems(char, req)) {
                 throw new Error("Insufficient items in inventory.");
             }
+        } else {
+            enrichedItems = [];
         }
 
         const updateData = {};
         if (isSender) {
-            updateData.sender_offer = { items, silver };
+            updateData.sender_offer = { items: enrichedItems, silver };
             updateData.sender_accepted = false;
             updateData.receiver_accepted = false; // Reset both as requested
         } else {
-            updateData.receiver_offer = { items, silver };
+            updateData.receiver_offer = { items: enrichedItems, silver };
             updateData.sender_accepted = false;
             updateData.receiver_accepted = false; // Reset both as requested
         }
