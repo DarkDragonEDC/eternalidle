@@ -82,15 +82,6 @@ export const ITEMS = {
         CREST: {},
         CHEST: {},
         RUNE_SHARD: {},
-        BATTLE_RUNE_SHARD: {
-            id: 'T1_BATTLE_RUNE_SHARD',
-            name: 'Battle Rune Shard',
-            description: 'A glowing shard obtained from the World Boss. Used to craft Combat Runes.',
-            type: 'SPECIAL',
-            rarity: 'EPIC',
-            rarityColor: '#9013fe',
-            icon: '/items/shard_battle.png'
-        },
         RUNE: {}
     }
 };
@@ -436,8 +427,10 @@ ITEMS.SPECIAL.RUNE_SHARD['BATTLE'] = {
     name: 'Battle Rune Shard',
     tier: 1,
     type: 'CRAFTING_MATERIAL',
-    rarity: 'UNCOMMON', // Or RARE? Keeping UNCOMMON for now as per plan logic discussion, or maybe RARE to distinguish? Plan said UNCOMMON/RARE. Let's stick to UNCOMMON but distinctive ID.
+    rarity: 'EPIC',
+    rarityColor: '#9013fe',
     noInventorySpace: true,
+    icon: '/items/shard_battle.png',
     description: 'A shard forged in the heat of battle. Used for advanced rune crafting.'
 };
 

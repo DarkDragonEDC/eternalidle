@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { formatNumber } from '@utils/format';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Timer, Sword, Gift, Users, Shield, ScrollText } from 'lucide-react';
+import { Trophy, Timer, Sword, Gift, Users, Shield, ScrollText, Info } from 'lucide-react';
+import { WORLDBOSS_DROP_TABLE } from '@shared/chest_drops';
 
 const CountdownTimer = ({ targetDate }) => {
     const [timeLeft, setTimeLeft] = useState('');
@@ -61,10 +62,115 @@ const CountdownTimer = ({ targetDate }) => {
     );
 };
 
+const WorldBossInfoModal = ({ onClose }) => {
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            style={{
+                position: 'fixed',
+                top: 0, left: 0, right: 0, bottom: 0,
+                background: 'rgba(0,0,0,0.85)',
+                backdropFilter: 'blur(8px)',
+                zIndex: 10000,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '20px'
+            }}
+        >
+            <motion.div
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, y: 20 }}
+                onClick={e => e.stopPropagation()}
+                style={{
+                    background: 'linear-gradient(135deg, #1e0505 0%, #0f0202 100%)',
+                    border: '1px solid rgba(220, 38, 38, 0.4)',
+                    borderRadius: '20px',
+                    padding: '24px 20px',
+                    maxWidth: '380px',
+                    width: '100%',
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+                    position: 'relative'
+                }}
+            >
+                <h2 style={{
+                    color: '#ff4d4d',
+                    textAlign: 'center',
+                    margin: '0 0 16px 0',
+                    fontSize: '1rem',
+                    fontWeight: '900',
+                    letterSpacing: '2px',
+                    textTransform: 'uppercase'
+                }}>
+                    World Boss Guide
+                </h2>
+
+                <div style={{ color: 'var(--text-dim)', fontSize: '0.75rem', lineHeight: '1.4', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', background: 'rgba(255,255,255,0.03)', padding: '10px', borderRadius: '10px' }}>
+                        <span style={{ fontSize: '1.2rem', lineHeight: '1' }}>⏰</span>
+                        <div>
+                            <strong style={{ color: 'var(--text-main)', fontSize: '0.7rem', display: 'block', marginBottom: '2px' }}>EVENT SCHEDULE</strong>
+                            The boss awakens at <span style={{ color: '#ff4d4d' }}>00:00 UTC</span> and leaves at <span style={{ color: '#ff4d4d' }}>23:50 UTC</span> daily.
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', background: 'rgba(255,255,255,0.03)', padding: '10px', borderRadius: '10px' }}>
+                        <span style={{ fontSize: '1.2rem', lineHeight: '1' }}>⚔️</span>
+                        <div>
+                            <strong style={{ color: 'var(--text-main)', fontSize: '0.7rem', display: 'block', marginBottom: '2px' }}>CHALLENGE RULES</strong>
+                            You have <span style={{ color: '#ff4d4d' }}>1 minute</span> to deal damage and consolidate your daily ranking.
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', background: 'rgba(255,255,255,0.03)', padding: '10px', borderRadius: '10px' }}>
+                        <span style={{ fontSize: '1.2rem', lineHeight: '1' }}>🏆</span>
+                        <div>
+                            <strong style={{ color: 'var(--text-main)', fontSize: '0.7rem', display: 'block', marginBottom: '2px' }}>RANKING REWARDS</strong>
+                            Prizes based on rank position. Claim rewards for <span style={{ color: '#d4af37' }}>World Boss Chests</span>.
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', background: 'rgba(255,255,255,0.03)', padding: '10px', borderRadius: '10px' }}>
+                        <span style={{ fontSize: '1.2rem', lineHeight: '1' }}>💎</span>
+                        <div>
+                            <strong style={{ color: 'var(--text-main)', fontSize: '0.7rem', display: 'block', marginBottom: '2px' }}>CRAFTING SHARDS</strong>
+                            Chests drop <span style={{ color: '#a855f7' }}>Special Shards</span> for crafting powerful Combat Runes.
+                        </div>
+                    </div>
+                </div>
+
+                <button
+                    onClick={onClose}
+                    style={{
+                        marginTop: '16px',
+                        width: '100%',
+                        padding: '10px',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '8px',
+                        color: 'var(--text-main)',
+                        fontWeight: '800',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        letterSpacing: '1px'
+                    }}
+                >
+                    UNDERSTOOD
+                </button>
+            </motion.div>
+        </motion.div>
+    );
+};
+
 const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge }) => {
     const [wbStatus, setWbStatus] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('BOSS'); // 'BOSS' | 'RANKING'
+    const [showInfo, setShowInfo] = useState(false);
 
     useEffect(() => {
         if (!socket) return;
@@ -146,6 +252,29 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge }) => {
         return null;
     };
 
+    const calculatePotentialChest = (pos, totalParticipants) => {
+        if (!totalParticipants || pos <= 0) return null;
+
+        const poolSize = Math.max(1, Math.floor((totalParticipants - 1) / 49));
+        const groupIndex = Math.floor((pos - 2) / poolSize);
+
+        let chestId;
+        if (pos === 1) {
+            chestId = 'T10_WORLDBOSS_CHEST_MASTERPIECE';
+        } else {
+            const chests = Object.keys(WORLDBOSS_DROP_TABLE).filter(c => c !== 'T10_WORLDBOSS_CHEST_MASTERPIECE');
+            const reverseIndex = 48 - Math.min(48, groupIndex);
+            chestId = chests[reverseIndex] || chests[0];
+        }
+
+        const parts = chestId.split('_');
+        const tier = parts[0];
+        const rarity = parts[parts.length - 1];
+        const rarityFormatted = rarity.charAt(0).toUpperCase() + rarity.slice(1).toLowerCase();
+
+        return `${tier} WB Chest (${rarityFormatted})`;
+    };
+
 
 
     return (
@@ -177,7 +306,7 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge }) => {
                 />
             </div>
 
-            <div className="scroll-container" style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '16px' : '24px' }}>
+            <div className="scroll-container" style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '8px' : '24px' }}>
 
                 <AnimatePresence mode="wait">
                     {activeTab === 'BOSS' && (
@@ -193,7 +322,7 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge }) => {
                                 position: 'relative',
                                 borderRadius: '16px',
                                 overflow: 'hidden',
-                                marginBottom: '20px'
+                                marginBottom: isMobile ? '12px' : '20px'
                             }}>
                                 {/* Animated Background Glow */}
                                 <motion.div
@@ -207,59 +336,95 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge }) => {
                                 />
                                 <div style={{
                                     position: 'relative',
-                                    padding: isMobile ? '24px 16px' : '32px 24px',
+                                    padding: isMobile ? '16px 12px' : '32px 24px',
                                     background: 'linear-gradient(180deg, rgba(30, 5, 5, 0.9) 0%, rgba(15, 2, 2, 0.95) 100%)',
                                     border: '1px solid rgba(220, 38, 38, 0.2)',
                                     borderRadius: '16px',
                                     textAlign: 'center'
                                 }}>
+                                    {/* Info Icon */}
+                                    <button
+                                        onClick={() => setShowInfo(true)}
+                                        style={{
+                                            position: 'absolute',
+                                            top: isMobile ? '8px' : '12px',
+                                            right: isMobile ? '8px' : '12px',
+                                            background: 'rgba(255,255,255,0.05)',
+                                            border: '1px solid rgba(255,255,255,0.1)',
+                                            borderRadius: '50%',
+                                            width: isMobile ? '24px' : '28px',
+                                            height: isMobile ? '24px' : '28px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: 'rgba(255,77,77,0.7)',
+                                            cursor: 'pointer',
+                                            transition: '0.2s',
+                                            zIndex: 2
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.color = '#ff4d4d'}
+                                        onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,77,77,0.7)'}
+                                    >
+                                        <Info size={isMobile ? 14 : 16} />
+                                    </button>
+
                                     {/* Dragon Icon */}
                                     <motion.div
                                         animate={{ y: [0, -4, 0] }}
                                         transition={{ repeat: Infinity, duration: 2.5, ease: 'easeInOut' }}
-                                        style={{ fontSize: isMobile ? '3rem' : '4rem', marginBottom: '16px', filter: 'drop-shadow(0 0 12px rgba(255,80,80,0.5))' }}
+                                        style={{
+                                            fontSize: isMobile ? '2.5rem' : '4rem',
+                                            marginBottom: isMobile ? '8px' : '16px',
+                                            filter: 'drop-shadow(0 0 12px rgba(255,80,80,0.5))'
+                                        }}
                                     >
                                         🐲
                                     </motion.div>
 
                                     {/* Boss Name */}
                                     <h1 style={{
-                                        margin: '0 0 4px 0',
+                                        margin: '0 0 2px 0',
                                         color: '#ff4d4d',
-                                        fontSize: isMobile ? '1.4rem' : '2rem',
+                                        fontSize: isMobile ? '1.2rem' : '2rem',
                                         fontWeight: '900',
-                                        letterSpacing: '3px',
+                                        letterSpacing: isMobile ? '2px' : '3px',
                                         textShadow: '0 0 20px rgba(255, 77, 77, 0.4), 0 2px 4px rgba(0,0,0,0.5)',
                                         textTransform: 'uppercase'
                                     }}>
                                         {boss?.name || 'RESTING'}
                                     </h1>
                                     <div style={{
-                                        fontSize: '0.7rem',
+                                        fontSize: isMobile ? '0.6rem' : '0.7rem',
                                         color: 'rgba(255,77,77,0.5)',
                                         letterSpacing: '6px',
                                         fontWeight: '700',
-                                        marginBottom: '24px',
+                                        marginBottom: isMobile ? '16px' : '24px',
                                         textTransform: 'uppercase'
                                     }}>
                                         WORLD BOSS
                                     </div>
 
                                     {/* Info Chips */}
-                                    <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'nowrap', marginBottom: '24px' }}>
+                                    <div style={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        gap: isMobile ? '8px' : '12px',
+                                        flexWrap: 'nowrap',
+                                        marginBottom: isMobile ? '16px' : '24px'
+                                    }}>
                                         <CountdownTimer targetDate={boss?.endsAt} />
                                         <div style={{
                                             display: 'flex', alignItems: 'center', gap: '6px',
-                                            padding: '8px 16px',
+                                            padding: isMobile ? '4px 12px' : '8px 16px',
                                             background: 'rgba(255,255,255,0.04)',
                                             borderRadius: '20px',
                                             border: '1px solid rgba(255,255,255,0.06)',
                                             color: 'var(--text-dim)',
-                                            fontSize: '0.8rem',
+                                            fontSize: isMobile ? '0.75rem' : '0.8rem',
                                             fontWeight: '600'
                                         }}>
-                                            <Users size={14} style={{ opacity: 0.7 }} />
-                                            <span>{rankings.length} Challenger{rankings.length !== 1 ? 's' : ''}</span>
+                                            <Users size={isMobile ? 12 : 14} style={{ opacity: 0.7 }} />
+                                            <span>{rankings.length} {isMobile ? '' : 'Challenger'}{rankings.length !== 1 && !isMobile ? 's' : ''}</span>
                                         </div>
                                     </div>
 
@@ -271,23 +436,23 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge }) => {
                                             whileTap={{ scale: 0.97 }}
                                             className="premium-button"
                                             style={{
-                                                padding: isMobile ? '16px 40px' : '18px 56px',
-                                                fontSize: isMobile ? '1.1rem' : '1.2rem',
+                                                padding: isMobile ? '12px 32px' : '14px 44px',
+                                                fontSize: isMobile ? '0.9rem' : '1rem',
                                                 background: 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)',
                                                 color: 'white',
                                                 border: '1px solid rgba(255,100,100,0.3)',
-                                                borderRadius: '12px',
+                                                borderRadius: '10px',
                                                 cursor: 'pointer',
                                                 fontWeight: '800',
-                                                letterSpacing: '2px',
-                                                boxShadow: '0 4px 24px rgba(220, 38, 38, 0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+                                                letterSpacing: '1px',
+                                                boxShadow: '0 4px 20px rgba(220, 38, 38, 0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
                                                 display: 'inline-flex',
                                                 alignItems: 'center',
-                                                gap: '12px',
+                                                gap: '10px',
                                                 textTransform: 'uppercase'
                                             }}
                                         >
-                                            <Sword size={22} />
+                                            <Sword size={18} />
                                             Challenge Now
                                         </motion.button>
                                     )}
@@ -486,6 +651,15 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge }) => {
                                                 }}>
                                                     {rank.name}
                                                     {isMe && <span style={{ marginLeft: '6px', fontSize: '0.7rem', opacity: 0.7 }}>(you)</span>}
+                                                    <div style={{
+                                                        fontSize: '0.65rem',
+                                                        color: '#d4af37',
+                                                        opacity: 0.8,
+                                                        fontWeight: '600',
+                                                        marginTop: '2px'
+                                                    }}>
+                                                        {calculatePotentialChest(index + 1, rankings.length)}
+                                                    </div>
                                                 </div>
 
                                                 {/* Damage */}
@@ -518,6 +692,10 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge }) => {
                 </AnimatePresence>
 
             </div>
+            {/* Info Modal */}
+            <AnimatePresence>
+                {showInfo && <WorldBossInfoModal onClose={() => setShowInfo(false)} />}
+            </AnimatePresence>
         </div>
     );
 };

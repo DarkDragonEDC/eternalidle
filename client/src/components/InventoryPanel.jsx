@@ -48,7 +48,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
             itemId,
             item,
             max: qty || 0,
-            quantity: 1
+            quantity: qty || 1
         });
     };
 
