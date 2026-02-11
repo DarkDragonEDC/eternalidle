@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Package, Coins, CheckCircle, Clock, X, ArrowLeftRight, ChevronRight, Search, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { resolveItem } from '@shared/items';
+import { resolveItem, calculateItemSellPrice } from '@shared/items';
 
 
 const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, isMobile }) => {
@@ -23,6 +23,24 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
     useEffect(() => {
         setLocalOffer(myOffer);
     }, [trade]);
+
+    const calculateTax = (offer) => {
+        if (!offer) return 0;
+        let totalValue = offer.silver || 0;
+
+        offer.items.forEach(it => {
+            const def = resolveItem(it.id);
+            if (def) {
+                const pricePerUnit = calculateItemSellPrice(def, it.id);
+                totalValue += (pricePerUnit * it.amount);
+            }
+        });
+
+        return Math.floor(totalValue * 0.15);
+    };
+
+    const myTax = calculateTax(myOffer);
+    const partnerTax = calculateTax(partnerOffer);
 
     const handleUpdateOffer = (newItems, newSilver) => {
         socket.emit('trade_update_offer', {
@@ -218,6 +236,14 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                         <button onClick={() => handleUpdateOffer(myOffer.items, 0)} style={{ color: '#ff4444', background: 'transparent', border: 'none', cursor: 'pointer' }}><X size={isMobile ? 14 : 16} /></button>
                                     </div>
                                 )}
+                                {(myOffer.items.length > 0 || myOffer.silver > 0) && (
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', marginTop: '5px', borderTop: '1px dashed var(--border)' }}>
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <Clock size={12} /> TRADE FEE (15%)
+                                        </span>
+                                        <span style={{ fontSize: '0.85rem', color: '#ff4444', fontWeight: 'bold' }}>-{myTax.toLocaleString()} Silver</span>
+                                    </div>
+                                )}
                             </div>
 
                             <div style={{ marginTop: isMobile ? '10px' : '20px', paddingTop: isMobile ? '10px' : '20px', borderTop: '1px solid var(--border)' }}>
@@ -401,6 +427,14 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                     <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '6px' : '10px', padding: isMobile ? '8px' : '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px' }}>
                                         <Coins size={isMobile ? 16 : 18} color="var(--accent)" />
                                         <span style={{ color: 'var(--accent)', fontWeight: '900', fontSize: isMobile ? '0.85rem' : '1rem' }}>{partnerOffer.silver.toLocaleString()} Silver</span>
+                                    </div>
+                                )}
+                                {(partnerOffer.items.length > 0 || partnerOffer.silver > 0) && (
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', marginTop: '5px', borderTop: '1px dashed var(--border)' }}>
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <Clock size={12} /> TRADE FEE (15%)
+                                        </span>
+                                        <span style={{ fontSize: '0.85rem', color: '#ff4444', fontWeight: 'bold' }}>-{partnerTax.toLocaleString()} Silver</span>
                                     </div>
                                 )}
                             </div>

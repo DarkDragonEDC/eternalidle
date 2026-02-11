@@ -1,7 +1,24 @@
+import { calculateItemSellPrice } from '../../shared/items.js';
+
 export class TradeManager {
     constructor(gameManager) {
         this.gameManager = gameManager;
         this.supabase = gameManager.supabase;
+    }
+
+    calculateOfferTax(offer) {
+        if (!offer) return 0;
+        let totalValue = offer.silver || 0;
+
+        if (offer.items && offer.items.length > 0) {
+            offer.items.forEach(it => {
+                // it is already enriched with metadata in updateOffer
+                const pricePerUnit = calculateItemSellPrice(it, it.id);
+                totalValue += (pricePerUnit * it.amount);
+            });
+        }
+
+        return Math.floor(totalValue * 0.15);
     }
 
     async createTrade(sender, receiverName) {
@@ -173,8 +190,13 @@ export class TradeManager {
                 const sOffer = trade.sender_offer;
                 const rOffer = trade.receiver_offer;
 
-                if (sOffer.silver > (sender.state.silver || 0)) throw new Error(`${sender.name} has insufficient silver.`);
-                if (rOffer.silver > (receiver.state.silver || 0)) throw new Error(`${receiver.name} has insufficient silver.`);
+                // Calculate Taxes
+                const sTax = this.calculateOfferTax(sOffer);
+                const rTax = this.calculateOfferTax(rOffer);
+
+                // Validate Silver (Price + Tax)
+                if ((sOffer.silver + sTax) > (sender.state.silver || 0)) throw new Error(`${sender.name} has insufficient silver to cover offer + 15% tax (${sTax.toLocaleString()} Silver tax).`);
+                if ((rOffer.silver + rTax) > (receiver.state.silver || 0)) throw new Error(`${receiver.name} has insufficient silver to cover offer + 15% tax (${rTax.toLocaleString()} Silver tax).`);
 
                 const sItemsReq = {};
                 sOffer.items.forEach(it => {
@@ -190,9 +212,14 @@ export class TradeManager {
                 });
                 if (!this.gameManager.inventoryManager.hasItems(receiver, rItemsReq)) throw new Error(`${receiver.name} has insufficient items.`);
 
-                // TRANSFER SILVER
-                sender.state.silver = (sender.state.silver || 0) - sOffer.silver + rOffer.silver;
-                receiver.state.silver = (receiver.state.silver || 0) - rOffer.silver + sOffer.silver;
+                // TRANSFER SILVER & CHARGE TAX
+                sender.state.silver = (sender.state.silver || 0) - (sOffer.silver + sTax) + rOffer.silver;
+                receiver.state.silver = (receiver.state.silver || 0) - (rOffer.silver + rTax) + sOffer.silver;
+
+                // Update Global Taxometer
+                if (sTax + rTax > 0) {
+                    this.gameManager.updateGlobalTax(sTax + rTax);
+                }
 
                 // CONSUME ITEMS
                 this.gameManager.inventoryManager.consumeItems(sender, sItemsReq);
