@@ -1106,14 +1106,24 @@ for (const t of TIERS) {
             const EFF_LABEL_MAP = { XP: 'Experience', COPY: 'Duplication', SPEED: 'Auto-Refine Chance', EFF: 'Speed', ATTACK: 'Damage', SAVE_FOOD: 'Conservation' };
 
             const actName = ACT_NAME_MAP[act] || act;
-            const effName = EFF_NAME_MAP[eff] || eff;
-            const effectLabel = EFF_LABEL_MAP[eff] || eff;
+            let effName = EFF_NAME_MAP[eff] || eff;
+            let effectLabel = EFF_LABEL_MAP[eff] || eff;
+
+            // SPECIAL CASE: Fishing SPEED rune is "Auto-Cooking"
+            if (act === 'FISH' && eff === 'SPEED') {
+                effName = 'Auto-Cooking';
+                effectLabel = 'Auto-Cooking Chance';
+            }
 
             const bonusValue = calculateRuneBonus(t, s, eff);
 
             let description = '';
             if (eff === 'SPEED') {
-                description = `Chance to automatically refine gathered materials by ${bonusValue}%.`;
+                if (act === 'FISH') {
+                    description = `Chance to automatically cook raw fish while fishing by ${bonusValue}%.`;
+                } else {
+                    description = `Chance to automatically refine gathered materials by ${bonusValue}%.`;
+                }
             } else if (eff === 'EFF' || eff === 'ATTACK') {
                 description = `Increases ${eff === 'EFF' ? 'speed' : 'damage'} by ${bonusValue}%.`;
             } else if (eff === 'SAVE_FOOD') {

@@ -226,7 +226,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                         <div style={{ fontSize: '0.8rem', color: bestCandidate.rarityColor || 'var(--accent)' }}>
                                             {bestCandidate.type === 'RUNE' ? `Tier ${bestCandidate.tier} • ${bestCandidate.stars} Stars` :
                                                 bestCandidate.type === 'FOOD' ? `Heal ${bestCandidate.heal} • Tier ${bestCandidate.tier}` :
-                                                    `Tier ${bestCandidate.tier}${bestCandidate.ip > 0 ? ` • IP ${bestCandidate.ip}` : ''}`}
+                                                    `Tier ${bestCandidate.tier}${(bestCandidate.ip > 0 && !bestCandidate.type.startsWith('TOOL')) ? ` • IP ${bestCandidate.ip}` : ''}`}
                                         </div>
                                     </div>
                                 </div>
@@ -300,7 +300,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                         <div style={{ fontSize: '0.8rem', color: resolvedCurrent?.rarityColor || '#888' }}>
                                             {resolvedCurrent?.type === 'RUNE' ? `Tier ${currentItem.tier} • ${resolvedCurrent.stars} Stars` :
                                                 resolvedCurrent?.type === 'FOOD' ? `Tier ${currentItem.tier} • Heal ${resolvedCurrent.heal}` :
-                                                    `Tier ${currentItem.tier}${currentItem.ip > 0 ? ` • IP ${currentItem.ip}` : ''}`}
+                                                    `Tier ${currentItem.tier}${(currentItem.ip > 0 && !resolvedCurrent?.type?.startsWith('TOOL')) ? ` • IP ${currentItem.ip}` : ''}`}
                                         </div>
                                     </div>
                                 </div>
@@ -435,7 +435,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                                     <div style={{ fontSize: '0.75rem', color: item.rarityColor || '#888' }}>
                                                         {item.type === 'RUNE' ? `Tier ${item.tier} • ${item.stars} Stars` :
                                                             item.type === 'FOOD' ? `Tier ${item.tier} • Heal ${item.heal}` :
-                                                                `Tier ${item.tier} ${item.ip ? `• IP ${item.ip}` : ''}`}
+                                                                `Tier ${item.tier} ${(item.ip && !item.type.startsWith('TOOL')) ? `• IP ${item.ip}` : ''}`}
                                                     </div>
                                                 </div>
                                             </div>

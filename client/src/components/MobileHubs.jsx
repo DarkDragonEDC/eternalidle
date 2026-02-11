@@ -185,7 +185,7 @@ export const SkillsOverview = ({ onNavigate, gameState }) => {
                                 const skill = gameState?.state?.skills?.[skillKey];
                                 const level = skill?.level || 1;
                                 const nextXP = calculateNextLevelXP(level);
-                                const progress = Math.min(100, ((skill?.xp || 0) / nextXP) * 100);
+                                const progress = level >= 100 ? 100 : Math.min(100, ((skill?.xp || 0) / nextXP) * 100);
 
                                 return (
                                     <button
@@ -293,11 +293,11 @@ export const CombatOverview = ({ onNavigate, gameState }) => {
 
     const combatLevel = combatSkill.level;
     const combatNextXP = calculateNextLevelXP(combatLevel);
-    const combatProgress = (combatSkill.xp / combatNextXP) * 100;
+    const combatProgress = combatLevel >= 100 ? 100 : (combatSkill.xp / combatNextXP) * 100;
 
     const dungeonLevel = dungeonSkill.level;
     const dungeonNextXP = calculateNextLevelXP(dungeonLevel);
-    const dungeonProgress = (dungeonSkill.xp / dungeonNextXP) * 100;
+    const dungeonProgress = dungeonLevel >= 100 ? 100 : (dungeonSkill.xp / dungeonNextXP) * 100;
 
     // Determine Adventure Button Icon
     let adventureIcon = <Sword />;

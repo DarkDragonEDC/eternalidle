@@ -6,6 +6,7 @@ import {
     Trophy, Tag, Zap, Box, Axe, Shield, Users, MessageSquare, Sun, Moon, Gift, Skull
 } from 'lucide-react';
 import DailySpinModal from './DailySpinModal';
+import { calculateNextLevelXP } from '@shared/skills';
 
 const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActiveCategory, isMobile, isOpen, onClose, onSwitchCharacter, theme, toggleTheme, socket, canSpin, onOpenDailySpin, hasActiveTrade }) => {
     const [expanded, setExpanded] = useState({
@@ -58,8 +59,8 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, activeCategory, setActive
         const skill = skills[skillKey] || { level: 1, xp: 0 };
         const level = skill.level || 1;
         const xp = skill.xp || 0;
-        const nextLevelXp = Math.floor(100 * Math.pow(1.15, level - 1));
-        const progress = Math.min(100, (xp / nextLevelXp) * 100);
+        const nextLevelXp = calculateNextLevelXP(level);
+        const progress = level >= 100 ? 100 : Math.min(100, (xp / nextLevelXp) * 100);
 
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px', minWidth: '45px' }}>

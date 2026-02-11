@@ -56,6 +56,24 @@ export class GameManager {
         setInterval(() => this.loadGlobalStats(), 600000); // 10 mins is enough for tax stats
 
         this.worldBossManager.initialize();
+
+        // SPECIAL: One-time check for all cached characters to grant "Pré-alpha player" title
+        // ONLY for existing characters (Created before Feb 11, 2026)
+        setTimeout(() => {
+            const CUTOFF_DATE = new Date('2026-02-11T15:10:00Z'); // 12:10 BRT
+            console.log('[GameManager] Running auto-grant title for online characters...');
+            this.cache.forEach((char, charId) => {
+                const charCreatedAt = char.created_at ? new Date(char.created_at) : null;
+                if (char.state && charCreatedAt && charCreatedAt < CUTOFF_DATE) {
+                    if (!char.state.unlockedTitles) char.state.unlockedTitles = [];
+                    if (!char.state.unlockedTitles.includes('Pré-alpha player')) {
+                        char.state.unlockedTitles.push('Pré-alpha player');
+                        this.dirty.add(charId);
+                        console.log(`[GameManager] Auto-granted title to online character: ${charId}`);
+                    }
+                }
+            });
+        }, 10000); // 10s after startup
     }
 
     broadcast(event, data) {
@@ -257,6 +275,18 @@ export class GameManager {
 
             // Rehydrate the state after loading from database (AFTER injecting columns)
             data.state = hydrateState(data.state || {});
+
+            // SPECIAL: Auto-grant "Pré-alpha player" title ONLY for existing characters (Created before Feb 11, 2026)
+            const CUTOFF_DATE = new Date('2026-02-11T15:10:00Z'); // 12:10 BRT
+            const charCreatedAt = new Date(data.created_at);
+
+            if (data.state && charCreatedAt < CUTOFF_DATE) {
+                if (!data.state.unlockedTitles) data.state.unlockedTitles = [];
+                if (!data.state.unlockedTitles.includes('Pré-alpha player')) {
+                    data.state.unlockedTitles.push('Pré-alpha player');
+                    this.dirty.add(data.id); // Mark for saving to DB
+                }
+            }
 
             // Attach a snapshot hash of the DB state to detect external changes
             data.dbHash = this.calculateHash(data.state);

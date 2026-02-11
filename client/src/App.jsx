@@ -1583,7 +1583,12 @@ function App() {
         onNavigate={handleNavigate}
         isMobile={isMobile}
         serverTimeOffset={clockOffset.current}
-        skillProgress={gameState?.current_activity && displayedGameState?.state?.skills ? (displayedGameState.state.skills[getSkillForItem(gameState.current_activity.item_id, gameState.current_activity.type)]?.xp / calculateNextLevelXP(displayedGameState.state.skills[getSkillForItem(gameState.current_activity.item_id, gameState.current_activity.type)]?.level || 1)) * 100 : 0}
+        skillProgress={gameState?.current_activity && displayedGameState?.state?.skills ? (() => {
+          const s = displayedGameState.state.skills[getSkillForItem(gameState.current_activity.item_id, gameState.current_activity.type)];
+          if (!s) return 0;
+          if (s.level >= 100) return 100;
+          return (s.xp / calculateNextLevelXP(s.level || 1)) * 100;
+        })() : 0}
       />
       <ToastContainer socket={socket} />
 

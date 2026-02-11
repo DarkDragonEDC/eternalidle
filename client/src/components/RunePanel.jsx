@@ -502,7 +502,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
                                         <option value="ALL">All Effects</option>
                                         <option value="XP">Experience</option>
                                         <option value="COPY">Duplication</option>
-                                        <option value="SPEED">Auto-Refine</option>
+                                        <option value="SPEED">Auto-Refine / Cooking</option>
                                         <option value="EFF">Efficiency</option>
                                     </select>
                                 </div>

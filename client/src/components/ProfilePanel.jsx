@@ -1497,7 +1497,7 @@ const RuneBuffSummary = ({ activeRuneBuffs }) => {
                             )}
                             {buffs.SPEED && (
                                 <div style={{ fontSize: '0.75rem', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ color: '#aaa' }}>Auto-Refine:</span>
+                                    <span style={{ color: '#aaa' }}>{act === 'FISH' ? 'Auto-Cooking:' : 'Auto-Refine:'}</span>
                                     <span style={{ color: '#2196f3', fontWeight: 'bold' }}>+{buffs.SPEED}%</span>
                                 </div>
                             )}
