@@ -785,6 +785,7 @@ export const resolveItem = (itemId, overrideQuality = null) => {
         quality: effectiveQualityId,
         qualityName: effectiveQuality.name,
         originalId: baseId,
+        craftedBy: creatorName, // Ensure signature is part of the resolved object
         ip: (baseItem.ip || 0) + ipBonus,
         stats: newStats
     };

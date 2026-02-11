@@ -179,9 +179,13 @@ export class TradeManager {
 
                 // ADD ITEMS (Safety via Claims if inventory full)
                 const deliver = (targetChar, items, fromName) => {
+                    console.log(`[TRADE-DEBUG] Delivering items to ${targetChar.name} from ${fromName}`);
                     items.forEach(it => {
+                        console.log(`[TRADE-DEBUG] Processing item:`, JSON.stringify(it));
                         // Pass the full item object to preserve metadata like craftedBy
                         const added = this.gameManager.inventoryManager.addItemToInventory(targetChar, it.id, it.amount, it);
+                        console.log(`[TRADE-DEBUG] Added to inventory? ${added}`);
+
                         if (!added) {
                             // Inventory Full - Send to Claims
                             this.gameManager.marketManager.addClaim(targetChar, {
