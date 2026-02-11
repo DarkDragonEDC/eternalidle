@@ -180,7 +180,8 @@ export class TradeManager {
                 // ADD ITEMS (Safety via Claims if inventory full)
                 const deliver = (targetChar, items, fromName) => {
                     items.forEach(it => {
-                        const added = this.gameManager.inventoryManager.addItemToInventory(targetChar, it.id, it.amount);
+                        // Pass the full item object to preserve metadata like craftedBy
+                        const added = this.gameManager.inventoryManager.addItemToInventory(targetChar, it.id, it.amount, it);
                         if (!added) {
                             // Inventory Full - Send to Claims
                             this.gameManager.marketManager.addClaim(targetChar, {
@@ -188,6 +189,7 @@ export class TradeManager {
                                 itemId: it.id,
                                 amount: it.amount,
                                 name: `Trade from ${fromName}`,
+                                itemData: it, // Store full item data for claim retrieval
                                 timestamp: Date.now()
                             });
                         }

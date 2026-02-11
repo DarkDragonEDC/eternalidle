@@ -44,7 +44,7 @@ export const CROWN_STORE = {
             price: 64.99,
             priceBRL: 299.90,
             amount: 2750,
-            icon: '👑',
+            icon: '🔮',
             category: 'PACKAGE',
             currency: 'USD',
             premium: true

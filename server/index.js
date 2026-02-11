@@ -1224,7 +1224,7 @@ io.on('connection', (socket) => {
                             product_data: {
                                 name: pkg.name,
                                 description: pkg.description,
-                                images: ['https://raw.githubusercontent.com/lucide-react/lucide/main/icons/crown.svg'],
+                                images: ['https://raw.githubusercontent.com/lucide-react/lucide/main/icons/gem.svg'],
                             },
                             unit_amount: Math.round(pkg.price * 100),
                         },

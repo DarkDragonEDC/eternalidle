@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Gift, X, Loader, Star, Crown, Zap } from 'lucide-react';
+import { Gift, X, Loader, Star, Zap } from 'lucide-react';
 import { resolveItem, formatItemId } from '@shared/items'; // Ensure correct path
 
 // Matches Server LOOT_TABLE
