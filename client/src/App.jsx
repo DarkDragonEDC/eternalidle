@@ -17,6 +17,8 @@ import DungeonPanel from './components/DungeonPanel';
 import RenameModal from './components/RenameModal';
 import BottomNav from './components/BottomNav';
 import { SkillsOverview, TownOverview, CombatOverview } from './components/MobileHubs';
+import WorldBossPanel from './components/WorldBossPanel';
+import WorldBossFight from './components/WorldBossFight';
 
 import CombatPanel from './components/CombatPanel';
 import RunePanel from './components/RunePanel';
@@ -134,6 +136,8 @@ function App() {
 
   const [lootModalData, setLootModalData] = useState(null);
   const [showCrownShop, setShowCrownShop] = useState(false);
+  const [showDailySpin, setShowDailySpin] = useState(false);
+  const [isWorldBossFight, setIsWorldBossFight] = useState(false);
 
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
@@ -501,6 +505,24 @@ function App() {
 
     newSocket.on('trade_invite', (trade) => {
       setTradeInvites(prev => [...prev, trade]);
+    });
+
+    newSocket.on('world_boss_started', (res) => {
+      if (res.success) {
+        setIsWorldBossFight(true);
+        setActiveTab('inventory'); // Clean UI backdrop
+      }
+    });
+
+    newSocket.on('world_boss_reward_claimed', (res) => {
+      if (res.success) {
+        setNotifications(prev => [{
+          id: Date.now(),
+          type: 'SUCCESS',
+          message: res.message,
+          timestamp: Date.now()
+        }, ...prev]);
+      }
     });
 
     newSocket.on('trade_update', (trade) => {
@@ -1141,7 +1163,20 @@ function App() {
       case 'inventory':
         return <InventoryPanel gameState={displayedGameState} socket={socket} onEquip={handleEquip} onShowInfo={setInfoItem} onListOnMarket={handleListOnMarket} onUse={handleUseItem} isMobile={isMobile} />;
       case 'ranking':
-        return <RankingPanel socket={socket} isMobile={isMobile} />;
+        return <RankingPanel gameState={displayedGameState} isMobile={isMobile} socket={socket} />;
+      case 'world_boss':
+        return (
+          <WorldBossPanel
+            gameState={displayedGameState}
+            isMobile={isMobile}
+            socket={socket}
+            onChallenge={() => {
+              socket.emit('challenge_world_boss');
+            }}
+          />
+        );
+      case 'trade':
+        return <TradePanel gameState={displayedGameState} isMobile={isMobile} socket={socket} theme={theme} />;
       case 'taxometer':
         return (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '20px' }}>
@@ -1603,6 +1638,18 @@ function App() {
         skillProgress={gameState?.current_activity && displayedGameState?.state?.skills ? (displayedGameState.state.skills[getSkillForItem(gameState.current_activity.item_id, gameState.current_activity.type)]?.xp / calculateNextLevelXP(displayedGameState.state.skills[getSkillForItem(gameState.current_activity.item_id, gameState.current_activity.type)]?.level || 1)) * 100 : 0}
       />
       <ToastContainer socket={socket} />
+
+      {isWorldBossFight && (
+        <WorldBossFight
+          gameState={displayedGameState}
+          socket={socket}
+          onFinish={() => {
+            setIsWorldBossFight(false);
+            setActiveTab('world_boss'); // Return to boss panel
+          }}
+        />
+      )}
+
       {
         modalItem && (
           <ActivityModal
@@ -1863,7 +1910,6 @@ const actionBtnStyle = {
 
 const ActivityProgressBar = ({ activity, serverTimeOffset = 0 }) => {
   const [progress, setProgress] = useState(0);
-
   useEffect(() => {
     if (!activity) return;
 

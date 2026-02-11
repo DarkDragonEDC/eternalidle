@@ -11,6 +11,7 @@ import { CrownsManager } from './managers/CrownsManager.js';
 import { AdminManager } from './managers/AdminManager.js';
 import { DailyRewardManager } from './managers/DailyRewardManager.js';
 import { TradeManager } from './managers/TradeManager.js';
+import { WorldBossManager } from './managers/WorldBossManager.js';
 import { pruneState, hydrateState } from './utils/statePruner.js';
 
 // Removed local ITEM_LOOKUP generation in favor of shared source of truth
@@ -28,6 +29,7 @@ export class GameManager {
         this.adminManager = new AdminManager(this);
         this.dailyRewardManager = new DailyRewardManager(this);
         this.tradeManager = new TradeManager(this);
+        this.worldBossManager = new WorldBossManager(this);
         this.userLocks = new Map(); // userId -> Promise (current task)
         this.cache = new Map(); // charId -> character object
         this.dirty = new Set(); // set of charIds that need persisting
@@ -52,6 +54,18 @@ export class GameManager {
 
         // At least keep loadGlobalStats in sync
         setInterval(() => this.loadGlobalStats(), 600000); // 10 mins is enough for tax stats
+
+        this.worldBossManager.initialize();
+    }
+
+    broadcast(event, data) {
+        if (this.io) {
+            this.io.emit(event, data);
+        }
+    }
+
+    setSocketServer(io) {
+        this.io = io;
     }
 
     async loadGlobalStats() {
@@ -1231,7 +1245,7 @@ export class GameManager {
         const foodResult = this.processFood(char);
         const foodUsed = foodResult.used;
 
-        if (!char.current_activity && !char.state.combat && !foodUsed && !char.state.dungeon) return null;
+        if (!char.current_activity && !char.state.combat && !foodUsed && !char.state.dungeon && !this.worldBossManager.activeFights.has(char.id)) return null;
 
         const now = Date.now();
         const IDLE_LIMIT_MS = this.getMaxIdleTime(char);
@@ -1529,18 +1543,31 @@ export class GameManager {
             }
         }
 
-        if (itemsGained > 0 || combatResult || foodUsed || activityFinished || stateChanged || dungeonResult) {
+        let worldBossResult = null;
+        if (this.worldBossManager.activeFights.has(char.id)) {
+            try {
+                worldBossResult = await this.worldBossManager.processTick(char);
+                if (worldBossResult) {
+                    stateChanged = true;
+                }
+            } catch (e) {
+                console.error("World Boss Error:", e);
+            }
+        }
+
+        if (itemsGained > 0 || combatResult || foodUsed || activityFinished || stateChanged || dungeonResult || worldBossResult) {
             this.markDirty(char.id);
         }
 
-        if (char.current_activity || char.state.combat || itemsGained > 0 || combatResult || dungeonResult) {
+        if (char.current_activity || char.state.combat || itemsGained > 0 || combatResult || dungeonResult || worldBossResult) {
             const returnObj = {
                 success: true,
-                message: lastActivityResult?.message || combatResult?.message || dungeonResult?.dungeonUpdate?.message || (foodUsed ? "Food consumed" : ""),
+                message: lastActivityResult?.message || combatResult?.message || dungeonResult?.dungeonUpdate?.message || worldBossResult?.worldBossUpdate?.message || (foodUsed ? "Food consumed" : ""),
                 leveledUp,
                 activityFinished,
                 combatUpdate: combatResult,
                 dungeonUpdate: dungeonResult?.dungeonUpdate,
+                worldBossUpdate: worldBossResult?.worldBossUpdate,
                 healingUpdate: foodUsed ? { amount: foodResult.amount, source: 'FOOD' } : null,
                 status: {
                     character_id: char.id,

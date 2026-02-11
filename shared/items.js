@@ -82,6 +82,15 @@ export const ITEMS = {
         CREST: {},
         CHEST: {},
         RUNE_SHARD: {},
+        BATTLE_RUNE_SHARD: {
+            id: 'T1_BATTLE_RUNE_SHARD',
+            name: 'Battle Rune Shard',
+            description: 'A glowing shard obtained from the World Boss. Used to craft Combat Runes.',
+            type: 'SPECIAL',
+            rarity: 'EPIC',
+            rarityColor: '#9013fe',
+            icon: '/items/shard_battle.png'
+        },
         RUNE: {}
     }
 };
@@ -1141,6 +1150,25 @@ for (const t of TIERS) {
     });
 }
 
+
+// Generation for World Boss Chests (50 types: T1-T10 x 5 Qualities)
+for (let t = 1; t <= 10; t++) {
+    Object.entries(QUALITIES).forEach(([qId, q]) => {
+        const id = `T${t}_WORLDBOSS_CHEST_${q.name.toUpperCase()}`;
+        if (!ITEMS.SPECIAL.CHEST) ITEMS.SPECIAL.CHEST = {};
+        ITEMS.SPECIAL.CHEST[id] = {
+            id: id,
+            name: `T${t} World Boss Chest (${q.name})`,
+            tier: t,
+            quality: parseInt(qId),
+            type: 'CHEST',
+            description: `A heavy chest containing rewards from the World Boss.`,
+            rarity: q.name === 'Masterpiece' ? 'LEGENDARY' : (q.name === 'Excellent' ? 'EPIC' : (q.name === 'Outstanding' ? 'RARE' : 'COMMON')),
+            rarityColor: q.color,
+            icon: '/items/chest_worldboss.png'
+        };
+    });
+}
 
 // Index items AFTER generation
 indexItems(ITEMS);

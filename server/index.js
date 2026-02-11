@@ -173,6 +173,7 @@ console.log('[SERVER] Supabase Key Role:', isServiceRole ? 'SERVICE_ROLE' : 'ANO
 
 import { GameManager } from './GameManager.js';
 const gameManager = new GameManager(supabase);
+gameManager.setSocketServer(io);
 
 // Register Global Stats Update Callback
 gameManager.onGlobalStatsUpdate = (stats) => {
@@ -581,6 +582,52 @@ io.on('connection', (socket) => {
             });
         } catch (err) {
             console.error('Error unequipping item:', err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    // --- WORLD BOSS ---
+    socket.on('get_world_boss_status', async () => {
+        try {
+            console.log(`[WORLD_BOSS] get_status called for char: ${socket.data?.characterId}`);
+            if (!socket.data?.characterId) {
+                console.warn('[WORLD_BOSS] get_status: No characterId on socket!');
+                return;
+            }
+            const status = await gameManager.worldBossManager.getStatus(socket.data.characterId);
+            socket.emit('world_boss_status', status);
+            console.log('[WORLD_BOSS] status sent to client.');
+        } catch (err) {
+            console.error('[WORLD_BOSS] get_status error:', err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('challenge_world_boss', async () => {
+        console.log(`[WORLD_BOSS] challenge_world_boss event received! charId=${socket.data?.characterId}`);
+        try {
+            if (!socket.data.characterId) return;
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                const result = await gameManager.worldBossManager.startFight(char);
+                socket.emit('world_boss_started', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('claim_world_boss_reward', async () => {
+        try {
+            if (!socket.data.characterId) return;
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                const result = await gameManager.worldBossManager.claimReward(char);
+                socket.emit('world_boss_reward_claimed', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            });
+        } catch (err) {
             socket.emit('error', { message: err.message });
         }
     });
@@ -1327,6 +1374,7 @@ setInterval(async () => {
                                         leveledUp: result.leveledUp,
                                         combatUpdate: result.combatUpdate,
                                         dungeonUpdate: result.dungeonUpdate,
+                                        worldBossUpdate: result.worldBossUpdate,
                                         healingUpdate: result.healingUpdate
                                     });
                                 } catch (e) { console.error("[EMIT-ERROR] action_result failed:", e); }
