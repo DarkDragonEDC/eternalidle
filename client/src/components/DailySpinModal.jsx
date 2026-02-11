@@ -246,15 +246,21 @@ const DailySpinModal = ({ isOpen, onClose, socket }) => {
                 }}>
                     <div style={{
                         background: '#1a1f2e',
-                        padding: '40px',
+                        padding: '30px',
                         borderRadius: '20px',
                         border: '2px solid #ffd700',
                         textAlign: 'center',
                         boxShadow: '0 0 50px rgba(255, 215, 0, 0.4)',
                         animation: 'popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+                        width: 'min(400px, 90vw)',
                         maxWidth: '90%'
                     }}>
-                        <h2 style={{ color: '#ffd700', fontSize: '2rem', marginBottom: '10px' }}>CONGRATULATIONS!</h2>
+                        <h2 style={{
+                            color: '#ffd700',
+                            fontSize: 'clamp(1.5rem, 6vw, 2rem)', // Responsive font
+                            marginBottom: '10px',
+                            wordBreak: 'break-word' // Safety wrap
+                        }}>CONGRATULATIONS!</h2>
                         <div style={{ fontSize: '4rem', margin: '20px 0' }}>🎁</div>
                         <p style={{ color: '#fff', fontSize: '1.2rem', marginBottom: '30px' }}>
                             You won <strong style={{ color: '#4ade80' }}>{reward.qty}x {formatItemId(reward.id)}</strong>!
