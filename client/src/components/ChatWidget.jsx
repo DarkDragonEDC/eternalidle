@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, Send, Minus } from 'lucide-react';
 
-const ChatWidget = ({ socket, user, characterName, isMobile }) => {
+const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
@@ -194,7 +194,12 @@ const ChatWidget = ({ socket, user, characterName, isMobile }) => {
                                 marginBottom: '4px',
                                 gap: '5px'
                             }}>
-                                <span>{msg.sender_name}</span>
+                                <span
+                                    style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                                    onClick={() => onInspect && onInspect(msg.sender_name)}
+                                >
+                                    {msg.sender_name}
+                                </span>
                                 <span style={{ opacity: 0.4 }}>{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
                             <div style={{

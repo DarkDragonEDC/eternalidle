@@ -105,7 +105,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
             width: '100vw',
             height: '100vh',
             background: 'rgba(0,0,0,0.7)',
-            zIndex: 2000,
+            zIndex: 10000,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

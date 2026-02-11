@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Users, Send, X, User, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const SocialPanel = ({ socket, isOpen, onClose, onInvite, tradeInvites, gameState }) => {
+const SocialPanel = ({ socket, isOpen, onClose, onInvite, tradeInvites, gameState, onInspect }) => {
     const [searchNick, setSearchNick] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [searching, setSearching] = useState(false);
@@ -209,7 +209,12 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, tradeInvites, gameStat
                                                 <User size={16} color="var(--accent)" />
                                             </div>
                                             <div>
-                                                <div style={{ fontSize: '0.85rem', fontWeight: '900', color: '#fff' }}>{result.name}</div>
+                                                <div
+                                                    style={{ fontSize: '0.85rem', fontWeight: '900', color: '#fff', cursor: 'pointer', textDecoration: 'underline' }}
+                                                    onClick={() => onInspect && onInspect(result.name)}
+                                                >
+                                                    {result.name}
+                                                </div>
                                                 <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>Level {result.level}</div>
                                             </div>
                                         </div>
@@ -251,7 +256,14 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, tradeInvites, gameStat
                                         borderRadius: '10px', border: '1px solid var(--border)',
                                         display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                                     }}>
-                                        <span style={{ fontSize: '0.85rem', color: '#fff' }}>Trade with <span style={{ color: 'var(--accent)', fontWeight: '900' }}>{trade.partner_name || 'Unknown'}</span></span>
+                                        <span style={{ fontSize: '0.85rem', color: '#fff' }}>
+                                            Trade with <span
+                                                style={{ color: 'var(--accent)', fontWeight: '900', cursor: 'pointer', textDecoration: 'underline' }}
+                                                onClick={() => onInspect && onInspect(trade.partner_name)}
+                                            >
+                                                {trade.partner_name || 'Unknown'}
+                                            </span>
+                                        </span>
                                         <button
                                             onClick={() => onInvite(trade.id)} // Reuse onInvite or handle specifically
                                             style={{

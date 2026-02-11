@@ -109,7 +109,6 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
             icon: <Hammer size={18} />,
             children: [
                 { id: 'WARRIORS_FORGE', label: "Warrior's Forge", skill: 'WARRIOR_CRAFTER' },
-                { id: 'HUNTERS_LODGE', label: "Hunter's Lodge", skill: 'HUNTER_CRAFTER' },
                 { id: 'MAGES_TOWER', label: "Mage's Tower", skill: 'MAGE_CRAFTER' },
                 { id: 'TOOLMAKER', label: 'Toolmaker', skill: 'TOOL_CRAFTER' },
                 { id: 'COOKING_STATION', label: 'Kitchen', skill: 'COOKING' },

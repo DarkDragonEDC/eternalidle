@@ -89,10 +89,9 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         str += getLvl('COOKING');
         str += getLvl('FISHING');
 
-        // AGI: Hunter Class (Skinning, Tanning, Hunter Crafting)
+        // AGI: Hunter Class (Skinning, Tanning)
         agi += getLvl('ANIMAL_SKINNER');
         agi += getLvl('LEATHER_REFINER');
-        agi += getLvl('HUNTER_CRAFTER');
         agi += getLvl('LUMBERJACK');
         agi += getLvl('PLANK_REFINER');
 
@@ -199,7 +198,6 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
             CLOTH: (skills.CLOTH_REFINER?.level || 1) * 0.2 + globalEff,
             EXTRACT: (skills.DISTILLATION?.level || 1) * 0.2 + globalEff,
             WARRIOR: (skills.WARRIOR_CRAFTER?.level || 1) * 0.2 + globalEff,
-            HUNTER: (skills.HUNTER_CRAFTER?.level || 1) * 0.2 + globalEff,
             MAGE: (skills.MAGE_CRAFTER?.level || 1) * 0.2 + globalEff,
             ALCHEMY: (skills.ALCHEMY?.level || 1) * 0.2 + globalEff,
             TOOLS: (skills.TOOL_CRAFTER?.level || 1) * 0.2 + globalEff,
@@ -405,9 +403,8 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
 
 Sources:
 ${fmtSkill('Animal Skinner', 'ANIMAL_SKINNER', 0.2)}
-${fmtSkill('Leather Refiner', 'LEATHER_REFINER', 0.2)}
-${fmtSkill('Hunter Crafter', 'HUNTER_CRAFTER', 0.2)}
-${fmtSkill('Lumberjack', 'LUMBERJACK', 0.2)}
+${fmtSkill('Warrior Crafter', 'WARRIOR_CRAFTER', 0.2)}
+${fmtSkill('Mage Crafter', 'MAGE_CRAFTER', 0.2)}
 ${fmtSkill('Plank Refiner', 'PLANK_REFINER', 0.2)}
 
 Multiplier: 0.2 per Level (Max 100 Total)`;

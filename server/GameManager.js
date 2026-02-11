@@ -251,49 +251,8 @@ export class GameManager {
 
 
         if (data) {
-            // INVENTORY MIGRATION: Inject the separate inventory column back into state for runtime
-            if (data.inventory) {
-                data.state.inventory = data.inventory;
-            } else if (!data.state.inventory) {
-                data.state.inventory = {};
-            }
-
-            // SKILLS MIGRATION: Inject the separate skills column back into state for runtime
-            if (data.skills) {
-                data.state.skills = data.skills;
-            }
-
-            // EQUIPMENT MIGRATION: Inject the separate equipment column back into state for runtime
-            if (data.equipment) {
-                data.state.equipment = data.equipment;
-            }
-
-            // INFO MIGRATION: Inject the separate info column back into state for runtime
-            if (data.info) {
-                // Inject each info field into state for runtime compatibility
-                if (data.info.stats) data.state.stats = data.info.stats;
-                if (data.info.health !== undefined) data.state.health = data.info.health;
-                if (data.info.silver !== undefined) data.state.silver = data.info.silver;
-                if (data.info.crowns !== undefined) data.state.crowns = data.info.crowns;
-                if (data.info.membership) data.state.membership = data.info.membership;
-                if (data.info.active_buffs) data.state.active_buffs = data.info.active_buffs;
-                if (data.info.inventorySlots !== undefined) data.state.inventorySlots = data.info.inventorySlots;
-                if (data.info.extraInventorySlots !== undefined) data.state.extraInventorySlots = data.info.extraInventorySlots;
-                if (data.info.unlockedTitles) data.state.unlockedTitles = data.info.unlockedTitles;
-            }
-
-            // COMBAT MIGRATION: Inject the separate combat column back into state for runtime
-            if (data.combat) {
-                data.state.combat = data.combat;
-            }
-
-            // DUNGEON MIGRATION: Inject the separate dungeon column back into state for runtime
-            if (data.dungeon) {
-                data.state.dungeon = data.dungeon;
-            }
-
-            // Rehydrate the state after loading from database (AFTER injecting columns)
-            data.state = hydrateState(data.state || {});
+            // Use the shared hydration helper to ensure consistent data structures
+            this._hydrateCharacterFromRaw(data);
 
             // SPECIAL: Auto-grant "Pre-Alpha Player" title ONLY for existing characters (Created before Feb 11, 2026)
             const CUTOFF_DATE = new Date('2026-02-11T15:10:00Z'); // 12:10 BRT
@@ -2306,10 +2265,19 @@ export class GameManager {
             search = ''
         } = filters;
 
-        // --- STEP 1: CALCULATE TOTAL COST ---
+        // --- STEP 1: CALCULATE TOTAL MERGES (GROUPED BY BASE ID) ---
         let totalUpgrades = 0;
         let totalSilverCost = 0;
-        const tempInv = { ...char.state.inventory };
+        const createdItems = [];
+
+        // Group by base ID to handle legacy signatures (::CreatorName)
+        const groupedInv = {};
+        for (const [itemId, qty] of Object.entries(char.state.inventory)) {
+            const baseId = itemId.includes('::') ? itemId.split('::')[0] : itemId;
+            groupedInv[baseId] = (groupedInv[baseId] || 0) + (typeof qty === 'object' ? (qty.amount || 0) : (Number(qty) || 0));
+        }
+
+        const tempInv = { ...groupedInv };
 
         let changed = true;
         while (changed) {
@@ -2356,6 +2324,12 @@ export class GameManager {
                     tempInv[itemId] -= (pairs * 2);
                     if (tempInv[itemId] <= 0) delete tempInv[itemId];
                     tempInv[nextItemId] = (tempInv[nextItemId] || 0) + pairs;
+
+                    // Track for result modal
+                    for (let i = 0; i < pairs; i++) {
+                        createdItems.push({ item: nextItemId, qty: 1 });
+                    }
+
                     changed = true;
                 }
             }
@@ -2372,61 +2346,44 @@ export class GameManager {
 
         // --- STEP 2: APPLY MERGES AND DEDUCT SILVER ---
         char.state.silver -= totalSilverCost;
-        const createdItems = [];
 
-        // Track what was created at each step
-        let subChanged = true;
-        const subInv = { ...char.state.inventory };
-        while (subChanged) {
-            subChanged = false;
-            for (const [itemId, qty] of Object.entries(subInv)) {
-                if (qty < 2) continue;
-                if (!itemId.includes('_RUNE_') || itemId.includes('SHARD')) continue;
+        // Create a copy of actual inventory to work with
+        const currentInv = { ...char.state.inventory };
+        const finalInv = {};
 
-                const match = itemId.match(/^T(\d+)_RUNE_(.+)_(\d+)STAR/);
-                if (!match) continue;
+        // 1. Group inventory into a temporary object with base IDs but tracking source keys for deduction
+        const baseGroups = {};
+        for (const [key, val] of Object.entries(currentInv)) {
+            const baseId = key.includes('::') ? key.split('::')[0] : key;
+            if (!baseGroups[baseId]) baseGroups[baseId] = [];
+            baseGroups[baseId].push({ key, val, amount: (typeof val === 'object' ? (val.amount || 0) : (Number(val) || 0)) });
+        }
 
-                const tier = parseInt(match[1]);
-                const stars = parseInt(match[3]);
-                if (stars >= 3 && tier >= 10) continue;
+        // 2. Process merges using the pre-calculated tempInv (the "target" state from Step 1)
+        // Actually, it's simpler to just rebuild the inventory based on tempInv
+        // since we've already calculated the final state in tempInv.
+        // However, we want to KEEP non-rune items and preserve metadata if possible (though runes don't have it now).
 
-                // Apply same filters
-                const itemData = this.inventoryManager.resolveItem(itemId);
-                if (!itemData) continue;
-                if (search && !itemData.name.toLowerCase().includes(search.toLowerCase()) && !itemId.toLowerCase().includes(search.toLowerCase())) continue;
-                if (categoryFilter !== 'ALL') {
-                    const isInCategory = RUNES_BY_CATEGORY[categoryFilter]?.some(catType => itemId.includes(`_RUNE_${catType}_`));
-                    if (!isInCategory) continue;
-                }
-                if (activityFilter !== 'ALL' && !itemId.includes(`_RUNE_${activityFilter}_`)) continue;
-                if (effectFilter !== 'ALL' && !itemId.includes(`_${effectFilter}_`)) continue;
-                if (tierFilter !== 'ALL' && tier !== parseInt(tierFilter)) continue;
-                if (starsFilter !== 'ALL' && stars !== parseInt(starsFilter)) continue;
+        // Rule: All items in tempInv that were merged are now standard (no signature).
+        // Non-rune items or runes that weren't merged should be kept as they were.
 
-                const pairs = Math.floor(qty / 2);
-                if (pairs > 0) {
-                    let nextStars = stars + 1;
-                    let nextTier = tier;
-                    if (stars >= 3) {
-                        nextStars = 1;
-                        nextTier = tier + 1;
-                    }
-                    const nextItemId = `T${nextTier}_RUNE_${match[2]}_${nextStars}STAR`;
+        // Let's just update the inventory with the results from tempInv
+        // and keep anything that isn't a Rune as is.
 
-                    subInv[itemId] -= (pairs * 2);
-                    if (subInv[itemId] <= 0) delete subInv[itemId];
-                    subInv[nextItemId] = (subInv[nextItemId] || 0) + pairs;
-
-                    // Track for result modal
-                    for (let i = 0; i < pairs; i++) {
-                        createdItems.push({ item: nextItemId, qty: 1 });
-                    }
-                    subChanged = true;
-                }
+        for (const [key, val] of Object.entries(currentInv)) {
+            if (!key.includes('_RUNE_') || key.includes('SHARD')) {
+                finalInv[key] = val;
             }
         }
 
-        char.state.inventory = subInv;
+        // Add the merged/finalized runes from tempInv
+        for (const [baseId, qty] of Object.entries(tempInv)) {
+            if (baseId.includes('_RUNE_') && !baseId.includes('SHARD')) {
+                finalInv[baseId] = qty;
+            }
+        }
+
+        char.state.inventory = finalInv;
         this.markDirty(char.id);
         await this.persistCharacter(char.id);
 
@@ -2436,5 +2393,103 @@ export class GameManager {
             count: createdItems.length,
             message: `Successfully performed ${totalUpgrades} merges for ${totalSilverCost.toLocaleString()} Silver!`
         };
+    }
+
+    async getPublicProfile(characterName) {
+        if (!characterName) throw new Error("Character name is required");
+
+        // 1. Try to find in cache first (case-insensitive find)
+        let char = Array.from(this.cache.values()).find(c => c.name.toLowerCase() === characterName.toLowerCase());
+
+        // 2. If not in cache, try DB
+        if (!char) {
+            const { data, error } = await this.supabase
+                .from('characters')
+                .select('*')
+                .ilike('name', characterName)
+                .single();
+
+            if (error || !data) {
+                // Try v2 table just in case
+                const { data: dataV2, error: errorV2 } = await this.supabase
+                    .from('characters_v2')
+                    .select('*')
+                    .ilike('name', characterName)
+                    .single();
+
+                if (errorV2 || !dataV2) throw new Error("Character not found");
+                char = this._hydrateCharacterFromRaw(dataV2);
+            } else {
+                char = this._hydrateCharacterFromRaw(data);
+            }
+        }
+
+        // 3. Prune data for public consumption
+        // We only want: name, level, title, equipment, skills, stats, and guild
+        const publicData = {
+            id: char.id,
+            name: char.name,
+            level: char.state?.level || 1,
+            health: char.state?.health || 0,
+            selectedTitle: char.state?.selectedTitle || null,
+            equipment: char.state?.equipment || {},
+            skills: char.state?.skills || {},
+            stats: this.inventoryManager.calculateStats(char),
+            isPremium: char.state?.isPremium || char.state?.membership?.active || false,
+            // Add guild if it exists in state
+            guildName: char.state?.guildName || null
+        };
+
+        return publicData;
+    }
+
+    _hydrateCharacterFromRaw(data) {
+        if (!data) return null;
+        if (!data.state) data.state = {};
+
+        // INVENTORY MIGRATION: Inject the separate inventory column back into state for runtime
+        if (data.inventory) {
+            data.state.inventory = data.inventory;
+        } else if (!data.state.inventory) {
+            data.state.inventory = {};
+        }
+
+        // SKILLS MIGRATION: Inject the separate skills column back into state for runtime
+        if (data.skills) {
+            data.state.skills = data.skills;
+        }
+
+        // EQUIPMENT MIGRATION: Inject the separate equipment column back into state for runtime
+        if (data.equipment) {
+            data.state.equipment = data.equipment;
+        }
+
+        // INFO MIGRATION: Inject the separate info column back into state for runtime
+        if (data.info) {
+            // Inject each info field into state for runtime compatibility
+            if (data.info.stats) data.state.stats = data.info.stats;
+            if (data.info.health !== undefined) data.state.health = data.info.health;
+            if (data.info.silver !== undefined) data.state.silver = data.info.silver;
+            if (data.info.crowns !== undefined) data.state.crowns = data.info.crowns;
+            if (data.info.membership) data.state.membership = data.info.membership;
+            if (data.info.active_buffs) data.state.active_buffs = data.info.active_buffs;
+            if (data.info.inventorySlots !== undefined) data.state.inventorySlots = data.info.inventorySlots;
+            if (data.info.extraInventorySlots !== undefined) data.state.extraInventorySlots = data.info.extraInventorySlots;
+            if (data.info.unlockedTitles) data.state.unlockedTitles = data.info.unlockedTitles;
+        }
+
+        // COMBAT MIGRATION: Inject the separate combat column back into state for runtime
+        if (data.combat) {
+            data.state.combat = data.combat;
+        }
+
+        // DUNGEON MIGRATION: Inject the separate dungeon column back into state for runtime
+        if (data.dungeon) {
+            data.state.dungeon = data.dungeon;
+        }
+
+        // Rehydrate the state after loading from database (AFTER injecting columns)
+        data.state = hydrateState(data.state || {});
+        return data;
     }
 }

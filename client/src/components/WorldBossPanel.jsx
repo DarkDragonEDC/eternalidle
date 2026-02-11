@@ -166,7 +166,7 @@ const WorldBossInfoModal = ({ onClose }) => {
     );
 };
 
-const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge }) => {
+const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge, onInspect }) => {
     const [wbStatus, setWbStatus] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('BOSS'); // 'BOSS' | 'RANKING'
@@ -638,17 +638,21 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge }) => {
                                                     {getMedalEmoji(index) || `#${index + 1}`}
                                                 </div>
 
-                                                {/* Name */}
-                                                <div style={{
-                                                    flex: 1,
-                                                    fontWeight: isMe ? '800' : '600',
-                                                    color: isMe ? '#22c55e' : 'var(--text-main)',
-                                                    fontSize: '0.9rem',
-                                                    marginLeft: '8px',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis',
-                                                    whiteSpace: 'nowrap'
-                                                }}>
+                                                <div
+                                                    onClick={() => onInspect && onInspect(rank.name)}
+                                                    style={{
+                                                        flex: 1,
+                                                        fontWeight: isMe ? '800' : '600',
+                                                        color: isMe ? '#22c55e' : 'var(--text-main)',
+                                                        fontSize: '0.9rem',
+                                                        marginLeft: '8px',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        whiteSpace: 'nowrap',
+                                                        cursor: 'pointer',
+                                                        textDecoration: 'underline'
+                                                    }}
+                                                >
                                                     {rank.name}
                                                     {isMe && <span style={{ marginLeft: '6px', fontSize: '0.7rem', opacity: 0.7 }}>(you)</span>}
                                                     <div style={{

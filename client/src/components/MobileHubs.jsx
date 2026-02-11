@@ -86,7 +86,6 @@ const mapTabCategoryToSkill = (tab, category) => {
         },
         crafting: {
             WARRIORS_FORGE: 'WARRIOR_CRAFTER',
-            HUNTERS_LODGE: 'HUNTER_CRAFTER',
             MAGES_TOWER: 'MAGE_CRAFTER',
             COOKING_STATION: 'COOKING',
             ALCHEMY_LAB: 'ALCHEMY',
@@ -137,7 +136,6 @@ export const SkillsOverview = ({ onNavigate, gameState }) => {
             items: [
                 { id: 'TOOLMAKER', label: 'Toolmaker' },
                 { id: 'WARRIORS_FORGE', label: 'Warrior' },
-                { id: 'HUNTERS_LODGE', label: 'Hunter' },
                 { id: 'MAGES_TOWER', label: 'Mage' },
                 { id: 'ALCHEMY_LAB', label: 'Alchemy' },
                 { id: 'COOKING_STATION', label: 'Kitchen' }

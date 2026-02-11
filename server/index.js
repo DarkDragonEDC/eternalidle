@@ -521,6 +521,17 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('get_public_profile', async ({ characterName }) => {
+        try {
+            console.log(`[SOCKET] get_public_profile for: ${characterName}`);
+            const profile = await gameManager.getPublicProfile(characterName);
+            socket.emit('public_profile_data', profile);
+        } catch (err) {
+            console.error("Inspect Error:", err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
     socket.on('stop_dungeon', async () => {
         try {
             if (!socket.data.characterId || socket.data.characterId === 'undefined') return;

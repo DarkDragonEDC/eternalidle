@@ -48,7 +48,6 @@ const CATEGORIES = {
         label: 'CRAFTING',
         options: [
             { key: 'WARRIOR_CRAFTER', label: 'Warrior' },
-            { key: 'HUNTER_CRAFTER', label: 'Hunter' },
             { key: 'MAGE_CRAFTER', label: 'Mage' },
             { key: 'TOOL_CRAFTER', label: 'Toolmaker' },
             { key: 'COOKING', label: 'Cooking' },
@@ -57,7 +56,7 @@ const CATEGORIES = {
     }
 };
 
-const RankingPanel = ({ gameState, isMobile, socket }) => {
+const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
     const [characters, setCharacters] = useState([]);
     const [userRankData, setUserRankData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -291,8 +290,10 @@ const RankingPanel = ({ gameState, isMobile, socket }) => {
                                         border: '1px solid',
                                         borderColor: index === 0 ? 'var(--accent)' : 'var(--border)',
                                         position: 'relative',
-                                        overflow: 'hidden'
+                                        overflow: 'hidden',
+                                        cursor: 'pointer'
                                     }}
+                                    onClick={() => onInspect && onInspect(char.name)}
                                 >
                                     {/* Medalha / Numero */}
                                     <div style={{ width: '40px', fontSize: '1.2rem', fontWeight: '900', color: index === 0 ? '#d4af37' : index === 1 ? '#94a3b8' : index === 2 ? '#cd7f32' : 'var(--text-dim)' }}>

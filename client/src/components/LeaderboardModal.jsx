@@ -3,7 +3,7 @@ import { formatNumber, formatSilver } from '@utils/format';
 import { Trophy, Sword, Skull, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const LeaderboardModal = ({ isOpen, onClose, socket, isMobile }) => {
+const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect }) => {
     const [activeTab, setActiveTab] = useState('COMBAT'); // COMBAT | DUNGEON
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -143,14 +143,18 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile }) => {
                                             : (char.state?.stats?.dungeonsCleared || 0);
 
                                         return (
-                                            <div key={char.id} style={{
-                                                background: isTop3 ? 'var(--accent-soft)' : 'var(--slot-bg)',
-                                                borderRadius: '8px',
-                                                padding: '12px 15px',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                border: isTop3 ? `1px solid var(--accent)` : '1px solid var(--border)'
-                                            }}>
+                                            <div key={char.id}
+                                                onClick={() => onInspect && onInspect(char.name)}
+                                                style={{
+                                                    background: isTop3 ? 'var(--accent-soft)' : 'var(--slot-bg)',
+                                                    borderRadius: '8px',
+                                                    padding: '12px 15px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    border: isTop3 ? `1px solid var(--accent)` : '1px solid var(--border)',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
                                                 <div style={{
                                                     width: '30px',
                                                     fontWeight: '900',

@@ -17,14 +17,10 @@ export const INITIAL_SKILLS = {
 
     // Crafting
     WARRIOR_CRAFTER: { level: 1, xp: 0 },
-    HUNTER_CRAFTER: { level: 1, xp: 0 },
     MAGE_CRAFTER: { level: 1, xp: 0 },
 
     // Combat
     COMBAT: { level: 1, xp: 0 },
-    SWORD_MASTERY: { level: 1, xp: 0 },
-    BOW_MASTERY: { level: 1, xp: 0 },
-    FIRE_STAFF_MASTERY: { level: 1, xp: 0 },
 
     // Specialization
     FISHING: { level: 1, xp: 0 },

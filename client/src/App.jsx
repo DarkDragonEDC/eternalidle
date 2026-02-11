@@ -19,6 +19,8 @@ import BottomNav from './components/BottomNav';
 import { SkillsOverview, TownOverview, CombatOverview } from './components/MobileHubs';
 import WorldBossPanel from './components/WorldBossPanel';
 import WorldBossFight from './components/WorldBossFight';
+import InspectModal from './components/InspectModal';
+import LeaderboardModal from './components/LeaderboardModal';
 
 import CombatPanel from './components/CombatPanel';
 import RunePanel from './components/RunePanel';
@@ -155,6 +157,13 @@ function App() {
   const [activeTrade, setActiveTrade] = useState(null);
   const [tradeInvites, setTradeInvites] = useState([]);
   const [showSocialModal, setShowSocialModal] = useState(false);
+  const [inspectData, setInspectData] = useState(null);
+
+  const handleInspectPlayer = (name) => {
+    if (socket && name) {
+      socket.emit('get_public_profile', { characterName: name });
+    }
+  };
 
   const handleRenameSubmit = (newName) => {
     socket.emit('change_name', { newName });
@@ -210,6 +219,7 @@ function App() {
         setShowNotifications(false);
         setShowCombatHistory(false);
         setShowCurrencyDropdown(false);
+        setInspectData(null);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -563,6 +573,11 @@ function App() {
     newSocket.on('trade_success', (data) => {
       addNotification({ type: 'SYSTEM', message: data.message });
       setActiveTrade(null);
+    });
+
+    newSocket.on('public_profile_data', (data) => {
+      console.log('[SOCKET] public_profile_data received:', data);
+      setInspectData(data);
     });
 
     setSocket(newSocket);
@@ -1185,7 +1200,7 @@ function App() {
       case 'inventory':
         return <InventoryPanel gameState={displayedGameState} socket={socket} onEquip={handleEquip} onShowInfo={setInfoItem} onListOnMarket={handleListOnMarket} onUse={handleUseItem} isMobile={isMobile} />;
       case 'ranking':
-        return <RankingPanel gameState={displayedGameState} isMobile={isMobile} socket={socket} />;
+        return <RankingPanel gameState={displayedGameState} isMobile={isMobile} socket={socket} onInspect={handleInspectPlayer} />;
       case 'world_boss':
         return (
           <WorldBossPanel
@@ -1275,6 +1290,7 @@ function App() {
               socket={socket}
               gameState={displayedGameState}
               onChallenge={handleStartWorldBoss}
+              onInspect={handleInspectPlayer}
             />
           </div>
         );
@@ -1601,7 +1617,7 @@ function App() {
         </main>
       </div >
 
-      <ChatWidget socket={socket} user={session.user} characterName={displayedGameState?.name} isMobile={isMobile} />
+      <ChatWidget socket={socket} user={session.user} characterName={displayedGameState?.name} isMobile={isMobile} onInspect={handleInspectPlayer} />
       <BuffsDrawer gameState={displayedGameState} isMobile={isMobile} />
       <ActivityWidget
         gameState={displayedGameState}
@@ -1779,6 +1795,7 @@ function App() {
             socket={socket}
             isOpen={showSocialModal}
             onClose={() => setShowSocialModal(false)}
+            onInspect={handleInspectPlayer}
             onInvite={(target) => {
               const isId = target.includes('-'); // Simple UUID check
               if (isId) {
@@ -1804,6 +1821,14 @@ function App() {
             isMobile={isMobile}
           />
         )}
+
+        <LeaderboardModal
+          isOpen={activeTab === 'leaderboard'}
+          onClose={() => setActiveTab('inventory')}
+          socket={socket}
+          isMobile={isMobile}
+          onInspect={handleInspectPlayer}
+        />
 
         {pendingPotion && (
           <div key="potion-modal-backdrop" style={{
@@ -1869,6 +1894,13 @@ function App() {
         )}
       </AnimatePresence>
 
+      {/* Inspect Modal */}
+      <InspectModal
+        isOpen={!!inspectData}
+        onClose={() => setInspectData(null)}
+        data={inspectData}
+        onItemClick={(item) => setInfoItem(item)}
+      />
     </div >
   );
 }

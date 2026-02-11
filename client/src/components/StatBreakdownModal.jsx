@@ -153,7 +153,7 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                     const skillsMap = {
                         WOOD: 'LUMBERJACK', ORE: 'ORE_MINER', HIDE: 'ANIMAL_SKINNER', FIBER: 'FIBER_HARVESTER', FISH: 'FISHING',
                         PLANK: 'PLANK_REFINER', METAL: 'METAL_BAR_REFINER', LEATHER: 'LEATHER_REFINER', CLOTH: 'CLOTH_REFINER',
-                        WARRIOR: 'WARRIOR_CRAFTER', HUNTER: 'HUNTER_CRAFTER', MAGE: 'MAGE_CRAFTER', COOKING: 'COOKING'
+                        WARRIOR: 'WARRIOR_CRAFTER', MAGE: 'MAGE_CRAFTER', COOKING: 'COOKING'
                     };
                     const skillName = skillsMap[effId];
                     if (skillName) {
@@ -246,7 +246,7 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                                 {
                                     WOOD: 'WOODCUTTING', ORE: 'MINING', HIDE: 'SKINNING', FIBER: 'FIBER', FISH: 'FISHING', HERB: 'HERBALISM',
                                     PLANK: 'PLANKS', METAL: 'BARS', LEATHER: 'LEATHERS', CLOTH: 'CLOTH', EXTRACT: 'DISTILLATION',
-                                    WARRIOR: 'WARRIOR GEAR', HUNTER: 'HUNTER GEAR', MAGE: 'MAGE GEAR', COOKING: 'COOKING',
+                                    WARRIOR: 'WARRIOR GEAR', MAGE: 'MAGE GEAR', COOKING: 'COOKING',
                                     ALCHEMY: 'ALCHEMY', TOOLS: 'TOOLS'
                                 }[statId] || statId
                             )
