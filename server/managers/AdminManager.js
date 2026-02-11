@@ -52,64 +52,127 @@ export class AdminManager {
     }
 
     async cmdGive(socket, args) {
-        // Usage: /give [target?] [itemId] [qty]
+        // Usage: /give [target?] [itemId] [qty] [quality?] [signature?]
         // Examples: 
-        // /give gold 100 -> gives self 100 gold
-        // /give PlayerTwo gold 100 -> gives PlayerTwo 100 gold
+        // /give gold 100
+        // /give me T5_FIRE_STAFF 1 4 <EternoDev>
 
-        let targetName, itemId, qty;
+        let targetName, itemId, qty, quality, signature;
 
-        // Primitive parsing logic
-        if (args.length === 2) {
-            // /give [itemId] [qty] (Target = Self)
-            targetName = 'me';
-            itemId = args[0];
-            qty = parseInt(args[1]);
-        } else if (args.length === 3) {
-            // /give [target] [itemId] [qty]
-            targetName = args[0];
-            itemId = args[1];
-            qty = parseInt(args[2]);
+        // Argument Parsing Logic
+        // We know [itemId] is mandatory. [qty] is mandatory.
+        // If args[0] is 'me' or a player name, it's target.
+        // But player names can be anything.
+        // Heuristic: If args[1] is a number, args[0] is likely ItemId and Target is 'me'. 
+        // Wait, qty is usually number. ItemId is string.
+
+        // Let's stick to strict structure or try to be smart.
+        // Strict: /give [player] [item] [qty] [quality] [signature] (5 args)
+        // Strict: /give [item] [qty] [quality] [signature] (4 args -> target=me)
+
+        // If args[0] matches a connected player or 'me', assume target.
+        // BUT item IDs look different from player names usually?
+
+        let startIndex = 0;
+        if (args.length >= 2) {
+            // Check if first arg is target
+            // If args[1] is NOT a number, then args[0] might be target and args[1] item?
+            // Or if args[1] IS a number, args[0] is item (target=me).
+            // Let's assume standard format:
+            // 2 args: [item] [qty] (target=me)
+            // 3 args: [target] [item] [qty]   OR   [item] [qty] [quality] (ambiguous if target is number? unlikely)
+
+            // Let's try to resolve target from first arg.
+            const likelyTarget = args[0];
+            let isTarget = (likelyTarget.toLowerCase() === 'me');
+            if (!isTarget) {
+                // Check if it looks like a user? 
+                // If 3 args, usually target item qty.
+                if (args.length === 3) isTarget = true;
+                if (args.length >= 4 && isNaN(parseInt(args[1]))) isTarget = true; // [target] [item] [qty] [q]...
+            }
+
+            if (isTarget) {
+                targetName = args[0];
+                itemId = args[1];
+                qty = parseInt(args[2]);
+                startIndex = 3;
+            } else {
+                targetName = 'me';
+                itemId = args[0];
+                qty = parseInt(args[1]);
+                startIndex = 2;
+            }
         } else {
-            return { success: false, error: "Usage: /give [player?] [item] [qty]" };
+            return { success: false, error: "Usage: /give [player?] [item] [qty] [quality?] [signature?]" };
         }
+
+        // Optional args
+        if (args.length > startIndex) quality = parseInt(args[startIndex]);
+        if (args.length > startIndex + 1) signature = args.slice(startIndex + 1).join(' '); // Signature might have spaces?
 
         if (isNaN(qty) || qty <= 0) return { success: false, error: "Invalid quantity." };
 
         const char = await this.resolveTarget(socket, targetName);
 
-        // Handle Gold specifically
-        if (itemId.toLowerCase() === 'gold' || itemId.toLowerCase() === 'silver') { // internally 'silver' but users might say 'gold'
+        // Handle Gold
+        if (itemId.toLowerCase() === 'gold' || itemId.toLowerCase() === 'silver') {
             char.state.silver = (char.state.silver || 0) + qty;
             await this.saveAndNotify(char);
             return { success: true, message: `Gave ${qty} Silver to ${char.name}.` };
         }
 
-        // Validate Item
         const storeItem = getStoreItem(itemId);
         if (storeItem) {
-            // It's a store item (like MEMBERSHIP)
-            if (storeItem.category === 'MEMBERSHIP') {
-                // For membership, we might want to activate it directly OR give the item if it exists as an inventory item
-                // The system seems to treat MEMBERSHIP as an item that invites activation on use, or auto-activates?
-                // Based on previous grep, adding 'MEMBERSHIP' to inventory works and client handles it?
-                // Or we should assume it's just an item 'MEMBERSHIP' with quantity.
-                this.gameManager.inventoryManager.addItemToInventory(char, itemId, qty);
-                await this.saveAndNotify(char);
-                return { success: true, message: `Gave ${qty}x ${storeItem.name} (Store Item) to ${char.name}.` };
-            }
-            // For packages/other store items that are virtual, we might need specific handling, but for now treat as item
             this.gameManager.inventoryManager.addItemToInventory(char, itemId, qty);
             await this.saveAndNotify(char);
             return { success: true, message: `Gave ${qty}x ${storeItem.name} (Store Item) to ${char.name}.` };
         }
 
-        const itemData = resolveItem(itemId);
-        if (!itemData) return { success: false, error: `Invalid item ID: ${itemId}` };
+        const baseItem = resolveItem(itemId);
+        if (!baseItem) return { success: false, error: `Invalid item ID: ${itemId}` };
 
-        this.gameManager.inventoryManager.addItemToInventory(char, itemId, qty);
+        // Construct custom item if quality/signature present
+        let customItem = null;
+        let finalItemId = itemId;
+
+        if (quality !== undefined || signature) {
+            customItem = { ...baseItem };
+
+            if (quality !== undefined && !isNaN(quality)) {
+                customItem.quality = quality;
+                // Append _Q suffix if not already present
+                if (quality > 0 && !finalItemId.includes('_Q')) {
+                    finalItemId += `_Q${quality}`;
+                }
+            }
+
+            if (signature) {
+                customItem.craftedBy = signature;
+                // We typically use <Name> format, ensuring brackets if user forgot? 
+                // Let's trust user input but maybe trim.
+                // customItem.craftedBy = signature.startsWith('<') ? signature : `<${signature}>`; 
+                customItem.craftedBy = signature;
+            }
+            // Add timestamp if signed?
+            if (customItem.craftedBy) {
+                customItem.craftedAt = new Date().toISOString();
+            }
+        }
+
+        // addItemToInventory(char, itemId, amount, customMetadata/ItemObject)
+        // If we pass customItem as 4th arg, it should merge/use it.
+        // InventoryManager logic: if 4th arg is object, uses it as metadata source.
+
+        this.gameManager.inventoryManager.addItemToInventory(char, finalItemId, qty, customItem);
         await this.saveAndNotify(char);
-        return { success: true, message: `Gave ${qty}x ${itemData.name} to ${char.name}.` };
+
+        let msg = `Gave ${qty}x ${baseItem.name}`;
+        if (quality !== undefined) msg += ` (Q${quality})`;
+        if (signature) msg += ` signed by ${signature}`;
+        msg += ` to ${char.name}.`;
+
+        return { success: true, message: msg };
     }
 
     async cmdAddCrowns(socket, args) {
