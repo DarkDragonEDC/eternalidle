@@ -1250,9 +1250,33 @@ export class GameManager {
 
             for (const char of toCleanup) {
                 console.log(`[MAINTENANCE] Cleaning up ${char.name} (${char.id})...`);
-                // Calling getCharacter with catchup=true will process gains up to 12h and clear the activity
+                // Calling getCharacter with catchup=true will process gains up to 12h
                 await this.executeLocked(char.user_id, async () => {
-                    await this.getCharacter(char.user_id, char.id, true);
+                    const fullChar = await this.getCharacter(char.user_id, char.id, true);
+
+                    // Force Stop activities if they are still running (exceeded limit)
+                    if (fullChar) {
+                        let stopped = false;
+                        if (fullChar.state.combat) {
+                            console.log(`[MAINTENANCE] Stopping combat for ${fullChar.name} (limit reached)`);
+                            await this.combatManager.stopCombat(fullChar.user_id, fullChar.id);
+                            stopped = true;
+                        }
+                        if (fullChar.state.dungeon) {
+                            console.log(`[MAINTENANCE] Stopping dungeon for ${fullChar.name} (limit reached)`);
+                            await this.dungeonManager.stopDungeon(fullChar.user_id, fullChar.id);
+                            stopped = true;
+                        }
+                        if (fullChar.current_activity) {
+                            console.log(`[MAINTENANCE] Stopping activity for ${fullChar.name} (limit reached)`);
+                            await this.activityManager.stopActivity(fullChar.user_id, fullChar.id);
+                            stopped = true;
+                        }
+
+                        if (stopped) {
+                            console.log(`[MAINTENANCE] Character ${fullChar.name} is now parked.`);
+                        }
+                    }
                 });
             }
 
