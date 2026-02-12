@@ -118,6 +118,7 @@ export class CombatManager {
             mobDmg = mobData ? mobData.damage : 5;
         }
 
+        // Restore Mitigation Calculations
         const playerMitigation = Math.min(0.60, playerStats.defense / (playerStats.defense + 36000));
 
         let mobDef = combat.mobDefense;
@@ -125,29 +126,67 @@ export class CombatManager {
             mobDef = mobData ? (mobData.defense || 0) : 0;
         }
         const mobMitigation = mobDef / (mobDef + 36000);
-        let mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
 
-        // BURST RUNE LOGIC
-        const burstChance = playerStats.burstChance || 0;
+        if (!combat.player_next_attack_at) combat.player_next_attack_at = now + (playerStats.attackSpeed || 2000);
+
+        // Player Attack Logic (Time-based / Catch-up)
+        let playerAttackCount = 0;
+        let mitigatedPlayerDmg = 0;
         let isBurst = false;
-        if (burstChance > 0) {
-            if (Math.random() * 100 < burstChance) {
-                mitigatedPlayerDmg = Math.floor(mitigatedPlayerDmg * 1.5);
-                isBurst = true;
-            }
-        }
 
-        // Apply Player Damage
-        combat.mobHealth -= mitigatedPlayerDmg;
-        if (combat.mobHealth < 0) combat.mobHealth = 0;
-        combat.totalPlayerDmg = (combat.totalPlayerDmg || 0) + mitigatedPlayerDmg;
-        if (isBurst) {
-            combat.totalBurstDmg = (combat.totalBurstDmg || 0) + mitigatedPlayerDmg;
-            combat.burstCount = (combat.burstCount || 0) + 1;
+        if (now >= combat.player_next_attack_at) {
+            const playerSpeed = Math.max(200, playerStats.attackSpeed || 2000); // Min 200ms cap
+
+            // Calculate how many attacks fit
+            playerAttackCount = 1 + Math.floor((now - combat.player_next_attack_at) / playerSpeed);
+
+            // Cap at 50 to prevent infinite loops
+            if (playerAttackCount > 50) playerAttackCount = 50;
+
+            const singleHitDmg = playerDmg;
+            // Note: We apply mitigation later for display/calc simplicity or here?
+            // The original code applied mitigation once. To be accurate, we apply per hit?
+            // Actually, mitigation is % based or flat? 
+            // "mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)))"
+            // It's linear/percent based, so (Dmg * Count) * Mitigation is same as (Dmg * Mitigation) * Count.
+
+            const singleHitMitigated = Math.max(1, Math.floor(singleHitDmg * (1 - mobMitigation)));
+
+            for (let i = 0; i < playerAttackCount; i++) {
+                let hitDmg = singleHitMitigated;
+
+                // Burst Rune Logic (Per Hit)
+                const burstChance = playerStats.burstChance || 0;
+                if (burstChance > 0 && Math.random() * 100 < burstChance) {
+                    hitDmg = Math.floor(hitDmg * 1.5);
+                    isBurst = true;
+                    combat.totalBurstDmg = (combat.totalBurstDmg || 0) + hitDmg;
+                    combat.burstCount = (combat.burstCount || 0) + 1;
+                }
+
+                mitigatedPlayerDmg += hitDmg;
+
+                // Check if mob died mid-barrage (optional optimization, but we usually overkill)
+                // If we want to be nice we could stop, but let's keep it simple for now.
+            }
+
+            // Apply Player Damage
+            combat.mobHealth -= mitigatedPlayerDmg;
+            if (combat.mobHealth < 0) combat.mobHealth = 0;
+            combat.totalPlayerDmg = (combat.totalPlayerDmg || 0) + mitigatedPlayerDmg;
+
+            // Advance Timer
+            combat.player_next_attack_at += (playerAttackCount * playerSpeed);
+
+            // Sync if too far behind
+            if (combat.player_next_attack_at < now - 10000) {
+                combat.player_next_attack_at = now + playerSpeed;
+            }
         }
 
         // Mob Attack Logic (with catch-up for slow players)
         let mitigatedMobDmg = 0;
+        let mobAttackCount = 0;
 
         // Ensure initialization
         if (!combat.mob_next_attack_at) combat.mob_next_attack_at = now + (combat.mobAtkSpeed || 1000);
@@ -157,16 +196,16 @@ export class CombatManager {
 
             // Calculate how many attacks fit in the elapsed time
             // +1 because the current due attack counts
-            let attackCount = 1 + Math.floor((now - combat.mob_next_attack_at) / mobSpeed);
+            mobAttackCount = 1 + Math.floor((now - combat.mob_next_attack_at) / mobSpeed);
             let foodEaten = 0;
 
             // Safety Cap to prevent infinite loops or millions of damage on lag spike
-            if (attackCount > 50) attackCount = 50;
+            if (mobAttackCount > 50) mobAttackCount = 50;
 
             const singleHitDmg = Math.max(1, Math.floor(mobDmg * (1 - playerMitigation)));
 
             // Loop through each attack for reactive healing
-            for (let a = 0; a < attackCount; a++) {
+            for (let a = 0; a < mobAttackCount; a++) {
                 combat.playerHealth -= singleHitDmg;
                 mitigatedMobDmg += singleHitDmg;
 
@@ -186,7 +225,7 @@ export class CombatManager {
 
             // Advance the timer by the EXACT amount of time covered by these attacks
             // This maintains the rhythm/average DPS
-            combat.mob_next_attack_at += (attackCount * mobSpeed);
+            combat.mob_next_attack_at += (mobAttackCount * mobSpeed);
 
             // If for some reason we are still behind (due to cap or drift), force sync to avoid death spiral
             if (combat.mob_next_attack_at < now - 10000) {
@@ -198,7 +237,9 @@ export class CombatManager {
 
         let roundDetails = {
             playerDmg: mitigatedPlayerDmg,
+            playerHits: playerAttackCount,
             mobDmg: mitigatedMobDmg,
+            mobHits: mobAttackCount,
             silverGained: 0,
             lootGained: [],
             xpGained: 0,

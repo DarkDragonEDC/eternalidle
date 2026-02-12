@@ -102,7 +102,7 @@ export class ActivityManager {
         const char = await this.gameManager.getCharacter(userId, characterId);
         console.log(`[DEBUG] Character found: ${char?.name}. Activity: ${char?.current_activity?.type || 'none'}`);
 
-        if (char.current_activity) {
+        if (char.current_activity && typeof char.current_activity === 'object') {
             const activity = char.current_activity;
             console.log(`[ACTIVITY] Found active ${activity.type}. Session XP: ${activity.sessionXp}`);
             if (!activity.sessionItems) activity.sessionItems = {};

@@ -306,6 +306,12 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                             if (!item.icon) item.icon = `/items/T${tier}_AXE.png`;
                             if (!item.scale) item.scale = '110%';
                         }
+
+                        // FORCE REMOVE WORLD BOSS CHEST ICONS (Fix for cache)
+                        if (item && item.id && item.id.toUpperCase().includes('WORLDBOSS_CHEST')) {
+                            item.noIcon = true;
+                        }
+
                         if (!item) {
                             return (
                                 <div key={`empty-${index}`} style={{
@@ -388,11 +394,11 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                 </div>
 
                                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', overflow: 'hidden' }}>
-                                    {item.icon ? (
+                                    {!item.noIcon && (item.icon ? (
                                         <img src={item.icon} alt={item.name} style={{ width: item.scale || '130%', height: item.scale || '130%', objectFit: 'contain' }} />
                                     ) : (
                                         <Package size={32} color="#666" style={{ opacity: 0.8 }} />
-                                    )}
+                                    ))}
                                 </div>
 
                                 <div style={{
@@ -428,6 +434,11 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                         onUse={(id) => {
                             setSelectedItemForModal(null);
                             const item = resolveItem(id);
+
+                            // FORCE FIX for World Boss Chests
+                            if (item && id.includes('WORLDBOSS_CHEST')) {
+                                item.noIcon = true;
+                            }
 
                             if (item?.type === 'POTION' || item?.type === 'CHEST' || id.includes('CHEST') || item?.type === 'CONSUMABLE') {
                                 setUsePotionModal({
@@ -634,11 +645,11 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                     justifyContent: 'center',
                                     border: '1px solid var(--border)'
                                 }}>
-                                    {usePotionModal.item.icon ? (
+                                    {!usePotionModal.item.noIcon && (usePotionModal.item.icon ? (
                                         <img src={usePotionModal.item.icon} alt="" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
                                     ) : (
                                         <Package size={32} color="#d4af37" />
-                                    )}
+                                    ))}
                                 </div>
                                 <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-main)', fontWeight: '900', letterSpacing: '1px' }}>
                                     {usePotionModal.item.type === 'POTION' ? 'Drink' : usePotionModal.item.type === 'CHEST' || usePotionModal.itemId.includes('CHEST') ? 'Open' : 'Use'} {usePotionModal.item.name}

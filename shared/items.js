@@ -516,7 +516,8 @@ for (const t of TIERS) {
         rarity: 'COMMON',
         type: 'CONSUMABLE',
         rarityColor: '#ffffff',
-        desc: 'An ordinary chest dropped by a World Boss.'
+        desc: 'An ordinary chest dropped by a World Boss.',
+        noIcon: true
     };
     // Good (Green)
     ITEMS.SPECIAL.CHEST[`${t}_WORLDBOSS_GOOD`] = {
@@ -526,7 +527,8 @@ for (const t of TIERS) {
         rarity: 'UNCOMMON',
         type: 'CONSUMABLE',
         rarityColor: '#10b981', // Green
-        desc: 'A good chest dropped by a World Boss.'
+        desc: 'A good chest dropped by a World Boss.',
+        noIcon: true
     };
 
     // Outstanding (Blue)
@@ -537,7 +539,8 @@ for (const t of TIERS) {
         rarity: 'RARE',
         type: 'CONSUMABLE',
         rarityColor: '#4a90e2',
-        desc: 'An outstanding chest dropped by a World Boss.'
+        desc: 'An outstanding chest dropped by a World Boss.',
+        noIcon: true
     };
     // Excellent (Purple)
     ITEMS.SPECIAL.CHEST[`${t}_WORLDBOSS_EXCELLENT`] = {
@@ -547,7 +550,8 @@ for (const t of TIERS) {
         rarity: 'EPIC',
         type: 'CONSUMABLE',
         rarityColor: '#9013fe', // Purple
-        desc: 'An excellent chest dropped by a World Boss.'
+        desc: 'An excellent chest dropped by a World Boss.',
+        noIcon: true
     };
     // Masterpiece (Orange)
     ITEMS.SPECIAL.CHEST[`${t}_WORLDBOSS_MASTERPIECE`] = {
@@ -557,7 +561,8 @@ for (const t of TIERS) {
         rarity: 'LEGENDARY',
         type: 'CONSUMABLE',
         rarityColor: '#f5a623', // Orange/Gold
-        desc: 'A masterpiece chest dropped by a World Boss.'
+        desc: 'A masterpiece chest dropped by a World Boss.',
+        noIcon: true
     };
 }
 

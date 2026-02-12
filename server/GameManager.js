@@ -1328,7 +1328,7 @@ export class GameManager {
         let combatResult = null;
         let activityFinished = false;
 
-        if (char.current_activity) {
+        if (char.current_activity && typeof char.current_activity === 'object') {
             const { type, item_id, actions_remaining, time_per_action = 3, next_action_at } = char.current_activity;
             let targetTime = Number(next_action_at);
             if (!targetTime) {

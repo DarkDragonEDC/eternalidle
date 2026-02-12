@@ -251,10 +251,11 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                         setIsMobHit(true);
                         setTimeout(() => setIsMobHit(false), 200);
 
+                        const hitsText = (details.playerHits > 1) ? ` (${details.playerHits} hits)` : '';
                         newLogs.push({
                             id: generateLogId(),
                             type: 'combat',
-                            content: `You dealt ${details.playerDmg} damage.`,
+                            content: `You dealt ${details.playerDmg} damage${hitsText}.`,
                             color: '#4a90e2',
                             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
                         });
@@ -265,10 +266,11 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                         setIsPlayerHit(true);
                         setTimeout(() => setIsPlayerHit(false), 200);
 
+                        const hitsText = (details.mobHits > 1) ? ` (${details.mobHits} hits)` : '';
                         newLogs.push({
                             id: generateLogId(),
                             type: 'combat',
-                            content: `${details?.mobName || 'Enemy'} dealt ${details.mobDmg} damage.`,
+                            content: `${details?.mobName || 'Enemy'} dealt ${details.mobDmg} damage${hitsText}.`,
                             color: '#ff4444',
                             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
                         });

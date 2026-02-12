@@ -281,6 +281,53 @@ export class WorldBossManager {
         if (error) console.error('[WORLD_BOSS] DB Error saving participation:', error);
     }
 
+    calculateChestReward(rank, totalParticipants) {
+        // Validation
+        if (rank <= 0 || totalParticipants <= 0) {
+            return { id: 'T1_WORLDBOSS_CHEST_NORMAL', name: 'Unknown Chest' };
+        }
+
+        const availableChests = Object.keys(WORLDBOSS_DROP_TABLE); // T1_Common ... T10_Masterpiece (50 items)
+        const maxIndex = availableChests.length - 1; // 49
+
+        // Logic: Bottom-up progression
+        // Rank N (Last) -> Score 0
+        // Rank 1 (First) -> Score N-1
+        const score = totalParticipants - rank;
+
+        let index = 0;
+
+        if (totalParticipants <= availableChests.length) {
+            // If fewer players than chests, 1:1 mapping from bottom
+            // 5 players: Rank 5->Idx 0, Rank 1->Idx 4
+            index = score;
+        } else {
+            // More players than chests: Scale score to fit 0..49
+            // Max Score = Total-1
+            // Index = (Score / MaxScore) * 49
+
+            // FIX: Prevent division by zero if totalParticipants is 1
+            const maxScore = Math.max(1, totalParticipants - 1);
+            const ratio = score / maxScore;
+
+            index = Math.floor(ratio * maxIndex);
+        }
+
+        // Safety Clamp
+        index = Math.max(0, Math.min(maxIndex, index));
+
+        const chestId = availableChests[index];
+
+        // Format Name
+        const parts = chestId.split('_');
+        const tier = parts[0];
+        const rarity = parts[parts.length - 1]; // NORMAL, GOOD, etc.
+        const rarityFormatted = rarity.charAt(0).toUpperCase() + rarity.slice(1).toLowerCase();
+        const chestName = `${tier} WB Chest (${rarityFormatted})`;
+
+        return { id: chestId, name: chestName };
+    }
+
     async getPendingReward(charId) {
         // Find if there's any record with claimed = false from PREVIOUS dates
         const todayStr = new Date().toISOString().split('T')[0];
@@ -308,27 +355,7 @@ export class WorldBossManager {
         const pos = rankingData.findIndex(r => r.character_id === charId) + 1;
         const totalParticipants = rankingData.length;
 
-        // Calculate Chest (Duplicated logic from claimReward - could be extracted to helper)
-        let chestName = 'Unknown Chest';
-        let chestId = 'T1_WORLDBOSS_CHEST_NORMAL';
-
-        if (pos > 0) {
-            if (pos === 1) {
-                chestId = 'T10_WORLDBOSS_CHEST_MASTERPIECE';
-            } else {
-                const poolSize = Math.max(1, Math.floor((totalParticipants - 1) / 49));
-                const groupIndex = Math.floor((pos - 2) / poolSize);
-                const chests = Object.keys(WORLDBOSS_DROP_TABLE).filter(c => c !== 'T10_WORLDBOSS_CHEST_MASTERPIECE');
-                const reverseIndex = 48 - Math.min(48, groupIndex);
-                chestId = chests[reverseIndex] || chests[0];
-            }
-
-            const parts = chestId.split('_');
-            const tier = parts[0];
-            const rarity = parts[parts.length - 1];
-            const rarityFormatted = rarity.charAt(0).toUpperCase() + rarity.slice(1).toLowerCase();
-            chestName = `${tier} WB Chest (${rarityFormatted})`;
-        }
+        const { id: chestId, name: chestName } = this.calculateChestReward(pos, totalParticipants);
 
         return {
             ...reward,
@@ -355,28 +382,7 @@ export class WorldBossManager {
 
         const totalParticipants = rankingData.length;
 
-        let chestId = 'T1_WORLDBOSS_CHEST_NORMAL'; // Default fallback
-
-        if (pos === 1) {
-            chestId = 'T10_WORLDBOSS_CHEST_MASTERPIECE';
-        } else {
-            // PROPORTIONAL LOGIC: (Total - 1) / 49
-            const poolSize = Math.max(1, Math.floor((totalParticipants - 1) / 49));
-            // Adjust for very small participant count
-            const groupIndex = Math.floor((pos - 2) / poolSize);
-
-            // Map groupIndex (0-48) to Chest IDs from worst (T1 Normal) to best (T10 Excellent)
-            // But we have 50 types (T1-T10 x 5). Masterpiece T10 is for pos 1. 
-            // So we have 49 others.
-
-            const chests = Object.keys(WORLDBOSS_DROP_TABLE).filter(c => c !== 'T10_WORLDBOSS_CHEST_MASTERPIECE');
-            // 'chests' should have 49 items.
-            // Best items are at the end of the list usually (T10 Excellent).
-            // pos 2 should get chests[48], pos last should get chests[0].
-
-            const reverseIndex = 48 - Math.min(48, groupIndex);
-            chestId = chests[reverseIndex] || chests[0];
-        }
+        const { id: chestId } = this.calculateChestReward(pos, totalParticipants);
 
         // Give the chest
         const added = this.gameManager.inventoryManager.addItemToInventory(char, chestId, 1);
