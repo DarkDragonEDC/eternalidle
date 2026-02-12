@@ -514,8 +514,9 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge, onInspect })
                                                     <div style={{ fontWeight: '800', color: '#d4af37', fontSize: '0.9rem', letterSpacing: '1px' }}>
                                                         UNCLAIMED REWARD
                                                     </div>
-                                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '2px' }}>
-                                                        From {new Date(pendingReward.date).toLocaleDateString()}
+                                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '2px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                        <span>From {new Date(pendingReward.date).toLocaleDateString()} • <span style={{ color: '#fff' }}>Rank #{pendingReward.rank}</span></span>
+                                                        <span style={{ color: '#ae00ff' }}>{pendingReward.chest}</span>
                                                     </div>
                                                 </div>
                                             </div>

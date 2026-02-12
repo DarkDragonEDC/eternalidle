@@ -1013,6 +1013,11 @@ export const calculateRuneBonus = (tier, stars, effType = null) => {
         bonus = Math.max(1, Math.floor(bonus * 0.3));
     }
 
+    // BURST (Critical Strike) runes give 40% bonus (max ~20% instead of ~50%)
+    if (effType === 'BURST') {
+        bonus = Math.max(1, Math.floor(bonus * 0.4));
+    }
+
     return bonus;
 };
 
@@ -1057,7 +1062,7 @@ RUNE_CRAFT_ACTIVITIES.forEach(act => {
 });
 
 RUNE_COMBAT_ACTIVITIES.forEach(act => {
-    ['ATTACK', 'SAVE_FOOD'].forEach(eff => {
+    ['ATTACK', 'SAVE_FOOD', 'BURST'].forEach(eff => {
         const type = `${act}_${eff}`;
         ALL_RUNE_TYPES.push(type);
         RUNES_BY_CATEGORY.COMBAT.push(type);
@@ -1102,8 +1107,8 @@ for (const t of TIERS) {
                 WARRIOR: 'Warrior', HUNTER: 'Hunter', MAGE: 'Mage', TOOLS: 'Tools', COOKING: 'Cooking', ALCHEMY: 'Alchemy',
                 ATTACK: 'Combat'
             };
-            const EFF_NAME_MAP = { XP: 'XP', COPY: 'Duplication', SPEED: 'Auto-Refine', EFF: 'Efficiency', ATTACK: 'Attack', SAVE_FOOD: 'Food Saving' };
-            const EFF_LABEL_MAP = { XP: 'Experience', COPY: 'Duplication', SPEED: 'Auto-Refine Chance', EFF: 'Speed', ATTACK: 'Damage', SAVE_FOOD: 'Conservation' };
+            const EFF_NAME_MAP = { XP: 'XP', COPY: 'Duplication', SPEED: 'Auto-Refine', EFF: 'Efficiency', ATTACK: 'Attack', SAVE_FOOD: 'Food Saving', BURST: 'Burst' };
+            const EFF_LABEL_MAP = { XP: 'Experience', COPY: 'Duplication', SPEED: 'Auto-Refine Chance', EFF: 'Speed', ATTACK: 'Damage', SAVE_FOOD: 'Conservation', BURST: 'Critical Chance' };
 
             const actName = ACT_NAME_MAP[act] || act;
             let effName = EFF_NAME_MAP[eff] || eff;
@@ -1128,6 +1133,8 @@ for (const t of TIERS) {
                 description = `Increases ${eff === 'EFF' ? 'speed' : 'damage'} by ${bonusValue}%.`;
             } else if (eff === 'SAVE_FOOD') {
                 description = `Chance to consume no food when healing by ${bonusValue}%.`;
+            } else if (eff === 'BURST') {
+                description = `${bonusValue}% Chance to deal 1.5x damage on hit.`;
             } else {
                 description = `Increases ${actName} ${effectLabel} by ${bonusValue}%.`;
             }

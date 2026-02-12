@@ -4,10 +4,8 @@ export const formatNumber = (num) => {
     return Math.floor(num).toLocaleString('pt-BR');
 };
 
-export const formatSilver = (num, abbreviate = false) => {
+export const formatCompactNumber = (num) => {
     if (!num) return '0';
-    if (!abbreviate) return formatNumber(num);
-
     if (num >= 1000000000) {
         return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
     }
@@ -19,3 +17,10 @@ export const formatSilver = (num, abbreviate = false) => {
     }
     return formatNumber(num);
 };
+
+export const formatSilver = (num, abbreviate = false) => {
+    if (!num) return '0';
+    if (!abbreviate) return formatNumber(num);
+    return formatCompactNumber(num);
+};
+

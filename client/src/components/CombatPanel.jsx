@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { formatNumber, formatSilver } from '@utils/format';
+import { formatNumber, formatSilver, formatCompactNumber } from '@utils/format';
 import { Sword, Shield, Skull, Coins, Zap, Clock, Trophy, ChevronRight, User, Terminal, Activity, TrendingUp, Star, Apple, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MONSTERS } from '@shared/monsters';
@@ -233,7 +233,8 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                     id: generateLogId(),
                     type: 'heal',
                     content: `You healed for ${result.healingUpdate.amount} HP.`,
-                    color: '#4caf50'
+                    color: '#4caf50',
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
                 });
             }
 
@@ -254,7 +255,8 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                             id: generateLogId(),
                             type: 'combat',
                             content: `You dealt ${details.playerDmg} damage.`,
-                            color: '#4a90e2'
+                            color: '#4a90e2',
+                            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
                         });
                     }
 
@@ -267,7 +269,8 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                             id: generateLogId(),
                             type: 'combat',
                             content: `${details?.mobName || 'Enemy'} dealt ${details.mobDmg} damage.`,
-                            color: '#ff4444'
+                            color: '#ff4444',
+                            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
                         });
                     }
 
@@ -276,7 +279,8 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                             id: generateLogId(),
                             type: 'reward',
                             content: `+${details.silverGained} Silver collected!`,
-                            color: 'var(--accent)'
+                            color: 'var(--accent)',
+                            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
                         });
                     }
 
@@ -294,7 +298,8 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 id: generateLogId(),
                                 type: 'loot',
                                 content: `Item found: ${itemData ? (itemData.tier ? `T${itemData.tier} ${itemData.name}` : itemData.name) : formatItemId(item)}!`,
-                                color: '#ae00ff'
+                                color: '#ae00ff',
+                                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
                             });
                         });
                     }
@@ -304,7 +309,8 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                             id: generateLogId(),
                             type: 'victory',
                             content: `Victory! ${details?.mobName || 'Enemy'} defeated.`,
-                            color: '#4caf50'
+                            color: '#4caf50',
+                            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
                         });
                     }
 
@@ -313,7 +319,8 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                             id: generateLogId(),
                             type: 'defeat',
                             content: `You were defeated! Returning to town...`,
-                            color: '#ff4444'
+                            color: '#ff4444',
+                            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
                         });
                     }
                 });
@@ -423,6 +430,9 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
 
         // Use Server Stats
         const totalDmgDealt = combat.totalPlayerDmg || 0;
+        const totalBurstDmg = combat.totalBurstDmg || 0;
+        const burstCount = combat.burstCount || 0;
+        const normalDmg = totalDmgDealt - totalBurstDmg;
         const xpGained = combat.sessionXp || 0;
         const silverGained = combat.sessionSilver || 0;
         const kills = combat.kills || 0;
@@ -737,43 +747,52 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Activity size={10} /> DPS
                                 </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4a90e2' }}>{dps.toFixed(1)}</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4a90e2' }}>{formatCompactNumber(dps)}</div>
                             </div>
                             <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
                                 <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Trophy size={10} /> KILLS
                                 </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4caf50' }}>{kills}</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4caf50' }}>{formatCompactNumber(kills)}</div>
                             </div>
                             <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
                                 <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Heart size={10} /> FOOD USE / SAVED
                                 </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#ff4444' }}>{foodConsumed} / {savedFoodCount}</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#ff4444' }}>{formatCompactNumber(foodConsumed)} / {formatCompactNumber(savedFoodCount)}</div>
                             </div>
-                            <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 3' : 'span 1' }}>
+                            <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
                                 <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <TrendingUp size={10} /> DAMAGE
+                                    <TrendingUp size={10} /> TOTAL DAMAGE
                                 </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{formatNumber(totalDmgDealt)}</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{formatCompactNumber(totalDmgDealt)}</div>
                             </div>
-                            <div style={{ background: 'var(--accent-soft)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-active)', gridColumn: isMobile ? 'span 3' : 'span 1' }}>
+                            <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
+                                <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <Zap size={10} /> DMG / CRIT
+                                </div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>
+                                    <span>{formatCompactNumber(normalDmg)}</span>
+                                    <span style={{ color: '#ff8c00', marginLeft: '4px' }}>/ {formatCompactNumber(totalBurstDmg)}</span>
+                                </div>
+                            </div>
+                            <div style={{ background: 'var(--accent-soft)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-active)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
                                 <div style={{ fontSize: '0.55rem', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Coins size={10} /> SILVER
                                 </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--accent)' }}>{formatNumber(silverGained)}</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--accent)' }}>{formatCompactNumber(silverGained)}</div>
                             </div>
                             <div style={{ background: 'rgba(76, 175, 80, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(76, 175, 80, 0.2)', gridColumn: isMobile ? 'span 3' : 'span 1' }}>
                                 <div style={{ fontSize: '0.55rem', color: '#4caf50', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Star size={10} /> TOTAL XP
                                 </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{formatNumber(xpGained)}</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{formatCompactNumber(xpGained)}</div>
                             </div>
                             <div style={{ background: 'rgba(76, 175, 80, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(76, 175, 80, 0.2)', gridColumn: isMobile ? 'span 3' : 'span 1' }}>
                                 <div style={{ fontSize: '0.55rem', color: '#4caf50', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <Activity size={10} /> XP/H
                                 </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4caf50' }}>{formatNumber(Math.floor(xph))}</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4caf50' }}>{formatCompactNumber(Math.floor(xph))}</div>
                             </div>
                         </div>
 
@@ -809,14 +828,14 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
 
                         {/* Battle Console */}
                         <div className="glass-panel" style={{
-                            flex: 'none',
                             display: 'flex',
                             flexDirection: 'column',
                             overflowY: 'hidden',
                             background: 'var(--bg-dark)',
                             border: '1px solid var(--border)',
-                            flex: 1,
-                            minHeight: isMobile ? '150px' : '200px',
+                            flex: isMobile ? 1 : 'none',
+                            height: isMobile ? 'auto' : '140px',
+                            minHeight: isMobile ? '150px' : '100px',
                             maxHeight: isMobile ? '300px' : '500px',
                             position: 'relative'
                         }}>
@@ -831,7 +850,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                             >
                                 {battleLogs.map(log => (
                                     <div key={log.id} style={{ marginBottom: '3px', borderLeft: `2px solid ${log.color || '#333'}`, paddingLeft: '6px' }}>
-                                        <span style={{ color: log.color || 'var(--text-main)', opacity: 0.5 }}>[{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span> {log.content}
+                                        <span style={{ color: log.color || 'var(--text-main)', opacity: 0.5 }}>[{log.timestamp || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span> {log.content}
                                     </div>
                                 ))}
                                 <div ref={logsEndRef} />

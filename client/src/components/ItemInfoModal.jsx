@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Sword, Shield, Heart, Star, Zap } from 'lucide-react';
+import { X, Sword, Shield, Heart, Star, Zap, Award } from 'lucide-react';
 import { QUALITIES, resolveItem } from '@shared/items';
 import { CHEST_DROP_TABLE } from '@shared/chest_drops';
 
@@ -192,6 +192,25 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                     }}>
                         "{getItemDescription(item)}"
                     </div>
+
+                    {/* Signature Section */}
+                    {item.craftedBy && (
+                        <div style={{
+                            fontSize: '0.7rem',
+                            color: '#fbbf24', // Amber/Yellow
+                            fontWeight: 'bold',
+                            textAlign: 'center',
+                            marginTop: '-10px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '4px'
+                        }}>
+                            <Award size={12} /> Crafted by {item.craftedBy}
+                        </div>
+                    )}
 
                     {/* Compact Info Badges */}
                     <div style={{

@@ -164,7 +164,9 @@ export class AdminManager {
         // If we pass customItem as 4th arg, it should merge/use it.
         // InventoryManager logic: if 4th arg is object, uses it as metadata source.
 
-        this.gameManager.inventoryManager.addItemToInventory(char, finalItemId, qty, customItem);
+        const added = this.gameManager.inventoryManager.addItemToInventory(char, finalItemId, qty, customItem);
+        if (!added) return { success: false, error: "Failed to add item. Inventory likely full." };
+
         await this.saveAndNotify(char);
 
         let msg = `Gave ${qty}x ${baseItem.name}`;

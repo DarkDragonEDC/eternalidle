@@ -2005,7 +2005,7 @@ export class GameManager {
                     // Collect all potential new items first
                     const potentialDrops = [];
 
-                    if (Math.random() < crestChance) {
+                    if (!itemData.id.includes('WORLDBOSS') && Math.random() < crestChance) {
                         const crestId = `T${tier}_CREST`;
                         totalRewards.items[crestId] = (totalRewards.items[crestId] || 0) + 1;
                     }
@@ -2099,6 +2099,18 @@ export class GameManager {
         const count = Math.max(1, parseInt(qty) || 1);
         const char = await this.getCharacter(userId, characterId);
         if (!char) return { success: false, error: "Character not found" };
+
+        // 0. Auto-correct category based on shard type (safeguard against client mismatches)
+        const activeShardIdPrecheck = shardId || 'T1_RUNE_SHARD';
+        if (activeShardIdPrecheck === 'T1_BATTLE_RUNE_SHARD' || activeShardIdPrecheck.includes('BATTLE')) {
+            if (category !== 'COMBAT') {
+                console.log(`[GameManager] Auto-correcting category from '${category}' to 'COMBAT' (battle shard detected)`);
+                category = 'COMBAT';
+            }
+        } else if (category === 'COMBAT') {
+            console.log(`[GameManager] Auto-correcting category from 'COMBAT' to 'GATHERING' (non-battle shard used)`);
+            category = 'GATHERING';
+        }
 
         // 1. Validate Category
         const types = RUNES_BY_CATEGORY[category];

@@ -564,8 +564,12 @@ function App() {
       if (trade.status === 'COMPLETED' || trade.status === 'CANCELLED') {
         setActiveTrade(null);
       } else {
-        // Only update if it's the current active trade. Do not auto-open if none is active.
-        setActiveTrade(prev => (prev?.id === trade.id) ? trade : prev);
+        // Update current trade OR auto-open if we are the sender (initiated the trade)
+        setActiveTrade(prev => {
+          if (prev?.id === trade.id) return trade;
+          if (!prev && trade.sender_id === characterId) return trade;
+          return prev;
+        });
       }
     });
 
@@ -633,6 +637,16 @@ function App() {
   const handleUseItem = (itemId, quantity = 1) => {
     if (socket) {
       socket.emit('use_item', { itemId, quantity });
+    }
+
+    // Client-side redirection for Battle Rune Shards
+    if (itemId === 'T1_BATTLE_RUNE_SHARD' || (itemId && itemId.includes('BATTLE') && itemId.includes('SHARD'))) {
+      setActiveTab('merging');
+      setActiveCategory('COMBAT');
+    } else if (itemId && itemId.includes('_SHARD') && itemId.includes('RUNE')) {
+      setActiveTab('merging');
+      // Default to GATHERING if not already set, or keep current
+      if (activeCategory === 'COMBAT') setActiveCategory('GATHERING');
     }
   };
 
@@ -1294,7 +1308,7 @@ function App() {
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <SkillProgressHeader tab="merging" category={activeCategory} />
             <div className="scroll-container" style={{ flex: 1, overflowY: 'auto' }}>
-              <RunePanel gameState={displayedGameState} onShowInfo={setInfoItem} isMobile={isMobile} socket={socket} onListOnMarket={handleListOnMarket} />
+              <RunePanel gameState={displayedGameState} onShowInfo={setInfoItem} isMobile={isMobile} socket={socket} onListOnMarket={handleListOnMarket} activeCategory={activeCategory} />
             </div>
           </div>
         );

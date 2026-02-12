@@ -293,9 +293,49 @@ export class WorldBossManager {
 
         if (error || !data || data.length === 0) return null;
 
-        // For simplicity, return the most recent unclaimed one
-        // In a real scenario, we might want to return all or aggregate.
-        return data[0];
+        const reward = data[0]; // Most recent unclaimed
+
+        // Determine Rank and Chest
+        // We need to fetch the ranking for that specific date to know the position
+        const { data: rankingData } = await this.gameManager.supabase
+            .from('world_boss_attempts')
+            .select('character_id, damage')
+            .eq('date', reward.date)
+            .order('damage', { ascending: false });
+
+        if (!rankingData) return reward; // Fallback to basic info if fail
+
+        const pos = rankingData.findIndex(r => r.character_id === charId) + 1;
+        const totalParticipants = rankingData.length;
+
+        // Calculate Chest (Duplicated logic from claimReward - could be extracted to helper)
+        let chestName = 'Unknown Chest';
+        let chestId = 'T1_WORLDBOSS_CHEST_NORMAL';
+
+        if (pos > 0) {
+            if (pos === 1) {
+                chestId = 'T10_WORLDBOSS_CHEST_MASTERPIECE';
+            } else {
+                const poolSize = Math.max(1, Math.floor((totalParticipants - 1) / 49));
+                const groupIndex = Math.floor((pos - 2) / poolSize);
+                const chests = Object.keys(WORLDBOSS_DROP_TABLE).filter(c => c !== 'T10_WORLDBOSS_CHEST_MASTERPIECE');
+                const reverseIndex = 48 - Math.min(48, groupIndex);
+                chestId = chests[reverseIndex] || chests[0];
+            }
+
+            const parts = chestId.split('_');
+            const tier = parts[0];
+            const rarity = parts[parts.length - 1];
+            const rarityFormatted = rarity.charAt(0).toUpperCase() + rarity.slice(1).toLowerCase();
+            chestName = `${tier} WB Chest (${rarityFormatted})`;
+        }
+
+        return {
+            ...reward,
+            rank: pos,
+            chest: chestName,
+            chestId: chestId
+        };
     }
 
     async claimReward(char) {

@@ -5,13 +5,20 @@ import { Package, Info, Sparkles, ArrowRight, Hammer, Coins, Star, Search, Filte
 import { motion } from 'framer-motion';
 import ItemActionModal from './ItemActionModal';
 
-const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) => {
+const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, activeCategory }) => {
     const [activeTab, setActiveTab] = useState('shards');
     const [selectedShard, setSelectedShard] = useState(null);
     const [isShardSelectionOpen, setIsShardSelectionOpen] = useState(false);
 
     // Forging Category State
-    const [forgeCategory, setForgeCategory] = useState('GATHERING');
+    const [forgeCategory, setForgeCategory] = useState(activeCategory || 'GATHERING');
+
+    // Sync with parent category
+    useEffect(() => {
+        if (activeCategory) {
+            setForgeCategory(activeCategory);
+        }
+    }, [activeCategory]);
 
     // Filtering and Sorting State
     const [search, setSearch] = useState('');
@@ -24,15 +31,22 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
     const [sortBy, setSortBy] = useState('TIER_DESC');
     const [isFilterExpanded, setIsFilterExpanded] = useState(false);
 
-    // Auto-select T1 Shard on load/tab switch
+    // Auto-select appropriate shard on load/tab switch
     useEffect(() => {
         if (activeTab === 'shards') {
+            if (activeCategory === 'COMBAT') {
+                const battleShard = resolveItem('T1_BATTLE_RUNE_SHARD');
+                if (battleShard) {
+                    setSelectedShard({ ...battleShard, id: 'T1_BATTLE_RUNE_SHARD' });
+                    return;
+                }
+            }
             const shard = resolveItem('T1_RUNE_SHARD');
             if (shard) {
                 setSelectedShard({ ...shard, id: 'T1_RUNE_SHARD' });
             }
         }
-    }, [activeTab]);
+    }, [activeTab, activeCategory]);
     const [isCrafting, setIsCrafting] = useState(false);
     const [craftResult, setCraftResult] = useState(null);
     const [selectedItemForModal, setSelectedItemForModal] = useState(null);
@@ -78,6 +92,16 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket }) 
             }
             setSelectedShard(item);
             setCraftResult(null);
+
+            // Auto-set forgeCategory based on shard type
+            if (activeTab === 'shards' && item.id) {
+                if (item.id.includes('BATTLE') || item.id.includes('COMBAT')) {
+                    setForgeCategory('COMBAT');
+                } else if (forgeCategory === 'COMBAT') {
+                    // Reset to GATHERING if switching away from battle shard
+                    setForgeCategory('GATHERING');
+                }
+            }
         }
     };
 

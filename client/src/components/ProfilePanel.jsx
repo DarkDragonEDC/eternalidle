@@ -244,7 +244,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
 
     const EquipmentSlot = ({ slot, icon, label, item: rawItem, onClick, onShowInfo }) => {
         // Resolve item to ensure we have latest stats and rarity color (even for Normal items if logic changes, but mostly for _Q items)
-        const item = rawItem ? { ...rawItem, ...resolveItem(rawItem.id || rawItem.item_id) } : null;
+        const item = rawItem ? { ...resolveItem(rawItem.id || rawItem.item_id), ...rawItem } : null;
 
         const tierColor = item ? '#666' : 'var(--glass-bg)';
 
@@ -1274,6 +1274,14 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                                     label="CONSERV."
                                                     item={equipment[`rune_ATTACK_SAVE_FOOD`]}
                                                     onClick={() => setSelectedSlot(`rune_ATTACK_SAVE_FOOD`)}
+                                                    onShowInfo={onShowInfo}
+                                                />
+                                                <EquipmentSlot
+                                                    slot={`rune_ATTACK_BURST`}
+                                                    icon={<Zap size={20} />}
+                                                    label="BURST"
+                                                    item={equipment[`rune_ATTACK_BURST`]}
+                                                    onClick={() => setSelectedSlot(`rune_ATTACK_BURST`)}
                                                     onShowInfo={onShowInfo}
                                                 />
                                             </div>

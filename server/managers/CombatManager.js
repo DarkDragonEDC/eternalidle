@@ -100,6 +100,8 @@ export class CombatManager {
         if (typeof combat.totalPlayerDmg === 'undefined') combat.totalPlayerDmg = 0;
         if (typeof combat.totalMobDmg === 'undefined') combat.totalMobDmg = 0;
         if (typeof combat.savedFoodCount === 'undefined') combat.savedFoodCount = 0;
+        if (typeof combat.totalBurstDmg === 'undefined') combat.totalBurstDmg = 0;
+        if (typeof combat.burstCount === 'undefined') combat.burstCount = 0;
 
         const playerStats = this.gameManager.inventoryManager.calculateStats(char);
         const playerDmg = playerStats.damage;
@@ -123,12 +125,26 @@ export class CombatManager {
             mobDef = mobData ? (mobData.defense || 0) : 0;
         }
         const mobMitigation = mobDef / (mobDef + 36000);
-        const mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
+        let mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
+
+        // BURST RUNE LOGIC
+        const burstChance = playerStats.burstChance || 0;
+        let isBurst = false;
+        if (burstChance > 0) {
+            if (Math.random() * 100 < burstChance) {
+                mitigatedPlayerDmg = Math.floor(mitigatedPlayerDmg * 1.5);
+                isBurst = true;
+            }
+        }
 
         // Apply Player Damage
         combat.mobHealth -= mitigatedPlayerDmg;
         if (combat.mobHealth < 0) combat.mobHealth = 0;
         combat.totalPlayerDmg = (combat.totalPlayerDmg || 0) + mitigatedPlayerDmg;
+        if (isBurst) {
+            combat.totalBurstDmg = (combat.totalBurstDmg || 0) + mitigatedPlayerDmg;
+            combat.burstCount = (combat.burstCount || 0) + 1;
+        }
 
         // Mob Attack Logic (with catch-up for slow players)
         let mitigatedMobDmg = 0;
@@ -195,7 +211,7 @@ export class CombatManager {
         // Reset the counter for next round
         combat.foodEatenInRound = 0;
 
-        let message = `Dmg: ${mitigatedPlayerDmg} | Recv: ${mitigatedMobDmg}`;
+        let message = `Dmg: ${mitigatedPlayerDmg}${isBurst ? ' (BURST!)' : ''} | Recv: ${mitigatedMobDmg}`;
         let leveledUp = false;
 
         if (combat.mobHealth <= 0) {

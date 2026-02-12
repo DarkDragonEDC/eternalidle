@@ -18,7 +18,7 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
     const totalLevel = Object.values(skills).reduce((acc, s) => acc + (s.level || 0), 0);
 
     const EquipmentSlot = ({ slot, icon, label, item: rawItem, delay = 0 }) => {
-        const item = rawItem ? { ...rawItem, ...resolveItem(rawItem.id || rawItem.item_id) } : null;
+        const item = rawItem ? { ...resolveItem(rawItem.id || rawItem.item_id), ...rawItem } : null;
         const rarityColor = item && item.rarityColor ? item.rarityColor : 'rgba(255,255,255,0.05)';
         const glowColor = item ? `${rarityColor}33` : 'transparent';
 
@@ -158,11 +158,18 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
         );
     };
 
+    const handleBackdropClick = (e) => {
+        if (e.target === e.currentTarget) {
+            onClose();
+        }
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            onClick={handleBackdropClick}
             style={{
                 position: 'fixed',
                 top: 0, left: 0, width: '100%', height: '100%',

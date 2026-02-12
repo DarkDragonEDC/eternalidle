@@ -276,12 +276,23 @@ export class InventoryManager {
 
             const currentEquip = state.equipment[slotName];
             if (currentEquip && currentEquip.id) {
-                // Fix: Use full ID to preserve quality
+                // Return old item to inventory with its metadata
                 const oldId = currentEquip.id;
-                state.inventory[oldId] = (state.inventory[oldId] || 0) + 1;
+                // If it was an object (has metadata), pass it back
+                const { id: _, stats: __, ...metadata } = currentEquip;
+                this.addItemToInventory(char, oldId, 1, Object.keys(metadata).length > 0 ? metadata : null);
             }
 
-            state.equipment[slotName] = item;
+            // Create equipment object with metadata from inventory
+            const inventoryEntry = state.inventory[itemId];
+            const equipmentObject = { ...item }; // item is resolved from itemId (has stats, name, etc)
+
+            if (typeof inventoryEntry === 'object' && inventoryEntry !== null) {
+                const { amount, ...metadata } = inventoryEntry;
+                Object.assign(equipmentObject, metadata);
+            }
+
+            state.equipment[slotName] = equipmentObject;
         }
 
         await this.gameManager.saveState(char.id, state);
@@ -474,7 +485,8 @@ export class InventoryManager {
 
         const combatRunes = {
             ATTACK: 0,
-            SAVE_FOOD: 0
+            SAVE_FOOD: 0,
+            BURST: 0
         };
 
         // 5. Rune Bonuses
@@ -497,7 +509,7 @@ export class InventoryManager {
                         if (autoRefine[act] !== undefined) autoRefine[act] += bonusValue;
                     } else if (eff === 'EFF') {
                         if (efficiency[act] !== undefined) efficiency[act] += bonusValue;
-                    } else if (eff === 'ATTACK' || eff === 'SAVE_FOOD') {
+                    } else if (eff === 'ATTACK' || eff === 'SAVE_FOOD' || eff === 'BURST') {
                         if (combatRunes[eff] !== undefined) combatRunes[eff] += bonusValue;
                     }
                 }
@@ -584,6 +596,7 @@ export class InventoryManager {
             dmgBonus: gearDmgBonus,
             runeAttackBonus: combatRunes.ATTACK,
             foodSaver: combatRunes.SAVE_FOOD,
+            burstChance: combatRunes.BURST || 0,
             efficiency,
             duplication,
             autoRefine,
