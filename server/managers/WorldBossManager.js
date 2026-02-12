@@ -246,11 +246,34 @@ export class WorldBossManager {
 
         // Global Announcement if Top 1 changed
         if (newTop1 && (!oldTop1 || oldTop1.character_id !== newTop1.character_id)) {
-            this.gameManager.broadcast('chat_message', {
-                type: 'GLOBAL',
-                sender: 'SYSTEM',
-                message: `📢 ${newTop1.name} has just taken the Top 1 spot in the World Boss Ranking with ${newTop1.damage.toLocaleString()} damage!`
-            });
+            const announcement = `📢 ${newTop1.name} has just taken the Top 1 spot in the World Boss Ranking with ${newTop1.damage.toLocaleString()} damage!`;
+
+            try {
+                // 1. Persist to DB for history
+                const { data: msgData, error: msgError } = await this.gameManager.supabase
+                    .from('messages')
+                    .insert({
+                        sender_name: '[SYSTEM]',
+                        content: announcement
+                    })
+                    .select()
+                    .single();
+
+                // 2. Broadcast to all online players
+                if (!msgError && msgData) {
+                    this.gameManager.broadcast('new_message', msgData);
+                } else {
+                    // Fallback broadcast if DB insert fails
+                    this.gameManager.broadcast('new_message', {
+                        id: 'wb-' + Date.now(),
+                        sender_name: '[SYSTEM]',
+                        content: announcement,
+                        created_at: new Date().toISOString()
+                    });
+                }
+            } catch (err) {
+                console.error('[WORLD_BOSS] Error broadcasting Top 1 announcement:', err);
+            }
         }
 
         this.activeFights.delete(char.id);
