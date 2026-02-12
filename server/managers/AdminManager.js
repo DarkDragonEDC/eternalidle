@@ -232,7 +232,7 @@ export class AdminManager {
         const char = await this.resolveTarget(socket, targetName);
         if (!char.state.skills[skill]) return { success: false, error: `Invalid skill: ${skill}` };
 
-        this.gameManager.inventoryManager.addXP(char, skill, amount);
+        this.gameManager.addXP(char, skill, amount);
         await this.saveAndNotify(char);
         return { success: true, message: `Added ${amount} XP to ${skill} for ${char.name}.` };
     }
