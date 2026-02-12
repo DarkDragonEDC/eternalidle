@@ -124,7 +124,7 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
                             exit={{ height: 0, opacity: 0 }}
                             style={{ overflow: 'hidden' }}
                         >
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '0 16px 16px 16px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '12px 16px 16px 16px' }}>
                                 {skillsList.map(sId => {
                                     const skill = skills[sId] || { level: 1, xp: 0 };
                                     const nextXP = calculateNextLevelXP(skill.level);
