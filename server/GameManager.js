@@ -667,7 +667,8 @@ export class GameManager {
         */
 
         // Create a pruned version of the state for storage
-        const prunedState = JSON.parse(JSON.stringify(char.state));
+        const stateToPrune = JSON.parse(JSON.stringify(char.state));
+        const prunedState = pruneState(stateToPrune);
 
         // INVENTORY MIGRATION: Extract inventory to its own column and remove from state JSON
         const inventoryToSave = prunedState.inventory || {};
@@ -711,7 +712,7 @@ export class GameManager {
         const dungeonToSave = prunedState.dungeon || null;
         delete prunedState.dungeon;
 
-        const finalPrunedState = pruneState(prunedState);
+        const finalPrunedState = prunedState;
 
         // console.log(`[DB] Persisting character ${char.name} (${charId})`);
         const saveTime = new Date().toISOString();
