@@ -1094,13 +1094,21 @@ function App() {
               <div className="scroll-container" style={{ padding: isMobile ? '20px' : '30px 40px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                   {itemsToRender.map(item => {
-                    const reqs = item.req || {};
-                    const stats = item.stats || {};
-                    const mainStat = item.heal ? { icon: <Heart size={12} />, val: `${item.heal} Heal`, color: '#4caf50' }
-                      : stats.damage ? { icon: <Sword size={12} />, val: `${stats.damage} Damage`, color: '#ff4444' }
-                        : stats.defense ? { icon: <Shield size={12} />, val: `${stats.defense} Def`, color: '#4caf50' }
-                          : stats.hp ? { icon: <Heart size={12} />, val: `${stats.hp} HP`, color: '#ff4444' }
-                            : null;
+                    // Resolve item to ensure we show the correct "in-game" stats (especially for Mage lookup)
+                    const resolved = resolveItem(item.id) || item;
+                    const reqs = resolved.req || item.req || {};
+                    const stats = resolved.stats || item.stats || {};
+
+                    const statsList = [];
+                    if (resolved.heal) statsList.push({ icon: <Heart size={12} />, val: `${resolved.heal} Heal`, color: '#4caf50' });
+                    if (stats.damage) statsList.push({ icon: <Sword size={12} />, val: `${stats.damage} Dmg`, color: '#ff4444' });
+                    if (stats.defense) statsList.push({ icon: <Shield size={12} />, val: `${stats.defense} Def`, color: '#4caf50' });
+                    if (stats.hp) statsList.push({ icon: <Heart size={12} />, val: `${stats.hp} HP`, color: '#ff4d4d' });
+                    if (stats.speed) statsList.push({ icon: <Zap size={12} />, val: `${stats.speed} Spd`, color: 'var(--accent)' });
+                    if (stats.attackSpeed) statsList.push({ icon: <Zap size={12} />, val: `${(1000 / stats.attackSpeed).toFixed(2)}/s`, color: 'var(--accent)' });
+
+                    // Main stat for sorting/highlighting if needed, but we render the list now
+                    const mainStat = statsList[0] || null;
 
                     const type = activeTab.toUpperCase();
                     const locked = isLocked(type, item);
@@ -1179,12 +1187,12 @@ function App() {
                               <Star size={12} />
                               <span>{item.xp} XP</span>
                             </div>
-                            {mainStat && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--slot-bg)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: locked ? '#555' : mainStat.color, border: '1px solid var(--border)' }}>
-                                {React.cloneElement(mainStat.icon, { size: 12, color: locked ? '#555' : mainStat.color })}
-                                <span>{mainStat.val}</span>
+                            {statsList.map((stat, idx) => (
+                              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--slot-bg)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: locked ? '#555' : stat.color, border: '1px solid var(--border)' }}>
+                                {React.cloneElement(stat.icon, { size: 12, color: locked ? '#555' : stat.color })}
+                                <span>{stat.val}</span>
                               </div>
-                            )}
+                            ))}
                             {Object.entries(reqs).map(([reqId, reqQty]) => {
                               const entry = displayedGameState?.state?.inventory?.[reqId];
                               const userQty = getSafeAmount(entry);
