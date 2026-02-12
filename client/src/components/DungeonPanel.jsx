@@ -582,12 +582,6 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
             </div>
 
             <div className="scroll-container" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px', paddingRight: '4px' }}>
-                <div style={{ padding: '12px 16px', background: 'rgba(255, 68, 68, 0.05)', borderRadius: '12px', border: '1px solid rgba(255, 68, 68, 0.2)', display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    <AlertTriangle color="#ff4444" size={20} />
-                    <div style={{ fontSize: '0.8rem', color: '#ff4444', fontWeight: 'bold' }}>
-                        HARDCORE MODE: If you die in a dungeon, it ends immediately and you lose your progress.
-                    </div>
-                </div>
 
                 {Object.values(DUNGEONS)
                     .filter(d => d.tier === selectedTier)
