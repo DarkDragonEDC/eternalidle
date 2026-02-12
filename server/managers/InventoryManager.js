@@ -1,4 +1,4 @@
-import { ITEMS, QUALITIES, resolveItem, ITEM_LOOKUP, calculateRuneBonus } from '../../shared/items.js';
+import { ITEMS, QUALITIES, resolveItem, ITEM_LOOKUP, calculateRuneBonus, getSkillForItem, getLevelRequirement, getRequiredProficiencyGroup } from '../../shared/items.js';
 
 // Removed local ITEM_LOOKUP generation in favor of shared source of truth
 
@@ -215,6 +215,34 @@ export class InventoryManager {
             throw new Error("You do not have this item");
         }
 
+        // --- LEVEL REQUIREMENT CHECK ---
+        const requiredLevel = getLevelRequirement(item.tier);
+        const profGroup = getRequiredProficiencyGroup(itemId);
+
+        if (profGroup) {
+            // Check Aggregated Proficiency (Warrior/Hunter/Mage)
+            const stats = this.calculateStats(char);
+            const userProfLevel = profGroup === 'warrior' ? stats.warriorProf
+                : profGroup === 'hunter' ? stats.hunterProf
+                    : stats.mageProf;
+
+            if (userProfLevel < requiredLevel) {
+                const groupName = profGroup.charAt(0).toUpperCase() + profGroup.slice(1);
+                throw new Error(`Insufficient level! Requires ${groupName} Prof. Lv ${requiredLevel} (Your Lv: ${userProfLevel.toFixed(1)})`);
+            }
+        } else if (item.type !== 'FOOD' && item.type !== 'RUNE') {
+            // Check Individual Skill Level (Tools, etc.)
+            const skillKey = getSkillForItem(itemId, 'GATHERING') || getSkillForItem(itemId, 'CRAFTING');
+            if (skillKey) {
+                const userLevel = char.state.skills[skillKey]?.level || 1;
+                if (userLevel < requiredLevel) {
+                    const skillName = skillKey.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+                    throw new Error(`Insufficient level! Requires ${skillName} Lv ${requiredLevel} (Your Lv: ${userLevel})`);
+                }
+            }
+        }
+        // -------------------------------
+
         let slotName = '';
         if (item.type === 'RUNE') {
             // ID Format: T{tier}_RUNE_{ACT}_{EFF}_{stars}STAR
@@ -243,6 +271,18 @@ export class InventoryManager {
         }
 
         if (!state.equipment) state.equipment = {};
+
+        // 3-Rune Combat Limit Check
+        // If equipping a Combat Rune, check if we already have 3 active (excluding the target slot if occupied)
+        if (slotName.startsWith('rune_ATTACK_')) {
+            const activeCombatRunes = Object.keys(state.equipment).filter(k => k.startsWith('rune_ATTACK_')).length;
+            const isReplacing = !!state.equipment[slotName];
+
+            // If we are NOT replacing an existing rune (adding new to empty slot), check limit
+            if (!isReplacing && activeCombatRunes >= 3) {
+                throw new Error("Maximum of 3 Combat Runes active at once.");
+            }
+        }
 
         if (slotName === 'food') {
             const entry = state.inventory[itemId];
@@ -321,43 +361,44 @@ export class InventoryManager {
     }
 
     calculateStats(char, nowOverride = null) {
-        if (!char?.state?.skills) return { str: 0, agi: 0, int: 0, maxHP: 100, damage: 5, defense: 0, dmgBonus: 0 };
+        if (!char?.state?.skills) return { warriorProf: 0, hunterProf: 0, mageProf: 0, maxHP: 100, damage: 5, defense: 0, dmgBonus: 0 };
         const skills = char.state.skills;
         const equipment = char.state.equipment || {};
 
-        let str = 0;
-        let agi = 0;
-        let int = 0;
+        let warriorProf = 0;
+        let hunterProf = 0;
+        let mageProf = 0;
 
         const getLvl = (key) => (skills[key]?.level || 1);
 
-        str += getLvl('ORE_MINER');
-        str += getLvl('METAL_BAR_REFINER');
-        str += getLvl('WARRIOR_CRAFTER');
-        str += getLvl('COOKING');
-        str += getLvl('FISHING');
-        str = Math.min(100, str * 0.2);
+        warriorProf += getLvl('ORE_MINER');
+        warriorProf += getLvl('METAL_BAR_REFINER');
+        warriorProf += getLvl('WARRIOR_CRAFTER');
+        warriorProf += getLvl('COOKING');
+        warriorProf += getLvl('FISHING');
+        warriorProf = Math.min(100, warriorProf * 0.2);
 
-        agi += getLvl('ANIMAL_SKINNER');
-        agi += getLvl('LEATHER_REFINER');
-        agi += getLvl('HUNTER_CRAFTER');
-        agi += getLvl('LUMBERJACK');
-        agi += getLvl('PLANK_REFINER');
-        agi = Math.min(100, agi * 0.2);
+        hunterProf += getLvl('ANIMAL_SKINNER');
+        hunterProf += getLvl('LEATHER_REFINER');
+        hunterProf += getLvl('HUNTER_CRAFTER');
+        hunterProf += getLvl('LUMBERJACK');
+        hunterProf += getLvl('PLANK_REFINER');
+        hunterProf = Math.min(100, hunterProf * 0.2);
 
-        int += getLvl('FIBER_HARVESTER');
-        int += getLvl('CLOTH_REFINER');
-        int += getLvl('MAGE_CRAFTER');
-        int += getLvl('HERBALISM');
-        int += getLvl('DISTILLATION');
-        int += getLvl('ALCHEMY');
-        int = Math.min(100, int * (1 / 6));
+        mageProf += getLvl('FIBER_HARVESTER');
+        mageProf += getLvl('CLOTH_REFINER');
+        mageProf += getLvl('MAGE_CRAFTER');
+        mageProf += getLvl('HERBALISM');
+        mageProf += getLvl('DISTILLATION');
+        mageProf += getLvl('ALCHEMY');
+        mageProf = Math.min(100, mageProf * (1 / 6));
 
         let gearHP = 0;
         let gearDamage = 0;
         let gearDefense = 0;
         let gearDmgBonus = 0;
         let gearSpeedBonus = 0;
+        let gearCritChance = 0;
 
         Object.values(equipment).forEach(item => {
             if (item) {
@@ -372,11 +413,15 @@ export class InventoryManager {
                     if (statsToUse.defense) gearDefense += statsToUse.defense;
                     if (statsToUse.dmgBonus) gearDmgBonus += statsToUse.dmgBonus;
                     if (statsToUse.speed && item.type !== 'WEAPON') gearSpeedBonus += statsToUse.speed;
+                    if (statsToUse.critChance) gearCritChance += statsToUse.critChance;
 
-                    // Allow gear to add directly to stats
-                    if (statsToUse.str) str += statsToUse.str;
-                    if (statsToUse.agi) agi += statsToUse.agi;
-                    if (statsToUse.int) int += statsToUse.int;
+                    // Allow gear to add directly to proficiencies
+                    if (statsToUse.str) warriorProf += statsToUse.str;
+                    if (statsToUse.warriorProf) warriorProf += statsToUse.warriorProf;
+                    if (statsToUse.agi) hunterProf += statsToUse.agi;
+                    if (statsToUse.hunterProf) hunterProf += statsToUse.hunterProf;
+                    if (statsToUse.int) mageProf += statsToUse.int;
+                    if (statsToUse.mageProf) mageProf += statsToUse.mageProf;
                 }
             }
         });
@@ -443,19 +488,48 @@ export class InventoryManager {
         efficiency.ALCHEMY += getLvl('ALCHEMY') * 0.2;
         efficiency.TOOLS += getLvl('TOOL_CRAFTER') * 0.2;
 
-        // 4. Intelligence Bonus to Global Yields
-        // Global XP: 1% per INT
-        // Silver: 1% per INT
-        // Efficiency: 0% from INT (removed)
+        // 4. Weapon Class Detection → Proficiency Gating
+        // Only the proficiency matching the equipped weapon provides combat bonuses
+        const weaponObj = equipment.mainHand;
+        const freshWeapon = weaponObj ? this.resolveItem(weaponObj.id) : null;
+        const weaponId = (freshWeapon?.id || weaponObj?.id || '').toUpperCase();
 
-        // 4. Intelligence Bonus to Global Yields
-        // Global XP: 1% per INT
-        // Silver: 1% per INT
-        // Efficiency: 0% from INT (removed)
+        let activeProf = null; // null = no weapon = no proficiency bonuses
+        if (weaponId.includes('SWORD')) activeProf = 'warrior';
+        else if (weaponId.includes('BOW')) activeProf = 'hunter';
+        else if (weaponId.includes('STAFF')) activeProf = 'mage';
+
+        // Determine active proficiency values for combat
+        // Determine active proficiency values for combat
+        const activeProfDmg = activeProf === 'warrior' ? warriorProf * 1200
+            : activeProf === 'hunter' ? hunterProf * 1200
+                : activeProf === 'mage' ? mageProf * 2600
+                    : 0;
+
+        const activeHP = activeProf === 'warrior' ? warriorProf * 10000
+            : activeProf === 'hunter' ? hunterProf * 8750
+                : activeProf === 'mage' ? mageProf * 7500
+                    : 0;
+
+        // Hunter at 100 needs approx 360ms reduction from 2000ms.
+        // User clarified: Max reduction at 100 is 360ms.
+        // 360 / 100 = 3.6 per level.
+        // Mage at 100 needs approx 333ms reduction from 2000ms.
+        // 333 / 100 = 3.33 per level.
+        // Warrior at 100 needs approx 333ms reduction from 2000ms.
+        // 333 / 100 = 3.33 per level.
+        const activeSpeedBonus = activeProf === 'hunter' ? hunterProf * 3.6
+            : activeProf === 'mage' ? mageProf * 3.33
+                : activeProf === 'warrior' ? warriorProf * 3.33 : 0;
+
+        const activeProfDefense = activeProf === 'hunter' ? hunterProf * 25
+            : activeProf === 'mage' ? mageProf * 12.5
+                : activeProf === 'warrior' ? warriorProf * 37.5 : 0;
+
 
         const globals = {
-            xpYield: int * 0.5, // 0.5% per INT
-            silverYield: int * 0.5, // 0.5% per INT
+            xpYield: 0,
+            silverYield: 0,
             efficiency: 0,
             globalEfficiency: 0, // Legacy/Unused
             dropRate: 0,
@@ -486,7 +560,8 @@ export class InventoryManager {
         const combatRunes = {
             ATTACK: 0,
             SAVE_FOOD: 0,
-            BURST: 0
+            BURST: 0,
+            ATTACK_SPEED: 0
         };
 
         // 5. Rune Bonuses
@@ -509,7 +584,7 @@ export class InventoryManager {
                         if (autoRefine[act] !== undefined) autoRefine[act] += bonusValue;
                     } else if (eff === 'EFF') {
                         if (efficiency[act] !== undefined) efficiency[act] += bonusValue;
-                    } else if (eff === 'ATTACK' || eff === 'SAVE_FOOD' || eff === 'BURST') {
+                    } else if (eff === 'ATTACK' || eff === 'SAVE_FOOD' || eff === 'BURST' || eff === 'ATTACK_SPEED') {
                         if (combatRunes[eff] !== undefined) combatRunes[eff] += bonusValue;
                     }
                 }
@@ -580,23 +655,32 @@ export class InventoryManager {
         efficiency.GLOBAL = parseFloat((efficiency.GLOBAL + (globals.efficiency || 0)).toFixed(2));
 
         // Total Speed = WeaponSpeed + GearSpeed
-        const weaponObj = equipment.mainHand; // Renaming to avoid conflict if I really want a local handle
-        const freshWeapon = weaponObj ? this.resolveItem(weaponObj.id) : null;
+        // weaponObj and freshWeapon already defined above in weapon class detection
         const weaponSpeed = freshWeapon?.stats?.speed || 0; // No weapon = no speed bonus
         const totalSpeed = weaponSpeed + gearSpeedBonus;
 
-        const finalAttackSpeed = Math.max(200, 2000 - totalSpeed - (agi * 2));
+        let finalAttackSpeed = Math.max(200, 2000 - totalSpeed - activeSpeedBonus);
+
+        // Handle Attack Speed Rune (Percentage boost on final speed)
+        // If rune gives +30% Speed, we divide the interval by 1.30
+        if (combatRunes.ATTACK_SPEED > 0) {
+            finalAttackSpeed = finalAttackSpeed / (1 + (combatRunes.ATTACK_SPEED / 100));
+            // Re-apply cap just in case
+            finalAttackSpeed = Math.max(200, finalAttackSpeed);
+        }
 
         return {
-            str, agi, int,
-            maxHP: parseFloat((100 + (str * 10) + gearHP).toFixed(1)),
-            damage: parseFloat(((5 + (str * 1) + (agi * 1) + (int * 1) + gearDamage) * (1 + gearDmgBonus) * (1 + (combatRunes.ATTACK / 100))).toFixed(1)),
-            defense: parseFloat(gearDefense.toFixed(1)),
+            warriorProf, hunterProf, mageProf,
+            activeProf, // 'warrior' | 'hunter' | 'mage' | null
+            maxHP: parseFloat((100 + activeHP + gearHP).toFixed(1)),
+            damage: parseFloat(((5 + activeProfDmg + gearDamage) * (1 + gearDmgBonus) * (1 + (combatRunes.ATTACK / 100))).toFixed(1)),
+            defense: parseFloat((gearDefense + activeProfDefense).toFixed(1)),
             attackSpeed: finalAttackSpeed,
             dmgBonus: gearDmgBonus,
             runeAttackBonus: combatRunes.ATTACK,
+            runeAtkSpdBonus: combatRunes.ATTACK_SPEED,
             foodSaver: combatRunes.SAVE_FOOD,
-            burstChance: combatRunes.BURST || 0,
+            burstChance: parseFloat(((combatRunes.BURST || 0) + gearCritChance).toFixed(2)),
             efficiency,
             duplication,
             autoRefine,

@@ -238,11 +238,11 @@ genRefined('EXTRACT', 'EXTRACT', 'HERB');
 for (const t of TIERS) {
     const foodItem = {
         id: `T${t}_FOOD`, name: 'Food', tier: t, type: 'FOOD',
-        heal: HP_CURVE[t - 1], // Heals roughly 1 full HP bar of that tier
+        healPercent: 5 * t, // Heals 5% * Tier of Max HP
         req: { [`T${t}_FISH`]: 1 },
         xp: Math.floor(REFINE_DATA.xp[t - 1] / 2), // Halved XP gain for food
         time: Math.ceil(REFINE_DATA.time[t - 1] / 2),
-        description: `A cooked meal. Restores health when eaten.`
+        description: `A cooked meal. Restores ${5 * t}% Health when eaten.`
     };
     ITEMS.CONSUMABLE.FOOD[t] = foodItem;
     ITEMS.GEAR.COOKING_STATION.FOOD[t] = foodItem;
@@ -583,14 +583,14 @@ const genGear = (category, slot, type, idSuffix, matType, statMultipliers = {}) 
         if (type === 'CAPE') req[`T${t}_CREST`] = 1;
 
         const stats = {};
-        if (statMultipliers.dmg) stats.damage = Math.floor(DMG_CURVE[t - 1] * statMultipliers.dmg);
-        if (statMultipliers.def) stats.defense = Math.floor(DEF_CURVE[t - 1] * statMultipliers.def);
-        if (statMultipliers.hp) stats.hp = Math.floor(HP_CURVE[t - 1] * statMultipliers.hp);
+        if (statMultipliers.dmg) stats.damage = DMG_CURVE[t - 1] * statMultipliers.dmg;
+        if (statMultipliers.def) stats.defense = DEF_CURVE[t - 1] * statMultipliers.def;
+        if (statMultipliers.hp) stats.hp = HP_CURVE[t - 1] * statMultipliers.hp;
         if (statMultipliers.speed) {
             if (type === 'WEAPON') {
                 stats.speed = statMultipliers.speed; // Fixed base for weapons
             } else {
-                stats.speed = Math.floor(t * statMultipliers.speed); // Multiplier for gear
+                stats.speed = t * statMultipliers.speed; // Multiplier for gear
             }
         }
         if (statMultipliers.eff) stats.efficiency = 1; // Base value, logic moved to resolveItem
@@ -603,6 +603,7 @@ const genGear = (category, slot, type, idSuffix, matType, statMultipliers = {}) 
             stats.efficiency = { GLOBAL: baseVal };
         }
         if (statMultipliers.atkSpeed) stats.attackSpeed = statMultipliers.atkSpeed; // Fixed base speed
+        if (statMultipliers.crit) stats.critChance = t * statMultipliers.crit; // New Crit support
 
         const gear = {
             id: `T${t}_${idSuffix}`,
@@ -625,32 +626,31 @@ const genGear = (category, slot, type, idSuffix, matType, statMultipliers = {}) 
 };
 
 // --- WARRIOR GEAR ---
-genGear('WARRIORS_FORGE', 'SWORD', 'WEAPON', 'SWORD', 'BAR', { dmg: 1.0, speed: 1000 });
-genGear('WARRIORS_FORGE', 'SHIELD', 'OFF_HAND', 'SHIELD', 'BAR', { def: 0.467, hp: 0.5 }); // Matches T2 10.5 Def / 90 HP
-genGear('WARRIORS_FORGE', 'PLATE_ARMOR', 'ARMOR', 'PLATE_ARMOR', 'BAR', { hp: 1.0, def: 1.0 });
-genGear('WARRIORS_FORGE', 'PLATE_HELMET', 'HELMET', 'PLATE_HELMET', 'BAR', { hp: 0.25, def: 0.25 });
-genGear('WARRIORS_FORGE', 'PLATE_BOOTS', 'BOOTS', 'PLATE_BOOTS', 'BAR', { hp: 0.25, def: 0.25 });
-genGear('WARRIORS_FORGE', 'PLATE_GLOVES', 'GLOVES', 'PLATE_GLOVES', 'BAR', { hp: 0.15, def: 0.15, dmg: 0.05 });
-genGear('WARRIORS_FORGE', 'PLATE_CAPE', 'CAPE', 'PLATE_CAPE', 'BAR', { hp: 0.2, globalEff: 1 });
+genGear('WARRIORS_FORGE', 'SWORD', 'WEAPON', 'SWORD', 'BAR', { dmg: 1.51794, speed: 137.7, crit: 0.16667 });
+genGear('WARRIORS_FORGE', 'SHIELD', 'OFF_HAND', 'SHIELD', 'BAR', { def: 0.02083, hp: 0.41667 });
+genGear('WARRIORS_FORGE', 'PLATE_ARMOR', 'ARMOR', 'PLATE_ARMOR', 'BAR', { dmg: 0.75898, def: 0.025, hp: 0.5 });
+genGear('WARRIORS_FORGE', 'PLATE_HELMET', 'HELMET', 'PLATE_HELMET', 'BAR', { dmg: 0.37949, def: 0.01667, hp: 0.33333 });
+genGear('WARRIORS_FORGE', 'PLATE_BOOTS', 'BOOTS', 'PLATE_BOOTS', 'BAR', { def: 0.00833, hp: 0.25, speed: 12.6533 });
+genGear('WARRIORS_FORGE', 'PLATE_GLOVES', 'GLOVES', 'PLATE_GLOVES', 'BAR', { dmg: 0.75898, def: 0.0125, hp: 0.16667, speed: 6.3267 });
+genGear('WARRIORS_FORGE', 'PLATE_CAPE', 'CAPE', 'PLATE_CAPE', 'BAR', { dmg: 0.37949, speed: 3.1633, globalEff: 1 });
 
 // --- HUNTER GEAR ---
-genGear('HUNTERS_LODGE', 'BOW', 'WEAPON', 'BOW', 'PLANK', { dmg: 0.8, speed: 1253 }); // Fast but lower dmg per hit
-genGear('HUNTERS_LODGE', 'TORCH', 'OFF_HAND', 'TORCH', 'PLANK', { speed: 5, hp: 0.2 }); // Speed bonus
-genGear('HUNTERS_LODGE', 'LEATHER_ARMOR', 'ARMOR', 'LEATHER_ARMOR', 'LEATHER', { hp: 0.7, def: 0.7, speed: 5 });
-genGear('HUNTERS_LODGE', 'LEATHER_HELMET', 'HELMET', 'LEATHER_HELMET', 'LEATHER', { hp: 0.2, def: 0.2, speed: 5 });
-genGear('HUNTERS_LODGE', 'LEATHER_BOOTS', 'BOOTS', 'LEATHER_BOOTS', 'LEATHER', { hp: 0.2, def: 0.2, speed: 5 });
-genGear('HUNTERS_LODGE', 'LEATHER_GLOVES', 'GLOVES', 'LEATHER_GLOVES', 'LEATHER', { hp: 0.1, def: 0.1, dmg: 0.1 });
-genGear('HUNTERS_LODGE', 'LEATHER_CAPE', 'CAPE', 'LEATHER_CAPE', 'LEATHER', { hp: 0.2, globalEff: 1 });
-genGear('HUNTERS_LODGE', 'LEATHER_CAPE', 'CAPE', 'LEATHER_CAPE', 'LEATHER', { hp: 0.2, globalEff: 1 });
+genGear('HUNTERS_LODGE', 'BOW', 'WEAPON', 'BOW', 'PLANK', { dmg: 1.70769, speed: 109 });
+genGear('HUNTERS_LODGE', 'TORCH', 'OFF_HAND', 'TORCH', 'PLANK', { dmg: 0.56923 });
+genGear('HUNTERS_LODGE', 'LEATHER_ARMOR', 'ARMOR', 'LEATHER_ARMOR', 'LEATHER', { hp: 0.58334, def: 0.01945 });
+genGear('HUNTERS_LODGE', 'LEATHER_HELMET', 'HELMET', 'LEATHER_HELMET', 'LEATHER', { hp: 0.4375, def: 0.01389 });
+genGear('HUNTERS_LODGE', 'LEATHER_BOOTS', 'BOOTS', 'LEATHER_BOOTS', 'LEATHER', { hp: 0.21875, def: 0.01112, dmg: 0.37949, speed: 11.9667 });
+genGear('HUNTERS_LODGE', 'LEATHER_GLOVES', 'GLOVES', 'LEATHER_GLOVES', 'LEATHER', { hp: 0.21875, def: 0.01112, dmg: 0.56923, speed: 8.5334 });
+genGear('HUNTERS_LODGE', 'LEATHER_CAPE', 'CAPE', 'LEATHER_CAPE', 'LEATHER', { dmg: 0.56923, speed: 5.1334, globalEff: 1 });
 
 // --- MAGE GEAR ---
-genGear('MAGES_TOWER', 'FIRE_STAFF', 'WEAPON', 'FIRE_STAFF', 'PLANK', { dmg: 1.2, speed: 500 }); // Slow but huge dmg
-genGear('MAGES_TOWER', 'TOME', 'OFF_HAND', 'TOME', 'CLOTH', { dmg: 0.3 }); // Pure Dmg bonus
-genGear('MAGES_TOWER', 'CLOTH_ARMOR', 'ARMOR', 'CLOTH_ARMOR', 'CLOTH', { hp: 0.5, def: 0.4, dmg: 0.2 });
-genGear('MAGES_TOWER', 'CLOTH_HELMET', 'HELMET', 'CLOTH_HELMET', 'CLOTH', { hp: 0.15, def: 0.1, dmg: 0.05 });
-genGear('MAGES_TOWER', 'CLOTH_BOOTS', 'BOOTS', 'CLOTH_BOOTS', 'CLOTH', { hp: 0.15, def: 0.1, dmg: 0.05 });
-genGear('MAGES_TOWER', 'CLOTH_GLOVES', 'GLOVES', 'CLOTH_GLOVES', 'CLOTH', { hp: 0.1, def: 0.1, dmg: 0.1 });
-genGear('MAGES_TOWER', 'CAPE', 'CAPE', 'MAGE_CAPE', 'CLOTH', { hp: 0.2, globalEff: 1 });
+genGear('MAGES_TOWER', 'FIRE_STAFF', 'WEAPON', 'FIRE_STAFF', 'PLANK', { dmg: 4.52222, speed: 137.7 });
+genGear('MAGES_TOWER', 'TOME', 'OFF_HAND', 'TOME', 'CLOTH', { dmg: 2.05556, crit: 0.16667 });
+genGear('MAGES_TOWER', 'CLOTH_ARMOR', 'ARMOR', 'CLOTH_ARMOR', 'CLOTH', { hp: 0.5, def: 0.01111 });
+genGear('MAGES_TOWER', 'CLOTH_HELMET', 'HELMET', 'CLOTH_HELMET', 'CLOTH', { hp: 0.375, def: 0.00833 });
+genGear('MAGES_TOWER', 'CLOTH_BOOTS', 'BOOTS', 'CLOTH_BOOTS', 'CLOTH', { hp: 0.1875, def: 0.00417, speed: 11.0733 });
+genGear('MAGES_TOWER', 'CLOTH_GLOVES', 'GLOVES', 'CLOTH_GLOVES', 'CLOTH', { hp: 0.1875, def: 0.00417, dmg: 0.82222, speed: 6.3267 });
+genGear('MAGES_TOWER', 'CAPE', 'CAPE', 'MAGE_CAPE', 'CLOTH', { dmg: 0.82222, speed: 4.7433, globalEff: 1 });
 
 // --- TOOLMAKER ---
 genGear('TOOLMAKER', 'PICKAXE', 'TOOL_PICKAXE', 'PICKAXE', 'BAR', { eff: 1 });
@@ -816,8 +816,14 @@ export const resolveItem = (itemId, overrideQuality = null) => {
                         // Added to base Speed.
                         const bonus = ((baseItem.tier - 1) * 15) + (effectiveQualityId * 3);
                         newStats[key] = baseItem.stats[key] + bonus;
+                    } else if (baseItem.stats[key] > 10) {
+                        // High Gear Speed (New Scaling): Follows Quality Multiplier
+                        newStats[key] = parseFloat((baseItem.stats[key] * statMultiplier).toFixed(1));
+                    } else if (key === 'critChance') {
+                        // Crit Chance (New Scaling): Follows Quality Multiplier
+                        newStats[key] = parseFloat((baseItem.stats[key] * statMultiplier).toFixed(2));
                     } else {
-                        // Gear Bonus: ((Tier - 1) * 5) + 1 + QualityId
+                        // Low Gear Speed (Legacy): Small additive bonus
                         const speedVal = ((baseItem.tier - 1) * 5) + 1 + effectiveQualityId;
                         newStats[key] = speedVal;
                     }
@@ -950,12 +956,12 @@ export const getSkillForItem = (itemId, actionType) => {
     const type = String(actionType).toUpperCase();
 
     if (type === 'GATHERING') {
-        if (id.includes('WOOD')) return 'LUMBERJACK';
-        if (id.includes('ORE')) return 'ORE_MINER';
-        if (id.includes('HIDE')) return 'ANIMAL_SKINNER';
-        if (id.includes('FIBER')) return 'FIBER_HARVESTER';
-        if (id.includes('FISH')) return 'FISHING';
-        if (id.includes('HERB')) return 'HERBALISM';
+        if (id.includes('WOOD') || id.includes('AXE')) return 'LUMBERJACK';
+        if (id.includes('ORE') || id.includes('PICKAXE')) return 'ORE_MINER';
+        if (id.includes('HIDE') || id.includes('KNIFE')) return 'ANIMAL_SKINNER';
+        if (id.includes('FIBER') || id.includes('SICKLE')) return 'FIBER_HARVESTER';
+        if (id.includes('FISH') || id.includes('ROD')) return 'FISHING';
+        if (id.includes('HERB') || id.includes('POUCH')) return 'HERBALISM';
     }
 
     if (type === 'REFINING') {
@@ -1001,16 +1007,48 @@ export const getSkillForItem = (itemId, actionType) => {
  */
 export const getLevelRequirement = (tier) => {
     const t = parseInt(tier) || 1;
+    if (t === 1) return 1;
     return (t - 1) * 10;
+};
+
+/**
+ * Returns the proficiency group ('warrior', 'hunter', 'mage') required for an item.
+ */
+export const getRequiredProficiencyGroup = (itemId) => {
+    if (!itemId) return null;
+    const id = String(itemId).toUpperCase();
+
+    // Warrior: PLATE, SWORD, SHIELD
+    if (id.includes('SWORD') || id.includes('PLATE') || id.includes('SHIELD') || id.includes('WARRIOR_CAPE')) {
+        return 'warrior';
+    }
+    // Hunter: LEATHER, BOW, TORCH
+    if (id.includes('BOW') || id.includes('LEATHER') || id.includes('TORCH') || id.includes('HUNTER_CAPE')) {
+        return 'hunter';
+    }
+    // Mage: CLOTH, STAFF, TOME
+    if (id.includes('STAFF') || id.includes('CLOTH') || id.includes('TOME') || id.includes('MAGE_CAPE')) {
+        return 'mage';
+    }
+
+    return null;
 };
 
 export const calculateRuneBonus = (tier, stars, effType = null) => {
     const starBonusMap = { 1: 1, 2: 3, 3: 5 }; // Max 3 stars
     let bonus = (tier - 1) * 5 + (starBonusMap[stars] || stars);
 
-    // SPEED (Auto-Refine) and ATTACK (Combat) runes give half bonus (max ~25% instead of ~50%)
-    if (effType === 'SPEED' || effType === 'ATTACK') {
+    // SPEED (Auto-Refine) runes give half bonus (max ~25% instead of ~50%)
+    if (effType === 'SPEED') {
         bonus = Math.max(1, Math.floor(bonus / 2));
+    }
+
+    // ATTACK (Combat) runes: Scale 1% (T1 1*) to 30% (T10 3*)
+    // Formula: Base Points * 0.6. Allows decimals.
+    // Also applies to ATTACK_SPEED
+    if (effType === 'ATTACK' || effType === 'ATTACK_SPEED') {
+        const raw = bonus * 0.6;
+        bonus = Math.max(1, Number(raw.toFixed(1)));
     }
 
     // Food Saving runes give 30% bonus (max ~15% instead of ~50%)
@@ -1018,9 +1056,10 @@ export const calculateRuneBonus = (tier, stars, effType = null) => {
         bonus = Math.max(1, Math.floor(bonus * 0.3));
     }
 
-    // BURST (Critical Strike) runes give 40% bonus (max ~20% instead of ~50%)
+    // BURST (Critical Strike) runes give 30% bonus (max 15% instead of ~50%)
+    // Fix: Burst Chance shouldn't be too high (cap at 15%)
     if (effType === 'BURST') {
-        bonus = Math.max(1, Math.floor(bonus * 0.4));
+        bonus = Math.max(1, Math.floor(bonus * 0.3));
     }
 
     return bonus;
@@ -1067,7 +1106,7 @@ RUNE_CRAFT_ACTIVITIES.forEach(act => {
 });
 
 RUNE_COMBAT_ACTIVITIES.forEach(act => {
-    ['ATTACK', 'SAVE_FOOD', 'BURST'].forEach(eff => {
+    ['ATTACK', 'SAVE_FOOD', 'BURST', 'ATTACK_SPEED'].forEach(eff => {
         const type = `${act}_${eff}`;
         ALL_RUNE_TYPES.push(type);
         RUNES_BY_CATEGORY.COMBAT.push(type);

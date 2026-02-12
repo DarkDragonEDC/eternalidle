@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Sword, Shield, Heart, Star, Zap, Award } from 'lucide-react';
-import { QUALITIES, resolveItem } from '@shared/items';
+import { QUALITIES, resolveItem, getSkillForItem, getLevelRequirement, getRequiredProficiencyGroup } from '@shared/items';
 import { CHEST_DROP_TABLE } from '@shared/chest_drops';
 
 const ItemInfoModal = ({ item: rawItem, onClose }) => {
@@ -29,7 +29,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
 
     const baseStats = item.stats || {};
     const statKeys = Object.keys(baseStats).filter(k =>
-        (typeof baseStats[k] === 'number' && ['damage', 'defense', 'hp', 'str', 'agi', 'int'].includes(k)) ||
+        (typeof baseStats[k] === 'number' && ['damage', 'defense', 'hp', 'str', 'agi', 'int', 'critChance'].includes(k)) ||
         (k === 'efficiency')
     );
 
@@ -39,7 +39,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
     const comparisonBaseStats = baseItemResult?.stats || {};
     const comparisonStatKeys = Object.keys(comparisonBaseStats).filter(k =>
         (typeof comparisonBaseStats[k] === 'number' || typeof comparisonBaseStats[k] === 'object') &&
-        ['damage', 'defense', 'hp', 'str', 'agi', 'int', 'efficiency'].includes(k)
+        ['damage', 'defense', 'hp', 'str', 'agi', 'int', 'efficiency', 'critChance'].includes(k)
     );
 
     const rarityComparison = Object.values(QUALITIES).map(q => {
@@ -81,7 +81,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
         if (itm.type === 'CAPE') return "Special cape. Offers passive bonuses and global efficiency.";
         if (itm.type.startsWith('TOOL')) return "Gathering tool. Required to gather higher TIER resources.";
 
-        if (itm.type === 'FOOD') return `Consumable. Restores ${itm.heal || 'Health'} Health over time.`;
+        if (itm.type === 'FOOD') return itm.description || `Consumable. Restores ${itm.heal || 'Health'} Health over time.`;
         if (itm.type === 'MAP') return "Dungeon Map. Use to access dangerous areas with valuable rewards.";
         if (itm.type === 'CRAFTING_MATERIAL' && itm.id.includes('CREST')) return "Rare boss material. Used to craft prestige items.";
 
@@ -92,7 +92,35 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
 
         if (itm.type === 'POTION') return itm.desc || "Consumable potion with special effects.";
 
-        if (itm.type === 'RUNE') return itm.description || "A magical rune with special power.";
+        if (itm.type === 'RUNE') {
+            // Calculate actual bonus for display
+            // ID format: T{tier}_RUNE_{ACT}_{EFF}_{stars}STAR
+
+            // Safer parsing logic using regex to separate Tier and Stars from the core Type
+            // RUNE ID: T{t}_RUNE_{TYPE}_{stars}STAR
+            const match = itm.id.match(/^T\d+_RUNE_(.+)_(\d+)STAR$/);
+            if (match) {
+                const typeStr = match[1];
+                const typeParts = typeStr.split('_');
+                const activity = typeParts[0];
+                const effect = typeParts.slice(1).join('_');
+
+                const bonus = calculateRuneBonus(itm.tier, itm.stars, effect);
+
+                let bonusText = "";
+                if (effect === 'XP') bonusText = `+${bonus} XP per action`;
+                else if (effect === 'COPY') bonusText = `+${bonus}% Double Item Chance`;
+                else if (effect === 'SPEED') bonusText = `+${bonus} Speed`;
+                else if (effect === 'EFF') bonusText = `+${bonus}% Efficiency`;
+                else if (effect === 'ATTACK') bonusText = `+${bonus.toFixed(1)}% Damage`;
+                else if (effect === 'SAVE_FOOD') bonusText = `+${bonus}% Food Save Chance`;
+                else if (effect === 'BURST') bonusText = `+${bonus}% Critical Strike Chance`;
+                else if (effect === 'ATTACK_SPEED') bonusText = `+${bonus.toFixed(1)}% Attack Speed`;
+
+                return `Rune of ${activity.charAt(0) + activity.slice(1).toLowerCase()}. Gives: ${bonusText}.`;
+            }
+            return itm.description || "A magical rune with special power.";
+        }
 
         return itm.description || "A useful item for your journey.";
     };
@@ -229,10 +257,37 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                         <div style={{ padding: '4px 10px', background: 'var(--accent-soft)', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid var(--border-active)', textTransform: 'uppercase' }}>
                             {item.type}
                         </div>
+                        {(() => {
+                            // FIX: Hide Requirement for Food
+                            if (item.type === 'FOOD') return null;
+
+                            const reqLv = getLevelRequirement(item.tier);
+                            const profGroup = getRequiredProficiencyGroup(item.id);
+
+                            if (profGroup) {
+                                const groupName = profGroup.charAt(0).toUpperCase() + profGroup.slice(1);
+                                return (
+                                    <div style={{ padding: '4px 10px', background: 'rgba(255, 68, 68, 0.1)', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid rgba(255, 68, 68, 0.2)', color: '#ff4444' }}>
+                                        REQ: {groupName} Prof. Lv {reqLv}
+                                    </div>
+                                );
+                            }
+
+                            const skillKey = getSkillForItem(item.id, 'GATHERING') || getSkillForItem(item.id, 'CRAFTING');
+                            if (skillKey) {
+                                const skillName = skillKey.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+                                return (
+                                    <div style={{ padding: '4px 10px', background: 'rgba(255, 68, 68, 0.1)', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid rgba(255, 68, 68, 0.2)', color: '#ff4444' }}>
+                                        REQ: {skillName} Lv {reqLv}
+                                    </div>
+                                );
+                            }
+                            return null;
+                        })()}
                         {(item.type === 'FOOD' || (item.ip > 0 && !item.type.startsWith('TOOL'))) && (
                             <div style={{ padding: '4px 10px', background: 'var(--accent-soft)', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid var(--border-active)' }}>
                                 {item.type === 'FOOD' ? (
-                                    <><span style={{ color: '#4caf50', marginRight: '4px' }}>HEAL</span>{item.heal || 0}</>
+                                    <><span style={{ color: '#4caf50', marginRight: '4px' }}>HEAL</span>{item.healPercent ? `${item.healPercent}%` : (item.heal || 0)}</>
                                 ) : (
                                     <><span style={{ color: '#888', marginRight: '4px' }}>IP</span>{item.ip}</>
                                 )}
@@ -266,11 +321,12 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                 {baseStats.damage && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ff4444', fontSize: '0.85rem', fontWeight: 'bold' }}><Sword size={14} /> {item.stats.damage} <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>DMG</span></div>}
                                 {baseStats.hp && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ff4d4d', fontSize: '0.85rem', fontWeight: 'bold' }}><Heart size={14} /> {item.stats.hp} <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>HP</span></div>}
                                 {baseStats.defense && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#4caf50', fontSize: '0.85rem', fontWeight: 'bold' }}><Shield size={14} /> {item.stats.defense} <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>DEF</span></div>}
+                                {baseStats.critChance && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#f59e0b', fontSize: '0.85rem', fontWeight: 'bold' }}><Star size={14} /> {item.stats.critChance.toFixed(2)}% <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>CRIT</span></div>}
                                 {baseStats.attackSpeed && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent)', fontSize: '0.85rem', fontWeight: 'bold' }}><Zap size={14} /> {(1000 / item.stats.attackSpeed).toFixed(1)} <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>/s</span></div>}
                                 {baseStats.speed && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent)', fontSize: '0.85rem', fontWeight: 'bold' }}><Zap size={14} /> {item.stats.speed} <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>SPD</span></div>}
-                                {baseStats.str && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ff8888', fontSize: '0.85rem', fontWeight: 'bold' }}>STR <span style={{ marginLeft: '4px' }}>+{item.stats.str}</span></div>}
-                                {baseStats.agi && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#88ff88', fontSize: '0.85rem', fontWeight: 'bold' }}>AGI <span style={{ marginLeft: '4px' }}>+{item.stats.agi}</span></div>}
-                                {baseStats.int && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#8888ff', fontSize: '0.85rem', fontWeight: 'bold' }}>INT <span style={{ marginLeft: '4px' }}>+{item.stats.int}</span></div>}
+                                {(baseStats.warriorProf || baseStats.str) && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ff8888', fontSize: '0.85rem', fontWeight: 'bold' }}>War. Prof. <span style={{ marginLeft: '4px' }}>+{(item.stats.warriorProf || item.stats.str)}</span></div>}
+                                {(baseStats.hunterProf || baseStats.agi) && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#88ff88', fontSize: '0.85rem', fontWeight: 'bold' }}>Hun. Prof. <span style={{ marginLeft: '4px' }}>+{(item.stats.hunterProf || item.stats.agi)}</span></div>}
+                                {(baseStats.mageProf || baseStats.int) && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#8888ff', fontSize: '0.85rem', fontWeight: 'bold' }}>Mag. Prof. <span style={{ marginLeft: '4px' }}>+{(item.stats.mageProf || item.stats.int)}</span></div>}
                                 {item.heal && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#4caf50', fontSize: '0.85rem', fontWeight: 'bold' }}><Heart size={14} /> <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>HEAL</span> {item.heal}</div>}
                                 {item.type === 'POTION' && item.desc && <div style={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '6px', color: 'var(--accent)', fontSize: '0.8rem', fontStyle: 'italic', textAlign: 'center' }}>{item.desc}</div>}
                                 {baseStats.efficiency && typeof baseStats.efficiency === 'number' && <div style={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '6px', color: 'var(--accent)', fontSize: '0.8rem', fontWeight: 'bold', textAlign: 'center' }}>Efficiency +{item.stats.efficiency}%</div>}
@@ -395,11 +451,12 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                                 let label = key.toUpperCase();
                                                 if (key === 'damage') label = 'Dmg';
                                                 if (key === 'defense') label = 'Def';
+                                                if (key === 'critChance') label = 'Crit';
                                                 if (key === 'globalEff') label = 'Global Eff';
                                                 if (key === 'efficiency') label = 'Eff';
                                                 return (
                                                     <span key={key}>
-                                                        {label}: {key === 'globalEff' || key === 'efficiency' ? '+' : ''}{val}{key === 'globalEff' || key === 'efficiency' ? '%' : ''}
+                                                        {label}: {['globalEff', 'efficiency', 'critChance'].includes(key) ? '+' : ''}{val}{['globalEff', 'efficiency', 'critChance'].includes(key) ? '%' : ''}
                                                     </span>
                                                 );
                                             })}

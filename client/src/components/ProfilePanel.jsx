@@ -4,13 +4,14 @@ import { motion } from 'framer-motion';
 import {
     Heart, Shield, Sword, Zap,
     User, Target, Star, Layers,
-    Axe, Pickaxe, Scissors, Anchor, Apple, Info, ShoppingBag, Edit
+    Axe, Pickaxe, Scissors, Anchor, Apple, Info, ShoppingBag, Edit, Droplets
 } from 'lucide-react';
 import { resolveItem, getTierColor, calculateRuneBonus } from '@shared/items';
 import { getBestItemForSlot, isBetterItem } from '../utils/equipment';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import StatBreakdownModal from './StatBreakdownModal';
 import { supabase } from '../supabase';
+import ProficiencyDetailsModal from './ProficiencyDetailsModal';
 
 
 const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpenRenameModal, theme, toggleTheme }) => {
@@ -22,6 +23,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
     const [activeProfileTab, setActiveProfileTab] = useState('EQUIPMENT'); // 'EQUIPMENT' or 'RUNES'
     const [selectedTitle, setSelectedTitle] = useState(gameState?.state?.selectedTitle || 'Lands Explorer');
     const [activeRuneTab, setActiveRuneTab] = useState('GATHERING'); // 'GATHERING', 'REFINING', 'CRAFTING', 'COMBAT'
+    const [proficiencyModal, setProficiencyModal] = useState(null);
 
     // Sync title from gameState when it updates
     React.useEffect(() => {
@@ -71,43 +73,43 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
     const name = gameState?.name || 'Explorer';
     const state = gameState?.state || {};
     const { skills = {}, silver = 0, health, maxHealth = 100, equipment = {} } = state;
-    const charStats = state.stats || { str: 0, agi: 0, int: 0 };
+    const charStats = state.stats || { warriorProf: 0, hunterProf: 0, mageProf: 0 };
 
     const calculatedStats = useMemo(() => {
         // Base stats iniciam em 0
-        let str = 0;
-        let agi = 0;
-        let int = 0;
+        let warriorProf = 0;
+        let hunterProf = 0;
+        let mageProf = 0;
 
         // Helper para pegar nível de forma segura
         const getLvl = (key) => (skills[key]?.level || 1);
 
-        // STR: Warrior Class (Mining, Smelting, Warrior Crafting)
-        str += getLvl('ORE_MINER');
-        str += getLvl('METAL_BAR_REFINER');
-        str += getLvl('WARRIOR_CRAFTER');
-        str += getLvl('COOKING');
-        str += getLvl('FISHING');
+        // Warrior Prof (STR Equivalent)
+        warriorProf += getLvl('ORE_MINER');
+        warriorProf += getLvl('METAL_BAR_REFINER');
+        warriorProf += getLvl('WARRIOR_CRAFTER');
+        warriorProf += getLvl('COOKING');
+        warriorProf += getLvl('FISHING');
 
-        // AGI: Hunter Class (Skinning, Tanning)
-        agi += getLvl('ANIMAL_SKINNER');
-        agi += getLvl('LEATHER_REFINER');
-        agi += getLvl('LUMBERJACK');
-        agi += getLvl('PLANK_REFINER');
-        agi += getLvl('HUNTER_CRAFTER');
+        // Hunter Prof (AGI Equivalent)
+        hunterProf += getLvl('ANIMAL_SKINNER');
+        hunterProf += getLvl('LEATHER_REFINER');
+        hunterProf += getLvl('LUMBERJACK');
+        hunterProf += getLvl('PLANK_REFINER');
+        hunterProf += getLvl('HUNTER_CRAFTER');
 
-        // INT: Mage Class (Harvesting, Woodcutting, Weaving, Woodworking, Mage Crafting, Herbalism, Distillation, Alchemy)
-        int += getLvl('FIBER_HARVESTER');
-        int += getLvl('CLOTH_REFINER');
-        int += getLvl('MAGE_CRAFTER');
-        int += getLvl('HERBALISM');
-        int += getLvl('DISTILLATION');
-        int += getLvl('ALCHEMY');
+        // Mage Prof (INT Equivalent)
+        mageProf += getLvl('FIBER_HARVESTER');
+        mageProf += getLvl('CLOTH_REFINER');
+        mageProf += getLvl('MAGE_CRAFTER');
+        mageProf += getLvl('HERBALISM');
+        mageProf += getLvl('DISTILLATION');
+        mageProf += getLvl('ALCHEMY');
 
         // Apply Multipliers & Cap
-        str = Math.min(100, str * 0.2);
-        agi = Math.min(100, agi * 0.2);
-        int = Math.min(100, int * (1 / 6));
+        warriorProf = Math.min(100, warriorProf * 0.2);
+        hunterProf = Math.min(100, hunterProf * 0.2);
+        mageProf = Math.min(100, mageProf * (1 / 6));
 
         // Gear Bonuses
         Object.values(equipment).forEach(item => {
@@ -115,14 +117,17 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                 const fresh = resolveItem(item.id || item.item_id);
                 const statsToUse = fresh?.stats || item.stats;
                 if (statsToUse) {
-                    if (statsToUse.str) str += statsToUse.str;
-                    if (statsToUse.agi) agi += statsToUse.agi;
-                    if (statsToUse.int) int += statsToUse.int;
+                    if (statsToUse.str) warriorProf += statsToUse.str;
+                    if (statsToUse.warriorProf) warriorProf += statsToUse.warriorProf;
+                    if (statsToUse.agi) hunterProf += statsToUse.agi;
+                    if (statsToUse.hunterProf) hunterProf += statsToUse.hunterProf;
+                    if (statsToUse.int) mageProf += statsToUse.int;
+                    if (statsToUse.mageProf) mageProf += statsToUse.mageProf;
                 }
             }
         });
 
-        return { str, agi, int };
+        return { warriorProf, hunterProf, mageProf };
     }, [skills, equipment]);
 
     const activeRuneBuffs = useMemo(() => {
@@ -146,15 +151,38 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
 
     const stats = useMemo(() => {
         // Fallback para cálculo local (útil para updates otimistas antes do servidor responder)
-        const gearDamage = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.damage || 0), 0);
-        const gearDefense = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.defense || 0), 0);
-        const gearHP = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.hp || 0), 0);
-        const gearDmgBonus = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.dmgBonus || 0), 0);
+        const gearDamage = Object.values(equipment).reduce((acc, item) => {
+            const fresh = item ? resolveItem(item.id || item.item_id) : null;
+            return acc + (fresh?.stats?.damage || 0);
+        }, 0);
+        const gearDefense = Object.values(equipment).reduce((acc, item) => {
+            const fresh = item ? resolveItem(item.id || item.item_id) : null;
+            return acc + (fresh?.stats?.defense || 0);
+        }, 0);
+        const gearHP = Object.values(equipment).reduce((acc, item) => {
+            const fresh = item ? resolveItem(item.id || item.item_id) : null;
+            return acc + (fresh?.stats?.hp || 0);
+        }, 0);
+        const gearDmgBonus = Object.values(equipment).reduce((acc, item) => {
+            const fresh = item ? resolveItem(item.id || item.item_id) : null;
+            return acc + (fresh?.stats?.dmgBonus || 0);
+        }, 0);
+        const gearCritChance = Object.values(equipment).reduce((acc, item) => {
+            const fresh = item ? resolveItem(item.id || item.item_id) : null;
+            return acc + (fresh?.stats?.critChance || 0);
+        }, 0);
 
         // Resolve Weapon Speed
         const weapon = equipment.mainHand;
         const freshWeapon = weapon ? resolveItem(weapon.id || weapon.item_id) : null;
         const weaponSpeed = freshWeapon?.stats?.speed || 0; // No weapon = no speed bonus
+
+        const weaponId = (freshWeapon?.id || weapon?.id || '').toUpperCase();
+
+        let activeProf = null;
+        if (weaponId.includes('SWORD')) activeProf = 'warrior';
+        else if (weaponId.includes('BOW')) activeProf = 'hunter';
+        else if (weaponId.includes('STAFF')) activeProf = 'mage';
 
         // Resolve Gear Speed (excluding weapon)
         const gearSpeedBonus = Object.entries(equipment).reduce((acc, [slot, item]) => {
@@ -163,8 +191,36 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
             return acc + (fresh?.stats?.speed || 0);
         }, 0);
 
-        const totalSpeed = weaponSpeed + gearSpeedBonus + (calculatedStats.agi * 2);
-        const finalAttackSpeed = Math.max(200, 2000 - totalSpeed);
+        // Match Server Logic for Active Stats
+        const activeProfDmg = activeProf === 'warrior' ? calculatedStats.warriorProf * 1200
+            : activeProf === 'hunter' ? calculatedStats.hunterProf * 1200
+                : activeProf === 'mage' ? calculatedStats.mageProf * 2600
+                    : 0;
+
+        const activeHP = activeProf === 'warrior' ? calculatedStats.warriorProf * 10000
+            : activeProf === 'hunter' ? calculatedStats.hunterProf * 8750
+                : activeProf === 'mage' ? calculatedStats.mageProf * 7500
+                    : 0;
+
+        // Hunter at 100 needs approx 360ms reduction from 2000ms.
+        // Mage at 100 needs 333ms interval. 2000 - 1667 = 333.
+        const activeSpeedBonus = activeProf === 'hunter' ? calculatedStats.hunterProf * 3.6
+            : activeProf === 'mage' ? calculatedStats.mageProf * 3.33
+                : activeProf === 'warrior' ? calculatedStats.warriorProf * 3.33 : 0;
+
+        const activeProfDefense = activeProf === 'hunter' ? calculatedStats.hunterProf * 25
+            : activeProf === 'mage' ? calculatedStats.mageProf * 12.5
+                : activeProf === 'warrior' ? calculatedStats.warriorProf * 37.5 : 0;
+
+        const totalSpeed = weaponSpeed + gearSpeedBonus + activeSpeedBonus;
+        // Apply Attack Speed Rune Logic (Percentage reduction of final interval)
+        let finalAttackSpeed = Math.max(200, 2000 - totalSpeed);
+
+        const atkSpdRune = activeRuneBuffs.ATTACK_SPEED?.ATTACK_SPEED || 0;
+        if (atkSpdRune > 0) {
+            finalAttackSpeed = finalAttackSpeed / (1 + (atkSpdRune / 100));
+            finalAttackSpeed = Math.max(200, finalAttackSpeed);
+        }
 
         // Helper para ferramentas
         const getToolEff = (toolSlot) => {
@@ -186,12 +242,13 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
             globalEff += 10; // Add 10% (or 10 points, assuming 10 means 10%)
         }
 
+        // ... (efficiency map remains same, just ensuring scope remains valid) ...
         const efficiency = {
             WOOD: (skills.LUMBERJACK?.level || 1) * 0.2 + getToolEff('tool_axe') + globalEff,
             ORE: (skills.ORE_MINER?.level || 1) * 0.2 + getToolEff('tool_pickaxe') + globalEff,
             HIDE: (skills.ANIMAL_SKINNER?.level || 1) * 0.2 + getToolEff('tool_knife') + globalEff,
             FIBER: (skills.FIBER_HARVESTER?.level || 1) * 0.2 + getToolEff('tool_sickle') + globalEff,
-            HERB: (skills.HERBALISM?.level || 1) * 0.2 + globalEff, // No tool for now? Or maybe sickle?
+            HERB: (skills.HERBALISM?.level || 1) * 0.2 + globalEff,
             FISH: (skills.FISHING?.level || 1) * 0.2 + getToolEff('tool_rod') + globalEff,
             PLANK: (skills.PLANK_REFINER?.level || 1) * 0.2 + globalEff,
             METAL: (skills.METAL_BAR_REFINER?.level || 1) * 0.2 + globalEff,
@@ -210,18 +267,20 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         const foodSaver = activeRuneBuffs.ATTACK?.SAVE_FOOD || 0;
 
         return {
-            hp: health !== undefined ? health : (100 + (calculatedStats.str * 10) + gearHP),
-            maxHp: 100 + (calculatedStats.str * 10) + gearHP,
-            damage: Math.floor((5 + (calculatedStats.str * 1) + (calculatedStats.agi * 1) + (calculatedStats.int * 1) + gearDamage) * (1 + gearDmgBonus) * (1 + (damageRuneBonus / 100))),
-            defense: gearDefense,
+            hp: health !== undefined ? health : (100 + activeHP + gearHP),
+            maxHp: 100 + activeHP + gearHP,
+            damage: Math.floor((5 + activeProfDmg + gearDamage) * (1 + (gearDmgBonus || 0)) * (1 + (damageRuneBonus / 100))),
+            defense: gearDefense + activeProfDefense,
             attackSpeed: finalAttackSpeed,
-            str: calculatedStats.str,
-            agi: calculatedStats.agi,
-            int: calculatedStats.int,
+            warriorProf: calculatedStats.warriorProf,
+            hunterProf: calculatedStats.hunterProf,
+            mageProf: calculatedStats.mageProf,
+            activeProf,
             efficiency,
             runeAttackBonus: damageRuneBonus,
             foodSaver,
-            silverMultiplier: 1.0 + (calculatedStats.int * 0.005) + (isPremium ? 0.10 : 0)
+            burstChance: (activeRuneBuffs.ATTACK?.BURST || 0) + gearCritChance,
+            silverMultiplier: 1.0 + (isPremium ? 0.10 : 0)
         };
     }, [gameState?.calculatedStats, calculatedStats, health, skills, equipment, isPremium, activeRuneBuffs]);
 
@@ -242,7 +301,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         return Math.floor(totalIP / 7);
     }, [equipment]);
 
-    const EquipmentSlot = ({ slot, icon, label, item: rawItem, onClick, onShowInfo }) => {
+    const EquipmentSlot = ({ slot, icon, label, item: rawItem, onClick, onShowInfo, isLocked = false }) => {
         // Resolve item to ensure we have latest stats and rarity color (even for Normal items if logic changes, but mostly for _Q items)
         const item = rawItem ? { ...resolveItem(rawItem.id || rawItem.item_id), ...rawItem } : null;
 
@@ -255,9 +314,10 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
 
         // Upgrade Detection
         const hasUpgrade = useMemo(() => {
+            if (isLocked) return false;
             const best = getBestItemForSlot(slot, state.inventory || {});
             return isBetterItem(best, item);
-        }, [slot, state.inventory, item]);
+        }, [slot, state.inventory, item, isLocked]);
 
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
@@ -271,8 +331,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'relative',
-                    cursor: 'pointer',
-                    cursor: 'pointer',
+                    cursor: isLocked ? 'not-allowed' : 'pointer',
                     transition: '0.2s',
                     boxShadow: hasQuality ? `0 0 10px ${borderColor}66` : 'none',
                     position: 'relative'
@@ -392,52 +451,79 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
     // Helper para pegar nível de forma segura (duplicado do useMemo acima, mas ok para render)
     const getLvl = (key) => (skills[key]?.level || 1);
 
-    const fmtSkill = (label, key, mult) => {
-        const lvl = getLvl(key);
-        const pts = (lvl * mult).toFixed(1); // Keep 1 decimal for clarity
-        return `• ${label} = LVL ${lvl} = ${pts} pts`;
+    const formatNumber = (num) => {
+        return num.toLocaleString('en-US');
     };
 
-    const agiBreakdown = `BENEFITS:
-• +1 Base Damage per Point = +${Math.floor(calculatedStats.agi)} DMG
-• -2ms Attack Speed Delay per Point = -${Math.floor(calculatedStats.agi * 2)}ms
+    const fmtSkillSource = (label, key, mult) => ({
+        label,
+        level: getLvl(key),
+        points: (getLvl(key) * mult)
+    });
 
-Sources:
-${fmtSkill('Animal Skinner', 'ANIMAL_SKINNER', 0.2)}
-${fmtSkill('Leather Refiner', 'LEATHER_REFINER', 0.2)}
-${fmtSkill('Hunter Crafter', 'HUNTER_CRAFTER', 0.2)}
-${fmtSkill('Lumberjack', 'LUMBERJACK', 0.2)}
-${fmtSkill('Plank Refiner', 'PLANK_REFINER', 0.2)}
+    const hunterBreakdown = {
+        title: 'Hunter Proficiency',
+        color: '#22c55e',
+        icon: Target,
+        level: calculatedStats.hunterProf,
+        multipliers: 'Multiplier: 0.2 per Level (Max 100 Total) - Requires BOW',
+        stats: [
+            { label: 'Damage', value: `+${formatNumber(Math.floor(calculatedStats.hunterProf * 1200))}`, subtext: '+1200/pt', icon: <Sword size={18} /> },
+            { label: 'Health', value: `+${formatNumber(Math.floor(calculatedStats.hunterProf * 8750))}`, subtext: '+8750/pt', icon: <Heart size={18} /> },
+            { label: 'Defense', value: `+${formatNumber(Math.floor(calculatedStats.hunterProf * 25))}`, subtext: '+25 Def (+0.25%)/pt', icon: <Shield size={18} /> },
+            { label: 'Attack Speed', value: `-${(calculatedStats.hunterProf * 3.6).toFixed(1)}ms`, subtext: '-3.6ms/pt', icon: <Zap size={18} /> }
+        ],
+        sources: [
+            fmtSkillSource('Animal Skinner', 'ANIMAL_SKINNER', 0.2),
+            fmtSkillSource('Leather Refiner', 'LEATHER_REFINER', 0.2),
+            fmtSkillSource('Hunter Crafter', 'HUNTER_CRAFTER', 0.2),
+            fmtSkillSource('Lumberjack', 'LUMBERJACK', 0.2),
+            fmtSkillSource('Plank Refiner', 'PLANK_REFINER', 0.2)
+        ]
+    };
 
-Multiplier: 0.2 per Level (Max 100 Total)`;
+    const warriorBreakdown = {
+        title: 'Warrior Proficiency',
+        color: '#ef4444',
+        icon: Sword,
+        level: calculatedStats.warriorProf,
+        multipliers: 'Multiplier: 0.2 per Level (Max 100 Total) - Requires SWORD',
+        stats: [
+            { label: 'Damage', value: `+${formatNumber(Math.floor(calculatedStats.warriorProf * 1200))}`, subtext: '+1200/pt', icon: <Sword size={18} /> },
+            { label: 'Health', value: `+${formatNumber(Math.floor(calculatedStats.warriorProf * 10000))}`, subtext: '+10000/pt', icon: <Heart size={18} /> },
+            { label: 'Defense', value: `+${formatNumber(Math.floor(calculatedStats.warriorProf * 37.5))}`, subtext: '+37.5 Def (+0.37%)/pt', icon: <Shield size={18} /> },
+            { label: 'Attack Speed', value: `-${(calculatedStats.warriorProf * 3.33).toFixed(1)}ms`, subtext: '-3.33ms/pt', icon: <Zap size={18} /> }
+        ],
+        sources: [
+            fmtSkillSource('Ore Miner', 'ORE_MINER', 0.2),
+            fmtSkillSource('Metal Bar Refiner', 'METAL_BAR_REFINER', 0.2),
+            fmtSkillSource('Warrior Crafter', 'WARRIOR_CRAFTER', 0.2),
+            fmtSkillSource('Cooking', 'COOKING', 0.2),
+            fmtSkillSource('Fishing', 'FISHING', 0.2)
+        ]
+    };
 
-    const strBreakdown = `BENEFITS:
-• +10 Max Health (HP) per Point = +${Math.floor(calculatedStats.str * 10)} HP
-• +1 Base Damage per Point = +${Math.floor(calculatedStats.str)} DMG
-
-Sources:
-${fmtSkill('Ore Miner', 'ORE_MINER', 0.2)}
-${fmtSkill('Metal Bar Refiner', 'METAL_BAR_REFINER', 0.2)}
-${fmtSkill('Warrior Crafter', 'WARRIOR_CRAFTER', 0.2)}
-${fmtSkill('Cooking', 'COOKING', 0.2)}
-${fmtSkill('Fishing', 'FISHING', 0.2)}
-
-Multiplier: 0.2 per Level (Max 100 Total)`;
-
-    const intBreakdown = `BENEFITS:
-• +0.5% Global XP Gain per Point = +${(calculatedStats.int * 0.5).toFixed(1)}% XP
-• +0.5% Silver Yield per Point = +${(calculatedStats.int * 0.5).toFixed(1)}% Silver
-• +1 Base Damage per Point = +${Math.floor(calculatedStats.int)} DMG
-
-Sources:
-${fmtSkill('Fiber Harvester', 'FIBER_HARVESTER', 1 / 6)}
-${fmtSkill('Cloth Refiner', 'CLOTH_REFINER', 1 / 6)}
-${fmtSkill('Mage Crafter', 'MAGE_CRAFTER', 1 / 6)}
-${fmtSkill('Herbalism', 'HERBALISM', 1 / 6)}
-${fmtSkill('Distillation', 'DISTILLATION', 1 / 6)}
-${fmtSkill('Alchemy', 'ALCHEMY', 1 / 6)}
-
-Multiplier: ~0.16 per Level (Max 100 Total)`;
+    const mageBreakdown = {
+        title: 'Mage Proficiency',
+        color: '#3b82f6',
+        icon: Star,
+        level: calculatedStats.mageProf,
+        multipliers: 'Multiplier: ~0.16 per Level (Max 100 Total) - Requires STAFF',
+        stats: [
+            { label: 'Damage', value: `+${formatNumber(Math.floor(calculatedStats.mageProf * 2600))}`, subtext: '+2600/pt', icon: <Sword size={18} /> },
+            { label: 'Health', value: `+${formatNumber(Math.floor(calculatedStats.mageProf * 7500))}`, subtext: '+7500/pt', icon: <Heart size={18} /> },
+            { label: 'Defense', value: `+${formatNumber(Math.floor(calculatedStats.mageProf * 12.5))}`, subtext: '+12.5/pt', icon: <Shield size={18} /> },
+            { label: 'Attack Speed', value: `-${(calculatedStats.mageProf * 3.33).toFixed(1)}ms`, subtext: '-3.33ms/pt', icon: <Zap size={18} /> }
+        ],
+        sources: [
+            fmtSkillSource('Fiber Harvester', 'FIBER_HARVESTER', 1 / 6),
+            fmtSkillSource('Cloth Refiner', 'CLOTH_REFINER', 1 / 6),
+            fmtSkillSource('Mage Crafter', 'MAGE_CRAFTER', 1 / 6),
+            fmtSkillSource('Herbalism', 'HERBALISM', 1 / 6),
+            fmtSkillSource('Distillation', 'DISTILLATION', 1 / 6),
+            fmtSkillSource('Alchemy', 'ALCHEMY', 1 / 6)
+        ]
+    };
 
     if (!gameState) return <div style={{ padding: 20, textAlign: 'center', opacity: 0.5 }}>Loading data...</div>;
 
@@ -760,30 +846,84 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                 border: '1px solid var(--border)'
                             }}>
                                 {[
-                                    { label: 'STR', value: stats.str, color: '#ff4444', desc: strBreakdown },
-                                    { label: 'AGI', value: stats.agi, color: '#4caf50', desc: agiBreakdown },
-                                    { label: 'INT', value: stats.int, color: '#2196f3', desc: intBreakdown }
-                                ].map(stat => (
-                                    <div key={stat.label} style={{ textAlign: 'center' }}>
-                                        <div
-                                            onClick={() => setInfoModal({ title: stat.label, desc: stat.desc })}
-                                            style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: '900', letterSpacing: '1px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
-                                        >
-                                            {stat.label}
-                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                <Info size={10} color="#777" />
+                                    { label: 'Warrior Prof.', value: stats.warriorProf, color: '#ff4444', desc: warriorBreakdown, key: 'warrior', weapon: 'Sword' },
+                                    { label: 'Hunter Prof.', value: stats.hunterProf, color: '#4caf50', desc: hunterBreakdown, key: 'hunter', weapon: 'Bow' },
+                                    { label: 'Mage Prof.', value: stats.mageProf, color: '#2196f3', desc: mageBreakdown, key: 'mage', weapon: 'Staff' }
+                                ].map(stat => {
+                                    const isActive = stats.activeProf === stat.key;
+                                    return (
+                                        <div key={stat.label} style={{
+                                            textAlign: 'center',
+                                            opacity: isActive ? 1 : 0.4,
+                                            transition: 'all 0.3s ease',
+                                            padding: isMobile ? '8px 4px' : '10px 14px',
+                                            borderRadius: '10px',
+                                            background: isActive ? `${stat.color}15` : 'transparent',
+                                            border: isActive ? `2px solid ${stat.color}` : '2px solid transparent',
+                                            boxShadow: isActive ? `0 0 12px ${stat.color}40, inset 0 0 8px ${stat.color}10` : 'none',
+                                            transform: isActive ? (isMobile ? 'scale(1.02)' : 'scale(1.08)') : (isMobile ? 'scale(0.95)' : 'scale(0.92)'),
+                                            flex: 1,
+                                            minWidth: 0 // Prevent flex item overflow
+                                        }}>
+                                            <div
+                                                onClick={() => setProficiencyModal(stat.desc)}
+                                                style={{
+                                                    fontSize: isMobile ? '0.5rem' : '0.55rem',
+                                                    color: isActive ? stat.color : '#555',
+                                                    fontWeight: '900',
+                                                    letterSpacing: '1px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '4px',
+                                                    cursor: 'pointer',
+                                                    whiteSpace: 'nowrap' // Prevent label wrapping
+                                                }}
+                                            >
+                                                {stat.label.replace(' Prof.', '')} {/* Shorten label on mobile logic if needed, but CSS nowrap helps */}
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <Info size={isMobile ? 8 : 10} color={isActive ? stat.color : '#555'} />
+                                                </div>
                                             </div>
+                                            <div style={{
+                                                fontSize: isActive ? (isMobile ? '1.4rem' : '1.8rem') : (isMobile ? '1.1rem' : '1.4rem'),
+                                                fontWeight: '900',
+                                                color: isActive ? stat.color : '#555',
+                                                transition: 'all 0.3s'
+                                            }}>
+                                                {parseFloat(Number(stat.value).toFixed(2))}
+                                            </div>
+                                            {isActive && (
+                                                <div style={{
+                                                    fontSize: isMobile ? '0.45rem' : '0.5rem',
+                                                    color: stat.color,
+                                                    marginTop: '3px',
+                                                    fontWeight: '700',
+                                                    letterSpacing: '1px'
+                                                }}>
+                                                    {isMobile ? 'ACTIVE' : '⚔ ACTIVE'}
+                                                </div>
+                                            )}
+                                            {!isActive && (
+                                                <div style={{
+                                                    fontSize: isMobile ? '0.4rem' : '0.45rem',
+                                                    color: '#444',
+                                                    marginTop: '3px',
+                                                    whiteSpace: 'nowrap'
+                                                }}>
+                                                    Equip {stat.weapon}
+                                                </div>
+                                            )}
                                         </div>
-                                        <div style={{ fontSize: '1.6rem', fontWeight: '900', color: stat.color }}>{parseFloat(Number(stat.value).toFixed(2))}</div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
 
                             {/* Combat & Action Stats - New Section */}
                             <div style={{
                                 display: 'grid',
-                                gridTemplateColumns: 'repeat(3, 1fr)',
-                                gap: '10px',
+                                gridTemplateColumns: 'repeat(2, 1fr)',
+                                gap: '15px',
                                 background: 'rgba(0,0,0,0.2)',
                                 padding: '12px',
                                 borderRadius: '12px',
@@ -800,7 +940,10 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                     <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
                                         <Shield size={10} color="#4caf50" /> DEF
                                     </div>
-                                    <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)' }}>{Math.floor(stats.defense)}</div>
+                                    <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)', display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '4px' }}>
+                                        {Math.floor(stats.defense)}
+                                        <span style={{ fontSize: '0.65rem', color: '#4caf50', fontWeight: '700' }}>({Math.min(75, stats.defense / 100).toFixed(1)}%)</span>
+                                    </div>
                                 </div>
                                 <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'SPEED', value: Math.floor(stats.attackSpeed) })}>
                                     <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
@@ -808,6 +951,14 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                     </div>
                                     <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)' }}>
                                         {(1000 / stats.attackSpeed).toFixed(1)} h/s
+                                    </div>
+                                </div>
+                                <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'CRIT', value: stats.burstChance })}>
+                                    <div style={{ fontSize: '0.55rem', color: '#888', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
+                                        <Star size={10} color="#f59e0b" /> CRIT
+                                    </div>
+                                    <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)' }}>
+                                        {(stats.burstChance || 0).toFixed(2)}%
                                     </div>
                                 </div>
                             </div>
@@ -1257,33 +1408,50 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                                             </div>
                                             <div style={{
                                                 display: 'grid',
-                                                gridTemplateColumns: 'repeat(3, 1fr)',
-                                                gap: '15px'
+                                                gridTemplateColumns: 'repeat(4, 1fr)',
+                                                gap: '10px'
                                             }}>
-                                                <EquipmentSlot
-                                                    slot={`rune_ATTACK_ATTACK`}
-                                                    icon={<Sword size={20} />}
-                                                    label="DAMAGE"
-                                                    item={equipment[`rune_ATTACK_ATTACK`]}
-                                                    onClick={() => setSelectedSlot(`rune_ATTACK_ATTACK`)}
-                                                    onShowInfo={onShowInfo}
-                                                />
-                                                <EquipmentSlot
-                                                    slot={`rune_ATTACK_SAVE_FOOD`}
-                                                    icon={<Heart size={20} />}
-                                                    label="CONSERV."
-                                                    item={equipment[`rune_ATTACK_SAVE_FOOD`]}
-                                                    onClick={() => setSelectedSlot(`rune_ATTACK_SAVE_FOOD`)}
-                                                    onShowInfo={onShowInfo}
-                                                />
-                                                <EquipmentSlot
-                                                    slot={`rune_ATTACK_BURST`}
-                                                    icon={<Zap size={20} />}
-                                                    label="BURST"
-                                                    item={equipment[`rune_ATTACK_BURST`]}
-                                                    onClick={() => setSelectedSlot(`rune_ATTACK_BURST`)}
-                                                    onShowInfo={onShowInfo}
-                                                />
+                                                {[
+                                                    { slot: 'rune_ATTACK_ATTACK', label: 'DAMAGE', icon: <Sword size={20} /> },
+                                                    { slot: 'rune_ATTACK_ATTACK_SPEED', label: 'SPEED', icon: <Zap size={20} /> },
+                                                    { slot: 'rune_ATTACK_SAVE_FOOD', label: 'CONSERV.', icon: <Heart size={20} /> },
+                                                    { slot: 'rune_ATTACK_BURST', label: 'BURST', icon: <Zap size={20} /> }
+                                                ].map(({ slot, label, icon }) => {
+                                                    const isEquipped = !!equipment[slot];
+                                                    const activeCombatRunes = Object.keys(equipment).filter(k => k.startsWith('rune_ATTACK_') && equipment[k]).length;
+                                                    const isLocked = !isEquipped && activeCombatRunes >= 3;
+
+                                                    return (
+                                                        <div key={slot} style={{ opacity: isLocked ? 0.5 : 1, position: 'relative' }}>
+                                                            <EquipmentSlot
+                                                                slot={slot}
+                                                                icon={icon}
+                                                                label={label}
+                                                                item={equipment[slot]}
+                                                                onClick={() => !isLocked && setSelectedSlot(slot)}
+                                                                onShowInfo={onShowInfo}
+                                                                isLocked={isLocked}
+                                                            />
+                                                            {isLocked && (
+                                                                <div style={{
+                                                                    position: 'absolute',
+                                                                    top: 0, left: 0, right: 0, bottom: 0,
+                                                                    background: 'rgba(0,0,0,0.5)',
+                                                                    borderRadius: '10px',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    fontSize: '0.6rem',
+                                                                    fontWeight: 'bold',
+                                                                    color: '#ff4444',
+                                                                    pointerEvents: 'none' // Let clicks pass through if needed, but onClick is blocked
+                                                                }}>
+                                                                    MAX 3
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         </div>
 
@@ -1340,6 +1508,7 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                     onEquip={handleEquip}
                     onUnequip={handleUnequip}
                     onShowInfo={onShowInfo}
+                    charStats={stats}
                 />
             )}
 
@@ -1352,6 +1521,13 @@ Multiplier: ~0.16 per Level (Max 100 Total)`;
                     equipment={gameState?.state?.equipment || {}}
                     membership={gameState?.state?.membership}
                     onClose={() => setBreakdownModal(null)}
+                />
+            )}
+
+            {proficiencyModal && (
+                <ProficiencyDetailsModal
+                    data={proficiencyModal}
+                    onClose={() => setProficiencyModal(null)}
                 />
             )}
 

@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { X, Sword, Shield, Heart, Zap, Play, Layers, User, Pickaxe, Target, Apple, Star, Info } from 'lucide-react';
-import { resolveItem, getTierColor, calculateRuneBonus } from '@shared/items';
+import { resolveItem, getTierColor, calculateRuneBonus, getRequiredProficiencyGroup, getLevelRequirement } from '@shared/items';
 import { getBestItemForSlot, isBetterItem } from '../utils/equipment';
 
-const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, inventory, onShowInfo }) => {
+const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, inventory, onShowInfo, charStats }) => {
 
     // Filter candidates from inventory based on slot
     const { candidates, bestCandidate } = React.useMemo(() => {
@@ -25,10 +25,10 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                     if (itemMatch) {
                         const runeKey = itemMatch[1];
                         const runeParts = runeKey.split('_');
-                        const act = runeParts[0];
-                        const eff = runeParts.slice(1).join('_'); // Fix for multi-part effects (e.g. SAVE_FOOD)
+                        const runeAct = runeParts[0];
+                        const runeEff = runeParts.slice(1).join('_');
 
-                        if (act === targetAct && eff === targetEff) {
+                        if (runeAct === targetAct && runeEff === targetEff) {
                             matches = true;
                         }
                     }
@@ -171,7 +171,18 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                 <Zap size={14} fill="var(--accent)" /> Recommended Item
                             </div>
                             <div
-                                onClick={() => { onEquip(bestCandidate.id); onClose(); }}
+                                onClick={() => {
+                                    const profGroup = getRequiredProficiencyGroup(bestCandidate.id);
+                                    const reqLv = getLevelRequirement(bestCandidate.tier);
+                                    const userLv = profGroup === 'warrior' ? charStats?.warriorProf
+                                        : profGroup === 'hunter' ? charStats?.hunterProf
+                                            : profGroup === 'mage' ? charStats?.mageProf
+                                                : 100; // default pass if no group
+
+                                    if (userLv < reqLv) return; // Prevent click if not meeting req
+                                    onEquip(bestCandidate.id);
+                                    onClose();
+                                }}
                                 style={{
                                     background: 'var(--slot-bg)',
                                     border: '1px solid var(--accent)',
@@ -181,7 +192,16 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                     alignItems: 'center',
                                     justifyContent: 'space-between',
                                     cursor: 'pointer',
-                                    boxShadow: '0 0 20px rgba(212, 175, 55, 0.1)'
+                                    boxShadow: '0 0 20px rgba(212, 175, 55, 0.1)',
+                                    opacity: (() => {
+                                        const profGroup = getRequiredProficiencyGroup(bestCandidate.id);
+                                        const reqLv = getLevelRequirement(bestCandidate.tier);
+                                        const userLv = profGroup === 'warrior' ? charStats?.warriorProf
+                                            : profGroup === 'hunter' ? charStats?.hunterProf
+                                                : profGroup === 'mage' ? charStats?.mageProf
+                                                    : 100;
+                                        return userLv < reqLv ? 0.5 : 1;
+                                    })()
                                 }}
                             >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -228,6 +248,20 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                                 bestCandidate.type === 'FOOD' ? `Heal ${bestCandidate.heal} • Tier ${bestCandidate.tier}` :
                                                     `Tier ${bestCandidate.tier}${(bestCandidate.ip > 0 && !bestCandidate.type.startsWith('TOOL')) ? ` • IP ${bestCandidate.ip}` : ''}`}
                                         </div>
+                                        {(() => {
+                                            const profGroup = getRequiredProficiencyGroup(bestCandidate.id);
+                                            const reqLv = getLevelRequirement(bestCandidate.tier);
+                                            const userLv = profGroup === 'warrior' ? charStats?.warriorProf
+                                                : profGroup === 'hunter' ? charStats?.hunterProf
+                                                    : profGroup === 'mage' ? charStats?.mageProf
+                                                        : 100;
+
+                                            if (userLv < reqLv && profGroup) {
+                                                const groupName = profGroup.charAt(0).toUpperCase() + profGroup.slice(1);
+                                                return <div style={{ fontSize: '0.7rem', color: '#ff4444', fontWeight: 'bold', marginTop: '4px' }}>Requires {groupName} Prof. Lv {reqLv}</div>;
+                                            }
+                                            return null;
+                                        })()}
                                     </div>
                                 </div>
                                 <div style={{ background: 'var(--accent)', color: 'var(--panel-bg)', padding: '6px 12px', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.75rem' }}>
@@ -252,7 +286,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                 alignItems: 'center',
                                 justifyContent: 'space-between'
                             }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', minWidth: 0, flex: 1 }}>
                                     <div style={{
                                         width: '48px',
                                         height: '48px',
@@ -264,7 +298,8 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                         border: `1px solid ${resolvedCurrent?.rarityColor || 'rgba(255,255,255,0.1)'}`,
                                         boxShadow: resolvedCurrent?.rarityColor ? `0 0 10px ${resolvedCurrent.rarityColor}33` : 'none',
                                         overflow: 'hidden',
-                                        position: 'relative'
+                                        position: 'relative',
+                                        flexShrink: 0
                                     }}>
                                         {resolvedCurrent?.icon ? (
                                             <img src={resolvedCurrent.icon} style={{ width: '80%', height: '80%', objectFit: 'contain' }} alt="" />
@@ -287,12 +322,12 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                             </div>
                                         )}
                                     </div>
-                                    <div>
-                                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            {resolvedCurrent?.name || currentItem.name || currentItem.id}
+                                    <div style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
+                                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{resolvedCurrent?.name || currentItem.name || currentItem.id}</span>
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); onShowInfo(currentItem); }}
-                                                style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.5 }}
+                                                style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.5, flexShrink: 0 }}
                                             >
                                                 <Info size={14} color="var(--text-main)" />
                                             </button>
@@ -311,11 +346,13 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                         color: '#ff4444',
                                         border: '1px solid rgba(255, 68, 68, 0.3)',
                                         borderRadius: '8px',
-                                        padding: '8px 16px',
+                                        padding: '5px 10px',
                                         cursor: 'pointer',
                                         fontWeight: 'bold',
-                                        fontSize: '0.8rem',
-                                        transition: '0.2s'
+                                        fontSize: '0.75rem',
+                                        transition: '0.2s',
+                                        marginLeft: '10px',
+                                        flexShrink: 0
                                     }}
                                 >
                                     UNEQUIP
@@ -347,7 +384,18 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                     return (
                                         <div
                                             key={`${item.id}-${idx}`}
-                                            onClick={() => { onEquip(item.id); onClose(); }}
+                                            onClick={() => {
+                                                const profGroup = getRequiredProficiencyGroup(item.id);
+                                                const reqLv = getLevelRequirement(item.tier);
+                                                const userLv = profGroup === 'warrior' ? charStats?.warriorProf
+                                                    : profGroup === 'hunter' ? charStats?.hunterProf
+                                                        : profGroup === 'mage' ? charStats?.mageProf
+                                                            : 100;
+
+                                                if (userLv < reqLv && profGroup) return;
+                                                onEquip(item.id);
+                                                onClose();
+                                            }}
                                             style={{
                                                 background: 'var(--slot-bg)',
                                                 border: `1px solid ${isItemRecommended ? 'var(--accent)' : (item.quality > 0 ? item.rarityColor : 'var(--border)')}`,
@@ -359,9 +407,28 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                                 cursor: 'pointer',
                                                 textAlign: 'left',
                                                 transition: '0.2s',
-                                                boxShadow: isItemRecommended ? '0 0 10px rgba(212, 175, 55, 0.05)' : (item.quality > 0 ? `0 0 10px ${item.rarityColor}10` : 'none')
+                                                boxShadow: isItemRecommended ? '0 0 10px rgba(212, 175, 55, 0.05)' : (item.quality > 0 ? `0 0 10px ${item.rarityColor}10` : 'none'),
+                                                opacity: (() => {
+                                                    const profGroup = getRequiredProficiencyGroup(item.id);
+                                                    const reqLv = getLevelRequirement(item.tier);
+                                                    const userLv = profGroup === 'warrior' ? charStats?.warriorProf
+                                                        : profGroup === 'hunter' ? charStats?.hunterProf
+                                                            : profGroup === 'mage' ? charStats?.mageProf
+                                                                : 100;
+                                                    return userLv < reqLv && profGroup ? 0.5 : 1;
+                                                })()
                                             }}
-                                            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--accent-soft)'}
+                                            onMouseEnter={(e) => {
+                                                const profGroup = getRequiredProficiencyGroup(item.id);
+                                                const reqLv = getLevelRequirement(item.tier);
+                                                const userLv = profGroup === 'warrior' ? charStats?.warriorProf
+                                                    : profGroup === 'hunter' ? charStats?.hunterProf
+                                                        : profGroup === 'mage' ? charStats?.mageProf
+                                                            : 100;
+                                                if (userLv >= reqLv || !profGroup) {
+                                                    e.currentTarget.style.background = 'var(--accent-soft)';
+                                                }
+                                            }}
                                             onMouseLeave={(e) => e.currentTarget.style.background = 'var(--slot-bg)'}
                                         >
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -437,6 +504,20 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                                             item.type === 'FOOD' ? `Tier ${item.tier} • Heal ${item.heal}` :
                                                                 `Tier ${item.tier} ${(item.ip && !item.type.startsWith('TOOL')) ? `• IP ${item.ip}` : ''}`}
                                                     </div>
+                                                    {(() => {
+                                                        const profGroup = getRequiredProficiencyGroup(item.id);
+                                                        const reqLv = getLevelRequirement(item.tier);
+                                                        const userLv = profGroup === 'warrior' ? charStats?.warriorProf
+                                                            : profGroup === 'hunter' ? charStats?.hunterProf
+                                                                : profGroup === 'mage' ? charStats?.mageProf
+                                                                    : 100;
+
+                                                        if (userLv < reqLv && profGroup) {
+                                                            const groupName = profGroup.charAt(0).toUpperCase() + profGroup.slice(1);
+                                                            return <div style={{ fontSize: '0.65rem', color: '#ff4444', fontWeight: 'bold', marginTop: '2px' }}>Requires {groupName} Prof. Lv {reqLv}</div>;
+                                                        }
+                                                        return null;
+                                                    })()}
                                                 </div>
                                             </div>
                                             <div style={{ color: isItemRecommended ? 'var(--accent)' : '#4caf50', fontSize: '0.8rem', fontWeight: 'bold' }}>EQUIP</div>
