@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Sword, Shield, Zap, Heart } from 'lucide-react';
+import { X, Sword, Shield, Zap, Heart, Star } from 'lucide-react';
 import { resolveItem, calculateRuneBonus } from '@shared/items';
 
 const StatBreakdownModal = ({ statType, statId, value, stats, equipment, membership, onClose }) => {
@@ -8,20 +8,35 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
         const breakdown = [];
 
         if (statType === 'DAMAGE') {
-            // Formula: (5 + STR + GearDmg + IPBonus) * (1 + DmgBonus)
-            // Note: We reverse engineer or re-calculate since we have raw data
-            const str = stats.str || 0;
-            const agi = stats.agi || 0;
-            const int = stats.int || 0;
-            const gearDamage = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.damage || 0), 0);
-            const weapon = equipment.mainHand;
-            const gearDmgBonus = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.dmgBonus || 0), 0);
+            // Formula: (5 + ActiveProfDmg + GearDmg) * (1 + DmgBonus) * (1 + RuneBonus)
+            // Only the proficiency matching the equipped weapon contributes
+            const warriorProf = stats.warriorProf || 0;
+            const hunterProf = stats.hunterProf || 0;
+            const mageProf = stats.mageProf || 0;
+            const activeProf = stats.activeProf; // 'warrior' | 'hunter' | 'mage' | null
+            const activeProfDmg = activeProf === 'warrior' ? warriorProf * 1200
+                : activeProf === 'hunter' ? hunterProf * 1200
+                    : activeProf === 'mage' ? mageProf * 2600 : 0;
+            const activeProfLabel = activeProf === 'warrior' ? 'Warrior'
+                : activeProf === 'hunter' ? 'Hunter'
+                    : activeProf === 'mage' ? 'Mage' : null;
+            const activeProfPerPt = activeProf === 'warrior' ? 1200
+                : activeProf === 'hunter' ? 1200
+                    : activeProf === 'mage' ? 2600 : 0;
+            const gearDamage = Object.values(equipment).reduce((acc, item) => {
+                const fresh = item ? resolveItem(item.id || item.item_id) : null;
+                return acc + (fresh?.stats?.damage || 0);
+            }, 0);
+            const gearDmgBonus = Object.values(equipment).reduce((acc, item) => {
+                const fresh = item ? resolveItem(item.id || item.item_id) : null;
+                return acc + (fresh?.stats?.dmgBonus || 0);
+            }, 0);
 
             const damageRuneBonus = Object.entries(equipment).reduce((acc, [slot, item]) => {
                 if (slot.startsWith('rune_') && item) {
                     const parts = slot.split('_');
                     const act = parts[1];
-                    const eff = parts[2];
+                    const eff = parts.slice(2).join('_');
                     if (act === 'ATTACK' && eff === 'ATTACK') {
                         const freshRune = resolveItem(item.id || item.item_id);
                         return acc + calculateRuneBonus(freshRune.tier, freshRune.stars, eff);
@@ -31,39 +46,76 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
             }, 0);
 
             breakdown.push({ label: 'Base', value: 5 });
-            if (str > 0) breakdown.push({ label: 'Strength Bonus', value: str, sub: '(Max 100, 0.2 per Skill Lvl)' });
-            if (agi > 0) breakdown.push({ label: 'Agility Bonus', value: agi, sub: '(Max 100, 0.2 per Skill Lvl)' });
-            if (int > 0) breakdown.push({ label: 'Intelligence Bonus', value: int.toFixed(2), sub: '(Max 100, ~0.166 per Skill Lvl)' });
+            if (activeProfLabel && activeProfDmg > 0) {
+                breakdown.push({ label: `${activeProfLabel} Prof. Bonus`, value: activeProfDmg.toFixed(1), sub: `(+${activeProfPerPt} DMG per ${activeProfLabel} Prof.)` });
+            } else if (!activeProf) {
+                breakdown.push({ label: 'No Weapon Equipped', value: 0, sub: '(Equip a weapon to activate a proficiency)' });
+            }
 
             breakdown.push({ label: 'Gear Damage', value: gearDamage });
 
-            const rawTotal = 5 + str + agi + int + gearDamage;
+            const rawTotal = 5 + activeProfDmg + gearDamage;
 
             if (gearDmgBonus > 0 || damageRuneBonus > 0) {
                 breakdown.push({ label: 'Raw Total', value: rawTotal.toFixed(1), isTotal: true });
                 if (gearDmgBonus > 0) breakdown.push({ label: 'Gear Modifier', value: `+${(gearDmgBonus * 100).toFixed(0)}%` });
-                if (damageRuneBonus > 0) breakdown.push({ label: 'Rune Modifier', value: `+${damageRuneBonus}%` });
+                if (damageRuneBonus > 0) breakdown.push({ label: 'Rune Modifier', value: `+${damageRuneBonus.toFixed(1)}%` });
             }
         } else if (statType === 'DEFENSE') {
             // Formula: GearDefense
+            const warriorProf = stats.warriorProf || 0;
+            const hunterProf = stats.hunterProf || 0;
+            const mageProf = stats.mageProf || 0;
+            const activeProf = stats.activeProf;
+
+            const activeProfDefense = activeProf === 'hunter' ? hunterProf * 25
+                : activeProf === 'mage' ? mageProf * 12.5
+                    : activeProf === 'warrior' ? warriorProf * 37.5 : 0;
             const gearDefense = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.defense || 0), 0);
+
             breakdown.push({ label: 'Base', value: 0 });
+            if (activeProfDefense > 0) {
+                const label = activeProf === 'hunter' ? 'Hunter' : activeProf === 'mage' ? 'Mage' : 'Warrior';
+                const perPt = activeProf === 'hunter' ? 25 : activeProf === 'mage' ? 12.5 : 37.5;
+                breakdown.push({ label: `${label} Prof. Bonus`, value: activeProfDefense, sub: `(+${perPt} per ${label} Prof.)` });
+            }
             breakdown.push({ label: 'Gear Defense', value: gearDefense });
 
             // Percentage Reduction display
             // Use Total Defense (stats.defense) not just Gear Defense
             const totalDef = stats.defense || 0;
-            const mitigation = Math.min(0.60, totalDef / (totalDef + 36000));
+            const mitigation = Math.min(0.75, totalDef / 10000);
             const reductionPercent = (mitigation * 100).toFixed(1);
-            breakdown.push({ label: 'Est. Dmg Reduction', value: `${reductionPercent}%`, sub: 'Based on Def / (Def + 36000) (Max 60%)', isTotal: true });
+            breakdown.push({ label: 'Est. Dmg Reduction', value: `${reductionPercent}%`, sub: '1% Reduction per 100 DEF (Max 75%)', isTotal: true });
         } else if (statType === 'SPEED') {
-            // Formula: GlobalBase(2000) - WeaponSpeed - (AGI * 2) - GearSpeed
-            // Everything converted to seconds for display (2 decimal places)
-            const agi = stats.agi || 0;
+            // Formula: GlobalBase(2000) - WeaponSpeed - ActiveSpeedBonus - GearSpeed
+            // Speed bonus only applies if a Bow is equipped
+            const hunterProf = stats.hunterProf || 0;
+            const mageProf = stats.mageProf || 0;
+            const activeProf = stats.activeProf;
+            const activeSpeedBonus = activeProf === 'hunter' ? hunterProf * 3.6
+                : activeProf === 'mage' ? mageProf * 3.33
+                    : activeProf === 'warrior' ? warriorProf * 3.33 : 0;
             const gearSpeed = Object.entries(equipment).reduce((acc, [slot, item]) => {
                 if (!item || slot === 'mainHand') return acc;
                 const fresh = resolveItem(item.id || item.item_id);
                 return acc + (fresh?.stats?.speed || 0);
+            }, 0);
+
+            // Calculate Attack Speed Rune
+            const runeSpeedBonus = Object.entries(equipment).reduce((acc, [slot, item]) => {
+                if (slot.startsWith('rune_') && item) {
+                    // slot format: rune_{ACT}_{EFF}
+                    const parts = slot.split('_');
+                    if (parts.length >= 3) {
+                        const eff = parts.slice(2).join('_');
+                        if (eff === 'ATTACK_SPEED') {
+                            const fresh = resolveItem(item.id || item.item_id);
+                            return acc + calculateRuneBonus(fresh.tier, fresh.stars, eff);
+                        }
+                    }
+                }
+                return acc;
             }, 0);
 
             // Get Weapon Speed (0 if no weapon - unarmed has no speed bonus)
@@ -82,11 +134,19 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                 });
             }
 
-            if (agi > 0) {
+            if (activeSpeedBonus > 0) {
+                const label = activeProf === 'hunter' ? 'Hunter' : activeProf === 'mage' ? 'Mage' : 'Warrior';
+                const perPt = activeProf === 'hunter' ? 3.6 : activeProf === 'mage' ? 3.33 : 3.33;
                 breakdown.push({
-                    label: 'Agility Bonus',
-                    value: `-${(agi * 2 / 1000).toFixed(2)}s`,
-                    sub: '(2ms per AGI)'
+                    label: `${label} Proficiency Bonus`,
+                    value: `-${(activeSpeedBonus / 1000).toFixed(2)}s`,
+                    sub: `(${perPt}ms per ${label} Prof.)`
+                });
+            } else if (activeProf && activeProf !== 'hunter' && hunterProf > 0) {
+                breakdown.push({
+                    label: 'Hunter Prof. (Inactive)',
+                    value: '0s',
+                    sub: '(Requires Bow to activate)'
                 });
             }
 
@@ -98,9 +158,21 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                 });
             }
 
-            const totalReduction = weaponSpeed + gearSpeed + (agi * 2);
+            const totalReduction = weaponSpeed + gearSpeed + activeSpeedBonus;
             const calculatedRaw = 2000 - totalReduction;
-            const finalInterval = Math.max(200, calculatedRaw);
+            let finalInterval = Math.max(200, calculatedRaw);
+
+            if (runeSpeedBonus > 0 && finalInterval > 200) {
+                breakdown.push({
+                    label: 'Att. Speed Rune',
+                    value: `+${runeSpeedBonus.toFixed(1)}%`,
+                    sub: 'Multiplies attack rate'
+                });
+
+                finalInterval = finalInterval / (1 + (runeSpeedBonus / 100));
+                // Re-apply cap
+                finalInterval = Math.max(200, finalInterval);
+            }
 
             if (calculatedRaw < 200) {
                 breakdown.push({
@@ -119,11 +191,22 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
             // Override the "Total" display at the bottom to show hits/second
             value = `${(1000 / finalInterval).toFixed(1)} h/s`;
         } else if (statType === 'HP') {
-            // Formula: 100 + (STR * 10) + GearHP
-            const str = stats.str || 0;
+            // Formula: 100 + ActiveHP + GearHP
+            // HP bonus only applies if a Sword is equipped
+            const warriorProf = stats.warriorProf || 0;
+            const mageProf = stats.mageProf || 0;
+            const activeProf = stats.activeProf;
+            const activeHP = activeProf === 'warrior' ? warriorProf * 10000
+                : activeProf === 'mage' ? mageProf * 7500 : 0;
             const gearHP = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.hp || 0), 0);
             breakdown.push({ label: 'Base', value: 100 });
-            breakdown.push({ label: 'Strength Bonus', value: str * 10, sub: '(10 per STR)' });
+            if (activeHP > 0) {
+                const label = activeProf === 'warrior' ? 'Warrior' : 'Mage';
+                const perPt = activeProf === 'warrior' ? 10000 : 7500;
+                breakdown.push({ label: `${label} Prof. Bonus`, value: activeHP, sub: `(+${perPt} per ${label} Prof.)` });
+            } else if (activeProf && activeProf !== 'warrior' && activeProf !== 'mage' && (warriorProf > 0 || mageProf > 0)) {
+                breakdown.push({ label: 'Proficiency (Inactive)', value: 0, sub: '(Requires specific weapon to activate)' });
+            }
             breakdown.push({ label: 'Gear HP', value: gearHP });
         } else if (statType === 'EFFICIENCY') {
             const effId = statId; // Skill context
@@ -174,7 +257,7 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                         if (slot.startsWith('rune_') && item) {
                             const parts = slot.split('_');
                             const act = parts[1];
-                            const eff = parts[2];
+                            const eff = parts.slice(2).join('_');
 
                             if (act === effId && eff === 'EFF') {
                                 const freshRune = resolveItem(item.id || item.item_id);
@@ -205,6 +288,29 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                     breakdown.push({ label: `Global Bonus (${freshGlobal.name.split(' ').pop()})`, value: `+${actualGlobalEff}%` });
                 }
             }
+        } else if (statType === 'CRIT') {
+            const gearCritChance = Object.values(equipment).reduce((acc, item) => {
+                const fresh = item ? resolveItem(item.id || item.item_id) : null;
+                return acc + (fresh?.stats?.critChance || 0);
+            }, 0);
+            const burstRuneBonus = Object.entries(equipment).reduce((acc, [slot, item]) => {
+                if (slot.startsWith('rune_') && item) {
+                    const parts = slot.split('_');
+                    const act = parts[1];
+                    const eff = parts.slice(2).join('_');
+                    if (act === 'ATTACK' && eff === 'BURST') {
+                        const freshRune = resolveItem(item.id || item.item_id);
+                        return acc + calculateRuneBonus(freshRune.tier, freshRune.stars, eff);
+                    }
+                }
+                return acc;
+            }, 0);
+
+            breakdown.push({ label: 'Base Crit Rate', value: '0%' });
+            if (gearCritChance > 0) breakdown.push({ label: 'Gear Crit Chance', value: `+${gearCritChance.toFixed(2)}%` });
+            if (burstRuneBonus > 0) breakdown.push({ label: 'Burst Rune Bonus', value: `+${burstRuneBonus.toFixed(2)}%` });
+
+            value = `${(gearCritChance + burstRuneBonus).toFixed(2)}%`;
 
 
         }
@@ -241,6 +347,7 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                         {statType === 'DEFENSE' && <Shield size={18} color="#4caf50" />}
                         {statType === 'SPEED' && <Zap size={18} color="#2196f3" />}
                         {statType === 'HP' && <Heart size={18} color="#ff4d4d" />}
+                        {statType === 'CRIT' && <Star size={18} color="#f59e0b" />}
                         {statType === 'EFFICIENCY' ? (
                             statId === 'GLOBAL' ? 'GLOBAL EFFICIENCY' : (
                                 {

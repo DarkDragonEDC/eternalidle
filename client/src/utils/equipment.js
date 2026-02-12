@@ -63,14 +63,17 @@ export const getBestItemForSlot = (slot, inventory) => {
         if (slot.startsWith('rune_')) {
             const parts = slot.split('_');
             const targetAct = parts[1];
-            const targetEff = parts[2];
+            const targetEff = parts.slice(2).join('_');
 
             if (item.type === 'RUNE') {
                 const itemMatch = itemId.match(/^T\d+_RUNE_(.+)_(\d+)STAR$/);
                 if (itemMatch) {
                     const runeKey = itemMatch[1];
                     const runeParts = runeKey.split('_');
-                    if (runeParts[0] === targetAct && runeParts[1] === targetEff) {
+                    const runeAct = runeParts[0];
+                    const runeEff = runeParts.slice(1).join('_');
+
+                    if (runeAct === targetAct && runeEff === targetEff) {
                         matches = true;
                     }
                 }

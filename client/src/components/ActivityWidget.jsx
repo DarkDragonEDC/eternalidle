@@ -540,7 +540,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                                         if (!activeMob) return <span>-</span>;
 
                                                         const defense = gameState?.calculatedStats?.defense || 0;
-                                                        const mitigation = defense / (defense + 36000);
+                                                        const mitigation = Math.min(0.75, defense / 10000);
                                                         const mobDmg = Math.max(1, Math.floor(activeMob.damage * (1 - mitigation)));
 
                                                         // Food Logic

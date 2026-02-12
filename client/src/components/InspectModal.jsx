@@ -10,6 +10,11 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
 
     const { name, level, selectedTitle, health = 0, equipment = {}, skills = {}, stats = {}, isPremium, guildName } = data;
 
+    // Fallback for legacy data/direct stats
+    const warriorProf = stats.warriorProf || stats.str || 0;
+    const hunterProf = stats.hunterProf || stats.agi || 0;
+    const mageProf = stats.mageProf || stats.int || 0;
+
     const totalIP = Math.floor(Object.values(equipment).reduce((acc, item) => {
         if (!item) return acc;
         return acc + (resolveItem(item.id || item.item_id)?.ip || 0);
@@ -418,11 +423,18 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Shield size={14} style={{ color: '#60a5fa' }} />
-                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)' }}>DEF <span style={{ color: '#fff' }}>{stats.defense || 0}</span></span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                            DEF <span style={{ color: '#fff' }}>{stats.defense || 0}</span>
+                            <span style={{ fontSize: '0.6rem', color: '#60a5fa', opacity: 0.8 }}>({Math.min(75, (stats.defense || 0) / 100).toFixed(1)}%)</span>
+                        </span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Zap size={14} style={{ color: '#facc15' }} />
                         <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)' }}>SPD <span style={{ color: '#fff' }}>{stats.attackSpeed ? `${(stats.attackSpeed / 1000).toFixed(1)}s` : '1.0s'}</span></span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Star size={14} style={{ color: '#f59e0b' }} />
+                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)' }}>CRIT <span style={{ color: '#fff' }}>{(stats.burstChance || 0).toFixed(1)}%</span></span>
                     </div>
                 </div>
             </motion.div>

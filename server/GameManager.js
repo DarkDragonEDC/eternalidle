@@ -1729,8 +1729,21 @@ export class GameManager {
 
     processFood(char, nowOverride = null) {
         if (!char.state.equipment || !char.state.equipment.food) return { used: false, amount: 0 };
-        const food = char.state.equipment.food;
-        if (!food.heal || !food.amount) return { used: false, amount: 0 };
+        // Get the equipped food object (which might be stale)
+        let food = char.state.equipment.food;
+
+        // RESOLVE FRESH ITEM DATA: 
+        // The equipped object might be a stale copy from the DB with old 'heal' values.
+        // We must fetch the latest definition from shared/items.js to get the new 'healPercent'.
+        const freshItem = this.inventoryManager.resolveItem(food.id);
+
+        // Merge fresh stats onto the food object temporarily for calculation (preserve amount)
+        if (freshItem) {
+            food = { ...freshItem, amount: food.amount };
+        }
+
+        // Support both old flat heal and new percent heal (freshItem handles this)
+        if (!food.heal && !food.healPercent && !food.amount) return { used: false, amount: 0 };
 
         const inCombat = !!char.state.combat;
         const stats = this.inventoryManager.calculateStats(char, nowOverride);
@@ -1743,6 +1756,16 @@ export class GameManager {
 
         const foodSaver = stats.foodSaver || 0;
 
+        // Calculate Heal Amount per unit
+        let unitHeal = 0;
+        if (food.healPercent) {
+            unitHeal = Math.floor(maxHp * (food.healPercent / 100));
+        } else {
+            unitHeal = food.heal || 0;
+        }
+
+        // Safety minimum 1 if it's supposed to heal
+        if (unitHeal < 1) unitHeal = 1;
 
         // Eat while HP is missing and we haven't hit the massive limit
         // STRICT RULE: Only eat if the heal fits entirely (No Waste)
@@ -1751,8 +1774,9 @@ export class GameManager {
             const hpPercent = (currentHp / maxHp) * 100;
 
             // SAFETY RULE: Eat if the heal fits entirely OR if HP is dangerously low (< 40%)
-            if (missing >= food.heal || hpPercent < 40) {
-                const actualHeal = Math.min(food.heal, missing);
+            // "unitHeal" is the standardized amount now
+            if (missing >= unitHeal || hpPercent < 40) {
+                const actualHeal = Math.min(unitHeal, missing);
                 if (actualHeal <= 0 && hpPercent >= 40) break; // Safety break
 
                 currentHp = currentHp + actualHeal;
@@ -1760,7 +1784,9 @@ export class GameManager {
                 // Roll for food saving
                 const savedFood = foodSaver > 0 && Math.random() * 100 < foodSaver;
                 if (!savedFood) {
-                    food.amount--;
+                    // CRITICAL FIX: Decrement from the REAL state object, not the local copy
+                    char.state.equipment.food.amount--;
+                    food.amount--; // Keep local copy in sync for the loop check
                 } else {
                     savedCount++;
                 }
@@ -1778,7 +1804,7 @@ export class GameManager {
             }
         }
 
-        if (food.amount <= 0) {
+        if (char.state.equipment.food.amount <= 0) {
             delete char.state.equipment.food;
         }
 

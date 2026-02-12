@@ -118,6 +118,14 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
             return acc + (fresh?.stats?.speed || 0);
         }, 0);
 
+        const weaponId = (freshWeapon?.id || weapon?.id || '').toUpperCase();
+        let activeProf = null;
+        if (weaponId.includes('SWORD')) activeProf = 'warrior';
+        else if (weaponId.includes('BOW')) activeProf = 'hunter';
+        else if (weaponId.includes('STAFF')) activeProf = 'mage';
+
+        const activeProfDefense = activeProf === 'hunter' ? agi * 25 : 0;
+
         const totalSpeed = weaponSpeed + gearSpeedBonus + (agi * 2);
         const finalAttackSpeed = Math.max(200, 2000 - totalSpeed);
 
@@ -128,7 +136,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
             str, agi, int,
             hp: 100 + (str * 10) + gearHP,
             damage: Math.floor(finalDmg),
-            defense: gearDefense,
+            defense: gearDefense + activeProfDefense,
             attackSpeed: finalAttackSpeed,
             globals: {
                 xpYield: int * 1,
@@ -482,7 +490,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 if (!activeMob) return <span style={{ fontSize: '1rem', fontWeight: 'bold', fontFamily: 'monospace', color: '#888' }}>-</span>;
 
                                 const defense = gameState?.calculatedStats?.defense || 0;
-                                const mitigation = Math.min(0.60, defense / (defense + 36000));
+                                const mitigation = Math.min(0.75, defense / 10000);
                                 const mobBaseDmg = combat.mobDamage || activeMob.damage || 1;
                                 const mobDmg = Math.max(1, Math.floor(mobBaseDmg * (1 - mitigation)));
 
@@ -961,7 +969,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
 
                         // 1. Calculate Mitigation
                         const mobDef = mob.defense || 0;
-                        const mobMitigation = mobDef / (mobDef + 36000);
+                        const mobMitigation = mobDef / 10000;
                         const mitigatedDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
 
                         // 2. Calculate Time per Cycle
@@ -1074,7 +1082,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                         <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)' }}>SURVIVAL</div>
                                         {(() => {
                                             const defense = gameState?.calculatedStats?.defense || 0;
-                                            const mitigation = Math.min(0.60, defense / (defense + 36000));
+                                            const mitigation = Math.min(0.75, defense / 10000);
                                             const mobDmg = Math.max(1, Math.floor(mob.damage * (1 - mitigation)));
 
                                             // Food Logic

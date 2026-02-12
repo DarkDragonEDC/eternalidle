@@ -185,7 +185,7 @@ export class DungeonManager {
                     while (now >= dungeonState.activeMob.next_mob_attack_at && dungeonState.activeMob.health > 0 && mIterations < MAX_BURST) {
                         const mobDmg = dungeonState.activeMob.damage || 0;
                         const playerDef = stats.defense || 0;
-                        const playerMitigation = Math.min(0.8, playerDef / (playerDef + 36000));
+                        const playerMitigation = Math.min(0.75, playerDef / 10000);
                         const finalMobDmg = Math.max(1, Math.floor(mobDmg * (1 - playerMitigation)));
 
                         char.state.health -= finalMobDmg;

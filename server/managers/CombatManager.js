@@ -119,7 +119,8 @@ export class CombatManager {
         }
 
         // Restore Mitigation Calculations
-        const playerMitigation = Math.min(0.60, playerStats.defense / (playerStats.defense + 36000));
+        // NEW FORMULA: 1% Mitigation per 100 Defense (Linear). Capped at 90%
+        const playerMitigation = Math.min(0.75, playerStats.defense / 10000);
 
         let mobDef = combat.mobDefense;
         if (typeof mobDef === 'undefined') {
