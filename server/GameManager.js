@@ -289,6 +289,10 @@ export class GameManager {
             // Time variables for catchup logic
             const now = new Date();
             let lastSaved = data.last_saved ? new Date(data.last_saved).getTime() : now.getTime();
+            if (isNaN(lastSaved)) {
+                console.error(`[DATA-FIX] Invalid last_saved date for ${data.name} (${data.last_saved}). Resetting to Now.`);
+                lastSaved = now.getTime();
+            }
             let elapsedSeconds = (now.getTime() - lastSaved) / 1000;
 
             // Simplified report structure for potential offline gains
@@ -395,224 +399,225 @@ export class GameManager {
             }
             */
 
-            if (catchup && (data.current_activity || data.state.combat || data.state.dungeon) && data.last_saved) {
-                console.log(`[CATCHUP] ${data.name}: last_saved=${data.last_saved}, elapsed=${elapsedSeconds.toFixed(1)}s, hasActivity=${!!data.current_activity}, hasCombat=${!!data.state.combat}`);
+            try {
+                if (catchup && (data.current_activity || data.state.combat || data.state.dungeon) && data.last_saved) {
+                    console.log(`[CATCHUP] ${data.name}: last_saved=${data.last_saved}, elapsed=${elapsedSeconds.toFixed(1)}s, hasActivity=${!!data.current_activity}, hasCombat=${!!data.state.combat}`);
 
-                if (data.current_activity && data.activity_started_at) {
-                    const timePerAction = data.current_activity.time_per_action || 3;
-                    console.log(`[CATCHUP] ${data.name}: timePerAction=${timePerAction}s, elapsed=${elapsedSeconds.toFixed(1)}s, needsProcessing=${elapsedSeconds >= timePerAction}`);
-                    if (elapsedSeconds >= timePerAction) {
-                        const actionsPossible = Math.floor(elapsedSeconds / timePerAction);
-                        const actionsToProcess = Math.min(actionsPossible, data.current_activity.actions_remaining);
+                    if (data.current_activity && typeof data.current_activity === 'object' && data.activity_started_at) {
+                        const timePerAction = data.current_activity.time_per_action || 3;
+                        console.log(`[CATCHUP] ${data.name}: timePerAction=${timePerAction}s, elapsed=${elapsedSeconds.toFixed(1)}s, needsProcessing=${elapsedSeconds >= timePerAction}`);
+                        if (elapsedSeconds >= timePerAction) {
+                            const actionsPossible = Math.floor(elapsedSeconds / timePerAction);
+                            const actionsToProcess = Math.min(actionsPossible, data.current_activity.actions_remaining);
 
-                        console.log(`[CATCHUP] ${data.name}: actionsPossible=${actionsPossible}, remaining=${data.current_activity.actions_remaining}, toProcess=${actionsToProcess}`);
+                            console.log(`[CATCHUP] ${data.name}: actionsPossible=${actionsPossible}, remaining=${data.current_activity.actions_remaining}, toProcess=${actionsToProcess}`);
 
-                        if (actionsToProcess > 0) {
-                            const activityReport = await this.processBatchActions(data, actionsToProcess);
-                            console.log(`[CATCHUP] ${data.name}: processed=${activityReport.processed}, items=${JSON.stringify(activityReport.itemsGained)}`);
-                            if (activityReport.processed > 0) {
-                                // Always update state if anything happened
-                                updated = true;
+                            if (actionsToProcess > 0) {
+                                const activityReport = await this.processBatchActions(data, actionsToProcess);
+                                console.log(`[CATCHUP] ${data.name}: processed=${activityReport.processed}, items=${JSON.stringify(activityReport.itemsGained)}`);
+                                if (activityReport.processed > 0) {
+                                    // Always update state if anything happened
+                                    updated = true;
 
-                                // FIX: Merge gains into the active session stats so "Stopped" reports are accurate
-                                if (data.current_activity) {
-                                    if (!data.current_activity.sessionItems) data.current_activity.sessionItems = {};
-                                    if (typeof data.current_activity.sessionXp === 'undefined') data.current_activity.sessionXp = 0;
+                                    // FIX: Merge gains into the active session stats so "Stopped" reports are accurate
+                                    if (data.current_activity && typeof data.current_activity === 'object') {
+                                        if (!data.current_activity.sessionItems) data.current_activity.sessionItems = {};
+                                        if (typeof data.current_activity.sessionXp === 'undefined') data.current_activity.sessionXp = 0;
 
-                                    // Merge Items
-                                    for (const [id, qty] of Object.entries(activityReport.itemsGained)) {
-                                        data.current_activity.sessionItems[id] = (data.current_activity.sessionItems[id] || 0) + qty;
+                                        // Merge Items
+                                        for (const [id, qty] of Object.entries(activityReport.itemsGained)) {
+                                            data.current_activity.sessionItems[id] = (data.current_activity.sessionItems[id] || 0) + qty;
+                                        }
+
+                                        // Merge XP (sum all skills for session total)
+                                        let totalXp = 0;
+                                        for (const xp of Object.values(activityReport.xpGained)) {
+                                            totalXp += xp;
+                                        }
+                                        data.current_activity.sessionXp += totalXp;
+
+                                        // Merge Counters
+                                        data.current_activity.duplicationCount = (data.current_activity.duplicationCount || 0) + (activityReport.duplicationCount || 0);
+                                        data.current_activity.autoRefineCount = (data.current_activity.autoRefineCount || 0) + (activityReport.autoRefineCount || 0);
                                     }
 
-                                    // Merge XP (sum all skills for session total)
-                                    let totalXp = 0;
-                                    for (const xp of Object.values(activityReport.xpGained)) {
-                                        totalXp += xp;
-                                    }
-                                    data.current_activity.sessionXp += totalXp;
+                                    // Only populate the visual report if it's significant (> 10s or gains items)
+                                    if (activityReport.totalTime > 10 || Object.keys(activityReport.itemsGained).length > 0) {
+                                        finalReport.totalTime += activityReport.totalTime;
+                                        // Merge items
+                                        for (const [id, qty] of Object.entries(activityReport.itemsGained)) {
+                                            finalReport.itemsGained[id] = (finalReport.itemsGained[id] || 0) + qty;
+                                        }
+                                        // Merge XP
+                                        for (const [skill, qty] of Object.entries(activityReport.xpGained)) {
+                                            finalReport.xpGained[skill] = (finalReport.xpGained[skill] || 0) + qty;
+                                        }
 
-                                    // Merge Counters
-                                    data.current_activity.duplicationCount = (data.current_activity.duplicationCount || 0) + (activityReport.duplicationCount || 0);
-                                    data.current_activity.autoRefineCount = (data.current_activity.autoRefineCount || 0) + (activityReport.autoRefineCount || 0);
-                                }
+                                        finalReport.duplicationCount = (finalReport.duplicationCount || 0) + (activityReport.duplicationCount || 0);
+                                        finalReport.autoRefineCount = (finalReport.autoRefineCount || 0) + (activityReport.autoRefineCount || 0);
 
-                                // Only populate the visual report if it's significant (> 10s or gains items)
-                                if (activityReport.totalTime > 10 || Object.keys(activityReport.itemsGained).length > 0) {
-                                    finalReport.totalTime += activityReport.totalTime;
-                                    // Merge items
-                                    for (const [id, qty] of Object.entries(activityReport.itemsGained)) {
-                                        finalReport.itemsGained[id] = (finalReport.itemsGained[id] || 0) + qty;
-                                    }
-                                    // Merge XP
-                                    for (const [skill, qty] of Object.entries(activityReport.xpGained)) {
-                                        finalReport.xpGained[skill] = (finalReport.xpGained[skill] || 0) + qty;
-                                    }
-
-                                    finalReport.duplicationCount = (finalReport.duplicationCount || 0) + (activityReport.duplicationCount || 0);
-                                    finalReport.autoRefineCount = (finalReport.autoRefineCount || 0) + (activityReport.autoRefineCount || 0);
-
-                                    if (activityReport.stopReason) {
-                                        finalReport.stopReason = activityReport.stopReason;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // FIX: Process combat INDEPENDENTLY (not else if) so both activity and combat can be processed
-                if (data.state.combat) {
-                    console.log(`[CATCHUP] ${data.name}: Processing combat offline...`);
-                    const stats = this.inventoryManager.calculateStats(data);
-                    const atkSpeed = Number(stats.attackSpeed) || 1000;
-                    const secondsPerRound = atkSpeed / 1000;
-
-                    if (elapsedSeconds >= secondsPerRound) {
-                        const maxIdleMs = this.getMaxIdleTime(data);
-                        const maxEffectSeconds = Math.min(elapsedSeconds, maxIdleMs / 1000);
-                        const maxRounds = Math.floor(maxEffectSeconds / secondsPerRound);
-                        console.log(`[CATCHUP] ${data.name}: Combat maxRounds=${maxRounds}, atkSpeed=${atkSpeed}ms`);
-
-                        if (maxRounds > 0) {
-                            const combatReport = await this.processBatchCombat(data, maxRounds);
-                            console.log(`[CATCHUP] ${data.name}: Combat processed=${combatReport.processedRounds}, kills=${combatReport.kills}`);
-                            if (combatReport.processedRounds > 0) {
-                                updated = true;
-
-                                if (combatReport.totalTime > 10 || Object.keys(combatReport.itemsGained).length > 0) {
-                                    finalReport.totalTime += combatReport.totalTime;
-                                    finalReport.combat = {
-                                        ...combatReport,
-                                        monsterName: combatReport.monsterName
-                                    };
-
-                                    // Merge items
-                                    for (const [id, qty] of Object.entries(combatReport.itemsGained)) {
-                                        finalReport.itemsGained[id] = (finalReport.itemsGained[id] || 0) + qty;
-                                    }
-                                    // Merge XP
-                                    for (const [skill, qty] of Object.entries(combatReport.xpGained)) {
-                                        finalReport.xpGained[skill] = (finalReport.xpGained[skill] || 0) + qty;
+                                        if (activityReport.stopReason) {
+                                            finalReport.stopReason = activityReport.stopReason;
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
 
-                // Process dungeon independently as well
-                if (data.state.dungeon) {
-                    const dungeonReport = await this.processBatchDungeon(data, elapsedSeconds);
-                    if (dungeonReport && dungeonReport.totalTime > 0) {
-                        finalReport.totalTime += dungeonReport.totalTime;
-                        finalReport.dungeon = dungeonReport;
+                    // FIX: Process combat INDEPENDENTLY (not else if) so both activity and combat can be processed
+                    if (data.state.combat) {
+                        console.log(`[CATCHUP] ${data.name}: Processing combat offline...`);
+                        const stats = this.inventoryManager.calculateStats(data);
+                        const atkSpeed = Number(stats.attackSpeed) || 1000;
+                        const secondsPerRound = atkSpeed / 1000;
 
-                        // Merge items
-                        for (const [id, qty] of Object.entries(dungeonReport.itemsGained)) {
-                            finalReport.itemsGained[id] = (finalReport.itemsGained[id] || 0) + qty;
+                        if (elapsedSeconds >= secondsPerRound) {
+                            const maxIdleMs = this.getMaxIdleTime(data);
+                            const maxEffectSeconds = Math.min(elapsedSeconds, maxIdleMs / 1000);
+                            const maxRounds = Math.floor(maxEffectSeconds / secondsPerRound);
+                            console.log(`[CATCHUP] ${data.name}: Combat maxRounds=${maxRounds}, atkSpeed=${atkSpeed}ms`);
+
+                            if (maxRounds > 0) {
+                                const combatReport = await this.processBatchCombat(data, maxRounds);
+                                console.log(`[CATCHUP] ${data.name}: Combat processed=${combatReport.processedRounds}, kills=${combatReport.kills}`);
+                                if (combatReport.processedRounds > 0) {
+                                    updated = true;
+
+                                    if (combatReport.totalTime > 10 || Object.keys(combatReport.itemsGained).length > 0) {
+                                        finalReport.totalTime += combatReport.totalTime;
+                                        finalReport.combat = {
+                                            ...combatReport,
+                                            monsterName: combatReport.monsterName
+                                        };
+
+                                        // Merge items
+                                        for (const [id, qty] of Object.entries(combatReport.itemsGained)) {
+                                            finalReport.itemsGained[id] = (finalReport.itemsGained[id] || 0) + qty;
+                                        }
+                                        // Merge XP
+                                        for (const [skill, qty] of Object.entries(combatReport.xpGained)) {
+                                            finalReport.xpGained[skill] = (finalReport.xpGained[skill] || 0) + qty;
+                                        }
+                                    }
+                                }
+                            }
                         }
-                        // Merge XP
-                        for (const [skill, qty] of Object.entries(dungeonReport.xpGained)) {
-                            finalReport.xpGained[skill] = (finalReport.xpGained[skill] || 0) + qty;
+                    }
+
+                    // Process dungeon independently as well
+                    if (data.state.dungeon) {
+                        const dungeonReport = await this.processBatchDungeon(data, elapsedSeconds);
+                        if (dungeonReport && dungeonReport.totalTime > 0) {
+                            finalReport.totalTime += dungeonReport.totalTime;
+                            finalReport.dungeon = dungeonReport;
+
+                            // Merge items
+                            for (const [id, qty] of Object.entries(dungeonReport.itemsGained)) {
+                                finalReport.itemsGained[id] = (finalReport.itemsGained[id] || 0) + qty;
+                            }
+                            // Merge XP
+                            for (const [skill, qty] of Object.entries(dungeonReport.xpGained)) {
+                                finalReport.xpGained[skill] = (finalReport.xpGained[skill] || 0) + qty;
+                            }
+                            updated = true;
                         }
-                        updated = true;
                     }
+
+                    // Update last_saved based on ACTUAL time processed, not wall-clock time
+                    finalReport.totalTime = Math.min(finalReport.totalTime, elapsedSeconds);
+                    const processedMs = Math.floor(finalReport.totalTime * 1000);
+                    let nextSavedTimestamp = lastSaved + processedMs;
+
+                    if (isNaN(nextSavedTimestamp) || !isFinite(nextSavedTimestamp)) {
+                        console.error(`[CATCHUP-FIX] Invalid nextSavedTimestamp detected. lastSaved=${lastSaved}, processedMs=${processedMs}`);
+                        nextSavedTimestamp = Date.now();
+                    }
+
+                    data.last_saved = new Date(nextSavedTimestamp).toISOString();
+
+                    console.log(`[CATCHUP] ${data.name} finished. Processed: ${finalReport.totalTime.toFixed(1)}s, Remaining in buffer: ${(elapsedSeconds - finalReport.totalTime).toFixed(1)}s. New last_saved: ${data.last_saved}`);
+
+                    // Sync activity_started_at with actual progress to prevent timer drift in UI
+                    if (data.current_activity && typeof data.current_activity === 'object' && data.activity_started_at) {
+                        const { initial_quantity, actions_remaining, time_per_action } = data.current_activity;
+                        const tpa = time_per_action || 3;
+
+                        const iqty = initial_quantity || (actions_remaining + Math.floor(finalReport.totalTime / tpa));
+                        const doneQty = Math.max(0, iqty - actions_remaining);
+                        const elapsedVirtual = doneQty * tpa;
+
+                        let newStartTs = Date.now() - (elapsedVirtual * 1000);
+                        if (isNaN(newStartTs) || !isFinite(newStartTs)) {
+                            console.error(`[CATCHUP-FIX] Invalid newStartTs detected. elapsedVirtual=${elapsedVirtual}, doneQty=${doneQty}`);
+                            newStartTs = Date.now();
+                        }
+                        data.activity_started_at = new Date(newStartTs).toISOString();
+
+                        // Ensure initial_quantity is persisted if it was missing
+                        if (!data.current_activity.initial_quantity) {
+                            data.current_activity.initial_quantity = iqty;
+                        }
+                    }
+
+                    // Add wall-clock elapsed time to report for UI accuracy
+                    finalReport.elapsedTime = elapsedSeconds;
                 }
 
-                // Update last_saved based on ACTUAL time processed, not wall-clock time
-                // This preserves "fragments" of time (e.g. if you have 40s but need 60s for a tick)
-                // Protection: totalTime must not exceed elapsedSeconds
-                finalReport.totalTime = Math.min(finalReport.totalTime, elapsedSeconds);
-                const processedMs = Math.floor(finalReport.totalTime * 1000);
-                const nextSavedDate = new Date(lastSaved + processedMs);
-                data.last_saved = nextSavedDate.toISOString();
-
-                console.log(`[CATCHUP] ${data.name} finished. Processed: ${finalReport.totalTime.toFixed(1)}s, Remaining in buffer: ${(elapsedSeconds - finalReport.totalTime).toFixed(1)}s. New last_saved: ${data.last_saved}`);
-
-                // Sync activity_started_at with actual progress to prevent timer drift in UI
-                if (data.current_activity && data.activity_started_at) {
-                    const { initial_quantity, actions_remaining, time_per_action } = data.current_activity;
-                    const tpa = time_per_action || 3;
-
-                    // Defensive: if initial_quantity is missing, we use a sensible fallback
-                    // to avoid resetting the visual timer to 0.
-                    const iqty = initial_quantity || (actions_remaining + Math.floor(finalReport.totalTime / tpa));
-                    const doneQty = Math.max(0, iqty - actions_remaining);
-                    const elapsedVirtual = doneQty * tpa;
-
-                    // Reset start time so client timer (Now - Start) matches progress (ElapsedVirtual)
-                    // NewStart = Now - WorkDoneTime
-                    const newStart = new Date(Date.now() - (elapsedVirtual * 1000));
-                    data.activity_started_at = newStart.toISOString();
-
-                    // Ensure initial_quantity is persisted if it was missing
-                    if (!data.current_activity.initial_quantity) {
-                        data.current_activity.initial_quantity = iqty;
+                // Shard Migration Logic
+                let migrationHappened = false;
+                Object.keys(data.state.inventory).forEach(itemId => {
+                    if (itemId.includes('_RUNE_SHARD') && !itemId.startsWith('T1_')) {
+                        const qty = data.state.inventory[itemId];
+                        if (qty > 0) {
+                            data.state.inventory['T1_RUNE_SHARD'] = (data.state.inventory['T1_RUNE_SHARD'] || 0) + qty;
+                            delete data.state.inventory[itemId];
+                            migrationHappened = true;
+                            console.log(`[MIGRATION] Converted ${qty} of ${itemId} to T1_RUNE_SHARD for ${data.name}`);
+                        }
                     }
-                }
-
-                // Add wall-clock elapsed time to report for UI accuracy
-                finalReport.elapsedTime = elapsedSeconds;
-
-                // Update the local dbHash to current state since we just processed it
-                // REMOVED: saveCharacter handles hash update to ensure consistency
-                // data.dbHash = this.calculateHash(data.state);
-            }
-
-            // Shard Migration Logic: Convert any T2+ shards to T1
-            let migrationHappened = false;
-            Object.keys(data.state.inventory).forEach(itemId => {
-                if (itemId.includes('_RUNE_SHARD') && !itemId.startsWith('T1_')) {
-                    const qty = data.state.inventory[itemId];
-                    if (qty > 0) {
-                        data.state.inventory['T1_RUNE_SHARD'] = (data.state.inventory['T1_RUNE_SHARD'] || 0) + qty;
-                        delete data.state.inventory[itemId];
-                        migrationHappened = true;
-                        console.log(`[MIGRATION] Converted ${qty} of ${itemId} to T1_RUNE_SHARD for ${data.name}`);
-                    }
-                }
-            });
-
-            // Membership Migration: Convert ETERNAL_MEMBERSHIP to MEMBERSHIP
-            if (data.state.inventory['ETERNAL_MEMBERSHIP']) {
-                const qty = data.state.inventory['ETERNAL_MEMBERSHIP'];
-                data.state.inventory['MEMBERSHIP'] = (data.state.inventory['MEMBERSHIP'] || 0) + qty;
-                delete data.state.inventory['ETERNAL_MEMBERSHIP'];
-                migrationHappened = true;
-                console.log(`[MIGRATION] Converted ${qty} ETERNAL_MEMBERSHIP to MEMBERSHIP for ${data.name}`);
-            }
-
-            if (migrationHappened) {
-                updated = true;
-            }
-
-            // Only show the modal if total catchup was significant
-            const hasNotableGains = finalReport.totalTime > 300;
-            if (hasNotableGains) {
-                data.offlineReport = finalReport;
-
-                // Trigger a system notification for the offline gain
-                this.addActionSummaryNotification(data, 'Offline Progress', {
-                    itemsGained: finalReport.itemsGained,
-                    xpGained: finalReport.xpGained,
-                    totalTime: finalReport.totalTime,
-                    elapsedTime: elapsedSeconds,
-                    kills: finalReport.combat?.kills || 0,
-                    silverGained: finalReport.combat?.silverGained || 0,
-                    duplicationCount: finalReport.duplicationCount,
-                    autoRefineCount: finalReport.autoRefineCount
                 });
-            }
 
-            if (updated) {
-                // FIX: Must mark dirty so persistCharacter actually does the work
-                this.markDirty(data.id);
-                // FIX: Persist immediately after catchup to ensure gains aren't lost if server shuts down
-                await this.persistCharacter(data.id);
+                // Membership Migration
+                if (data.state.inventory['ETERNAL_MEMBERSHIP']) {
+                    const qty = data.state.inventory['ETERNAL_MEMBERSHIP'];
+                    data.state.inventory['MEMBERSHIP'] = (data.state.inventory['MEMBERSHIP'] || 0) + qty;
+                    delete data.state.inventory['ETERNAL_MEMBERSHIP'];
+                    migrationHappened = true;
+                    console.log(`[MIGRATION] Converted ${qty} ETERNAL_MEMBERSHIP to MEMBERSHIP for ${data.name}`);
+                }
 
-                // FIX: Explicitly update the cache with the modified data after persist
-                // This ensures any subsequent getStatus calls use the fresh data, not stale cache
-                this.cache.set(data.id, data);
+                if (migrationHappened) {
+                    updated = true;
+                }
+
+                // Only show the modal if total catchup was significant
+                const hasNotableGains = finalReport.totalTime > 300;
+                if (hasNotableGains) {
+                    data.offlineReport = finalReport;
+
+                    this.addActionSummaryNotification(data, 'Offline Progress', {
+                        itemsGained: finalReport.itemsGained,
+                        xpGained: finalReport.xpGained,
+                        totalTime: finalReport.totalTime,
+                        elapsedTime: elapsedSeconds,
+                        kills: finalReport.combat?.kills || 0,
+                        silverGained: finalReport.combat?.silverGained || 0,
+                        duplicationCount: finalReport.duplicationCount,
+                        autoRefineCount: finalReport.autoRefineCount
+                    });
+                }
+
+                if (updated) {
+                    this.markDirty(data.id);
+                    await this.persistCharacter(data.id);
+                    this.cache.set(data.id, data);
+                }
+            } catch (err) {
+                console.error(`[CATCHUP-CRASH] Critical error processing character ${data.name}:`, err);
+                const fs = await import('fs');
+                fs.appendFileSync('catchup_errors.log', `[${new Date().toISOString()}] Error for ${data.name}: ${err.message}\n${err.stack}\n---\n`);
+                // Continue despite catchup error to allow login
             }
 
         }
