@@ -950,7 +950,8 @@ io.on('connection', (socket) => {
             // Cooldown Check (10s)
             const lastChat = socket.data.lastChatTime || 0;
             const now = Date.now();
-            if (now - lastChat < 10000) {
+            const IS_ADMIN = socket.user.id === '5093ffaa-4770-4123-a83b-fca97a30601b';
+            if (now - lastChat < 10000 && !IS_ADMIN) {
                 // Allow commands to bypass cooldown
                 if (!content.startsWith('/')) {
                     const remaining = Math.ceil((10000 - (now - lastChat)) / 1000);
