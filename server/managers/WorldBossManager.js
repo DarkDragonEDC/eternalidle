@@ -173,10 +173,19 @@ export class WorldBossManager {
 
         while (fight.lastTick + atkSpeed <= now && rounds < 10) {
             const damage = Math.max(1, stats.damage || 1);
-            // TODO: Add crit logic here if needed later
-            fight.damage += damage;
+
+            const burstChance = stats.burstChance || 0;
+            let hitDmg = damage;
+            let isCrit = false;
+
+            if (burstChance > 0 && Math.random() * 100 < burstChance) {
+                hitDmg = Math.floor(hitDmg * 1.5);
+                isCrit = true;
+            }
+
+            fight.damage += hitDmg;
             fight.lastTick += atkSpeed;
-            hits.push({ damage: damage, timestamp: fight.lastTick });
+            hits.push({ damage: hitDmg, timestamp: fight.lastTick, crit: isCrit });
             rounds++;
         }
 

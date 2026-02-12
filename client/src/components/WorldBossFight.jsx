@@ -33,7 +33,7 @@ const WorldBossFight = ({ gameState, socket, onFinish }) => {
                     const newLogs = update.hits.map(hit => ({
                         id: Date.now() + Math.random(),
                         damage: hit.damage,
-                        crit: false // Placeholder
+                        crit: hit.crit
                     }));
 
                     setLogs(prev => {
@@ -249,17 +249,20 @@ const WorldBossFight = ({ gameState, socket, onFinish }) => {
                             {logs.map((log) => (
                                 <motion.div
                                     key={log.id}
-                                    initial={{ opacity: 0, y: 10, scale: 0.8 }}
+                                    initial={{ opacity: 0, y: 10, scale: log.crit ? 1.2 : 0.8 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0 }}
                                     style={{
-                                        fontSize: '0.9rem',
-                                        fontWeight: 'bold',
-                                        color: 'rgba(255, 255, 255, 0.6)',
-                                        textShadow: '0 0 5px rgba(255, 77, 77, 0.5)'
+                                        fontSize: log.crit ? '1.1rem' : '0.9rem',
+                                        fontWeight: log.crit ? '900' : 'bold',
+                                        color: log.crit ? '#ffd700' : 'rgba(255, 255, 255, 0.6)',
+                                        textShadow: log.crit
+                                            ? '0 0 10px rgba(255, 215, 0, 0.6), 0 0 20px rgba(255, 77, 77, 0.4)'
+                                            : '0 0 5px rgba(255, 77, 77, 0.5)',
+                                        letterSpacing: log.crit ? '1px' : 'normal'
                                     }}
                                 >
-                                    +{formatNumber(log.damage)}
+                                    +{formatNumber(log.damage)}{log.crit && '!'}
                                 </motion.div>
                             ))}
                         </AnimatePresence>
