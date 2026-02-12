@@ -1526,6 +1526,12 @@ const RuneBuffSummary = ({ activeRuneBuffs }) => {
                                     <span style={{ color: '#ff4444', fontWeight: 'bold' }}>+{buffs.SAVE_FOOD}%</span>
                                 </div>
                             )}
+                            {buffs.BURST && (
+                                <div style={{ fontSize: '0.75rem', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ color: '#aaa' }}>Burst:</span>
+                                    <span style={{ color: '#ffd700', fontWeight: 'bold' }}>+{buffs.BURST}%</span>
+                                </div>
+                            )}
                         </div>
                     </div>
                 ))}
