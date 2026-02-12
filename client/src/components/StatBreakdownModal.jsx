@@ -92,6 +92,7 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
             // Speed bonus only applies if a Bow is equipped
             const hunterProf = stats.hunterProf || 0;
             const mageProf = stats.mageProf || 0;
+            const warriorProf = stats.warriorProf || 0;
             const activeProf = stats.activeProf;
             const activeSpeedBonus = activeProf === 'hunter' ? hunterProf * 3.6
                 : activeProf === 'mage' ? mageProf * 3.33

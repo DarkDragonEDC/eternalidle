@@ -258,8 +258,8 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                             {item.type}
                         </div>
                         {(() => {
-                            // FIX: Hide Requirement for Food
-                            if (item.type === 'FOOD') return null;
+                            // FIX: Hide Requirement for Food and Potions
+                            if (item.type === 'FOOD' || item.type === 'POTION') return null;
 
                             const reqLv = getLevelRequirement(item.tier);
                             const profGroup = getRequiredProficiencyGroup(item.id);
