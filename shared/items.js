@@ -1,3 +1,4 @@
+import { HUNTER_STATS_FIXED } from './hunter_stats_fixed.js';
 export const ITEMS_VERSION = "20260130_2007";
 export const TIERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -634,14 +635,44 @@ genGear('WARRIORS_FORGE', 'PLATE_BOOTS', 'BOOTS', 'PLATE_BOOTS', 'BAR', { def: 0
 genGear('WARRIORS_FORGE', 'PLATE_GLOVES', 'GLOVES', 'PLATE_GLOVES', 'BAR', { dmg: 0.75898, def: 0.0125, hp: 0.16667, speed: 6.3267 });
 genGear('WARRIORS_FORGE', 'PLATE_CAPE', 'CAPE', 'PLATE_CAPE', 'BAR', { dmg: 0.37949, speed: 3.1633, globalEff: 1 });
 
-// --- HUNTER GEAR ---
-genGear('HUNTERS_LODGE', 'BOW', 'WEAPON', 'BOW', 'PLANK', { dmg: 1.70769, speed: 109 });
-genGear('HUNTERS_LODGE', 'TORCH', 'OFF_HAND', 'TORCH', 'PLANK', { dmg: 0.56923 });
-genGear('HUNTERS_LODGE', 'LEATHER_ARMOR', 'ARMOR', 'LEATHER_ARMOR', 'LEATHER', { hp: 0.58334, def: 0.01945 });
-genGear('HUNTERS_LODGE', 'LEATHER_HELMET', 'HELMET', 'LEATHER_HELMET', 'LEATHER', { hp: 0.4375, def: 0.01389 });
-genGear('HUNTERS_LODGE', 'LEATHER_BOOTS', 'BOOTS', 'LEATHER_BOOTS', 'LEATHER', { hp: 0.21875, def: 0.01112, dmg: 0.37949, speed: 11.9667 });
-genGear('HUNTERS_LODGE', 'LEATHER_GLOVES', 'GLOVES', 'LEATHER_GLOVES', 'LEATHER', { hp: 0.21875, def: 0.01112, dmg: 0.56923, speed: 8.5334 });
-genGear('HUNTERS_LODGE', 'LEATHER_CAPE', 'CAPE', 'LEATHER_CAPE', 'LEATHER', { dmg: 0.56923, speed: 5.1334, globalEff: 1 });
+// --- HUNTER GEAR (FIXED LOOKUP) ---
+const genHunterGear = (slot, type, idSuffix, matType, lookupName) => {
+    for (const t of TIERS) {
+        const matId = `T${t}_${matType}`;
+        const req = { [matId]: 20 };
+        if (type === 'CAPE') req[`T${t}_CREST`] = 1;
+
+        // Default to Normal quality stats for the base item view
+        // Hunter fixed stats structure: HUNTER_STATS_FIXED[lookupName][t][qualityId]
+        const stats = HUNTER_STATS_FIXED[lookupName][t][0];
+
+        const gear = {
+            id: `T${t}_${idSuffix}`,
+            name: idSuffix.replace(/_/g, ' ').toLowerCase().replace(/ w/g, l => l.toUpperCase()),
+            tier: t,
+            req,
+            xp: CRAFT_DATA.xp[t - 1],
+            time: CRAFT_DATA.time[t - 1],
+            ip: getBaseIP(t),
+            type: type,
+            stats,
+            isHunterLookup: true,
+            lookupName: lookupName,
+            description: `A Tier ${t} ${idSuffix.replace(/_/g, ' ').toLowerCase()}. Specialized Hunter gear.`
+        };
+
+        if (!ITEMS.GEAR.HUNTERS_LODGE[slot]) ITEMS.GEAR.HUNTERS_LODGE[slot] = {};
+        ITEMS.GEAR.HUNTERS_LODGE[slot][t] = gear;
+    }
+};
+
+genHunterGear('BOW', 'WEAPON', 'BOW', 'PLANK', 'Bow');
+genHunterGear('TORCH', 'OFF_HAND', 'TORCH', 'PLANK', 'Torch');
+genHunterGear('LEATHER_ARMOR', 'ARMOR', 'LEATHER_ARMOR', 'LEATHER', 'Leather Armor');
+genHunterGear('LEATHER_HELMET', 'HELMET', 'LEATHER_HELMET', 'LEATHER', 'Leather Helmet');
+genHunterGear('LEATHER_BOOTS', 'BOOTS', 'LEATHER_BOOTS', 'LEATHER', 'Leather Boots');
+genHunterGear('LEATHER_GLOVES', 'GLOVES', 'LEATHER_GLOVES', 'LEATHER', 'Leather Gloves');
+genHunterGear('LEATHER_CAPE', 'CAPE', 'LEATHER_CAPE', 'LEATHER', 'Leather Cape');
 
 
 
@@ -2695,7 +2726,17 @@ export const resolveItem = (itemId, overrideQuality = null) => {
 
     const newStats = {};
     if (baseItem.stats) {
-        if (baseItem.isMageLookup) {
+        if (baseItem.isHunterLookup) {
+            const lookup = HUNTER_STATS_FIXED[baseItem.lookupName];
+            if (lookup && lookup[baseItem.tier] && lookup[baseItem.tier][effectiveQualityId]) {
+                const fixedStats = lookup[baseItem.tier][effectiveQualityId];
+                for (const key in fixedStats) {
+                    newStats[key] = fixedStats[key];
+                }
+            } else {
+                for (const key in baseItem.stats) newStats[key] = baseItem.stats[key];
+            }
+        } else if (baseItem.isMageLookup) {
             // 12/02/26: Fixed Lookup Table for Mage Rebalance
             const lookup = MAGE_STATS_FIXED[baseItem.lookupName];
             if (lookup && lookup[baseItem.tier] && lookup[baseItem.tier][effectiveQualityId]) {
@@ -3145,3 +3186,4 @@ export const formatItemId = (itemId) => {
         .toLowerCase()
         .replace(/\b\w/g, char => char.toUpperCase());
 };
+
