@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Sword, Shield, Zap, Heart, Star } from 'lucide-react';
 import { resolveItem, calculateRuneBonus } from '@shared/items';
+import { getProficiencyStats } from '@shared/proficiency_stats';
 
 const StatBreakdownModal = ({ statType, statId, value, stats, equipment, membership, onClose }) => {
     // Calculate breakdowns based on known formulas
@@ -14,15 +15,13 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
             const hunterProf = stats.hunterProf || 0;
             const mageProf = stats.mageProf || 0;
             const activeProf = stats.activeProf; // 'warrior' | 'hunter' | 'mage' | null
-            const activeProfDmg = activeProf === 'warrior' ? warriorProf * 1200
-                : activeProf === 'hunter' ? hunterProf * 1200
-                    : activeProf === 'mage' ? mageProf * 2600 : 0;
+
+            const profData = activeProf ? getProficiencyStats(activeProf, stats[`${activeProf}Prof`]) : { dmg: 0, hp: 0 };
+            const activeProfDmg = profData.dmg;
+
             const activeProfLabel = activeProf === 'warrior' ? 'Warrior'
                 : activeProf === 'hunter' ? 'Hunter'
                     : activeProf === 'mage' ? 'Mage' : null;
-            const activeProfPerPt = activeProf === 'warrior' ? 1200
-                : activeProf === 'hunter' ? 1200
-                    : activeProf === 'mage' ? 2600 : 0;
             const gearDamage = Object.values(equipment).reduce((acc, item) => {
                 const fresh = item ? resolveItem(item.id || item.item_id) : null;
                 return acc + (fresh?.stats?.damage || 0);
@@ -47,7 +46,7 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
 
             breakdown.push({ label: 'Base', value: 5 });
             if (activeProfLabel && activeProfDmg > 0) {
-                breakdown.push({ label: `${activeProfLabel} Prof. Bonus`, value: activeProfDmg.toFixed(1), sub: `(+${activeProfPerPt} DMG per ${activeProfLabel} Prof.)` });
+                breakdown.push({ label: `${activeProfLabel} Prof. Bonus`, value: activeProfDmg.toFixed(1), sub: `(Total from Level)` });
             } else if (!activeProf) {
                 breakdown.push({ label: 'No Weapon Equipped', value: 0, sub: '(Equip a weapon to activate a proficiency)' });
             }
@@ -197,14 +196,14 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
             const warriorProf = stats.warriorProf || 0;
             const mageProf = stats.mageProf || 0;
             const activeProf = stats.activeProf;
-            const activeHP = activeProf === 'warrior' ? warriorProf * 10000
-                : activeProf === 'mage' ? mageProf * 7500 : 0;
+
+            const profData = activeProf ? getProficiencyStats(activeProf, stats[`${activeProf}Prof`]) : { dmg: 0, hp: 0 };
+            const activeHP = profData.hp;
             const gearHP = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.hp || 0), 0);
             breakdown.push({ label: 'Base', value: 100 });
             if (activeHP > 0) {
                 const label = activeProf === 'warrior' ? 'Warrior' : 'Mage';
-                const perPt = activeProf === 'warrior' ? 10000 : 7500;
-                breakdown.push({ label: `${label} Prof. Bonus`, value: activeHP, sub: `(+${perPt} per ${label} Prof.)` });
+                breakdown.push({ label: `${label} Prof. Bonus`, value: activeHP, sub: `(Total from Level)` });
             } else if (activeProf && activeProf !== 'warrior' && activeProf !== 'mage' && (warriorProf > 0 || mageProf > 0)) {
                 breakdown.push({ label: 'Proficiency (Inactive)', value: 0, sub: '(Requires specific weapon to activate)' });
             }

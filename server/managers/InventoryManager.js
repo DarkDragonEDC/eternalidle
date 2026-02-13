@@ -1,4 +1,5 @@
 import { ITEMS, QUALITIES, resolveItem, ITEM_LOOKUP, calculateRuneBonus, getSkillForItem, getLevelRequirement, getRequiredProficiencyGroup } from '../../shared/items.js';
+import { getProficiencyStats } from '../../shared/proficiency_stats.js';
 
 // Removed local ITEM_LOOKUP generation in favor of shared source of truth
 
@@ -500,16 +501,9 @@ export class InventoryManager {
         else if (weaponId.includes('STAFF')) activeProf = 'mage';
 
         // Determine active proficiency values for combat
-        // Determine active proficiency values for combat
-        const activeProfDmg = activeProf === 'warrior' ? warriorProf * 1200
-            : activeProf === 'hunter' ? hunterProf * 1200
-                : activeProf === 'mage' ? mageProf * 2600
-                    : 0;
-
-        const activeHP = activeProf === 'warrior' ? warriorProf * 10000
-            : activeProf === 'hunter' ? hunterProf * 8750
-                : activeProf === 'mage' ? mageProf * 7500
-                    : 0;
+        const profData = activeProf ? getProficiencyStats(activeProf, char[activeProf]) : { dmg: 0, hp: 0 };
+        const activeProfDmg = profData.dmg;
+        const activeHP = profData.hp;
 
         // Hunter at 100 needs approx 360ms reduction from 2000ms.
         // User clarified: Max reduction at 100 is 360ms.

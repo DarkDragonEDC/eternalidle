@@ -7,6 +7,7 @@ import {
     Axe, Pickaxe, Scissors, Anchor, Apple, Info, ShoppingBag, Edit, Droplets
 } from 'lucide-react';
 import { resolveItem, getTierColor, calculateRuneBonus } from '@shared/items';
+import { getProficiencyStats } from '@shared/proficiency_stats';
 import { getBestItemForSlot, isBetterItem } from '../utils/equipment';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import StatBreakdownModal from './StatBreakdownModal';
@@ -461,15 +462,16 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         points: (getLvl(key) * mult)
     });
 
+    const hunterStats = getProficiencyStats('hunter', calculatedStats.hunterProf);
     const hunterBreakdown = {
         title: 'Hunter Proficiency',
         color: '#22c55e',
         icon: Target,
         level: calculatedStats.hunterProf,
-        multipliers: 'Multiplier: 0.2 per Level (Max 100 Total) - Requires BOW',
+        multipliers: 'Based on Level - Requires BOW',
         stats: [
-            { label: 'Damage', value: `+${formatNumber(Math.floor(calculatedStats.hunterProf * 1200))}`, subtext: '+1200/pt', icon: <Sword size={18} /> },
-            { label: 'Health', value: `+${formatNumber(Math.floor(calculatedStats.hunterProf * 8750))}`, subtext: '+8750/pt', icon: <Heart size={18} /> },
+            { label: 'Damage', value: `+${formatNumber(hunterStats.dmg)}`, subtext: 'Exact Value', icon: <Sword size={18} /> },
+            { label: 'Health', value: `+${formatNumber(hunterStats.hp)}`, subtext: 'Exact Value', icon: <Heart size={18} /> },
             { label: 'Defense', value: `+${formatNumber(Math.floor(calculatedStats.hunterProf * 25))}`, subtext: '+25 Def (+0.25%)/pt', icon: <Shield size={18} /> },
             { label: 'Attack Speed', value: `-${(calculatedStats.hunterProf * 3.6).toFixed(1)}ms`, subtext: '-3.6ms/pt', icon: <Zap size={18} /> }
         ],
@@ -482,15 +484,16 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         ]
     };
 
+    const warriorStats = getProficiencyStats('warrior', calculatedStats.warriorProf);
     const warriorBreakdown = {
         title: 'Warrior Proficiency',
         color: '#ef4444',
         icon: Sword,
         level: calculatedStats.warriorProf,
-        multipliers: 'Multiplier: 0.2 per Level (Max 100 Total) - Requires SWORD',
+        multipliers: 'Based on Level - Requires SWORD',
         stats: [
-            { label: 'Damage', value: `+${formatNumber(Math.floor(calculatedStats.warriorProf * 1200))}`, subtext: '+1200/pt', icon: <Sword size={18} /> },
-            { label: 'Health', value: `+${formatNumber(Math.floor(calculatedStats.warriorProf * 10000))}`, subtext: '+10000/pt', icon: <Heart size={18} /> },
+            { label: 'Damage', value: `+${formatNumber(warriorStats.dmg)}`, subtext: 'Exact Value', icon: <Sword size={18} /> },
+            { label: 'Health', value: `+${formatNumber(warriorStats.hp)}`, subtext: 'Exact Value', icon: <Heart size={18} /> },
             { label: 'Defense', value: `+${formatNumber(Math.floor(calculatedStats.warriorProf * 37.5))}`, subtext: '+37.5 Def (+0.37%)/pt', icon: <Shield size={18} /> },
             { label: 'Attack Speed', value: `-${(calculatedStats.warriorProf * 3.33).toFixed(1)}ms`, subtext: '-3.33ms/pt', icon: <Zap size={18} /> }
         ],
@@ -503,15 +506,16 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         ]
     };
 
+    const mageStats = getProficiencyStats('mage', calculatedStats.mageProf);
     const mageBreakdown = {
         title: 'Mage Proficiency',
         color: '#3b82f6',
         icon: Star,
         level: calculatedStats.mageProf,
-        multipliers: 'Multiplier: ~0.16 per Level (Max 100 Total) - Requires STAFF',
+        multipliers: 'Based on Level - Requires STAFF',
         stats: [
-            { label: 'Damage', value: `+${formatNumber(Math.floor(calculatedStats.mageProf * 2600))}`, subtext: '+2600/pt', icon: <Sword size={18} /> },
-            { label: 'Health', value: `+${formatNumber(Math.floor(calculatedStats.mageProf * 7500))}`, subtext: '+7500/pt', icon: <Heart size={18} /> },
+            { label: 'Damage', value: `+${formatNumber(mageStats.dmg)}`, subtext: 'Exact Value', icon: <Sword size={18} /> },
+            { label: 'Health', value: `+${formatNumber(mageStats.hp)}`, subtext: 'Exact Value', icon: <Heart size={18} /> },
             { label: 'Defense', value: `+${formatNumber(Math.floor(calculatedStats.mageProf * 12.5))}`, subtext: '+12.5/pt', icon: <Shield size={18} /> },
             { label: 'Attack Speed', value: `-${(calculatedStats.mageProf * 3.33).toFixed(1)}ms`, subtext: '-3.33ms/pt', icon: <Zap size={18} /> }
         ],
