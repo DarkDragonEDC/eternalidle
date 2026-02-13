@@ -1,351 +1,351 @@
-Name,Tier,Rarity,IP,DMG,HP,DEF,SPEED,CRIT,GLOBAL_EFF
-Normal Fire Staff,T1,Normal,100,185,,,26,,
-Good Fire Staff,T1,Good,120,195,,,"27,3",,
-Outstanding Fire Staff,T1,Outstanding,140,204,,,"28,6",,
-Excellent Fire Staff,T1,Excellent,160,215,,,"30,1",,
-Masterpiece Fire Staff,T1,Masterpiece,300,225,,,"31,6",,
-Normal Fire Staff,T2,Normal,200,237,,,"33,1",,
-Good Fire Staff,T2,Good,220,248,,,"34,8",,
-Outstanding Fire Staff,T2,Outstanding,240,261,,,"36,5",,
-Excellent Fire Staff,T2,Excellent,260,274,,,"38,4",,
-Masterpiece Fire Staff,T2,Masterpiece,400,288,,,"40,3",,
-Normal Fire Staff,T3,Normal,300,302,,,"42,3",,
-Good Fire Staff,T3,Good,320,317,,,"44,4",,
-Outstanding Fire Staff,T3,Outstanding,340,333,,,"46,6",,
-Excellent Fire Staff,T3,Excellent,360,350,,,"48,9",,
-Masterpiece Fire Staff,T3,Masterpiece,500,367,,,"51,4",,
-Normal Fire Staff,T4,Normal,400,385,,,54,,
-Good Fire Staff,T4,Good,420,405,,,"56,7",,
-Outstanding Fire Staff,T4,Outstanding,440,425,,,"59,5",,
-Excellent Fire Staff,T4,Excellent,460,446,,,"62,5",,
-Masterpiece Fire Staff,T4,Masterpiece,600,468,,,"65,6",,
-Normal Fire Staff,T5,Normal,500,492,,,"68,9",,
-Good Fire Staff,T5,Good,520,517,,,"72,3",,
-Outstanding Fire Staff,T5,Outstanding,540,542,,,"75,9",,
-Excellent Fire Staff,T5,Excellent,560,569,,,"79,7",,
-Masterpiece Fire Staff,T5,Masterpiece,700,598,,,"83,7",,
-Normal Fire Staff,T6,Normal,600,628,,,"87,9",,
-Good Fire Staff,T6,Good,620,659,,,"92,3",,
-Outstanding Fire Staff,T6,Outstanding,640,692,,,"96,9",,
-Excellent Fire Staff,T6,Excellent,660,727,,,"101,8",,
-Masterpiece Fire Staff,T6,Masterpiece,800,763,,,"106,9",,
-Normal Fire Staff,T7,Normal,700,801,,,"112,2",,
-Good Fire Staff,T7,Good,720,841,,,"117,8",,
-Outstanding Fire Staff,T7,Outstanding,740,883,,,"123,7",,
-Excellent Fire Staff,T7,Excellent,760,928,,,"129,9",,
-Masterpiece Fire Staff,T7,Masterpiece,900,974,,,"136,4",,
-Normal Fire Staff,T8,Normal,800,1023,,,"143,2",,
-Good Fire Staff,T8,Good,820,1074,,,"150,3",,
-Outstanding Fire Staff,T8,Outstanding,840,1127,,,"157,9",,
-Excellent Fire Staff,T8,Excellent,860,1184,,,"165,8",,
-Masterpiece Fire Staff,T8,Masterpiece,1000,1243,,,"174,1",,
-Normal Fire Staff,T9,Normal,900,1305,,,"182,8",,
-Good Fire Staff,T9,Good,920,1370,,,"191,9",,
-Outstanding Fire Staff,T9,Outstanding,940,1439,,,"201,5",,
-Excellent Fire Staff,T9,Excellent,960,1511,,,"211,6",,
-Masterpiece Fire Staff,T9,Masterpiece,1100,1586,,,"222,1",,
-Normal Fire Staff,T10,Normal,1000,1666,,,"233,2",,
-Good Fire Staff,T10,Good,1020,1749,,,"244,9",,
-Outstanding Fire Staff,T10,Outstanding,1040,1837,,,"257,1",,
-Excellent Fire Staff,T10,Excellent,1060,1928,,,270,,
-Masterpiece Fire Staff,T10,Masterpiece,1200,2025,,,"284,7",,
-Normal Tome,T1,Normal,100,84,,,,"0,46",
-Good Tome,T1,Good,120,89,,,,"0,48",
-Outstanding Tome,T1,Outstanding,140,93,,,,"0,5",
-Excellent Tome,T1,Excellent,160,98,,,,"0,53",
-Masterpiece Tome,T1,Masterpiece,300,103,,,,"0,55",
-Normal Tome,T2,Normal,200,108,,,,"0,58",
-Good Tome,T2,Good,220,113,,,,"0,61",
-Outstanding Tome,T2,Outstanding,240,119,,,,"0,64",
-Excellent Tome,T2,Excellent,260,125,,,,"0,67",
-Masterpiece Tome,T2,Masterpiece,400,131,,,,"0,7",
-Normal Tome,T3,Normal,300,137,,,,"0,74",
-Good Tome,T3,Good,320,144,,,,"0,77",
-Outstanding Tome,T3,Outstanding,340,152,,,,"0,81",
-Excellent Tome,T3,Excellent,360,159,,,,"0,85",
-Masterpiece Tome,T3,Masterpiece,500,167,,,,"0,89",
-Normal Tome,T4,Normal,400,175,,,,"0,93",
-Good Tome,T4,Good,420,184,,,,"0,98",
-Outstanding Tome,T4,Outstanding,440,193,,,,"1,03",
-Excellent Tome,T4,Excellent,460,203,,,,"1,08",
-Masterpiece Tome,T4,Masterpiece,600,213,,,,"1,13",
-Normal Tome,T5,Normal,500,224,,,,"1,19",
-Good Tome,T5,Good,520,235,,,,"1,25",
-Outstanding Tome,T5,Outstanding,540,247,,,,"1,31",
-Excellent Tome,T5,Excellent,560,259,,,,"1,38",
-Masterpiece Tome,T5,Masterpiece,700,272,,,,"1,45",
-Normal Tome,T6,Normal,600,286,,,,"1,52",
-Good Tome,T6,Good,620,300,,,,"1,6",
-Outstanding Tome,T6,Outstanding,640,315,,,,"1,68",
-Excellent Tome,T6,Excellent,660,331,,,,"1,76",
-Masterpiece Tome,T6,Masterpiece,800,347,,,,"1,85",
-Normal Tome,T7,Normal,700,364,,,,"1,94",
-Good Tome,T7,Good,720,382,,,,"2,04",
-Outstanding Tome,T7,Outstanding,740,401,,,,"2,14",
-Excellent Tome,T7,Excellent,760,421,,,,"2,25",
-Masterpiece Tome,T7,Masterpiece,900,442,,,,"2,36",
-Normal Tome,T8,Normal,800,463,,,,"2,48",
-Good Tome,T8,Good,820,486,,,,"2,6",
-Outstanding Tome,T8,Outstanding,840,510,,,,"2,73",
-Excellent Tome,T8,Excellent,860,535,,,,"2,87",
-Masterpiece Tome,T8,Masterpiece,1000,562,,,,"3,01",
-Normal Tome,T9,Normal,900,589,,,,"3,16",
-Good Tome,T9,Good,920,618,,,,"3,32",
-Outstanding Tome,T9,Outstanding,940,649,,,,"3,49",
-Excellent Tome,T9,Excellent,960,681,,,,"3,66",
-Masterpiece Tome,T9,Masterpiece,1100,714,,,,"3,84",
-Normal Tome,T10,Normal,1000,750,,,,"4,03",
-Good Tome,T10,Good,1020,787,,,,"4,23",
-Outstanding Tome,T10,Outstanding,1040,826,,,,"4,44",
-Excellent Tome,T10,Excellent,1060,867,,,,"4,66",
-Masterpiece Tome,T10,Masterpiece,1200,925,,,,5,
-Normal Cloth Armor,T1,Normal,100,,137,"45,6",,,
-Good Cloth Armor,T1,Good,120,,144,"47,9",,,
-Outstanding Cloth Armor,T1,Outstanding,140,,151,"50,3",,,
-Excellent Cloth Armor,T1,Excellent,160,,158,"52,8",,,
-Masterpiece Cloth Armor,T1,Masterpiece,300,,166,"55,4",,,
-Normal Cloth Armor,T2,Normal,200,,175,"58,2",,,
-Good Cloth Armor,T2,Good,220,,183,"61,1",,,
-Outstanding Cloth Armor,T2,Outstanding,240,,193,"64,1",,,
-Excellent Cloth Armor,T2,Excellent,260,,202,"67,3",,,
-Masterpiece Cloth Armor,T2,Masterpiece,400,,212,"70,7",,,
-Normal Cloth Armor,T3,Normal,300,,223,"74,2",,,
-Good Cloth Armor,T3,Good,320,,234,"77,9",,,
-Outstanding Cloth Armor,T3,Outstanding,340,,246,"81,8",,,
-Excellent Cloth Armor,T3,Excellent,360,,258,"85,9",,,
-Masterpiece Cloth Armor,T3,Masterpiece,500,,271,"90,2",,,
-Normal Cloth Armor,T4,Normal,400,,284,"94,7",,,
-Good Cloth Armor,T4,Good,420,,299,"99,4",,,
-Outstanding Cloth Armor,T4,Outstanding,440,,314,"104,4",,,
-Excellent Cloth Armor,T4,Excellent,460,,329,"109,6",,,
-Masterpiece Cloth Armor,T4,Masterpiece,600,,346,"115,1",,,
-Normal Cloth Armor,T5,Normal,500,,363,"120,8",,,
-Good Cloth Armor,T5,Good,520,,381,"126,9",,,
-Outstanding Cloth Armor,T5,Outstanding,540,,400,"133,2",,,
-Excellent Cloth Armor,T5,Excellent,560,,420,"139,9",,,
-Masterpiece Cloth Armor,T5,Masterpiece,700,,441,"146,9",,,
-Normal Cloth Armor,T6,Normal,600,,463,"154,2",,,
-Good Cloth Armor,T6,Good,620,,487,"161,9",,,
-Outstanding Cloth Armor,T6,Outstanding,640,,511,170,,,
-Excellent Cloth Armor,T6,Excellent,660,,536,"178,5",,,
-Masterpiece Cloth Armor,T6,Masterpiece,800,,563,"187,4",,,
-Normal Cloth Armor,T7,Normal,700,,591,"196,8",,,
-Good Cloth Armor,T7,Good,720,,621,"206,6",,,
-Outstanding Cloth Armor,T7,Outstanding,740,,652,"216,9",,,
-Excellent Cloth Armor,T7,Excellent,760,,685,"227,8",,,
-Masterpiece Cloth Armor,T7,Masterpiece,900,,719,"239,2",,,
-Normal Cloth Armor,T8,Normal,800,,755,"251,2",,,
-Good Cloth Armor,T8,Good,820,,793,"263,8",,,
-Outstanding Cloth Armor,T8,Outstanding,840,,832,277,,,
-Excellent Cloth Armor,T8,Excellent,860,,874,"290,9",,,
-Masterpiece Cloth Armor,T8,Masterpiece,1000,,917,"305,4",,,
-Normal Cloth Armor,T9,Normal,900,,963,"320,7",,,
-Good Cloth Armor,T9,Good,920,,1011,"336,7",,,
-Outstanding Cloth Armor,T9,Outstanding,940,,1062,"353,5",,,
-Excellent Cloth Armor,T9,Excellent,960,,1115,"371,2",,,
-Masterpiece Cloth Armor,T9,Masterpiece,1100,,1171,"389,8",,,
-Normal Cloth Armor,T10,Normal,1000,,1229,"409,3",,,
-Good Cloth Armor,T10,Good,1020,,1291,"429,7",,,
-Outstanding Cloth Armor,T10,Outstanding,1040,,1355,"451,2",,,
-Excellent Cloth Armor,T10,Excellent,1060,,1423,"473,8",,,
-Masterpiece Cloth Armor,T10,Masterpiece,1200,,1500,500,,,
-Normal Cloth Helmet,T1,Normal,100,,103,"34,2",,,
-Good Cloth Helmet,T1,Good,120,,108,"35,9",,,
-Outstanding Cloth Helmet,T1,Outstanding,140,,113,"37,7",,,
-Excellent Cloth Helmet,T1,Excellent,160,,119,"39,6",,,
-Masterpiece Cloth Helmet,T1,Masterpiece,300,,125,"41,6",,,
-Normal Cloth Helmet,T2,Normal,200,,131,"43,7",,,
-Good Cloth Helmet,T2,Good,220,,138,"45,9",,,
-Outstanding Cloth Helmet,T2,Outstanding,240,,144,"48,2",,,
-Excellent Cloth Helmet,T2,Excellent,260,,152,"50,6",,,
-Masterpiece Cloth Helmet,T2,Masterpiece,400,,159,"53,1",,,
-Normal Cloth Helmet,T3,Normal,300,,167,"55,8",,,
-Good Cloth Helmet,T3,Good,320,,176,"58,6",,,
-Outstanding Cloth Helmet,T3,Outstanding,340,,184,"61,5",,,
-Excellent Cloth Helmet,T3,Excellent,360,,194,"64,6",,,
-Masterpiece Cloth Helmet,T3,Masterpiece,500,,203,"67,8",,,
-Normal Cloth Helmet,T4,Normal,400,,213,"71,2",,,
-Good Cloth Helmet,T4,Good,420,,224,"74,8",,,
-Outstanding Cloth Helmet,T4,Outstanding,440,,235,"78,5",,,
-Excellent Cloth Helmet,T4,Excellent,460,,247,"82,4",,,
-Masterpiece Cloth Helmet,T4,Masterpiece,600,,259,"86,5",,,
-Normal Cloth Helmet,T5,Normal,500,,272,"90,8",,,
-Good Cloth Helmet,T5,Good,520,,286,"95,4",,,
-Outstanding Cloth Helmet,T5,Outstanding,540,,300,"100,2",,,
-Excellent Cloth Helmet,T5,Excellent,560,,315,"105,2",,,
-Masterpiece Cloth Helmet,T5,Masterpiece,700,,331,"110,5",,,
-Normal Cloth Helmet,T6,Normal,600,,348,116,,,
-Good Cloth Helmet,T6,Good,620,,365,"121,8",,,
-Outstanding Cloth Helmet,T6,Outstanding,640,,383,"127,9",,,
-Excellent Cloth Helmet,T6,Excellent,660,,402,"134,3",,,
-Masterpiece Cloth Helmet,T6,Masterpiece,800,,422,141,,,
-Normal Cloth Helmet,T7,Normal,700,,444,"148,1",,,
-Good Cloth Helmet,T7,Good,720,,466,"155,5",,,
-Outstanding Cloth Helmet,T7,Outstanding,740,,489,"163,3",,,
-Excellent Cloth Helmet,T7,Excellent,760,,513,"171,5",,,
-Masterpiece Cloth Helmet,T7,Masterpiece,900,,539,"180,1",,,
-Normal Cloth Helmet,T8,Normal,800,,566,"189,1",,,
-Good Cloth Helmet,T8,Good,820,,594,"198,6",,,
-Outstanding Cloth Helmet,T8,Outstanding,840,,624,"208,5",,,
-Excellent Cloth Helmet,T8,Excellent,860,,655,219,,,
-Masterpiece Cloth Helmet,T8,Masterpiece,1000,,688,"229,9",,,
-Normal Cloth Helmet,T9,Normal,900,,722,"241,4",,,
-Good Cloth Helmet,T9,Good,920,,759,"253,5",,,
-Outstanding Cloth Helmet,T9,Outstanding,940,,797,"266,2",,,
-Excellent Cloth Helmet,T9,Excellent,960,,836,"279,5",,,
-Masterpiece Cloth Helmet,T9,Masterpiece,1100,,878,"293,5",,,
-Normal Cloth Helmet,T10,Normal,1000,,922,"308,2",,,
-Good Cloth Helmet,T10,Good,1020,,968,"323,6",,,
-Outstanding Cloth Helmet,T10,Outstanding,1040,,1017,"339,8",,,
-Excellent Cloth Helmet,T10,Excellent,1060,,1067,"356,8",,,
-Masterpiece Cloth Helmet,T10,Masterpiece,1200,,1125,375,,,
-Normal Cloth Boots,T1,Normal,100,,52,"17,2","30,3",,
-Good Cloth Boots,T1,Good,120,,54,"18,1","31,8",,
-Outstanding Cloth Boots,T1,Outstanding,140,,57,19,"33,4",,
-Excellent Cloth Boots,T1,Excellent,160,,60,"19,9","35,1",,
-Masterpiece Cloth Boots,T1,Masterpiece,300,,63,"20,9","36,9",,
-Normal Cloth Boots,T2,Normal,200,,66,22,"38,7",,
-Good Cloth Boots,T2,Good,220,,69,"23,1","40,6",,
-Outstanding Cloth Boots,T2,Outstanding,240,,73,"24,3","42,6",,
-Excellent Cloth Boots,T2,Excellent,260,,76,"25,5","44,8",,
-Masterpiece Cloth Boots,T2,Masterpiece,400,,80,"26,8",47,,
-Normal Cloth Boots,T3,Normal,300,,84,"28,1","49,3",,
-Good Cloth Boots,T3,Good,320,,88,"29,5","51,8",,
-Outstanding Cloth Boots,T3,Outstanding,340,,93,31,"54,4",,
-Excellent Cloth Boots,T3,Excellent,360,,97,"32,6","57,1",,
-Masterpiece Cloth Boots,T3,Masterpiece,500,,102,"34,2",60,,
-Normal Cloth Boots,T4,Normal,400,,107,"35,9",63,,
-Good Cloth Boots,T4,Good,420,,113,"37,7","66,2",,
-Outstanding Cloth Boots,T4,Outstanding,440,,118,"39,6","69,5",,
-Excellent Cloth Boots,T4,Excellent,460,,124,"41,6",73,,
-Masterpiece Cloth Boots,T4,Masterpiece,600,,130,"43,7","76,6",,
-Normal Cloth Boots,T5,Normal,500,,137,"45,9","80,4",,
-Good Cloth Boots,T5,Good,520,,144,"48,2","84,4",,
-Outstanding Cloth Boots,T5,Outstanding,540,,151,"50,6","88,6",,
-Excellent Cloth Boots,T5,Excellent,560,,158,"53,1",93,,
-Masterpiece Cloth Boots,T5,Masterpiece,700,,166,"55,8","97,7",,
-Normal Cloth Boots,T6,Normal,600,,175,"58,6","102,6",,
-Good Cloth Boots,T6,Good,620,,183,"61,5","107,7",,
-Outstanding Cloth Boots,T6,Outstanding,640,,193,"64,6","113,1",,
-Excellent Cloth Boots,T6,Excellent,660,,202,"67,8","118,8",,
-Masterpiece Cloth Boots,T6,Masterpiece,800,,212,"71,2","124,7",,
-Normal Cloth Boots,T7,Normal,700,,223,"74,8","130,9",,
-Good Cloth Boots,T7,Good,720,,234,"78,5","137,4",,
-Outstanding Cloth Boots,T7,Outstanding,740,,246,"82,4","144,3",,
-Excellent Cloth Boots,T7,Excellent,760,,258,"86,5","151,5",,
-Masterpiece Cloth Boots,T7,Masterpiece,900,,271,"90,8","159,1",,
-Normal Cloth Boots,T8,Normal,800,,284,"95,4","167,1",,
-Good Cloth Boots,T8,Good,820,,299,"100,2","175,4",,
-Outstanding Cloth Boots,T8,Outstanding,840,,314,"105,2","184,2",,
-Excellent Cloth Boots,T8,Excellent,860,,329,"110,5","193,4",,
-Masterpiece Cloth Boots,T8,Masterpiece,1000,,346,116,"203,1",,
-Normal Cloth Boots,T9,Normal,900,,363,"121,8","213,3",,
-Good Cloth Boots,T9,Good,920,,381,"127,9","223,9",,
-Outstanding Cloth Boots,T9,Outstanding,940,,400,"134,3","235,1",,
-Excellent Cloth Boots,T9,Excellent,960,,420,141,"246,9",,
-Masterpiece Cloth Boots,T9,Masterpiece,1100,,441,"148,1","259,2",,
-Normal Cloth Boots,T10,Normal,1000,,463,"155,5","272,2",,
-Good Cloth Boots,T10,Good,1020,,487,"163,3","285,8",,
-Outstanding Cloth Boots,T10,Outstanding,1040,,511,"171,5","300,1",,
-Excellent Cloth Boots,T10,Excellent,1060,,536,"180,1","315,1",,
-Masterpiece Cloth Boots,T10,Masterpiece,1200,,563,"187,5","332,2",,
-Normal Cloth Gloves,T1,Normal,100,34,51,"17,1","17,3",,
-Good Cloth Gloves,T1,Good,120,35,54,18,"18,2",,
-Outstanding Cloth Gloves,T1,Outstanding,140,37,57,"18,9","19,1",,
-Excellent Cloth Gloves,T1,Excellent,160,39,59,"19,8","20,1",,
-Masterpiece Cloth Gloves,T1,Masterpiece,300,41,62,"20,8","21,1",,
-Normal Cloth Gloves,T2,Normal,200,43,65,"21,8","22,1",,
-Good Cloth Gloves,T2,Good,220,45,69,"22,9","23,2",,
-Outstanding Cloth Gloves,T2,Outstanding,240,47,72,24,"24,4",,
-Excellent Cloth Gloves,T2,Excellent,260,50,76,"25,2","25,6",,
-Masterpiece Cloth Gloves,T2,Masterpiece,400,52,80,"26,5","26,9",,
-Normal Cloth Gloves,T3,Normal,300,55,84,"27,8","28,2",,
-Good Cloth Gloves,T3,Good,320,58,88,"29,2","29,6",,
-Outstanding Cloth Gloves,T3,Outstanding,340,61,92,"30,7","31,1",,
-Excellent Cloth Gloves,T3,Excellent,360,64,97,"32,2","32,7",,
-Masterpiece Cloth Gloves,T3,Masterpiece,500,67,102,"33,8","34,3",,
-Normal Cloth Gloves,T4,Normal,400,70,107,"35,5",36,,
-Good Cloth Gloves,T4,Good,420,74,112,"37,3","37,8",,
-Outstanding Cloth Gloves,T4,Outstanding,440,77,118,"39,2","39,7",,
-Excellent Cloth Gloves,T4,Excellent,460,81,123,"41,2","41,7",,
-Masterpiece Cloth Gloves,T4,Masterpiece,600,85,130,"43,3","43,8",,
-Normal Cloth Gloves,T5,Normal,500,90,136,"45,5",46,,
-Good Cloth Gloves,T5,Good,520,94,143,"47,8","48,3",,
-Outstanding Cloth Gloves,T5,Outstanding,540,99,150,"50,2","50,7",,
-Excellent Cloth Gloves,T5,Excellent,560,104,158,"52,7","53,2",,
-Masterpiece Cloth Gloves,T5,Masterpiece,700,109,166,"55,3","55,9",,
-Normal Cloth Gloves,T6,Normal,600,114,174,"58,1","58,7",,
-Good Cloth Gloves,T6,Good,620,120,182,61,"61,6",,
-Outstanding Cloth Gloves,T6,Outstanding,640,126,192,"64,1","64,7",,
-Excellent Cloth Gloves,T6,Excellent,660,132,201,"67,3","67,9",,
-Masterpiece Cloth Gloves,T6,Masterpiece,800,139,211,"70,7","71,3",,
-Normal Cloth Gloves,T7,Normal,700,146,222,"74,2","74,9",,
-Good Cloth Gloves,T7,Good,720,153,233,"77,9","78,6",,
-Outstanding Cloth Gloves,T7,Outstanding,740,161,245,"81,8","82,5",,
-Excellent Cloth Gloves,T7,Excellent,760,169,257,"85,9","86,6",,
-Masterpiece Cloth Gloves,T7,Masterpiece,900,177,270,"90,2","90,9",,
-Normal Cloth Gloves,T8,Normal,800,186,283,"94,7","95,4",,
-Good Cloth Gloves,T8,Good,820,195,297,"99,4","100,2",,
-Outstanding Cloth Gloves,T8,Outstanding,840,205,312,"104,4","105,2",,
-Excellent Cloth Gloves,T8,Excellent,860,216,328,"109,6","110,5",,
-Masterpiece Cloth Gloves,T8,Masterpiece,1000,226,344,"115,1",116,,
-Normal Cloth Gloves,T9,Normal,900,238,361,"120,9","121,8",,
-Good Cloth Gloves,T9,Good,920,249,379,"126,9","127,9",,
-Outstanding Cloth Gloves,T9,Outstanding,940,262,398,"133,2","134,3",,
-Excellent Cloth Gloves,T9,Excellent,960,275,418,"139,9",141,,
-Masterpiece Cloth Gloves,T9,Masterpiece,1100,289,439,"146,9","148,1",,
-Normal Cloth Gloves,T10,Normal,1000,303,461,"154,2","155,5",,
-Good Cloth Gloves,T10,Good,1020,318,484,"161,9","163,3",,
-Outstanding Cloth Gloves,T10,Outstanding,1040,334,508,170,"171,5",,
-Excellent Cloth Gloves,T10,Excellent,1060,351,534,"178,5","180,1",,
-Masterpiece Cloth Gloves,T10,Masterpiece,1200,370,563,"187,5","189,8",,
-Normal Mage Cape,T1,Normal,100,34,,,13,,"1,37"
-Good Mage Cape,T1,Good,120,35,,,"13,7",,"1,44"
-Outstanding Mage Cape,T1,Outstanding,140,37,,,"14,4",,"1,51"
-Excellent Mage Cape,T1,Excellent,160,39,,,"15,1",,"1,59"
-Masterpiece Mage Cape,T1,Masterpiece,300,41,,,"15,9",,"1,67"
-Normal Mage Cape,T2,Normal,200,43,,,"16,7",,"1,75"
-Good Mage Cape,T2,Good,220,45,,,"17,5",,"1,84"
-Outstanding Mage Cape,T2,Outstanding,240,47,,,"18,4",,"1,93"
-Excellent Mage Cape,T2,Excellent,260,50,,,"19,3",,"2,03"
-Masterpiece Mage Cape,T2,Masterpiece,400,52,,,"20,3",,"2,13"
-Normal Mage Cape,T3,Normal,300,55,,,"21,3",,"2,24"
-Good Mage Cape,T3,Good,320,58,,,"22,4",,"2,35"
-Outstanding Mage Cape,T3,Outstanding,340,61,,,"23,5",,"2,47"
-Excellent Mage Cape,T3,Excellent,360,64,,,"24,7",,"2,59"
-Masterpiece Mage Cape,T3,Masterpiece,500,67,,,"25,9",,"2,72"
-Normal Mage Cape,T4,Normal,400,70,,,"27,2",,"2,86"
-Good Mage Cape,T4,Good,420,74,,,"28,6",,3
-Outstanding Mage Cape,T4,Outstanding,440,77,,,30,,"3,15"
-Excellent Mage Cape,T4,Excellent,460,81,,,"31,5",,"3,31"
-Masterpiece Mage Cape,T4,Masterpiece,600,85,,,"33,1",,"3,48"
-Normal Mage Cape,T5,Normal,500,90,,,"34,8",,"3,65"
-Good Mage Cape,T5,Good,520,94,,,"36,5",,"3,83"
-Outstanding Mage Cape,T5,Outstanding,540,99,,,"38,3",,"4,02"
-Excellent Mage Cape,T5,Excellent,560,104,,,"40,2",,"4,22"
-Masterpiece Mage Cape,T5,Masterpiece,700,109,,,"42,2",,"4,43"
-Normal Mage Cape,T6,Normal,600,114,,,"44,3",,"4,65"
-Good Mage Cape,T6,Good,620,120,,,"46,5",,"4,88"
-Outstanding Mage Cape,T6,Outstanding,640,126,,,"48,8",,"5,12"
-Excellent Mage Cape,T6,Excellent,660,132,,,"51,2",,"5,38"
-Masterpiece Mage Cape,T6,Masterpiece,800,139,,,"53,8",,"5,65"
-Normal Mage Cape,T7,Normal,700,146,,,"56,5",,"5,93"
-Good Mage Cape,T7,Good,720,153,,,"59,3",,"6,23"
-Outstanding Mage Cape,T7,Outstanding,740,161,,,"62,3",,"6,54"
-Excellent Mage Cape,T7,Excellent,760,169,,,"65,4",,"6,87"
-Masterpiece Mage Cape,T7,Masterpiece,900,177,,,"68,7",,"7,21"
-Normal Mage Cape,T8,Normal,800,186,,,"72,1",,"7,57"
-Good Mage Cape,T8,Good,820,195,,,"75,7",,"7,95"
-Outstanding Mage Cape,T8,Outstanding,840,205,,,"79,5",,"8,35"
-Excellent Mage Cape,T8,Excellent,860,216,,,"83,5",,"8,77"
-Masterpiece Mage Cape,T8,Masterpiece,1000,226,,,"87,7",,"9,21"
-Normal Mage Cape,T9,Normal,900,238,,,"92,1",,"9,67"
-Good Mage Cape,T9,Good,920,249,,,"96,7",,"10,15"
-Outstanding Mage Cape,T9,Outstanding,940,262,,,"101,5",,"10,66"
-Excellent Mage Cape,T9,Excellent,960,275,,,"106,6",,"11,19"
-Masterpiece Mage Cape,T9,Masterpiece,1100,289,,,"111,9",,"11,75"
-Normal Mage Cape,T10,Normal,1000,303,,,"117,5",,"12,34"
-Good Mage Cape,T10,Good,1020,318,,,"123,4",,"12,96"
-Outstanding Mage Cape,T10,Outstanding,1040,334,,,"129,6",,"13,61"
-Excellent Mage Cape,T10,Excellent,1060,351,,,"136,1",,"14,29"
-Masterpiece Mage Cape,T10,Masterpiece,1200,370,,,"142,3",,15
+Name,Tier,IP,DMG,HP,DEF,SPEED,CRIT
+Normal Fire Staff,T1,100,"147,6",0,0,"27,1",0
+Good Fire Staff,T1,120,155,0,0,"28,4",0
+Outstanding Fire Staff,T1,140,"162,7",0,0,"29,8",0
+Excellent Fire Staff,T1,160,"170,9",0,0,"31,3",0
+Masterpiece Fire Staff,T1,300,"179,4",0,0,"32,9",0
+Normal Fire Staff,T2,200,"188,4",0,0,"34,5",0
+Good Fire Staff,T2,220,"197,8",0,0,"36,3",0
+Outstanding Fire Staff,T2,240,"207,7",0,0,"38,1",0
+Excellent Fire Staff,T2,260,"218,1",0,0,40,0
+Masterpiece Fire Staff,T2,400,229,0,0,42,0
+Normal Fire Staff,T3,300,"240,4",0,0,"44,1",0
+Good Fire Staff,T3,320,"252,5",0,0,"46,3",0
+Outstanding Fire Staff,T3,340,"265,1",0,0,"48,6",0
+Excellent Fire Staff,T3,360,"278,3",0,0,51,0
+Masterpiece Fire Staff,T3,500,"292,2",0,0,"53,6",0
+Normal Fire Staff,T4,400,"306,9",0,0,"56,2",0
+Good Fire Staff,T4,420,"322,2",0,0,"59,1",0
+Outstanding Fire Staff,T4,440,"338,3",0,0,62,0
+Excellent Fire Staff,T4,460,"355,2",0,0,"65,1",0
+Masterpiece Fire Staff,T4,600,373,0,0,"68,4",0
+Normal Fire Staff,T5,500,"391,6",0,0,"71,8",0
+Good Fire Staff,T5,520,"411,2",0,0,"75,4",0
+Outstanding Fire Staff,T5,540,"431,8",0,0,"79,1",0
+Excellent Fire Staff,T5,560,"453,4",0,0,"83,1",0
+Masterpiece Fire Staff,T5,700,476,0,0,"87,3",0
+Normal Fire Staff,T6,600,"499,8",0,0,"91,6",0
+Good Fire Staff,T6,620,"524,8",0,0,"96,2",0
+Outstanding Fire Staff,T6,640,"551,1",0,0,101,0
+Excellent Fire Staff,T6,660,"578,6",0,0,"106,1",0
+Masterpiece Fire Staff,T6,800,"607,6",0,0,"111,4",0
+Normal Fire Staff,T7,700,"637,9",0,0,"116,9",0
+Good Fire Staff,T7,720,"669,8",0,0,"122,8",0
+Outstanding Fire Staff,T7,740,"703,3",0,0,"128,9",0
+Excellent Fire Staff,T7,760,"738,5",0,0,"135,4",0
+Masterpiece Fire Staff,T7,900,"775,4",0,0,"142,1",0
+Normal Fire Staff,T8,800,"814,2",0,0,"149,2",0
+Good Fire Staff,T8,820,"854,9",0,0,"156,7",0
+Outstanding Fire Staff,T8,840,"897,6",0,0,"164,5",0
+Excellent Fire Staff,T8,860,"942,5",0,0,"172,8",0
+Masterpiece Fire Staff,T8,1000,"989,7",0,0,"181,4",0
+Normal Fire Staff,T9,900,"1039,1",0,0,"190,5",0
+Good Fire Staff,T9,920,"1091,1",0,0,200,0
+Outstanding Fire Staff,T9,940,"1145,7",0,0,210,0
+Excellent Fire Staff,T9,960,"1202,9",0,0,"220,5",0
+Masterpiece Fire Staff,T9,1100,"1263,1",0,0,"231,5",0
+Normal Fire Staff,T10,1000,"1326,2",0,0,"243,1",0
+Good Fire Staff,T10,1020,"1392,5",0,0,"255,3",0
+Outstanding Fire Staff,T10,1040,"1462,2",0,0,268,0
+Excellent Fire Staff,T10,1060,"1535,3",0,0,"281,4",0
+Masterpiece Fire Staff,T10,1200,1612,0,0,"295,5",0
+Normal Tome,T1,100,"67,1",0,0,0,"0,46"
+Good Tome,T1,120,"70,4",0,0,0,"0,48"
+Outstanding Tome,T1,140,74,0,0,0,"0,5"
+Excellent Tome,T1,160,"77,7",0,0,0,"0,53"
+Masterpiece Tome,T1,300,"81,6",0,0,0,"0,56"
+Normal Tome,T2,200,"85,6",0,0,0,"0,58"
+Good Tome,T2,220,"89,9",0,0,0,"0,61"
+Outstanding Tome,T2,240,"94,4",0,0,0,"0,64"
+Excellent Tome,T2,260,"99,1",0,0,0,"0,68"
+Masterpiece Tome,T2,400,"104,1",0,0,0,"0,71"
+Normal Tome,T3,300,"109,3",0,0,0,"0,75"
+Good Tome,T3,320,"114,8",0,0,0,"0,78"
+Outstanding Tome,T3,340,"120,5",0,0,0,"0,82"
+Excellent Tome,T3,360,"126,5",0,0,0,"0,86"
+Masterpiece Tome,T3,500,"132,8",0,0,0,"0,91"
+Normal Tome,T4,400,"139,5",0,0,0,"0,95"
+Good Tome,T4,420,"146,5",0,0,0,1
+Outstanding Tome,T4,440,"153,8",0,0,0,"1,05"
+Excellent Tome,T4,460,"161,5",0,0,0,"1,1"
+Masterpiece Tome,T4,600,"169,5",0,0,0,"1,16"
+Normal Tome,T5,500,178,0,0,0,"1,21"
+Good Tome,T5,520,"186,9",0,0,0,"1,28"
+Outstanding Tome,T5,540,"196,3",0,0,0,"1,34"
+Excellent Tome,T5,560,"206,1",0,0,0,"1,41"
+Masterpiece Tome,T5,700,"216,4",0,0,0,"1,48"
+Normal Tome,T6,600,"227,2",0,0,0,"1,55"
+Good Tome,T6,620,"238,6",0,0,0,"1,63"
+Outstanding Tome,T6,640,"250,5",0,0,0,"1,71"
+Excellent Tome,T6,660,263,0,0,0,"1,79"
+Masterpiece Tome,T6,800,"276,2",0,0,0,"1,88"
+Normal Tome,T7,700,290,0,0,0,"1,98"
+Good Tome,T7,720,"304,5",0,0,0,"2,08"
+Outstanding Tome,T7,740,"319,7",0,0,0,"2,18"
+Excellent Tome,T7,760,"335,7",0,0,0,"2,29"
+Masterpiece Tome,T7,900,"352,5",0,0,0,"2,41"
+Normal Tome,T8,800,"370,1",0,0,0,"2,53"
+Good Tome,T8,820,"388,6",0,0,0,"2,65"
+Outstanding Tome,T8,840,408,0,0,0,"2,78"
+Excellent Tome,T8,860,"428,4",0,0,0,"2,92"
+Masterpiece Tome,T8,1000,"449,8",0,0,0,"3,07"
+Normal Tome,T9,900,"472,3",0,0,0,"3,22"
+Good Tome,T9,920,496,0,0,0,"3,38"
+Outstanding Tome,T9,940,"520,8",0,0,0,"3,55"
+Excellent Tome,T9,960,"546,8",0,0,0,"3,73"
+Masterpiece Tome,T9,1100,"574,1",0,0,0,"3,92"
+Normal Tome,T10,1000,"602,8",0,0,0,"4,11"
+Good Tome,T10,1020,633,0,0,0,"4,32"
+Outstanding Tome,T10,1040,"664,6",0,0,0,"4,54"
+Excellent Tome,T10,1060,"697,9",0,0,0,"4,76"
+Masterpiece Tome,T10,1200,"732,8",0,0,0,5
+Normal Cloth Armor,T1,100,0,"137,3","27,5",0,0
+Good Cloth Armor,T1,120,0,"144,2","28,8",0,0
+Outstanding Cloth Armor,T1,140,0,"151,4","30,3",0,0
+Excellent Cloth Armor,T1,160,0,159,"31,8",0,0
+Masterpiece Cloth Armor,T1,300,0,"166,9","33,4",0,0
+Normal Cloth Armor,T2,200,0,"175,3","35,1",0,0
+Good Cloth Armor,T2,220,0,"184,1","36,8",0,0
+Outstanding Cloth Armor,T2,240,0,"193,3","38,7",0,0
+Excellent Cloth Armor,T2,260,0,"202,9","40,6",0,0
+Masterpiece Cloth Armor,T2,400,0,"213,1","42,6",0,0
+Normal Cloth Armor,T3,300,0,"223,7","44,7",0,0
+Good Cloth Armor,T3,320,0,"234,9",47,0,0
+Outstanding Cloth Armor,T3,340,0,"246,7","49,3",0,0
+Excellent Cloth Armor,T3,360,0,259,"51,8",0,0
+Masterpiece Cloth Armor,T3,500,0,"271,9","54,4",0,0
+Normal Cloth Armor,T4,400,0,"285,5","57,1",0,0
+Good Cloth Armor,T4,420,0,"299,8",60,0,0
+Outstanding Cloth Armor,T4,440,0,"314,8",63,0,0
+Excellent Cloth Armor,T4,460,0,"330,5","66,1",0,0
+Masterpiece Cloth Armor,T4,600,0,"347,1","69,4",0,0
+Normal Cloth Armor,T5,500,0,"364,4","72,9",0,0
+Good Cloth Armor,T5,520,0,"382,6","76,5",0,0
+Outstanding Cloth Armor,T5,540,0,"401,8","80,4",0,0
+Excellent Cloth Armor,T5,560,0,"421,9","84,4",0,0
+Masterpiece Cloth Armor,T5,700,0,443,"88,6",0,0
+Normal Cloth Armor,T6,600,0,"465,1",93,0,0
+Good Cloth Armor,T6,620,0,"488,4","97,7",0,0
+Outstanding Cloth Armor,T6,640,0,"512,8","102,6",0,0
+Excellent Cloth Armor,T6,660,0,"538,4","107,7",0,0
+Masterpiece Cloth Armor,T6,800,0,"565,3","113,1",0,0
+Normal Cloth Armor,T7,700,0,"593,6","118,7",0,0
+Good Cloth Armor,T7,720,0,"623,3","124,7",0,0
+Outstanding Cloth Armor,T7,740,0,"654,4","130,9",0,0
+Excellent Cloth Armor,T7,760,0,"687,2","137,4",0,0
+Masterpiece Cloth Armor,T7,900,0,"721,5","144,3",0,0
+Normal Cloth Armor,T8,800,0,"757,6","151,5",0,0
+Good Cloth Armor,T8,820,0,"795,5","159,1",0,0
+Outstanding Cloth Armor,T8,840,0,"835,3","167,1",0,0
+Excellent Cloth Armor,T8,860,0,877,"175,4",0,0
+Masterpiece Cloth Armor,T8,1000,0,"920,9","184,2",0,0
+Normal Cloth Armor,T9,900,0,"966,9","193,4",0,0
+Good Cloth Armor,T9,920,0,"1015,3","203,1",0,0
+Outstanding Cloth Armor,T9,940,0,1066,"213,2",0,0
+Excellent Cloth Armor,T9,960,0,"1119,3","223,9",0,0
+Masterpiece Cloth Armor,T9,1100,0,"1175,3","235,1",0,0
+Normal Cloth Armor,T10,1000,0,"1234,1","246,8",0,0
+Good Cloth Armor,T10,1020,0,"1295,8","259,2",0,0
+Outstanding Cloth Armor,T10,1040,0,"1360,5","272,1",0,0
+Excellent Cloth Armor,T10,1060,0,"1428,6","285,7",0,0
+Masterpiece Cloth Armor,T10,1200,0,1500,300,0,0
+Normal Cloth Helmet,T1,100,0,103,"20,6",0,0
+Good Cloth Helmet,T1,120,0,"108,2","21,6",0,0
+Outstanding Cloth Helmet,T1,140,0,"113,6","22,7",0,0
+Excellent Cloth Helmet,T1,160,0,"119,2","23,8",0,0
+Masterpiece Cloth Helmet,T1,300,0,"125,2",25,0,0
+Normal Cloth Helmet,T2,200,0,"131,5","26,3",0,0
+Good Cloth Helmet,T2,220,0,138,"27,6",0,0
+Outstanding Cloth Helmet,T2,240,0,"144,9",29,0,0
+Excellent Cloth Helmet,T2,260,0,"152,2","30,4",0,0
+Masterpiece Cloth Helmet,T2,400,0,"159,8",32,0,0
+Normal Cloth Helmet,T3,300,0,"167,8","33,6",0,0
+Good Cloth Helmet,T3,320,0,"176,2","35,2",0,0
+Outstanding Cloth Helmet,T3,340,0,185,37,0,0
+Excellent Cloth Helmet,T3,360,0,"194,2","38,8",0,0
+Masterpiece Cloth Helmet,T3,500,0,204,"40,8",0,0
+Normal Cloth Helmet,T4,400,0,"214,1","42,8",0,0
+Good Cloth Helmet,T4,420,0,"224,9",45,0,0
+Outstanding Cloth Helmet,T4,440,0,"236,1","47,2",0,0
+Excellent Cloth Helmet,T4,460,0,"247,9","49,6",0,0
+Masterpiece Cloth Helmet,T4,600,0,"260,3","52,1",0,0
+Normal Cloth Helmet,T5,500,0,"273,3","54,7",0,0
+Good Cloth Helmet,T5,520,0,287,"57,4",0,0
+Outstanding Cloth Helmet,T5,540,0,"301,3","60,3",0,0
+Excellent Cloth Helmet,T5,560,0,"316,4","63,3",0,0
+Masterpiece Cloth Helmet,T5,700,0,"332,2","66,4",0,0
+Normal Cloth Helmet,T6,600,0,"348,8","69,8",0,0
+Good Cloth Helmet,T6,620,0,"366,3","73,3",0,0
+Outstanding Cloth Helmet,T6,640,0,"384,6","76,9",0,0
+Excellent Cloth Helmet,T6,660,0,"403,8","80,8",0,0
+Masterpiece Cloth Helmet,T6,800,0,424,"84,8",0,0
+Normal Cloth Helmet,T7,700,0,"445,2",89,0,0
+Good Cloth Helmet,T7,720,0,"467,5","93,5",0,0
+Outstanding Cloth Helmet,T7,740,0,"490,8","98,2",0,0
+Excellent Cloth Helmet,T7,760,0,"515,4","103,1",0,0
+Masterpiece Cloth Helmet,T7,900,0,"541,1","108,2",0,0
+Normal Cloth Helmet,T8,800,0,"568,2","113,6",0,0
+Good Cloth Helmet,T8,820,0,"596,6","119,3",0,0
+Outstanding Cloth Helmet,T8,840,0,"626,4","125,3",0,0
+Excellent Cloth Helmet,T8,860,0,"657,8","131,6",0,0
+Masterpiece Cloth Helmet,T8,1000,0,"690,7","138,1",0,0
+Normal Cloth Helmet,T9,900,0,"725,2",145,0,0
+Good Cloth Helmet,T9,920,0,"761,4","152,3",0,0
+Outstanding Cloth Helmet,T9,940,0,"799,5","159,9",0,0
+Excellent Cloth Helmet,T9,960,0,"839,5","167,9",0,0
+Masterpiece Cloth Helmet,T9,1100,0,"881,5","176,3",0,0
+Normal Cloth Helmet,T10,1000,0,"925,5","185,1",0,0
+Good Cloth Helmet,T10,1020,0,"971,8","194,4",0,0
+Outstanding Cloth Helmet,T10,1040,0,"1020,4","204,1",0,0
+Excellent Cloth Helmet,T10,1060,0,"1071,4","214,3",0,0
+Masterpiece Cloth Helmet,T10,1200,0,1125,225,0,0
+Normal Cloth Boots,T1,100,0,"51,5","10,3","31,6",0
+Good Cloth Boots,T1,120,0,"54,1","10,8","33,1",0
+Outstanding Cloth Boots,T1,140,0,"56,8","11,4","34,8",0
+Excellent Cloth Boots,T1,160,0,"59,6","11,9","36,5",0
+Masterpiece Cloth Boots,T1,300,0,"62,6","12,5","38,4",0
+Normal Cloth Boots,T2,200,0,"65,7","13,1","40,3",0
+Good Cloth Boots,T2,220,0,69,"13,8","42,3",0
+Outstanding Cloth Boots,T2,240,0,"72,5","14,5","44,4",0
+Excellent Cloth Boots,T2,260,0,"76,1","15,2","46,6",0
+Masterpiece Cloth Boots,T2,400,0,"79,9",16,49,0
+Normal Cloth Boots,T3,300,0,"83,9","16,8","51,4",0
+Good Cloth Boots,T3,320,0,"88,1","17,6",54,0
+Outstanding Cloth Boots,T3,340,0,"92,5","18,5","56,7",0
+Excellent Cloth Boots,T3,360,0,"97,1","19,4","59,5",0
+Masterpiece Cloth Boots,T3,500,0,102,"20,4","62,5",0
+Normal Cloth Boots,T4,400,0,"107,1","21,4","65,6",0
+Good Cloth Boots,T4,420,0,"112,4","22,5","68,9",0
+Outstanding Cloth Boots,T4,440,0,118,"23,6","72,4",0
+Excellent Cloth Boots,T4,460,0,124,"24,8",76,0
+Masterpiece Cloth Boots,T4,600,0,"130,1",26,"79,8",0
+Normal Cloth Boots,T5,500,0,"136,7","27,3","83,8",0
+Good Cloth Boots,T5,520,0,"143,5","28,7","87,9",0
+Outstanding Cloth Boots,T5,540,0,"150,7","30,1","92,3",0
+Excellent Cloth Boots,T5,560,0,"158,2","31,6",97,0
+Masterpiece Cloth Boots,T5,700,0,"166,1","33,2","101,8",0
+Normal Cloth Boots,T6,600,0,"174,4","34,9","106,9",0
+Good Cloth Boots,T6,620,0,"183,1","36,6","112,2",0
+Outstanding Cloth Boots,T6,640,0,"192,3","38,5","117,9",0
+Excellent Cloth Boots,T6,660,0,"201,9","40,4","123,7",0
+Masterpiece Cloth Boots,T6,800,0,212,"42,4","129,9",0
+Normal Cloth Boots,T7,700,0,"222,6","44,5","136,4",0
+Good Cloth Boots,T7,720,0,"233,7","46,7","143,3",0
+Outstanding Cloth Boots,T7,740,0,"245,4","49,1","150,4",0
+Excellent Cloth Boots,T7,760,0,"257,7","51,5","157,9",0
+Masterpiece Cloth Boots,T7,900,0,"270,6","54,1","165,8",0
+Normal Cloth Boots,T8,800,0,"284,1","56,8","174,1",0
+Good Cloth Boots,T8,820,0,"298,3","59,7","182,8",0
+Outstanding Cloth Boots,T8,840,0,"313,2","62,6",192,0
+Excellent Cloth Boots,T8,860,0,"328,9","65,8","201,6",0
+Masterpiece Cloth Boots,T8,1000,0,"345,3","69,1","211,6",0
+Normal Cloth Boots,T9,900,0,"362,6","72,5","222,2",0
+Good Cloth Boots,T9,920,0,"380,7","76,1","233,3",0
+Outstanding Cloth Boots,T9,940,0,"399,8",80,245,0
+Excellent Cloth Boots,T9,960,0,"419,7","83,9","257,3",0
+Masterpiece Cloth Boots,T9,1100,0,"440,7","88,1","270,1",0
+Normal Cloth Boots,T10,1000,0,"462,8","92,6","283,6",0
+Good Cloth Boots,T10,1020,0,"485,9","97,2","297,8",0
+Outstanding Cloth Boots,T10,1040,0,"510,2",102,"312,7",0
+Excellent Cloth Boots,T10,1060,0,"535,7","107,1","328,3",0
+Masterpiece Cloth Boots,T10,1200,0,"562,5","112,5","344,8",0
+Normal Cloth Gloves,T1,100,"26,8","51,5","10,3",18,0
+Good Cloth Gloves,T1,120,"28,2","54,1","10,8","18,9",0
+Outstanding Cloth Gloves,T1,140,"29,6","56,8","11,4","19,9",0
+Excellent Cloth Gloves,T1,160,"31,1","59,6","11,9","20,9",0
+Masterpiece Cloth Gloves,T1,300,"32,6","62,6","12,5","21,9",0
+Normal Cloth Gloves,T2,200,"34,3","65,7","13,1",23,0
+Good Cloth Gloves,T2,220,36,69,"13,8","24,2",0
+Outstanding Cloth Gloves,T2,240,"37,8","72,5","14,5","25,4",0
+Excellent Cloth Gloves,T2,260,"39,7","76,1","15,2","26,7",0
+Masterpiece Cloth Gloves,T2,400,"41,6","79,9",16,28,0
+Normal Cloth Gloves,T3,300,"43,7","83,9","16,8","29,4",0
+Good Cloth Gloves,T3,320,"45,9","88,1","17,6","30,9",0
+Outstanding Cloth Gloves,T3,340,"48,2","92,5","18,5","32,4",0
+Excellent Cloth Gloves,T3,360,"50,6","97,1","19,4",34,0
+Masterpiece Cloth Gloves,T3,500,"53,1",102,"20,4","35,7",0
+Normal Cloth Gloves,T4,400,"55,8","107,1","21,4","37,5",0
+Good Cloth Gloves,T4,420,"58,6","112,4","22,5","39,4",0
+Outstanding Cloth Gloves,T4,440,"61,5",118,"23,6","41,3",0
+Excellent Cloth Gloves,T4,460,"64,6",124,"24,8","43,4",0
+Masterpiece Cloth Gloves,T4,600,"67,8","130,1",26,"45,6",0
+Normal Cloth Gloves,T5,500,"71,2","136,7","27,3","47,9",0
+Good Cloth Gloves,T5,520,"74,8","143,5","28,7","50,3",0
+Outstanding Cloth Gloves,T5,540,"78,5","150,7","30,1","52,8",0
+Excellent Cloth Gloves,T5,560,"82,4","158,2","31,6","55,4",0
+Masterpiece Cloth Gloves,T5,700,"86,6","166,1","33,2","58,2",0
+Normal Cloth Gloves,T6,600,"90,9","174,4","34,9","61,1",0
+Good Cloth Gloves,T6,620,"95,4","183,1","36,6","64,1",0
+Outstanding Cloth Gloves,T6,640,"100,2","192,3","38,5","67,3",0
+Excellent Cloth Gloves,T6,660,"105,2","201,9","40,4","70,7",0
+Masterpiece Cloth Gloves,T6,800,"110,5",212,"42,4","74,2",0
+Normal Cloth Gloves,T7,700,116,"222,6","44,5",78,0
+Good Cloth Gloves,T7,720,"121,8","233,7","46,7","81,9",0
+Outstanding Cloth Gloves,T7,740,"127,9","245,4","49,1",86,0
+Excellent Cloth Gloves,T7,760,"134,3","257,7","51,5","90,2",0
+Masterpiece Cloth Gloves,T7,900,141,"270,6","54,1","94,8",0
+Normal Cloth Gloves,T8,800,148,"284,1","56,8","99,5",0
+Good Cloth Gloves,T8,820,"155,4","298,3","59,7","104,5",0
+Outstanding Cloth Gloves,T8,840,"163,2","313,2","62,6","109,7",0
+Excellent Cloth Gloves,T8,860,"171,4","328,9","65,8","115,2",0
+Masterpiece Cloth Gloves,T8,1000,"179,9","345,3","69,1","120,9",0
+Normal Cloth Gloves,T9,900,"188,9","362,6","72,5",127,0
+Good Cloth Gloves,T9,920,"198,4","380,7","76,1","133,3",0
+Outstanding Cloth Gloves,T9,940,"208,3","399,8",80,140,0
+Excellent Cloth Gloves,T9,960,"218,7","419,7","83,9",147,0
+Masterpiece Cloth Gloves,T9,1100,"229,7","440,7","88,1","154,4",0
+Normal Cloth Gloves,T10,1000,"241,1","462,8","92,6","162,1",0
+Good Cloth Gloves,T10,1020,"253,2","485,9","97,2","170,2",0
+Outstanding Cloth Gloves,T10,1040,"265,9","510,2",102,"178,7",0
+Excellent Cloth Gloves,T10,1060,"279,1","535,7","107,1","187,6",0
+Masterpiece Cloth Gloves,T10,1200,"293,1","562,5","112,5",197,0
+Normal Mage Cape,T1,100,"26,8",0,0,"13,5",0
+Good Mage Cape,T1,120,"28,2",0,0,"14,2",0
+Outstanding Mage Cape,T1,140,"29,6",0,0,"14,9",0
+Excellent Mage Cape,T1,160,"31,1",0,0,"15,7",0
+Masterpiece Mage Cape,T1,300,"32,6",0,0,"16,4",0
+Normal Mage Cape,T2,200,"34,3",0,0,"17,3",0
+Good Mage Cape,T2,220,36,0,0,"18,1",0
+Outstanding Mage Cape,T2,240,"37,8",0,0,19,0
+Excellent Mage Cape,T2,260,"39,7",0,0,20,0
+Masterpiece Mage Cape,T2,400,"41,6",0,0,21,0
+Normal Mage Cape,T3,300,"43,7",0,0,22,0
+Good Mage Cape,T3,320,"45,9",0,0,"23,1",0
+Outstanding Mage Cape,T3,340,"48,2",0,0,"24,3",0
+Excellent Mage Cape,T3,360,"50,6",0,0,"25,5",0
+Masterpiece Mage Cape,T3,500,"53,1",0,0,"26,8",0
+Normal Mage Cape,T4,400,"55,8",0,0,"28,1",0
+Good Mage Cape,T4,420,"58,6",0,0,"29,5",0
+Outstanding Mage Cape,T4,440,"61,5",0,0,31,0
+Excellent Mage Cape,T4,460,"64,6",0,0,"32,6",0
+Masterpiece Mage Cape,T4,600,"67,8",0,0,"34,2",0
+Normal Mage Cape,T5,500,"71,2",0,0,"35,9",0
+Good Mage Cape,T5,520,"74,8",0,0,"37,7",0
+Outstanding Mage Cape,T5,540,"78,5",0,0,"39,6",0
+Excellent Mage Cape,T5,560,"82,4",0,0,"41,6",0
+Masterpiece Mage Cape,T5,700,"86,6",0,0,"43,6",0
+Normal Mage Cape,T6,600,"90,9",0,0,"45,8",0
+Good Mage Cape,T6,620,"95,4",0,0,"48,1",0
+Outstanding Mage Cape,T6,640,"100,2",0,0,"50,5",0
+Excellent Mage Cape,T6,660,"105,2",0,0,53,0
+Masterpiece Mage Cape,T6,800,"110,5",0,0,"55,7",0
+Normal Mage Cape,T7,700,116,0,0,"58,5",0
+Good Mage Cape,T7,720,"121,8",0,0,"61,4",0
+Outstanding Mage Cape,T7,740,"127,9",0,0,"64,5",0
+Excellent Mage Cape,T7,760,"134,3",0,0,"67,7",0
+Masterpiece Mage Cape,T7,900,141,0,0,"71,1",0
+Normal Mage Cape,T8,800,148,0,0,"74,6",0
+Good Mage Cape,T8,820,"155,4",0,0,"78,4",0
+Outstanding Mage Cape,T8,840,"163,2",0,0,"82,3",0
+Excellent Mage Cape,T8,860,"171,4",0,0,"86,4",0
+Masterpiece Mage Cape,T8,1000,"179,9",0,0,"90,7",0
+Normal Mage Cape,T9,900,"188,9",0,0,"95,2",0
+Good Mage Cape,T9,920,"198,4",0,0,100,0
+Outstanding Mage Cape,T9,940,"208,3",0,0,105,0
+Excellent Mage Cape,T9,960,"218,7",0,0,"110,3",0
+Masterpiece Mage Cape,T9,1100,"229,7",0,0,"115,8",0
+Normal Mage Cape,T10,1000,"241,1",0,0,"121,6",0
+Good Mage Cape,T10,1020,"253,2",0,0,"127,6",0
+Outstanding Mage Cape,T10,1040,"265,9",0,0,134,0
+Excellent Mage Cape,T10,1060,"279,1",0,0,"140,7",0
+Masterpiece Mage Cape,T10,1200,"293,1",0,0,"147,8",0
