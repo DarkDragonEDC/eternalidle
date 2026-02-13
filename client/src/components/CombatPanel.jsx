@@ -535,7 +535,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                     : 0;
 
                                 const netDmgPerSecond = mobDmgPerSecond - foodHealRate;
-                                const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
+                                const isPremium = gameState?.state?.isPremium || gameState?.state?.membership?.active; const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
                                 let survivalText = "∞";
                                 let survivalColor = "#4caf50";
 
