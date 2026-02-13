@@ -242,7 +242,7 @@ for (const t of TIERS) {
     const foodItem = {
         id: `T${t}_FOOD`, name: 'Food', tier: t, type: 'FOOD',
         healPercent: 5 * t, // Heals 5% * Tier of Max HP
-        req: { [`T${t}_FISH`]: 1 },
+        req: { [`T${t}_FISH`]: 2 },
         xp: Math.floor(REFINE_DATA.xp[t - 1] / 2), // Halved XP gain for food
         time: Math.ceil(REFINE_DATA.time[t - 1] / 2),
         description: `A cooked meal. Restores ${5 * t}% Health when eaten.`
