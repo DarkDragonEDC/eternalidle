@@ -6,7 +6,7 @@ import {
     User, Target, Star, Layers,
     Axe, Pickaxe, Scissors, Anchor, Apple, Info, ShoppingBag, Edit, Droplets
 } from 'lucide-react';
-import { resolveItem, getTierColor, calculateRuneBonus } from '@shared/items';
+import { resolveItem, getTierColor, calculateRuneBonus, getRequiredProficiencyGroup } from '@shared/items';
 import { getProficiencyStats } from '@shared/proficiency_stats';
 import { getBestItemForSlot, isBetterItem } from '../utils/equipment';
 import { ChevronUp, ChevronDown } from 'lucide-react';
@@ -75,6 +75,8 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
     const state = gameState?.state || {};
     const { skills = {}, silver = 0, health, maxHealth = 100, equipment = {} } = state;
     const charStats = state.stats || { warriorProf: 0, hunterProf: 0, mageProf: 0 };
+    const hasWeapon = !!equipment.mainHand;
+    const currentWeaponClass = equipment.mainHand ? getRequiredProficiencyGroup(equipment.mainHand.id) : null;
 
     const calculatedStats = useMemo(() => {
         // Base stats iniciam em 0
@@ -291,7 +293,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         return Math.floor(totalIP / 7);
     }, [equipment]);
 
-    const EquipmentSlot = ({ slot, icon, label, item: rawItem, onClick, onShowInfo, isLocked = false }) => {
+    const EquipmentSlot = ({ slot, icon, label, item: rawItem, onClick, onShowInfo, isLocked = false, weaponClass = null }) => {
         // Resolve item to ensure we have latest stats and rarity color (even for Normal items if logic changes, but mostly for _Q items)
         const item = rawItem ? { ...resolveItem(rawItem.id || rawItem.item_id), ...rawItem } : null;
 
@@ -305,9 +307,9 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         // Upgrade Detection
         const hasUpgrade = useMemo(() => {
             if (isLocked) return false;
-            const best = getBestItemForSlot(slot, state.inventory || {});
+            const best = getBestItemForSlot(slot, state.inventory || {}, weaponClass);
             return isBetterItem(best, item);
-        }, [slot, state.inventory, item, isLocked]);
+        }, [slot, state.inventory, item, isLocked, weaponClass]);
 
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
@@ -323,10 +325,25 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                     position: 'relative',
                     cursor: isLocked ? 'not-allowed' : 'pointer',
                     transition: '0.2s',
-                    boxShadow: hasQuality ? `0 0 10px ${borderColor}66` : 'none'
+                    boxShadow: hasQuality ? `0 0 10px ${borderColor}66` : 'none',
+                    filter: isLocked ? 'grayscale(0.8) brightness(0.7)' : 'none'
                 }}
-                    onClick={onClick}
+                    onClick={isLocked ? null : onClick}
                 >
+                    {isLocked && !item && (
+                        <div style={{
+                            position: 'absolute',
+                            inset: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: 'rgba(0,0,0,0.4)',
+                            borderRadius: '10px',
+                            zIndex: 2
+                        }}>
+                            <Sword size={20} color="#ff4444" style={{ opacity: 0.6 }} />
+                        </div>
+                    )}
                     {/* Upgrade Indicator */}
                     {hasUpgrade && (
                         <div style={{
@@ -780,16 +797,16 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                                 justifyContent: 'center',
                                 padding: isMobile ? '10px 5px' : '25px',
                             }}>
-                                <EquipmentSlot slot="cape" icon={<Layers size={20} />} label="CAPE" item={equipment.cape} onClick={() => setSelectedSlot('cape')} onShowInfo={onShowInfo} />
-                                <EquipmentSlot slot="helmet" icon={<User size={20} />} label="HEAD" item={equipment.helmet} onClick={() => setSelectedSlot('helmet')} onShowInfo={onShowInfo} />
+                                <EquipmentSlot slot="cape" icon={<Layers size={20} />} label="CAPE" item={equipment.cape} onClick={() => setSelectedSlot('cape')} onShowInfo={onShowInfo} isLocked={!hasWeapon} weaponClass={currentWeaponClass} />
+                                <EquipmentSlot slot="helmet" icon={<User size={20} />} label="HEAD" item={equipment.helmet} onClick={() => setSelectedSlot('helmet')} onShowInfo={onShowInfo} isLocked={!hasWeapon} weaponClass={currentWeaponClass} />
                                 <EquipmentSlot slot="food" icon={<Apple size={20} />} label="FOOD" item={equipment.food} onClick={() => setSelectedSlot('food')} onShowInfo={onShowInfo} />
 
-                                <EquipmentSlot slot="gloves" icon={<Shield size={20} />} label="HANDS" item={equipment.gloves} onClick={() => setSelectedSlot('gloves')} onShowInfo={onShowInfo} />
-                                <EquipmentSlot slot="chest" icon={<Shield size={20} />} label="CHEST" item={equipment.chest} onClick={() => setSelectedSlot('chest')} onShowInfo={onShowInfo} />
-                                <EquipmentSlot slot="offHand" icon={<Target size={20} />} label="OFF-HAND" item={equipment.offHand} onClick={() => setSelectedSlot('offHand')} onShowInfo={onShowInfo} />
+                                <EquipmentSlot slot="gloves" icon={<Shield size={20} />} label="HANDS" item={equipment.gloves} onClick={() => setSelectedSlot('gloves')} onShowInfo={onShowInfo} isLocked={!hasWeapon} weaponClass={currentWeaponClass} />
+                                <EquipmentSlot slot="chest" icon={<Shield size={20} />} label="CHEST" item={equipment.chest} onClick={() => setSelectedSlot('chest')} onShowInfo={onShowInfo} isLocked={!hasWeapon} weaponClass={currentWeaponClass} />
+                                <EquipmentSlot slot="offHand" icon={<Target size={20} />} label="OFF-HAND" item={equipment.offHand} onClick={() => setSelectedSlot('offHand')} onShowInfo={onShowInfo} isLocked={!hasWeapon} weaponClass={currentWeaponClass} />
 
-                                <EquipmentSlot slot="mainHand" icon={<Sword size={20} />} label="WEAPON" item={equipment.mainHand} onClick={() => setSelectedSlot('mainHand')} onShowInfo={onShowInfo} />
-                                <EquipmentSlot slot="boots" icon={<Target size={20} />} label="FEET" item={equipment.boots} onClick={() => setSelectedSlot('boots')} onShowInfo={onShowInfo} />
+                                <EquipmentSlot slot="mainHand" icon={<Sword size={20} />} label="WEAPON" item={equipment.mainHand} onClick={() => setSelectedSlot('mainHand')} onShowInfo={onShowInfo} weaponClass={currentWeaponClass} />
+                                <EquipmentSlot slot="boots" icon={<Target size={20} />} label="FEET" item={equipment.boots} onClick={() => setSelectedSlot('boots')} onShowInfo={onShowInfo} isLocked={!hasWeapon} weaponClass={currentWeaponClass} />
                                 <div style={{
                                     width: '64px',
                                     height: '64px',
@@ -1411,7 +1428,8 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                                                 ].map(({ slot, label, icon }) => {
                                                     const isEquipped = !!equipment[slot];
                                                     const activeCombatRunes = Object.keys(equipment).filter(k => k.startsWith('rune_ATTACK_') && equipment[k]).length;
-                                                    const isLocked = !isEquipped && activeCombatRunes >= 3;
+                                                    const isMaxRunes = !isEquipped && activeCombatRunes >= 3;
+                                                    const isLocked = isMaxRunes;
 
                                                     return (
                                                         <div key={slot} style={{ opacity: isLocked ? 0.5 : 1, position: 'relative' }}>
@@ -1424,7 +1442,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                                                                 onShowInfo={onShowInfo}
                                                                 isLocked={isLocked}
                                                             />
-                                                            {isLocked && (
+                                                            {isMaxRunes && (
                                                                 <div style={{
                                                                     position: 'absolute',
                                                                     top: 0, left: 0, right: 0, bottom: 0,
@@ -1436,9 +1454,28 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                                                                     fontSize: '0.6rem',
                                                                     fontWeight: 'bold',
                                                                     color: '#ff4444',
-                                                                    pointerEvents: 'none' // Let clicks pass through if needed, but onClick is blocked
+                                                                    pointerEvents: 'none'
                                                                 }}>
                                                                     MAX 3
+                                                                </div>
+                                                            )}
+                                                            {isLockedByWeapon && !isMaxRunes && (
+                                                                <div style={{
+                                                                    position: 'absolute',
+                                                                    top: 0, left: 0, right: 0, bottom: 0,
+                                                                    background: 'rgba(0,0,0,0.6)',
+                                                                    borderRadius: '10px',
+                                                                    display: 'flex',
+                                                                    flexDirection: 'column',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    fontSize: '0.5rem',
+                                                                    fontWeight: 'bold',
+                                                                    color: '#ff4444',
+                                                                    pointerEvents: 'none'
+                                                                }}>
+                                                                    <Sword size={12} />
+                                                                    WEAPON REQ.
                                                                 </div>
                                                             )}
                                                         </div>
@@ -1501,6 +1538,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                     onUnequip={handleUnequip}
                     onShowInfo={onShowInfo}
                     charStats={stats}
+                    weaponClass={currentWeaponClass}
                 />
             )}
 

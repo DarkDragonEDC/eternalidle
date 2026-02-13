@@ -505,7 +505,7 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge, onInspect })
                                         }}>
                                             <Shield size={18} color="#22c55e" />
                                             <span style={{ color: '#22c55e', fontWeight: '700', fontSize: '0.9rem', letterSpacing: '1px' }}>
-                                                CHALLENGED TODAY — RANK #{myRank.rank}
+                                                CHALLENGED TODAY — RANK #{myRank.pos}
                                             </span>
                                         </div>
                                     )}

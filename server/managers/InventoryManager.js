@@ -210,6 +210,16 @@ export class InventoryManager {
         }
 
         const state = char.state;
+
+        // --- WEAPON-FIRST REQUIREMENT ---
+        const isWeapon = item.type === 'WEAPON';
+        const isUtility = ['TOOL', 'TOOL_AXE', 'TOOL_PICKAXE', 'TOOL_KNIFE', 'TOOL_SICKLE', 'TOOL_ROD', 'TOOL_POUCH', 'FOOD', 'RUNE'].includes(item.type);
+        const hasWeapon = !!state.equipment?.mainHand;
+
+        if (!isWeapon && !isUtility && !hasWeapon) {
+            throw new Error("You must equip a weapon before other gear!");
+        }
+        // -------------------------------
         const inventoryEntry = state.inventory[itemId];
         const qty = typeof inventoryEntry === 'object' ? (inventoryEntry?.amount || 0) : (Number(inventoryEntry) || 0);
         if (qty < 1) {
@@ -242,6 +252,16 @@ export class InventoryManager {
                 }
             }
         }
+        // --- CLASS REQUIREMENT CHECK ---
+        const itemClass = getRequiredProficiencyGroup(itemId);
+        const currentWeaponId = state.equipment?.mainHand?.id;
+        const weaponClass = currentWeaponId ? getRequiredProficiencyGroup(currentWeaponId) : null;
+
+        if (itemClass && weaponClass && itemClass !== weaponClass && !isWeapon) {
+            const itemClassName = itemClass.charAt(0).toUpperCase() + itemClass.slice(1);
+            const weaponClassName = weaponClass.charAt(0).toUpperCase() + weaponClass.slice(1);
+            throw new Error(`This is a ${itemClassName} item! You are using a ${weaponClassName} weapon.`);
+        }
         // -------------------------------
 
         let slotName = '';
@@ -272,6 +292,31 @@ export class InventoryManager {
         }
 
         if (!state.equipment) state.equipment = {};
+
+        // --- AUTO-UNEQUIP INCOMPATIBLE GEAR ---
+        if (isWeapon) {
+            const newWeaponClass = getRequiredProficiencyGroup(itemId);
+            if (newWeaponClass) {
+                for (const slot of Object.keys(state.equipment)) {
+                    // Skip the weapon slot itself and utility slots
+                    if (['mainHand', 'tool', 'tool_axe', 'tool_pickaxe', 'tool_knife', 'tool_sickle', 'tool_rod', 'tool_pouch', 'food'].includes(slot)) continue;
+                    if (slot.startsWith('rune_')) continue;
+
+                    const equippedItem = state.equipment[slot];
+                    if (equippedItem && equippedItem.id) {
+                        const gearClass = getRequiredProficiencyGroup(equippedItem.id);
+                        if (gearClass && gearClass !== newWeaponClass) {
+                            // Unequip incompatible item
+                            const oldId = equippedItem.id;
+                            const { id: _, stats: __, ...metadata } = equippedItem;
+                            this.addItemToInventory(char, oldId, 1, Object.keys(metadata).length > 0 ? metadata : null);
+                            delete state.equipment[slot];
+                        }
+                    }
+                }
+            }
+        }
+        // --------------------------------------
 
         // 3-Rune Combat Limit Check
         // If equipping a Combat Rune, check if we already have 3 active (excluding the target slot if occupied)
@@ -325,11 +370,12 @@ export class InventoryManager {
             }
 
             // Create equipment object with metadata from inventory
-            const inventoryEntry = state.inventory[itemId];
+            // Re-resolve item entry since state.inventory[itemId] might have changed above
+            const finalInventoryEntry = state.inventory[itemId];
             const equipmentObject = { ...item }; // item is resolved from itemId (has stats, name, etc)
 
-            if (typeof inventoryEntry === 'object' && inventoryEntry !== null) {
-                const { amount, ...metadata } = inventoryEntry;
+            if (typeof finalInventoryEntry === 'object' && finalInventoryEntry !== null) {
+                const { amount, ...metadata } = finalInventoryEntry;
                 Object.assign(equipmentObject, metadata);
             }
 

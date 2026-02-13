@@ -1,4 +1,4 @@
-import { resolveItem, calculateRuneBonus } from '@shared/items';
+import { resolveItem, calculateRuneBonus, getRequiredProficiencyGroup } from '@shared/items';
 
 /**
  * Checks if a candidate item is better than the currently equipped item.
@@ -49,9 +49,10 @@ export const isBetterItem = (candidate, current) => {
  * Finds the best item in the inventory for a specific slot.
  * @param {String} slot - The equipment slot (e.g., 'mainHand', 'rune_WOOD_XP').
  * @param {Object} inventory - The character's inventory.
+ * @param {String} weaponClass - The current weapon class (warrior/hunter/mage).
  * @returns {Object|null} - The best item or null.
  */
-export const getBestItemForSlot = (slot, inventory) => {
+export const getBestItemForSlot = (slot, inventory, weaponClass = null) => {
     const candidates = [];
 
     Object.entries(inventory).forEach(([itemId, qty]) => {
@@ -99,6 +100,14 @@ export const getBestItemForSlot = (slot, inventory) => {
         }
 
         if (matches) {
+            // Class mismatch filter (combat gear only)
+            const isUtility = ['TOOL', 'TOOL_AXE', 'TOOL_PICKAXE', 'TOOL_KNIFE', 'TOOL_SICKLE', 'TOOL_ROD', 'TOOL_POUCH', 'FOOD', 'RUNE', 'WEAPON'].includes(item.type);
+            const itemClass = getRequiredProficiencyGroup(itemId);
+
+            if (!isUtility && itemClass && weaponClass && itemClass !== weaponClass) {
+                return; // Hide item if class mismatch
+            }
+
             candidates.push({ ...item, id: itemId });
         }
     });

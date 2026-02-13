@@ -4,7 +4,7 @@ import { X, Sword, Shield, Heart, Zap, Play, Layers, User, Pickaxe, Target, Appl
 import { resolveItem, getTierColor, calculateRuneBonus, getRequiredProficiencyGroup, getLevelRequirement } from '@shared/items';
 import { getBestItemForSlot, isBetterItem } from '../utils/equipment';
 
-const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, inventory, onShowInfo, charStats }) => {
+const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, inventory, onShowInfo, charStats, weaponClass }) => {
 
     // Filter candidates from inventory based on slot
     const { candidates, bestCandidate } = React.useMemo(() => {
@@ -54,6 +54,14 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
             }
 
             if (matches) {
+                // Class mismatch filter (combat gear only)
+                const isUtility = ['TOOL', 'TOOL_AXE', 'TOOL_PICKAXE', 'TOOL_KNIFE', 'TOOL_SICKLE', 'TOOL_ROD', 'TOOL_POUCH', 'FOOD', 'RUNE'].includes(item.type);
+                const itemClass = getRequiredProficiencyGroup(itemId);
+
+                if (!isUtility && itemClass && weaponClass && itemClass !== weaponClass) {
+                    return; // Hide item if class mismatch
+                }
+
                 itemArray.push({ ...item, id: itemId, qty });
             }
         });
@@ -79,7 +87,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
 
         const best = itemArray.length > 0 ? itemArray[0] : null;
         return { candidates: itemArray, bestCandidate: best };
-    }, [slot, inventory]);
+    }, [slot, inventory, weaponClass]);
 
     // Resolve current item for comparison
     const resolvedCurrent = React.useMemo(() => {
