@@ -503,7 +503,8 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 // Food Logic
                                 const food = gameState?.state?.equipment?.food;
                                 const foodAmount = (food && food.amount > 0) ? food.amount : 0;
-                                const foodHealPerUse = (food && food.heal) ? food.heal : 0;
+                                const maxHp = gameState?.calculatedStats?.hp || 100;
+                                const foodHealPerUse = (food && (food.heal || (food.healPercent && Math.floor(maxHp * food.healPercent / 100)))) || 0;
 
                                 // Player HP
                                 const playerHp = combat.playerHealth || 1;

@@ -172,29 +172,58 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge, onInspect })
     const [activeTab, setActiveTab] = useState('BOSS'); // 'BOSS' | 'RANKING'
     const [showInfo, setShowInfo] = useState(false);
 
+    // History State
+    const [viewingHistory, setViewingHistory] = useState(false);
+    const [historyRankings, setHistoryRankings] = useState([]);
+    const [loadingHistory, setLoadingHistory] = useState(false);
+
     useEffect(() => {
         if (!socket) return;
         const handleStatus = (status) => {
             setWbStatus(status);
             setLoading(false);
         };
+        const handleHistory = ({ date, rankings }) => {
+            setHistoryRankings(rankings);
+            setLoadingHistory(false);
+        };
+
         socket.on('world_boss_status', handleStatus);
+        socket.on('world_boss_ranking_history', handleHistory);
 
         // Initial fetch
         socket.emit('get_world_boss_status');
 
         // Auto-refresh every 5 seconds for live rankings
         const interval = setInterval(() => {
-            if (activeTab === 'RANKING') {
+            if (activeTab === 'RANKING' && !viewingHistory) {
                 socket.emit('get_world_boss_status');
             }
         }, 5000);
 
         return () => {
             socket.off('world_boss_status', handleStatus);
+            socket.off('world_boss_ranking_history', handleHistory);
             clearInterval(interval);
         };
-    }, [socket, activeTab]);
+    }, [socket, activeTab, viewingHistory]);
+
+    const fetchHistory = () => {
+        setViewingHistory(true);
+        setLoadingHistory(true);
+        setHistoryRankings([]); // Clear prev
+
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const dateStr = yesterday.toISOString().split('T')[0];
+
+        socket.emit('get_world_boss_ranking_history', { date: dateStr });
+    };
+
+    const clearHistory = () => {
+        setViewingHistory(false);
+        setHistoryRankings([]);
+    };
 
     if (loading) {
         return (
@@ -207,7 +236,8 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge, onInspect })
     }
 
     const boss = wbStatus?.boss;
-    const rankings = wbStatus?.rankings || [];
+    const currentRankings = wbStatus?.rankings || [];
+    const rankings = viewingHistory ? historyRankings : currentRankings;
     const myRank = wbStatus?.myRank;
     const pendingReward = wbStatus?.pendingReward;
 
@@ -255,17 +285,22 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge, onInspect })
     const calculatePotentialChest = (pos, totalParticipants) => {
         if (!totalParticipants || pos <= 0) return null;
 
-        const poolSize = Math.max(1, Math.floor((totalParticipants - 1) / 49));
-        const groupIndex = Math.floor((pos - 2) / poolSize);
+        const availableChests = Object.keys(WORLDBOSS_DROP_TABLE);
+        const maxIndex = availableChests.length - 1;
 
-        let chestId;
-        if (pos === 1) {
-            chestId = 'T10_WORLDBOSS_CHEST_MASTERPIECE';
+        const score = totalParticipants - pos;
+        let index = 0;
+
+        if (totalParticipants <= availableChests.length) {
+            index = score;
         } else {
-            const chests = Object.keys(WORLDBOSS_DROP_TABLE).filter(c => c !== 'T10_WORLDBOSS_CHEST_MASTERPIECE');
-            const reverseIndex = 48 - Math.min(48, groupIndex);
-            chestId = chests[reverseIndex] || chests[0];
+            const maxScore = Math.max(1, totalParticipants - 1);
+            const ratio = score / maxScore;
+            index = Math.floor(ratio * maxIndex);
         }
+
+        index = Math.max(0, Math.min(maxIndex, index));
+        const chestId = availableChests[index];
 
         const parts = chestId.split('_');
         const tier = parts[0];
@@ -571,23 +606,43 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge, onInspect })
                                     letterSpacing: '2px',
                                     textTransform: 'uppercase'
                                 }}>
-                                    Daily Ranking
+                                    {viewingHistory ? 'Yesterday\'s Ranking' : 'Daily Ranking'}
                                 </span>
-                                <div style={{
-                                    marginLeft: 'auto',
-                                    padding: '3px 10px',
-                                    background: 'rgba(255,255,255,0.04)',
-                                    borderRadius: '12px',
-                                    fontSize: '0.7rem',
-                                    color: 'var(--text-dim)',
-                                    fontWeight: '600'
-                                }}>
-                                    {rankings.length} player{rankings.length !== 1 ? 's' : ''}
+
+                                <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                    <button
+                                        onClick={viewingHistory ? clearHistory : fetchHistory}
+                                        style={{
+                                            padding: '4px 10px',
+                                            background: 'rgba(255, 255, 255, 0.1)',
+                                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                                            borderRadius: '8px',
+                                            color: 'var(--text-main)',
+                                            fontSize: '0.7rem',
+                                            cursor: 'pointer',
+                                            fontWeight: '600'
+                                        }}
+                                    >
+                                        {viewingHistory ? 'View Today' : 'View Yesterday'}
+                                    </button>
+
+                                    <div style={{
+                                        padding: '3px 10px',
+                                        background: 'rgba(255,255,255,0.04)',
+                                        borderRadius: '12px',
+                                        fontSize: '0.7rem',
+                                        color: 'var(--text-dim)',
+                                        fontWeight: '600'
+                                    }}>
+                                        {rankings.length} player{rankings.length !== 1 ? 's' : ''}
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Rankings List */}
-                            {rankings.length === 0 ? (
+                            {loadingHistory ? (
+                                <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-dim)' }}>Loading history...</div>
+                            ) : rankings.length === 0 ? (
                                 <div style={{
                                     padding: '40px 20px',
                                     textAlign: 'center',
@@ -598,8 +653,10 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge, onInspect })
                                     border: '1px dashed rgba(255,255,255,0.06)'
                                 }}>
                                     <Sword size={28} style={{ opacity: 0.2, marginBottom: '10px' }} />
-                                    <div>No challengers yet today.</div>
-                                    <div style={{ fontSize: '0.75rem', marginTop: '4px', opacity: 0.5 }}>Be the first to fight!</div>
+                                    <div>{viewingHistory ? 'No data for yesterday.' : 'No challengers yet today.'}</div>
+                                    <div style={{ fontSize: '0.75rem', marginTop: '4px', opacity: 0.5 }}>
+                                        {viewingHistory ? 'The Boss was peaceful.' : 'Be the first to fight!'}
+                                    </div>
                                 </div>
                             ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>

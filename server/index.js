@@ -605,16 +605,26 @@ io.on('connection', (socket) => {
     // --- WORLD BOSS ---
     socket.on('get_world_boss_status', async () => {
         try {
-            console.log(`[WORLD_BOSS] get_status called for char: ${socket.data?.characterId}`);
+            // console.log(`[WORLD_BOSS] get_status called for char: ${socket.data?.characterId}`);
             if (!socket.data?.characterId) {
                 console.warn('[WORLD_BOSS] get_status: No characterId on socket!');
                 return;
             }
             const status = await gameManager.worldBossManager.getStatus(socket.data.characterId);
             socket.emit('world_boss_status', status);
-            console.log('[WORLD_BOSS] status sent to client.');
+            // console.log('[WORLD_BOSS] status sent to client.');
         } catch (err) {
             console.error('[WORLD_BOSS] get_status error:', err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('get_world_boss_ranking_history', async ({ date }) => {
+        try {
+            const rankings = await gameManager.worldBossManager.getRankingHistory(date);
+            socket.emit('world_boss_ranking_history', { date, rankings });
+        } catch (err) {
+            console.error('[WORLD_BOSS] history error:', err);
             socket.emit('error', { message: err.message });
         }
     });

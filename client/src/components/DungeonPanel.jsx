@@ -114,7 +114,8 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
         // Player HP + Food healing
         const baseHp = gameState?.state?.health || stats.hp || 100;
         const food = gameState?.state?.equipment?.food;
-        const foodTotalHeal = (food && food.amount > 0) ? (food.amount * (food.heal || 0)) : 0;
+        const healPerUse = (food && (food.heal || (food.healPercent && Math.floor(baseHp * food.healPercent / 100)))) || 0;
+        const foodTotalHeal = (food && food.amount > 0) ? (food.amount * healPerUse) : 0;
         const totalEffectiveHp = baseHp + foodTotalHeal;
 
         const trashMobIds = dungeon.trashMobs || [];
@@ -940,7 +941,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                             {hasFood && (
                                                 <>
                                                     <span>|</span>
-                                                    <span style={{ color: '#ff9800' }}>🍖 {food.amount}x ({food.heal} HP each)</span>
+                                                    <span style={{ color: '#ff9800' }}>🍖 {food.amount}x ({food.heal || (food.healPercent ? `${food.healPercent}%` : 0)} HP)</span>
                                                 </>
                                             )}
                                         </div>

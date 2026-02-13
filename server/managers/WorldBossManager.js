@@ -438,4 +438,26 @@ export class WorldBossManager {
             throw new Error("Inventory is full! Please make space before claiming.");
         }
     }
+    async getRankingHistory(dateStr) {
+        try {
+            const { data, error } = await this.gameManager.supabase
+                .from('world_boss_attempts')
+                .select('character_id, damage, characters(name)')
+                .eq('date', dateStr)
+                .order('damage', { ascending: false })
+                .limit(50);
+
+            if (error) throw error;
+
+            return data.map((r, index) => ({
+                pos: index + 1,
+                character_id: r.character_id,
+                name: r.characters?.name || 'Unknown',
+                damage: parseInt(r.damage)
+            }));
+        } catch (err) {
+            console.error('[WORLD_BOSS] Error fetching ranking history:', err);
+            return [];
+        }
+    }
 }

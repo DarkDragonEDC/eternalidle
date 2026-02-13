@@ -81,7 +81,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
         if (itm.type === 'CAPE') return "Special cape. Offers passive bonuses and global efficiency.";
         if (itm.type.startsWith('TOOL')) return "Gathering tool. Required to gather higher TIER resources.";
 
-        if (itm.type === 'FOOD') return itm.description || `Consumable. Restores ${itm.heal || 'Health'} Health over time.`;
+        if (itm.type === 'FOOD') return itm.description || `Consumable. Restores ${itm.heal || (itm.healPercent ? `${itm.healPercent}% ` : '') || 'Health'} Health over time.`;
         if (itm.type === 'MAP') return "Dungeon Map. Use to access dangerous areas with valuable rewards.";
         if (itm.type === 'CRAFTING_MATERIAL' && itm.id.includes('CREST')) return "Rare boss material. Used to craft prestige items.";
 
