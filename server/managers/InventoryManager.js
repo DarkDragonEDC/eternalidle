@@ -412,33 +412,12 @@ export class InventoryManager {
         const skills = char.state.skills;
         const equipment = char.state.equipment || {};
 
-        let warriorProf = 0;
-        let hunterProf = 0;
-        let mageProf = 0;
-
         const getLvl = (key) => (skills[key]?.level || 1);
 
-        warriorProf += getLvl('ORE_MINER');
-        warriorProf += getLvl('METAL_BAR_REFINER');
-        warriorProf += getLvl('WARRIOR_CRAFTER');
-        warriorProf += getLvl('COOKING');
-        warriorProf += getLvl('FISHING');
-        warriorProf = Math.min(100, warriorProf * 0.2);
-
-        hunterProf += getLvl('ANIMAL_SKINNER');
-        hunterProf += getLvl('LEATHER_REFINER');
-        hunterProf += getLvl('HUNTER_CRAFTER');
-        hunterProf += getLvl('LUMBERJACK');
-        hunterProf += getLvl('PLANK_REFINER');
-        hunterProf = Math.min(100, hunterProf * 0.2);
-
-        mageProf += getLvl('FIBER_HARVESTER');
-        mageProf += getLvl('CLOTH_REFINER');
-        mageProf += getLvl('MAGE_CRAFTER');
-        mageProf += getLvl('HERBALISM');
-        mageProf += getLvl('DISTILLATION');
-        mageProf += getLvl('ALCHEMY');
-        mageProf = Math.min(100, mageProf * (1 / 6));
+        // Proficiency Base Levels (Direct from Skill)
+        let warriorProf = getLvl('WARRIOR_PROFICIENCY');
+        let hunterProf = getLvl('HUNTER_PROFICIENCY');
+        let mageProf = getLvl('MAGE_PROFICIENCY');
 
         let gearHP = 0;
         let gearDamage = 0;
@@ -554,13 +533,24 @@ export class InventoryManager {
         else if (weaponId.includes('BOW')) activeProf = 'hunter';
         else if (weaponId.includes('STAFF')) activeProf = 'mage';
 
+
+
         // Determine active proficiency values for combat
         const profLevel = activeProf === 'warrior' ? warriorProf
             : activeProf === 'hunter' ? hunterProf
                 : activeProf === 'mage' ? mageProf
                     : 1;
 
-        const profData = activeProf ? getProficiencyStats(activeProf, profLevel) : { dmg: 0, hp: 0, speedBonus: 0 };
+        // Re-using existing helper function if available, otherwise we define stats here
+        // The original code used:
+        // const profData = activeProf ? getProficiencyStats(activeProf, profLevel) : ...
+        // We need to make sure getProficiencyStats is available or we reimplement it.
+        // Looking at the view_file history, getProficiencyStats seems to be imported or defined in this file?
+        // It wasn't in the view, let's assume it's external or helper.
+        // Wait, the previous view showed it being used: `const profData = activeProf ? getProficiencyStats(activeProf, profLevel) : ...`
+
+        // Let's stick to the existing data structure consumption to imply minimal breakage
+        const profData = activeProf ? getProficiencyStats(activeProf, profLevel) : { dmg: 0, hp: 0, speedBonus: 0, def: 0 };
         const activeProfDmg = profData.dmg;
         const activeHP = profData.hp;
 
@@ -568,7 +558,6 @@ export class InventoryManager {
         const activeSpeedBonus = profData.speedBonus || 0;
 
         const activeProfDefense = profData.def || 0;
-
 
         const globals = {
             xpYield: 0,

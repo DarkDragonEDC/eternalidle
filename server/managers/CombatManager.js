@@ -271,6 +271,32 @@ export class CombatManager {
                 leveledUp = this.gameManager.addXP(char, 'COMBAT', finalXp);
                 roundDetails.xpGained = finalXp;
 
+                // --- NEW PROFICIENCY XP LOGIC ---
+                // 50% of Combat XP goes to the active weapon proficiency
+                const profXp = Math.floor(finalXp * 0.5);
+                if (profXp > 0) {
+                    const weaponObj = char.state.equipment?.mainHand; // Access directly from state
+                    const weaponId = (weaponObj?.id || '').toUpperCase();
+                    let profSkillKey = null;
+
+                    if (weaponId.includes('SWORD')) profSkillKey = 'WARRIOR_PROFICIENCY';
+                    else if (weaponId.includes('BOW')) profSkillKey = 'HUNTER_PROFICIENCY';
+                    else if (weaponId.includes('STAFF')) profSkillKey = 'MAGE_PROFICIENCY';
+
+                    if (profSkillKey) {
+                        const profLeveled = this.gameManager.addXP(char, profSkillKey, profXp);
+                        if (profLeveled) {
+                            leveledUp = true; // Trigger level up notification/effect
+                        }
+
+                        // Track session XP for specific proficiency
+                        if (!char.state.combat.sessionProfXp) char.state.combat.sessionProfXp = {};
+                        char.state.combat.sessionProfXp[profSkillKey] = (char.state.combat.sessionProfXp[profSkillKey] || 0) + profXp;
+                    }
+                }
+
+
+
                 // Track Persistent Stats (Kills)
                 if (!char.state.stats) char.state.stats = {};
                 char.state.stats.totalKills = (char.state.stats.totalKills || 0) + 1;

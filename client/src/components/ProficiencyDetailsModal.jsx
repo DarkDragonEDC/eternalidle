@@ -174,51 +174,53 @@ const ProficiencyDetailsModal = ({ data, onClose }) => {
                     </div>
 
                     {/* Sources List */}
-                    <div>
-                        <h4 style={{ color: '#888', fontSize: '0.7rem', fontWeight: '900', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '15px' }}>
-                            Mastery Sources
-                        </h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            {sources.map((source, i) => (
-                                <motion.div
-                                    key={source.label}
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: 0.2 + (i * 0.05) }}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        padding: '12px 16px',
-                                        background: 'rgba(255,255,255,0.02)',
-                                        borderRadius: '12px',
-                                        border: '1px solid rgba(255,255,255,0.03)'
-                                    }}
-                                >
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                        <div style={{
-                                            width: '32px', height: '32px',
-                                            background: 'rgba(255,255,255,0.05)',
-                                            borderRadius: '8px',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            color: '#aaa'
-                                        }}>
-                                            {/* We can infer icon based on label or pass it, for now generic logic or specific icons */}
-                                            <ChevronRight size={16} />
+                    {sources && sources.length > 0 && (
+                        <div>
+                            <h4 style={{ color: '#888', fontSize: '0.7rem', fontWeight: '900', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '15px' }}>
+                                Mastery Sources
+                            </h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {sources.map((source, i) => (
+                                    <motion.div
+                                        key={source.label}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 0.2 + (i * 0.05) }}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            padding: '12px 16px',
+                                            background: 'rgba(255,255,255,0.02)',
+                                            borderRadius: '12px',
+                                            border: '1px solid rgba(255,255,255,0.03)'
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <div style={{
+                                                width: '32px', height: '32px',
+                                                background: 'rgba(255,255,255,0.05)',
+                                                borderRadius: '8px',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                color: '#aaa'
+                                            }}>
+                                                {/* We can infer icon based on label or pass it, for now generic logic or specific icons */}
+                                                <ChevronRight size={16} />
+                                            </div>
+                                            <div>
+                                                <div style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 'bold' }}>{source.label}</div>
+                                                <div style={{ color: '#666', fontSize: '0.65rem', fontWeight: 'bold' }}>Level {Math.floor(source.level)}</div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <div style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 'bold' }}>{source.label}</div>
-                                            <div style={{ color: '#666', fontSize: '0.65rem', fontWeight: 'bold' }}>Level {Math.floor(source.level)}</div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ color: color, fontSize: '0.9rem', fontWeight: '900' }}>+{source.points.toFixed(1)}</div>
+                                            <div style={{ color: '#444', fontSize: '0.55rem', fontWeight: 'bold', textTransform: 'uppercase' }}>POINTS</div>
                                         </div>
-                                    </div>
-                                    <div style={{ textAlign: 'right' }}>
-                                        <div style={{ color: color, fontSize: '0.9rem', fontWeight: '900' }}>+{source.points.toFixed(1)}</div>
-                                        <div style={{ color: '#444', fontSize: '0.55rem', fontWeight: 'bold', textTransform: 'uppercase' }}>POINTS</div>
-                                    </div>
-                                </motion.div>
-                            ))}
+                                    </motion.div>
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Footer Info */}
                     <div style={{ marginTop: '30px', padding: '15px', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: `1px dashed ${color}30`, textAlign: 'center' }}>

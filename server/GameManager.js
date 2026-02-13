@@ -320,6 +320,8 @@ export class GameManager {
                 }
             }
 
+
+
             if (!data.state.stats) {
                 data.state.stats = {};
                 updated = true;
@@ -1666,6 +1668,10 @@ export class GameManager {
             leveledUp = true;
             nextLevelXP = calculateNextLevelXP(skill.level);
         }
+
+        // FIX: Persist the nextLevelXp to the state so the client knows the target
+        skill.nextLevelXp = nextLevelXP;
+
         return leveledUp ? { skill: skillKey, level: skill.level } : null;
     }
 

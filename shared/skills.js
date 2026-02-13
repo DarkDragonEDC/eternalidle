@@ -77,6 +77,9 @@ export const INITIAL_SKILLS = {
 
     // Combat
     COMBAT: { level: 1, xp: 0, nextLevelXp: 84 },
+    WARRIOR_PROFICIENCY: { level: 1, xp: 0, nextLevelXp: 84 },
+    HUNTER_PROFICIENCY: { level: 1, xp: 0, nextLevelXp: 84 },
+    MAGE_PROFICIENCY: { level: 1, xp: 0, nextLevelXp: 84 },
 
     // Specialization
     FISHING: { level: 1, xp: 0, nextLevelXp: 84 },

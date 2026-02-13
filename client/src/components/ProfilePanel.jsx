@@ -7,6 +7,7 @@ import {
     Axe, Pickaxe, Scissors, Anchor, Apple, Info, ShoppingBag, Edit, Droplets,
     Hammer, Zap as EfficiencyIcon
 } from 'lucide-react';
+import { calculateNextLevelXP } from '../utils/xpTable';
 import { resolveItem, getTierColor, calculateRuneBonus, getRequiredProficiencyGroup } from '@shared/items';
 import { getProficiencyStats } from '@shared/proficiency_stats';
 import { getBestItemForSlot, isBetterItem } from '../utils/equipment';
@@ -88,32 +89,19 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         // Helper para pegar nível de forma segura
         const getLvl = (key) => (skills[key]?.level || 1);
 
-        // Warrior Prof (STR Equivalent)
-        warriorProf += getLvl('ORE_MINER');
-        warriorProf += getLvl('METAL_BAR_REFINER');
-        warriorProf += getLvl('WARRIOR_CRAFTER');
-        warriorProf += getLvl('COOKING');
-        warriorProf += getLvl('FISHING');
+        // New Logic: Direct Proficiency Skills
+        warriorProf = getLvl('WARRIOR_PROFICIENCY');
+        hunterProf = getLvl('HUNTER_PROFICIENCY');
+        mageProf = getLvl('MAGE_PROFICIENCY');
 
-        // Hunter Prof (AGI Equivalent)
-        hunterProf += getLvl('ANIMAL_SKINNER');
-        hunterProf += getLvl('LEATHER_REFINER');
-        hunterProf += getLvl('LUMBERJACK');
-        hunterProf += getLvl('PLANK_REFINER');
-        hunterProf += getLvl('HUNTER_CRAFTER');
-
-        // Mage Prof (INT Equivalent)
-        mageProf += getLvl('FIBER_HARVESTER');
-        mageProf += getLvl('CLOTH_REFINER');
-        mageProf += getLvl('MAGE_CRAFTER');
-        mageProf += getLvl('HERBALISM');
-        mageProf += getLvl('DISTILLATION');
-        mageProf += getLvl('ALCHEMY');
-
-        // Apply Multipliers & Cap
-        warriorProf = Math.min(100, warriorProf * 0.2);
-        hunterProf = Math.min(100, hunterProf * 0.2);
-        mageProf = Math.min(100, mageProf * (1 / 6));
+        // Apply Multipliers & Cap (Logic changed: it is now just the level, not * 0.2)
+        // The * 0.2 was to convert sum of skills (max 500) to percentage (max 100).
+        // Now the level IS the proficiency level (1-100).
+        // So we don't need to multiply by 0.2 anymore, UNLESS the UI expects a percentage and the level is just an integer?
+        // In the old logic: `warriorProf = Math.min(100, warriorProf * 0.2)`
+        // If sum was 500 -> 100.
+        // Now `nativeProf` is 1-100. So it is already 1:1.
+        // However, we still need to add gear bonuses below.
 
         // Gear Bonuses
         Object.values(equipment).forEach(item => {
@@ -469,18 +457,11 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         return <Star size={size} />;
     };
 
-    // Helper para pegar nível de forma segura (duplicado do useMemo acima, mas ok para render)
-    const getLvl = (key) => (skills[key]?.level || 1);
+
 
     const formatNumber = (num) => {
         return num.toLocaleString('en-US');
     };
-
-    const fmtSkillSource = (label, key, mult) => ({
-        label,
-        level: getLvl(key),
-        points: (getLvl(key) * mult)
-    });
 
     const hunterStats = getProficiencyStats('hunter', calculatedStats.hunterProf);
     const hunterBreakdown = {
@@ -495,13 +476,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
             { label: 'Defense', value: `+${formatNumber(hunterStats.def || 0)}`, subtext: 'Exact Value', icon: <Shield size={18} /> },
             { label: 'Attack Speed', value: `-${(hunterStats.speedBonus || 0).toFixed(1)}ms`, subtext: 'Exact Value', icon: <Zap size={18} /> }
         ],
-        sources: [
-            fmtSkillSource('Animal Skinner', 'ANIMAL_SKINNER', 0.2),
-            fmtSkillSource('Leather Refiner', 'LEATHER_REFINER', 0.2),
-            fmtSkillSource('Hunter Crafter', 'HUNTER_CRAFTER', 0.2),
-            fmtSkillSource('Lumberjack', 'LUMBERJACK', 0.2),
-            fmtSkillSource('Plank Refiner', 'PLANK_REFINER', 0.2)
-        ]
+        sources: []
     };
 
     const warriorStats = getProficiencyStats('warrior', calculatedStats.warriorProf);
@@ -517,13 +492,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
             { label: 'Defense', value: `+${formatNumber(warriorStats.def || 0)}`, subtext: 'Exact Value', icon: <Shield size={18} /> },
             { label: 'Attack Speed', value: `-${(warriorStats.speedBonus || 0).toFixed(1)}ms`, subtext: 'Exact Value', icon: <Zap size={18} /> }
         ],
-        sources: [
-            fmtSkillSource('Ore Miner', 'ORE_MINER', 0.2),
-            fmtSkillSource('Metal Bar Refiner', 'METAL_BAR_REFINER', 0.2),
-            fmtSkillSource('Warrior Crafter', 'WARRIOR_CRAFTER', 0.2),
-            fmtSkillSource('Cooking', 'COOKING', 0.2),
-            fmtSkillSource('Fishing', 'FISHING', 0.2)
-        ]
+        sources: []
     };
 
     const mageStats = getProficiencyStats('mage', calculatedStats.mageProf);
@@ -539,14 +508,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
             { label: 'Defense', value: `+${formatNumber(mageStats.def || 0)}`, subtext: 'Exact Value', icon: <Shield size={18} /> },
             { label: 'Attack Speed', value: `-${(mageStats.speedBonus || 0).toFixed(1)}ms`, subtext: 'Exact Value', icon: <Zap size={18} /> }
         ],
-        sources: [
-            fmtSkillSource('Fiber Harvester', 'FIBER_HARVESTER', 1 / 6),
-            fmtSkillSource('Cloth Refiner', 'CLOTH_REFINER', 1 / 6),
-            fmtSkillSource('Mage Crafter', 'MAGE_CRAFTER', 1 / 6),
-            fmtSkillSource('Herbalism', 'HERBALISM', 1 / 6),
-            fmtSkillSource('Distillation', 'DISTILLATION', 1 / 6),
-            fmtSkillSource('Alchemy', 'ALCHEMY', 1 / 6)
-        ]
+        sources: []
     };
 
     if (!gameState) return <div style={{ padding: 20, textAlign: 'center', opacity: 0.5 }}>Loading data...</div>;
@@ -875,6 +837,24 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                                     { label: 'Mage Prof.', value: stats.mageProf, color: '#2196f3', desc: mageBreakdown, key: 'mage', weapon: 'Staff' }
                                 ].map(stat => {
                                     const isActive = stats.activeProf === stat.key;
+
+                                    // Calculate XP Progress
+                                    const skillKey = stat.key === 'warrior' ? 'WARRIOR_PROFICIENCY'
+                                        : stat.key === 'hunter' ? 'HUNTER_PROFICIENCY'
+                                            : 'MAGE_PROFICIENCY';
+
+                                    const rawSkill = skills[skillKey] || { xp: 0, nextLevelXp: 100, level: 1 };
+
+                                    // Fallback if nextLevelXp is missing (old data)
+                                    const nextLvlXp = rawSkill.nextLevelXp || calculateNextLevelXP(rawSkill.level);
+
+                                    const skillData = {
+                                        ...rawSkill,
+                                        nextLevelXp: nextLvlXp
+                                    };
+
+                                    const progress = Math.min(100, Math.max(0, (skillData.xp / skillData.nextLevelXp) * 100)) || 0;
+
                                     return (
                                         <div key={stat.label} style={{
                                             textAlign: 'center',
@@ -887,7 +867,9 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                                             boxShadow: isActive ? `0 0 12px ${stat.color}40, inset 0 0 8px ${stat.color}10` : 'none',
                                             transform: isActive ? (isMobile ? 'scale(1.02)' : 'scale(1.08)') : (isMobile ? 'scale(0.95)' : 'scale(0.92)'),
                                             flex: 1,
-                                            minWidth: 0 // Prevent flex item overflow
+                                            minWidth: 0, // Prevent flex item overflow
+                                            position: 'relative',
+                                            overflow: 'hidden'
                                         }}>
                                             <div
                                                 onClick={() => setProficiencyModal(stat.desc)}
@@ -913,31 +895,75 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                                                 fontSize: isActive ? (isMobile ? '1.4rem' : '1.8rem') : (isMobile ? '1.1rem' : '1.4rem'),
                                                 fontWeight: '900',
                                                 color: isActive ? stat.color : '#555',
-                                                transition: 'all 0.3s'
+                                                transition: 'all 0.3s',
+                                                zIndex: 2,
+                                                position: 'relative'
                                             }}>
                                                 {parseFloat(Number(stat.value).toFixed(2))}
                                             </div>
-                                            {isActive && (
-                                                <div style={{
-                                                    fontSize: isMobile ? '0.45rem' : '0.5rem',
-                                                    color: stat.color,
-                                                    marginTop: '3px',
-                                                    fontWeight: '700',
-                                                    letterSpacing: '1px'
-                                                }}>
-                                                    {isMobile ? 'ACTIVE' : '⚔ ACTIVE'}
-                                                </div>
-                                            )}
-                                            {!isActive && (
-                                                <div style={{
-                                                    fontSize: isMobile ? '0.4rem' : '0.45rem',
-                                                    color: '#444',
-                                                    marginTop: '3px',
-                                                    whiteSpace: 'nowrap'
-                                                }}>
-                                                    Equip {stat.weapon}
-                                                </div>
-                                            )}
+
+
+                                            {/* XP Bar Background */}
+                                            <div style={{
+                                                marginTop: '4px',
+                                                marginBottom: '2px', // Reduced margin
+                                                height: '4px',
+                                                background: 'rgba(0,0,0,0.2)',
+                                                borderRadius: '2px',
+                                                overflow: 'hidden',
+                                                width: '80%',
+                                                margin: '4px auto'
+                                            }}>
+                                                <motion.div
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${progress}%` }}
+                                                    transition={{ duration: 0.5 }}
+                                                    style={{
+                                                        height: '100%',
+                                                        background: stat.color,
+                                                        borderRadius: '2px'
+                                                    }}
+                                                />
+                                            </div>
+
+                                            {/* XP Text */}
+                                            {/* XP Text */}
+                                            <div style={{
+                                                fontSize: '0.65rem',
+                                                color: isActive ? stat.color : '#888',
+                                                fontWeight: '900',
+                                                marginTop: '2px',
+                                                marginBottom: '6px',
+                                                textShadow: isMobile ? 'none' : '0 1px 2px rgba(0,0,0,0.8)',
+                                                letterSpacing: '0.5px'
+                                            }}>
+                                                {formatNumber(Math.floor(skillData.xp))} / {formatNumber(Math.floor(skillData.nextLevelXp))} XP
+                                            </div>
+
+                                            {
+                                                isActive && (
+                                                    <div style={{
+                                                        fontSize: isMobile ? '0.45rem' : '0.5rem',
+                                                        color: stat.color,
+                                                        fontWeight: '700',
+                                                        letterSpacing: '1px'
+                                                    }}>
+                                                        {isMobile ? 'ACTIVE' : '⚔ ACTIVE'}
+                                                    </div>
+                                                )
+                                            }
+                                            {
+                                                !isActive && (
+                                                    <div style={{
+                                                        fontSize: isMobile ? '0.4rem' : '0.45rem',
+                                                        color: '#444',
+                                                        /* marginTop: '3px', removed for space */
+                                                        whiteSpace: 'nowrap'
+                                                    }}>
+                                                        Equip {stat.weapon}
+                                                    </div>
+                                                )
+                                            }
                                         </div>
                                     );
                                 })}
@@ -1563,7 +1589,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                         </div>
                     )}
                 </div>
-            </div>
+            </div >
 
             {selectedSlot && (
                 <EquipmentSelectModal
@@ -1577,66 +1603,73 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                     charStats={stats}
                     weaponClass={currentWeaponClass}
                 />
-            )}
+            )
+            }
 
-            {breakdownModal && (
-                <StatBreakdownModal
-                    statType={breakdownModal.type}
-                    value={typeof breakdownModal.value === 'object' ? breakdownModal.value.total : breakdownModal.value}
-                    statId={typeof breakdownModal.value === 'object' ? breakdownModal.value.id : null}
-                    stats={{ ...stats, skills }} // Pass skills for efficiency breakdown
-                    equipment={gameState?.state?.equipment || {}}
-                    membership={gameState?.state?.membership}
-                    onClose={() => setBreakdownModal(null)}
-                />
-            )}
+            {
+                breakdownModal && (
+                    <StatBreakdownModal
+                        statType={breakdownModal.type}
+                        value={typeof breakdownModal.value === 'object' ? breakdownModal.value.total : breakdownModal.value}
+                        statId={typeof breakdownModal.value === 'object' ? breakdownModal.value.id : null}
+                        stats={{ ...stats, skills }} // Pass skills for efficiency breakdown
+                        equipment={gameState?.state?.equipment || {}}
+                        membership={gameState?.state?.membership}
+                        onClose={() => setBreakdownModal(null)}
+                    />
+                )
+            }
 
-            {proficiencyModal && (
-                <ProficiencyDetailsModal
-                    data={proficiencyModal}
-                    onClose={() => setProficiencyModal(null)}
-                />
-            )}
+            {
+                proficiencyModal && (
+                    <ProficiencyDetailsModal
+                        data={proficiencyModal}
+                        onClose={() => setProficiencyModal(null)}
+                    />
+                )
+            }
 
-            {infoModal && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0,0,0,0.8)',
-                    zIndex: 9999,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backdropFilter: 'blur(2px)'
-                }} onClick={() => setInfoModal(null)}>
+            {
+                infoModal && (
                     <div style={{
-                        background: 'var(--bg-dark)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '12px',
-                        padding: '20px',
-                        maxWidth: '80%',
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
-                    }} onClick={e => e.stopPropagation()}>
-                        <h3 style={{ color: 'var(--accent)', marginTop: 0 }}>{infoModal.title}</h3>
-                        <p style={{ color: 'var(--text-main)', fontSize: '0.9rem', whiteSpace: 'pre-line' }}>{infoModal.desc}</p>
-                        <button
-                            onClick={() => setInfoModal(null)}
-                            style={{
-                                marginTop: '10px',
-                                width: '100%',
-                                padding: '8px',
-                                background: 'var(--accent)',
-                                border: 'none',
-                                borderRadius: '6px',
-                                fontWeight: 'bold',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            Got it
-                        </button>
+                        position: 'fixed',
+                        top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(0,0,0,0.8)',
+                        zIndex: 9999,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backdropFilter: 'blur(2px)'
+                    }} onClick={() => setInfoModal(null)}>
+                        <div style={{
+                            background: 'var(--bg-dark)',
+                            border: '1px solid var(--border)',
+                            borderRadius: '12px',
+                            padding: '20px',
+                            maxWidth: '80%',
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
+                        }} onClick={e => e.stopPropagation()}>
+                            <h3 style={{ color: 'var(--accent)', marginTop: 0 }}>{infoModal.title}</h3>
+                            <p style={{ color: 'var(--text-main)', fontSize: '0.9rem', whiteSpace: 'pre-line' }}>{infoModal.desc}</p>
+                            <button
+                                onClick={() => setInfoModal(null)}
+                                style={{
+                                    marginTop: '10px',
+                                    width: '100%',
+                                    padding: '8px',
+                                    background: 'var(--accent)',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Got it
+                            </button>
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
         </>
     );
 };
