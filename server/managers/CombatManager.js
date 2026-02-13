@@ -286,7 +286,7 @@ export class CombatManager {
                     if (profSkillKey) {
                         const profLeveled = this.gameManager.addXP(char, profSkillKey, profXp);
                         if (profLeveled) {
-                            leveledUp = true; // Trigger level up notification/effect
+                            leveledUp = profLeveled; // Store the object, not just true
                         }
 
                         // Track session XP for specific proficiency

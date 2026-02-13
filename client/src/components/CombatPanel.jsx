@@ -504,7 +504,10 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 const food = gameState?.state?.equipment?.food;
                                 const foodAmount = (food && food.amount > 0) ? food.amount : 0;
                                 const maxHp = gameState?.calculatedStats?.hp || 100;
-                                const foodHealPerUse = (food && (food.heal || (food.healPercent && Math.floor(maxHp * food.healPercent / 100)))) || 0;
+
+                                // RESOLVE FRESH ITEM DATA: Ensure we have the latest heal/healPercent
+                                const freshFood = food ? resolveItem(food.id) : null;
+                                const foodHealPerUse = (freshFood && (freshFood.heal || (freshFood.healPercent && Math.floor(maxHp * freshFood.healPercent / 100)))) || 0;
 
                                 // Player HP
                                 const playerHp = combat.playerHealth || 1;
@@ -521,36 +524,33 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 // Simplified model: per second
                                 const mobDmgPerSecond = mobDmg * (1000 / MOB_ATTACK_INTERVAL);
 
-                                // Food consumption rate: ~1 food per playerAtkSpeed when healing is needed
-                                // But food only heals when missing >= foodHealPerUse
-                                // In practice, food heals at rate of: foodHealPerUse per (foodHealPerUse / mobDmgPerSecond) seconds
-                                const foodHealRate = foodAmount > 0 && foodHealPerUse > 0
-                                    ? mobDmgPerSecond // Food heals to match incoming damage 
+                                // Better Survival Formula:
+                                // 1. How much can we heal per second? (Max 1 food per player attack)
+                                const maxHealsPerSecond = 1000 / Math.max(100, playerAtkSpeed);
+                                const maxFoodHealPerSecond = foodHealPerUse * maxHealsPerSecond;
+
+                                // 2. Real healing rate is the lesser of (what we need) and (what we can do)
+                                const foodHealRate = foodAmount > 0
+                                    ? Math.min(mobDmgPerSecond, maxFoodHealPerSecond)
                                     : 0;
 
-                                // Net damage per second
                                 const netDmgPerSecond = mobDmgPerSecond - foodHealRate;
-
+                                const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
                                 let survivalText = "∞";
                                 let survivalColor = "#4caf50";
 
                                 if (netDmgPerSecond > 0) {
-                                    // Player is taking more damage than healing
-                                    // Total effective HP = current HP + all remaining food healing
-                                    const totalEffectiveHp = playerHp + (foodAmount * foodHealPerUse);
-                                    const secondsToDie = totalEffectiveHp / netDmgPerSecond;
+                                    // Player is losing HP even with food
+                                    // Time to die = Current HP / (Net Damage)
+                                    const totalSeconds = playerHp / netDmgPerSecond;
 
-                                    // Threshold: Dynamic Idle Limit (8h normal / 12h Membership)
-                                    const isPremium = gameState?.state?.isPremium || gameState?.state?.membership?.active;
-                                    const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
-
-                                    if (secondsToDie > idleLimitSeconds) {
+                                    if (totalSeconds > idleLimitSeconds) {
                                         survivalText = "∞";
                                         survivalColor = "#4caf50";
                                     } else {
-                                        const hrs = Math.floor(secondsToDie / 3600);
-                                        const mins = Math.floor((secondsToDie % 3600) / 60);
-                                        const secs = Math.floor(secondsToDie % 60);
+                                        const hrs = Math.floor(totalSeconds / 3600);
+                                        const mins = Math.floor((totalSeconds % 3600) / 60);
+                                        const secs = Math.floor(totalSeconds % 60);
 
                                         if (hrs > 0) {
                                             survivalText = `${hrs}h ${mins}m ${secs}s`;
@@ -563,16 +563,18 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                             survivalColor = "#ff4444";
                                         }
                                     }
-                                } else if (netDmgPerSecond <= 0 && foodAmount > 0) {
+                                } else if (netDmgPerSecond <= 0 && foodAmount > 0 && mobDmgPerSecond > 0) {
                                     // Food heals faster than damage - but food will run out eventually
                                     // How long until food runs out?
-                                    const secondsOfFood = (foodAmount * foodHealPerUse) / mobDmgPerSecond;
+                                    // In this case, each "hit" takes 1 food (or less if we heal more than 1 hit worth, but server consumes 1 per hit)
+                                    // Actually server consumes 1 food per player attack if HP < MaxHP.
+                                    // If mob hits for 100 every 1s, and we heal 100 every 1s, we use 1 food every 1s.
+                                    const foodConsumptionRate = mobDmgPerSecond / foodHealPerUse;
+                                    const secondsOfFood = foodAmount / Math.max(0.001, foodConsumptionRate);
+
                                     // Then player dies in playerHp / mobDmgPerSecond more seconds
                                     const secondsAfterFood = playerHp / mobDmgPerSecond;
                                     const totalSeconds = secondsOfFood + secondsAfterFood;
-
-                                    const isPremium = gameState?.state?.isPremium || gameState?.state?.membership?.active;
-                                    const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
 
                                     if (totalSeconds > idleLimitSeconds) {
                                         survivalText = "∞";
@@ -594,11 +596,10 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                         }
                                     }
                                 } else {
-                                    // No food, survival based purely on HP
-                                    const secondsToDie = playerHp / mobDmgPerSecond;
-
-                                    const isPremium = gameState?.state?.isPremium || gameState?.state?.membership?.active;
-                                    const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
+                                    // No food, or food heals 0, or mob does 0 damage
+                                    // If mob does 0 damage, survival is infinite
+                                    // If mob does damage and no food, survival is playerHp / mobDmgPerSecond
+                                    const secondsToDie = mobDmgPerSecond > 0 ? playerHp / mobDmgPerSecond : Infinity;
 
                                     if (secondsToDie > idleLimitSeconds) {
                                         survivalText = "∞";
@@ -1088,17 +1089,38 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
 
                                             // Food Logic
                                             const food = gameState?.state?.equipment?.food;
-                                            const foodTotalHeal = (food && food.amount > 0) ? (food.amount * (food.heal || 0)) : 0;
+                                            const freshFood = food ? resolveItem(food.id) : null;
+                                            const maxHp = gameState?.calculatedStats?.hp || 100;
+                                            const foodHealPerUse = (freshFood && (freshFood.heal || (freshFood.healPercent && Math.floor(maxHp * freshFood.healPercent / 100)))) || 0;
+                                            const foodAmount = (food && food.amount) || 0;
 
                                             const playerHp = gameState?.state?.health || 1;
-                                            const totalEffectiveHp = playerHp + foodTotalHeal;
-                                            const atkSpeed = gameState?.calculatedStats?.attackSpeed || 1000;
+                                            const playerAtkSpeed = gameState?.calculatedStats?.attackSpeed || 1000;
+                                            const mobDmgPerSecond = mobDmg; // Mobs attack every 1s
+
+                                            const maxHealsPerSecond = 1000 / Math.max(100, playerAtkSpeed);
+                                            const maxFoodHealPerSecond = foodHealPerUse * maxHealsPerSecond;
+
+                                            const foodHealRate = foodAmount > 0
+                                                ? Math.min(mobDmgPerSecond, maxFoodHealPerSecond)
+                                                : 0;
+
+                                            const netDmgPerSecond = mobDmgPerSecond - foodHealRate;
 
                                             let survivalText = "∞";
                                             let survivalColor = "#4caf50";
+                                            let totalSeconds = Infinity;
 
-                                            if (mobDmg > 0) {
-                                                const secondsToDie = totalEffectiveHp / mobDmg;
+                                            if (netDmgPerSecond > 0) {
+                                                totalSeconds = playerHp / netDmgPerSecond;
+                                            } else if (foodAmount > 0 && mobDmgPerSecond > 0) {
+                                                const foodConsumptionRate = mobDmgPerSecond / foodHealPerUse;
+                                                const secondsOfFood = foodAmount / Math.max(0.001, foodConsumptionRate);
+                                                totalSeconds = secondsOfFood + (playerHp / mobDmgPerSecond);
+                                            }
+
+                                            if (totalSeconds !== Infinity) {
+                                                const secondsToDie = totalSeconds;
 
                                                 if (secondsToDie > 43200) {
                                                     survivalText = "∞";
