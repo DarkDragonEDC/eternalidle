@@ -4,28 +4,30 @@ import { resolveItem, calculateRuneBonus } from '@shared/items';
 import { getProficiencyStats } from '@shared/proficiency_stats';
 
 const StatBreakdownModal = ({ statType, statId, value, stats, equipment, membership, onClose }) => {
+    // Rounding helper to avoid 0.9999999999995 artifacts
+    const fmt = (val) => {
+        if (typeof val !== 'number') return val;
+        return parseFloat(val.toFixed(1));
+    };
+
     // Calculate breakdowns based on known formulas
     const getBreakdown = () => {
         const breakdown = [];
 
         if (statType === 'DAMAGE') {
-            // Formula: (5 + ActiveProfDmg + GearDmg) * (1 + DmgBonus) * (1 + RuneBonus)
-            // Only the proficiency matching the equipped weapon contributes
-            const warriorProf = stats.warriorProf || 0;
-            const hunterProf = stats.hunterProf || 0;
-            const mageProf = stats.mageProf || 0;
-            const activeProf = stats.activeProf; // 'warrior' | 'hunter' | 'mage' | null
-
+            const activeProf = stats.activeProf;
             const profData = activeProf ? getProficiencyStats(activeProf, stats[`${activeProf}Prof`]) : { dmg: 0, hp: 0 };
             const activeProfDmg = profData.dmg;
 
             const activeProfLabel = activeProf === 'warrior' ? 'Warrior'
                 : activeProf === 'hunter' ? 'Hunter'
                     : activeProf === 'mage' ? 'Mage' : null;
+
             const gearDamage = Object.values(equipment).reduce((acc, item) => {
                 const fresh = item ? resolveItem(item.id || item.item_id) : null;
                 return acc + (fresh?.stats?.damage || 0);
             }, 0);
+
             const gearDmgBonus = Object.values(equipment).reduce((acc, item) => {
                 const fresh = item ? resolveItem(item.id || item.item_id) : null;
                 return acc + (fresh?.stats?.dmgBonus || 0);
@@ -46,27 +48,22 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
 
             breakdown.push({ label: 'Base', value: 5 });
             if (activeProfLabel && activeProfDmg > 0) {
-                breakdown.push({ label: `${activeProfLabel} Prof. Bonus`, value: activeProfDmg.toFixed(1), sub: `(Total from Level)` });
+                breakdown.push({ label: `${activeProfLabel} Prof. Bonus`, value: fmt(activeProfDmg), sub: `(Total from Level)` });
             } else if (!activeProf) {
-                breakdown.push({ label: 'No Weapon Equipped', value: 0, sub: '(Equip a weapon to activate a proficiency)' });
+                breakdown.push({ label: 'No Weapon Equipped', value: 0, sub: '(Equip a weapon to activate)' });
             }
 
-            breakdown.push({ label: 'Gear Damage', value: gearDamage });
+            breakdown.push({ label: 'Gear Damage', value: fmt(gearDamage) });
 
             const rawTotal = 5 + activeProfDmg + gearDamage;
 
             if (gearDmgBonus > 0 || damageRuneBonus > 0) {
-                breakdown.push({ label: 'Raw Total', value: rawTotal.toFixed(1), isTotal: true });
+                breakdown.push({ label: 'Raw Total', value: fmt(rawTotal), isTotal: true });
                 if (gearDmgBonus > 0) breakdown.push({ label: 'Gear Modifier', value: `+${(gearDmgBonus * 100).toFixed(0)}%` });
                 if (damageRuneBonus > 0) breakdown.push({ label: 'Rune Modifier', value: `+${damageRuneBonus.toFixed(1)}%` });
             }
         } else if (statType === 'DEFENSE') {
-            // Formula: GearDefense
-            const warriorProf = stats.warriorProf || 0;
-            const hunterProf = stats.hunterProf || 0;
-            const mageProf = stats.mageProf || 0;
             const activeProf = stats.activeProf;
-
             const profData = activeProf ? getProficiencyStats(activeProf, stats[`${activeProf}Prof`]) : { def: 0 };
             const activeProfDefense = profData.def || 0;
             const gearDefense = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.defense || 0), 0);
@@ -74,22 +71,15 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
             breakdown.push({ label: 'Base', value: 0 });
             if (activeProfDefense > 0) {
                 const label = activeProf === 'hunter' ? 'Hunter' : activeProf === 'mage' ? 'Mage' : 'Warrior';
-                breakdown.push({ label: `${label} Prof. Bonus`, value: activeProfDefense, sub: `(Total from Level)` });
+                breakdown.push({ label: `${label} Prof. Bonus`, value: fmt(activeProfDefense), sub: `(Total from Level)` });
             }
-            breakdown.push({ label: 'Gear Defense', value: gearDefense });
+            breakdown.push({ label: 'Gear Defense', value: fmt(gearDefense) });
 
-            // Percentage Reduction display
-            // Use Total Defense (stats.defense) not just Gear Defense
             const totalDef = stats.defense || 0;
             const mitigation = Math.min(0.75, totalDef / 10000);
             const reductionPercent = (mitigation * 100).toFixed(1);
-            breakdown.push({ label: 'Est. Dmg Reduction', value: `${reductionPercent}%`, sub: '1% Reduction per 100 DEF (Max 75%)', isTotal: true });
+            breakdown.push({ label: 'Est. Dmg Reduction', value: `${reductionPercent}%`, sub: 'Max 75% Reduction', isTotal: true });
         } else if (statType === 'SPEED') {
-            // Formula: GlobalBase(2000) - WeaponSpeed - ActiveSpeedBonus - GearSpeed
-            // Speed bonus only applies if a Bow is equipped
-            const hunterProf = stats.hunterProf || 0;
-            const mageProf = stats.mageProf || 0;
-            const warriorProf = stats.warriorProf || 0;
             const activeProf = stats.activeProf;
             const profData = activeProf ? getProficiencyStats(activeProf, stats[`${activeProf}Prof`]) : { speedBonus: 0 };
             const activeSpeedBonus = profData.speedBonus || 0;
@@ -99,10 +89,8 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                 return acc + (fresh?.stats?.speed || fresh?.stats?.attackSpeed || 0);
             }, 0);
 
-            // Calculate Attack Speed Rune
             const runeSpeedBonus = Object.entries(equipment).reduce((acc, [slot, item]) => {
                 if (slot.startsWith('rune_') && item) {
-                    // slot format: rune_{ACT}_{EFF}
                     const parts = slot.split('_');
                     if (parts.length >= 3) {
                         const eff = parts.slice(2).join('_');
@@ -115,26 +103,14 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                 return acc;
             }, 0);
 
-            // Get Weapon Speed (0 if no weapon - unarmed has no speed bonus)
-            const weapon = equipment.mainHand;
-            const freshWeapon = weapon ? resolveItem(weapon.id || weapon.item_id) : null;
-            const weaponSpeed = freshWeapon?.stats?.speed || freshWeapon?.stats?.attackSpeed || 0; // No weapon = no speed bonus
-
             breakdown.push({ label: 'Global Base', value: '2.00s', sub: '(Attack Cycle Start)' });
-
 
             if (activeSpeedBonus > 0) {
                 const label = activeProf === 'hunter' ? 'Hunter' : activeProf === 'mage' ? 'Mage' : 'Warrior';
                 breakdown.push({
-                    label: `${label} Proficiency Bonus`,
+                    label: `${label} Proficiency`,
                     value: `-${(activeSpeedBonus / 1000).toFixed(2)}s`,
-                    sub: `(Custom Curve)`
-                });
-            } else if (activeProf && activeProf !== 'hunter' && hunterProf > 0) {
-                breakdown.push({
-                    label: 'Hunter Prof. (Inactive)',
-                    value: '0s',
-                    sub: '(Requires Bow to activate)'
+                    sub: `(Level Growth)`
                 });
             }
 
@@ -142,21 +118,19 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                 breakdown.push({
                     label: 'Gear Bonus',
                     value: `-${(gearSpeed / 1000).toFixed(2)}s`,
-                    sub: '(1ms per Speed)'
+                    sub: '(Fast Gear)'
                 });
             }
 
-            const totalReduction = gearSpeed + activeSpeedBonus;
             const totalBaseReduction = gearSpeed + activeSpeedBonus;
             let finalReduction = totalBaseReduction;
 
             if (runeSpeedBonus > 0) {
                 breakdown.push({
-                    label: 'Att. Speed Rune',
+                    label: 'Haste Rune',
                     value: `+${runeSpeedBonus.toFixed(1)}%`,
-                    sub: 'Multiplies total reduction'
+                    sub: 'Bonus Multiplier'
                 });
-
                 finalReduction = totalBaseReduction * (1 + (runeSpeedBonus / 100));
             }
 
@@ -166,7 +140,7 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                 breakdown.push({
                     label: 'Cap Correction',
                     value: `+${((200 - (2000 - finalReduction)) / 1000).toFixed(2)}s`,
-                    sub: '(Min 0.20s limit)'
+                    sub: '(0.20s global limit)'
                 });
             }
 
@@ -176,37 +150,25 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                 isTotal: true
             });
 
-            // Override the "Total" display at the bottom to show hits/second
             value = `${(1000 / finalInterval).toFixed(1)} h/s`;
         } else if (statType === 'HP') {
-            // Formula: 100 + ActiveHP + GearHP
-            // HP bonus only applies if a Sword is equipped
-            const warriorProf = stats.warriorProf || 0;
-            const mageProf = stats.mageProf || 0;
             const activeProf = stats.activeProf;
-
             const profData = activeProf ? getProficiencyStats(activeProf, stats[`${activeProf}Prof`]) : { dmg: 0, hp: 0 };
             const activeHP = profData.hp;
             const gearHP = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.hp || 0), 0);
+
             breakdown.push({ label: 'Base', value: 100 });
             if (activeHP > 0) {
                 const label = activeProf === 'warrior' ? 'Warrior' : 'Mage';
-                breakdown.push({ label: `${label} Prof. Bonus`, value: activeHP, sub: `(Total from Level)` });
-            } else if (activeProf && activeProf !== 'warrior' && activeProf !== 'mage' && (warriorProf > 0 || mageProf > 0)) {
-                breakdown.push({ label: 'Proficiency (Inactive)', value: 0, sub: '(Requires specific weapon to activate)' });
+                breakdown.push({ label: `${label} Prof. Bonus`, value: fmt(activeHP), sub: `(Total from Level)` });
             }
-            breakdown.push({ label: 'Gear HP', value: gearHP });
+            breakdown.push({ label: 'Gear HP', value: fmt(gearHP) });
         } else if (statType === 'EFFICIENCY') {
-            const effId = statId; // Skill context
-            const globalEffVal = stats.efficiency?.GLOBAL || 0;
-
+            const effId = statId;
             if (effId === 'GLOBAL') {
                 const isPremium = membership?.active && membership?.expiresAt > Date.now();
-                if (isPremium) {
-                    breakdown.push({ label: 'Premium Membership', value: '+10%' });
-                }
+                if (isPremium) breakdown.push({ label: 'Premium Membership', value: '+10%' });
 
-                // Global items (usually cape)
                 const globalSource = Object.values(equipment).find(item => {
                     if (!item) return false;
                     const fresh = resolveItem(item.id || item.item_id);
@@ -215,66 +177,43 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
 
                 if (globalSource) {
                     const freshGlobal = resolveItem(globalSource.id || globalSource.item_id);
-                    const actualGlobalEff = freshGlobal?.stats?.efficiency?.GLOBAL || 0;
-                    breakdown.push({ label: `Global Item (${freshGlobal.name.split(' ').pop()})`, value: `+${actualGlobalEff}%` });
+                    breakdown.push({ label: `Global Item (${freshGlobal.name.split(' ').pop()})`, value: `+${freshGlobal?.stats?.efficiency?.GLOBAL}%` });
                 }
             } else {
                 breakdown.push({ label: 'Skill Base', value: '100% Speed' });
-                if (effId) {
-                    const skillsMap = {
-                        WOOD: 'LUMBERJACK', ORE: 'ORE_MINER', HIDE: 'ANIMAL_SKINNER', FIBER: 'FIBER_HARVESTER', FISH: 'FISHING',
-                        PLANK: 'PLANK_REFINER', METAL: 'METAL_BAR_REFINER', LEATHER: 'LEATHER_REFINER', CLOTH: 'CLOTH_REFINER',
-                        WARRIOR: 'WARRIOR_CRAFTER', MAGE: 'MAGE_CRAFTER', COOKING: 'COOKING'
-                    };
-                    const skillName = skillsMap[effId];
-                    if (skillName) {
-                        const skillLvl = stats.skills?.[skillName]?.level || 1;
-                        breakdown.push({ label: 'Skill Level Bonus', value: `+${(skillLvl * 0.2).toFixed(1)}%`, sub: `(0.2% per ${skillName} Lv)` });
-                    }
+                const skillsMap = {
+                    WOOD: 'LUMBERJACK', ORE: 'ORE_MINER', HIDE: 'ANIMAL_SKINNER', FIBER: 'FIBER_HARVESTER', FISH: 'FISHING',
+                    PLANK: 'PLANK_REFINER', METAL: 'METAL_BAR_REFINER', LEATHER: 'LEATHER_REFINER', CLOTH: 'CLOTH_REFINER',
+                    WARRIOR: 'WARRIOR_CRAFTER', MAGE: 'MAGE_CRAFTER', COOKING: 'COOKING'
+                };
+                const skillName = skillsMap[effId];
+                if (skillName) {
+                    const skillLvl = stats.skills?.[skillName]?.level || 1;
+                    breakdown.push({ label: 'Skill Level Bonus', value: `+${(skillLvl * 0.2).toFixed(1)}%`, sub: `(0.2% per Lv)` });
+                }
 
-                    const toolMap = { WOOD: 'tool_axe', ORE: 'tool_pickaxe', HIDE: 'tool_knife', FIBER: 'tool_sickle', FISH: 'tool_rod' };
-                    const toolKey = toolMap[effId];
-                    if (toolKey && equipment[toolKey]) {
-                        const freshTool = resolveItem(equipment[toolKey].id || equipment[toolKey].item_id);
-                        const toolEff = freshTool?.stats?.efficiency || 0;
-                        breakdown.push({ label: 'Tool Bonus', value: `+${toolEff}%` });
-                    }
+                const toolMap = { WOOD: 'tool_axe', ORE: 'tool_pickaxe', HIDE: 'tool_knife', FIBER: 'tool_sickle', FISH: 'tool_rod' };
+                const toolKey = toolMap[effId];
+                if (toolKey && equipment[toolKey]) {
+                    const freshTool = resolveItem(equipment[toolKey].id || equipment[toolKey].item_id);
+                    breakdown.push({ label: 'Tool Bonus', value: `+${freshTool?.stats?.efficiency || 0}%` });
+                }
 
-                    // Rune Bonus
-                    Object.entries(equipment).forEach(([slot, item]) => {
-                        if (slot.startsWith('rune_') && item) {
-                            const parts = slot.split('_');
-                            const act = parts[1];
-                            const eff = parts.slice(2).join('_');
-
-                            if (act === effId && eff === 'EFF') {
-                                const freshRune = resolveItem(item.id || item.item_id);
-                                if (freshRune) {
-                                    const bonus = calculateRuneBonus(freshRune.tier, freshRune.stars, eff);
-                                    breakdown.push({ label: 'Rune Bonus', value: `+${bonus}%`, sub: `${freshRune.name}` });
-                                }
-                            }
+                Object.entries(equipment).forEach(([slot, item]) => {
+                    if (slot.startsWith('rune_') && item) {
+                        const parts = slot.split('_');
+                        const act = parts[1];
+                        const eff = parts.slice(2).join('_');
+                        if (act === effId && eff === 'EFF') {
+                            const freshRune = resolveItem(item.id || item.item_id);
+                            const bonus = calculateRuneBonus(freshRune.tier, freshRune.stars, eff);
+                            breakdown.push({ label: 'Rune Bonus', value: `+${bonus}%`, sub: freshRune.name });
                         }
-                    });
-                }
-
-                // Global Bonuses (Membership + Items)
-                const isPremium = membership?.active && membership?.expiresAt > Date.now();
-                if (isPremium) {
-                    breakdown.push({ label: 'Premium Membership', value: '+10%' });
-                }
-
-                const globalSource = Object.values(equipment).find(item => {
-                    if (!item) return false;
-                    const fresh = resolveItem(item.id || item.item_id);
-                    return fresh?.stats?.efficiency?.GLOBAL > 0;
+                    }
                 });
 
-                if (globalSource) {
-                    const freshGlobal = resolveItem(globalSource.id || globalSource.item_id);
-                    const actualGlobalEff = freshGlobal?.stats?.efficiency?.GLOBAL || 0;
-                    breakdown.push({ label: `Global Bonus (${freshGlobal.name.split(' ').pop()})`, value: `+${actualGlobalEff}%` });
-                }
+                const isPremium = membership?.active && membership?.expiresAt > Date.now();
+                if (isPremium) breakdown.push({ label: 'Premium Membership', value: '+10%' });
             }
         } else if (statType === 'CRIT') {
             const gearCritChance = Object.values(equipment).reduce((acc, item) => {
@@ -284,11 +223,9 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
             const burstRuneBonus = Object.entries(equipment).reduce((acc, [slot, item]) => {
                 if (slot.startsWith('rune_') && item) {
                     const parts = slot.split('_');
-                    const act = parts[1];
-                    const eff = parts.slice(2).join('_');
-                    if (act === 'ATTACK' && eff === 'BURST') {
+                    if (parts[1] === 'ATTACK' && parts.slice(2).join('_') === 'BURST') {
                         const freshRune = resolveItem(item.id || item.item_id);
-                        return acc + calculateRuneBonus(freshRune.tier, freshRune.stars, eff);
+                        return acc + calculateRuneBonus(freshRune.tier, freshRune.stars, 'BURST');
                     }
                 }
                 return acc;
@@ -297,10 +234,7 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
             breakdown.push({ label: 'Base Crit Rate', value: '0%' });
             if (gearCritChance > 0) breakdown.push({ label: 'Gear Crit Chance', value: `+${gearCritChance.toFixed(2)}%` });
             if (burstRuneBonus > 0) breakdown.push({ label: 'Burst Rune Bonus', value: `+${burstRuneBonus.toFixed(2)}%` });
-
             value = `${(gearCritChance + burstRuneBonus).toFixed(2)}%`;
-
-
         }
 
         return breakdown;
@@ -311,31 +245,80 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
     return (
         <div style={{
             position: 'fixed',
-            top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.7)',
+            inset: 0,
+            background: 'rgba(0,0,0,0.4)',
             zIndex: 3000,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backdropFilter: 'blur(5px)'
+            backdropFilter: 'blur(12px)',
+            padding: '20px'
         }} onClick={onClose}>
-            <div style={{
-                background: 'var(--panel-bg)',
-                border: '1px solid var(--border)',
-                borderRadius: '16px',
-                padding: '20px',
-                width: '90%',
-                maxWidth: '350px',
-                boxShadow: 'var(--panel-shadow)',
-                color: 'var(--text-main)'
-            }} onClick={e => e.stopPropagation()}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', borderBottom: '1px solid var(--border)', paddingBottom: '8px' }}>
-                    <h3 style={{ margin: 0, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase' }}>
-                        {statType === 'DAMAGE' && <Sword size={18} color="#ff4444" />}
-                        {statType === 'DEFENSE' && <Shield size={18} color="#4caf50" />}
-                        {statType === 'SPEED' && <Zap size={18} color="#2196f3" />}
-                        {statType === 'HP' && <Heart size={18} color="#ff4d4d" />}
-                        {statType === 'CRIT' && <Star size={18} color="#f59e0b" />}
+            <style>
+                {`
+                    @keyframes slideUpFade {
+                        from { transform: translateY(20px) scale(0.95); opacity: 0; }
+                        to { transform: translateY(0) scale(1); opacity: 1; }
+                    }
+                    .aaa-modal {
+                        animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                    }
+                `}
+            </style>
+            <div
+                className="aaa-modal"
+                style={{
+                    background: 'rgba(15, 23, 42, 0.85)', // Slate 900
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '24px',
+                    padding: '28px',
+                    width: '100%',
+                    maxWidth: '380px',
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255,255,255,0.05)',
+                    color: '#f8fafc',
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}
+                onClick={e => e.stopPropagation()}
+            >
+                {/* Decorative background glow */}
+                <div style={{
+                    position: 'absolute',
+                    top: '-50px',
+                    left: '-50px',
+                    width: '150px',
+                    height: '150px',
+                    background: 'radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%)',
+                    pointerEvents: 'none'
+                }} />
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                    <h3 style={{
+                        margin: 0,
+                        fontSize: '1rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        fontWeight: '800',
+                        letterSpacing: '1px',
+                        color: '#f8fafc',
+                        textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                    }}>
+                        <div style={{
+                            padding: '8px',
+                            background: 'rgba(255,255,255,0.05)',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            {statType === 'DAMAGE' && <Sword size={20} color="#ef4444" />}
+                            {statType === 'DEFENSE' && <Shield size={20} color="#22c55e" />}
+                            {statType === 'SPEED' && <Zap size={20} color="#0ea5e9" />}
+                            {statType === 'HP' && <Heart size={20} color="#f43f5e" />}
+                            {statType === 'CRIT' && <Star size={20} color="#f59e0b" />}
+                            {statType === 'EFFICIENCY' && <Zap size={20} color="#8b5cf6" />}
+                        </div>
                         {statType === 'EFFICIENCY' ? (
                             statId === 'GLOBAL' ? 'GLOBAL EFFICIENCY' : (
                                 {
@@ -347,37 +330,72 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                             )
                         ) : `${statType} SOURCE`}
                     </h3>
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer' }}><X size={20} /></button>
+                    <button
+                        onClick={onClose}
+                        style={{
+                            background: 'rgba(255,255,255,0.05)',
+                            border: 'none',
+                            color: '#94a3b8',
+                            cursor: 'pointer',
+                            borderRadius: '50%',
+                            width: '32px',
+                            height: '32px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: '0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                    >
+                        <X size={18} />
+                    </button>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {rows.map((row, idx) => (
                         <div key={idx} style={{
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
-                            padding: '4px 0',
-                            borderBottom: row.isTotal ? '1px dashed var(--border)' : 'none',
-                            fontWeight: row.isTotal ? 'bold' : 'normal',
-                            color: row.isTotal ? 'var(--text-main)' : 'var(--text-dim)'
+                            padding: '12px 14px',
+                            background: row.isTotal ? 'rgba(255,255,255,0.03)' : 'transparent',
+                            borderRadius: '12px',
+                            border: row.isTotal ? '1px dashed rgba(255,255,255,0.1)' : 'none',
                         }}>
-                            <div>
-                                <div style={{ fontSize: '0.9rem' }}>{row.label}</div>
-                                {row.sub && <div style={{ fontSize: '0.65rem', color: '#666' }}>{row.sub}</div>}
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: '0.85rem', fontWeight: row.isTotal ? '700' : '500', color: row.isTotal ? '#fff' : '#94a3b8' }}>{row.label}</div>
+                                {row.sub && <div style={{ fontSize: '0.65rem', color: '#64748b', marginTop: '2px' }}>{row.sub}</div>}
                             </div>
-                            <div style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>{row.value}</div>
+                            <div style={{
+                                fontSize: '0.9rem',
+                                fontWeight: '700',
+                                color: row.isTotal ? '#fff' : '#cbd5e1',
+                                textAlign: 'right'
+                            }}>
+                                {row.value}
+                            </div>
                         </div>
                     ))}
 
                     <div style={{
-                        marginTop: '10px',
-                        paddingTop: '10px',
-                        borderTop: '2px solid var(--border)',
+                        marginTop: '16px',
+                        padding: '20px',
+                        background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%)',
+                        borderRadius: '16px',
+                        border: '1px solid rgba(255, 255, 255, 0.05)',
                         display: 'flex',
                         justifyContent: 'space-between',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        boxShadow: 'inset 0 0 20px rgba(0,0,0,0.2)'
                     }}>
-                        <div style={{ fontWeight: 'bold', color: 'var(--text-dim)', fontSize: '0.9rem' }}>TOTAL</div>
-                        <div style={{ fontSize: '1.3rem', fontWeight: '900', color: 'var(--text-main)' }}>{value}</div>
+                        <div style={{ fontWeight: '800', color: '#94a3b8', fontSize: '0.75rem', letterSpacing: '2px' }}>FINAL TOTAL</div>
+                        <div style={{
+                            fontSize: '1.75rem',
+                            fontWeight: '900',
+                            color: '#fff',
+                            textShadow: '0 0 15px rgba(255,255,255,0.3)'
+                        }}>{value}</div>
                     </div>
                 </div>
             </div>
