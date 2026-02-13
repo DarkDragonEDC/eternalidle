@@ -1,5 +1,6 @@
 import { HUNTER_STATS_FIXED } from './hunter_stats_fixed.js';
 import { MAGE_STATS_FIXED } from './mage_stats_fixed.js';
+import { WARRIOR_STATS_FIXED } from './warrior_stats_fixed.js';
 export const ITEMS_VERSION = "20260130_2007";
 export const TIERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -627,14 +628,43 @@ const genGear = (category, slot, type, idSuffix, matType, statMultipliers = {}) 
     }
 };
 
+const genWarriorGear = (slot, type, idSuffix, matType, lookupName) => {
+    for (const t of TIERS) {
+        const matId = `T${t}_${matType}`;
+        const req = { [matId]: 20 };
+        if (type === 'CAPE') req[`T${t}_CREST`] = 1;
+
+        // Default to Normal quality stats for the base item view
+        const stats = WARRIOR_STATS_FIXED[lookupName][t][0];
+
+        const gear = {
+            id: `T${t}_${idSuffix}`,
+            name: idSuffix.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase()),
+            tier: t,
+            req,
+            xp: CRAFT_DATA.xp[t - 1],
+            time: CRAFT_DATA.time[t - 1],
+            ip: getBaseIP(t),
+            type: type,
+            stats,
+            isWarriorLookup: true,
+            lookupName: lookupName,
+            description: `A Tier ${t} ${idSuffix.replace(/_/g, ' ').toLowerCase()}. Specialized Warrior gear.`
+        };
+
+        if (!ITEMS.GEAR.WARRIORS_FORGE[slot]) ITEMS.GEAR.WARRIORS_FORGE[slot] = {};
+        ITEMS.GEAR.WARRIORS_FORGE[slot][t] = gear;
+    }
+};
+
 // --- WARRIOR GEAR ---
-genGear('WARRIORS_FORGE', 'SWORD', 'WEAPON', 'SWORD', 'BAR', { dmg: 1.51794, speed: 137.7, crit: 0.16667 });
-genGear('WARRIORS_FORGE', 'SHIELD', 'OFF_HAND', 'SHIELD', 'BAR', { def: 0.02083, hp: 0.41667 });
-genGear('WARRIORS_FORGE', 'PLATE_ARMOR', 'ARMOR', 'PLATE_ARMOR', 'BAR', { dmg: 0.75898, def: 0.025, hp: 0.5 });
-genGear('WARRIORS_FORGE', 'PLATE_HELMET', 'HELMET', 'PLATE_HELMET', 'BAR', { dmg: 0.37949, def: 0.01667, hp: 0.33333 });
-genGear('WARRIORS_FORGE', 'PLATE_BOOTS', 'BOOTS', 'PLATE_BOOTS', 'BAR', { def: 0.00833, hp: 0.25, speed: 12.6533 });
-genGear('WARRIORS_FORGE', 'PLATE_GLOVES', 'GLOVES', 'PLATE_GLOVES', 'BAR', { dmg: 0.75898, def: 0.0125, hp: 0.16667, speed: 6.3267 });
-genGear('WARRIORS_FORGE', 'PLATE_CAPE', 'CAPE', 'PLATE_CAPE', 'BAR', { dmg: 0.37949, speed: 3.1633, globalEff: 1 });
+genWarriorGear('SWORD', 'WEAPON', 'SWORD', 'BAR', 'Sword');
+genWarriorGear('SHIELD', 'OFF_HAND', 'SHIELD', 'BAR', 'Shield');
+genWarriorGear('PLATE_ARMOR', 'ARMOR', 'PLATE_ARMOR', 'BAR', 'Plate Armor');
+genWarriorGear('PLATE_HELMET', 'HELMET', 'PLATE_HELMET', 'BAR', 'Plate Helmet');
+genWarriorGear('PLATE_BOOTS', 'BOOTS', 'PLATE_BOOTS', 'BAR', 'Plate Boots');
+genWarriorGear('PLATE_GLOVES', 'GLOVES', 'PLATE_GLOVES', 'BAR', 'Plate Gloves');
+genWarriorGear('PLATE_CAPE', 'CAPE', 'PLATE_CAPE', 'BAR', 'Warrior Cape');
 
 // --- HUNTER GEAR (FIXED LOOKUP) ---
 const genHunterGear = (slot, type, idSuffix, matType, lookupName) => {
@@ -891,6 +921,16 @@ export const resolveItem = (itemId, overrideQuality = null) => {
                 }
             } else {
                 // Fallback
+                for (const key in baseItem.stats) newStats[key] = baseItem.stats[key];
+            }
+        } else if (baseItem.isWarriorLookup) {
+            const lookup = WARRIOR_STATS_FIXED[baseItem.lookupName];
+            if (lookup && lookup[baseItem.tier] && lookup[baseItem.tier][effectiveQualityId]) {
+                const fixedStats = lookup[baseItem.tier][effectiveQualityId];
+                for (const key in fixedStats) {
+                    newStats[key] = fixedStats[key];
+                }
+            } else {
                 for (const key in baseItem.stats) newStats[key] = baseItem.stats[key];
             }
         } else {
