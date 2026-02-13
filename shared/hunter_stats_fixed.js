@@ -1,506 +1,506 @@
 export const HUNTER_STATS_FIXED = {
     "Bow": {
         "1": {
-            "0": { "damage": 70, "speed": 23.4 },
-            "1": { "damage": 74, "speed": 24.6 },
-            "2": { "damage": 77, "speed": 25.8 },
-            "3": { "damage": 81, "speed": 27.1 },
-            "4": { "damage": 85, "speed": 28.5 }
+            "0": { "damage": 70.4, "speed": 28.7 },
+            "1": { "damage": 73.9, "speed": 30.2 },
+            "2": { "damage": 77.6, "speed": 31.7 },
+            "3": { "damage": 81.5, "speed": 33.3 },
+            "4": { "damage": 85.5, "speed": 34.9 }
         },
         "2": {
-            "0": { "damage": 90, "speed": 29.9 },
-            "1": { "damage": 94, "speed": 31.4 },
-            "2": { "damage": 99, "speed": 33 },
-            "3": { "damage": 104, "speed": 34.7 },
-            "4": { "damage": 109, "speed": 36.4 }
+            "0": { "damage": 89.8, "speed": 36.7 },
+            "1": { "damage": 94.3, "speed": 38.5 },
+            "2": { "damage": 99, "speed": 40.4 },
+            "3": { "damage": 104, "speed": 42.5 },
+            "4": { "damage": 109.2, "speed": 44.6 }
         },
         "3": {
-            "0": { "damage": 114, "speed": 38.2 },
-            "1": { "damage": 120, "speed": 40.1 },
-            "2": { "damage": 126, "speed": 42.1 },
-            "3": { "damage": 132, "speed": 44.2 },
-            "4": { "damage": 139, "speed": 46.4 }
+            "0": { "damage": 114.6, "speed": 46.8 },
+            "1": { "damage": 120.4, "speed": 49.1 },
+            "2": { "damage": 126.4, "speed": 51.6 },
+            "3": { "damage": 132.7, "speed": 54.2 },
+            "4": { "damage": 139.3, "speed": 56.9 }
         },
         "4": {
-            "0": { "damage": 146, "speed": 48.7 },
-            "1": { "damage": 153, "speed": 51.1 },
-            "2": { "damage": 161, "speed": 53.7 },
-            "3": { "damage": 169, "speed": 56.4 },
-            "4": { "damage": 177, "speed": 59.2 }
+            "0": { "damage": 146.3, "speed": 59.7 },
+            "1": { "damage": 153.6, "speed": 62.7 },
+            "2": { "damage": 161.3, "speed": 65.9 },
+            "3": { "damage": 169.4, "speed": 69.1 },
+            "4": { "damage": 177.8, "speed": 72.6 }
         },
         "5": {
-            "0": { "damage": 186, "speed": 62.2 },
-            "1": { "damage": 195, "speed": 65.3 },
-            "2": { "damage": 205, "speed": 68.6 },
-            "3": { "damage": 215, "speed": 72 },
-            "4": { "damage": 226, "speed": 75.6 }
+            "0": { "damage": 186.7, "speed": 76.2 },
+            "1": { "damage": 196.1, "speed": 80 },
+            "2": { "damage": 205.9, "speed": 84.1 },
+            "3": { "damage": 216.2, "speed": 88.3 },
+            "4": { "damage": 227, "speed": 92.7 }
         },
         "6": {
-            "0": { "damage": 238, "speed": 79.4 },
-            "1": { "damage": 249, "speed": 83.4 },
-            "2": { "damage": 262, "speed": 87.6 },
-            "3": { "damage": 275, "speed": 92 },
-            "4": { "damage": 289, "speed": 96.6 }
+            "0": { "damage": 238.3, "speed": 97.3 },
+            "1": { "damage": 250.2, "speed": 102.2 },
+            "2": { "damage": 262.7, "speed": 107.3 },
+            "3": { "damage": 275.9, "speed": 112.6 },
+            "4": { "damage": 289.7, "speed": 118.3 }
         },
         "7": {
-            "0": { "damage": 303, "speed": 101.4 },
-            "1": { "damage": 318, "speed": 106.5 },
-            "2": { "damage": 334, "speed": 111.8 },
-            "3": { "damage": 351, "speed": 117.4 },
-            "4": { "damage": 369, "speed": 123.3 }
+            "0": { "damage": 304.2, "speed": 124.2 },
+            "1": { "damage": 319.4, "speed": 130.4 },
+            "2": { "damage": 335.3, "speed": 136.9 },
+            "3": { "damage": 352.1, "speed": 143.8 },
+            "4": { "damage": 369.7, "speed": 150.9 }
         },
         "8": {
-            "0": { "damage": 387, "speed": 129.5 },
-            "1": { "damage": 406, "speed": 136 },
-            "2": { "damage": 427, "speed": 142.8 },
-            "3": { "damage": 448, "speed": 150 },
-            "4": { "damage": 470, "speed": 157.5 }
+            "0": { "damage": 388.2, "speed": 158.5 },
+            "1": { "damage": 407.6, "speed": 166.4 },
+            "2": { "damage": 428, "speed": 174.7 },
+            "3": { "damage": 449.4, "speed": 183.5 },
+            "4": { "damage": 471.9, "speed": 192.6 }
         },
         "9": {
-            "0": { "damage": 494, "speed": 165.4 },
-            "1": { "damage": 519, "speed": 173.7 },
-            "2": { "damage": 545, "speed": 182.4 },
-            "3": { "damage": 572, "speed": 191.5 },
-            "4": { "damage": 600, "speed": 201.1 }
+            "0": { "damage": 495.4, "speed": 202.3 },
+            "1": { "damage": 520.2, "speed": 212.4 },
+            "2": { "damage": 546.2, "speed": 223 },
+            "3": { "damage": 573.5, "speed": 234.2 },
+            "4": { "damage": 602.2, "speed": 245.9 }
         },
         "10": {
-            "0": { "damage": 630, "speed": 211.2 },
-            "1": { "damage": 662, "speed": 221.8 },
-            "2": { "damage": 695, "speed": 233 },
-            "3": { "damage": 730, "speed": 244.6 },
-            "4": { "damage": 766, "speed": 256 }
+            "0": { "damage": 632.3, "speed": 258.2 },
+            "1": { "damage": 663.9, "speed": 271.1 },
+            "2": { "damage": 697.1, "speed": 284.6 },
+            "3": { "damage": 732, "speed": 298.9 },
+            "4": { "damage": 768.6, "speed": 313.8 }
         }
     },
     "Torch": {
         "1": {
-            "0": { "damage": 23 },
-            "1": { "damage": 25 },
-            "2": { "damage": 26 },
-            "3": { "damage": 27 },
-            "4": { "damage": 28 }
+            "0": { "damage": 23.5, "speed": 23.9 },
+            "1": { "damage": 24.6, "speed": 25.1 },
+            "2": { "damage": 25.9, "speed": 26.4 },
+            "3": { "damage": 27.2, "speed": 27.7 },
+            "4": { "damage": 28.5, "speed": 29.1 }
         },
         "2": {
-            "0": { "damage": 30 },
-            "1": { "damage": 31 },
-            "2": { "damage": 33 },
-            "3": { "damage": 35 },
-            "4": { "damage": 36 }
+            "0": { "damage": 29.9, "speed": 30.6 },
+            "1": { "damage": 31.4, "speed": 32.1 },
+            "2": { "damage": 33, "speed": 33.7 },
+            "3": { "damage": 34.7, "speed": 35.4 },
+            "4": { "damage": 36.4, "speed": 37.1 }
         },
         "3": {
-            "0": { "damage": 38 },
-            "1": { "damage": 40 },
-            "2": { "damage": 42 },
-            "3": { "damage": 44 },
-            "4": { "damage": 46 }
+            "0": { "damage": 38.2, "speed": 39 },
+            "1": { "damage": 40.1, "speed": 41 },
+            "2": { "damage": 42.1, "speed": 43 },
+            "3": { "damage": 44.2, "speed": 45.1 },
+            "4": { "damage": 46.4, "speed": 47.4 }
         },
         "4": {
-            "0": { "damage": 49 },
-            "1": { "damage": 51 },
-            "2": { "damage": 54 },
-            "3": { "damage": 56 },
-            "4": { "damage": 59 }
+            "0": { "damage": 48.8, "speed": 49.8 },
+            "1": { "damage": 51.2, "speed": 52.3 },
+            "2": { "damage": 53.8, "speed": 54.9 },
+            "3": { "damage": 56.5, "speed": 57.6 },
+            "4": { "damage": 59.3, "speed": 60.5 }
         },
         "5": {
-            "0": { "damage": 62 },
-            "1": { "damage": 65 },
-            "2": { "damage": 68 },
-            "3": { "damage": 72 },
-            "4": { "damage": 75 }
+            "0": { "damage": 62.2, "speed": 63.5 },
+            "1": { "damage": 65.4, "speed": 66.7 },
+            "2": { "damage": 68.6, "speed": 70 },
+            "3": { "damage": 72.1, "speed": 73.5 },
+            "4": { "damage": 75.7, "speed": 77.2 }
         },
         "6": {
-            "0": { "damage": 79 },
-            "1": { "damage": 83 },
-            "2": { "damage": 87 },
-            "3": { "damage": 92 },
-            "4": { "damage": 96 }
+            "0": { "damage": 79.4, "speed": 81.1 },
+            "1": { "damage": 83.4, "speed": 85.1 },
+            "2": { "damage": 87.6, "speed": 89.4 },
+            "3": { "damage": 92, "speed": 93.9 },
+            "4": { "damage": 96.6, "speed": 98.6 }
         },
         "7": {
-            "0": { "damage": 101 },
-            "1": { "damage": 106 },
-            "2": { "damage": 111 },
-            "3": { "damage": 117 },
-            "4": { "damage": 123 }
+            "0": { "damage": 101.4, "speed": 103.5 },
+            "1": { "damage": 106.5, "speed": 108.7 },
+            "2": { "damage": 111.8, "speed": 114.1 },
+            "3": { "damage": 117.4, "speed": 119.8 },
+            "4": { "damage": 123.2, "speed": 125.8 }
         },
         "8": {
-            "0": { "damage": 129 },
-            "1": { "damage": 135 },
-            "2": { "damage": 142 },
-            "3": { "damage": 149 },
-            "4": { "damage": 157 }
+            "0": { "damage": 129.4, "speed": 132.1 },
+            "1": { "damage": 135.9, "speed": 138.7 },
+            "2": { "damage": 142.7, "speed": 145.6 },
+            "3": { "damage": 149.8, "speed": 152.9 },
+            "4": { "damage": 157.3, "speed": 160.5 }
         },
         "9": {
-            "0": { "damage": 164 },
-            "1": { "damage": 173 },
-            "2": { "damage": 181 },
-            "3": { "damage": 190 },
-            "4": { "damage": 200 }
+            "0": { "damage": 165.1, "speed": 168.6 },
+            "1": { "damage": 173.4, "speed": 177 },
+            "2": { "damage": 182.1, "speed": 185.8 },
+            "3": { "damage": 191.2, "speed": 195.1 },
+            "4": { "damage": 200.7, "speed": 204.9 }
         },
         "10": {
-            "0": { "damage": 210 },
-            "1": { "damage": 220 },
-            "2": { "damage": 231 },
-            "3": { "damage": 243 },
-            "4": { "damage": 256 }
+            "0": { "damage": 210.8, "speed": 215.1 },
+            "1": { "damage": 221.3, "speed": 225.9 },
+            "2": { "damage": 232.4, "speed": 237.2 },
+            "3": { "damage": 244, "speed": 249 },
+            "4": { "damage": 256.2, "speed": 261.5 }
         }
     },
     "Leather Armor": {
         "1": {
-            "0": { "defense": 80, "hp": 160 },
-            "1": { "defense": 84, "hp": 168 },
-            "2": { "defense": 88, "hp": 176 },
-            "3": { "defense": 92, "hp": 184 },
-            "4": { "defense": 97, "hp": 193 }
+            "0": { "defense": 40.1, "hp": 160.2 },
+            "1": { "defense": 42.1, "hp": 168.2 },
+            "2": { "defense": 44.2, "hp": 176.7 },
+            "3": { "defense": 46.4, "hp": 185.5 },
+            "4": { "defense": 48.7, "hp": 194.8 }
         },
         "2": {
-            "0": { "defense": 102, "hp": 202 },
-            "1": { "defense": 107, "hp": 211 },
-            "2": { "defense": 112, "hp": 222 },
-            "3": { "defense": 118, "hp": 232 },
-            "4": { "defense": 124, "hp": 243 }
+            "0": { "defense": 51.1, "hp": 204.5 },
+            "1": { "defense": 53.7, "hp": 214.7 },
+            "2": { "defense": 56.4, "hp": 225.5 },
+            "3": { "defense": 59.2, "hp": 236.7 },
+            "4": { "defense": 62.1, "hp": 248.6 }
         },
         "3": {
-            "0": { "defense": 130, "hp": 255 },
-            "1": { "defense": 137, "hp": 267 },
-            "2": { "defense": 144, "hp": 280 },
-            "3": { "defense": 151, "hp": 294 },
-            "4": { "defense": 159, "hp": 308 }
+            "0": { "defense": 65.3, "hp": 261 },
+            "1": { "defense": 68.5, "hp": 274.1 },
+            "2": { "defense": 71.9, "hp": 287.8 },
+            "3": { "defense": 75.5, "hp": 302.2 },
+            "4": { "defense": 79.3, "hp": 317.3 }
         },
         "4": {
-            "0": { "defense": 167, "hp": 323 },
-            "1": { "defense": 175, "hp": 339 },
-            "2": { "defense": 184, "hp": 355 },
-            "3": { "defense": 193, "hp": 372 },
-            "4": { "defense": 203, "hp": 390 }
+            "0": { "defense": 83.3, "hp": 333.1 },
+            "1": { "defense": 87.4, "hp": 349.8 },
+            "2": { "defense": 91.8, "hp": 367.3 },
+            "3": { "defense": 96.4, "hp": 385.6 },
+            "4": { "defense": 101.2, "hp": 404.9 }
         },
         "5": {
-            "0": { "defense": 213, "hp": 409 },
-            "1": { "defense": 224, "hp": 429 },
-            "2": { "defense": 235, "hp": 450 },
-            "3": { "defense": 247, "hp": 472 },
-            "4": { "defense": 259, "hp": 495 }
+            "0": { "defense": 106.3, "hp": 425.2 },
+            "1": { "defense": 111.6, "hp": 446.4 },
+            "2": { "defense": 117.2, "hp": 468.7 },
+            "3": { "defense": 123, "hp": 492.2 },
+            "4": { "defense": 129.2, "hp": 516.8 }
         },
         "6": {
-            "0": { "defense": 272, "hp": 519 },
-            "1": { "defense": 286, "hp": 544 },
-            "2": { "defense": 300, "hp": 571 },
-            "3": { "defense": 315, "hp": 600 },
-            "4": { "defense": 331, "hp": 631 }
+            "0": { "defense": 135.7, "hp": 542.6 },
+            "1": { "defense": 142.4, "hp": 569.7 },
+            "2": { "defense": 149.6, "hp": 598.2 },
+            "3": { "defense": 157, "hp": 628.1 },
+            "4": { "defense": 164.9, "hp": 659.6 }
         },
         "7": {
-            "0": { "defense": 348, "hp": 664 },
-            "1": { "defense": 365, "hp": 699 },
-            "2": { "defense": 383, "hp": 736 },
-            "3": { "defense": 402, "hp": 775 },
-            "4": { "defense": 422, "hp": 816 }
+            "0": { "defense": 173.1, "hp": 692.5 },
+            "1": { "defense": 181.8, "hp": 727.2 },
+            "2": { "defense": 190.9, "hp": 763.5 },
+            "3": { "defense": 200.4, "hp": 801.7 },
+            "4": { "defense": 210.4, "hp": 841.8 }
         },
         "8": {
-            "0": { "defense": 443, "hp": 859 },
-            "1": { "defense": 465, "hp": 905 },
-            "2": { "defense": 488, "hp": 954 },
-            "3": { "defense": 512, "hp": 1005 },
-            "4": { "defense": 538, "hp": 1059 }
+            "0": { "defense": 221, "hp": 883.9 },
+            "1": { "defense": 232, "hp": 928.1 },
+            "2": { "defense": 243.6, "hp": 974.5 },
+            "3": { "defense": 255.8, "hp": 1023.2 },
+            "4": { "defense": 268.6, "hp": 1074.3 }
         },
         "9": {
-            "0": { "defense": 565, "hp": 1116 },
-            "1": { "defense": 593, "hp": 1176 },
-            "2": { "defense": 623, "hp": 1240 },
-            "3": { "defense": 654, "hp": 1306 },
-            "4": { "defense": 687, "hp": 1376 }
+            "0": { "defense": 282, "hp": 1128.1 },
+            "1": { "defense": 296.1, "hp": 1184.5 },
+            "2": { "defense": 310.9, "hp": 1243.7 },
+            "3": { "defense": 326.5, "hp": 1305.9 },
+            "4": { "defense": 342.8, "hp": 1371.2 }
         },
         "10": {
-            "0": { "defense": 721, "hp": 1449 },
-            "1": { "defense": 757, "hp": 1526 },
-            "2": { "defense": 795, "hp": 1607 },
-            "3": { "defense": 835, "hp": 1692 },
-            "4": { "defense": 875, "hp": 1750 }
+            "0": { "defense": 359.9, "hp": 1439.7 },
+            "1": { "defense": 377.9, "hp": 1511.7 },
+            "2": { "defense": 396.8, "hp": 1587.3 },
+            "3": { "defense": 416.7, "hp": 1666.7 },
+            "4": { "defense": 437.5, "hp": 1750 }
         }
     },
     "Leather Helmet": {
         "1": {
-            "0": { "defense": 57, "hp": 120 },
-            "1": { "defense": 60, "hp": 126 },
-            "2": { "defense": 63, "hp": 132 },
-            "3": { "defense": 66, "hp": 139 },
-            "4": { "defense": 69, "hp": 146 }
+            "0": { "defense": 28.6, "hp": 120.2 },
+            "1": { "defense": 30, "hp": 126.2 },
+            "2": { "defense": 31.5, "hp": 132.5 },
+            "3": { "defense": 33.1, "hp": 139.1 },
+            "4": { "defense": 34.8, "hp": 146.1 }
         },
         "2": {
-            "0": { "defense": 73, "hp": 153 },
-            "1": { "defense": 77, "hp": 161 },
-            "2": { "defense": 81, "hp": 169 },
-            "3": { "defense": 85, "hp": 178 },
-            "4": { "defense": 90, "hp": 186 }
+            "0": { "defense": 36.5, "hp": 153.4 },
+            "1": { "defense": 38.3, "hp": 161 },
+            "2": { "defense": 40.3, "hp": 169.1 },
+            "3": { "defense": 42.3, "hp": 177.6 },
+            "4": { "defense": 44.4, "hp": 186.4 }
         },
         "3": {
-            "0": { "defense": 94, "hp": 196 },
-            "1": { "defense": 99, "hp": 206 },
-            "2": { "defense": 104, "hp": 216 },
-            "3": { "defense": 109, "hp": 227 },
-            "4": { "defense": 114, "hp": 238 }
+            "0": { "defense": 46.6, "hp": 195.8 },
+            "1": { "defense": 48.9, "hp": 205.5 },
+            "2": { "defense": 51.4, "hp": 215.8 },
+            "3": { "defense": 54, "hp": 226.6 },
+            "4": { "defense": 56.7, "hp": 237.9 }
         },
         "4": {
-            "0": { "defense": 120, "hp": 250 },
-            "1": { "defense": 126, "hp": 262 },
-            "2": { "defense": 132, "hp": 275 },
-            "3": { "defense": 138, "hp": 289 },
-            "4": { "defense": 145, "hp": 304 }
+            "0": { "defense": 59.5, "hp": 249.8 },
+            "1": { "defense": 62.5, "hp": 262.3 },
+            "2": { "defense": 65.6, "hp": 275.4 },
+            "3": { "defense": 68.9, "hp": 289.2 },
+            "4": { "defense": 72.3, "hp": 303.7 }
         },
         "5": {
-            "0": { "defense": 152, "hp": 319 },
-            "1": { "defense": 160, "hp": 335 },
-            "2": { "defense": 168, "hp": 352 },
-            "3": { "defense": 176, "hp": 369 },
-            "4": { "defense": 185, "hp": 388 }
+            "0": { "defense": 75.9, "hp": 318.9 },
+            "1": { "defense": 79.7, "hp": 334.8 },
+            "2": { "defense": 83.7, "hp": 351.6 },
+            "3": { "defense": 87.9, "hp": 369.1 },
+            "4": { "defense": 92.3, "hp": 387.6 }
         },
         "6": {
-            "0": { "defense": 194, "hp": 407 },
-            "1": { "defense": 204, "hp": 427 },
-            "2": { "defense": 214, "hp": 449 },
-            "3": { "defense": 224, "hp": 471 },
-            "4": { "defense": 235, "hp": 495 }
+            "0": { "defense": 96.9, "hp": 407 },
+            "1": { "defense": 101.7, "hp": 427.3 },
+            "2": { "defense": 106.8, "hp": 448.7 },
+            "3": { "defense": 112.2, "hp": 471.1 },
+            "4": { "defense": 117.8, "hp": 494.7 }
         },
         "7": {
-            "0": { "defense": 247, "hp": 519 },
-            "1": { "defense": 259, "hp": 545 },
-            "2": { "defense": 272, "hp": 573 },
-            "3": { "defense": 285, "hp": 601 },
-            "4": { "defense": 299, "hp": 631 }
+            "0": { "defense": 123.7, "hp": 519.4 },
+            "1": { "defense": 129.9, "hp": 545.4 },
+            "2": { "defense": 136.3, "hp": 572.6 },
+            "3": { "defense": 143.2, "hp": 601.3 },
+            "4": { "defense": 150.3, "hp": 631.3 }
         },
         "8": {
-            "0": { "defense": 314, "hp": 663 },
-            "1": { "defense": 329, "hp": 696 },
-            "2": { "defense": 345, "hp": 731 },
-            "3": { "defense": 362, "hp": 767 },
-            "4": { "defense": 380, "hp": 806 }
+            "0": { "defense": 157.8, "hp": 662.9 },
+            "1": { "defense": 165.7, "hp": 696 },
+            "2": { "defense": 174, "hp": 730.8 },
+            "3": { "defense": 182.7, "hp": 767.4 },
+            "4": { "defense": 191.8, "hp": 805.8 }
         },
         "9": {
-            "0": { "defense": 399, "hp": 846 },
-            "1": { "defense": 419, "hp": 888 },
-            "2": { "defense": 440, "hp": 933 },
-            "3": { "defense": 462, "hp": 979 },
-            "4": { "defense": 485, "hp": 1028 }
+            "0": { "defense": 201.4, "hp": 846 },
+            "1": { "defense": 211.5, "hp": 888.4 },
+            "2": { "defense": 222.1, "hp": 932.8 },
+            "3": { "defense": 233.2, "hp": 979.4 },
+            "4": { "defense": 244.9, "hp": 1028.4 }
         },
         "10": {
-            "0": { "defense": 510, "hp": 1080 },
-            "1": { "defense": 535, "hp": 1134 },
-            "2": { "defense": 562, "hp": 1190 },
-            "3": { "defense": 590, "hp": 1250 },
-            "4": { "defense": 625, "hp": 1313 }
+            "0": { "defense": 257.1, "hp": 1079.8 },
+            "1": { "defense": 269.9, "hp": 1133.8 },
+            "2": { "defense": 283.4, "hp": 1190.5 },
+            "3": { "defense": 297.6, "hp": 1250 },
+            "4": { "defense": 312.5, "hp": 1312.5 }
         }
     },
     "Leather Boots": {
         "1": {
-            "0": { "damage": 16, "defense": 46, "hp": 60, "speed": 33 },
-            "1": { "damage": 16, "defense": 48, "hp": 63, "speed": 35 },
-            "2": { "damage": 17, "defense": 50, "hp": 66, "speed": 36 },
-            "3": { "damage": 18, "defense": 53, "hp": 70, "speed": 38 },
-            "4": { "damage": 19, "defense": 56, "hp": 73, "speed": 40 }
+            "0": { "damage": 15.6, "defense": 22.9, "hp": 60.1, "speed": 19.2 },
+            "1": { "damage": 16.4, "defense": 24, "hp": 63.1, "speed": 20.1 },
+            "2": { "damage": 17.2, "defense": 25.2, "hp": 66.2, "speed": 21.1 },
+            "3": { "damage": 18.1, "defense": 26.5, "hp": 69.6, "speed": 22.2 },
+            "4": { "damage": 19, "defense": 27.8, "hp": 73, "speed": 23.3 }
         },
         "2": {
-            "0": { "damage": 20, "defense": 58, "hp": 77, "speed": 42 },
-            "1": { "damage": 21, "defense": 61, "hp": 81, "speed": 44 },
-            "2": { "damage": 22, "defense": 64, "hp": 85, "speed": 46 },
-            "3": { "damage": 23, "defense": 68, "hp": 89, "speed": 49 },
-            "4": { "damage": 24, "defense": 71, "hp": 93, "speed": 51 }
+            "0": { "damage": 20, "defense": 29.2, "hp": 76.7, "speed": 24.4 },
+            "1": { "damage": 21, "defense": 30.7, "hp": 80.5, "speed": 25.7 },
+            "2": { "damage": 22, "defense": 32.2, "hp": 84.6, "speed": 27 },
+            "3": { "damage": 23.1, "defense": 33.8, "hp": 88.8, "speed": 28.3 },
+            "4": { "damage": 24.3, "defense": 35.5, "hp": 93.2, "speed": 29.7 }
         },
         "3": {
-            "0": { "damage": 25, "defense": 75, "hp": 98, "speed": 54 },
-            "1": { "damage": 27, "defense": 78, "hp": 103, "speed": 56 },
-            "2": { "damage": 28, "defense": 82, "hp": 108, "speed": 59 },
-            "3": { "damage": 29, "defense": 86, "hp": 113, "speed": 62 },
-            "4": { "damage": 31, "defense": 91, "hp": 119, "speed": 65 }
+            "0": { "damage": 25.5, "defense": 37.3, "hp": 97.9, "speed": 31.2 },
+            "1": { "damage": 26.7, "defense": 39.2, "hp": 102.8, "speed": 32.8 },
+            "2": { "damage": 28.1, "defense": 41.1, "hp": 107.9, "speed": 34.4 },
+            "3": { "damage": 29.5, "defense": 43.2, "hp": 113.3, "speed": 36.1 },
+            "4": { "damage": 31, "defense": 45.3, "hp": 119, "speed": 37.9 }
         },
         "4": {
-            "0": { "damage": 33, "defense": 95, "hp": 125, "speed": 68 },
-            "1": { "damage": 34, "defense": 100, "hp": 131, "speed": 72 },
-            "2": { "damage": 36, "defense": 105, "hp": 138, "speed": 75 },
-            "3": { "damage": 38, "defense": 110, "hp": 145, "speed": 79 },
-            "4": { "damage": 40, "defense": 116, "hp": 152, "speed": 83 }
+            "0": { "damage": 32.5, "defense": 47.6, "hp": 124.9, "speed": 39.8 },
+            "1": { "damage": 34.1, "defense": 50, "hp": 131.2, "speed": 41.8 },
+            "2": { "damage": 35.8, "defense": 52.5, "hp": 137.7, "speed": 43.9 },
+            "3": { "damage": 37.6, "defense": 55.1, "hp": 144.6, "speed": 46.1 },
+            "4": { "damage": 39.5, "defense": 57.8, "hp": 151.8, "speed": 48.4 }
         },
         "5": {
-            "0": { "damage": 41, "defense": 121, "hp": 159, "speed": 87 },
-            "1": { "damage": 44, "defense": 128, "hp": 167, "speed": 92 },
-            "2": { "damage": 46, "defense": 134, "hp": 176, "speed": 96 },
-            "3": { "damage": 48, "defense": 141, "hp": 185, "speed": 101 },
-            "4": { "damage": 50, "defense": 148, "hp": 194, "speed": 106 }
+            "0": { "damage": 41.5, "defense": 60.7, "hp": 159.4, "speed": 50.8 },
+            "1": { "damage": 43.6, "defense": 63.8, "hp": 167.4, "speed": 53.4 },
+            "2": { "damage": 45.7, "defense": 67, "hp": 175.8, "speed": 56 },
+            "3": { "damage": 48, "defense": 70.3, "hp": 184.6, "speed": 58.8 },
+            "4": { "damage": 50.4, "defense": 73.8, "hp": 193.8, "speed": 61.8 }
         },
         "6": {
-            "0": { "damage": 53, "defense": 155, "hp": 203, "speed": 111 },
-            "1": { "damage": 56, "defense": 163, "hp": 214, "speed": 117 },
-            "2": { "damage": 58, "defense": 171, "hp": 224, "speed": 123 },
-            "3": { "damage": 61, "defense": 179, "hp": 236, "speed": 129 },
-            "4": { "damage": 64, "defense": 188, "hp": 247, "speed": 135 }
+            "0": { "damage": 53, "defense": 77.5, "hp": 203.5, "speed": 64.9 },
+            "1": { "damage": 55.6, "defense": 81.4, "hp": 213.7, "speed": 68.1 },
+            "2": { "damage": 58.4, "defense": 85.5, "hp": 224.3, "speed": 71.5 },
+            "3": { "damage": 61.3, "defense": 89.7, "hp": 235.6, "speed": 75.1 },
+            "4": { "damage": 64.4, "defense": 94.2, "hp": 247.3, "speed": 78.8 }
         },
         "7": {
-            "0": { "damage": 68, "defense": 198, "hp": 260, "speed": 142 },
-            "1": { "damage": 71, "defense": 208, "hp": 273, "speed": 149 },
-            "2": { "damage": 75, "defense": 218, "hp": 286, "speed": 157 },
-            "3": { "damage": 78, "defense": 229, "hp": 301, "speed": 164 },
-            "4": { "damage": 82, "defense": 241, "hp": 316, "speed": 173 }
+            "0": { "damage": 67.6, "defense": 98.9, "hp": 259.7, "speed": 82.8 },
+            "1": { "damage": 71, "defense": 103.9, "hp": 272.7, "speed": 86.9 },
+            "2": { "damage": 74.5, "defense": 109.1, "hp": 286.3, "speed": 91.3 },
+            "3": { "damage": 78.2, "defense": 114.5, "hp": 300.6, "speed": 95.8 },
+            "4": { "damage": 82.2, "defense": 120.3, "hp": 315.7, "speed": 100.6 }
         },
         "8": {
-            "0": { "damage": 86, "defense": 253, "hp": 331, "speed": 181 },
-            "1": { "damage": 91, "defense": 265, "hp": 348, "speed": 190 },
-            "2": { "damage": 95, "defense": 278, "hp": 365, "speed": 200 },
-            "3": { "damage": 100, "defense": 292, "hp": 384, "speed": 210 },
-            "4": { "damage": 105, "defense": 307, "hp": 403, "speed": 220 }
+            "0": { "damage": 86.3, "defense": 126.3, "hp": 331.5, "speed": 105.7 },
+            "1": { "damage": 90.6, "defense": 132.6, "hp": 348, "speed": 110.9 },
+            "2": { "damage": 95.1, "defense": 139.2, "hp": 365.4, "speed": 116.5 },
+            "3": { "damage": 99.9, "defense": 146.2, "hp": 383.7, "speed": 122.3 },
+            "4": { "damage": 104.9, "defense": 153.5, "hp": 402.9, "speed": 128.4 }
         },
         "9": {
-            "0": { "damage": 110, "defense": 322, "hp": 423, "speed": 231 },
-            "1": { "damage": 116, "defense": 338, "hp": 444, "speed": 243 },
-            "2": { "damage": 121, "defense": 355, "hp": 466, "speed": 255 },
-            "3": { "damage": 127, "defense": 373, "hp": 490, "speed": 268 },
-            "4": { "damage": 134, "defense": 392, "hp": 514, "speed": 281 }
+            "0": { "damage": 110.1, "defense": 161.2, "hp": 423, "speed": 134.9 },
+            "1": { "damage": 115.6, "defense": 169.2, "hp": 444.2, "speed": 141.6 },
+            "2": { "damage": 121.4, "defense": 177.7, "hp": 466.4, "speed": 148.7 },
+            "3": { "damage": 127.5, "defense": 186.6, "hp": 489.7, "speed": 156.1 },
+            "4": { "damage": 133.8, "defense": 195.9, "hp": 514.2, "speed": 163.9 }
         },
         "10": {
-            "0": { "damage": 140, "defense": 411, "hp": 540, "speed": 295 },
-            "1": { "damage": 148, "defense": 432, "hp": 567, "speed": 310 },
-            "2": { "damage": 155, "defense": 454, "hp": 595, "speed": 326 },
-            "3": { "damage": 163, "defense": 476, "hp": 625, "speed": 342 },
-            "4": { "damage": 171, "defense": 500, "hp": 656, "speed": 359 }
+            "0": { "damage": 140.5, "defense": 205.7, "hp": 539.9, "speed": 172.1 },
+            "1": { "damage": 147.5, "defense": 216, "hp": 566.9, "speed": 180.7 },
+            "2": { "damage": 154.9, "defense": 226.8, "hp": 595.2, "speed": 189.8 },
+            "3": { "damage": 162.7, "defense": 238.1, "hp": 625, "speed": 199.2 },
+            "4": { "damage": 170.8, "defense": 250, "hp": 656.2, "speed": 209.2 }
         }
     },
     "Leather Gloves": {
         "1": {
-            "0": { "damage": 23, "defense": 46, "hp": 60, "speed": 23 },
-            "1": { "damage": 25, "defense": 48, "hp": 63, "speed": 25 },
-            "2": { "damage": 26, "defense": 50, "hp": 66, "speed": 26 },
-            "3": { "damage": 27, "defense": 53, "hp": 70, "speed": 27 },
-            "4": { "damage": 29, "defense": 56, "hp": 73, "speed": 28 }
+            "0": { "damage": 23.5, "defense": 22.9, "hp": 60.1, "speed": 14.4 },
+            "1": { "damage": 24.6, "defense": 24, "hp": 63.1, "speed": 15.1 },
+            "2": { "damage": 25.9, "defense": 25.2, "hp": 66.2, "speed": 15.8 },
+            "3": { "damage": 27.2, "defense": 26.5, "hp": 69.6, "speed": 16.6 },
+            "4": { "damage": 28.5, "defense": 27.8, "hp": 73, "speed": 17.5 }
         },
         "2": {
-            "0": { "damage": 30, "defense": 58, "hp": 77, "speed": 30 },
-            "1": { "damage": 31, "defense": 61, "hp": 81, "speed": 31 },
-            "2": { "damage": 33, "defense": 64, "hp": 85, "speed": 33 },
-            "3": { "damage": 35, "defense": 68, "hp": 89, "speed": 35 },
-            "4": { "damage": 36, "defense": 71, "hp": 93, "speed": 36 }
+            "0": { "damage": 29.9, "defense": 29.2, "hp": 76.7, "speed": 18.3 },
+            "1": { "damage": 31.4, "defense": 30.7, "hp": 80.5, "speed": 19.3 },
+            "2": { "damage": 33, "defense": 32.2, "hp": 84.6, "speed": 20.2 },
+            "3": { "damage": 34.7, "defense": 33.8, "hp": 88.8, "speed": 21.2 },
+            "4": { "damage": 36.4, "defense": 35.5, "hp": 93.2, "speed": 22.3 }
         },
         "3": {
-            "0": { "damage": 38, "defense": 75, "hp": 98, "speed": 38 },
-            "1": { "damage": 40, "defense": 78, "hp": 103, "speed": 40 },
-            "2": { "damage": 42, "defense": 82, "hp": 108, "speed": 42 },
-            "3": { "damage": 44, "defense": 86, "hp": 113, "speed": 44 },
-            "4": { "damage": 46, "defense": 91, "hp": 119, "speed": 46 }
+            "0": { "damage": 38.2, "defense": 37.3, "hp": 97.9, "speed": 23.4 },
+            "1": { "damage": 40.1, "defense": 39.2, "hp": 102.8, "speed": 24.6 },
+            "2": { "damage": 42.1, "defense": 41.1, "hp": 107.9, "speed": 25.8 },
+            "3": { "damage": 44.2, "defense": 43.2, "hp": 113.3, "speed": 27.1 },
+            "4": { "damage": 46.4, "defense": 45.3, "hp": 119, "speed": 28.4 }
         },
         "4": {
-            "0": { "damage": 49, "defense": 95, "hp": 125, "speed": 49 },
-            "1": { "damage": 51, "defense": 100, "hp": 131, "speed": 51 },
-            "2": { "damage": 54, "defense": 105, "hp": 138, "speed": 54 },
-            "3": { "damage": 56, "defense": 110, "hp": 145, "speed": 56 },
-            "4": { "damage": 59, "defense": 116, "hp": 152, "speed": 59 }
+            "0": { "damage": 48.8, "defense": 47.6, "hp": 124.9, "speed": 29.9 },
+            "1": { "damage": 51.2, "defense": 50, "hp": 131.2, "speed": 31.4 },
+            "2": { "damage": 53.8, "defense": 52.5, "hp": 137.7, "speed": 32.9 },
+            "3": { "damage": 56.5, "defense": 55.1, "hp": 144.6, "speed": 34.6 },
+            "4": { "damage": 59.3, "defense": 57.8, "hp": 151.8, "speed": 36.3 }
         },
         "5": {
-            "0": { "damage": 62, "defense": 121, "hp": 159, "speed": 62 },
-            "1": { "damage": 65, "defense": 128, "hp": 167, "speed": 65 },
-            "2": { "damage": 69, "defense": 134, "hp": 176, "speed": 69 },
-            "3": { "damage": 72, "defense": 141, "hp": 185, "speed": 72 },
-            "4": { "damage": 76, "defense": 148, "hp": 194, "speed": 76 }
+            "0": { "damage": 62.2, "defense": 60.7, "hp": 159.4, "speed": 38.1 },
+            "1": { "damage": 65.4, "defense": 63.8, "hp": 167.4, "speed": 40 },
+            "2": { "damage": 68.6, "defense": 67, "hp": 175.8, "speed": 42 },
+            "3": { "damage": 72.1, "defense": 70.3, "hp": 184.6, "speed": 44.1 },
+            "4": { "damage": 75.7, "defense": 73.8, "hp": 193.8, "speed": 46.3 }
         },
         "6": {
-            "0": { "damage": 79, "defense": 155, "hp": 203, "speed": 79 },
-            "1": { "damage": 83, "defense": 163, "hp": 214, "speed": 83 },
-            "2": { "damage": 88, "defense": 171, "hp": 224, "speed": 88 },
-            "3": { "damage": 92, "defense": 179, "hp": 236, "speed": 92 },
-            "4": { "damage": 97, "defense": 188, "hp": 247, "speed": 96 }
+            "0": { "damage": 79.4, "defense": 77.5, "hp": 203.5, "speed": 48.6 },
+            "1": { "damage": 83.4, "defense": 81.4, "hp": 213.7, "speed": 51.1 },
+            "2": { "damage": 87.6, "defense": 85.5, "hp": 224.3, "speed": 53.6 },
+            "3": { "damage": 92, "defense": 89.7, "hp": 235.6, "speed": 56.3 },
+            "4": { "damage": 96.6, "defense": 94.2, "hp": 247.3, "speed": 59.1 }
         },
         "7": {
-            "0": { "damage": 101, "defense": 198, "hp": 260, "speed": 101 },
-            "1": { "damage": 106, "defense": 208, "hp": 273, "speed": 106 },
-            "2": { "damage": 112, "defense": 218, "hp": 286, "speed": 112 },
-            "3": { "damage": 117, "defense": 229, "hp": 301, "speed": 117 },
-            "4": { "damage": 123, "defense": 241, "hp": 316, "speed": 123 }
+            "0": { "damage": 101.4, "defense": 98.9, "hp": 259.7, "speed": 62.1 },
+            "1": { "damage": 106.5, "defense": 103.9, "hp": 272.7, "speed": 65.2 },
+            "2": { "damage": 111.8, "defense": 109.1, "hp": 286.3, "speed": 68.5 },
+            "3": { "damage": 117.4, "defense": 114.5, "hp": 300.6, "speed": 71.9 },
+            "4": { "damage": 123.2, "defense": 120.3, "hp": 315.7, "speed": 75.5 }
         },
         "8": {
-            "0": { "damage": 129, "defense": 253, "hp": 331, "speed": 129 },
-            "1": { "damage": 136, "defense": 265, "hp": 348, "speed": 136 },
-            "2": { "damage": 143, "defense": 278, "hp": 365, "speed": 143 },
-            "3": { "damage": 150, "defense": 292, "hp": 384, "speed": 150 },
-            "4": { "damage": 157, "defense": 307, "hp": 403, "speed": 157 }
+            "0": { "damage": 129.4, "defense": 126.3, "hp": 331.5, "speed": 79.2 },
+            "1": { "damage": 135.9, "defense": 132.6, "hp": 348, "speed": 83.2 },
+            "2": { "damage": 142.7, "defense": 139.2, "hp": 365.4, "speed": 87.4 },
+            "3": { "damage": 149.8, "defense": 146.2, "hp": 383.7, "speed": 91.7 },
+            "4": { "damage": 157.3, "defense": 153.5, "hp": 402.9, "speed": 96.3 }
         },
         "9": {
-            "0": { "damage": 165, "defense": 322, "hp": 423, "speed": 165 },
-            "1": { "damage": 173, "defense": 338, "hp": 444, "speed": 173 },
-            "2": { "damage": 182, "defense": 355, "hp": 466, "speed": 182 },
-            "3": { "damage": 191, "defense": 373, "hp": 490, "speed": 191 },
-            "4": { "damage": 201, "defense": 392, "hp": 514, "speed": 201 }
+            "0": { "damage": 165.1, "defense": 161.2, "hp": 423, "speed": 101.1 },
+            "1": { "damage": 173.4, "defense": 169.2, "hp": 444.2, "speed": 106.2 },
+            "2": { "damage": 182.1, "defense": 177.7, "hp": 466.4, "speed": 111.5 },
+            "3": { "damage": 191.2, "defense": 186.6, "hp": 489.7, "speed": 117.1 },
+            "4": { "damage": 200.7, "defense": 195.9, "hp": 514.2, "speed": 122.9 }
         },
         "10": {
-            "0": { "damage": 211, "defense": 411, "hp": 540, "speed": 211 },
-            "1": { "damage": 221, "defense": 432, "hp": 567, "speed": 221 },
-            "2": { "damage": 232, "defense": 454, "hp": 595, "speed": 232 },
-            "3": { "damage": 244, "defense": 476, "hp": 625, "speed": 244 },
-            "4": { "damage": 256, "defense": 500, "hp": 656, "speed": 256 }
+            "0": { "damage": 210.8, "defense": 205.7, "hp": 539.9, "speed": 129.1 },
+            "1": { "damage": 221.3, "defense": 216, "hp": 566.9, "speed": 135.5 },
+            "2": { "damage": 232.4, "defense": 226.8, "hp": 595.2, "speed": 142.3 },
+            "3": { "damage": 244, "defense": 238.1, "hp": 625, "speed": 149.4 },
+            "4": { "damage": 256.2, "defense": 250, "hp": 656.2, "speed": 156.9 }
         }
     },
     "Leather Cape": {
         "1": {
-            "0": { "damage": 23, "speed": 14.1 },
-            "1": { "damage": 25, "speed": 14.81 },
-            "2": { "damage": 26, "speed": 15.55 },
-            "3": { "damage": 27, "speed": 16.32 },
-            "4": { "damage": 29, "speed": 17.14 }
+            "0": { "damage": 23.5, "speed": 9.6 },
+            "1": { "damage": 24.6, "speed": 10.1 },
+            "2": { "damage": 25.9, "speed": 10.6 },
+            "3": { "damage": 27.2, "speed": 11.1 },
+            "4": { "damage": 28.5, "speed": 11.6 }
         },
         "2": {
-            "0": { "damage": 30, "speed": 18 },
-            "1": { "damage": 31, "speed": 18.9 },
-            "2": { "damage": 33, "speed": 19.84 },
-            "3": { "damage": 35, "speed": 20.83 },
-            "4": { "damage": 36, "speed": 21.88 }
+            "0": { "damage": 29.9, "speed": 12.2 },
+            "1": { "damage": 31.4, "speed": 12.8 },
+            "2": { "damage": 33, "speed": 13.5 },
+            "3": { "damage": 34.7, "speed": 14.2 },
+            "4": { "damage": 36.4, "speed": 14.9 }
         },
         "3": {
-            "0": { "damage": 38, "speed": 22.97 },
-            "1": { "damage": 40, "speed": 24.12 },
-            "2": { "damage": 42, "speed": 25.32 },
-            "3": { "damage": 44, "speed": 26.59 },
-            "4": { "damage": 46, "speed": 27.92 }
+            "0": { "damage": 38.2, "speed": 15.6 },
+            "1": { "damage": 40.1, "speed": 16.4 },
+            "2": { "damage": 42.1, "speed": 17.2 },
+            "3": { "damage": 44.2, "speed": 18.1 },
+            "4": { "damage": 46.4, "speed": 19 }
         },
         "4": {
-            "0": { "damage": 49, "speed": 29.31 },
-            "1": { "damage": 51, "speed": 30.78 },
-            "2": { "damage": 54, "speed": 32.32 },
-            "3": { "damage": 56, "speed": 33.94 },
-            "4": { "damage": 59, "speed": 35.63 }
+            "0": { "damage": 48.8, "speed": 19.9 },
+            "1": { "damage": 51.2, "speed": 20.9 },
+            "2": { "damage": 53.8, "speed": 22 },
+            "3": { "damage": 56.5, "speed": 23 },
+            "4": { "damage": 59.3, "speed": 24.2 }
         },
         "5": {
-            "0": { "damage": 62, "speed": 37.41 },
-            "1": { "damage": 65, "speed": 39.28 },
-            "2": { "damage": 69, "speed": 41.25 },
-            "3": { "damage": 72, "speed": 43.31 },
-            "4": { "damage": 76, "speed": 45.48 }
+            "0": { "damage": 62.2, "speed": 25.4 },
+            "1": { "damage": 65.4, "speed": 26.7 },
+            "2": { "damage": 68.6, "speed": 28 },
+            "3": { "damage": 72.1, "speed": 29.4 },
+            "4": { "damage": 75.7, "speed": 30.9 }
         },
         "6": {
-            "0": { "damage": 79, "speed": 47.75 },
-            "1": { "damage": 83, "speed": 50.14 },
-            "2": { "damage": 88, "speed": 52.64 },
-            "3": { "damage": 92, "speed": 55.28 },
-            "4": { "damage": 97, "speed": 58.04 }
+            "0": { "damage": 79.4, "speed": 32.4 },
+            "1": { "damage": 83.4, "speed": 34.1 },
+            "2": { "damage": 87.6, "speed": 35.8 },
+            "3": { "damage": 92, "speed": 37.5 },
+            "4": { "damage": 96.6, "speed": 39.4 }
         },
         "7": {
-            "0": { "damage": 101, "speed": 60.94 },
-            "1": { "damage": 106, "speed": 63.99 },
-            "2": { "damage": 112, "speed": 67.19 },
-            "3": { "damage": 117, "speed": 70.55 },
-            "4": { "damage": 123, "speed": 74.08 }
+            "0": { "damage": 101.4, "speed": 41.4 },
+            "1": { "damage": 106.5, "speed": 43.5 },
+            "2": { "damage": 111.8, "speed": 45.6 },
+            "3": { "damage": 117.4, "speed": 47.9 },
+            "4": { "damage": 123.2, "speed": 50.3 }
         },
         "8": {
-            "0": { "damage": 129, "speed": 77.78 },
-            "1": { "damage": 136, "speed": 81.67 },
-            "2": { "damage": 143, "speed": 85.75 },
-            "3": { "damage": 150, "speed": 90.04 },
-            "4": { "damage": 157, "speed": 94.54 }
+            "0": { "damage": 129.4, "speed": 52.8 },
+            "1": { "damage": 135.9, "speed": 55.5 },
+            "2": { "damage": 142.7, "speed": 58.2 },
+            "3": { "damage": 149.8, "speed": 61.2 },
+            "4": { "damage": 157.3, "speed": 64.2 }
         },
         "9": {
-            "0": { "damage": 165, "speed": 99.27 },
-            "1": { "damage": 173, "speed": 104.23 },
-            "2": { "damage": 182, "speed": 109.44 },
-            "3": { "damage": 191, "speed": 114.92 },
-            "4": { "damage": 201, "speed": 120.66 }
+            "0": { "damage": 165.1, "speed": 67.4 },
+            "1": { "damage": 173.4, "speed": 70.8 },
+            "2": { "damage": 182.1, "speed": 74.3 },
+            "3": { "damage": 191.2, "speed": 78.1 },
+            "4": { "damage": 200.7, "speed": 82 }
         },
         "10": {
-            "0": { "damage": 211, "speed": 126.7 },
-            "1": { "damage": 221, "speed": 133.03 },
-            "2": { "damage": 232, "speed": 139.68 },
-            "3": { "damage": 244, "speed": 146.67 },
-            "4": { "damage": 256, "speed": 154 }
+            "0": { "damage": 210.8, "speed": 86.1 },
+            "1": { "damage": 221.3, "speed": 90.4 },
+            "2": { "damage": 232.4, "speed": 94.9 },
+            "3": { "damage": 244, "speed": 99.6 },
+            "4": { "damage": 256.2, "speed": 104.6 }
         }
     },
 };

@@ -15,10 +15,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
     const item = {
         ...resolved,
         ...rawItem,
-        stats: {
-            ...rawItem.stats,
-            ...mergedStats
-        }
+        stats: mergedStats // Primary source for gear/tools
     };
 
     const handleBackdropClick = (e) => {
