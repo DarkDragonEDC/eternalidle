@@ -489,8 +489,8 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 const activeMob = (MONSTERS[combat.tier] || []).find(m => m.id === combat.mobId);
                                 if (!activeMob) return <span style={{ fontSize: '1rem', fontWeight: 'bold', fontFamily: 'monospace', color: '#888' }}>-</span>;
 
-                                const defense = gameState?.calculatedStats?.defense || 0;
-                                const mitigation = Math.min(0.75, defense / 10000);
+                                const defense = stats.defense;
+                                            const mitigation = Math.min(0.75, defense / 10000);
                                 const mobBaseDmg = combat.mobDamage || activeMob.damage || 1;
                                 const mobDmg = Math.max(1, Math.floor(mobBaseDmg * (1 - mitigation)));
 
@@ -498,12 +498,12 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 const MOB_ATTACK_INTERVAL = 1000;
 
                                 // Player attack speed (for food consumption rate)
-                                const playerAtkSpeed = gameState?.calculatedStats?.attackSpeed || 1000;
+                                const playerAtkSpeed = stats.attackSpeed;
 
                                 // Food Logic
                                 const food = gameState?.state?.equipment?.food;
                                 const foodAmount = (food && food.amount > 0) ? food.amount : 0;
-                                const maxHp = gameState?.calculatedStats?.hp || 100;
+                                const maxHp = stats.hp;
 
                                 // RESOLVE FRESH ITEM DATA: Ensure we have the latest heal/healPercent
                                 const freshFood = food ? resolveItem(food.id) : null;
@@ -535,7 +535,8 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                     : 0;
 
                                 const netDmgPerSecond = mobDmgPerSecond - foodHealRate;
-                                const isPremium = gameState?.state?.isPremium || gameState?.state?.membership?.active; const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
+                                const isPremium = gameState?.state?.isPremium || gameState?.state?.membership?.active;
+                                const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
                                 let survivalText = "∞";
                                 let survivalColor = "#4caf50";
 
@@ -1083,19 +1084,19 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)' }}>SURVIVAL</div>
                                         {(() => {
-                                            const defense = gameState?.calculatedStats?.defense || 0;
+                                            const defense = stats.defense;
                                             const mitigation = Math.min(0.75, defense / 10000);
                                             const mobDmg = Math.max(1, Math.floor(mob.damage * (1 - mitigation)));
 
                                             // Food Logic
                                             const food = gameState?.state?.equipment?.food;
                                             const freshFood = food ? resolveItem(food.id) : null;
-                                            const maxHp = gameState?.calculatedStats?.hp || 100;
+                                            const maxHp = stats.hp;
                                             const foodHealPerUse = (freshFood && (freshFood.heal || (freshFood.healPercent && Math.floor(maxHp * freshFood.healPercent / 100)))) || 0;
                                             const foodAmount = (food && food.amount) || 0;
 
                                             const playerHp = gameState?.state?.health || 1;
-                                            const playerAtkSpeed = gameState?.calculatedStats?.attackSpeed || 1000;
+                                            const playerAtkSpeed = stats.attackSpeed;
                                             const mobDmgPerSecond = mobDmg; // Mobs attack every 1s
 
                                             const maxHealsPerSecond = 1000 / Math.max(100, playerAtkSpeed);
@@ -1106,6 +1107,8 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                                 : 0;
 
                                             const netDmgPerSecond = mobDmgPerSecond - foodHealRate;
+                                            const isPremium = gameState?.state?.isPremium || gameState?.state?.membership?.active;
+                                            const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
 
                                             let survivalText = "∞";
                                             let survivalColor = "#4caf50";
@@ -1122,7 +1125,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                             if (totalSeconds !== Infinity) {
                                                 const secondsToDie = totalSeconds;
 
-                                                if (secondsToDie > 43200) {
+                                                if (secondsToDie > idleLimitSeconds) {
                                                     survivalText = "∞";
                                                 } else {
                                                     const hrs = Math.floor(secondsToDie / 3600);
