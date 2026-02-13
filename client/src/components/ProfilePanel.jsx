@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import {
     Heart, Shield, Sword, Zap,
     User, Target, Star, Layers,
-    Axe, Pickaxe, Scissors, Anchor, Apple, Info, ShoppingBag, Edit, Droplets
+    Axe, Pickaxe, Scissors, Anchor, Apple, Info, ShoppingBag, Edit, Droplets,
+    Hammer, Zap as EfficiencyIcon
 } from 'lucide-react';
 import { resolveItem, getTierColor, calculateRuneBonus, getRequiredProficiencyGroup } from '@shared/items';
 import { getProficiencyStats } from '@shared/proficiency_stats';
@@ -988,30 +989,51 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                             <div style={{ borderTop: '1px solid var(--border)', paddingTop: '30px' }}>
                                 <h4 style={{ color: 'var(--text-main)', fontSize: '0.7rem', fontWeight: '900', textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '2px', opacity: 0.8, textAlign: 'center' }}>Skill Efficiency</h4>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '10px' }}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '10px' }}>
-                                        <EfficiencyCard title="Gathering" items={[
-                                            { id: 'WOOD', label: 'Woodcutting' },
-                                            { id: 'ORE', label: 'Mining' },
-                                            { id: 'HIDE', label: 'Skinning' },
-                                            { id: 'FIBER', label: 'Fiber' },
-                                            { id: 'FISH', label: 'Fishing' },
-                                            { id: 'HERB', label: 'Herbalism' }
-                                        ]} stats={stats} onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })} />
-                                        <EfficiencyCard title="Refining" items={[
-                                            { id: 'PLANK', label: 'Planks' },
-                                            { id: 'METAL', label: 'Bars' },
-                                            { id: 'LEATHER', label: 'Leathers' },
-                                            { id: 'CLOTH', label: 'Cloth' },
-                                            { id: 'EXTRACT', label: 'Distillation' }
-                                        ]} stats={stats} onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })} />
-                                        <EfficiencyCard title="Crafting" items={[
-                                            { id: 'WARRIOR', label: 'Warrior Gear' },
-                                            { id: 'HUNTER', label: 'Hunter Gear' },
-                                            { id: 'MAGE', label: 'Mage Gear' },
-                                            { id: 'COOKING', label: 'Cooking' },
-                                            { id: 'ALCHEMY', label: 'Alchemy' },
-                                            { id: 'TOOLS', label: 'Tools' }
-                                        ]} stats={stats} onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })} />
+                                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '15px' }}>
+                                        <EfficiencyCard
+                                            title="Gathering"
+                                            icon={<Pickaxe size={14} color="#fcd34d" />}
+                                            color="rgba(252, 211, 77, 0.1)"
+                                            items={[
+                                                { id: 'WOOD', label: 'Woodcutting' },
+                                                { id: 'ORE', label: 'Mining' },
+                                                { id: 'HIDE', label: 'Skinning' },
+                                                { id: 'FIBER', label: 'Fiber' },
+                                                { id: 'FISH', label: 'Fishing' },
+                                                { id: 'HERB', label: 'Herbalism' }
+                                            ]}
+                                            stats={stats}
+                                            onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })}
+                                        />
+                                        <EfficiencyCard
+                                            title="Refining"
+                                            icon={<Hammer size={14} color="#38bdf8" />}
+                                            color="rgba(56, 189, 248, 0.1)"
+                                            items={[
+                                                { id: 'PLANK', label: 'Planks' },
+                                                { id: 'METAL', label: 'Bars' },
+                                                { id: 'LEATHER', label: 'Leathers' },
+                                                { id: 'CLOTH', label: 'Cloth' },
+                                                { id: 'EXTRACT', label: 'Distillation' }
+                                            ]}
+                                            stats={stats}
+                                            onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })}
+                                        />
+                                        <EfficiencyCard
+                                            title="Crafting"
+                                            icon={<EfficiencyIcon size={14} color="#a78bfa" />}
+                                            color="rgba(167, 139, 250, 0.1)"
+                                            items={[
+                                                { id: 'WARRIOR', label: 'Warrior Gear' },
+                                                { id: 'HUNTER', label: 'Hunter Gear' },
+                                                { id: 'MAGE', label: 'Mage Gear' },
+                                                { id: 'COOKING', label: 'Cooking' },
+                                                { id: 'ALCHEMY', label: 'Alchemy' },
+                                                { id: 'TOOLS', label: 'Tools' }
+                                            ]}
+                                            stats={stats}
+                                            onShowBreakdown={(id, total) => setBreakdownModal({ type: 'EFFICIENCY', value: { id, total } })}
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -1617,34 +1639,96 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
     );
 };
 
-const EfficiencyCard = ({ title, items, stats, onShowBreakdown }) => (
-    <div style={{ background: 'rgba(0,0,0,0.1)', padding: '15px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.02)' }}>
-        <div style={{ fontSize: '0.55rem', color: '#d4af37', fontWeight: '900', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>{title}</div>
-        {items.map(item => (
-            <div key={item.id}
-                style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', marginBottom: '5px', opacity: 0.8, cursor: 'pointer' }}
-                onClick={() => onShowBreakdown && onShowBreakdown(item.id, `+${(stats.efficiency[item.id] || 0).toFixed(1)}%`)}
-            >
-                <span style={{ color: '#888' }}>{item.label}</span>
-                <span style={{ color: 'var(--text-main)', fontWeight: 'bold' }}>+{(stats.efficiency[item.id] || 0).toFixed(1)}% <Info size={10} color="#555" /></span>
+const EfficiencyCard = ({ title, items, stats, onShowBreakdown, icon, color }) => (
+    <div style={{
+        background: 'rgba(15, 23, 42, 0.4)', // Glass Slate 900
+        padding: '18px',
+        borderRadius: '16px',
+        border: '1px solid rgba(255,255,255,0.05)',
+        backdropFilter: 'blur(10px)',
+        position: 'relative',
+        overflow: 'hidden'
+    }}>
+        {/* Glow behind icon */}
+        <div style={{
+            position: 'absolute',
+            top: '-20px',
+            right: '-20px',
+            width: '60px',
+            height: '60px',
+            background: color,
+            filter: 'blur(30px)',
+            opacity: 0.5,
+            pointerEvents: 'none'
+        }} />
+
+        <div style={{
+            fontSize: '0.75rem',
+            color: '#f8fafc',
+            fontWeight: '800',
+            marginBottom: '15px',
+            textTransform: 'uppercase',
+            letterSpacing: '1.5px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px'
+        }}>
+            <div style={{
+                background: 'rgba(255,255,255,0.05)',
+                padding: '6px',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+            }}>
+                {icon}
             </div>
-        ))}
+            {title}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {items.map(item => {
+                const val = stats.efficiency[item.id] || 0;
+                const progressWidth = Math.min(100, (val / 150) * 100); // 150% as a normalization target
+
+                return (
+                    <div key={item.id}
+                        style={{ cursor: 'pointer', transition: '0.2s' }}
+                        onClick={() => onShowBreakdown && onShowBreakdown(item.id, `+${val.toFixed(1)}%`)}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(4px)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(0)'}
+                    >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                            <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#94a3b8' }}>{item.label}</span>
+                            <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#fff', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                +{val.toFixed(1)}%
+                                <Info size={10} color="#64748b" />
+                            </span>
+                        </div>
+                        {/* Potency Bar */}
+                        <div style={{
+                            width: '100%',
+                            height: '3px',
+                            background: 'rgba(255,255,255,0.03)',
+                            borderRadius: '2px',
+                            overflow: 'hidden'
+                        }}>
+                            <div style={{
+                                width: `${progressWidth}%`,
+                                height: '100%',
+                                background: color.replace('0.1', '0.6'),
+                                borderRadius: '2px',
+                                boxShadow: `0 0 8px ${color.replace('0.1', '0.4')}`
+                            }} />
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
     </div>
 );
 
-const EfficiencyRow = ({ label, value }) => (
-    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '5px 8px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: '4px' }}>
-        <span style={{ color: '#888' }}>{label}:</span>
-        <span style={{ color: '#d4af37', fontWeight: 'bold' }}>+{value}%</span>
-    </div>
-);
 
-const StatRow = ({ label, value, color }) => (
-    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-        <span style={{ color: '#888' }}>{label}:</span>
-        <span style={{ color, fontWeight: 'bold' }}>{value}</span>
-    </div>
-);
 
 const RuneBuffSummary = ({ activeRuneBuffs }) => {
     if (Object.entries(activeRuneBuffs).length === 0) return null;
