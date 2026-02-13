@@ -153,25 +153,33 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
     }, [equipment]);
 
     const stats = useMemo(() => {
+        const combatSlots = ['helmet', 'chest', 'boots', 'gloves', 'cape', 'offHand'];
+        const hasWeapon = !!equipment.mainHand;
+
         // Fallback para cálculo local (útil para updates otimistas antes do servidor responder)
-        const gearDamage = Object.values(equipment).reduce((acc, item) => {
-            const fresh = item ? resolveItem(item.id || item.item_id) : null;
+        const gearDamage = Object.entries(equipment).reduce((acc, [slot, item]) => {
+            if (!item || (!hasWeapon && combatSlots.includes(slot))) return acc;
+            const fresh = resolveItem(item.id || item.item_id);
             return acc + (fresh?.stats?.damage || 0);
         }, 0);
-        const gearDefense = Object.values(equipment).reduce((acc, item) => {
-            const fresh = item ? resolveItem(item.id || item.item_id) : null;
+        const gearDefense = Object.entries(equipment).reduce((acc, [slot, item]) => {
+            if (!item || (!hasWeapon && combatSlots.includes(slot))) return acc;
+            const fresh = resolveItem(item.id || item.item_id);
             return acc + (fresh?.stats?.defense || 0);
         }, 0);
-        const gearHP = Object.values(equipment).reduce((acc, item) => {
-            const fresh = item ? resolveItem(item.id || item.item_id) : null;
+        const gearHP = Object.entries(equipment).reduce((acc, [slot, item]) => {
+            if (!item || (!hasWeapon && combatSlots.includes(slot))) return acc;
+            const fresh = resolveItem(item.id || item.item_id);
             return acc + (fresh?.stats?.hp || 0);
         }, 0);
-        const gearDmgBonus = Object.values(equipment).reduce((acc, item) => {
-            const fresh = item ? resolveItem(item.id || item.item_id) : null;
+        const gearDmgBonus = Object.entries(equipment).reduce((acc, [slot, item]) => {
+            if (!item || (!hasWeapon && combatSlots.includes(slot))) return acc;
+            const fresh = resolveItem(item.id || item.item_id);
             return acc + (fresh?.stats?.dmgBonus || 0);
         }, 0);
-        const gearCritChance = Object.values(equipment).reduce((acc, item) => {
-            const fresh = item ? resolveItem(item.id || item.item_id) : null;
+        const gearCritChance = Object.entries(equipment).reduce((acc, [slot, item]) => {
+            if (!item || (!hasWeapon && combatSlots.includes(slot))) return acc;
+            const fresh = resolveItem(item.id || item.item_id);
             return acc + (fresh?.stats?.critChance || 0);
         }, 0);
 
@@ -222,8 +230,8 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
             return fresh?.stats?.efficiency || 0;
         };
 
-        let globalEff = Object.values(equipment).reduce((acc, item) => {
-            if (!item) return acc;
+        let globalEff = Object.entries(equipment).reduce((acc, [slot, item]) => {
+            if (!item || (!hasWeapon && combatSlots.includes(slot))) return acc;
             const fresh = resolveItem(item.id || item.item_id);
             const statsToUse = fresh?.stats || item.stats;
             const effVal = typeof statsToUse?.efficiency === 'object' ? (statsToUse.efficiency.GLOBAL || 0) : 0;
@@ -280,9 +288,14 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         const combatSlots = ['helmet', 'chest', 'boots', 'gloves', 'cape', 'mainHand', 'offHand'];
         let totalIP = 0;
 
+        const hasWeapon = !!equipment.mainHand;
+
         combatSlots.forEach(slot => {
             const rawItem = equipment[slot];
             if (rawItem) {
+                // Return early if no weapon and it's a combat gear slot
+                if (!hasWeapon && slot !== 'mainHand') return;
+
                 // Resolve item to ensure we have the 'ip' field even if it's missing in the cached raw state
                 const item = { ...rawItem, ...resolveItem(rawItem.id || rawItem.item_id) };
                 totalIP += item.ip || 0;

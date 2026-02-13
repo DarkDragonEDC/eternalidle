@@ -447,10 +447,15 @@ export class InventoryManager {
         let gearSpeedBonus = 0;
         let gearCritChance = 0;
 
-        Object.values(equipment).forEach(item => {
+        const hasWeapon = !!equipment.mainHand;
+        const combatSlots = ['helmet', 'chest', 'gloves', 'boots', 'cape', 'offHand'];
+
+        Object.entries(equipment).forEach(([slot, item]) => {
             if (item) {
+                // Skip combat gear stats if no weapon is equipped
+                if (!hasWeapon && combatSlots.includes(slot)) return;
+
                 // HOTFIX: Re-resolve item stats to ensure balance changes apply retroactively
-                // This prevents "snapshot" stats from persisting after code updates
                 const freshItem = this.resolveItem(item.id);
                 const statsToUse = freshItem ? freshItem.stats : item.stats;
 
@@ -499,8 +504,11 @@ export class InventoryManager {
         efficiency.HERB += resolveToolEff(equipment.tool_pouch);
 
         // 2. Global/Other Item Bonuses (e.g., Capes)
-        Object.values(equipment).forEach(item => {
+        Object.entries(equipment).forEach(([slot, item]) => {
             if (item) {
+                // Skip combat gear efficiency if no weapon is equipped
+                if (!hasWeapon && combatSlots.includes(slot)) return;
+
                 const freshItem = this.resolveItem(item.id);
                 const statsToUse = freshItem ? freshItem.stats : item.stats;
 
