@@ -413,7 +413,7 @@ export class InventoryManager {
                     if (statsToUse.damage) gearDamage += statsToUse.damage;
                     if (statsToUse.defense) gearDefense += statsToUse.defense;
                     if (statsToUse.dmgBonus) gearDmgBonus += statsToUse.dmgBonus;
-                    if (statsToUse.speed && item.type !== 'WEAPON') gearSpeedBonus += statsToUse.speed;
+                    if (statsToUse.speed || statsToUse.attackSpeed) gearSpeedBonus += (statsToUse.speed || statsToUse.attackSpeed);
                     if (statsToUse.critChance) gearCritChance += statsToUse.critChance;
 
                     // Allow gear to add directly to proficiencies
@@ -501,24 +501,19 @@ export class InventoryManager {
         else if (weaponId.includes('STAFF')) activeProf = 'mage';
 
         // Determine active proficiency values for combat
-        const profData = activeProf ? getProficiencyStats(activeProf, char[activeProf]) : { dmg: 0, hp: 0 };
+        const profLevel = activeProf === 'warrior' ? warriorProf
+            : activeProf === 'hunter' ? hunterProf
+                : activeProf === 'mage' ? mageProf
+                    : 1;
+
+        const profData = activeProf ? getProficiencyStats(activeProf, profLevel) : { dmg: 0, hp: 0, speedBonus: 0 };
         const activeProfDmg = profData.dmg;
         const activeHP = profData.hp;
 
-        // Hunter at 100 needs approx 360ms reduction from 2000ms.
-        // User clarified: Max reduction at 100 is 360ms.
-        // 360 / 100 = 3.6 per level.
-        // Mage at 100 needs approx 333ms reduction from 2000ms.
-        // 333 / 100 = 3.33 per level.
-        // Warrior at 100 needs approx 333ms reduction from 2000ms.
-        // 333 / 100 = 3.33 per level.
-        const activeSpeedBonus = activeProf === 'hunter' ? hunterProf * 3.6
-            : activeProf === 'mage' ? mageProf * 3.33
-                : activeProf === 'warrior' ? warriorProf * 3.33 : 0;
+        // Use custom non-linear speed curve from proficiency data
+        const activeSpeedBonus = profData.speedBonus || 0;
 
-        const activeProfDefense = activeProf === 'hunter' ? hunterProf * 25
-            : activeProf === 'mage' ? mageProf * 12.5
-                : activeProf === 'warrior' ? warriorProf * 37.5 : 0;
+        const activeProfDefense = profData.def || 0;
 
 
         const globals = {
@@ -648,20 +643,14 @@ export class InventoryManager {
         });
         efficiency.GLOBAL = parseFloat((efficiency.GLOBAL + (globals.efficiency || 0)).toFixed(2));
 
-        // Total Speed = WeaponSpeed + GearSpeed
-        // weaponObj and freshWeapon already defined above in weapon class detection
-        const weaponSpeed = freshWeapon?.stats?.speed || 0; // No weapon = no speed bonus
-        const totalSpeed = weaponSpeed + gearSpeedBonus;
+        // Total Reduction = Gear (including Weapon) + Proficiency
+        const totalBaseReduction = gearSpeedBonus + activeSpeedBonus;
 
-        let finalAttackSpeed = Math.max(200, 2000 - totalSpeed - activeSpeedBonus);
+        // Apply Attack Speed Rune (Multiplies total reduction)
+        const totalBonusMultiplier = 1 + (combatRunes.ATTACK_SPEED / 100);
+        const finalReduction = totalBaseReduction * totalBonusMultiplier;
 
-        // Handle Attack Speed Rune (Percentage boost on final speed)
-        // If rune gives +30% Speed, we divide the interval by 1.30
-        if (combatRunes.ATTACK_SPEED > 0) {
-            finalAttackSpeed = finalAttackSpeed / (1 + (combatRunes.ATTACK_SPEED / 100));
-            // Re-apply cap just in case
-            finalAttackSpeed = Math.max(200, finalAttackSpeed);
-        }
+        let finalAttackSpeed = Math.max(200, 2000 - finalReduction);
 
         return {
             warriorProf, hunterProf, mageProf,

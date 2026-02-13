@@ -42,10 +42,25 @@ for (let i = 1; i < lines.length; i++) {
 
     const parseVal = (str) => parseFloat(String(str).replace(',', '.'));
 
-    // Headers: Level,Warrior_DMG,Warrior_HP,Hunter_DMG,Hunter_HP,Mage_DMG,Mage_HP
-    data.warrior[lvl] = { dmg: parseVal(parts[1]), hp: parseVal(parts[2]) };
-    data.hunter[lvl] = { dmg: parseVal(parts[3]), hp: parseVal(parts[4]) };
-    data.mage[lvl] = { dmg: parseVal(parts[5]), hp: parseVal(parts[6]) };
+    // Level(0), Warrior(1,2,3,4), Hunter(5,6,7,8), Mage(9,10,11,12)
+    data.warrior[lvl] = {
+        dmg: parseVal(parts[1]),
+        hp: parseVal(parts[2]),
+        def: parseVal(parts[3]),
+        speedBonus: parseVal(parts[4])
+    };
+    data.hunter[lvl] = {
+        dmg: parseVal(parts[5]),
+        hp: parseVal(parts[6]),
+        def: parseVal(parts[7]),
+        speedBonus: parseVal(parts[8])
+    };
+    data.mage[lvl] = {
+        dmg: parseVal(parts[9]),
+        hp: parseVal(parts[10]),
+        def: parseVal(parts[11]),
+        speedBonus: parseVal(parts[12])
+    };
 }
 
 let jsContent = `/**
@@ -62,7 +77,7 @@ export const PROFICIENCY_STATS = ${JSON.stringify(data, null, 4)};
 export const getProficiencyStats = (group, level) => {
     const lvl = Math.min(100, Math.max(1, Math.floor(level)));
     const stats = PROFICIENCY_STATS[group] || {};
-    return stats[lvl] || { dmg: 0, hp: 0 };
+    return stats[lvl] || { dmg: 0, hp: 0, def: 0, speedBonus: 0 };
 };
 `;
 

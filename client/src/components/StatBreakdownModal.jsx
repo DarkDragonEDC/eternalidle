@@ -67,16 +67,14 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
             const mageProf = stats.mageProf || 0;
             const activeProf = stats.activeProf;
 
-            const activeProfDefense = activeProf === 'hunter' ? hunterProf * 25
-                : activeProf === 'mage' ? mageProf * 12.5
-                    : activeProf === 'warrior' ? warriorProf * 37.5 : 0;
+            const profData = activeProf ? getProficiencyStats(activeProf, stats[`${activeProf}Prof`]) : { def: 0 };
+            const activeProfDefense = profData.def || 0;
             const gearDefense = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.defense || 0), 0);
 
             breakdown.push({ label: 'Base', value: 0 });
             if (activeProfDefense > 0) {
                 const label = activeProf === 'hunter' ? 'Hunter' : activeProf === 'mage' ? 'Mage' : 'Warrior';
-                const perPt = activeProf === 'hunter' ? 25 : activeProf === 'mage' ? 12.5 : 37.5;
-                breakdown.push({ label: `${label} Prof. Bonus`, value: activeProfDefense, sub: `(+${perPt} per ${label} Prof.)` });
+                breakdown.push({ label: `${label} Prof. Bonus`, value: activeProfDefense, sub: `(Total from Level)` });
             }
             breakdown.push({ label: 'Gear Defense', value: gearDefense });
 
@@ -93,13 +91,12 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
             const mageProf = stats.mageProf || 0;
             const warriorProf = stats.warriorProf || 0;
             const activeProf = stats.activeProf;
-            const activeSpeedBonus = activeProf === 'hunter' ? hunterProf * 3.6
-                : activeProf === 'mage' ? mageProf * 3.33
-                    : activeProf === 'warrior' ? warriorProf * 3.33 : 0;
+            const profData = activeProf ? getProficiencyStats(activeProf, stats[`${activeProf}Prof`]) : { speedBonus: 0 };
+            const activeSpeedBonus = profData.speedBonus || 0;
             const gearSpeed = Object.entries(equipment).reduce((acc, [slot, item]) => {
-                if (!item || slot === 'mainHand') return acc;
+                if (!item) return acc;
                 const fresh = resolveItem(item.id || item.item_id);
-                return acc + (fresh?.stats?.speed || 0);
+                return acc + (fresh?.stats?.speed || fresh?.stats?.attackSpeed || 0);
             }, 0);
 
             // Calculate Attack Speed Rune
@@ -121,26 +118,17 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
             // Get Weapon Speed (0 if no weapon - unarmed has no speed bonus)
             const weapon = equipment.mainHand;
             const freshWeapon = weapon ? resolveItem(weapon.id || weapon.item_id) : null;
-            const weaponSpeed = freshWeapon?.stats?.speed || 0; // No weapon = no speed bonus
+            const weaponSpeed = freshWeapon?.stats?.speed || freshWeapon?.stats?.attackSpeed || 0; // No weapon = no speed bonus
 
             breakdown.push({ label: 'Global Base', value: '2.00s', sub: '(Attack Cycle Start)' });
 
-            // Only show weapon speed if a weapon is equipped
-            if (freshWeapon && weaponSpeed > 0) {
-                breakdown.push({
-                    label: 'Weapon Speed',
-                    value: `-${(weaponSpeed / 1000).toFixed(2)}s`,
-                    sub: `${freshWeapon.name}`
-                });
-            }
 
             if (activeSpeedBonus > 0) {
                 const label = activeProf === 'hunter' ? 'Hunter' : activeProf === 'mage' ? 'Mage' : 'Warrior';
-                const perPt = activeProf === 'hunter' ? 3.6 : activeProf === 'mage' ? 3.33 : 3.33;
                 breakdown.push({
                     label: `${label} Proficiency Bonus`,
                     value: `-${(activeSpeedBonus / 1000).toFixed(2)}s`,
-                    sub: `(${perPt}ms per ${label} Prof.)`
+                    sub: `(Custom Curve)`
                 });
             } else if (activeProf && activeProf !== 'hunter' && hunterProf > 0) {
                 breakdown.push({
@@ -158,26 +146,26 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                 });
             }
 
-            const totalReduction = weaponSpeed + gearSpeed + activeSpeedBonus;
-            const calculatedRaw = 2000 - totalReduction;
-            let finalInterval = Math.max(200, calculatedRaw);
+            const totalReduction = gearSpeed + activeSpeedBonus;
+            const totalBaseReduction = gearSpeed + activeSpeedBonus;
+            let finalReduction = totalBaseReduction;
 
-            if (runeSpeedBonus > 0 && finalInterval > 200) {
+            if (runeSpeedBonus > 0) {
                 breakdown.push({
                     label: 'Att. Speed Rune',
                     value: `+${runeSpeedBonus.toFixed(1)}%`,
-                    sub: 'Multiplies attack rate'
+                    sub: 'Multiplies total reduction'
                 });
 
-                finalInterval = finalInterval / (1 + (runeSpeedBonus / 100));
-                // Re-apply cap
-                finalInterval = Math.max(200, finalInterval);
+                finalReduction = totalBaseReduction * (1 + (runeSpeedBonus / 100));
             }
 
-            if (calculatedRaw < 200) {
+            let finalInterval = Math.max(200, 2000 - finalReduction);
+
+            if (2000 - finalReduction < 200) {
                 breakdown.push({
                     label: 'Cap Correction',
-                    value: `+${((200 - calculatedRaw) / 1000).toFixed(2)}s`,
+                    value: `+${((200 - (2000 - finalReduction)) / 1000).toFixed(2)}s`,
                     sub: '(Min 0.20s limit)'
                 });
             }

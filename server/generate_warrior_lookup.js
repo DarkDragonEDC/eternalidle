@@ -21,48 +21,30 @@ for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
 
-    // Handle quotes in CSV (e.g. "26,1")
-    const parts = [];
-    let currentPart = '';
-    let inQuotes = false;
+    // Proper CSV parsing that handles quotes and commas inside quotes
+    const regex = /(".*?"|[^",]+)(?=\s*,|\s*$)/g;
+    const partsMatched = line.match(/(".*?"|[^",]*)(?:,|$)/g) || [];
+    const parts = partsMatched.map(p => p.replace(/,$/, '').trim());
 
-    for (let j = 0; j < line.length; j++) {
-        const char = line[j];
-        if (char === '"') {
-            inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
-            parts.push(currentPart);
-            currentPart = '';
-        } else {
-            currentPart += char;
-        }
-    }
-    parts.push(currentPart);
+    // Use parts directly by index as defined in absolute table
+    const parseVal = (str) => {
+        if (!str) return 0;
+        let s = String(str).trim();
+        // Remove quotes if present
+        if (s.startsWith('"') && s.endsWith('"')) s = s.slice(1, -1);
+        return parseFloat(s.replace(',', '.')) || 0;
+    };
 
-    const row = {};
-    headers.forEach((h, index) => {
-        row[h] = parts[index];
-    });
+    const itemId = parts[0];
+    const qualityName = parts[1];
 
-    const itemId = row['ItemID'];
-    const qualityName = row['QualityName'];
-
-    // Parse values
-    const damage = parseInt(row['Damage']) || 0;
-    const defense = parseInt(row['Defense']) || 0;
-    const hp = parseInt(row['HP']) || 0;
-    const blockChance = parseInt(row['BlockChance']) || 0;
-
-    // Parse speed (handle commas)
-    let speed = 0;
-    if (row['Speed']) {
-        speed = parseFloat(row['Speed'].replace(',', '.'));
-    }
-
-    let attackSpeed = 0;
-    if (row['AttackSpeed']) {
-        attackSpeed = parseFloat(row['AttackSpeed'].replace(',', '.'));
-    }
+    // DEFINITIVE Indices: ItemID(0), Quality(1), DMG(2), DEF(3), HP(4), Speed(5), AttackSpeed(6), BlockChance(7)
+    const damage = parseVal(parts[2]);
+    const defense = parseVal(parts[3]);
+    const hp = parseVal(parts[4]);
+    const speed = parseVal(parts[5]);
+    const attackSpeed = parseVal(parts[6]);
+    const blockChance = parseVal(parts[7]);
 
     // Determine Tier from ItemID (e.g. T1_SWORD -> 1)
     const tierMatch = itemId.match(/^T(\d+)_/);

@@ -176,8 +176,6 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         // Resolve Weapon Speed
         const weapon = equipment.mainHand;
         const freshWeapon = weapon ? resolveItem(weapon.id || weapon.item_id) : null;
-        const weaponSpeed = freshWeapon?.stats?.speed || 0; // No weapon = no speed bonus
-
         const weaponId = (freshWeapon?.id || weapon?.id || '').toUpperCase();
 
         let activeProf = null;
@@ -185,43 +183,34 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         else if (weaponId.includes('BOW')) activeProf = 'hunter';
         else if (weaponId.includes('STAFF')) activeProf = 'mage';
 
-        // Resolve Gear Speed (excluding weapon)
+        // Match Server Logic for Base Speed (2000ms)
+        const weaponSpeed = freshWeapon?.stats?.speed || freshWeapon?.stats?.attackSpeed || 0;
+
+        // Resolve Gear Speed (including weapon)
         const gearSpeedBonus = Object.entries(equipment).reduce((acc, [slot, item]) => {
-            if (!item || slot === 'mainHand') return acc;
+            if (!item) return acc;
             const fresh = resolveItem(item.id || item.item_id);
-            return acc + (fresh?.stats?.speed || 0);
+            return acc + (fresh?.stats?.speed || fresh?.stats?.attackSpeed || 0);
         }, 0);
 
-        // Match Server Logic for Active Stats
-        const activeProfDmg = activeProf === 'warrior' ? calculatedStats.warriorProf * 1200
-            : activeProf === 'hunter' ? calculatedStats.hunterProf * 1200
-                : activeProf === 'mage' ? calculatedStats.mageProf * 2600
-                    : 0;
-
-        const activeHP = activeProf === 'warrior' ? calculatedStats.warriorProf * 10000
-            : activeProf === 'hunter' ? calculatedStats.hunterProf * 8750
-                : activeProf === 'mage' ? calculatedStats.mageProf * 7500
-                    : 0;
+        // Match Server Logic for Active Stats - ABSOLUTE TABLE
+        const profData = activeProf ? getProficiencyStats(activeProf, calculatedStats[`${activeProf}Prof`]) : { dmg: 0, hp: 0, def: 0, speedBonus: 0 };
+        const activeProfDmg = profData.dmg || 0;
+        const activeHP = profData.hp || 0;
 
         // Hunter at 100 needs approx 360ms reduction from 2000ms.
         // Mage at 100 needs 333ms interval. 2000 - 1667 = 333.
-        const activeSpeedBonus = activeProf === 'hunter' ? calculatedStats.hunterProf * 3.6
-            : activeProf === 'mage' ? calculatedStats.mageProf * 3.33
-                : activeProf === 'warrior' ? calculatedStats.warriorProf * 3.33 : 0;
+        // Active Prof Bonuses (DEF and Speed) - NOW FROM ABSOLUTE TABLE
+        const activeProfDefense = profData.def || 0;
+        const activeSpeedBonus = profData.speedBonus || 0;
 
-        const activeProfDefense = activeProf === 'hunter' ? calculatedStats.hunterProf * 25
-            : activeProf === 'mage' ? calculatedStats.mageProf * 12.5
-                : activeProf === 'warrior' ? calculatedStats.warriorProf * 37.5 : 0;
+        const totalBaseReduction = gearSpeedBonus + activeSpeedBonus;
 
-        const totalSpeed = weaponSpeed + gearSpeedBonus + activeSpeedBonus;
-        // Apply Attack Speed Rune Logic (Percentage reduction of final interval)
-        let finalAttackSpeed = Math.max(200, 2000 - totalSpeed);
+        const atkSpdRune = activeRuneBuffs.ATTACK?.ATTACK_SPEED || 0;
+        const totalBonusMultiplier = 1 + (atkSpdRune / 100);
+        const finalReduction = totalBaseReduction * totalBonusMultiplier;
 
-        const atkSpdRune = activeRuneBuffs.ATTACK_SPEED?.ATTACK_SPEED || 0;
-        if (atkSpdRune > 0) {
-            finalAttackSpeed = finalAttackSpeed / (1 + (atkSpdRune / 100));
-            finalAttackSpeed = Math.max(200, finalAttackSpeed);
-        }
+        let finalAttackSpeed = Math.max(200, 2000 - finalReduction);
 
         // Helper para ferramentas
         const getToolEff = (toolSlot) => {
@@ -334,8 +323,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                     position: 'relative',
                     cursor: isLocked ? 'not-allowed' : 'pointer',
                     transition: '0.2s',
-                    boxShadow: hasQuality ? `0 0 10px ${borderColor}66` : 'none',
-                    position: 'relative'
+                    boxShadow: hasQuality ? `0 0 10px ${borderColor}66` : 'none'
                 }}
                     onClick={onClick}
                 >
@@ -472,8 +460,8 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         stats: [
             { label: 'Damage', value: `+${formatNumber(hunterStats.dmg)}`, subtext: 'Exact Value', icon: <Sword size={18} /> },
             { label: 'Health', value: `+${formatNumber(hunterStats.hp)}`, subtext: 'Exact Value', icon: <Heart size={18} /> },
-            { label: 'Defense', value: `+${formatNumber(Math.floor(calculatedStats.hunterProf * 25))}`, subtext: '+25 Def (+0.25%)/pt', icon: <Shield size={18} /> },
-            { label: 'Attack Speed', value: `-${(calculatedStats.hunterProf * 3.6).toFixed(1)}ms`, subtext: '-3.6ms/pt', icon: <Zap size={18} /> }
+            { label: 'Defense', value: `+${formatNumber(hunterStats.def || 0)}`, subtext: 'Exact Value', icon: <Shield size={18} /> },
+            { label: 'Attack Speed', value: `-${(hunterStats.speedBonus || 0).toFixed(1)}ms`, subtext: 'Exact Value', icon: <Zap size={18} /> }
         ],
         sources: [
             fmtSkillSource('Animal Skinner', 'ANIMAL_SKINNER', 0.2),
@@ -494,8 +482,8 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         stats: [
             { label: 'Damage', value: `+${formatNumber(warriorStats.dmg)}`, subtext: 'Exact Value', icon: <Sword size={18} /> },
             { label: 'Health', value: `+${formatNumber(warriorStats.hp)}`, subtext: 'Exact Value', icon: <Heart size={18} /> },
-            { label: 'Defense', value: `+${formatNumber(Math.floor(calculatedStats.warriorProf * 37.5))}`, subtext: '+37.5 Def (+0.37%)/pt', icon: <Shield size={18} /> },
-            { label: 'Attack Speed', value: `-${(calculatedStats.warriorProf * 3.33).toFixed(1)}ms`, subtext: '-3.33ms/pt', icon: <Zap size={18} /> }
+            { label: 'Defense', value: `+${formatNumber(warriorStats.def || 0)}`, subtext: 'Exact Value', icon: <Shield size={18} /> },
+            { label: 'Attack Speed', value: `-${(warriorStats.speedBonus || 0).toFixed(1)}ms`, subtext: 'Exact Value', icon: <Zap size={18} /> }
         ],
         sources: [
             fmtSkillSource('Ore Miner', 'ORE_MINER', 0.2),
@@ -516,8 +504,8 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         stats: [
             { label: 'Damage', value: `+${formatNumber(mageStats.dmg)}`, subtext: 'Exact Value', icon: <Sword size={18} /> },
             { label: 'Health', value: `+${formatNumber(mageStats.hp)}`, subtext: 'Exact Value', icon: <Heart size={18} /> },
-            { label: 'Defense', value: `+${formatNumber(Math.floor(calculatedStats.mageProf * 12.5))}`, subtext: '+12.5/pt', icon: <Shield size={18} /> },
-            { label: 'Attack Speed', value: `-${(calculatedStats.mageProf * 3.33).toFixed(1)}ms`, subtext: '-3.33ms/pt', icon: <Zap size={18} /> }
+            { label: 'Defense', value: `+${formatNumber(mageStats.def || 0)}`, subtext: 'Exact Value', icon: <Shield size={18} /> },
+            { label: 'Attack Speed', value: `-${(mageStats.speedBonus || 0).toFixed(1)}ms`, subtext: 'Exact Value', icon: <Zap size={18} /> }
         ],
         sources: [
             fmtSkillSource('Fiber Harvester', 'FIBER_HARVESTER', 1 / 6),
