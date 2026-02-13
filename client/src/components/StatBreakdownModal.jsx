@@ -182,9 +182,10 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
             } else {
                 breakdown.push({ label: 'Skill Base', value: '100% Speed' });
                 const skillsMap = {
-                    WOOD: 'LUMBERJACK', ORE: 'ORE_MINER', HIDE: 'ANIMAL_SKINNER', FIBER: 'FIBER_HARVESTER', FISH: 'FISHING',
-                    PLANK: 'PLANK_REFINER', METAL: 'METAL_BAR_REFINER', LEATHER: 'LEATHER_REFINER', CLOTH: 'CLOTH_REFINER',
-                    WARRIOR: 'WARRIOR_CRAFTER', MAGE: 'MAGE_CRAFTER', COOKING: 'COOKING'
+                    WOOD: 'LUMBERJACK', ORE: 'ORE_MINER', HIDE: 'ANIMAL_SKINNER', FIBER: 'FIBER_HARVESTER', FISH: 'FISHING', HERB: 'HERBALISM',
+                    PLANK: 'PLANK_REFINER', METAL: 'METAL_BAR_REFINER', LEATHER: 'LEATHER_REFINER', CLOTH: 'CLOTH_REFINER', EXTRACT: 'DISTILLATION',
+                    WARRIOR: 'WARRIOR_CRAFTER', HUNTER: 'HUNTER_CRAFTER', MAGE: 'MAGE_CRAFTER',
+                    COOKING: 'COOKING', ALCHEMY: 'ALCHEMY', TOOLS: 'TOOL_CRAFTER'
                 };
                 const skillName = skillsMap[effId];
                 if (skillName) {
@@ -192,7 +193,7 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                     breakdown.push({ label: 'Skill Level Bonus', value: `+${(skillLvl * 0.2).toFixed(1)}%`, sub: `(0.2% per Lv)` });
                 }
 
-                const toolMap = { WOOD: 'tool_axe', ORE: 'tool_pickaxe', HIDE: 'tool_knife', FIBER: 'tool_sickle', FISH: 'tool_rod' };
+                const toolMap = { WOOD: 'tool_axe', ORE: 'tool_pickaxe', HIDE: 'tool_knife', FIBER: 'tool_sickle', FISH: 'tool_rod', HERB: 'tool_pouch' };
                 const toolKey = toolMap[effId];
                 if (toolKey && equipment[toolKey]) {
                     const freshTool = resolveItem(equipment[toolKey].id || equipment[toolKey].item_id);
@@ -237,8 +238,37 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
             value = `${(gearCritChance + burstRuneBonus).toFixed(2)}%`;
         }
 
+        // Recalculate Total for Efficiency to ensure consistency
+        if (statType === 'EFFICIENCY') {
+            const calculatedTotal = breakdown.reduce((acc, row) => {
+                if (typeof row.value === 'string' && row.value.includes('%')) {
+                    const val = parseFloat(row.value.replace('+', '').replace('%', ''));
+                    if (!isNaN(val)) return acc + val;
+                }
+                return acc;
+            }, 0);
+
+            // If the calculated total differs significantly (likely due to global bonuses not being in the passed prop), use the calculated one
+            // We ignore "Speed" 100% base
+            // breakdown.filter(r => r.label !== 'Skill Base')
+
+            // Actually, for Efficiency we just want to sum everything except "Skill Base" which is a text label "100% Speed"
+            const numericTotal = breakdown.reduce((acc, row) => {
+                if (row.label === 'Skill Base') return acc;
+                if (typeof row.value === 'string' && row.value.includes('%')) {
+                    const val = parseFloat(row.value.replace('+', '').replace('%', ''));
+                    // Only sum positive bonuses
+                    if (!isNaN(val)) return acc + val;
+                }
+                return acc;
+            }, 0);
+
+            value = `+${numericTotal.toFixed(1)}%`;
+        }
+
         return breakdown;
     };
+
 
     const rows = getBreakdown();
 

@@ -257,6 +257,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
             CLOTH: (skills.CLOTH_REFINER?.level || 1) * 0.2 + globalEff,
             EXTRACT: (skills.DISTILLATION?.level || 1) * 0.2 + globalEff,
             WARRIOR: (skills.WARRIOR_CRAFTER?.level || 1) * 0.2 + globalEff,
+            HUNTER: (skills.HUNTER_CRAFTER?.level || 1) * 0.2 + globalEff,
             MAGE: (skills.MAGE_CRAFTER?.level || 1) * 0.2 + globalEff,
             ALCHEMY: (skills.ALCHEMY?.level || 1) * 0.2 + globalEff,
             TOOLS: (skills.TOOL_CRAFTER?.level || 1) * 0.2 + globalEff,
@@ -1465,6 +1466,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                                                     const activeCombatRunes = Object.keys(equipment).filter(k => k.startsWith('rune_ATTACK_') && equipment[k]).length;
                                                     const isMaxRunes = !isEquipped && activeCombatRunes >= 3;
                                                     const isLocked = isMaxRunes;
+                                                    const isLockedByWeapon = false;
 
                                                     return (
                                                         <div key={slot} style={{ opacity: isLocked ? 0.5 : 1, position: 'relative' }}>
@@ -1833,6 +1835,12 @@ const RuneBuffSummary = ({ activeRuneBuffs }) => {
                                 <div style={{ fontSize: '0.75rem', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
                                     <span style={{ color: '#aaa' }}>Burst:</span>
                                     <span style={{ color: '#ffd700', fontWeight: 'bold' }}>+{buffs.BURST}%</span>
+                                </div>
+                            )}
+                            {buffs.ATTACK_SPEED && (
+                                <div style={{ fontSize: '0.75rem', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ color: '#aaa' }}>Attack Speed:</span>
+                                    <span style={{ color: '#0ea5e9', fontWeight: 'bold' }}>+{buffs.ATTACK_SPEED}%</span>
                                 </div>
                             )}
                         </div>
