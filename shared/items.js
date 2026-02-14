@@ -1092,8 +1092,8 @@ export const getSkillForItem = (itemId, actionType) => {
     const type = String(actionType).toUpperCase();
 
     if (type === 'GATHERING') {
-        if (id.includes('WOOD') || id.includes('AXE')) return 'LUMBERJACK';
         if (id.includes('ORE') || id.includes('PICKAXE')) return 'ORE_MINER';
+        if (id.includes('WOOD') || id.includes('AXE')) return 'LUMBERJACK';
         if (id.includes('HIDE') || id.includes('KNIFE')) return 'ANIMAL_SKINNER';
         if (id.includes('FIBER') || id.includes('SICKLE')) return 'FIBER_HARVESTER';
         if (id.includes('FISH') || id.includes('ROD')) return 'FISHING';
@@ -1153,6 +1153,7 @@ export const getLevelRequirement = (tier) => {
 export const getRequiredProficiencyGroup = (itemId) => {
     if (!itemId) return null;
     const id = String(itemId).toUpperCase();
+    if (id.includes('_RUNE_')) return null;
 
     // Warrior: PLATE, SWORD, SHIELD
     if (id.includes('SWORD') || id.includes('PLATE') || id.includes('SHIELD') || id.includes('WARRIOR_CAPE')) {
