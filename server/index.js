@@ -1368,8 +1368,6 @@ io.on('connection', (socket) => {
 
                 // 2. Set Activity to 'world_boss' so processTick picks it up
                 if (result.success) {
-                    char.current_activity = 'world_boss';
-                    char.activity_started_at = new Date().toISOString();
                     await gameManager.saveState(char.id, char.state);
 
                     // Trigger client UI transition

@@ -1,102 +1,1394 @@
 export const MONSTERS = {
-    1: [
-        { id: 'RABBIT', name: 'Rabbit', health: 600, damage: 4, defense: 15, xp: 229, loot: { 'T1_DUNGEON_MAP': 0.01 }, silver: [137, 275], tier: 1, image: 'rabbit.png', flipCombat: true, flipList: true },
-        { id: 'GOBLIN_SCOUT', name: 'Goblin Scout', health: 650, damage: 4, defense: 16, xp: 240, loot: { 'T1_DUNGEON_MAP': 0.02 }, silver: [144, 288], tier: 1, image: 'goblin_scout.png' },
-        { id: 'WILD_HOG', name: 'Wild Hog', health: 704, damage: 5, defense: 17, xp: 252, loot: { 'T1_DUNGEON_MAP': 0.015 }, silver: [151, 303], tier: 1 },
-        { id: 'FOX', name: 'Fox', health: 762, damage: 6, defense: 19, xp: 265, loot: { 'T1_DUNGEON_MAP': 0.015 }, silver: [159, 318], tier: 1 },
-        { id: 'SNAKE', name: 'Snake', health: 826, damage: 6, defense: 20, xp: 278, loot: { 'T1_DUNGEON_MAP': 0.02 }, silver: [167, 334], tier: 1 },
-        { id: 'ROCK_ELEMENTAL_T1', name: 'Small Rock Elemental', health: 80, damage: 8, defense: 2, xp: 30, loot: { 'T1_ORE': 0.6, 'T1_DUNGEON_MAP': 0.005 }, silver: [10, 20], tier: 1, dungeonOnly: true, image: 'rock_elemental_t1.png' },
-        { id: 'GIANT_SPIDER_T1', name: 'Forest Spider', health: 100, damage: 12, defense: 3, xp: 40, loot: { 'T1_FIBER': 0.5 }, silver: [15, 25], tier: 1, dungeonOnly: true, image: 'giant_spider_t1.png' },
-        { id: 'BOSS_GOBLIN_KING', name: 'Goblin King', health: 500, damage: 25, defense: 10, xp: 500, loot: { 'T1_CREST': 0.2 }, silver: [100, 200], tier: 1, dungeonOnly: true, image: 'boss_goblin_king.png' },
+    "1": [
+        {
+            "id": "RABBIT",
+            "name": "Rabbit",
+            "health": 600,
+            "damage": 4,
+            "defense": 15,
+            "xp": 0,
+            "loot": {
+                "T1_DUNGEON_MAP": 0.01
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 1,
+            "image": "rabbit.png",
+            "flipCombat": true,
+            "flipList": true
+        },
+        {
+            "id": "GOBLIN_SCOUT",
+            "name": "Goblin Scout",
+            "health": 650,
+            "damage": 4,
+            "defense": 16,
+            "xp": 0,
+            "loot": {
+                "T1_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 1,
+            "image": "goblin_scout.png"
+        },
+        {
+            "id": "WILD_HOG",
+            "name": "Wild Hog",
+            "health": 704,
+            "damage": 5,
+            "defense": 17,
+            "xp": 252,
+            "loot": {
+                "T1_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                151,
+                303
+            ],
+            "tier": 1
+        },
+        {
+            "id": "FOX",
+            "name": "Fox",
+            "health": 762,
+            "damage": 6,
+            "defense": 19,
+            "xp": 265,
+            "loot": {
+                "T1_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                159,
+                318
+            ],
+            "tier": 1
+        },
+        {
+            "id": "SNAKE",
+            "name": "Snake",
+            "health": 826,
+            "damage": 6,
+            "defense": 20,
+            "xp": 278,
+            "loot": {
+                "T1_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                167,
+                334
+            ],
+            "tier": 1
+        },
+        {
+            "id": "ROCK_ELEMENTAL_T1",
+            "name": "Small Rock Elemental",
+            "health": 704,
+            "damage": 5,
+            "defense": 17,
+            "xp": 0,
+            "loot": {
+                "T1_ORE": 0.6,
+                "T1_DUNGEON_MAP": 0.005
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 1,
+            "dungeonOnly": true,
+            "image": "rock_elemental_t1.png"
+        },
+        {
+            "id": "GIANT_SPIDER_T1",
+            "name": "Forest Spider",
+            "health": 762,
+            "damage": 6,
+            "defense": 19,
+            "xp": 0,
+            "loot": {
+                "T1_FIBER": 0.5
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 1,
+            "dungeonOnly": true,
+            "image": "giant_spider_t1.png"
+        },
+        {
+            "id": "BOSS_GOBLIN_KING",
+            "name": "Goblin King",
+            "health": 1651,
+            "damage": 12,
+            "defense": 20,
+            "xp": 120,
+            "loot": {
+                "T1_CREST": 0.2
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 1,
+            "dungeonOnly": true,
+            "image": "boss_goblin_king.png"
+        }
     ],
-    2: [
-        { id: 'WOLF', name: 'Wolf', health: 894, damage: 7, defense: 22, xp: 292, loot: { 'T2_DUNGEON_MAP': 0.01 }, silver: [175, 351], tier: 2, image: 'wolf.png' },
-        { id: 'DIRE_RAT', name: 'Dire Rat', health: 969, damage: 8, defense: 24, xp: 307, loot: { 'T2_DUNGEON_MAP': 0.02 }, silver: [184, 368], tier: 2, image: 'dire_rat.png' },
-        { id: 'STAG', name: 'Stag', health: 1049, damage: 9, defense: 25, xp: 322, loot: { 'T2_DUNGEON_MAP': 0.015 }, silver: [193, 387], tier: 2 },
-        { id: 'MOUNTAIN_GOAT', name: 'Mountain Goat', health: 1136, damage: 10, defense: 27, xp: 338, loot: { 'T2_DUNGEON_MAP': 0.015 }, silver: [203, 406], tier: 2 },
-        { id: 'BANDIT_THUG', name: 'Bandit Thug', health: 1231, damage: 11, defense: 30, xp: 355, loot: { 'T2_DUNGEON_MAP': 0.02 }, silver: [213, 426], tier: 2 },
-        { id: 'FOREST_SPIRIT', name: 'Forest Spirit', health: 300, damage: 25, defense: 8, xp: 70, loot: { 'T2_WOOD': 0.5, 'T2_DUNGEON_MAP': 0.006 }, silver: [25, 50], tier: 2, dungeonOnly: true, image: 'forest_spirit.png' },
-        { id: 'BANDIT_SCOUT', name: 'Bandit Scout', health: 350, damage: 32, defense: 10, xp: 85, loot: { 'T2_ORE': 0.3 }, silver: [35, 60], tier: 2, dungeonOnly: true, image: 'bandit_scout.png' },
-        { id: 'BOSS_WOLF_ALPHA', name: 'Alpha Wolf', health: 1500, damage: 70, defense: 30, xp: 1200, loot: { 'T2_CREST': 0.2 }, silver: [300, 500], tier: 2, dungeonOnly: true, image: 'boss_wolf_alpha.png' },
+    "2": [
+        {
+            "id": "WOLF",
+            "name": "Wolf",
+            "health": 894,
+            "damage": 7,
+            "defense": 22,
+            "xp": 0,
+            "loot": {
+                "T2_DUNGEON_MAP": 0.01
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 2,
+            "image": "wolf.png"
+        },
+        {
+            "id": "DIRE_RAT",
+            "name": "Dire Rat",
+            "health": 969,
+            "damage": 8,
+            "defense": 24,
+            "xp": 0,
+            "loot": {
+                "T2_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 2,
+            "image": "dire_rat.png"
+        },
+        {
+            "id": "STAG",
+            "name": "Stag",
+            "health": 1049,
+            "damage": 9,
+            "defense": 25,
+            "xp": 322,
+            "loot": {
+                "T2_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                193,
+                387
+            ],
+            "tier": 2
+        },
+        {
+            "id": "MOUNTAIN_GOAT",
+            "name": "Mountain Goat",
+            "health": 1136,
+            "damage": 10,
+            "defense": 27,
+            "xp": 338,
+            "loot": {
+                "T2_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                203,
+                406
+            ],
+            "tier": 2
+        },
+        {
+            "id": "BANDIT_THUG",
+            "name": "Bandit Thug",
+            "health": 1231,
+            "damage": 11,
+            "defense": 30,
+            "xp": 355,
+            "loot": {
+                "T2_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                213,
+                426
+            ],
+            "tier": 2
+        },
+        {
+            "id": "FOREST_SPIRIT",
+            "name": "Forest Spirit",
+            "health": 1049,
+            "damage": 9,
+            "defense": 25,
+            "xp": 0,
+            "loot": {
+                "T2_WOOD": 0.5,
+                "T2_DUNGEON_MAP": 0.006
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 2,
+            "dungeonOnly": true,
+            "image": "forest_spirit.png"
+        },
+        {
+            "id": "BANDIT_SCOUT",
+            "name": "Bandit Scout",
+            "health": 1136,
+            "damage": 10,
+            "defense": 27,
+            "xp": 0,
+            "loot": {
+                "T2_ORE": 0.3
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 2,
+            "dungeonOnly": true,
+            "image": "bandit_scout.png"
+        },
+        {
+            "id": "BOSS_WOLF_ALPHA",
+            "name": "Alpha Wolf",
+            "health": 2462,
+            "damage": 22,
+            "defense": 30,
+            "xp": 180,
+            "loot": {
+                "T2_CREST": 0.2
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 2,
+            "dungeonOnly": true,
+            "image": "boss_wolf_alpha.png"
+        }
     ],
-    3: [
-        { id: 'BEAR', name: 'Bear', health: 1333, damage: 13, defense: 32, xp: 373, loot: { 'T3_DUNGEON_MAP': 0.01 }, silver: [224, 447], tier: 3, image: 'bear.png' },
-        { id: 'MOUNTAIN_GOBLIN', name: 'Mountain Goblin', health: 1444, damage: 14, defense: 34, xp: 392, loot: { 'T3_DUNGEON_MAP': 0.02 }, silver: [235, 470], tier: 3, image: 'mountain_goblin.png' },
-        { id: 'HIGHLAND_COW', name: 'Highland Cow', health: 1564, damage: 16, defense: 37, xp: 411, loot: { 'T3_DUNGEON_MAP': 0.015 }, silver: [247, 493], tier: 3 },
-        { id: 'HARPY', name: 'Harpy', health: 1694, damage: 18, defense: 40, xp: 432, loot: { 'T3_DUNGEON_MAP': 0.015 }, silver: [259, 518], tier: 3 },
-        { id: 'ROGUE_KNIGHT', name: 'Rogue Knight', health: 1835, damage: 20, defense: 43, xp: 453, loot: { 'T3_DUNGEON_MAP': 0.02 }, silver: [272, 544], tier: 3 },
-        { id: 'SKELETON', name: 'Skeleton', health: 700, damage: 60, defense: 20, xp: 175, loot: { 'T3_FIBER': 0.4, 'T3_DUNGEON_MAP': 0.007 }, silver: [80, 150], tier: 3, dungeonOnly: true, image: 'skeleton.png' },
-        { id: 'SKELETON_WARRIOR', name: 'Skeleton Warrior', health: 800, damage: 75, defense: 25, xp: 200, loot: { 'T3_BAR': 0.2 }, silver: [100, 180], tier: 3, dungeonOnly: true, image: 'skeleton_warrior.png' },
-        { id: 'BOSS_BEAR_ANCIENT', name: 'Ancient Bear', health: 3000, damage: 150, defense: 60, xp: 2500, loot: { 'T3_CREST': 0.2 }, silver: [600, 1200], tier: 3, dungeonOnly: true, image: 'boss_bear_ancient.png' },
+    "3": [
+        {
+            "id": "BEAR",
+            "name": "Bear",
+            "health": 1333,
+            "damage": 13,
+            "defense": 32,
+            "xp": 0,
+            "loot": {
+                "T3_DUNGEON_MAP": 0.01
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 3,
+            "image": "bear.png"
+        },
+        {
+            "id": "MOUNTAIN_GOBLIN",
+            "name": "Mountain Goblin",
+            "health": 1444,
+            "damage": 14,
+            "defense": 34,
+            "xp": 0,
+            "loot": {
+                "T3_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 3,
+            "image": "mountain_goblin.png"
+        },
+        {
+            "id": "HIGHLAND_COW",
+            "name": "Highland Cow",
+            "health": 1564,
+            "damage": 16,
+            "defense": 37,
+            "xp": 411,
+            "loot": {
+                "T3_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                247,
+                493
+            ],
+            "tier": 3
+        },
+        {
+            "id": "HARPY",
+            "name": "Harpy",
+            "health": 1694,
+            "damage": 18,
+            "defense": 40,
+            "xp": 432,
+            "loot": {
+                "T3_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                259,
+                518
+            ],
+            "tier": 3
+        },
+        {
+            "id": "ROGUE_KNIGHT",
+            "name": "Rogue Knight",
+            "health": 1835,
+            "damage": 20,
+            "defense": 43,
+            "xp": 453,
+            "loot": {
+                "T3_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                272,
+                544
+            ],
+            "tier": 3
+        },
+        {
+            "id": "SKELETON",
+            "name": "Skeleton",
+            "health": 1564,
+            "damage": 16,
+            "defense": 37,
+            "xp": 0,
+            "loot": {
+                "T3_FIBER": 0.4,
+                "T3_DUNGEON_MAP": 0.007
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 3,
+            "dungeonOnly": true,
+            "image": "skeleton.png"
+        },
+        {
+            "id": "SKELETON_WARRIOR",
+            "name": "Skeleton Warrior",
+            "health": 1694,
+            "damage": 18,
+            "defense": 40,
+            "xp": 0,
+            "loot": {
+                "T3_BAR": 0.2
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 3,
+            "dungeonOnly": true,
+            "image": "skeleton_warrior.png"
+        },
+        {
+            "id": "BOSS_BEAR_ANCIENT",
+            "name": "Ancient Bear",
+            "health": 3669,
+            "damage": 40,
+            "defense": 43,
+            "xp": 240,
+            "loot": {
+                "T3_CREST": 0.2
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 3,
+            "dungeonOnly": true,
+            "image": "boss_bear_ancient.png"
+        }
     ],
-    4: [
-        { id: 'DIRE_WOLF', name: 'Dire Wolf', health: 1987, damage: 23, defense: 46, xp: 476, loot: { 'T4_DUNGEON_MAP': 0.01 }, silver: [286, 571], tier: 4, image: 'dire_wolf.png' },
-        { id: 'GHOST_KNIGHT', name: 'Ghost Knight', health: 2152, damage: 26, defense: 50, xp: 500, loot: { 'T4_DUNGEON_MAP': 0.02 }, silver: [300, 600], tier: 4, image: 'ghost_knight.png' },
-        { id: 'SNOW_LEOPARD', name: 'Snow Leopard', health: 2331, damage: 29, defense: 54, xp: 525, loot: { 'T4_DUNGEON_MAP': 0.015 }, silver: [315, 630], tier: 4 },
-        { id: 'GIANT_EAGLE', name: 'Giant Eagle', health: 2525, damage: 33, defense: 58, xp: 551, loot: { 'T4_DUNGEON_MAP': 0.015 }, silver: [331, 661], tier: 4 },
-        { id: 'ASH_GHOUL', name: 'Ash Ghoul', health: 2735, damage: 37, defense: 63, xp: 578, loot: { 'T4_DUNGEON_MAP': 0.02 }, silver: [347, 694], tier: 4 },
-        { id: 'UNDEAD_SOLDIER', name: 'Undead Soldier', health: 1800, damage: 140, defense: 50, xp: 450, loot: { 'T4_BAR': 0.2, 'T4_DUNGEON_MAP': 0.008 }, silver: [250, 500], tier: 4, dungeonOnly: true, image: 'undead_soldier.png' },
-        { id: 'CRYPT_WARDEN', name: 'Crypt Warden', health: 2200, damage: 180, defense: 65, xp: 550, loot: { 'T4_SHARD': 0.1 }, silver: [350, 650], tier: 4, dungeonOnly: true, image: 'crypt_warden.png' },
-        { id: 'BOSS_SKELETON_KING', name: 'Skeleton King', health: 8000, damage: 450, defense: 150, xp: 6000, loot: { 'T4_CREST': 0.2 }, silver: [1500, 3000], tier: 4, dungeonOnly: true, image: 'boss_skeleton_king.png' },
+    "4": [
+        {
+            "id": "DIRE_WOLF",
+            "name": "Dire Wolf",
+            "health": 1987,
+            "damage": 23,
+            "defense": 46,
+            "xp": 0,
+            "loot": {
+                "T4_DUNGEON_MAP": 0.01
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 4,
+            "image": "dire_wolf.png"
+        },
+        {
+            "id": "GHOST_KNIGHT",
+            "name": "Ghost Knight",
+            "health": 2152,
+            "damage": 26,
+            "defense": 50,
+            "xp": 0,
+            "loot": {
+                "T4_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 4,
+            "image": "ghost_knight.png"
+        },
+        {
+            "id": "SNOW_LEOPARD",
+            "name": "Snow Leopard",
+            "health": 2331,
+            "damage": 29,
+            "defense": 54,
+            "xp": 525,
+            "loot": {
+                "T4_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                315,
+                630
+            ],
+            "tier": 4
+        },
+        {
+            "id": "GIANT_EAGLE",
+            "name": "Giant Eagle",
+            "health": 2525,
+            "damage": 33,
+            "defense": 58,
+            "xp": 551,
+            "loot": {
+                "T4_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                331,
+                661
+            ],
+            "tier": 4
+        },
+        {
+            "id": "ASH_GHOUL",
+            "name": "Ash Ghoul",
+            "health": 2735,
+            "damage": 37,
+            "defense": 63,
+            "xp": 578,
+            "loot": {
+                "T4_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                347,
+                694
+            ],
+            "tier": 4
+        },
+        {
+            "id": "UNDEAD_SOLDIER",
+            "name": "Undead Soldier",
+            "health": 2331,
+            "damage": 29,
+            "defense": 54,
+            "xp": 0,
+            "loot": {
+                "T4_BAR": 0.2,
+                "T4_DUNGEON_MAP": 0.008
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 4,
+            "dungeonOnly": true,
+            "image": "undead_soldier.png"
+        },
+        {
+            "id": "CRYPT_WARDEN",
+            "name": "Crypt Warden",
+            "health": 2525,
+            "damage": 33,
+            "defense": 58,
+            "xp": 0,
+            "loot": {
+                "T4_SHARD": 0.1
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 4,
+            "dungeonOnly": true,
+            "image": "crypt_warden.png"
+        },
+        {
+            "id": "BOSS_SKELETON_KING",
+            "name": "Skeleton King",
+            "health": 5470,
+            "damage": 74,
+            "defense": 63,
+            "xp": 315,
+            "loot": {
+                "T4_CREST": 0.2
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 4,
+            "dungeonOnly": true,
+            "image": "boss_skeleton_king.png"
+        }
     ],
-    5: [
-        { id: 'OGRE', name: 'Ogre', health: 2962, damage: 41, defense: 68, xp: 607, loot: { 'T5_DUNGEON_MAP': 0.01 }, silver: [364, 729], tier: 5, image: 'ogre.png' },
-        { id: 'WAR_OGRE', name: 'War Ogre', health: 3208, damage: 46, defense: 73, xp: 638, loot: { 'T5_DUNGEON_MAP': 0.02 }, silver: [383, 765], tier: 5, image: 'war_ogre.png' },
-        { id: 'SWAMP_TROC', name: 'Swamp Troc', health: 3475, damage: 52, defense: 79, xp: 670, loot: { 'T5_DUNGEON_MAP': 0.015 }, silver: [402, 804], tier: 5 },
-        { id: 'CRIMSON_BAT', name: 'Crimson Bat', health: 3764, damage: 58, defense: 85, xp: 703, loot: { 'T5_DUNGEON_MAP': 0.015 }, silver: [422, 844], tier: 5 },
-        { id: 'CORRUPTED_PALADIN', name: 'Corrupted Paladin', health: 4077, damage: 65, defense: 91, xp: 738, loot: { 'T5_DUNGEON_MAP': 0.02 }, silver: [443, 886], tier: 5 },
-        { id: 'LICH', name: 'Ancient Lich', health: 4500, damage: 350, defense: 120, xp: 1200, loot: { 'T5_CLOTH': 0.2, 'T5_DUNGEON_MAP': 0.009 }, silver: [800, 1500], tier: 5, dungeonOnly: true, image: 'lich.png' },
-        { id: 'LICH_LORD', name: 'Lich Lord', health: 5500, damage: 450, defense: 160, xp: 1500, loot: { 'T5_SHARD': 0.1 }, silver: [1000, 2000], tier: 5, dungeonOnly: true, image: 'lich_lord.png' },
-        { id: 'BOSS_OGRE_CHIEFTAIN', name: 'Ogre Chieftain', health: 18000, damage: 1000, defense: 400, xp: 12000, loot: { 'T5_CREST': 0.2 }, silver: [3000, 6000], tier: 5, dungeonOnly: true, image: 'boss_ogre_chieftain.png' },
+    "5": [
+        {
+            "id": "OGRE",
+            "name": "Ogre",
+            "health": 2962,
+            "damage": 41,
+            "defense": 68,
+            "xp": 0,
+            "loot": {
+                "T5_DUNGEON_MAP": 0.01
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 5,
+            "image": "ogre.png"
+        },
+        {
+            "id": "WAR_OGRE",
+            "name": "War Ogre",
+            "health": 3208,
+            "damage": 46,
+            "defense": 73,
+            "xp": 0,
+            "loot": {
+                "T5_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 5,
+            "image": "war_ogre.png"
+        },
+        {
+            "id": "SWAMP_TROC",
+            "name": "Swamp Troc",
+            "health": 3475,
+            "damage": 52,
+            "defense": 79,
+            "xp": 670,
+            "loot": {
+                "T5_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                402,
+                804
+            ],
+            "tier": 5
+        },
+        {
+            "id": "CRIMSON_BAT",
+            "name": "Crimson Bat",
+            "health": 3764,
+            "damage": 58,
+            "defense": 85,
+            "xp": 703,
+            "loot": {
+                "T5_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                422,
+                844
+            ],
+            "tier": 5
+        },
+        {
+            "id": "CORRUPTED_PALADIN",
+            "name": "Corrupted Paladin",
+            "health": 4077,
+            "damage": 65,
+            "defense": 91,
+            "xp": 738,
+            "loot": {
+                "T5_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                443,
+                886
+            ],
+            "tier": 5
+        },
+        {
+            "id": "LICH",
+            "name": "Ancient Lich",
+            "health": 3475,
+            "damage": 52,
+            "defense": 79,
+            "xp": 0,
+            "loot": {
+                "T5_CLOTH": 0.2,
+                "T5_DUNGEON_MAP": 0.009
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 5,
+            "dungeonOnly": true,
+            "image": "lich.png"
+        },
+        {
+            "id": "LICH_LORD",
+            "name": "Lich Lord",
+            "health": 3764,
+            "damage": 58,
+            "defense": 85,
+            "xp": 0,
+            "loot": {
+                "T5_SHARD": 0.1
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 5,
+            "dungeonOnly": true,
+            "image": "lich_lord.png"
+        },
+        {
+            "id": "BOSS_OGRE_CHIEFTAIN",
+            "name": "Ogre Chieftain",
+            "health": 8153,
+            "damage": 130,
+            "defense": 91,
+            "xp": 396,
+            "loot": {
+                "T5_CREST": 0.2
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 5,
+            "dungeonOnly": true,
+            "image": "boss_ogre_chieftain.png"
+        }
     ],
-    6: [
-        { id: 'TROLL', name: 'Mountain Troll', health: 4415, damage: 73, defense: 99, xp: 775, loot: { 'T6_DUNGEON_MAP': 0.01 }, silver: [465, 930], tier: 6, image: 'troll.png' },
-        { id: 'ARMORED_TROLL', name: 'Armored Troll', health: 4782, damage: 83, defense: 106, xp: 814, loot: { 'T6_DUNGEON_MAP': 0.02 }, silver: [488, 977], tier: 6, image: 'armored_troll.png' },
-        { id: 'TUNDRA_BEAR', name: 'Tundra Bear', health: 5180, damage: 93, defense: 115, xp: 855, loot: { 'T6_DUNGEON_MAP': 0.015 }, silver: [513, 1026], tier: 6 },
-        { id: 'SKY_STALKER', name: 'Sky Stalker', health: 5610, damage: 104, defense: 123, xp: 897, loot: { 'T6_DUNGEON_MAP': 0.015 }, silver: [538, 1077], tier: 6 },
-        { id: 'EXECUTIONER', name: 'Executioner', health: 6077, damage: 117, defense: 133, xp: 942, loot: { 'T6_DUNGEON_MAP': 0.02 }, silver: [565, 1131], tier: 6 },
-        { id: 'FIRE_ELEMENTAL', name: 'Fire Elemental', health: 15000, damage: 900, defense: 350, xp: 3000, loot: { 'T6_ORE': 0.3, 'T6_DUNGEON_MAP': 0.01 }, silver: [2000, 3500], tier: 6, dungeonOnly: true, image: 'fire_elemental.png' },
-        { id: 'INFERNAL_ELEMENTAL', name: 'Infernal Elemental', health: 18000, damage: 1100, defense: 450, xp: 3800, loot: { 'T6_SHARD': 0.1 }, silver: [2500, 4500], tier: 6, dungeonOnly: true, image: 'infernal_elemental.png' },
-        { id: 'BOSS_TROLL_ELDER', name: 'Elder Troll', health: 50000, damage: 2500, defense: 1000, xp: 25000, loot: { 'T6_CREST': 0.2 }, silver: [10000, 20000], tier: 6, dungeonOnly: true, image: 'boss_troll_elder.png' },
+    "6": [
+        {
+            "id": "TROLL",
+            "name": "Mountain Troll",
+            "health": 4415,
+            "damage": 73,
+            "defense": 99,
+            "xp": 0,
+            "loot": {
+                "T6_DUNGEON_MAP": 0.01
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 6,
+            "image": "troll.png"
+        },
+        {
+            "id": "ARMORED_TROLL",
+            "name": "Armored Troll",
+            "health": 4782,
+            "damage": 83,
+            "defense": 106,
+            "xp": 0,
+            "loot": {
+                "T6_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 6,
+            "image": "armored_troll.png"
+        },
+        {
+            "id": "TUNDRA_BEAR",
+            "name": "Tundra Bear",
+            "health": 5180,
+            "damage": 93,
+            "defense": 115,
+            "xp": 855,
+            "loot": {
+                "T6_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                513,
+                1026
+            ],
+            "tier": 6
+        },
+        {
+            "id": "SKY_STALKER",
+            "name": "Sky Stalker",
+            "health": 5610,
+            "damage": 104,
+            "defense": 123,
+            "xp": 897,
+            "loot": {
+                "T6_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                538,
+                1077
+            ],
+            "tier": 6
+        },
+        {
+            "id": "EXECUTIONER",
+            "name": "Executioner",
+            "health": 6077,
+            "damage": 117,
+            "defense": 133,
+            "xp": 942,
+            "loot": {
+                "T6_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                565,
+                1131
+            ],
+            "tier": 6
+        },
+        {
+            "id": "FIRE_ELEMENTAL",
+            "name": "Fire Elemental",
+            "health": 5180,
+            "damage": 93,
+            "defense": 115,
+            "xp": 0,
+            "loot": {
+                "T6_ORE": 0.3,
+                "T6_DUNGEON_MAP": 0.01
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 6,
+            "dungeonOnly": true,
+            "image": "fire_elemental.png"
+        },
+        {
+            "id": "INFERNAL_ELEMENTAL",
+            "name": "Infernal Elemental",
+            "health": 5610,
+            "damage": 104,
+            "defense": 123,
+            "xp": 0,
+            "loot": {
+                "T6_SHARD": 0.1
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 6,
+            "dungeonOnly": true,
+            "image": "infernal_elemental.png"
+        },
+        {
+            "id": "BOSS_TROLL_ELDER",
+            "name": "Elder Troll",
+            "health": 12153,
+            "damage": 256,
+            "defense": 133,
+            "xp": 480,
+            "loot": {
+                "T6_CREST": 0.2
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 6,
+            "dungeonOnly": true,
+            "image": "boss_troll_elder.png"
+        }
     ],
-    7: [
-        { id: 'DRAGON_WHELP', name: 'Dragon Whelp', health: 6582, damage: 131, defense: 144, xp: 989, loot: { 'T7_DUNGEON_MAP': 0.01 }, silver: [594, 1187], tier: 7, image: 'dragon_whelp.png' },
-        { id: 'FIRE_DRAKE', name: 'Fire Drake', health: 7129, damage: 148, defense: 155, xp: 1039, loot: { 'T7_DUNGEON_MAP': 0.02 }, silver: [623, 1247], tier: 7, image: 'fire_drake.png' },
-        { id: 'LAVA_HOUND', name: 'Lava Hound', health: 7721, damage: 166, defense: 167, xp: 1091, loot: { 'T7_DUNGEON_MAP': 0.015 }, silver: [654, 1309], tier: 7 },
-        { id: 'STORM_WRAITH', name: 'Storm Wraith', health: 8363, damage: 186, defense: 180, xp: 1145, loot: { 'T7_DUNGEON_MAP': 0.015 }, silver: [687, 1374], tier: 7 },
-        { id: 'RUNE_GUARDIAN', name: 'Rune Guardian', health: 9058, damage: 209, defense: 194, xp: 1203, loot: { 'T7_DUNGEON_MAP': 0.02 }, silver: [722, 1443], tier: 7 },
-        { id: 'DARK_KNIGHT', name: 'Dark Knight', health: 40000, damage: 2200, defense: 900, xp: 8000, loot: { 'T7_BAR': 0.2, 'T7_DUNGEON_MAP': 0.012 }, silver: [4000, 8000], tier: 7, dungeonOnly: true, image: 'dark_knight.png' },
-        { id: 'DEATH_KNIGHT', name: 'Death Knight', health: 48000, damage: 2800, defense: 1200, xp: 10000, loot: { 'T7_SHARD': 0.1 }, silver: [5000, 10000], tier: 7, dungeonOnly: true, image: 'death_knight.png' },
-        { id: 'BOSS_DRAGON_MOTHER', name: 'Dragon Mother', health: 150000, damage: 7000, defense: 2500, xp: 60000, loot: { 'T7_CREST': 0.2 }, silver: [25000, 50000], tier: 7, dungeonOnly: true, image: 'boss_dragon_mother.png' },
+    "7": [
+        {
+            "id": "DRAGON_WHELP",
+            "name": "Dragon Whelp",
+            "health": 6582,
+            "damage": 131,
+            "defense": 144,
+            "xp": 0,
+            "loot": {
+                "T7_DUNGEON_MAP": 0.01
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 7,
+            "image": "dragon_whelp.png"
+        },
+        {
+            "id": "FIRE_DRAKE",
+            "name": "Fire Drake",
+            "health": 7129,
+            "damage": 148,
+            "defense": 155,
+            "xp": 0,
+            "loot": {
+                "T7_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 7,
+            "image": "fire_drake.png"
+        },
+        {
+            "id": "LAVA_HOUND",
+            "name": "Lava Hound",
+            "health": 7721,
+            "damage": 166,
+            "defense": 167,
+            "xp": 1091,
+            "loot": {
+                "T7_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                654,
+                1309
+            ],
+            "tier": 7
+        },
+        {
+            "id": "STORM_WRAITH",
+            "name": "Storm Wraith",
+            "health": 8363,
+            "damage": 186,
+            "defense": 180,
+            "xp": 1145,
+            "loot": {
+                "T7_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                687,
+                1374
+            ],
+            "tier": 7
+        },
+        {
+            "id": "RUNE_GUARDIAN",
+            "name": "Rune Guardian",
+            "health": 9058,
+            "damage": 209,
+            "defense": 194,
+            "xp": 1203,
+            "loot": {
+                "T7_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                722,
+                1443
+            ],
+            "tier": 7
+        },
+        {
+            "id": "DARK_KNIGHT",
+            "name": "Dark Knight",
+            "health": 7721,
+            "damage": 166,
+            "defense": 167,
+            "xp": 0,
+            "loot": {
+                "T7_BAR": 0.2,
+                "T7_DUNGEON_MAP": 0.012
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 7,
+            "dungeonOnly": true,
+            "image": "dark_knight.png"
+        },
+        {
+            "id": "DEATH_KNIGHT",
+            "name": "Death Knight",
+            "health": 8363,
+            "damage": 186,
+            "defense": 180,
+            "xp": 0,
+            "loot": {
+                "T7_SHARD": 0.1
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 7,
+            "dungeonOnly": true,
+            "image": "death_knight.png"
+        },
+        {
+            "id": "BOSS_DRAGON_MOTHER",
+            "name": "Dragon Mother",
+            "health": 18116,
+            "damage": 209,
+            "defense": 194,
+            "xp": 565,
+            "loot": {
+                "T7_CREST": 0.2
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 7,
+            "dungeonOnly": true,
+            "image": "boss_dragon_mother.png"
+        }
     ],
-    8: [
-        { id: 'ANCIENT_GOLEM', name: 'Ancient Golem', health: 9811, damage: 235, defense: 209, xp: 1263, loot: { 'T8_DUNGEON_MAP': 0.01 }, silver: [758, 1515], tier: 8, image: 'ancient_golem.png' },
-        { id: 'OBSIDIAN_GOLEM', name: 'Obsidian Golem', health: 10626, damage: 264, defense: 225, xp: 1326, loot: { 'T8_DUNGEON_MAP': 0.02 }, silver: [795, 1591], tier: 8, image: 'obsidian_golem.png' },
-        { id: 'GLACIER_GIANT', name: 'Glacier Giant', health: 11509, damage: 297, defense: 243, xp: 1392, loot: { 'T8_DUNGEON_MAP': 0.015 }, silver: [835, 1671], tier: 8 },
-        { id: 'VOID_STALKER', name: 'Void Stalker', health: 12466, damage: 334, defense: 262, xp: 1462, loot: { 'T8_DUNGEON_MAP': 0.015 }, silver: [877, 1754], tier: 8 },
-        { id: 'ABYSSAL_KNIGHT', name: 'Abyssal Knight', health: 13502, damage: 375, defense: 283, xp: 1535, loot: { 'T8_DUNGEON_MAP': 0.02 }, silver: [921, 1842], tier: 8 },
-        { id: 'DEMON', name: 'Lesser Demon', health: 90000, damage: 5500, defense: 2200, xp: 20000, loot: { 'T8_FIBER': 0.25, 'T8_DUNGEON_MAP': 0.015 }, silver: [10000, 18000], tier: 8, dungeonOnly: true, image: 'demon.png' },
-        { id: 'DEMON_WARRIOR', name: 'Demon Warrior', health: 110000, damage: 6800, defense: 2800, xp: 25000, loot: { 'T8_SHARD': 0.1 }, silver: [12000, 22000], tier: 8, dungeonOnly: true, image: 'demon_warrior.png' },
-        { id: 'BOSS_GOLEM_PRIMORDIAL', name: 'Primordial Golem', health: 350000, damage: 15000, defense: 5000, xp: 120000, loot: { 'T8_CREST': 0.2 }, silver: [60000, 120000], tier: 8, dungeonOnly: true, image: 'boss_golem_primordial.png' },
+    "8": [
+        {
+            "id": "ANCIENT_GOLEM",
+            "name": "Ancient Golem",
+            "health": 9811,
+            "damage": 235,
+            "defense": 209,
+            "xp": 0,
+            "loot": {
+                "T8_DUNGEON_MAP": 0.01
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 8,
+            "image": "ancient_golem.png"
+        },
+        {
+            "id": "OBSIDIAN_GOLEM",
+            "name": "Obsidian Golem",
+            "health": 10626,
+            "damage": 264,
+            "defense": 225,
+            "xp": 0,
+            "loot": {
+                "T8_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 8,
+            "image": "obsidian_golem.png"
+        },
+        {
+            "id": "GLACIER_GIANT",
+            "name": "Glacier Giant",
+            "health": 11509,
+            "damage": 297,
+            "defense": 243,
+            "xp": 1392,
+            "loot": {
+                "T8_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                835,
+                1671
+            ],
+            "tier": 8
+        },
+        {
+            "id": "VOID_STALKER",
+            "name": "Void Stalker",
+            "health": 12466,
+            "damage": 334,
+            "defense": 262,
+            "xp": 1462,
+            "loot": {
+                "T8_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                877,
+                1754
+            ],
+            "tier": 8
+        },
+        {
+            "id": "ABYSSAL_KNIGHT",
+            "name": "Abyssal Knight",
+            "health": 13502,
+            "damage": 375,
+            "defense": 283,
+            "xp": 1535,
+            "loot": {
+                "T8_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                921,
+                1842
+            ],
+            "tier": 8
+        },
+        {
+            "id": "DEMON",
+            "name": "Lesser Demon",
+            "health": 11509,
+            "damage": 297,
+            "defense": 243,
+            "xp": 0,
+            "loot": {
+                "T8_FIBER": 0.25,
+                "T8_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 8,
+            "dungeonOnly": true,
+            "image": "demon.png"
+        },
+        {
+            "id": "DEMON_WARRIOR",
+            "name": "Demon Warrior",
+            "health": 12466,
+            "damage": 334,
+            "defense": 262,
+            "xp": 0,
+            "loot": {
+                "T8_SHARD": 0.1
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 8,
+            "dungeonOnly": true,
+            "image": "demon_warrior.png"
+        },
+        {
+            "id": "BOSS_GOLEM_PRIMORDIAL",
+            "name": "Primordial Golem",
+            "health": 27004,
+            "damage": 375,
+            "defense": 283,
+            "xp": 652,
+            "loot": {
+                "T8_CREST": 0.2
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 8,
+            "dungeonOnly": true,
+            "image": "boss_golem_primordial.png"
+        }
     ],
-    9: [
-        { id: 'ELDER_DRAGON', name: 'Elder Dragon', health: 14624, damage: 421, defense: 305, xp: 1612, loot: { 'T9_DUNGEON_MAP': 0.01 }, silver: [967, 1934], tier: 9, image: 'elder_dragon.png' },
-        { id: 'VOID_DRAGON', name: 'Void Dragon', health: 15839, damage: 473, defense: 329, xp: 1692, loot: { 'T9_DUNGEON_MAP': 0.02 }, silver: [1015, 2031], tier: 9, image: 'void_dragon.png' },
-        { id: 'NEBULA_SERPENT', name: 'Nebula Serpent', health: 17156, damage: 531, defense: 354, xp: 1777, loot: { 'T9_DUNGEON_MAP': 0.015 }, silver: [1066, 2132], tier: 9 },
-        { id: 'STAR_DEVOURER', name: 'Star Devourer', health: 18582, damage: 597, defense: 382, xp: 1866, loot: { 'T9_DUNGEON_MAP': 0.015 }, silver: [1119, 2239], tier: 9 },
-        { id: 'COSMIC_HORROR', name: 'Cosmic Horror', health: 20126, damage: 671, defense: 412, xp: 1959, loot: { 'T9_DUNGEON_MAP': 0.02 }, silver: [1175, 2351], tier: 9 },
-        { id: 'ARCHDEMON', name: 'Archdemon', health: 300000, damage: 14000, defense: 5500, xp: 60000, loot: { 'T9_BAR': 0.2, 'T9_DUNGEON_MAP': 0.018 }, silver: [20000, 40000], tier: 9, dungeonOnly: true, image: 'archdemon.png' },
-        { id: 'ABYSSAL_FIEND', name: 'Abyssal Fiend', health: 380000, damage: 18000, defense: 7500, xp: 80000, loot: { 'T9_SHARD': 0.1 }, silver: [30000, 50000], tier: 9, dungeonOnly: true, image: 'abyssal_fiend.png' },
-        { id: 'BOSS_DEMON_PRINCE', name: 'Demon Prince', health: 1000000, damage: 45000, defense: 10000, xp: 300000, loot: { 'T9_CREST': 0.2 }, silver: [150000, 300000], tier: 9, dungeonOnly: true, image: 'boss_demon_prince.png' },
+    "9": [
+        {
+            "id": "ELDER_DRAGON",
+            "name": "Elder Dragon",
+            "health": 14624,
+            "damage": 421,
+            "defense": 305,
+            "xp": 0,
+            "loot": {
+                "T9_DUNGEON_MAP": 0.01
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 9,
+            "image": "elder_dragon.png"
+        },
+        {
+            "id": "VOID_DRAGON",
+            "name": "Void Dragon",
+            "health": 15839,
+            "damage": 473,
+            "defense": 329,
+            "xp": 0,
+            "loot": {
+                "T9_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 9,
+            "image": "void_dragon.png"
+        },
+        {
+            "id": "NEBULA_SERPENT",
+            "name": "Nebula Serpent",
+            "health": 17156,
+            "damage": 531,
+            "defense": 354,
+            "xp": 1777,
+            "loot": {
+                "T9_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                1066,
+                2132
+            ],
+            "tier": 9
+        },
+        {
+            "id": "STAR_DEVOURER",
+            "name": "Star Devourer",
+            "health": 18582,
+            "damage": 597,
+            "defense": 382,
+            "xp": 1866,
+            "loot": {
+                "T9_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                1119,
+                2239
+            ],
+            "tier": 9
+        },
+        {
+            "id": "COSMIC_HORROR",
+            "name": "Cosmic Horror",
+            "health": 20126,
+            "damage": 671,
+            "defense": 412,
+            "xp": 1959,
+            "loot": {
+                "T9_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                1175,
+                2351
+            ],
+            "tier": 9
+        },
+        {
+            "id": "ARCHDEMON",
+            "name": "Archdemon",
+            "health": 17156,
+            "damage": 531,
+            "defense": 354,
+            "xp": 0,
+            "loot": {
+                "T9_BAR": 0.2,
+                "T9_DUNGEON_MAP": 0.018
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 9,
+            "dungeonOnly": true,
+            "image": "archdemon.png"
+        },
+        {
+            "id": "ABYSSAL_FIEND",
+            "name": "Abyssal Fiend",
+            "health": 18582,
+            "damage": 597,
+            "defense": 382,
+            "xp": 0,
+            "loot": {
+                "T9_SHARD": 0.1
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 9,
+            "dungeonOnly": true,
+            "image": "abyssal_fiend.png"
+        },
+        {
+            "id": "BOSS_DEMON_PRINCE",
+            "name": "Demon Prince",
+            "health": 40252,
+            "damage": 671,
+            "defense": 412,
+            "xp": 740,
+            "loot": {
+                "T9_CREST": 0.2
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 9,
+            "dungeonOnly": true,
+            "image": "boss_demon_prince.png"
+        }
     ],
-    10: [
-        { id: 'ANCIENT_DRAGON', name: 'Ancient Dragon', health: 21799, damage: 753, defense: 444, xp: 2057, loot: { 'T10_DUNGEON_MAP': 0.01 }, silver: [1234, 2468], tier: 10, image: 'ancient_dragon.png' },
-        { id: 'VOID_DRAGON_LORD', name: 'Void Dragon Lord', health: 23610, damage: 846, defense: 479, xp: 2160, loot: { 'T10_DUNGEON_MAP': 0.02 }, silver: [1296, 2592], tier: 10, image: 'void_dragon_lord.png' },
-        { id: 'GALAXY_EATER', name: 'Galaxy Eater', health: 25573, damage: 951, defense: 516, xp: 2268, loot: { 'T10_DUNGEON_MAP': 0.015 }, silver: [1361, 2721], tier: 10 },
-        { id: 'VOID_REAPER', name: 'Void Reaper', health: 27698, damage: 1068, defense: 556, xp: 2381, loot: { 'T10_DUNGEON_MAP': 0.015 }, silver: [1429, 2857], tier: 10 },
-        { id: 'ETERNAL_WATCHER', name: 'Eternal Watcher', health: 30000, damage: 1200, defense: 600, xp: 2500, loot: { 'T10_DUNGEON_MAP': 0.02 }, silver: [1500, 3000], tier: 10 },
-        { id: 'DEMON_LORD', name: 'Demon Lord', health: 1000000, damage: 30000, defense: 10000, xp: 200000, loot: { 'T10_BAR': 0.15, 'T10_DUNGEON_MAP': 0.02 }, silver: [50000, 90000], tier: 10, dungeonOnly: true, image: 'demon_lord.png' },
-        { id: 'VOID_EXECUTIONER', name: 'Void Executioner', health: 1300000, damage: 40000, defense: 14000, xp: 280000, loot: { 'T10_SHARD': 0.1 }, silver: [70000, 120000], tier: 10, dungeonOnly: true, image: 'void_executioner.png' },
-        { id: 'BOSS_VOID_ENTITY', name: 'Void Entity', health: 5000000, damage: 100000, defense: 25000, xp: 1000000, loot: { 'T10_CREST': 0.2 }, silver: [500000, 1000000], tier: 10, dungeonOnly: true, image: 'boss_void_entity.png' },
+    "10": [
+        {
+            "id": "ANCIENT_DRAGON",
+            "name": "Ancient Dragon",
+            "health": 21799,
+            "damage": 753,
+            "defense": 444,
+            "xp": 0,
+            "loot": {
+                "T10_DUNGEON_MAP": 0.01
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 10,
+            "image": "ancient_dragon.png"
+        },
+        {
+            "id": "VOID_DRAGON_LORD",
+            "name": "Void Dragon Lord",
+            "health": 23610,
+            "damage": 846,
+            "defense": 479,
+            "xp": 0,
+            "loot": {
+                "T10_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 10,
+            "image": "void_dragon_lord.png"
+        },
+        {
+            "id": "GALAXY_EATER",
+            "name": "Galaxy Eater",
+            "health": 25573,
+            "damage": 951,
+            "defense": 516,
+            "xp": 2268,
+            "loot": {
+                "T10_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                1361,
+                2721
+            ],
+            "tier": 10
+        },
+        {
+            "id": "VOID_REAPER",
+            "name": "Void Reaper",
+            "health": 27698,
+            "damage": 1068,
+            "defense": 556,
+            "xp": 2381,
+            "loot": {
+                "T10_DUNGEON_MAP": 0.015
+            },
+            "silver": [
+                1429,
+                2857
+            ],
+            "tier": 10
+        },
+        {
+            "id": "ETERNAL_WATCHER",
+            "name": "Eternal Watcher",
+            "health": 30000,
+            "damage": 1200,
+            "defense": 600,
+            "xp": 2500,
+            "loot": {
+                "T10_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                1500,
+                3000
+            ],
+            "tier": 10
+        },
+        {
+            "id": "DEMON_LORD",
+            "name": "Demon Lord",
+            "health": 25573,
+            "damage": 951,
+            "defense": 516,
+            "xp": 0,
+            "loot": {
+                "T10_BAR": 0.15,
+                "T10_DUNGEON_MAP": 0.02
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 10,
+            "dungeonOnly": true,
+            "image": "demon_lord.png"
+        },
+        {
+            "id": "VOID_EXECUTIONER",
+            "name": "Void Executioner",
+            "health": 27698,
+            "damage": 1068,
+            "defense": 556,
+            "xp": 0,
+            "loot": {
+                "T10_SHARD": 0.1
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 10,
+            "dungeonOnly": true,
+            "image": "void_executioner.png"
+        },
+        {
+            "id": "BOSS_VOID_ENTITY",
+            "name": "Void Entity",
+            "health": 60000,
+            "damage": 1200,
+            "defense": 600,
+            "xp": 830,
+            "loot": {
+                "T10_CREST": 0.2
+            },
+            "silver": [
+                0,
+                0
+            ],
+            "tier": 10,
+            "dungeonOnly": true,
+            "image": "boss_void_entity.png"
+        }
     ]
 };

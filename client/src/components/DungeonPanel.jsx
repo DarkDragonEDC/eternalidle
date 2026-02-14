@@ -803,6 +803,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                             // Survival calculation
                             const survival = calculateSurvival(pendingTier, repeatCount);
                             const food = gameState?.state?.equipment?.food;
+                            const freshFood = food ? resolveItem(food.id) : null;
                             const hasFood = food && food.amount > 0;
 
                             return (

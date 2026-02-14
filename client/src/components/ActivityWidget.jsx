@@ -12,6 +12,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
     const [dungeonElapsed, setDungeonElapsed] = useState(0);
     const [syncedElapsed, setSyncedElapsed] = useState(0);
     const [smoothProgress, setSmoothProgress] = useState(0);
+    const [worldBossData, setWorldBossData] = useState(null);
 
     const activity = gameState?.current_activity;
     const combat = gameState?.state?.combat;
@@ -126,9 +127,29 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
         return () => cancelAnimationFrame(animationFrameId);
     }, [activity?.next_action_at, activity?.time_per_action, serverTimeOffset]);
 
+    // Listener para o World Boss
+    useEffect(() => {
+        if (!socket) return;
+        const handleUpdate = (result) => {
+            if (result.worldBossUpdate) {
+                setWorldBossData(result.worldBossUpdate);
+            }
+        };
+        socket.on('action_result', handleUpdate);
+        return () => socket.off('action_result', handleUpdate);
+    }, [socket]);
+
+    // Auto-limpeza do World Boss quando terminar
+    useEffect(() => {
+        if (worldBossData?.status === 'FINISHED') {
+            const timer = setTimeout(() => setWorldBossData(null), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [worldBossData?.status]);
+
     // ... keydown handler ...
 
-    if (!activity && !combat && (!dungeonState || !dungeonState.active)) return null;
+    if (!activity && !combat && (!dungeonState || !dungeonState.active) && !worldBossData) return null;
 
     const isGathering = activity?.type === 'GATHERING';
     const isRefining = activity?.type === 'REFINING';
@@ -184,9 +205,9 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                     width: '64px',
                     height: '64px',
                     borderRadius: '16px',
-                    background: (combat || (dungeonState?.active)) ? 'rgba(50, 10, 10, 0.95)' : 'var(--panel-bg)',
+                    background: (combat || (dungeonState?.active) || worldBossData) ? 'rgba(50, 10, 10, 0.95)' : 'var(--panel-bg)',
                     opacity: 0.9,
-                    border: (combat || (dungeonState?.active)) ? '1px solid #ff4444' : '1px solid var(--border-active)',
+                    border: (combat || (dungeonState?.active) || worldBossData) ? '1px solid #ff4444' : '1px solid var(--border-active)',
                     color: 'var(--text-main)',
                     cursor: 'pointer',
                     display: 'flex',
@@ -289,13 +310,13 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                     {/* Efeito de Pulso (APENAS O ANEL) */}
                     <motion.div
                         animate={{ opacity: [0.5, 1, 0.5], scale: [1, 1.1, 1] }}
-                        transition={{ repeat: Infinity, duration: (combat || (dungeonState?.active)) ? 0.8 : 2 }}
+                        transition={{ repeat: Infinity, duration: (combat || (dungeonState?.active) || worldBossData) ? 0.8 : 2 }}
                         style={{
                             position: 'absolute',
                             width: '100%',
                             height: '100%',
                             borderRadius: '50%',
-                            boxShadow: (combat || (dungeonState?.active)) ? '0 0 20px rgba(255, 68, 68, 0.4)' : '0 0 15px var(--accent-soft)',
+                            boxShadow: (combat || (dungeonState?.active) || worldBossData) ? '0 0 20px rgba(255, 68, 68, 0.4)' : '0 0 15px var(--accent-soft)',
                             pointerEvents: 'none'
                         }}
                     />
@@ -810,7 +831,102 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                         }}
                                     >
                                         <Skull size={14} />
-                                        {dungeonState.status === 'COMPLETED' ? 'FINISH' : 'ABANDON'}
+                                        {dungeonState.status === 'COMPLETED' ? "CLAIM & EXIT" : "ABANDON"}
+                                    </button>
+                                </motion.div>
+                            )}
+
+                            {/* --- CARD DO WORLD BOSS (Se houver) --- */}
+                            {worldBossData && (
+                                <motion.div
+                                    initial={{ opacity: 0, x: 20, scale: 0.95 }}
+                                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                                    exit={{ opacity: 0, x: 20, scale: 0.95 }}
+                                    onClick={() => {
+                                        if (onNavigate) {
+                                            onNavigate('world_boss');
+                                            setIsOpen(false);
+                                        }
+                                    }}
+                                    style={{
+                                        width: '280px',
+                                        maxWidth: 'calc(100vw - 60px)',
+                                        background: 'rgba(30, 0, 0, 0.95)',
+                                        backdropFilter: 'blur(20px)',
+                                        border: '1px solid rgba(255, 77, 77, 0.4)',
+                                        borderRadius: '12px',
+                                        padding: '12px',
+                                        boxShadow: '0 10px 40px rgba(255, 0, 0, 0.2)',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <div style={{
+                                                width: '32px', height: '32px', borderRadius: '8px',
+                                                background: 'rgba(255, 77, 77, 0.1)',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                border: '1px solid rgba(255, 77, 77, 0.3)'
+                                            }}>
+                                                <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 2 }}>
+                                                    <Skull size={18} color="#ff4d4d" />
+                                                </motion.div>
+                                            </div>
+                                            <div>
+                                                <div style={{ fontSize: '0.55rem', color: '#ff4d4d', fontWeight: '900', letterSpacing: '1px' }}>WORLD BOSS</div>
+                                                <div style={{ fontSize: '0.85rem', color: '#fff', fontWeight: '900' }}>Active Fight</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '8px', padding: '10px', marginBottom: '10px', border: '1px solid rgba(255, 77, 77, 0.1)' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                                            <span style={{ fontSize: '0.7rem', color: '#aaa' }}>DAMAGE</span>
+                                            <span style={{ fontSize: '0.9rem', color: '#fff', fontWeight: '900', fontFamily: 'monospace' }}>{formatNumber(worldBossData.damage || 0)}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span style={{ fontSize: '0.7rem', color: '#aaa' }}>RANK</span>
+                                            <span style={{ fontSize: '0.9rem', color: '#ffd700', fontWeight: '900' }}>#{worldBossData.rankingPos || '--'}</span>
+                                        </div>
+
+                                        {/* Progress Bar for Time Remaining (60s limit) */}
+                                        <div style={{ marginTop: '10px', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+                                            <motion.div
+                                                initial={{ width: '0%' }}
+                                                animate={{ width: `${Math.min(100, ((worldBossData.elapsed || 0) / 60000) * 100)}%` }}
+                                                style={{ height: '100%', background: '#ff4d4d', boxShadow: '0 0 10px rgba(255, 77, 77, 0.5)' }}
+                                            />
+                                        </div>
+                                        <div style={{ textAlign: 'right', fontSize: '0.6rem', color: '#ff4d4d', marginTop: '4px', fontWeight: 'bold' }}>
+                                            {Math.max(0, 60 - Math.floor((worldBossData.elapsed || 0) / 1000))}s REMAINING
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (socket) socket.emit('stop_world_boss');
+                                            setIsOpen(false);
+                                        }}
+                                        style={{
+                                            width: '100%',
+                                            background: '#ff4d4d',
+                                            color: '#fff',
+                                            padding: '10px',
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            fontWeight: '900',
+                                            fontSize: '0.8rem',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '8px',
+                                            border: 'none',
+                                            boxShadow: '0 4px 15px rgba(255, 77, 77, 0.3)'
+                                        }}
+                                    >
+                                        <X size={14} />
+                                        {worldBossData.status === 'FINISHED' ? "EXIT" : "ABANDON"}
                                     </button>
                                 </motion.div>
                             )}
