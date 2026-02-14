@@ -6,13 +6,13 @@ export const MONSTERS = {
             "health": 600,
             "damage": 4,
             "defense": 15,
-            "xp": 0,
+            "xp": 229,
             "loot": {
                 "T1_DUNGEON_MAP": 0.01
             },
             "silver": [
-                0,
-                0
+                137,
+                275
             ],
             "tier": 1,
             "image": "rabbit.png",
@@ -25,13 +25,13 @@ export const MONSTERS = {
             "health": 650,
             "damage": 4,
             "defense": 16,
-            "xp": 0,
+            "xp": 240,
             "loot": {
                 "T1_DUNGEON_MAP": 0.02
             },
             "silver": [
-                0,
-                0
+                144,
+                288
             ],
             "tier": 1,
             "image": "goblin_scout.png"
@@ -147,13 +147,13 @@ export const MONSTERS = {
             "health": 894,
             "damage": 7,
             "defense": 22,
-            "xp": 0,
+            "xp": 292,
             "loot": {
                 "T2_DUNGEON_MAP": 0.01
             },
             "silver": [
-                0,
-                0
+                175,
+                351
             ],
             "tier": 2,
             "image": "wolf.png"
@@ -164,13 +164,13 @@ export const MONSTERS = {
             "health": 969,
             "damage": 8,
             "defense": 24,
-            "xp": 0,
+            "xp": 307,
             "loot": {
                 "T2_DUNGEON_MAP": 0.02
             },
             "silver": [
-                0,
-                0
+                184,
+                368
             ],
             "tier": 2,
             "image": "dire_rat.png"
@@ -286,13 +286,13 @@ export const MONSTERS = {
             "health": 1333,
             "damage": 13,
             "defense": 32,
-            "xp": 0,
+            "xp": 373,
             "loot": {
                 "T3_DUNGEON_MAP": 0.01
             },
             "silver": [
-                0,
-                0
+                224,
+                447
             ],
             "tier": 3,
             "image": "bear.png"
@@ -303,13 +303,13 @@ export const MONSTERS = {
             "health": 1444,
             "damage": 14,
             "defense": 34,
-            "xp": 0,
+            "xp": 392,
             "loot": {
                 "T3_DUNGEON_MAP": 0.02
             },
             "silver": [
-                0,
-                0
+                235,
+                470
             ],
             "tier": 3,
             "image": "mountain_goblin.png"
@@ -425,13 +425,13 @@ export const MONSTERS = {
             "health": 1987,
             "damage": 23,
             "defense": 46,
-            "xp": 0,
+            "xp": 476,
             "loot": {
                 "T4_DUNGEON_MAP": 0.01
             },
             "silver": [
-                0,
-                0
+                286,
+                571
             ],
             "tier": 4,
             "image": "dire_wolf.png"
@@ -442,13 +442,13 @@ export const MONSTERS = {
             "health": 2152,
             "damage": 26,
             "defense": 50,
-            "xp": 0,
+            "xp": 500,
             "loot": {
                 "T4_DUNGEON_MAP": 0.02
             },
             "silver": [
-                0,
-                0
+                300,
+                600
             ],
             "tier": 4,
             "image": "ghost_knight.png"
@@ -564,13 +564,13 @@ export const MONSTERS = {
             "health": 2962,
             "damage": 41,
             "defense": 68,
-            "xp": 0,
+            "xp": 607,
             "loot": {
                 "T5_DUNGEON_MAP": 0.01
             },
             "silver": [
-                0,
-                0
+                364,
+                729
             ],
             "tier": 5,
             "image": "ogre.png"
@@ -581,13 +581,13 @@ export const MONSTERS = {
             "health": 3208,
             "damage": 46,
             "defense": 73,
-            "xp": 0,
+            "xp": 638,
             "loot": {
                 "T5_DUNGEON_MAP": 0.02
             },
             "silver": [
-                0,
-                0
+                383,
+                765
             ],
             "tier": 5,
             "image": "war_ogre.png"
@@ -703,13 +703,13 @@ export const MONSTERS = {
             "health": 4415,
             "damage": 73,
             "defense": 99,
-            "xp": 0,
+            "xp": 775,
             "loot": {
                 "T6_DUNGEON_MAP": 0.01
             },
             "silver": [
-                0,
-                0
+                465,
+                930
             ],
             "tier": 6,
             "image": "troll.png"
@@ -720,13 +720,13 @@ export const MONSTERS = {
             "health": 4782,
             "damage": 83,
             "defense": 106,
-            "xp": 0,
+            "xp": 814,
             "loot": {
                 "T6_DUNGEON_MAP": 0.02
             },
             "silver": [
-                0,
-                0
+                488,
+                977
             ],
             "tier": 6,
             "image": "armored_troll.png"
@@ -842,13 +842,13 @@ export const MONSTERS = {
             "health": 6582,
             "damage": 131,
             "defense": 144,
-            "xp": 0,
+            "xp": 989,
             "loot": {
                 "T7_DUNGEON_MAP": 0.01
             },
             "silver": [
-                0,
-                0
+                594,
+                1187
             ],
             "tier": 7,
             "image": "dragon_whelp.png"
@@ -859,13 +859,13 @@ export const MONSTERS = {
             "health": 7129,
             "damage": 148,
             "defense": 155,
-            "xp": 0,
+            "xp": 1039,
             "loot": {
                 "T7_DUNGEON_MAP": 0.02
             },
             "silver": [
-                0,
-                0
+                623,
+                1247
             ],
             "tier": 7,
             "image": "fire_drake.png"
@@ -981,13 +981,13 @@ export const MONSTERS = {
             "health": 9811,
             "damage": 235,
             "defense": 209,
-            "xp": 0,
+            "xp": 1263,
             "loot": {
                 "T8_DUNGEON_MAP": 0.01
             },
             "silver": [
-                0,
-                0
+                758,
+                1515
             ],
             "tier": 8,
             "image": "ancient_golem.png"
@@ -998,13 +998,13 @@ export const MONSTERS = {
             "health": 10626,
             "damage": 264,
             "defense": 225,
-            "xp": 0,
+            "xp": 1326,
             "loot": {
                 "T8_DUNGEON_MAP": 0.02
             },
             "silver": [
-                0,
-                0
+                795,
+                1591
             ],
             "tier": 8,
             "image": "obsidian_golem.png"
@@ -1120,13 +1120,13 @@ export const MONSTERS = {
             "health": 14624,
             "damage": 421,
             "defense": 305,
-            "xp": 0,
+            "xp": 1612,
             "loot": {
                 "T9_DUNGEON_MAP": 0.01
             },
             "silver": [
-                0,
-                0
+                967,
+                1934
             ],
             "tier": 9,
             "image": "elder_dragon.png"
@@ -1137,13 +1137,13 @@ export const MONSTERS = {
             "health": 15839,
             "damage": 473,
             "defense": 329,
-            "xp": 0,
+            "xp": 1692,
             "loot": {
                 "T9_DUNGEON_MAP": 0.02
             },
             "silver": [
-                0,
-                0
+                1015,
+                2031
             ],
             "tier": 9,
             "image": "void_dragon.png"
@@ -1259,13 +1259,13 @@ export const MONSTERS = {
             "health": 21799,
             "damage": 753,
             "defense": 444,
-            "xp": 0,
+            "xp": 2057,
             "loot": {
                 "T10_DUNGEON_MAP": 0.01
             },
             "silver": [
-                0,
-                0
+                1234,
+                2468
             ],
             "tier": 10,
             "image": "ancient_dragon.png"
@@ -1276,13 +1276,13 @@ export const MONSTERS = {
             "health": 23610,
             "damage": 846,
             "defense": 479,
-            "xp": 0,
+            "xp": 2160,
             "loot": {
                 "T10_DUNGEON_MAP": 0.02
             },
             "silver": [
-                0,
-                0
+                1296,
+                2592
             ],
             "tier": 10,
             "image": "void_dragon_lord.png"
