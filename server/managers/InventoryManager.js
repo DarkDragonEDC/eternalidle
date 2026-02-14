@@ -70,10 +70,10 @@ export class InventoryManager {
             const cleanMetadata = { ...metadata };
             delete cleanMetadata.amount;
             Object.assign(inv[storageKey], cleanMetadata);
-            inv[storageKey].amount = (inv[storageKey].amount || 0) + safeAmount;
+            inv[storageKey].amount = (Number(inv[storageKey].amount) || 0) + safeAmount;
         } else {
             if (typeof inv[storageKey] === 'object' && inv[storageKey] !== null) {
-                inv[storageKey].amount = (inv[storageKey].amount || 0) + safeAmount;
+                inv[storageKey].amount = (Number(inv[storageKey].amount) || 0) + safeAmount;
                 if (inv[storageKey].amount <= 0) delete inv[storageKey];
             } else {
                 inv[storageKey] = (Number(inv[storageKey]) || 0) + safeAmount;
@@ -90,7 +90,7 @@ export class InventoryManager {
         const entry = inv[storageKey];
         if (!entry) return { success: false, error: "Item not found in inventory" };
 
-        const currentQty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
+        const currentQty = (entry && typeof entry === 'object') ? (Number(entry.amount) || 0) : (Number(entry) || 0);
         if (currentQty < quantity) return { success: false, error: "Not enough items" };
 
         const baseId = storageKey.split('::')[0];
@@ -447,11 +447,8 @@ export class InventoryManager {
                     if (statsToUse.critChance) gearCritChance += statsToUse.critChance;
 
                     // Allow gear to add directly to proficiencies
-                    if (statsToUse.str) warriorProf += statsToUse.str;
                     if (statsToUse.warriorProf) warriorProf += statsToUse.warriorProf;
-                    if (statsToUse.agi) hunterProf += statsToUse.agi;
                     if (statsToUse.hunterProf) hunterProf += statsToUse.hunterProf;
-                    if (statsToUse.int) mageProf += statsToUse.int;
                     if (statsToUse.mageProf) mageProf += statsToUse.mageProf;
                 }
             }
@@ -666,8 +663,7 @@ export class InventoryManager {
                             case 'MEMBERSHIP_BOOST':
                                 // 10% XP Bonus
                                 globals.xpYield += (buff.xpBonus || 0.10) * 100;
-                                // 10% Silver Bonus
-                                globals.silverYield += 10;
+                                // 10% Silver Bonus removed (user request)
                                 // 10% Efficiency Bonus
                                 globals.efficiency += 10;
                                 // Speed bonus removed

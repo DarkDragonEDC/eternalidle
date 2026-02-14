@@ -644,20 +644,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('claim_world_boss_reward', async () => {
-        try {
-            if (!socket.data.characterId) return;
-            await gameManager.executeLocked(socket.user.id, async () => {
-                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
-                const result = await gameManager.worldBossManager.claimReward(char);
-                socket.emit('world_boss_reward_claimed', result);
-                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
-            });
-        } catch (err) {
-            socket.emit('error', { message: err.message });
-        }
-    });
-
     socket.on('sell_item', async ({ itemId, quantity }) => {
         try {
             if (!socket.data.characterId || socket.data.characterId === 'undefined') return;
@@ -1031,7 +1017,7 @@ io.on('connection', (socket) => {
         try {
             const { data, error } = await supabase
                 .from('characters')
-                .select('id, name, state')
+                .select('id, name, state, skills')
                 .ilike('name', `%${nickname}%`)
                 .limit(10);
 
@@ -1042,12 +1028,12 @@ io.on('connection', (socket) => {
             }
 
             const results = data.map(char => {
-                const skills = char.state?.skills || {};
-                const level = Object.values(skills).reduce((acc, s) => acc + (s.level || 1), 0);
+                const skills = char.skills || char.state?.skills || {};
+                const level = Object.values(skills).reduce((acc, s) => acc + (Number(s?.level) || 0), 0);
                 return {
                     id: char.id,
                     name: char.name,
-                    level: level,
+                    level: Math.max(1, level),
                     isIronman: !!(char.state?.isIronman || char.name?.toLowerCase().includes('[im]'))
                 };
             });
@@ -1394,11 +1380,18 @@ io.on('connection', (socket) => {
                 const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
                 const result = await gameManager.worldBossManager.claimReward(char);
 
+                // Send specific event expected by App.jsx
+                socket.emit('world_boss_reward_claimed', result);
+
+                // Also send action_result for generic feedback if needed
                 socket.emit('action_result', {
                     success: result.success,
                     message: result.message,
                     worldBossUpdate: await gameManager.worldBossManager.getStatus(char.id)
                 });
+
+                // And status update
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
             });
         } catch (err) {
             console.error('[WORLD_BOSS] Claim Error:', err);

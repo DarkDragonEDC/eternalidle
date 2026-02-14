@@ -393,7 +393,9 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                     {(!isMobile || mobileTab === 'OFFER') && (
                         <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', background: 'rgba(144,213,255,0.02)', padding: isMobile ? '10px' : '15px', borderRadius: '16px', border: '1px solid rgba(144,213,255,0.1)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? '10px' : '15px' }}>
-                                <h3 style={{ margin: 0, fontSize: isMobile ? '0.9rem' : '0.9rem', fontWeight: '900', color: '#90d5ff', letterSpacing: '1px' }}>THEIR OFFER</h3>
+                                <h3 style={{ margin: 0, fontSize: isMobile ? '0.9rem' : '0.9rem', fontWeight: '900', color: '#90d5ff', letterSpacing: '1px' }}>
+                                    {isSender ? (trade.receiver_name || 'THEIR OFFER') : (trade.sender_name || 'THEIR OFFER')}
+                                </h3>
                                 {partnerAccepted ? (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#44ff44', fontSize: '0.8rem', fontWeight: 'bold' }}>
                                         <CheckCircle size={16} /> ACCEPTED

@@ -191,6 +191,19 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge, onInspect })
         socket.on('world_boss_status', handleStatus);
         socket.on('world_boss_ranking_history', handleHistory);
 
+        // Listen for reward claim updates to refresh UI immediately
+        const handleRewardClaimed = (result) => {
+            if (result.success) {
+                setWbStatus(prev => ({
+                    ...prev,
+                    pendingReward: null // clear reward locally
+                }));
+                // Also fetch fresh status to be sure
+                socket.emit('get_world_boss_status');
+            }
+        };
+        socket.on('world_boss_reward_claimed', handleRewardClaimed);
+
         // Initial fetch
         socket.emit('get_world_boss_status');
 
@@ -204,6 +217,7 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge, onInspect })
         return () => {
             socket.off('world_boss_status', handleStatus);
             socket.off('world_boss_ranking_history', handleHistory);
+            socket.off('world_boss_reward_claimed', handleRewardClaimed);
             clearInterval(interval);
         };
     }, [socket, activeTab, viewingHistory]);

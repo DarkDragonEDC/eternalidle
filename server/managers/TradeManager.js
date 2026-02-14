@@ -57,6 +57,8 @@ export class TradeManager {
             .insert({
                 sender_id: sender.id,
                 receiver_id: receiverData.id,
+                sender_name: sender.name,
+                receiver_name: receiverData.name,
                 status: 'PENDING'
             })
             .select()

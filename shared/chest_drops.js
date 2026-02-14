@@ -9,6 +9,13 @@ export const CHEST_DROP_TABLE = {
     }
 };
 
+export const getChestRuneShardRange = (tier, rarity) => {
+    const rarities = ['COMMON', 'UNCOMMON', 'RARE', 'EPIC', 'LEGENDARY'];
+    const rarityOffset = Math.max(0, rarities.indexOf(rarity || 'COMMON'));
+    const min = (tier - 1) * 10 + (rarityOffset * 2) + 1;
+    return [min, min + 1];
+};
+
 export const WORLDBOSS_DROP_TABLE = {
     'T1_WORLDBOSS_CHEST_NORMAL': 100,
     'T1_WORLDBOSS_CHEST_GOOD': 261,

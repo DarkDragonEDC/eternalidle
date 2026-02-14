@@ -557,55 +557,62 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                                 <div style={{ fontSize: '0.55rem', color: '#ff8888', fontWeight: 'bold' }}>SURVIVAL</div>
                                                 <div style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: '#fff', fontWeight: 'bold' }}>
                                                     {(() => {
-                                                        const activeMob = (MONSTERS[combat.tier] || []).find(m => m.id === combat.mobId);
-                                                        if (!activeMob) return <span>-</span>;
+                                                        const tier = combat.tier || 1;
+                                                        const activeMob = (MONSTERS[tier] || []).find(m => m.id === combat.mobId);
 
-                                                        const defense = gameState?.calculatedStats?.defense || 0;
-                                                        const mitigation = Math.min(0.75, defense / 10000);
-                                                        const mobDmg = Math.max(1, Math.floor(activeMob.damage * (1 - mitigation)));
+                                                        // Fallback for mob stats
+                                                        const mobHp = combat.mobMaxHealth || (activeMob?.health * (tier === 1 ? 1 : 1.5)) || 100; // Rough estimate if missing
+                                                        const mobDmgRaw = activeMob?.damage || 0;
+                                                        const mobDef = activeMob?.defense || 0;
 
-                                                        // Food Logic
+                                                        const playerStats = gameState?.calculatedStats || {};
+                                                        const defense = playerStats.defense || 0;
+                                                        const playerDmg = playerStats.damage || 1;
+                                                        const playerAtkSpeed = playerStats.attackSpeed || 1000;
+
+                                                        // Mitigation
+                                                        const playerMitigation = Math.min(0.75, defense / 10000);
+                                                        const mobMitigation = Math.min(0.75, mobDef / 10000);
+
+                                                        // Fight Dynamics: Player vs Mob
+                                                        const dmgToMob = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
+                                                        const hitsToKillMob = Math.ceil(mobHp / dmgToMob);
+                                                        const fightDurationMs = hitsToKillMob * playerAtkSpeed;
+
+                                                        // Fight Dynamics: Mob vs Player
+                                                        const dmgToPlayer = Math.max(1, Math.floor(mobDmgRaw * (1 - playerMitigation)));
+                                                        // Assume 1:1 attacks (Mob attacks once per Player attack cycle)
+                                                        const damageTakenPerFight = hitsToKillMob * dmgToPlayer;
+
+                                                        // Food Logic (using resolveItem for accurate heal)
                                                         const food = gameState?.state?.equipment?.food;
-                                                        const foodTotalHeal = (food && food.amount > 0) ? (food.amount * (food.heal || 0)) : 0;
+                                                        let foodTotalHeal = 0;
+                                                        if (food && food.amount > 0) {
+                                                            const freshFood = resolveItem(food.id);
+                                                            const healAmount = freshFood?.heal ||
+                                                                (freshFood?.healPercent ? Math.floor((playerStats.hp || 100) * freshFood.healPercent / 100) : 0);
+                                                            foodTotalHeal = food.amount * healAmount;
+                                                        }
 
-                                                        const playerHp = combat.playerHealth || 1;
-                                                        const totalEffectiveHp = playerHp + foodTotalHeal;
-                                                        const atkSpeed = gameState?.calculatedStats?.attackSpeed || 1000;
+                                                        const currentHp = combat.playerHealth || 1;
+                                                        const totalEffectiveHp = currentHp + foodTotalHeal;
 
                                                         let survivalText = "∞";
                                                         let survivalColor = "#4caf50";
 
-                                                        if (mobDmg > 0) {
-                                                            const roundsToDie = totalEffectiveHp / mobDmg;
-                                                            // Interpolation Logic:
-                                                            // Time = (Time until next hit) + (Remaining hits * Interval)
-                                                            // roundsToDie is roughly (1 + remaining)
-                                                            // So we take (roundsToDie - 1) * Interval + (nextAttack - now)
+                                                        // If we take damage, calculate how many fights and total time
+                                                        if (damageTakenPerFight > 0) {
+                                                            const fightsBeforeDeath = Math.floor(totalEffectiveHp / damageTakenPerFight);
 
-                                                            let secondsToDie = 0;
-
-                                                            // Note: We need currentTime state for smooth interpolation in Widget
-                                                            // The widget uses syncedElapsed (50ms interval) for activity, 
-                                                            // but here we are in a render scope.
-                                                            // We can use Date.now() if this component re-renders often.
-                                                            // The Widget pulsates so it might re-render, but better to use a driving state.
-                                                            // syncedElapsed is updated every 50ms, triggering re-render.
-                                                            // So we can use Date.now() here safely.
-
-                                                            const now = Date.now() + (serverTimeOffset || 0);
-                                                            const nextAttack = combat.next_attack_at ? new Date(combat.next_attack_at).getTime() : now;
-                                                            const timeToNext = Math.max(0, nextAttack - now);
-
-                                                            if (roundsToDie <= 1) {
-                                                                secondsToDie = timeToNext / 1000;
-                                                            } else {
-                                                                secondsToDie = (timeToNext + ((roundsToDie - 1) * atkSpeed)) / 1000;
-                                                            }
+                                                            // Total Survival Time = Fights * (Fight Time + Respawn Gap)
+                                                            // Use 1000ms as approximate gap/respawn
+                                                            const totalSurvivalMs = fightsBeforeDeath * (fightDurationMs + 1000);
+                                                            const secondsToDie = totalSurvivalMs / 1000;
 
                                                             const isPremium = gameState?.state?.isPremium || gameState?.state?.membership?.active;
                                                             const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
 
-                                                            if (secondsToDie > idleLimitSeconds) {
+                                                            if (fightsBeforeDeath >= 10000 || secondsToDie > idleLimitSeconds) {
                                                                 survivalText = "∞";
                                                                 survivalColor = "#4caf50";
                                                             } else {

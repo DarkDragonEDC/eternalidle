@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, Sword, Shield, Heart, Star, Zap, Award } from 'lucide-react';
 import { QUALITIES, resolveItem, getSkillForItem, getLevelRequirement, getRequiredProficiencyGroup } from '@shared/items';
-import { CHEST_DROP_TABLE } from '@shared/chest_drops';
+import { CHEST_DROP_TABLE, getChestRuneShardRange, WORLDBOSS_DROP_TABLE } from '@shared/chest_drops';
 
 const ItemInfoModal = ({ item: rawItem, onClose }) => {
     if (!rawItem) return null;
@@ -372,19 +372,40 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                             <div style={{ color: '#888', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Possible Rewards</div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                 {/* Rune Shards - Guaranteed */}
-                                {CHEST_DROP_TABLE.RARITIES[item.rarity]?.runeShardRange && (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                                            <span style={{ color: '#ddd' }}>Rune Shard (T{item.tier})</span>
-                                            <span style={{ color: '#4a90e2', fontWeight: 'bold' }}>100%</span>
-                                        </div>
-                                        <div style={{ fontSize: '0.75rem', color: '#888', textAlign: 'right' }}>
-                                            {CHEST_DROP_TABLE.RARITIES[item.rarity].runeShardRange[0]} (80%) / {CHEST_DROP_TABLE.RARITIES[item.rarity].runeShardRange[1]} (20%)
-                                        </div>
-                                    </div>
-                                )}
+                                {(() => {
+                                    const isWorldBoss = item.id.includes('WORLDBOSS');
+                                    const shardName = isWorldBoss ? 'Battle Rune Shard' : `Rune Shard (T${item.tier})`;
 
-                                {CHEST_DROP_TABLE.RARITIES[item.rarity]?.crestChance > 0 && (
+                                    if (isWorldBoss) {
+                                        const qty = WORLDBOSS_DROP_TABLE[item.id] || 0;
+                                        return (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                                                    <span style={{ color: '#9013fe', fontWeight: 'bold' }}>{shardName}</span>
+                                                    <span style={{ color: '#9013fe', fontWeight: 'bold' }}>100%</span>
+                                                </div>
+                                                <div style={{ fontSize: '0.75rem', color: '#888', textAlign: 'right' }}>
+                                                    Quantity: {qty}
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+
+                                    const [min, max] = getChestRuneShardRange(item.tier, item.rarity);
+                                    return (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                                                <span style={{ color: '#ddd' }}>{shardName}</span>
+                                                <span style={{ color: '#4a90e2', fontWeight: 'bold' }}>100%</span>
+                                            </div>
+                                            <div style={{ fontSize: '0.75rem', color: '#888', textAlign: 'right' }}>
+                                                {min} (80%) / {max} (20%)
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+
+                                {!item.id.includes('WORLDBOSS') && CHEST_DROP_TABLE.RARITIES[item.rarity]?.crestChance > 0 && (
                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', borderTop: '1px solid var(--border)', paddingTop: '8px', marginTop: '2px' }}>
                                         <span style={{ color: 'var(--accent)' }}>Boss Crest (T{item.tier})</span>
                                         <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{(CHEST_DROP_TABLE.RARITIES[item.rarity].crestChance * 100).toFixed(0)}%</span>
@@ -392,7 +413,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                 )}
                             </div>
                             <div style={{ marginTop: '5px', fontSize: '0.75rem', color: '#666', fontStyle: 'italic', textAlign: 'center' }}>
-                                * Yields guaranteed Rune Shards and a chance for Boss Crests.
+                                {item.id.includes('WORLDBOSS') ? '* Yields guaranteed Battle Rune Shards.' : '* Yields guaranteed Rune Shards and a chance for Boss Crests.'}
                             </div>
                         </div>
                     )}

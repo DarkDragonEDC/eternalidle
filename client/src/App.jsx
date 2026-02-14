@@ -1174,6 +1174,11 @@ function App() {
                               {isActive && <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 2 }} style={{ fontSize: '0.6rem', background: 'var(--accent)', color: 'var(--bg-dark)', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>ACTIVE</motion.span>}
                             </span>
                           </div>
+                          {(resolved.desc || resolved.description) && (
+                            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '8px', fontStyle: 'italic' }}>
+                              {resolved.desc || resolved.description}
+                            </div>
+                          )}
 
                           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--slot-bg)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--accent)', border: '1px solid var(--border)' }}>
@@ -1808,6 +1813,7 @@ function App() {
       <AnimatePresence>
         {showSocialModal && (
           <SocialPanel
+            key="social-panel-modal"
             gameState={displayedGameState}
             socket={socket}
             isOpen={showSocialModal}
@@ -1829,6 +1835,7 @@ function App() {
 
         {activeTrade && (
           <TradePanel
+            key={`trade-panel-${activeTrade.id}`}
             socket={socket}
             trade={activeTrade}
             charId={selectedCharacter}
@@ -1840,6 +1847,7 @@ function App() {
         )}
 
         <LeaderboardModal
+          key="leaderboard-modal"
           isOpen={activeTab === 'leaderboard'}
           onClose={() => setActiveTab('inventory')}
           socket={socket}

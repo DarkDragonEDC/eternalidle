@@ -660,6 +660,16 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 </div>
                             </div>
 
+                            {/* Description for Potions/Food */}
+                            {(['FOOD', 'POTION'].includes(resolvedItem.type) || resolvedItem.id.includes('FOOD') || resolvedItem.id.includes('POTION')) && (
+                                <div style={{ marginBottom: '1.25rem', padding: '16px', background: 'var(--slot-bg)', borderRadius: '12px', border: '1px solid var(--border)', width: '100%' }}>
+                                    <div style={{ color: 'var(--text-dim)', fontSize: '0.8rem', fontWeight: '600', marginBottom: '4px' }}>EFFECT</div>
+                                    <div style={{ color: 'var(--text-main)', fontSize: '0.9rem', lineHeight: '1.5' }}>
+                                        {resolvedItem.desc || resolvedItem.description || "No description available."}
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Probabilities Section */}
                             {!['FOOD', 'POTION'].includes(resolvedItem.type) && !resolvedItem.id.includes('FOOD') && !resolvedItem.id.includes('POTION') && (
                                 <div style={{ marginBottom: '0.75rem', width: '100%' }}>

@@ -1,6 +1,6 @@
 ﻿import crypto from 'crypto';
 import { ITEMS, ALL_RUNE_TYPES, RUNES_BY_CATEGORY, ITEM_LOOKUP } from '../shared/items.js';
-import { CHEST_DROP_TABLE, WORLDBOSS_DROP_TABLE } from '../shared/chest_drops.js';
+import { CHEST_DROP_TABLE, WORLDBOSS_DROP_TABLE, getChestRuneShardRange } from '../shared/chest_drops.js';
 import { INITIAL_SKILLS, calculateNextLevelXP } from '../shared/skills.js';
 import { InventoryManager } from './managers/InventoryManager.js';
 import { ActivityManager } from './managers/ActivityManager.js';
@@ -203,8 +203,9 @@ export class GameManager {
             if (!state) return '';
             return crypto.createHash('md5').update(JSON.stringify(state)).digest('hex');
         } catch (err) {
-            console.error(`[HASH-ERROR] Failed to calculate hash:`, err);
-            return 'error-' + Date.now();
+            console.error(`[HASH-ERROR] Failed to calculate hash:`, err.message);
+            // Return a unique changing hash so it doesn't match the DB and forces a re-sync or save
+            return 'error-' + Date.now() + '-' + Math.random();
         }
     }
 
@@ -426,21 +427,29 @@ export class GameManager {
                                         if (!data.current_activity.sessionItems) data.current_activity.sessionItems = {};
                                         if (typeof data.current_activity.sessionXp === 'undefined') data.current_activity.sessionXp = 0;
 
-                                        // Merge Items
+                                        // Merge Items - SAFER LOGIC
                                         for (const [id, qty] of Object.entries(activityReport.itemsGained)) {
-                                            data.current_activity.sessionItems[id] = (data.current_activity.sessionItems[id] || 0) + qty;
+                                            const safeQty = Number(qty) || 1;
+                                            const currentVal = data.current_activity.sessionItems[id];
+
+                                            // Ensure we are working with a number
+                                            let currentQty = 0;
+                                            if (typeof currentVal === 'number') currentQty = currentVal;
+                                            if (typeof currentVal === 'object' && currentVal !== null) currentQty = Number(currentVal.amount) || 0;
+
+                                            data.current_activity.sessionItems[id] = currentQty + safeQty;
                                         }
 
                                         // Merge XP (sum all skills for session total)
                                         let totalXp = 0;
                                         for (const xp of Object.values(activityReport.xpGained)) {
-                                            totalXp += xp;
+                                            totalXp += Number(xp) || 0;
                                         }
                                         data.current_activity.sessionXp += totalXp;
 
                                         // Merge Counters
-                                        data.current_activity.duplicationCount = (data.current_activity.duplicationCount || 0) + (activityReport.duplicationCount || 0);
-                                        data.current_activity.autoRefineCount = (data.current_activity.autoRefineCount || 0) + (activityReport.autoRefineCount || 0);
+                                        data.current_activity.duplicationCount = (Number(data.current_activity.duplicationCount) || 0) + (activityReport.duplicationCount || 0);
+                                        data.current_activity.autoRefineCount = (Number(data.current_activity.autoRefineCount) || 0) + (activityReport.autoRefineCount || 0);
                                     }
 
                                     // Only populate the visual report if it's significant (> 10s or gains items)
@@ -2054,11 +2063,7 @@ export class GameManager {
                 const rarityConfig = CHEST_DROP_TABLE.RARITIES[itemData.rarity] || CHEST_DROP_TABLE.RARITIES.COMMON;
                 const crestChance = rarityConfig.crestChance;
 
-                // New Shard Drop Formula: min = (tier-1)*10 + (rarity*2)+1, max = min + 1
-                const rarities = ['COMMON', 'UNCOMMON', 'RARE', 'EPIC', 'LEGENDARY'];
-                const rarityOffset = Math.max(0, rarities.indexOf(itemData.rarity));
-                const min = (tier - 1) * 10 + (rarityOffset * 2) + 1;
-                const max = min + 1;
+                const [min, max] = getChestRuneShardRange(tier, itemData.id.includes('WORLDBOSS') ? 'COMMON' : itemData.rarity);
 
                 // Determine Shard Type: WorldBoss Chests drop Battle Rune Shards
                 const shardId = itemData.id.includes('WORLDBOSS') ? `T1_BATTLE_RUNE_SHARD` : `T1_RUNE_SHARD`;

@@ -180,7 +180,7 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
                 top: 0, left: 0, width: '100%', height: '100%',
                 background: 'rgba(0,0,0,0.85)',
                 backdropFilter: 'blur(12px)',
-                zIndex: 4000,
+                zIndex: 13000,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -376,6 +376,33 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
                                     <EquipmentSlot slot="tool_pouch" icon={<ShoppingBag size={18} />} label="POUCH" item={equipment.tool_pouch} delay={0.7} />
                                 </div>
                             </div>
+
+                            {/* Proficiencies Section */}
+                            <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '20px' }}>
+                                <h4 style={{ color: 'var(--accent)', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '15px', textAlign: 'center', letterSpacing: '2px', fontWeight: '900', opacity: 0.6 }}>Combat Proficiencies</h4>
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    gap: '20px',
+                                    flexWrap: 'wrap'
+                                }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                        <Sword size={18} color="#ef4444" />
+                                        <span style={{ fontSize: '0.65rem', fontWeight: '900', color: 'var(--text-dim)', letterSpacing: '1px' }}>WARRIOR</span>
+                                        <span style={{ fontSize: '1.1rem', fontWeight: '950', color: '#fff' }}>{warriorProf}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                        <Target size={18} color="#4ade80" />
+                                        <span style={{ fontSize: '0.65rem', fontWeight: '900', color: 'var(--text-dim)', letterSpacing: '1px' }}>HUNTER</span>
+                                        <span style={{ fontSize: '1.1rem', fontWeight: '950', color: '#fff' }}>{hunterProf}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                        <Sparkles size={18} color="#60a5fa" />
+                                        <span style={{ fontSize: '0.65rem', fontWeight: '900', color: 'var(--text-dim)', letterSpacing: '1px' }}>MAGE</span>
+                                        <span style={{ fontSize: '1.1rem', fontWeight: '950', color: '#fff' }}>{mageProf}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
@@ -430,7 +457,7 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Zap size={14} style={{ color: '#facc15' }} />
-                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)' }}>SPD <span style={{ color: '#fff' }}>{stats.attackSpeed ? `${(stats.attackSpeed / 1000).toFixed(1)}s` : '1.0s'}</span></span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)' }}>SPD <span style={{ color: '#fff' }}>{stats.attackSpeed ? `${(1000 / stats.attackSpeed).toFixed(2)} hit/s` : '1.00 hit/s'}</span></span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Star size={14} style={{ color: '#f59e0b' }} />
