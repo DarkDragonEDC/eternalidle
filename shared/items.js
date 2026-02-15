@@ -18,6 +18,17 @@ export const CRAFTING_STATIONS = {
 
 const getBaseIP = (tier) => tier * 100;
 
+/**
+ * Standardizes capitalization for item names.
+ * Example: "cloth helmet" -> "Cloth Helmet"
+ */
+const toTitleCase = (str) => {
+    if (!str) return '';
+    return str.replace(/_/g, ' ')
+        .toLowerCase()
+        .replace(/\b\w/g, l => l.toUpperCase());
+};
+
 export const QUALITIES = {
     0: { id: 0, name: 'Normal', suffix: '', chance: 0.699, ipBonus: 0, color: '#fff' },
     1: { id: 1, name: 'Good', suffix: '_Q1', chance: 0.20, ipBonus: 20, color: '#4caf50' },
@@ -94,7 +105,7 @@ const genRaw = (type, idPrefix) => {
     for (const t of TIERS) {
         ITEMS.RAW[type][t] = {
             id: `T${t}_${idPrefix}`,
-            name: `${type.charAt(0) + type.slice(1).toLowerCase()}`,
+            name: toTitleCase(type),
             tier: t,
             type: 'RAW',
             xp: GATHER_DATA.xp[t - 1],
@@ -111,7 +122,7 @@ const genRefined = (type, idPrefix, rawId) => {
 
         ITEMS.REFINED[type][t] = {
             id: `T${t}_${idPrefix}`,
-            name: type.charAt(0) + type.slice(1).toLowerCase(),
+            name: toTitleCase(type),
             tier: t,
             type: 'REFINED',
             req,
@@ -610,7 +621,7 @@ const genGear = (category, slot, type, idSuffix, matType, statMultipliers = {}) 
 
         const gear = {
             id: `T${t}_${idSuffix}`,
-            name: idSuffix.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase()),
+            name: toTitleCase(idSuffix),
             tier: t,
             req,
             xp: CRAFT_DATA.xp[t - 1],
@@ -619,7 +630,7 @@ const genGear = (category, slot, type, idSuffix, matType, statMultipliers = {}) 
             type: type,
             isTool: !!statMultipliers.eff,
             stats,
-            description: `A Tier ${t} ${idSuffix.replace(/_/g, ' ').toLowerCase()}. Equip to increase stats.`
+            description: `A Tier ${t} ${toTitleCase(idSuffix)}. Equip to increase stats.`
         };
 
         // Assign to ITEMS structure
@@ -639,7 +650,7 @@ const genWarriorGear = (slot, type, idSuffix, matType, lookupName) => {
 
         const gear = {
             id: `T${t}_${idSuffix}`,
-            name: idSuffix.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase()),
+            name: toTitleCase(idSuffix),
             tier: t,
             req,
             xp: CRAFT_DATA.xp[t - 1],
@@ -649,7 +660,7 @@ const genWarriorGear = (slot, type, idSuffix, matType, lookupName) => {
             stats,
             isWarriorLookup: true,
             lookupName: lookupName,
-            description: `A Tier ${t} ${idSuffix.replace(/_/g, ' ').toLowerCase()}. Specialized Warrior gear.`
+            description: `A Tier ${t} ${toTitleCase(idSuffix)}. Specialized Warrior gear.`
         };
 
         if (!ITEMS.GEAR.WARRIORS_FORGE[slot]) ITEMS.GEAR.WARRIORS_FORGE[slot] = {};
@@ -679,7 +690,7 @@ const genHunterGear = (slot, type, idSuffix, matType, lookupName) => {
 
         const gear = {
             id: `T${t}_${idSuffix}`,
-            name: idSuffix.replace(/_/g, ' ').toLowerCase().replace(/ w/g, l => l.toUpperCase()),
+            name: toTitleCase(idSuffix),
             tier: t,
             req,
             xp: CRAFT_DATA.xp[t - 1],
@@ -689,7 +700,7 @@ const genHunterGear = (slot, type, idSuffix, matType, lookupName) => {
             stats,
             isHunterLookup: true,
             lookupName: lookupName,
-            description: `A Tier ${t} ${idSuffix.replace(/_/g, ' ').toLowerCase()}. Specialized Hunter gear.`
+            description: `A Tier ${t} ${toTitleCase(idSuffix)}. Specialized Hunter gear.`
         };
 
         if (!ITEMS.GEAR.HUNTERS_LODGE[slot]) ITEMS.GEAR.HUNTERS_LODGE[slot] = {};
@@ -722,7 +733,7 @@ const genMageGear = (slot, type, idSuffix, matType, lookupName) => {
 
         const gear = {
             id: `T${t}_${idSuffix}`,
-            name: idSuffix.replace(/_/g, ' ').toLowerCase().replace(/w/g, l => l.toUpperCase()),
+            name: toTitleCase(idSuffix),
             tier: t,
             req,
             xp: CRAFT_DATA.xp[t - 1],
@@ -732,7 +743,7 @@ const genMageGear = (slot, type, idSuffix, matType, lookupName) => {
             stats,
             isMageLookup: true,
             lookupName: lookupName,
-            description: `A Tier ${t} ${idSuffix.replace(/_/g, ' ').toLowerCase()}. Specialized Mage gear.`
+            description: `A Tier ${t} ${toTitleCase(idSuffix)}. Specialized Mage gear.`
         };
 
         if (!ITEMS.GEAR.MAGES_TOWER[slot]) ITEMS.GEAR.MAGES_TOWER[slot] = {};
