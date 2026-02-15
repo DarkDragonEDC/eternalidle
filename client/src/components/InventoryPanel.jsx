@@ -81,17 +81,17 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
         }
 
         // Search Filter
-        if (searchQuery) {
-            const lowerQuery = searchQuery.toLowerCase();
+        if (searchQuery.trim() !== "") {
+            const keywords = searchQuery.trim().toLowerCase().split(/\s+/);
+            const itemName = item.name.toLowerCase();
+            const itemId = item.id.toLowerCase();
+            const itemTier = `t${item.tier}`;
 
-            // Tier Filter (e.g., "t3")
-            const tierMatch = lowerQuery.match(/^t(\d+)$/);
-            if (tierMatch) {
-                const searchTier = parseInt(tierMatch[1]);
-                return item.tier === searchTier;
-            }
+            const matchesKeywords = keywords.every(word => {
+                return itemName.includes(word) || itemId.includes(word) || itemTier === word;
+            });
 
-            return item.name.toLowerCase().includes(lowerQuery);
+            if (!matchesKeywords) return false;
         }
         return true;
     });

@@ -211,7 +211,7 @@ export const SkillsOverview = ({ onNavigate, gameState }) => {
                                         }}
                                     >
                                         <div style={{
-                                            fontSize: '0.85rem',
+                                            fontSize: '1rem',
                                             fontWeight: 'bold',
                                             color: item.isSpecial ? 'var(--accent)' : 'var(--text-main)',
                                             whiteSpace: 'nowrap',
@@ -225,10 +225,10 @@ export const SkillsOverview = ({ onNavigate, gameState }) => {
 
                                         {!item.isSpecial && (
                                             <div style={{ display: 'flex', gap: '4px', alignItems: 'center', justifyContent: 'center' }}>
-                                                <div style={{ fontSize: '0.55rem', color: cat.color, fontWeight: 'bold' }}>
+                                                <div style={{ fontSize: '0.65rem', color: cat.color, fontWeight: 'bold' }}>
                                                     L{level}
                                                 </div>
-                                                <div style={{ fontSize: '0.5rem', color: 'var(--text-dim)', opacity: 0.7 }}>
+                                                <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', opacity: 0.7 }}>
                                                     {Math.floor(progress)}%
                                                 </div>
                                             </div>
