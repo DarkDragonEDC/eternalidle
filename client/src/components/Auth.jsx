@@ -12,6 +12,8 @@ const Auth = ({ onLogin, initialView = 'LOGIN' }) => {
     const [password, setPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [otpCode, setOtpCode] = useState('');
+    const [showOtpInput, setShowOtpInput] = useState(false);
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
     const [activePlayers, setActivePlayers] = useState(0);
@@ -47,15 +49,42 @@ const Auth = ({ onLogin, initialView = 'LOGIN' }) => {
 
         try {
             if (view === 'REGISTER') {
-                const { data, error: regError } = await supabase.auth.signUp({
-                    email,
-                    password: cleanPassword,
-                });
-                if (regError) {
-                    setError(regError.message);
+                if (showOtpInput) {
+                    // Verify OTP for signup
+                    const { data, error: verifyError } = await supabase.auth.verifyOtp({
+                        email,
+                        token: otpCode,
+                        type: 'signup'
+                    });
+
+                    if (verifyError) {
+                        setError(verifyError.message);
+                    } else {
+                        setView('LOGIN');
+                        setMessage('Email verified successfully! You can now log in.');
+                        setShowOtpInput(false);
+                        setOtpCode('');
+                    }
                 } else {
-                    setView('LOGIN');
-                    setMessage('Registration successful! Now please log in.');
+                    // Start Signup Process
+                    const { data, error: regError } = await supabase.auth.signUp({
+                        email,
+                        password: cleanPassword,
+                    });
+                    if (regError) {
+                        setError(regError.message);
+                    } else {
+                        // Check if session was created immediately (email confirm off) or if we need OTP
+                        if (data?.session) {
+                            setView('LOGIN');
+                            setMessage('Registration successful! You are logged in.');
+                            onLogin(data.session);
+                        } else if (data?.user && !data?.session) {
+                            // Email confirmation required
+                            setMessage('Confirmation code sent to your email.');
+                            setShowOtpInput(true);
+                        }
+                    }
                 }
             } else if (view === 'LOGIN') {
                 const { data, error: logError } = await supabase.auth.signInWithPassword({
@@ -306,7 +335,7 @@ const Auth = ({ onLogin, initialView = 'LOGIN' }) => {
                                     exit={{ height: 0, opacity: 0 }}
                                     style={{ overflow: 'hidden', width: '100%' }}
                                 >
-                                    {view !== 'RESET' && (
+                                    {view !== 'RESET' && !showOtpInput && (
                                         <div style={{ marginBottom: '0.8rem' }}>
                                             <label style={labelStyle}>EMAIL ADDRESS</label>
                                             <div style={{ position: 'relative' }}>
@@ -323,7 +352,34 @@ const Auth = ({ onLogin, initialView = 'LOGIN' }) => {
                                         </div>
                                     )}
 
-                                    {view !== 'FORGOT' && view !== 'RESET' && (
+                                    {/* OTP Input for Register */}
+                                    {view === 'REGISTER' && showOtpInput && (
+                                        <div style={{ marginBottom: '1.5rem' }}>
+                                            <label style={labelStyle}>VERIFICATION CODE</label>
+                                            <div style={{ position: 'relative' }}>
+                                                <Key size={16} style={inputIconStyle} />
+                                                <input
+                                                    type="text"
+                                                    style={{ ...inputStyle, textAlign: 'center', letterSpacing: '4px', fontSize: '1.1rem', fontWeight: 'bold' }}
+                                                    value={otpCode}
+                                                    onChange={(e) => setOtpCode(e.target.value)}
+                                                    placeholder="123456"
+                                                    maxLength={6}
+                                                    required
+                                                />
+                                            </div>
+                                            <div style={{ textAlign: 'center', marginTop: '8px' }}>
+                                                <span
+                                                    onClick={() => setShowOtpInput(false)}
+                                                    style={{ fontSize: '0.7rem', color: 'var(--text-dim)', cursor: 'pointer', textDecoration: 'underline' }}
+                                                >
+                                                    Back to details
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {view !== 'FORGOT' && view !== 'RESET' && !showOtpInput && (
                                         <div style={{ marginBottom: view === 'LOGIN' ? '0.8rem' : '1.5rem' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                 <label style={labelStyle}>PASSWORD</label>

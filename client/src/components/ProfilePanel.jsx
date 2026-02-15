@@ -32,7 +32,11 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
     const [showEmailLink, setShowEmailLink] = useState(false);
     const [linkEmail, setLinkEmail] = useState('');
     const [linkPassword, setLinkPassword] = useState('');
+    const [otpCode, setOtpCode] = useState('');
+    const [showOtpInput, setShowOtpInput] = useState(false);
     const [isLinking, setIsLinking] = useState(false);
+    const [linkError, setLinkError] = useState('');
+    const [linkSuccess, setLinkSuccess] = useState('');
 
     // Sync title from gameState when it updates
     React.useEffect(() => {
@@ -700,7 +704,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                     </div>
 
                     {/* Guest Account Linking Banner */}
-                    {session?.user?.is_anonymous && (
+                    {(session?.user?.is_anonymous || showEmailLink || showOtpInput) && (
                         <div style={{
                             marginBottom: '25px',
                             padding: '15px',
@@ -760,7 +764,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                             </button>
 
                             {/* Email Linking Toggle */}
-                            {!showEmailLink && (
+                            {!showEmailLink && session?.user?.is_anonymous && (
                                 <button
                                     onClick={() => setShowEmailLink(true)}
                                     style={{
@@ -798,7 +802,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                                         type="email"
                                         placeholder="Enter your email"
                                         value={linkEmail}
-                                        onChange={(e) => setLinkEmail(e.target.value)}
+                                        onChange={(e) => { setLinkEmail(e.target.value); setLinkError(''); }}
                                         style={{
                                             width: '100%',
                                             padding: '10px',
@@ -844,19 +848,55 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                                         <button
                                             disabled={isLinking || !linkEmail || !linkPassword}
                                             onClick={async () => {
+                                                const emailToLink = linkEmail.trim().toLowerCase();
+                                                const passwordToLink = linkPassword.trim();
+
+                                                if (!emailToLink) {
+                                                    setLinkError("Please enter a valid email.");
+                                                    return;
+                                                }
+                                                if (passwordToLink.length < 6) {
+                                                    setLinkError("Password must be at least 6 characters.");
+                                                    return;
+                                                }
+
                                                 setIsLinking(true);
+                                                // 1. Update user with email/password (triggers email change verification)
+                                                console.log("Attempting to link with:", emailToLink);
                                                 const { data, error } = await supabase.auth.updateUser({
-                                                    email: linkEmail,
-                                                    password: linkPassword
+                                                    email: emailToLink,
+                                                    password: passwordToLink
                                                 });
 
                                                 if (error) {
-                                                    alert('Error linking account: ' + error.message);
+                                                    console.error("Link error:", error);
+                                                    if (error.message.includes("rate limit")) {
+                                                        setLinkError("Too many attempts. Please wait a minute before trying again.");
+                                                    } else {
+                                                        setLinkError('Error initiating link: ' + error.message);
+                                                    }
+                                                    setIsLinking(false);
                                                 } else {
-                                                    alert('Account linked successfully! Please check your email for confirmation if required.');
-                                                    setShowEmailLink(false);
+                                                    // Check if email was updated immediately (no confirmation required)
+                                                    if (data?.user?.email === linkEmail) {
+                                                        setLinkSuccess('Account linked successfully! (Instant verified)');
+                                                        setLinkError('');
+                                                        setTimeout(() => {
+                                                            setShowEmailLink(false);
+                                                            setShowOtpInput(false);
+                                                            setLinkEmail('');
+                                                            setLinkPassword('');
+                                                            setOtpCode('');
+                                                            setLinkSuccess('');
+                                                            setIsLinking(false);
+                                                        }, 2500);
+                                                    } else {
+                                                        // 2. Show OTP Input
+                                                        setLinkError('');
+                                                        setShowOtpInput(true);
+                                                        setIsLinking(false);
+                                                    }
                                                 }
-                                                setIsLinking(false);
                                             }}
                                             style={{
                                                 flex: 1,
@@ -868,12 +908,98 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                                                 fontWeight: 'bold',
                                                 fontSize: '0.8rem',
                                                 cursor: isLinking ? 'wait' : 'pointer',
-                                                opacity: (isLinking || !linkEmail || !linkPassword) ? 0.6 : 1
+                                                opacity: (isLinking || !linkEmail || !linkPassword) ? 0.6 : 1,
+                                                display: showOtpInput ? 'none' : 'block'
                                             }}
                                         >
-                                            {isLinking ? 'LINKING...' : 'CONFIRM LINK'}
+                                            {isLinking ? 'SENDING CODE...' : 'SEND CODE'}
                                         </button>
                                     </div>
+
+                                    {/* Feedback Messages */}
+                                    {linkError && (
+                                        <div style={{ color: '#ff6b6b', fontSize: '0.8rem', textAlign: 'center', marginTop: '10px', background: 'rgba(255, 107, 107, 0.1)', padding: '8px', borderRadius: '8px' }}>
+                                            {linkError}
+                                        </div>
+                                    )}
+                                    {linkSuccess && (
+                                        <div style={{ color: '#4ade80', fontSize: '0.8rem', textAlign: 'center', marginTop: '10px', background: 'rgba(74, 222, 128, 0.1)', padding: '8px', borderRadius: '8px' }}>
+                                            {linkSuccess}
+                                        </div>
+                                    )}
+
+                                    {/* OTP Input Section */}
+                                    {showOtpInput && (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
+                                            <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--accent)' }}>
+                                                Confirmation code sent to <b>{linkEmail}</b>.<br />Please enter it below.
+                                            </div>
+                                            <input
+                                                type="text"
+                                                placeholder="123456"
+                                                value={otpCode}
+                                                maxLength={6}
+                                                onChange={(e) => setOtpCode(e.target.value)}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '10px',
+                                                    borderRadius: '8px',
+                                                    border: '1px solid var(--accent)',
+                                                    background: 'rgba(0,0,0,0.3)',
+                                                    color: '#fff',
+                                                    fontSize: '1.2rem',
+                                                    textAlign: 'center',
+                                                    letterSpacing: '5px',
+                                                    fontWeight: 'bold'
+                                                }}
+                                            />
+                                            <button
+                                                disabled={isLinking || otpCode.length < 6}
+                                                onClick={async () => {
+                                                    setIsLinking(true);
+                                                    // 3. Verify OTP for email change
+                                                    const { data, error } = await supabase.auth.verifyOtp({
+                                                        email: linkEmail,
+                                                        token: otpCode,
+                                                        type: 'email_change'
+                                                    });
+
+                                                    if (error) {
+                                                        setLinkError('Verification failed: ' + error.message);
+                                                        setIsLinking(false);
+                                                    } else {
+                                                        setLinkSuccess('Account linked successfully! Your guest account is now permanent.');
+                                                        setLinkError('');
+                                                        // Delay close to show success message
+                                                        setTimeout(() => {
+                                                            setShowEmailLink(false);
+                                                            setShowOtpInput(false);
+                                                            setLinkEmail('');
+                                                            setLinkPassword('');
+                                                            setOtpCode('');
+                                                            setLinkSuccess('');
+                                                            setIsLinking(false);
+                                                        }, 2000);
+                                                    }
+                                                }}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '12px',
+                                                    background: '#4ade80',
+                                                    border: 'none',
+                                                    borderRadius: '8px',
+                                                    color: '#000',
+                                                    fontWeight: 'bold',
+                                                    fontSize: '0.9rem',
+                                                    cursor: isLinking ? 'wait' : 'pointer',
+                                                    opacity: (isLinking || otpCode.length < 6) ? 0.6 : 1,
+                                                    boxShadow: '0 0 15px rgba(74, 222, 128, 0.3)'
+                                                }}
+                                            >
+                                                {isLinking ? 'VERIFYING...' : 'VERIFY & LINK'}
+                                            </button>
+                                        </div>
+                                    )}
                                 </motion.div>
                             )}
                         </div>
