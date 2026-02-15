@@ -33,7 +33,13 @@ export class GameManager {
         this.userLocks = new Map(); // userId -> Promise (current task)
         this.cache = new Map(); // charId -> character object
         this.dirty = new Set(); // set of charIds that need persisting
-        this.globalStats = { total_market_tax: 0 };
+        this.globalStats = {
+            total_market_tax: 0,
+            market_tax_total: 0,
+            trade_tax_total: 0,
+            tax_24h_ago: 0,
+            history: []
+        };
         this.leaderboardCache = new Map(); // type+mode -> { data, timestamp }
         this.LEADERBOARD_CACHE_TTL = 30 * 60 * 1000; // 30 minutes in ms
 
@@ -54,6 +60,10 @@ export class GameManager {
 
         // At least keep loadGlobalStats in sync
         setInterval(() => this.loadGlobalStats(), 600000); // 10 mins is enough for tax stats
+
+        // 24h Snapshot Check (Every hour)
+        setInterval(() => this.checkTaxSnapshot(), 3600000);
+        setTimeout(() => this.checkTaxSnapshot(), 5000); // Check once shortly after startup
 
         this.worldBossManager.initialize();
 
@@ -113,45 +123,156 @@ export class GameManager {
 
             if (!error && data) {
                 this.globalStats = {
-                    total_market_tax: Number(data.total_market_tax) || 0
+                    total_market_tax: Number(data.total_market_tax) || 0,
+                    market_tax_total: Number(data.market_tax_total) || 0,
+                    trade_tax_total: Number(data.trade_tax_total) || 0,
+                    tax_24h_ago: Number(data.tax_24h_ago) || 0,
+                    history: Array.isArray(data.history) ? data.history : []
                 };
+
+                // CRITICAL: If tax_24h_ago is 0 but we have a total, initialize the baseline 
+                // so "Daily Increase" doesn't show the entire historical total.
+                if (this.globalStats.tax_24h_ago === 0 && this.globalStats.total_market_tax > 0) {
+                    console.log(`[GameManager] Initializing tax_24h_ago baseline to: ${this.globalStats.total_market_tax}`);
+                    this.globalStats.tax_24h_ago = this.globalStats.total_market_tax;
+
+                    // User Request: Redistribute historical total into 80% Market and 20% Trades to not look strange
+                    if (this.globalStats.market_tax_total < 1000 && this.globalStats.trade_tax_total === 0) {
+                        const total = this.globalStats.total_market_tax;
+                        this.globalStats.market_tax_total = Math.floor(total * 0.80);
+                        this.globalStats.trade_tax_total = Math.floor(total * 0.20);
+                        console.log(`[GameManager] Redistributing historical tax: Market=${this.globalStats.market_tax_total}, Trades=${this.globalStats.trade_tax_total}`);
+                    }
+
+                    // Notify all clients IMMEDIATELY
+                    if (this.onGlobalStatsUpdate) {
+                        this.onGlobalStatsUpdate(this.globalStats);
+                    }
+
+                    // Persist this baseline and redistribution immediately
+                    this.supabase
+                        .from('global_stats')
+                        .update({
+                            tax_24h_ago: this.globalStats.tax_24h_ago,
+                            market_tax_total: this.globalStats.market_tax_total,
+                            trade_tax_total: this.globalStats.trade_tax_total,
+                            last_snapshot_at: new Date().toISOString()
+                        })
+                        .eq('id', 'global')
+                        .then(({ error }) => {
+                            if (error) console.error('[DB] Error initializing tax baseline/redistribution:', error);
+                        });
+                }
             }
         } catch (err) {
             console.error('[DB] Error loading global stats:', err);
         }
     }
 
-    async updateGlobalTax(amount) {
+    async updateGlobalTax(amount, source = 'MARKET') {
         if (!amount || amount <= 0) return;
 
         try {
             if (!this.globalStats) {
-                this.globalStats = { total_market_tax: 0 };
+                this.globalStats = {
+                    total_market_tax: 0,
+                    market_tax_total: 0,
+                    trade_tax_total: 0,
+                    tax_24h_ago: 0
+                };
             }
-            this.globalStats.total_market_tax += Math.floor(amount);
-            console.log(`[GameManager] Global stats updated. New total_market_tax: ${this.globalStats.total_market_tax}`);
 
-            // Notify all clients IMMEDIATELY for real-time feel
+            const taxAmount = Math.floor(amount);
+            this.globalStats.total_market_tax += taxAmount;
+
+            if (source === 'TRADE') {
+                this.globalStats.trade_tax_total = (this.globalStats.trade_tax_total || 0) + taxAmount;
+            } else {
+                this.globalStats.market_tax_total = (this.globalStats.market_tax_total || 0) + taxAmount;
+            }
+
+            console.log(`[GameManager] Global stats updated. Source: ${source}, Amount: ${taxAmount}`);
+
+            // Notify all clients IMMEDIATELY
             if (this.onGlobalStatsUpdate) {
-                console.log(`[GameManager] Broadcasting global_stats_update via onGlobalStatsUpdate callback`);
                 this.onGlobalStatsUpdate(this.globalStats);
             }
 
-            // Persist to DB in the background (no need to await for UI feel, but we keep it for safety in this method)
-            // Or better yet, don't block the method return if possible, but since it's async we'll just move the broadcast up.
-            const { error } = await this.supabase.rpc('increment_global_tax', { amount: Math.floor(amount) });
+            // Persist to DB
+            // We'll update the total and the specific source
+            const updateFields = {
+                total_market_tax: this.globalStats.total_market_tax,
+                updated_at: new Date().toISOString()
+            };
 
-            if (error) {
+            if (source === 'TRADE') {
+                updateFields.trade_tax_total = this.globalStats.trade_tax_total;
+            } else {
+                updateFields.market_tax_total = this.globalStats.market_tax_total;
+            }
+
+            const { error } = await this.supabase
+                .from('global_stats')
+                .update(updateFields)
+                .eq('id', 'global');
+
+            if (error) console.error('[DB] Error updating global tax field:', error);
+
+        } catch (err) {
+            console.error('[DB] Error updating global tax:', err);
+        }
+    }
+
+    async checkTaxSnapshot() {
+        try {
+            const { data, error } = await this.supabase
+                .from('global_stats')
+                .select('*')
+                .eq('id', 'global')
+                .single();
+
+            if (error) return;
+
+            const now = new Date();
+            const lastSnapshotAt = data.last_snapshot_at ? new Date(data.last_snapshot_at) : new Date(0);
+            const msSinceSnapshot = now.getTime() - lastSnapshotAt.getTime();
+
+            // If more than 24 hours (86,400,000 ms) passed, take a new snapshot
+            if (msSinceSnapshot >= 86400000 || !data.last_snapshot_at) {
+                const newTotal = Number(data.total_market_tax) || 0;
+                const oldTotal = Number(data.tax_24h_ago) || 0;
+                const dailyIncrease = Math.max(0, newTotal - oldTotal);
+
+                console.log(`[GameManager] Taking 24h tax snapshot. Increase: ${dailyIncrease}`);
+
+                let history = Array.isArray(data.history) ? data.history : [];
+                history.push({
+                    date: now.toISOString(),
+                    amount: dailyIncrease
+                });
+
+                // Keep last 7 days
+                if (history.length > 7) history = history.slice(-7);
+
                 await this.supabase
                     .from('global_stats')
                     .update({
-                        total_market_tax: this.globalStats.total_market_tax,
-                        updated_at: new Date().toISOString()
+                        tax_24h_ago: newTotal,
+                        last_snapshot_at: now.toISOString(),
+                        history: history
                     })
                     .eq('id', 'global');
+
+                this.globalStats.tax_24h_ago = newTotal;
+                this.globalStats.history = history;
+
+                // Sync UI
+                if (this.onGlobalStatsUpdate) {
+                    this.onGlobalStatsUpdate(this.globalStats);
+                }
             }
         } catch (err) {
-            console.error('[DB] Error updating global tax:', err);
+            console.error('[GameManager] Error in checkTaxSnapshot:', err);
         }
     }
 

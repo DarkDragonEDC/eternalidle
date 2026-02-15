@@ -205,7 +205,7 @@ export class MarketManager {
 
         // Update Global Taxometer IMMEDIATELY after buyer pays
         const tax = Math.floor(totalCost * 0.20);
-        this.gameManager.updateGlobalTax(tax);
+        this.gameManager.updateGlobalTax(tax, 'MARKET');
 
         // Process Seller side
         // Note: Seller might be offline or playing another character.
@@ -280,7 +280,7 @@ export class MarketManager {
             char.state.silver -= fee;
 
             // Update Global Taxometer
-            this.gameManager.updateGlobalTax(fee);
+            this.gameManager.updateGlobalTax(fee, 'MARKET');
 
             feeMsg = ` A fee of ${fee.toLocaleString()} Silver was charged.`;
         }

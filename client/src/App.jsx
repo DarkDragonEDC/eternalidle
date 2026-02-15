@@ -1285,8 +1285,163 @@ function App() {
       case 'trade':
         return null; // TradePanel is a modal, handled separately
       case 'taxometer':
+        const marketTax = globalStats?.market_tax_total || 0;
+        const tradeTax = globalStats?.trade_tax_total || 0;
+        const totalTax = globalStats?.total_market_tax || 0;
+        const taxHistory = globalStats?.history || [];
+
+        const TaxHistoryChart = ({ history = [] }) => {
+          const [hoveredIndex, setHoveredIndex] = useState(null);
+
+          // Get dates for mock data
+          const getMockDate = (daysAgo) => {
+            const d = new Date();
+            d.setDate(d.getDate() - daysAgo);
+            return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}`;
+          };
+
+          const formatDayDate = (dateStr) => {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}`;
+          };
+
+          const mockData = [
+            { amount: 452189, label: getMockDate(6) },
+            { amount: 621450, label: getMockDate(5) },
+            { amount: 589321, label: getMockDate(4) },
+            { amount: 843210, label: getMockDate(3) },
+            { amount: 712908, label: getMockDate(2) },
+            { amount: 924556, label: getMockDate(1) },
+            { amount: 1056782, label: getMockDate(0) }
+          ];
+
+          const todayIncrease = Math.max(0, totalTax - (globalStats?.tax_24h_ago || 0));
+
+          const displayData = history.length >= 3 ? history.map(h => ({
+            amount: h.amount,
+            label: formatDayDate(h.date)
+          })) : mockData.slice(0, 7 - history.length).concat(history.map(h => ({
+            amount: h.amount,
+            label: formatDayDate(h.date)
+          })));
+
+          // Always override the last bar (Today) with real-time data
+          if (displayData.length > 0) {
+            displayData[displayData.length - 1] = {
+              amount: todayIncrease,
+              label: 'HOJE'
+            };
+          }
+
+          const maxVal = Math.max(...displayData.map(h => h.amount), 1000);
+          const chartHeight = 50;
+          const barWidth = isMobile ? 25 : 35;
+          const gap = 8;
+          const totalWidth = (barWidth + gap) * displayData.length - gap;
+
+          return (
+            <div style={{
+              marginTop: '5px',
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              background: 'rgba(0,0,0,0.15)',
+              padding: '15px 10px',
+              borderRadius: '12px',
+              border: '1px solid rgba(255,255,255,0.05)',
+              position: 'relative'
+            }}>
+              <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', marginBottom: '12px', fontWeight: 'bold', letterSpacing: '1px' }}>DAILY TAX INCREASE (LAST 7 DAYS)</div>
+
+              <div style={{ height: '15px', marginBottom: '5px' }}>
+                <AnimatePresence>
+                  {hoveredIndex !== null && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 5 }}
+                      style={{
+                        fontSize: '0.7rem',
+                        color: 'var(--accent)',
+                        fontWeight: '900',
+                        fontFamily: 'monospace'
+                      }}
+                    >
+                      +{formatNumber(displayData[hoveredIndex].amount)}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <svg width={totalWidth} height={chartHeight + 20} style={{ overflow: 'visible' }}>
+                {displayData.map((day, i) => {
+                  const h = Math.max(4, (day.amount / maxVal) * chartHeight);
+                  return (
+                    <g key={i}>
+                      <motion.rect
+                        initial={{ height: 0, y: chartHeight }}
+                        animate={{
+                          height: h,
+                          y: chartHeight - h,
+                          fillOpacity: hoveredIndex === i ? 1 : 0.4 + (i * 0.08)
+                        }}
+                        onMouseEnter={() => setHoveredIndex(i)}
+                        onMouseLeave={() => setHoveredIndex(null)}
+                        transition={{
+                          height: { delay: i * 0.05, duration: 0.5 },
+                          fillOpacity: { duration: 0.2 }
+                        }}
+                        x={i * (barWidth + gap)}
+                        width={barWidth}
+                        fill="var(--accent)"
+                        rx="3"
+                        style={{ cursor: 'pointer' }}
+                      />
+                      <text
+                        x={i * (barWidth + gap) + barWidth / 2}
+                        y={chartHeight + 15}
+                        textAnchor="middle"
+                        style={{
+                          fontSize: '0.55rem',
+                          fill: hoveredIndex === i ? 'var(--text-main)' : 'var(--text-dim)',
+                          fontWeight: hoveredIndex === i ? 'bold' : 'normal',
+                          transition: 'all 0.2s',
+                          fontFamily: 'monospace'
+                        }}
+                      >
+                        {day.label}
+                      </text>
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+          );
+        };
+
+        const StatCard = ({ label, value, icon, color }) => (
+          <div className="glass-panel" style={{
+            padding: '15px',
+            borderRadius: '12px',
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid var(--border)',
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>{label}</div>
+            <div style={{ fontSize: '1.2rem', color: color || 'var(--text-main)', fontWeight: '900', fontFamily: 'monospace' }}>
+              {formatNumber(value)}
+            </div>
+          </div>
+        );
+
         return (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: isMobile ? '10px' : '20px', justifyContent: 'center', height: '100%' }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: isMobile ? '10px' : '20px', justifyContent: 'center', height: '100%', overflowY: 'auto' }}>
             <div className="glass-panel" style={{
               padding: isMobile ? '20px' : '30px',
               borderRadius: '16px',
@@ -1296,7 +1451,10 @@ function App() {
               textAlign: 'center',
               display: 'flex',
               flexDirection: 'column',
-              gap: isMobile ? '15px' : '20px'
+              gap: isMobile ? '15px' : '20px',
+              maxWidth: '600px',
+              margin: '0 auto',
+              width: '100%'
             }}>
               <div>
                 <div style={{ color: 'var(--accent)', fontSize: '0.65rem', fontWeight: '900', letterSpacing: '3px', marginBottom: '8px' }}>GLOBAL ECONOMY</div>
@@ -1307,32 +1465,52 @@ function App() {
 
               <div style={{
                 background: 'rgba(0,0,0,0.2)',
-                padding: isMobile ? '20px 10px' : '40px 20px',
+                padding: isMobile ? '20px 10px' : '30px 20px',
                 borderRadius: '12px',
                 border: '1px solid rgba(255, 215, 0, 0.1)',
                 position: 'relative',
                 overflow: 'hidden'
               }}>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '10px', fontWeight: 'bold' }}>TOTAL TAXES COLLECTED</div>
-                <ResponsiveText
-                  maxFontSize={isMobile ? 32 : 40}
-                  minFontSize={12}
-                  color='var(--accent)'
-                  fontWeight='900'
-                  fontFamily='monospace'
-                  textShadow='0 0 20px rgba(212, 175, 55, 0.3)'
-                  style={{ marginBottom: '5px' }}
-                >
-                  {formatNumber(globalStats?.total_market_tax || 0)}
-                </ResponsiveText>
-                <div style={{ marginTop: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'rgba(74, 222, 128, 0.8)', fontSize: '0.7rem', fontWeight: 'bold' }}>
+
+                {/* Odometer-style Animation */}
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '4px', marginBottom: '5px' }}>
+                  <motion.div
+                    key={totalTax}
+                    initial={{ scale: 1.1, color: '#fff' }}
+                    animate={{ scale: 1, color: 'var(--accent)' }}
+                    transition={{ duration: 0.5 }}
+                    style={{
+                      fontSize: isMobile ? '2rem' : '2.5rem',
+                      fontWeight: '900',
+                      fontFamily: 'monospace',
+                      textShadow: '0 0 20px rgba(212, 175, 55, 0.3)'
+                    }}
+                  >
+                    {formatNumber(totalTax)}
+                  </motion.div>
+                </div>
+
+                <div style={{ marginTop: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'rgba(74, 222, 128, 0.6)', fontSize: '0.65rem', fontWeight: 'bold' }}>
                   <div style={{ width: '6px', height: '6px', background: '#4ade80', borderRadius: '50%', boxShadow: '0 0 8px #4ade80' }}></div>
                   LIVE COUNTER
                 </div>
               </div>
 
-              <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: isMobile ? '0.75rem' : '0.85rem', lineHeight: '1.5', maxWidth: '400px', margin: '0 auto' }}>
-                <p style={{ margin: 0 }}>Monitoring the global flow of Silver. 20% of marketplace transactions and 15% of player trades are collected as tax to maintain the economy.</p>
+              {/* Breakdown Cards */}
+              <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
+                <StatCard label="Marketplace" value={marketTax} color="var(--t5)" />
+                <StatCard label="Player Trades" value={tradeTax} color="var(--t3)" />
+              </div>
+
+              <TaxHistoryChart history={taxHistory} />
+
+              <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: isMobile ? '0.7rem' : '0.8rem', lineHeight: '1.5', maxWidth: '450px', margin: '0 auto' }}>
+                <p style={{ margin: 0 }}>
+                  Monitoring the global flow of Silver.
+                  <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}> 20% </span> from Market and
+                  <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}> 15% </span> from Trades are collected to maintain a healthy economy.
+                </p>
               </div>
             </div>
           </div>

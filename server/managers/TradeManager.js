@@ -239,7 +239,7 @@ export class TradeManager {
                 // Update Global Taxometer
                 if (sTax + rTax > 0) {
                     console.log(`[TRADE-TAX] Updating global tax with: ${sTax + rTax}`);
-                    this.gameManager.updateGlobalTax(sTax + rTax);
+                    this.gameManager.updateGlobalTax(sTax + rTax, 'TRADE');
                 } else {
                     console.log(`[TRADE-TAX] No tax to update (sTax: ${sTax}, rTax: ${rTax})`);
                 }
