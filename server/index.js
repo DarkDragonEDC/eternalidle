@@ -198,7 +198,11 @@ app.post('/api/update_last_active', authMiddleware, async (req, res) => {
     try {
         const { error } = await supabase
             .from('user_sessions')
-            .upsert({ user_id: req.user.id, last_active_at: new Date().toISOString() });
+            .upsert({
+                user_id: req.user.id,
+                last_active_at: new Date().toISOString(),
+                ip_address: req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip
+            });
 
         if (error) throw error;
         res.json({ success: true });
@@ -299,6 +303,20 @@ io.use(async (socket, next) => {
 
 io.on('connection', (socket) => {
     console.log(`[SOCKET] User connected: ${socket.user?.email || 'Unknown'} (Socket: ${socket.id})`);
+    const clientIp = socket.handshake.headers['x-forwarded-for'] || socket.handshake.address;
+    console.log(`[SOCKET] User connected: ${socket.user?.email || 'Unknown'} (Socket: ${socket.id}, IP: ${clientIp})`);
+
+    // Log IP to user_sessions immediately on connection
+    if (socket.user?.id) {
+        supabase.from('user_sessions').upsert({
+            user_id: socket.user.id,
+            last_active_at: new Date().toISOString(),
+            ip_address: clientIp
+        }).then(({ error }) => {
+            if (error) console.error('[SOCKET] Error logging session IP:', error);
+        });
+    }
+
     connectedSockets.set(socket.id, socket);
 
     // Version Handshake for Auto-Refresh
