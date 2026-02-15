@@ -3,9 +3,23 @@ import { formatNumber, formatSilver } from '@utils/format';
 import {
     Tag, ShoppingBag, Package, Search,
     Coins, ArrowRight, User, Info, Trash2,
-    Shield, Zap, Apple, Box, Clock, Check, AlertTriangle, X, Star, Hammer, Lock
+    Shield, Zap, Apple, Box, Clock, Check, AlertTriangle, X, Star, Hammer, Lock, History, TrendingUp, TrendingDown
 } from 'lucide-react';
 import { resolveItem, getTierColor, formatItemId, getRequiredProficiencyGroup } from '@shared/items';
+
+const getTimeAgo = (dateStr) => {
+    if (!dateStr) return '';
+    const now = Date.now();
+    const then = new Date(dateStr).getTime();
+    const diff = Math.max(0, now - then);
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+};
 
 const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket, isMobile, initialSearch = '', isAnonymous }) => {
     const [activeTab, setActiveTab] = useState('BUY'); // BUY, SELL, LISTINGS, CLAIM
@@ -23,6 +37,10 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
     const [selectedSortOrder, setSelectedSortOrder] = useState('NEWEST');
     const [selectedClass, setSelectedClass] = useState('ALL');
     const [sellSearchQuery, setSellSearchQuery] = useState('');
+    const [marketHistory, setMarketHistory] = useState([]);
+    const [myMarketHistory, setMyMarketHistory] = useState([]);
+    const [historySubTab, setHistorySubTab] = useState('GLOBAL'); // GLOBAL, PERSONAL
+    const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
 
     // Auto-dismiss notification
@@ -52,16 +70,41 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
             setNotification({ type: 'error', message: err.message || 'An error occurred.' });
         };
 
+        const handleMarketHistory = (history) => {
+            setMarketHistory(history || []);
+            setIsLoadingHistory(false);
+        };
+
+        const handleMyMarketHistory = (history) => {
+            setMyMarketHistory(history || []);
+            setIsLoadingHistory(false);
+        };
+
         socket.on('market_listings_update', handleUpdate);
         socket.on('market_action_success', handleSuccess);
+        socket.on('market_history_update', handleMarketHistory);
+        socket.on('my_market_history_update', handleMyMarketHistory);
         socket.on('error', handleError);
 
         return () => {
             socket.off('market_listings_update', handleUpdate);
             socket.off('market_action_success', handleSuccess);
+            socket.off('market_history_update', handleMarketHistory);
+            socket.off('my_market_history_update', handleMyMarketHistory);
             socket.off('error', handleError);
         };
     }, [socket]);
+
+    useEffect(() => {
+        if (activeTab === 'HISTORY') {
+            setIsLoadingHistory(true);
+            if (historySubTab === 'GLOBAL') {
+                socket.emit('get_market_history');
+            } else {
+                socket.emit('get_my_market_history');
+            }
+        }
+    }, [activeTab, historySubTab, socket]);
 
     useEffect(() => {
         if (initialSearch) {
@@ -384,6 +427,22 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                     justifyContent: 'center'
                                 }}>{gameState?.state?.claims?.length}</span>
                             )}
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('HISTORY')}
+                            style={{
+                                padding: '8px 16px',
+                                borderRadius: '8px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                fontSize: '0.85rem',
+                                fontWeight: 'bold',
+                                background: activeTab === 'HISTORY' ? 'var(--accent-soft)' : 'transparent',
+                                color: activeTab === 'HISTORY' ? 'var(--accent)' : 'var(--text-dim)',
+                                border: activeTab === 'HISTORY' ? '1px solid var(--accent)' : '1px solid transparent',
+                                transition: '0.2s'
+                            }}>
+                            History
                         </button>
                     </div>
                 </div>
@@ -1138,6 +1197,242 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                         );
                                     })}
                                 </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* View: HISTORY */}
+                    {activeTab === 'HISTORY' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            {/* Sub-tabs: Global / My History */}
+                            <div style={{ display: 'flex', gap: '8px', marginBottom: '4px' }}>
+                                <button
+                                    onClick={() => setHistorySubTab('GLOBAL')}
+                                    style={{
+                                        flex: 1,
+                                        padding: '10px',
+                                        borderRadius: '8px',
+                                        border: '1px solid',
+                                        borderColor: historySubTab === 'GLOBAL' ? 'var(--accent)' : 'var(--border)',
+                                        background: historySubTab === 'GLOBAL' ? 'var(--accent-soft)' : 'var(--glass-bg)',
+                                        color: historySubTab === 'GLOBAL' ? 'var(--accent)' : 'var(--text-dim)',
+                                        cursor: 'pointer',
+                                        fontWeight: 'bold',
+                                        fontSize: '0.85rem',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '6px'
+                                    }}
+                                >
+                                    <ShoppingBag size={14} /> Global
+                                </button>
+                                <button
+                                    onClick={() => setHistorySubTab('PERSONAL')}
+                                    style={{
+                                        flex: 1,
+                                        padding: '10px',
+                                        borderRadius: '8px',
+                                        border: '1px solid',
+                                        borderColor: historySubTab === 'PERSONAL' ? 'var(--accent)' : 'var(--border)',
+                                        background: historySubTab === 'PERSONAL' ? 'var(--accent-soft)' : 'var(--glass-bg)',
+                                        color: historySubTab === 'PERSONAL' ? 'var(--accent)' : 'var(--text-dim)',
+                                        cursor: 'pointer',
+                                        fontWeight: 'bold',
+                                        fontSize: '0.85rem',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '6px'
+                                    }}
+                                >
+                                    <User size={14} /> My History
+                                </button>
+                            </div>
+
+                            {/* Loading State */}
+                            {isLoadingHistory && (
+                                <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-dim)' }}>
+                                    <Clock size={32} style={{ marginBottom: '10px', opacity: 0.4 }} />
+                                    <p>Loading history...</p>
+                                </div>
+                            )}
+
+                            {/* Global History Content */}
+                            {!isLoadingHistory && historySubTab === 'GLOBAL' && (
+                                <>
+                                    {marketHistory.length === 0 ? (
+                                        <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-dim)' }}>
+                                            <History size={48} style={{ marginBottom: '15px', opacity: 0.3 }} />
+                                            <p>No market transactions recorded yet.</p>
+                                            <p style={{ fontSize: '0.8rem', opacity: 0.6 }}>Transactions will appear here as players buy items.</p>
+                                        </div>
+                                    ) : (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                            {marketHistory.map((tx, idx) => {
+                                                const itemInfo = tx.item_data || {};
+                                                const tierColor = getTierColor(itemInfo.tier || 1);
+                                                const timeAgo = getTimeAgo(tx.created_at);
+
+                                                return (
+                                                    <div key={tx.id || idx} style={{
+                                                        background: 'var(--glass-bg)',
+                                                        border: '1px solid var(--border)',
+                                                        borderRadius: '10px',
+                                                        padding: '10px 14px',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '12px',
+                                                        transition: '0.2s'
+                                                    }}>
+                                                        {/* Item icon */}
+                                                        <div style={{
+                                                            width: '40px',
+                                                            height: '40px',
+                                                            borderRadius: '8px',
+                                                            background: 'rgba(0, 0, 0, 0.4)',
+                                                            border: `1px solid ${tierColor}40`,
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            flexShrink: 0,
+                                                            overflow: 'hidden',
+                                                            position: 'relative'
+                                                        }}>
+                                                            {itemInfo.icon ? (
+                                                                <img src={itemInfo.icon} alt={itemInfo.name || ''} style={{ width: '130%', height: '130%', objectFit: 'contain' }} />
+                                                            ) : (
+                                                                <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{itemInfo.tier || '?'}</span>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Item info */}
+                                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                                            <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: tierColor, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                                {itemInfo.qualityName && itemInfo.qualityName !== 'Normal' ? `${itemInfo.qualityName} ` : ''}
+                                                                {itemInfo.name || formatItemId(tx.item_id)}
+                                                            </div>
+                                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
+                                                                x{tx.quantity}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Price + time */}
+                                                        <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                                            <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+                                                                <Coins size={14} /> {formatNumber(tx.price_total)}
+                                                            </div>
+                                                            {tx.quantity > 1 && (
+                                                                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>
+                                                                    {formatNumber(tx.price_per_unit)} ea
+                                                                </div>
+                                                            )}
+                                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>
+                                                                {timeAgo}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </>
+                            )}
+
+                            {/* Personal History Content */}
+                            {!isLoadingHistory && historySubTab === 'PERSONAL' && (
+                                <>
+                                    {myMarketHistory.length === 0 ? (
+                                        <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-dim)' }}>
+                                            <User size={48} style={{ marginBottom: '15px', opacity: 0.3 }} />
+                                            <p>You have no market transactions yet.</p>
+                                            <p style={{ fontSize: '0.8rem', opacity: 0.6 }}>Your buys and sales will appear here.</p>
+                                        </div>
+                                    ) : (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                            {myMarketHistory.map((tx, idx) => {
+                                                const itemInfo = tx.item_data || {};
+                                                const tierColor = getTierColor(itemInfo.tier || 1);
+                                                const timeAgo = getTimeAgo(tx.created_at);
+                                                const isBuyer = tx.role === 'BOUGHT';
+                                                const actionLabel = isBuyer ? 'BOUGHT' : 'SOLD';
+                                                const actionColor = isBuyer ? '#ff6b6b' : '#4caf50';
+                                                const otherParty = isBuyer ? (tx.seller_name || 'Unknown') : (tx.buyer_name || 'Unknown');
+
+                                                return (
+                                                    <div key={tx.id || idx} style={{
+                                                        background: 'var(--glass-bg)',
+                                                        border: '1px solid var(--border)',
+                                                        borderLeft: `3px solid ${actionColor}`,
+                                                        borderRadius: '10px',
+                                                        padding: '10px 14px',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '12px'
+                                                    }}>
+                                                        {/* Item icon */}
+                                                        <div style={{
+                                                            width: '40px',
+                                                            height: '40px',
+                                                            borderRadius: '8px',
+                                                            background: 'rgba(0, 0, 0, 0.4)',
+                                                            border: `1px solid ${tierColor}40`,
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            flexShrink: 0,
+                                                            overflow: 'hidden',
+                                                            position: 'relative'
+                                                        }}>
+                                                            {itemInfo.icon ? (
+                                                                <img src={itemInfo.icon} alt={itemInfo.name || ''} style={{ width: '130%', height: '130%', objectFit: 'contain' }} />
+                                                            ) : (
+                                                                <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{itemInfo.tier || '?'}</span>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Info */}
+                                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                                            <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: tierColor, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                                {itemInfo.qualityName && itemInfo.qualityName !== 'Normal' ? `${itemInfo.qualityName} ` : ''}
+                                                                {itemInfo.name || formatItemId(tx.item_id)}
+                                                            </div>
+                                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                                                <span style={{
+                                                                    background: `${actionColor}20`,
+                                                                    color: actionColor,
+                                                                    padding: '1px 6px',
+                                                                    borderRadius: '4px',
+                                                                    fontWeight: 'bold',
+                                                                    fontSize: '0.7rem'
+                                                                }}>{actionLabel}</span>
+                                                                <span>x{tx.quantity}</span>
+                                                                <span>•</span>
+                                                                <span>{isBuyer ? 'from' : 'to'} {otherParty}</span>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Price + time */}
+                                                        <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                                            <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: actionColor, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+                                                                <Coins size={14} />
+                                                                {isBuyer ? '-' : '+'}{formatNumber(isBuyer ? tx.price_total : (tx.price_total - tx.tax_paid))}
+                                                            </div>
+                                                            {tx.quantity > 1 && (
+                                                                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>
+                                                                    {formatNumber(tx.price_per_unit)} ea
+                                                                </div>
+                                                            )}
+                                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>
+                                                                {timeAgo}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </div>
                     )}

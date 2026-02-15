@@ -909,7 +909,6 @@ io.on('connection', (socket) => {
 
     socket.on('get_dungeon_history', async () => {
         try {
-            // Fix: Fetch history for the SELECTED character
             const charId = socket.data.characterId;
             if (!charId) return;
 
@@ -923,6 +922,26 @@ io.on('connection', (socket) => {
         } catch (err) {
             console.error('Error fetching dungeon history:', err);
             socket.emit('error', { message: `Failed to fetch dungeon history: ${err.message}` });
+        }
+    });
+
+    socket.on('get_market_history', async () => {
+        try {
+            const history = await gameManager.marketManager.getGlobalHistory();
+            socket.emit('market_history_update', history);
+        } catch (err) {
+            console.error('[SOCKET] Error getting market history:', err);
+            socket.emit('error', { message: 'Failed to fetch market history.' });
+        }
+    });
+
+    socket.on('get_my_market_history', async () => {
+        try {
+            const history = await gameManager.marketManager.getPersonalHistory(socket.user.id);
+            socket.emit('my_market_history_update', history);
+        } catch (err) {
+            console.error('[SOCKET] Error getting personal market history:', err);
+            socket.emit('error', { message: 'Failed to fetch your market history.' });
         }
     });
 

@@ -249,6 +249,35 @@ export class MarketManager {
             if (updateError) throw updateError;
         }
 
+        // --- NEW: Record Market History ---
+        try {
+            const sellerName = seller?.name || (await this.gameManager.supabase
+                .from('characters')
+                .select('name')
+                .eq('id', sellerCharId)
+                .single()).data?.name || 'Unknown';
+
+            await this.gameManager.supabase
+                .from('market_history')
+                .insert([{
+                    item_id: listing.item_id,
+                    item_data: listing.item_data,
+                    seller_id: listing.seller_id,
+                    buyer_id: buyerId,
+                    seller_name: sellerName,
+                    buyer_name: buyer.name,
+                    quantity: qtyNum,
+                    price_total: totalCost,
+                    price_per_unit: unitPrice,
+                    tax_paid: tax,
+                    created_at: new Date().toISOString()
+                }]);
+            console.log(`[MarketManager] Recorded history for ${qtyNum}x ${listing.item_id}`);
+        } catch (historyErr) {
+            console.error('[MarketManager] Error recording history:', historyErr);
+            // Don't throw, transaction is already done
+        }
+
         return { success: true, message: `Bought ${qtyNum}x ${listing.item_data.name} for ${totalCost} Silver` };
     }
 
@@ -326,6 +355,7 @@ export class MarketManager {
     }
 
     async claimMarketItem(userId, characterId, claimId) {
+        // ... (existing code stays the same)
         const char = await this.gameManager.getCharacter(userId, characterId);
         if (!char.state.claims) return { success: false, message: "No items to claim." };
 
@@ -334,8 +364,6 @@ export class MarketManager {
 
         const claim = char.state.claims[claimIndex];
 
-        // 1. Handle Item Claim (if applicable and not a SOLD_ITEM)
-        // Note: SOLD_ITEM claims might have itemId for UI/history, but should not add items back to seller.
         if (claim.itemId && claim.type !== 'SOLD_ITEM') {
             const success = this.gameManager.inventoryManager.addItemToInventory(char, claim.itemId, claim.amount, claim.metadata || null);
             if (!success) {
@@ -343,14 +371,39 @@ export class MarketManager {
             }
         }
 
-        // 2. Handle Silver Claim
         if (claim.silver) {
             char.state.silver = (char.state.silver || 0) + claim.silver;
         }
 
-        // Success: Remove following successful additions
         char.state.claims.splice(claimIndex, 1);
         await this.gameManager.saveState(char.id, char.state);
         return { success: true, message: "Claimed successfully!" };
+    }
+
+    async getGlobalHistory() {
+        const { data, error } = await this.gameManager.supabase
+            .from('market_history')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(50);
+
+        if (error) throw error;
+        return data || [];
+    }
+
+    async getPersonalHistory(userId) {
+        const { data, error } = await this.gameManager.supabase
+            .from('market_history')
+            .select('*')
+            .or(`seller_id.eq.${userId},buyer_id.eq.${userId}`)
+            .order('created_at', { ascending: false })
+            .limit(100);
+
+        if (error) throw error;
+        // Tag each record with the user's role
+        return (data || []).map(tx => ({
+            ...tx,
+            role: tx.buyer_id === userId ? 'BOUGHT' : 'SOLD'
+        }));
     }
 }
