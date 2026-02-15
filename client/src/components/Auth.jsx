@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
+import { Users } from 'lucide-react';
 
 const Auth = ({ onLogin, initialView = 'LOGIN' }) => {
     const [isRegister, setIsRegister] = useState(false);
@@ -337,6 +338,50 @@ const Auth = ({ onLogin, initialView = 'LOGIN' }) => {
                             ? (view === 'REGISTER' ? 'CREATING ACCOUNT...' : view === 'FORGOT' ? 'SENDING...' : view === 'RESET' ? 'UPDATING...' : 'STARTING JOURNEY...')
                             : (view === 'REGISTER' ? 'CREATE ACCOUNT' : view === 'FORGOT' ? 'SEND RESET LINK' : view === 'RESET' ? 'UPDATE PASSWORD' : 'START JOURNEY')}
                     </button>
+
+                    {/* guest login logic */}
+                    {view === 'LOGIN' && (
+                        <button
+                            type="button"
+                            onClick={async () => {
+                                setIsLoading(true);
+                                setError('');
+                                try {
+                                    const { data, error } = await supabase.auth.signInAnonymously();
+                                    if (error) {
+                                        setError(error.message);
+                                    } else {
+                                        onLogin(data.session);
+                                    }
+                                } catch (err) {
+                                    setError('Failed to sign in as guest');
+                                } finally {
+                                    setIsLoading(false);
+                                }
+                            }}
+                            disabled={isLoading}
+                            style={{
+                                width: '100%',
+                                padding: '10px',
+                                marginBottom: '0.75rem',
+                                background: 'rgba(212, 175, 55, 0.15)',
+                                border: '1px solid rgba(212, 175, 55, 0.4)',
+                                borderRadius: '8px',
+                                color: '#d4af37',
+                                fontWeight: 'bold',
+                                fontSize: '0.9rem',
+                                cursor: 'pointer',
+                                transition: '0.2s',
+                                textTransform: 'uppercase',
+                                letterSpacing: '1px'
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(212, 175, 55, 0.25)'}
+                            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(212, 175, 55, 0.15)'}
+                        >
+                            <Users size={18} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                            Play as Guest
+                        </button>
+                    )}
 
                     {/* Google Login Button */}
                     {view === 'LOGIN' && (

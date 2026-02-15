@@ -11,7 +11,7 @@ export class AdminManager {
         const ALLOWED_ADMINS = ['5093ffaa-4770-4123-a83b-fca97a30601b', 'eea1abae-badf-4043-a3bf-1a18f4143dd2'];
         if (!ALLOWED_ADMINS.includes(socket.user.id)) return { success: false, error: "Permission denied." };
 
-        console.log(`[ADMIN] Command '${command}' from ${socket.user.email} with args:`, args);
+        console.log(`[ADMIN] Command '${command}' from ${socket.user.email || 'Guest'} with args:`, args);
 
         try {
             switch (command) {

@@ -1633,6 +1633,45 @@ function App() {
           margin: '0 auto',
           width: '100%'
         }}>
+          {/* Guest Account Warning Banner */}
+          {session?.user?.is_anonymous && (
+            <div style={{
+              background: 'rgba(212, 175, 55, 0.1)',
+              border: '1px solid rgba(212, 175, 55, 0.3)',
+              borderRadius: '10px',
+              padding: '10px 20px',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '15px',
+              backdropFilter: 'blur(10px)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Users size={18} color="#d4af37" />
+                <span style={{ fontSize: '0.85rem', color: '#d4af37', fontWeight: '500' }}>
+                  {isMobile ? "Guest Account: Save progress!" : "You are playing as a Guest. Save your progress by linking your account!"}
+                </span>
+              </div>
+              <button
+                onClick={() => setActiveTab('profile')} // Redirect to profile to see link button
+                style={{
+                  background: '#d4af37',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '5px 12px',
+                  color: '#000',
+                  fontSize: '0.75rem',
+                  fontWeight: '900',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                SAVE PROGRESS
+              </button>
+            </div>
+          )}
+
           {error && <div style={{ background: 'rgba(255, 68, 68, 0.05)', color: '#ff4444', padding: '12px 20px', marginBottom: 25, borderRadius: 8, border: '1px solid rgba(255, 68, 68, 0.1)', fontSize: '0.8rem' }}>{error}</div>}
 
           {renderContent()}

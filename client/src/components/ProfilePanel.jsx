@@ -693,6 +693,68 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                         </div>
                     </div>
 
+                    {/* Guest Account Linking Banner */}
+                    {session?.user?.is_anonymous && (
+                        <div style={{
+                            marginBottom: '25px',
+                            padding: '15px',
+                            background: 'rgba(212, 175, 55, 0.05)',
+                            border: '1px solid rgba(212, 175, 55, 0.2)',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '12px'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <Info size={18} color="#d4af37" />
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#d4af37' }}>Guest Account</span>
+                                    <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>Link your account with Google to never lose your progress!</span>
+                                </div>
+                            </div>
+                            <button
+                                onClick={async () => {
+                                    const { error } = await supabase.auth.linkIdentity({
+                                        provider: 'google',
+                                        options: {
+                                            redirectTo: window.location.origin
+                                        }
+                                    });
+                                    if (error) {
+                                        console.error('Linking error:', error.message);
+                                        alert('Failed to link account: ' + error.message);
+                                    }
+                                }}
+                                style={{
+                                    width: '100%',
+                                    padding: '10px',
+                                    background: '#fff',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    color: '#000',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.8rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '10px',
+                                    cursor: 'pointer',
+                                    transition: '0.2s'
+                                }}
+                                onMouseOver={(e) => e.currentTarget.style.filter = 'brightness(0.9)'}
+                                onMouseOut={(e) => e.currentTarget.style.filter = 'brightness(1)'}
+                            >
+                                <svg width="18" height="18" viewBox="0 0 18 18">
+                                    <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.248h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" />
+                                    <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.248c-.806.54-1.836.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" />
+                                    <path fill="#FBBC05" d="M3.964 10.719c-.18-.54-.282-1.117-.282-1.719s.102-1.179.282-1.719V4.949H.957C.347 6.169 0 7.548 0 9s.347 2.831.957 4.051l3.007-2.332z" />
+                                    <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.949L3.964 7.28c.708-2.127 2.692-3.711 5.036-3.711z" />
+                                </svg>
+                                LINK WITH GOOGLE
+                            </button>
+                        </div>
+                    )}
+
                     {/* Tab Navigation */}
                     <div style={{
                         display: 'flex',
