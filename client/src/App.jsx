@@ -622,9 +622,18 @@ function App() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    // For anonymous/guest users, we don't necessarily want to wipe the session
+    // because once they sign out, they lose access to that account forever.
+    // Instead, we just clear the local state to take them back to the Auth screen.
+    if (session?.user?.is_anonymous) {
+      // Just clear React state, but keep the session in Supabase storage
+      setSession(null);
+    } else {
+      await supabase.auth.signOut();
+      setSession(null);
+    }
+
     localStorage.removeItem('selectedCharacterId');
-    setSession(null);
     setGameState(null);
     setSelectedCharacter(null);
   };

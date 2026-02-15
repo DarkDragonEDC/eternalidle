@@ -28,6 +28,12 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
     const [activeRuneTab, setActiveRuneTab] = useState('GATHERING'); // 'GATHERING', 'REFINING', 'CRAFTING', 'COMBAT'
     const [proficiencyModal, setProficiencyModal] = useState(null);
 
+    // Guest Linking State
+    const [showEmailLink, setShowEmailLink] = useState(false);
+    const [linkEmail, setLinkEmail] = useState('');
+    const [linkPassword, setLinkPassword] = useState('');
+    const [isLinking, setIsLinking] = useState(false);
+
     // Sync title from gameState when it updates
     React.useEffect(() => {
         if (gameState?.state?.selectedTitle) {
@@ -752,6 +758,124 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                                 </svg>
                                 LINK WITH GOOGLE
                             </button>
+
+                            {/* Email Linking Toggle */}
+                            {!showEmailLink && (
+                                <button
+                                    onClick={() => setShowEmailLink(true)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '10px',
+                                        background: 'rgba(255, 255, 255, 0.1)',
+                                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                                        borderRadius: '8px',
+                                        color: '#fff',
+                                        fontWeight: 'bold',
+                                        fontSize: '0.8rem',
+                                        cursor: 'pointer',
+                                        transition: '0.2s',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '8px'
+                                    }}
+                                    onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'}
+                                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
+                                >
+                                    <Edit size={16} />
+                                    LINK WITH EMAIL
+                                </button>
+                            )}
+
+                            {/* Email Linking Form */}
+                            {showEmailLink && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: '10px' }}
+                                >
+                                    <input
+                                        type="email"
+                                        placeholder="Enter your email"
+                                        value={linkEmail}
+                                        onChange={(e) => setLinkEmail(e.target.value)}
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px',
+                                            borderRadius: '8px',
+                                            border: '1px solid var(--border)',
+                                            background: 'rgba(0,0,0,0.3)',
+                                            color: '#fff',
+                                            fontSize: '0.9rem'
+                                        }}
+                                    />
+                                    <input
+                                        type="password"
+                                        placeholder="Choose a password"
+                                        value={linkPassword}
+                                        onChange={(e) => setLinkPassword(e.target.value)}
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px',
+                                            borderRadius: '8px',
+                                            border: '1px solid var(--border)',
+                                            background: 'rgba(0,0,0,0.3)',
+                                            color: '#fff',
+                                            fontSize: '0.9rem'
+                                        }}
+                                    />
+                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                        <button
+                                            onClick={() => setShowEmailLink(false)}
+                                            style={{
+                                                flex: 1,
+                                                padding: '10px',
+                                                background: 'transparent',
+                                                border: '1px solid var(--border)',
+                                                borderRadius: '8px',
+                                                color: 'var(--text-dim)',
+                                                fontWeight: 'bold',
+                                                fontSize: '0.8rem',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            CANCEL
+                                        </button>
+                                        <button
+                                            disabled={isLinking || !linkEmail || !linkPassword}
+                                            onClick={async () => {
+                                                setIsLinking(true);
+                                                const { data, error } = await supabase.auth.updateUser({
+                                                    email: linkEmail,
+                                                    password: linkPassword
+                                                });
+
+                                                if (error) {
+                                                    alert('Error linking account: ' + error.message);
+                                                } else {
+                                                    alert('Account linked successfully! Please check your email for confirmation if required.');
+                                                    setShowEmailLink(false);
+                                                }
+                                                setIsLinking(false);
+                                            }}
+                                            style={{
+                                                flex: 1,
+                                                padding: '10px',
+                                                background: 'var(--accent)',
+                                                border: 'none',
+                                                borderRadius: '8px',
+                                                color: '#000',
+                                                fontWeight: 'bold',
+                                                fontSize: '0.8rem',
+                                                cursor: isLinking ? 'wait' : 'pointer',
+                                                opacity: (isLinking || !linkEmail || !linkPassword) ? 0.6 : 1
+                                            }}
+                                        >
+                                            {isLinking ? 'LINKING...' : 'CONFIRM LINK'}
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            )}
                         </div>
                     )}
 
