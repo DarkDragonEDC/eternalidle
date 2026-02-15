@@ -1,7 +1,7 @@
 import React from 'react';
-import { Home, User, Package, Zap, Castle, Map, Skull, Trophy, ShoppingBag } from 'lucide-react';
+import { Home, User, Package, Zap, Castle, Map, Skull, Trophy, ShoppingBag, Lock } from 'lucide-react';
 
-const BottomNav = ({ gameState, activeTab, setActiveTab, onNavigate, canSpin, hasActiveTrade }) => {
+const BottomNav = ({ gameState, activeTab, setActiveTab, onNavigate, canSpin, hasActiveTrade, isAnonymous, onShowGuestModal }) => {
     const navItems = [
         { id: 'profile', label: 'Profile', icon: <User size={20} /> }, // Using Profile as Home/Dashboard
         { id: 'inventory', label: 'Inventory', icon: <Package size={20} /> },
@@ -67,9 +67,14 @@ const BottomNav = ({ gameState, activeTab, setActiveTab, onNavigate, canSpin, ha
                             position: 'relative'
                         }}
                     >
-                        <div style={{ position: 'relative' }}>
+                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             {item.icon}
-                            {item.id === 'town' && (gameState?.state?.claims?.length > 0 || canSpin || hasActiveTrade) && (
+                            {item.id === 'town' && isAnonymous && (
+                                <div style={{ position: 'absolute', top: -4, right: -4 }}>
+                                    <Lock size={10} color="#f87171" />
+                                </div>
+                            )}
+                            {item.id === 'town' && !isAnonymous && (gameState?.state?.claims?.length > 0 || canSpin || hasActiveTrade) && (
                                 <div style={{
                                     position: 'absolute',
                                     top: '-4px',

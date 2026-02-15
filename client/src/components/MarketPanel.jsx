@@ -3,11 +3,11 @@ import { formatNumber, formatSilver } from '@utils/format';
 import {
     Tag, ShoppingBag, Package, Search,
     Coins, ArrowRight, User, Info, Trash2,
-    Shield, Zap, Apple, Box, Clock, Check, AlertTriangle, X, Star, Hammer
+    Shield, Zap, Apple, Box, Clock, Check, AlertTriangle, X, Star, Hammer, Lock
 } from 'lucide-react';
 import { resolveItem, getTierColor, formatItemId } from '@shared/items';
 
-const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket, isMobile, initialSearch = '' }) => {
+const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket, isMobile, initialSearch = '', isAnonymous }) => {
     const [activeTab, setActiveTab] = useState('BUY'); // BUY, SELL, LISTINGS, CLAIM
     const [selectedCategory, setSelectedCategory] = useState('ALL');
     const [selectedSubCategory, setSelectedSubCategory] = useState('ALL');
@@ -208,7 +208,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
     const isIronman = gameState?.state?.isIronman;
 
 
-    if (isIronman) {
+    if (isIronman || isAnonymous) {
         return (
             <div className="panel" style={{
                 height: '100%',
@@ -226,20 +226,22 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                     width: '80px',
                     height: '80px',
                     borderRadius: '50%',
-                    background: 'rgba(212, 175, 55, 0.1)',
+                    background: isIronman ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255, 68, 68, 0.1)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: '10px',
-                    border: '2px solid rgba(212, 175, 55, 0.2)'
+                    border: isIronman ? '2px solid rgba(212, 175, 55, 0.2)' : '2px solid rgba(255, 68, 68, 0.2)'
                 }}>
-                    <Shield size={40} color="var(--accent)" />
+                    {isIronman ? <Shield size={40} color="var(--accent)" /> : <Lock size={40} color="#ff4444" />}
                 </div>
-                <h2 style={{ color: 'var(--accent)', margin: 0, fontSize: '1.8rem', letterSpacing: '2px' }}>IRONMAN MODE</h2>
+                <h2 style={{ color: isIronman ? 'var(--accent)' : '#ff4444', margin: 0, fontSize: '1.8rem', letterSpacing: '2px' }}>
+                    {isIronman ? 'IRONMAN MODE' : 'GUEST ACCOUNT'}
+                </h2>
                 <p style={{ color: 'var(--text-dim)', maxWidth: '400px', lineHeight: '1.6', fontSize: '1rem' }}>
-                    Ironman characters are self-sufficient and cannot use the Marketplace.
-                    <br /><br />
-                    All items must be gathered, crafted, or found through your own adventures!
+                    {isIronman
+                        ? "Ironman characters are self-sufficient and cannot use the Marketplace. All items must be gathered, crafted, or found through your own adventures!"
+                        : "Marketplace is locked for Guest accounts to prevent abuse. Please link your account in the Profile tab to access the shared trade system."}
                 </p>
                 <div style={{
                     marginTop: '20px',
@@ -251,7 +253,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                     color: 'var(--accent)',
                     fontWeight: 'bold'
                 }}>
-                    STRICT SELF-SUFFICIENCY ACTIVE
+                    {isIronman ? 'STRICT SELF-SUFFICIENCY ACTIVE' : 'ACCOUNT LINKING REQUIRED'}
                 </div>
             </div>
         );

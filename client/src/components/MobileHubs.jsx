@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pickaxe, Box, Hammer, Sword, Castle, Trophy, ShoppingBag, Zap, Coins, Gift, ArrowLeftRight, Skull } from 'lucide-react';
+import { Pickaxe, Box, Hammer, Sword, Castle, Trophy, ShoppingBag, Zap, Coins, Gift, ArrowLeftRight, Skull, Lock } from 'lucide-react';
 
 const HubButton = ({ label, icon, onClick, color = 'var(--text-main)', level, progress, showBadge, customStyle = {} }) => (
     <button
@@ -257,27 +257,62 @@ export const SkillsOverview = ({ onNavigate, gameState }) => {
     );
 };
 
-export const TownOverview = ({ onNavigate, gameState, canSpin, onOpenDailySpin, hasActiveTrade }) => {
+export const TownOverview = ({ onNavigate, gameState, canSpin, onOpenDailySpin, hasActiveTrade, isAnonymous, onShowGuestModal }) => {
     const hasClaims = gameState?.state?.claims?.length > 0;
 
     return (
         <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {canSpin && (
+            {(canSpin || isAnonymous) && (
                 <HubButton
-                    label="Daily Gift"
-                    icon={<Gift />}
-                    color="#fff"
-                    onClick={onOpenDailySpin}
-                    showBadge={true}
+                    label={isAnonymous ? "Save to Spin" : "Daily Gift"}
+                    icon={isAnonymous ? <Lock /> : <Gift />}
+                    color={isAnonymous ? "var(--text-dim)" : "#fff"}
+                    onClick={() => {
+                        if (isAnonymous) {
+                            onShowGuestModal();
+                            return;
+                        }
+                        onOpenDailySpin();
+                    }}
+                    showBadge={!isAnonymous}
                     customStyle={{
-                        background: 'linear-gradient(135deg, var(--accent) 0%, #b8860b 100%)',
-                        border: '1px solid #ffd700',
-                        boxShadow: '0 0 15px rgba(255, 215, 0, 0.3)'
+                        background: isAnonymous
+                            ? 'var(--panel-bg)'
+                            : 'linear-gradient(135deg, var(--accent) 0%, #b8860b 100%)',
+                        border: isAnonymous ? '1px solid var(--border)' : '1px solid #ffd700',
+                        boxShadow: isAnonymous ? 'none' : '0 0 15px rgba(255, 215, 0, 0.3)',
+                        opacity: isAnonymous ? 0.7 : 1
                     }}
                 />
             )}
-            <HubButton label="Market" icon={<ShoppingBag />} color="#fbbf24" onClick={() => onNavigate('market')} showBadge={hasClaims} />
-            <HubButton label="Trade" icon={<ArrowLeftRight />} color="#8b5cf6" onClick={() => onNavigate('trade')} showBadge={hasActiveTrade} />
+            <HubButton
+                label="Market"
+                icon={isAnonymous ? <Lock /> : <ShoppingBag />}
+                color={isAnonymous ? "var(--text-dim)" : "#fbbf24"}
+                onClick={() => {
+                    if (isAnonymous) {
+                        onShowGuestModal();
+                        return;
+                    }
+                    onNavigate('market');
+                }}
+                showBadge={hasClaims && !isAnonymous}
+                customStyle={isAnonymous ? { opacity: 0.7 } : {}}
+            />
+            <HubButton
+                label="Trade"
+                icon={isAnonymous ? <Lock /> : <ArrowLeftRight />}
+                color={isAnonymous ? "var(--text-dim)" : "#8b5cf6"}
+                onClick={() => {
+                    if (isAnonymous) {
+                        onShowGuestModal();
+                        return;
+                    }
+                    onNavigate('trade');
+                }}
+                showBadge={hasActiveTrade && !isAnonymous}
+                customStyle={isAnonymous ? { opacity: 0.7 } : {}}
+            />
             <HubButton label="Ranking" icon={<Trophy />} color="#a78bfa" onClick={() => onNavigate('ranking')} />
             <HubButton label="Taxometer" icon={<Coins />} color="var(--accent)" onClick={() => onNavigate('taxometer')} />
         </div>

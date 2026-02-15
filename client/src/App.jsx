@@ -152,6 +152,7 @@ function App() {
 
   const [dailySpinOpen, setDailySpinOpen] = useState(false);
   const [canSpin, setCanSpin] = useState(false);
+  const [showGuestModal, setShowGuestModal] = useState(false);
 
   // Trade State
   const [activeTrade, setActiveTrade] = useState(null);
@@ -854,7 +855,15 @@ function App() {
       case 'skills_overview':
         return <SkillsOverview gameState={displayedGameState} onNavigate={(tab, cat) => { setActiveTab(tab); if (cat) setActiveCategory(cat); }} />;
       case 'town_overview':
-        return <TownOverview onNavigate={(tab) => setActiveTab(tab)} gameState={displayedGameState} canSpin={canSpin} onOpenDailySpin={() => setDailySpinOpen(true)} hasActiveTrade={tradeInvites?.length > 0 || !!activeTrade} />;
+        return <TownOverview
+          onNavigate={(tab) => setActiveTab(tab)}
+          gameState={displayedGameState}
+          canSpin={canSpin}
+          onOpenDailySpin={() => setDailySpinOpen(true)}
+          hasActiveTrade={tradeInvites?.length > 0 || !!activeTrade}
+          isAnonymous={session?.user?.is_anonymous}
+          onShowGuestModal={() => setShowGuestModal(true)}
+        />;
       case 'combat_overview':
         return <CombatOverview gameState={displayedGameState} onNavigate={(tab) => setActiveTab(tab)} />;
       case 'gathering':
@@ -1247,6 +1256,23 @@ function App() {
             />
           </div>
         );
+      case 'market':
+        return (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <SkillProgressHeader tab="market" category="MARKETPLACE" />
+            <MarketPanel
+              socket={socket}
+              gameState={displayedGameState}
+              silver={displayedGameState?.state?.silver || 0}
+              onShowInfo={handleShowInfo}
+              onListOnMarket={handleListOnMarket}
+              isMobile={isMobile}
+              isAnonymous={session?.user?.is_anonymous}
+              filter={marketFilter}
+              onClearFilter={() => setMarketFilter(null)}
+            />
+          </div>
+        );
       case 'trade':
         return null; // TradePanel is a modal, handled separately
       case 'taxometer':
@@ -1427,23 +1453,36 @@ function App() {
           gameState={displayedGameState}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          onNavigate={handleNavigate}
           activeCategory={activeCategory}
           setActiveCategory={setActiveCategory}
+          activeTier={activeTier}
+          setActiveTier={setActiveTier}
+          onNavigate={handleNavigate}
           isMobile={isMobile}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
+          onSwitchCharacter={handleSwitchCharacter}
           theme={theme}
           toggleTheme={toggleTheme}
-          onSwitchCharacter={handleSwitchCharacter}
           socket={socket}
           canSpin={canSpin}
           onOpenDailySpin={() => setDailySpinOpen(true)}
           hasActiveTrade={tradeInvites?.length > 0 || !!activeTrade}
+          isAnonymous={session?.user?.is_anonymous}
+          onShowGuestModal={() => setShowGuestModal(true)}
         />
       )}
 
-      {isMobile && <BottomNav gameState={displayedGameState} activeTab={activeTab} setActiveTab={setActiveTab} onNavigate={handleNavigate} canSpin={canSpin} hasActiveTrade={tradeInvites?.length > 0 || !!activeTrade} />}
+      {isMobile && <BottomNav
+        gameState={displayedGameState}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onNavigate={handleNavigate}
+        canSpin={canSpin}
+        hasActiveTrade={tradeInvites?.length > 0 || !!activeTrade}
+        isAnonymous={session?.user?.is_anonymous}
+        onShowGuestModal={() => setShowGuestModal(true)}
+      />}
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', minHeight: 0 }}>
         <header style={{
@@ -1848,7 +1887,6 @@ function App() {
         socket={socket}
       />
 
-      {/* Potion Replacement Confirmation Modal */}
       <AnimatePresence>
         {showSocialModal && (
           <SocialPanel
@@ -1871,7 +1909,9 @@ function App() {
             tradeInvites={tradeInvites}
           />
         )}
+      </AnimatePresence>
 
+      <AnimatePresence>
         {activeTrade && (
           <TradePanel
             key={`trade-panel-${activeTrade.id}`}
@@ -1884,16 +1924,18 @@ function App() {
             isMobile={isMobile}
           />
         )}
+      </AnimatePresence>
 
-        <LeaderboardModal
-          key="leaderboard-modal"
-          isOpen={activeTab === 'leaderboard'}
-          onClose={() => setActiveTab('inventory')}
-          socket={socket}
-          isMobile={isMobile}
-          onInspect={handleInspectPlayer}
-        />
+      <LeaderboardModal
+        key="leaderboard-modal"
+        isOpen={activeTab === 'leaderboard'}
+        onClose={() => setActiveTab('inventory')}
+        socket={socket}
+        isMobile={isMobile}
+        onInspect={handleInspectPlayer}
+      />
 
+      <AnimatePresence>
         {pendingPotion && (
           <div key="potion-modal-backdrop" style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -1968,7 +2010,13 @@ function App() {
           />
         )}
       </AnimatePresence>
-    </div >
+
+      <AnimatePresence>
+        {showGuestModal && (
+          <GuestRestrictionModal onClose={() => setShowGuestModal(false)} />
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -2041,6 +2089,126 @@ const ActivityProgressBar = ({ activity, serverTimeOffset = 0 }) => {
       <div style={{ fontSize: '0.6rem', textAlign: 'right', color: '#aaa', marginTop: '2px' }}>
         {progress.toFixed(1)}%
       </div>
+    </div>
+  );
+};
+
+const GuestRestrictionModal = ({ onClose }) => {
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+      background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      zIndex: 11000, padding: '20px'
+    }} onClick={onClose}>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: 'var(--panel-bg)',
+          border: '1px solid var(--border-active)',
+          borderRadius: '24px',
+          padding: '40px',
+          maxWidth: '450px',
+          width: '100%',
+          textAlign: 'center',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}
+      >
+        {/* Decorative background element */}
+        <div style={{
+          position: 'absolute', top: '-50px', right: '-50px',
+          width: '150px', height: '150px', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(255,107,107,0.1) 0%, transparent 70%)',
+          zIndex: 0
+        }} />
+
+        <div style={{
+          width: '80px', height: '80px', borderRadius: '20px',
+          background: 'rgba(255, 107, 107, 0.1)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto 25px',
+          border: '1px solid rgba(255, 107, 107, 0.2)',
+          boxShadow: '0 10px 20px rgba(255, 107, 107, 0.1)',
+          position: 'relative', zIndex: 1
+        }}>
+          <Lock size={40} color="#ff6b6b" />
+        </div>
+
+        <h2 style={{
+          margin: '0 0 15px',
+          color: 'var(--text-main)',
+          fontSize: '1.8rem',
+          fontWeight: '900',
+          letterSpacing: '1px',
+          position: 'relative', zIndex: 1
+        }}>
+          FEATURE LOCKED
+        </h2>
+
+        <p style={{
+          color: 'var(--text-dim)',
+          fontSize: '1rem',
+          lineHeight: '1.6',
+          margin: '0 0 30px',
+          position: 'relative', zIndex: 1
+        }}>
+          Marketplace, Trading and Daily Spin are premium features reserved for permanent accounts.
+          <br /><br />
+          <strong style={{ color: 'var(--text-main)' }}>Link your account now</strong> to protect your progress and join the player economy!
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative', zIndex: 1 }}>
+          <button
+            onClick={onClose}
+            style={{
+              width: '100%',
+              padding: '16px',
+              borderRadius: '14px',
+              border: 'none',
+              background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5253 100%)',
+              color: '#fff',
+              fontSize: '1rem',
+              fontWeight: '800',
+              cursor: 'pointer',
+              boxShadow: '0 4px 15px rgba(238, 82, 83, 0.4)',
+              transition: 'transform 0.2s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+          >
+            GOT IT
+          </button>
+
+          <button
+            onClick={() => {
+              onClose();
+              // The user can find the link button in Profile
+              document.querySelector('[data-tab="profile"]')?.click();
+            }}
+            style={{
+              width: '100%',
+              padding: '14px',
+              borderRadius: '14px',
+              border: '1px solid var(--border)',
+              background: 'rgba(255,255,255,0.03)',
+              color: 'var(--text-main)',
+              fontSize: '0.9rem',
+              fontWeight: '700',
+              cursor: 'pointer',
+              transition: 'background 0.2s'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+          >
+            GO TO PROFILE
+          </button>
+        </div>
+      </motion.div>
     </div>
   );
 };

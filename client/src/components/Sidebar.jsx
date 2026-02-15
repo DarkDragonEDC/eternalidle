@@ -3,12 +3,12 @@ import React, { useState, useEffect } from 'react';
 import {
     Package, User, Pickaxe, Hammer, Sword,
     ChevronDown, ChevronRight, Coins, Castle,
-    Trophy, Tag, Zap, Box, Axe, Shield, Users, MessageSquare, Sun, Moon, Gift, Skull
+    Trophy, Tag, Zap, Box, Axe, Shield, Users, MessageSquare, Sun, Moon, Gift, Skull, Lock
 } from 'lucide-react';
 import DailySpinModal from './DailySpinModal';
 import { calculateNextLevelXP } from '@shared/skills';
 
-const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategory, setActiveCategory, isMobile, isOpen, onClose, onSwitchCharacter, theme, toggleTheme, socket, canSpin, onOpenDailySpin, hasActiveTrade }) => {
+const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategory, setActiveCategory, isMobile, isOpen, onClose, onSwitchCharacter, theme, toggleTheme, socket, canSpin, onOpenDailySpin, hasActiveTrade, isAnonymous, onShowGuestModal }) => {
     const [expanded, setExpanded] = useState({
         gathering: true,
         refining: false,
@@ -247,12 +247,16 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
                     {[
                         { id: 'profile', label: 'PROFILE', icon: <User size={14} /> },
                         { id: 'inventory', label: 'BAG', icon: <Package size={14} /> },
-                        { id: 'market', label: 'MARKET', icon: <Tag size={14} /> },
-                        { id: 'trade', label: 'TRADE', icon: <Users size={14} /> }
+                        { id: 'market', label: 'MARKET', icon: <Tag size={14} />, restricted: isAnonymous },
+                        { id: 'trade', label: 'TRADE', icon: <Users size={14} />, restricted: isAnonymous }
                     ].map(item => (
                         <button
                             key={item.id}
                             onClick={() => {
+                                if (item.restricted) {
+                                    onShowGuestModal();
+                                    return;
+                                }
                                 if (item.id === 'trade' && onNavigate) {
                                     onNavigate('trade');
                                 } else {
@@ -271,12 +275,19 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
                                 background: activeTab === item.id ? 'var(--accent-soft)' : 'var(--glass-bg)',
                                 color: activeTab === item.id ? 'var(--accent)' : 'var(--text-dim)',
                                 transition: '0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-                                cursor: 'pointer'
+                                cursor: item.restricted ? 'not-allowed' : 'pointer',
+                                opacity: item.restricted ? 0.5 : 1,
+                                position: 'relative'
                             }}
                         >
-                            <div style={{ position: 'relative' }}>
+                            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 {item.icon}
-                                {item.id === 'market' && gameState?.state?.claims?.length > 0 && (
+                                {item.restricted && (
+                                    <div style={{ position: 'absolute', top: -4, right: -4 }}>
+                                        <Lock size={10} color="#f87171" />
+                                    </div>
+                                )}
+                                {item.id === 'market' && !item.restricted && gameState?.state?.claims?.length > 0 && (
                                     <div style={{
                                         position: 'absolute',
                                         top: '-4px',
@@ -309,10 +320,16 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
                 </div>
             </div>
 
-            {canSpin && !gameState?.state?.isIronman && (
+            {(canSpin || isAnonymous) && !gameState?.state?.isIronman && (
                 <div style={{ padding: '0 10px 10px 10px' }}>
                     <button
-                        onClick={onOpenDailySpin}
+                        onClick={() => {
+                            if (isAnonymous) {
+                                onShowGuestModal();
+                                return;
+                            }
+                            onOpenDailySpin();
+                        }}
                         style={{
                             width: '100%',
                             padding: '12px',
@@ -320,19 +337,22 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
                             alignItems: 'center',
                             justifyContent: 'center',
                             gap: '10px',
-                            background: 'linear-gradient(135deg, var(--accent) 0%, #b8860b 100%)',
+                            background: isAnonymous
+                                ? 'linear-gradient(135deg, #444 0%, #222 100%)'
+                                : 'linear-gradient(135deg, var(--accent) 0%, #b8860b 100%)',
                             borderRadius: '10px',
-                            border: '1px solid #ffd700',
-                            color: '#000',
+                            border: isAnonymous ? '1px solid #666' : '1px solid #ffd700',
+                            color: isAnonymous ? '#aaa' : '#000',
                             fontWeight: 'bold',
-                            cursor: 'pointer',
-                            boxShadow: '0 4px 15px rgba(255, 215, 0, 0.2)',
-                            animation: 'pulse 2s infinite',
-                            fontSize: '0.9rem'
+                            cursor: isAnonymous ? 'pointer' : 'pointer',
+                            boxShadow: isAnonymous ? 'none' : '0 4px 15px rgba(255, 215, 0, 0.2)',
+                            animation: isAnonymous ? 'none' : 'pulse 2s infinite',
+                            fontSize: '0.9rem',
+                            position: 'relative'
                         }}
                     >
-                        <Gift size={18} />
-                        <span>CLAIM REWARD</span>
+                        {isAnonymous ? <Lock size={18} /> : <Gift size={18} />}
+                        <span>{isAnonymous ? 'SAVE TO SPIN' : 'CLAIM REWARD'}</span>
                     </button>
                 </div>
             )}

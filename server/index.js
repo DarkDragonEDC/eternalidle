@@ -737,6 +737,7 @@ io.on('connection', (socket) => {
 
     socket.on('list_market_item', async ({ itemId, amount, price, metadata }) => {
         try {
+            if (socket.user.is_anonymous) throw new Error("Market is locked for Guest accounts.");
             await gameManager.executeLocked(socket.user.id, async () => {
                 const result = await gameManager.listMarketItem(socket.user.id, socket.data.characterId, itemId, amount, price, metadata);
                 socket.emit('market_action_success', result);
@@ -755,6 +756,7 @@ io.on('connection', (socket) => {
 
     socket.on('buy_market_item', async ({ listingId, quantity }) => {
         try {
+            if (socket.user.is_anonymous) throw new Error("Market is locked for Guest accounts.");
             await gameManager.executeLocked(socket.user.id, async () => {
                 const result = await gameManager.buyMarketItem(socket.user.id, socket.data.characterId, listingId, quantity);
                 socket.emit('market_action_success', result);
@@ -774,6 +776,7 @@ io.on('connection', (socket) => {
 
     socket.on('cancel_listing', async ({ listingId }) => {
         try {
+            if (socket.user.is_anonymous) throw new Error("Market is locked for Guest accounts.");
             await gameManager.executeLocked(socket.user.id, async () => {
                 const result = await gameManager.cancelMarketListing(socket.user.id, socket.data.characterId, listingId);
                 socket.emit('market_action_success', result);
@@ -837,6 +840,7 @@ io.on('connection', (socket) => {
 
     socket.on('claim_market_item', async ({ claimId }) => {
         try {
+            if (socket.user.is_anonymous) throw new Error("Market is locked for Guest accounts.");
             await gameManager.executeLocked(socket.user.id, async () => {
                 const result = await gameManager.claimMarketItem(socket.user.id, socket.data.characterId, claimId);
                 socket.emit('market_action_success', result);
@@ -918,6 +922,9 @@ io.on('connection', (socket) => {
     });
 
     socket.on('spin_daily', async () => {
+        if (socket.user.is_anonymous) {
+            return socket.emit('error', { message: "Daily Spin is locked for Guest accounts." });
+        }
         // FIX: Use executeLocked to prevent race condition
         await gameManager.executeLocked(socket.user.id, async () => {
             const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
@@ -1046,6 +1053,7 @@ io.on('connection', (socket) => {
 
     socket.on('trade_create', async ({ receiverName }) => {
         try {
+            if (socket.user.is_anonymous) throw new Error("Trading is locked for Guest accounts.");
             await gameManager.executeLocked(socket.user.id, async () => {
                 const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
                 const trade = await gameManager.tradeManager.createTrade(char, receiverName);
@@ -1096,6 +1104,7 @@ io.on('connection', (socket) => {
 
     socket.on('trade_update_offer', async ({ tradeId, items, silver }) => {
         try {
+            if (socket.user.is_anonymous) throw new Error("Trading is locked for Guest accounts.");
             await gameManager.executeLocked(socket.user.id, async () => {
                 const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
                 const trade = await gameManager.tradeManager.updateOffer(char, tradeId, items, silver);
@@ -1113,6 +1122,7 @@ io.on('connection', (socket) => {
 
     socket.on('trade_accept', async ({ tradeId }) => {
         try {
+            if (socket.user.is_anonymous) throw new Error("Trading is locked for Guest accounts.");
             await gameManager.executeLocked(socket.user.id, async () => {
                 const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
                 const result = await gameManager.tradeManager.acceptTrade(char, tradeId);
