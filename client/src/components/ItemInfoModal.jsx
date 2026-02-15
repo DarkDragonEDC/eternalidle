@@ -82,8 +82,8 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
         if (itm.type === 'MAP') return "Dungeon Map. Use to access dangerous areas with valuable rewards.";
         if (itm.type === 'CRAFTING_MATERIAL' && itm.id.includes('CREST')) return "Rare boss material. Used to craft prestige items.";
 
-        if (itm.type === 'RESOURCE') {
-            if (itm.req) return "Refined material. Used to craft equipment and structures.";
+        if (itm.type === 'RESOURCE' || itm.type === 'RAW' || itm.type === 'REFINED') {
+            if (itm.type === 'REFINED' || itm.req) return "Refined material. Used to craft equipment and structures.";
             return "Raw material gathered in the world. Used to refine materials.";
         }
 

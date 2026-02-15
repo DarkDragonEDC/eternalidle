@@ -5,7 +5,7 @@ import {
     Coins, ArrowRight, User, Info, Trash2,
     Shield, Zap, Apple, Box, Clock, Check, AlertTriangle, X, Star, Hammer, Lock
 } from 'lucide-react';
-import { resolveItem, getTierColor, formatItemId } from '@shared/items';
+import { resolveItem, getTierColor, formatItemId, getRequiredProficiencyGroup } from '@shared/items';
 
 const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket, isMobile, initialSearch = '', isAnonymous }) => {
     const [activeTab, setActiveTab] = useState('BUY'); // BUY, SELL, LISTINGS, CLAIM
@@ -21,6 +21,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
     const [selectedTier, setSelectedTier] = useState('ALL');
     const [selectedQuality, setSelectedQuality] = useState('ALL');
     const [selectedSortOrder, setSelectedSortOrder] = useState('NEWEST');
+    const [selectedClass, setSelectedClass] = useState('ALL');
     const [sellSearchQuery, setSellSearchQuery] = useState('');
 
 
@@ -174,12 +175,32 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
             if (selectedCategory === 'EQUIPMENT') {
                 if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'OFF_HAND', 'GLOVES', 'CAPE', 'TOOL'].includes(l.item_data?.type)) return false;
             } else if (selectedCategory === 'RESOURCE') {
-                if (!['RESOURCE', 'RAW', 'REFINED'].includes(l.item_data?.type)) return false;
+                // Show only raw materials/resources, excluding refined ones
+                if (l.item_data?.type === 'RAW') return true;
+                if (l.item_data?.type === 'RESOURCE') {
+                    // Legacy support: check if it's a refined item by ID
+                    const isRefined = l.item_id.includes('_BAR') || l.item_id.includes('_PLANK') || l.item_id.includes('_LEATHER') || l.item_id.includes('_CLOTH') || l.item_id.includes('_EXTRACT');
+                    if (isRefined) return false;
+                    return true;
+                }
+                return false;
             } else if (selectedCategory === 'REFINED') {
-                if (l.item_data?.type !== 'REFINED') return false;
+                if (l.item_data?.type === 'REFINED') return true;
+                if (l.item_data?.type === 'RESOURCE') {
+                    // Legacy support: check if it's a refined item by ID
+                    const isRefined = l.item_id.includes('_BAR') || l.item_id.includes('_PLANK') || l.item_id.includes('_LEATHER') || l.item_id.includes('_CLOTH') || l.item_id.includes('_EXTRACT');
+                    if (isRefined) return true;
+                }
+                return false;
             } else if (selectedCategory === 'CONSUMABLE') {
                 if (!['FOOD', 'POTION'].includes(l.item_data?.type)) return false;
             }
+        }
+
+        // 5. Class Filter (New)
+        if (selectedClass !== 'ALL') {
+            const requiredClass = getRequiredProficiencyGroup(l.item_id);
+            if (requiredClass !== selectedClass.toLowerCase()) return false;
         }
 
         return true;
@@ -433,6 +454,26 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                     <option value="2">Outstanding</option>
                                     <option value="3">Excellent</option>
                                     <option value="4">Masterpiece</option>
+                                </select>
+
+                                <select
+                                    value={selectedClass}
+                                    onChange={(e) => setSelectedClass(e.target.value)}
+                                    style={{
+                                        flex: '1',
+                                        minWidth: '100px',
+                                        background: 'rgba(0, 0, 0, 0.3)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '8px',
+                                        padding: '5px 10px',
+                                        color: 'var(--text-main)',
+                                        fontSize: '0.8rem'
+                                    }}
+                                >
+                                    <option value="ALL">All Classes</option>
+                                    <option value="WARRIOR">Warrior</option>
+                                    <option value="HUNTER">Hunter</option>
+                                    <option value="MAGE">Mage</option>
                                 </select>
 
                                 <select
@@ -780,7 +821,6 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                         </div>
                                                     )}
                                                 </div>
-
                                                 <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 'bold', textAlign: 'center', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                     {data.name}
                                                 </div>
@@ -942,32 +982,42 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                 </div>
                             ) : (
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
-                                    {gameState?.state?.claims?.map(c => {
+                                    {gameState.state.claims.map(c => {
                                         let isItem = c.type === 'BOUGHT_ITEM' || c.type === 'CANCELLED_LISTING' || c.type === 'SOLD_ITEM';
                                         let name = c.name || 'Item';
                                         let icon = <Coins size={24} color="var(--accent)" />;
-                                        let tierColor = '#fff';
 
                                         let itemData = null;
                                         if (isItem && c.itemId) {
-                                            itemData = resolveItem(c.itemId);
+                                            const resolved = resolveItem(c.itemId, c.metadata?.quality);
+                                            // Prioritize resolved item data for name, icon, and rarityColor
+                                            itemData = {
+                                                ...(c.metadata || {}),
+                                                ...resolved,
+                                                // If metadata has specific runtime info like craftedBy, keep it
+                                                craftedBy: c.metadata?.craftedBy || resolved?.craftedBy
+                                            };
+
                                             if (itemData) {
-                                                tierColor = getTierColor(itemData.tier);
                                                 if (c.type === 'SOLD_ITEM') {
                                                     name = `Sold: ${itemData.name}`;
                                                 } else {
-                                                    name = `${itemData.name}`;
+                                                    name = itemData.name;
                                                 }
 
                                                 if (c.type !== 'SOLD_ITEM') {
                                                     if (itemData.icon) {
                                                         icon = <img src={itemData.icon} alt={itemData.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />;
                                                     } else {
-                                                        icon = <Package size={24} color="#666" style={{ opacity: 0.8 }} />;
+                                                        // Fallback to Tier text if NO icon exists (matching Buy tab behavior)
+                                                        icon = <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{itemData.tier}</span>;
                                                     }
                                                 }
                                             }
                                         }
+
+                                        const itemRarityColor = itemData?.rarityColor || '#fff';
+                                        const hasGlow = itemRarityColor !== '#fff';
 
                                         return (
                                             <div key={c.id} style={{
@@ -992,12 +1042,21 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
-                                                    border: isItem ? `1px solid ${tierColor}` : '1px solid var(--accent)',
+                                                    border: isItem ? `2px solid ${itemRarityColor}` : '1px solid var(--accent)',
+                                                    boxShadow: hasGlow ? `0 0 10px ${itemRarityColor}88` : 'none',
                                                     flexShrink: 0,
                                                     overflow: 'hidden',
-                                                    position: 'relative'
+                                                    position: 'relative',
+                                                    zIndex: 1
                                                 }}>
-                                                    {isItem && icon.props?.style ? React.cloneElement(icon, { style: { ...icon.props.style, width: '130%', height: '130%', objectFit: 'contain' } }) : icon}
+                                                    {icon}
+
+                                                    {/* Small Tier Label (Top Left) */}
+                                                    {itemData?.tier && (
+                                                        <div style={{ position: 'absolute', top: 2, left: 2, fontSize: '0.6rem', fontWeight: '900', color: 'var(--text-main)', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>
+                                                            T{itemData.tier}
+                                                        </div>
+                                                    )}
 
                                                     {/* Rune Stars Overlay */}
                                                     {itemData?.stars > 0 && (

@@ -96,7 +96,7 @@ const genRaw = (type, idPrefix) => {
             id: `T${t}_${idPrefix}`,
             name: `${type.charAt(0) + type.slice(1).toLowerCase()}`,
             tier: t,
-            type: 'RESOURCE',
+            type: 'RAW',
             xp: GATHER_DATA.xp[t - 1],
             time: GATHER_DATA.time[t - 1],
             description: `A raw resource of Tier ${t}. Used for refining.`
@@ -113,7 +113,7 @@ const genRefined = (type, idPrefix, rawId) => {
             id: `T${t}_${idPrefix}`,
             name: type.charAt(0) + type.slice(1).toLowerCase(),
             tier: t,
-            type: 'RESOURCE',
+            type: 'REFINED',
             req,
             xp: REFINE_DATA.xp[t - 1],
             time: REFINE_DATA.time[t - 1],
@@ -848,10 +848,6 @@ export const resolveItem = (itemId, overrideQuality = null) => {
     let baseId = upperId;
     let baseItem = null;
 
-    // DEBUG LOG
-    if (upperId.includes('FIRE_STAFF')) {
-        console.log('Resolving:', upperId);
-    }
 
     // 2. Quality Detection (Legacy Split Method - Safer)
     if (upperId.includes('_Q')) {
@@ -995,7 +991,7 @@ export const resolveItem = (itemId, overrideQuality = null) => {
         ...baseItem,
         id: itemId,
         name: baseItem.name,
-        rarityColor: baseItem.rarityColor || effectiveQuality.color,
+        rarityColor: baseItem.rarityColor || effectiveQuality.color || '#fff',
         quality: effectiveQualityId,
         qualityName: effectiveQuality.name,
         originalId: baseId,
@@ -1003,6 +999,7 @@ export const resolveItem = (itemId, overrideQuality = null) => {
         ip: (baseItem.ip || 0) + ipBonus,
         stats: newStats
     };
+
 
     // EMERGENCY GLOBAL FIX FOR AXE ICONS
     if (baseId.toUpperCase().includes('AXE') && !baseId.toUpperCase().includes('PICKAXE')) {

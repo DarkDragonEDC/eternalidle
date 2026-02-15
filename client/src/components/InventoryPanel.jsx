@@ -72,7 +72,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
         // Category Filter
         if (filter !== 'ALL') {
             const isGear = ['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'OFF_HAND', 'CAPE'].includes(item.type) || item.type.startsWith('TOOL');
-            const isRaw = ['RESOURCE', 'RAW', 'CRAFTING_MATERIAL'].includes(item.type) || item.id.includes('_ORE') || item.id.includes('_WOOD');
+            const isRaw = ['RESOURCE', 'RAW', 'REFINED', 'CRAFTING_MATERIAL'].includes(item.type) || item.id.includes('_ORE') || item.id.includes('_WOOD');
             const isConsumable = ['FOOD', 'POTION', 'MAP', 'CONSUMABLE', 'CHEST'].includes(item.type);
 
             if (filter === 'EQUIPMENT' && !isGear) return false;
