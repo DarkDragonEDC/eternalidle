@@ -6,7 +6,7 @@ export const MONSTERS = {
             "health": 600,
             "damage": 4,
             "defense": 15,
-            "xp": 229,
+            "xp": 23,
             "loot": {
                 "T1_DUNGEON_MAP": 0.01
             },
@@ -25,9 +25,9 @@ export const MONSTERS = {
             "health": 650,
             "damage": 4,
             "defense": 16,
-            "xp": 240,
+            "xp": 24,
             "loot": {
-                "T1_DUNGEON_MAP": 0.02
+                "T1_DUNGEON_MAP": 0.015
             },
             "silver": [
                 144,
@@ -42,9 +42,9 @@ export const MONSTERS = {
             "health": 704,
             "damage": 5,
             "defense": 17,
-            "xp": 252,
+            "xp": 25,
             "loot": {
-                "T1_DUNGEON_MAP": 0.015
+                "T1_DUNGEON_MAP": 0.02
             },
             "silver": [
                 151,
@@ -58,9 +58,9 @@ export const MONSTERS = {
             "health": 762,
             "damage": 6,
             "defense": 19,
-            "xp": 265,
+            "xp": 27,
             "loot": {
-                "T1_DUNGEON_MAP": 0.015
+                "T1_DUNGEON_MAP": 0.025
             },
             "silver": [
                 159,
@@ -74,9 +74,9 @@ export const MONSTERS = {
             "health": 826,
             "damage": 6,
             "defense": 20,
-            "xp": 278,
+            "xp": 28,
             "loot": {
-                "T1_DUNGEON_MAP": 0.02
+                "T1_DUNGEON_MAP": 0.03
             },
             "silver": [
                 167,
@@ -147,7 +147,7 @@ export const MONSTERS = {
             "health": 894,
             "damage": 7,
             "defense": 22,
-            "xp": 292,
+            "xp": 29,
             "loot": {
                 "T2_DUNGEON_MAP": 0.01
             },
@@ -164,9 +164,9 @@ export const MONSTERS = {
             "health": 969,
             "damage": 8,
             "defense": 24,
-            "xp": 307,
+            "xp": 31,
             "loot": {
-                "T2_DUNGEON_MAP": 0.02
+                "T2_DUNGEON_MAP": 0.015
             },
             "silver": [
                 184,
@@ -181,9 +181,9 @@ export const MONSTERS = {
             "health": 1049,
             "damage": 9,
             "defense": 25,
-            "xp": 322,
+            "xp": 32,
             "loot": {
-                "T2_DUNGEON_MAP": 0.015
+                "T2_DUNGEON_MAP": 0.02
             },
             "silver": [
                 193,
@@ -197,9 +197,9 @@ export const MONSTERS = {
             "health": 1136,
             "damage": 10,
             "defense": 27,
-            "xp": 338,
+            "xp": 34,
             "loot": {
-                "T2_DUNGEON_MAP": 0.015
+                "T2_DUNGEON_MAP": 0.025
             },
             "silver": [
                 203,
@@ -213,9 +213,9 @@ export const MONSTERS = {
             "health": 1231,
             "damage": 11,
             "defense": 30,
-            "xp": 355,
+            "xp": 36,
             "loot": {
-                "T2_DUNGEON_MAP": 0.02
+                "T2_DUNGEON_MAP": 0.03
             },
             "silver": [
                 213,
@@ -286,7 +286,7 @@ export const MONSTERS = {
             "health": 1333,
             "damage": 13,
             "defense": 32,
-            "xp": 373,
+            "xp": 37,
             "loot": {
                 "T3_DUNGEON_MAP": 0.01
             },
@@ -303,9 +303,9 @@ export const MONSTERS = {
             "health": 1444,
             "damage": 14,
             "defense": 34,
-            "xp": 392,
+            "xp": 39,
             "loot": {
-                "T3_DUNGEON_MAP": 0.02
+                "T3_DUNGEON_MAP": 0.015
             },
             "silver": [
                 235,
@@ -320,9 +320,9 @@ export const MONSTERS = {
             "health": 1564,
             "damage": 16,
             "defense": 37,
-            "xp": 411,
+            "xp": 41,
             "loot": {
-                "T3_DUNGEON_MAP": 0.015
+                "T3_DUNGEON_MAP": 0.02
             },
             "silver": [
                 247,
@@ -336,9 +336,9 @@ export const MONSTERS = {
             "health": 1694,
             "damage": 18,
             "defense": 40,
-            "xp": 432,
+            "xp": 43,
             "loot": {
-                "T3_DUNGEON_MAP": 0.015
+                "T3_DUNGEON_MAP": 0.025
             },
             "silver": [
                 259,
@@ -352,9 +352,9 @@ export const MONSTERS = {
             "health": 1835,
             "damage": 20,
             "defense": 43,
-            "xp": 453,
+            "xp": 45,
             "loot": {
-                "T3_DUNGEON_MAP": 0.02
+                "T3_DUNGEON_MAP": 0.03
             },
             "silver": [
                 272,
@@ -425,7 +425,7 @@ export const MONSTERS = {
             "health": 1987,
             "damage": 23,
             "defense": 46,
-            "xp": 476,
+            "xp": 48,
             "loot": {
                 "T4_DUNGEON_MAP": 0.01
             },
@@ -442,9 +442,9 @@ export const MONSTERS = {
             "health": 2152,
             "damage": 26,
             "defense": 50,
-            "xp": 500,
+            "xp": 50,
             "loot": {
-                "T4_DUNGEON_MAP": 0.02
+                "T4_DUNGEON_MAP": 0.015
             },
             "silver": [
                 300,
@@ -459,9 +459,9 @@ export const MONSTERS = {
             "health": 2331,
             "damage": 29,
             "defense": 54,
-            "xp": 525,
+            "xp": 53,
             "loot": {
-                "T4_DUNGEON_MAP": 0.015
+                "T4_DUNGEON_MAP": 0.02
             },
             "silver": [
                 315,
@@ -475,9 +475,9 @@ export const MONSTERS = {
             "health": 2525,
             "damage": 33,
             "defense": 58,
-            "xp": 551,
+            "xp": 55,
             "loot": {
-                "T4_DUNGEON_MAP": 0.015
+                "T4_DUNGEON_MAP": 0.025
             },
             "silver": [
                 331,
@@ -491,9 +491,9 @@ export const MONSTERS = {
             "health": 2735,
             "damage": 37,
             "defense": 63,
-            "xp": 578,
+            "xp": 58,
             "loot": {
-                "T4_DUNGEON_MAP": 0.02
+                "T4_DUNGEON_MAP": 0.03
             },
             "silver": [
                 347,
@@ -564,7 +564,7 @@ export const MONSTERS = {
             "health": 2962,
             "damage": 41,
             "defense": 68,
-            "xp": 607,
+            "xp": 61,
             "loot": {
                 "T5_DUNGEON_MAP": 0.01
             },
@@ -581,9 +581,9 @@ export const MONSTERS = {
             "health": 3208,
             "damage": 46,
             "defense": 73,
-            "xp": 638,
+            "xp": 64,
             "loot": {
-                "T5_DUNGEON_MAP": 0.02
+                "T5_DUNGEON_MAP": 0.015
             },
             "silver": [
                 383,
@@ -598,9 +598,9 @@ export const MONSTERS = {
             "health": 3475,
             "damage": 52,
             "defense": 79,
-            "xp": 670,
+            "xp": 67,
             "loot": {
-                "T5_DUNGEON_MAP": 0.015
+                "T5_DUNGEON_MAP": 0.02
             },
             "silver": [
                 402,
@@ -614,9 +614,9 @@ export const MONSTERS = {
             "health": 3764,
             "damage": 58,
             "defense": 85,
-            "xp": 703,
+            "xp": 70,
             "loot": {
-                "T5_DUNGEON_MAP": 0.015
+                "T5_DUNGEON_MAP": 0.025
             },
             "silver": [
                 422,
@@ -630,9 +630,9 @@ export const MONSTERS = {
             "health": 4077,
             "damage": 65,
             "defense": 91,
-            "xp": 738,
+            "xp": 74,
             "loot": {
-                "T5_DUNGEON_MAP": 0.02
+                "T5_DUNGEON_MAP": 0.03
             },
             "silver": [
                 443,
@@ -703,7 +703,7 @@ export const MONSTERS = {
             "health": 4415,
             "damage": 73,
             "defense": 99,
-            "xp": 775,
+            "xp": 78,
             "loot": {
                 "T6_DUNGEON_MAP": 0.01
             },
@@ -720,9 +720,9 @@ export const MONSTERS = {
             "health": 4782,
             "damage": 83,
             "defense": 106,
-            "xp": 814,
+            "xp": 81,
             "loot": {
-                "T6_DUNGEON_MAP": 0.02
+                "T6_DUNGEON_MAP": 0.015
             },
             "silver": [
                 488,
@@ -737,9 +737,9 @@ export const MONSTERS = {
             "health": 5180,
             "damage": 93,
             "defense": 115,
-            "xp": 855,
+            "xp": 86,
             "loot": {
-                "T6_DUNGEON_MAP": 0.015
+                "T6_DUNGEON_MAP": 0.02
             },
             "silver": [
                 513,
@@ -753,9 +753,9 @@ export const MONSTERS = {
             "health": 5610,
             "damage": 104,
             "defense": 123,
-            "xp": 897,
+            "xp": 90,
             "loot": {
-                "T6_DUNGEON_MAP": 0.015
+                "T6_DUNGEON_MAP": 0.025
             },
             "silver": [
                 538,
@@ -769,9 +769,9 @@ export const MONSTERS = {
             "health": 6077,
             "damage": 117,
             "defense": 133,
-            "xp": 942,
+            "xp": 94,
             "loot": {
-                "T6_DUNGEON_MAP": 0.02
+                "T6_DUNGEON_MAP": 0.03
             },
             "silver": [
                 565,
@@ -842,7 +842,7 @@ export const MONSTERS = {
             "health": 6582,
             "damage": 131,
             "defense": 144,
-            "xp": 989,
+            "xp": 99,
             "loot": {
                 "T7_DUNGEON_MAP": 0.01
             },
@@ -859,9 +859,9 @@ export const MONSTERS = {
             "health": 7129,
             "damage": 148,
             "defense": 155,
-            "xp": 1039,
+            "xp": 104,
             "loot": {
-                "T7_DUNGEON_MAP": 0.02
+                "T7_DUNGEON_MAP": 0.015
             },
             "silver": [
                 623,
@@ -876,9 +876,9 @@ export const MONSTERS = {
             "health": 7721,
             "damage": 166,
             "defense": 167,
-            "xp": 1091,
+            "xp": 109,
             "loot": {
-                "T7_DUNGEON_MAP": 0.015
+                "T7_DUNGEON_MAP": 0.02
             },
             "silver": [
                 654,
@@ -892,9 +892,9 @@ export const MONSTERS = {
             "health": 8363,
             "damage": 186,
             "defense": 180,
-            "xp": 1145,
+            "xp": 115,
             "loot": {
-                "T7_DUNGEON_MAP": 0.015
+                "T7_DUNGEON_MAP": 0.025
             },
             "silver": [
                 687,
@@ -908,9 +908,9 @@ export const MONSTERS = {
             "health": 9058,
             "damage": 209,
             "defense": 194,
-            "xp": 1203,
+            "xp": 120,
             "loot": {
-                "T7_DUNGEON_MAP": 0.02
+                "T7_DUNGEON_MAP": 0.03
             },
             "silver": [
                 722,
@@ -981,7 +981,7 @@ export const MONSTERS = {
             "health": 9811,
             "damage": 235,
             "defense": 209,
-            "xp": 1263,
+            "xp": 126,
             "loot": {
                 "T8_DUNGEON_MAP": 0.01
             },
@@ -998,9 +998,9 @@ export const MONSTERS = {
             "health": 10626,
             "damage": 264,
             "defense": 225,
-            "xp": 1326,
+            "xp": 133,
             "loot": {
-                "T8_DUNGEON_MAP": 0.02
+                "T8_DUNGEON_MAP": 0.015
             },
             "silver": [
                 795,
@@ -1015,9 +1015,9 @@ export const MONSTERS = {
             "health": 11509,
             "damage": 297,
             "defense": 243,
-            "xp": 1392,
+            "xp": 139,
             "loot": {
-                "T8_DUNGEON_MAP": 0.015
+                "T8_DUNGEON_MAP": 0.02
             },
             "silver": [
                 835,
@@ -1031,9 +1031,9 @@ export const MONSTERS = {
             "health": 12466,
             "damage": 334,
             "defense": 262,
-            "xp": 1462,
+            "xp": 146,
             "loot": {
-                "T8_DUNGEON_MAP": 0.015
+                "T8_DUNGEON_MAP": 0.025
             },
             "silver": [
                 877,
@@ -1047,9 +1047,9 @@ export const MONSTERS = {
             "health": 13502,
             "damage": 375,
             "defense": 283,
-            "xp": 1535,
+            "xp": 154,
             "loot": {
-                "T8_DUNGEON_MAP": 0.02
+                "T8_DUNGEON_MAP": 0.03
             },
             "silver": [
                 921,
@@ -1120,7 +1120,7 @@ export const MONSTERS = {
             "health": 14624,
             "damage": 421,
             "defense": 305,
-            "xp": 1612,
+            "xp": 161,
             "loot": {
                 "T9_DUNGEON_MAP": 0.01
             },
@@ -1137,9 +1137,9 @@ export const MONSTERS = {
             "health": 15839,
             "damage": 473,
             "defense": 329,
-            "xp": 1692,
+            "xp": 169,
             "loot": {
-                "T9_DUNGEON_MAP": 0.02
+                "T9_DUNGEON_MAP": 0.015
             },
             "silver": [
                 1015,
@@ -1154,9 +1154,9 @@ export const MONSTERS = {
             "health": 17156,
             "damage": 531,
             "defense": 354,
-            "xp": 1777,
+            "xp": 178,
             "loot": {
-                "T9_DUNGEON_MAP": 0.015
+                "T9_DUNGEON_MAP": 0.02
             },
             "silver": [
                 1066,
@@ -1170,9 +1170,9 @@ export const MONSTERS = {
             "health": 18582,
             "damage": 597,
             "defense": 382,
-            "xp": 1866,
+            "xp": 187,
             "loot": {
-                "T9_DUNGEON_MAP": 0.015
+                "T9_DUNGEON_MAP": 0.025
             },
             "silver": [
                 1119,
@@ -1186,9 +1186,9 @@ export const MONSTERS = {
             "health": 20126,
             "damage": 671,
             "defense": 412,
-            "xp": 1959,
+            "xp": 196,
             "loot": {
-                "T9_DUNGEON_MAP": 0.02
+                "T9_DUNGEON_MAP": 0.03
             },
             "silver": [
                 1175,
@@ -1259,7 +1259,7 @@ export const MONSTERS = {
             "health": 21799,
             "damage": 753,
             "defense": 444,
-            "xp": 2057,
+            "xp": 206,
             "loot": {
                 "T10_DUNGEON_MAP": 0.01
             },
@@ -1276,9 +1276,9 @@ export const MONSTERS = {
             "health": 23610,
             "damage": 846,
             "defense": 479,
-            "xp": 2160,
+            "xp": 216,
             "loot": {
-                "T10_DUNGEON_MAP": 0.02
+                "T10_DUNGEON_MAP": 0.015
             },
             "silver": [
                 1296,
@@ -1293,9 +1293,9 @@ export const MONSTERS = {
             "health": 25573,
             "damage": 951,
             "defense": 516,
-            "xp": 2268,
+            "xp": 227,
             "loot": {
-                "T10_DUNGEON_MAP": 0.015
+                "T10_DUNGEON_MAP": 0.02
             },
             "silver": [
                 1361,
@@ -1309,9 +1309,9 @@ export const MONSTERS = {
             "health": 27698,
             "damage": 1068,
             "defense": 556,
-            "xp": 2381,
+            "xp": 238,
             "loot": {
-                "T10_DUNGEON_MAP": 0.015
+                "T10_DUNGEON_MAP": 0.025
             },
             "silver": [
                 1429,
@@ -1325,9 +1325,9 @@ export const MONSTERS = {
             "health": 30000,
             "damage": 1200,
             "defense": 600,
-            "xp": 2500,
+            "xp": 250,
             "loot": {
-                "T10_DUNGEON_MAP": 0.02
+                "T10_DUNGEON_MAP": 0.03
             },
             "silver": [
                 1500,

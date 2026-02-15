@@ -180,7 +180,7 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
                 top: 0, left: 0, width: '100%', height: '100%',
                 background: 'rgba(0,0,0,0.85)',
                 backdropFilter: 'blur(12px)',
-                zIndex: 13000,
+                zIndex: 15000,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

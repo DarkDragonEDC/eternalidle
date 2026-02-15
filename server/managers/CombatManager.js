@@ -119,14 +119,14 @@ export class CombatManager {
         }
 
         // Restore Mitigation Calculations
-        // NEW FORMULA: 1% Mitigation per 100 Defense (Linear). Capped at 90%
-        const playerMitigation = Math.min(0.75, playerStats.defense / 10000);
+        // NEW FORMULA: 1% Mitigation per 10 Defense (Linear). Capped at 90%
+        const playerMitigation = Math.min(0.9, playerStats.defense / 1000);
 
         let mobDef = combat.mobDefense;
         if (typeof mobDef === 'undefined') {
             mobDef = mobData ? (mobData.defense || 0) : 0;
         }
-        const mobMitigation = mobDef / (mobDef + 36000);
+        const mobMitigation = Math.min(0.9, mobDef / 1000);
 
         if (!combat.player_next_attack_at) combat.player_next_attack_at = now + (playerStats.attackSpeed || 2000);
 
@@ -134,6 +134,7 @@ export class CombatManager {
         let playerAttackCount = 0;
         let mitigatedPlayerDmg = 0;
         let isBurst = false;
+        let playerHitList = [];
 
         if (now >= combat.player_next_attack_at) {
             const playerSpeed = Math.max(200, playerStats.attackSpeed || 2000); // Min 200ms cap
@@ -145,30 +146,35 @@ export class CombatManager {
             if (playerAttackCount > 50) playerAttackCount = 50;
 
             const singleHitDmg = playerDmg;
-            // Note: We apply mitigation later for display/calc simplicity or here?
-            // The original code applied mitigation once. To be accurate, we apply per hit?
-            // Actually, mitigation is % based or flat? 
+            playerHitList = [];
             // "mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)))"
             // It's linear/percent based, so (Dmg * Count) * Mitigation is same as (Dmg * Mitigation) * Count.
 
             const singleHitMitigated = Math.max(1, Math.floor(singleHitDmg * (1 - mobMitigation)));
 
+            let currentMobHP = combat.mobHealth;
             for (let i = 0; i < playerAttackCount; i++) {
                 let hitDmg = singleHitMitigated;
 
                 // Burst Rune Logic (Per Hit)
                 const burstChance = playerStats.burstChance || 0;
+                let hitIsBurst = false;
                 if (burstChance > 0 && Math.random() * 100 < burstChance) {
-                    hitDmg = Math.floor(hitDmg * 1.5);
+                    hitDmg = Math.floor(hitDmg * (playerStats.burstDmg || 1.5));
+                    hitIsBurst = true;
                     isBurst = true;
                     combat.totalBurstDmg = (combat.totalBurstDmg || 0) + hitDmg;
                     combat.burstCount = (combat.burstCount || 0) + 1;
                 }
 
                 mitigatedPlayerDmg += hitDmg;
+                playerHitList.push({ dmg: hitDmg, isBurst: hitIsBurst });
 
-                // Check if mob died mid-barrage (optional optimization, but we usually overkill)
-                // If we want to be nice we could stop, but let's keep it simple for now.
+                currentMobHP -= hitDmg;
+                if (currentMobHP <= 0) {
+                    playerAttackCount = i + 1;
+                    break;
+                }
             }
 
             // Apply Player Damage
@@ -188,6 +194,7 @@ export class CombatManager {
         // Mob Attack Logic (with catch-up for slow players)
         let mitigatedMobDmg = 0;
         let mobAttackCount = 0;
+        let mobHitList = [];
 
         // Ensure initialization
         if (!combat.mob_next_attack_at) combat.mob_next_attack_at = now + (combat.mobAtkSpeed || 1000);
@@ -204,11 +211,13 @@ export class CombatManager {
             if (mobAttackCount > 50) mobAttackCount = 50;
 
             const singleHitDmg = Math.max(1, Math.floor(mobDmg * (1 - playerMitigation)));
+            mobHitList = [];
 
             // Loop through each attack for reactive healing
             for (let a = 0; a < mobAttackCount; a++) {
                 combat.playerHealth -= singleHitDmg;
                 mitigatedMobDmg += singleHitDmg;
+                mobHitList.push(singleHitDmg);
 
                 // REACTIVE HEALING: Check food after each hit to prevent burst deaths
                 const result = this.gameManager.processFood(char);
@@ -241,6 +250,8 @@ export class CombatManager {
             playerHits: playerAttackCount,
             mobDmg: mitigatedMobDmg,
             mobHits: mobAttackCount,
+            playerHitList,
+            mobHitList,
             silverGained: 0,
             lootGained: [],
             xpGained: 0,

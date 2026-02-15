@@ -809,7 +809,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        zIndex: 2000,
+                        zIndex: 11000,
                         padding: '20px',
                         background: 'rgba(0,0,0,0.85)',
                         backdropFilter: 'blur(4px)'

@@ -11,7 +11,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, ac
     const [isShardSelectionOpen, setIsShardSelectionOpen] = useState(false);
 
     // Forging Category State
-    const [forgeCategory, setForgeCategory] = useState(activeCategory || 'GATHERING');
+    const [forgeCategory, setForgeCategory] = useState(activeCategory && activeCategory !== 'RUNE' ? activeCategory : 'GATHERING');
 
     // Sync with parent category
     useEffect(() => {
@@ -956,9 +956,9 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, ac
                                 <div style={{
                                     fontSize: '1rem',
                                     fontWeight: '900',
-                                    color: (gameState?.state?.silver || 0) < (activeTab === 'shards' ? 1000 : 2500 * selectedShard.tier) ? '#ef4444' : '#ffd700'
+                                    color: (gameState?.state?.silver || 0) < (activeTab === 'shards' ? 100 : 2 * selectedShard.tier) ? '#ef4444' : '#ffd700'
                                 }}>
-                                    {formatNumber(activeTab === 'shards' ? 1000 : 2500 * selectedShard.tier)} Silver
+                                    {formatNumber(activeTab === 'shards' ? 100 : 2 * selectedShard.tier)} Silver
                                 </div>
                             </div>
                         )}
@@ -1010,7 +1010,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, ac
                                 width: '100%'
                             }}
                         >
-                            {isCrafting ? (activeTab === 'shards' ? 'Forging...' : 'Merging...') : (activeTab === 'shards' ? `Forge (1,000 Silver)` : `Merge (2,500 × T${selectedShard?.tier} Silver)`)}
+                            {isCrafting ? (activeTab === 'shards' ? 'Forging...' : 'Merging...') : (activeTab === 'shards' ? `Forge (100 Silver)` : `Merge (2 × T${selectedShard?.tier} Silver)`)}
                         </button>
 
                         {activeTab === 'runes' && (
@@ -1434,9 +1434,6 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, ac
                             {/* Rune Category Selection (FORGE ONLY) */}
                             {batchModal.type === 'FORGE' && (
                                 <div style={{ marginBottom: '20px' }}>
-                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '8px', textAlign: 'center' }}>
-                                        Select Rune Category
-                                    </div>
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                                         {[
                                             { id: 'GATHERING', label: 'Gathering', icon: <Search size={14} /> },
@@ -1473,6 +1470,11 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, ac
                                             </button>
                                         ))}
                                     </div>
+                                    {(!forgeCategory || forgeCategory === 'RUNE') && (
+                                        <div style={{ fontSize: '0.7rem', color: '#ef4444', marginTop: '8px', textAlign: 'center', fontWeight: 'bold' }}>
+                                            ⚠️ PLEASE SELECT A CATEGORY
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
@@ -1482,7 +1484,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, ac
                                     {batchModal.quantity * (batchModal.type === 'FORGE' ? 5 : 2)} {batchModal.type === 'FORGE' ? 'Shards' : 'Runes'}
                                 </div>
                                 <div style={{ fontSize: '1.2rem', fontWeight: '900', color: '#ffd700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '5px' }}>
-                                    <Coins size={16} /> {formatNumber(batchModal.quantity * (batchModal.type === 'FORGE' ? 1000 : 2500 * batchModal.item.tier))} Silver
+                                    <Coins size={16} /> {formatNumber(batchModal.quantity * (batchModal.type === 'FORGE' ? 100 : 2 * batchModal.item.tier))} Silver
                                 </div>
                             </div>
 
@@ -1495,10 +1497,22 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, ac
                                 </button>
                                 <button
                                     onClick={() => {
+                                        if (batchModal.type === 'FORGE' && (!forgeCategory || forgeCategory === 'RUNE')) return;
                                         handleCraft(batchModal.quantity);
                                         setBatchModal(null);
                                     }}
-                                    style={{ flex: 1, padding: '12px', background: 'var(--accent)', border: 'none', color: 'var(--bg-dark)', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                                    disabled={batchModal.type === 'FORGE' && (!forgeCategory || forgeCategory === 'RUNE')}
+                                    style={{
+                                        flex: 1,
+                                        padding: '12px',
+                                        background: (batchModal.type === 'FORGE' && (!forgeCategory || forgeCategory === 'RUNE')) ? 'var(--bg-dark)' : 'var(--accent)',
+                                        border: 'none',
+                                        color: (batchModal.type === 'FORGE' && (!forgeCategory || forgeCategory === 'RUNE')) ? 'var(--text-dim)' : 'var(--bg-dark)',
+                                        borderRadius: '8px',
+                                        fontWeight: 'bold',
+                                        cursor: (batchModal.type === 'FORGE' && (!forgeCategory || forgeCategory === 'RUNE')) ? 'not-allowed' : 'pointer',
+                                        opacity: (batchModal.type === 'FORGE' && (!forgeCategory || forgeCategory === 'RUNE')) ? 0.5 : 1
+                                    }}
                                 >
                                     CONFIRM
                                 </button>

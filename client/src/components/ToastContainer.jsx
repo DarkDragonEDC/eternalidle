@@ -67,7 +67,7 @@ const ToastContainer = ({ socket }) => {
             position: 'fixed',
             bottom: '80px', // Above bottom nav/footer
             right: '20px',
-            zIndex: 9000,
+            zIndex: 50000,
             display: 'flex',
             flexDirection: 'column',
             gap: '10px',

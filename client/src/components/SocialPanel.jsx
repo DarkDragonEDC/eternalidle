@@ -48,7 +48,7 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, tradeInvites, gameStat
     if (isIronman) {
         return (
             <div style={{
-                position: 'fixed', inset: 0, zIndex: 11000,
+                position: 'fixed', inset: 0, zIndex: 12000,
                 background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
             }}>
@@ -114,7 +114,7 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, tradeInvites, gameStat
 
     return (
         <div style={{
-            position: 'fixed', inset: 0, zIndex: 11000,
+            position: 'fixed', inset: 0, zIndex: 12000,
             background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
         }}>

@@ -52,19 +52,28 @@ export class TradeManager {
 
         if (existing) throw new Error("A trade session already exists with this player.");
 
+        // Ensure names are not null
+        const sName = sender.name || (sender.state ? sender.state.name : null) || 'Unknown';
+        const rName = receiverData.name || (receiverData.state ? receiverData.state.name : null) || 'Unknown';
+
+        console.log(`[TRADE-CREATE] ${sName} (${sender.id}) inviting ${rName} (${receiverData.id})`);
+
         const { data, error } = await this.supabase
             .from('trade_sessions')
             .insert({
                 sender_id: sender.id,
                 receiver_id: receiverData.id,
-                sender_name: sender.name,
-                receiver_name: receiverData.name,
+                sender_name: sName,
+                receiver_name: rName,
                 status: 'PENDING'
             })
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) {
+            console.error("[TRADE-CREATE] DB Error:", error.message);
+            throw error;
+        }
         return data;
     }
 

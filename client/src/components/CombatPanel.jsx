@@ -255,7 +255,21 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                     if (!details) return;
 
                     // Player Damage Visuals
-                    if (details.playerDmg > 0) {
+                    if (details.playerHitList && details.playerHitList.length > 0) {
+                        setIsMobHit(true);
+                        setTimeout(() => setIsMobHit(false), 200);
+
+                        details.playerHitList.forEach(hit => {
+                            newLogs.push({
+                                id: generateLogId(),
+                                type: 'combat',
+                                content: `You dealt ${hit.dmg} damage${hit.isBurst ? ' (Burst!)' : ''}.`,
+                                color: hit.isBurst ? '#ff9800' : '#4a90e2',
+                                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+                            });
+                        });
+                    } else if (details.playerDmg > 0) {
+                        // Fallback for aggregate data
                         setIsMobHit(true);
                         setTimeout(() => setIsMobHit(false), 200);
 
@@ -270,7 +284,21 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                     }
 
                     // Mob Damage Visuals
-                    if (details.mobDmg > 0) {
+                    if (details.mobHitList && details.mobHitList.length > 0) {
+                        setIsPlayerHit(true);
+                        setTimeout(() => setIsPlayerHit(false), 200);
+
+                        details.mobHitList.forEach(dmg => {
+                            newLogs.push({
+                                id: generateLogId(),
+                                type: 'combat',
+                                content: `${details?.mobName || 'Enemy'} dealt ${dmg} damage.`,
+                                color: '#ff4444',
+                                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+                            });
+                        });
+                    } else if (details.mobDmg > 0) {
+                        // Fallback for aggregate data
                         setIsPlayerHit(true);
                         setTimeout(() => setIsPlayerHit(false), 200);
 
@@ -490,7 +518,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 if (!activeMob) return <span style={{ fontSize: '1rem', fontWeight: 'bold', fontFamily: 'monospace', color: '#888' }}>-</span>;
 
                                 const defense = stats.defense;
-                                            const mitigation = Math.min(0.75, defense / 10000);
+                                const mitigation = Math.min(0.75, defense / 10000);
                                 const mobBaseDmg = combat.mobDamage || activeMob.damage || 1;
                                 const mobDmg = Math.max(1, Math.floor(mobBaseDmg * (1 - mitigation)));
 
@@ -964,26 +992,32 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                 </div>
             </div>
 
-            {/* Mobs List */}
             <div className="glass-panel scroll-container" style={{ flex: 1, padding: isMobile ? '5px' : '15px', background: 'var(--bg-dark)', overflowY: 'auto', overflowX: 'hidden' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '6px' : '8px', paddingBottom: '40px' }}>
                     {(MONSTERS[activeTier] || []).filter(m => !m.id.startsWith('BOSS_') && !m.dungeonOnly).map(mob => {
                         const playerDmg = stats.damage;
 
-                        // 1. Calculate Mitigation
+                        // 1. Calculate Mitigation (Server-side formula: 10 def = 1% [def/1000])
                         const mobDef = mob.defense || 0;
-                        const mobMitigation = mobDef / 10000;
-                        const mitigatedDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
+                        const mobMitigation = Math.min(0.9, mobDef / 1000);
 
-                        // 2. Calculate Time per Cycle
+                        // 2. Include average Burst Damage in the calculation
+                        const burstChance = stats.burstChance || 0;
+                        const burstDmg = stats.burstDmg || 1.5;
+                        const avgDmgMultiplier = 1 + (burstChance / 100 * (burstDmg - 1));
+
+                        const baseMitigatedDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
+                        const mitigatedDmg = baseMitigatedDmg * avgDmgMultiplier;
+
+                        // 3. Calculate Time per Cycle
                         const roundsToKill = Math.ceil(mob.health / mitigatedDmg);
-                        const interval = stats.attackSpeed / 1000;
+                        const interval = (stats.attackSpeed || 1000) / 1000;
                         const killTime = roundsToKill * interval;
                         const cycleTime = killTime + 1.0; // +1s Respawn Delay
 
                         const killsPerHour = 3600 / cycleTime;
 
-                        // 3. Rewards Calculations
+                        // 4. Rewards Calculations
                         const xpBonus = stats.globals?.xpYield || 0;
                         const silverBonus = stats.globals?.silverYield || 0;
 
@@ -995,6 +1029,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                         const silverHour = killsPerHour * silverPerKill;
 
                         const isLocked = ((activeTier === 1 ? 1 : (activeTier - 1) * 10) > (gameState?.state?.skills?.COMBAT?.level || 1));
+
 
                         return (
                             <div key={mob.id} style={{
@@ -1085,7 +1120,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                         <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)' }}>SURVIVAL</div>
                                         {(() => {
                                             const defense = stats.defense;
-                                            const mitigation = Math.min(0.75, defense / 10000);
+                                            const mitigation = Math.min(0.9, defense / 1000);
                                             const mobDmg = Math.max(1, Math.floor(mob.damage * (1 - mitigation)));
 
                                             // Food Logic
@@ -1169,8 +1204,8 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                         );
                     })}
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

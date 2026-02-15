@@ -1796,7 +1796,7 @@ export class GameManager {
 
                 currentHp = currentHp + actualHeal;
 
-                // Roll for food saving
+                // Sync if too far behind
                 const savedFood = foodSaver > 0 && Math.random() * 100 < foodSaver;
                 if (!savedFood) {
                     // CRITICAL FIX: Decrement from the REAL state object, not the local copy
@@ -2181,8 +2181,8 @@ export class GameManager {
 
         // 1. Validate Category
         const types = RUNES_BY_CATEGORY[category];
-        if (!types || types.length === 0) {
-            return { success: false, error: `Rune type '${category}' is currently under development!` };
+        if (!category || !types || types.length === 0) {
+            return { success: false, error: "Please select a valid Rune Category (Gathering, Refining, Crafting, or Combat) before forging." };
         }
 
         // 2. Validate Shard ID & Category Compatibility
@@ -2199,9 +2199,9 @@ export class GameManager {
             }
         }
 
-        // 3. Check Quantity and Silver (Need 5 * qty and 1000 * qty)
+        // 3. Check Quantity and Silver (Need 5 * qty and 100 * qty)
         const totalNeeded = 5 * count;
-        const totalSilverCost = 1000 * count;
+        const totalSilverCost = 100 * count;
         const currentQty = char.state.inventory[activeShardId] || 0;
         const currentSilver = char.state.silver || 0;
 
@@ -2277,9 +2277,9 @@ export class GameManager {
             console.log(`[GameManager] Evolving rune ${runeId} to Tier ${nextTier}`);
         }
 
-        // 4. Check Quantity and Silver (Need 2 * qty and 2500 * tier * qty)
+        // 4. Check Quantity and Silver (Need 2 * qty and 2 * tier * qty)
         const totalNeeded = 2 * count;
-        const totalSilverCost = 2500 * tier * count;
+        const totalSilverCost = 2 * tier * count;
         const currentQty = char.state.inventory[runeId] || 0;
         const currentSilver = char.state.silver || 0;
 

@@ -462,7 +462,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                 <AnimatePresence>
                     {quantityModal.isOpen && (
                         <div style={{
-                            position: 'fixed', inset: 0, zIndex: 12100,
+                            position: 'fixed', inset: 0, zIndex: 20100,
                             background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)',
                             display: 'flex', justifyContent: 'center', alignItems: 'center'
                         }}>

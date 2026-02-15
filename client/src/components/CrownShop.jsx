@@ -101,7 +101,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
             position: 'fixed',
             top: 0, left: 0, right: 0, bottom: 0,
             background: 'rgba(0,0,0,0.7)',
-            zIndex: 9999,
+            zIndex: 12000,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
