@@ -5,10 +5,10 @@ import { resolveItem, calculateRuneBonus } from '@shared/items';
 import { calculateNextLevelXP } from '@shared/skills';
 
 const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
-    const [activeTab, setActiveTab] = useState('EQUIPMENT'); // EQUIPMENT | SKILLS
+    const [activeTab, setActiveTab] = useState('EQUIPMENT'); // EQUIPMENT | SKILLS | RUNES
     const [expandedCategory, setExpandedCategory] = useState(null);
 
-    const { name, level, selectedTitle, health = 0, equipment = {}, skills = {}, stats = {}, isPremium, guildName } = data;
+    const { name, level, selectedTitle, health = 0, equipment = {}, skills = {}, runes = {}, stats = {}, isPremium, guildName } = data;
 
     // Fallback for legacy data/direct stats
     const warriorProf = stats.warriorProf || stats.str || 0;
@@ -286,7 +286,7 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
 
                 {/* Navigation */}
                 <div style={{ display: 'flex', padding: '0 30px', gap: '8px', marginTop: '10px', justifyContent: 'center' }}>
-                    {['EQUIPMENT', 'SKILLS'].map(tab => (
+                    {['EQUIPMENT', 'SKILLS', 'RUNES'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -299,7 +299,7 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
                                 letterSpacing: '1.5px',
                                 transition: '0.3s',
                                 border: activeTab === tab ? '1px solid rgba(255,255,255,0.1)' : '1px solid transparent',
-                                minWidth: '110px'
+                                minWidth: '80px'
                             }}
                         >
                             {tab}
@@ -308,7 +308,7 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
                 </div>
 
                 <div style={{ flex: 1, overflowY: 'auto', padding: '20px 25px', position: 'relative' }}>
-                    {activeTab === 'EQUIPMENT' ? (
+                    {activeTab === 'EQUIPMENT' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
                             {/* HP Bar */}
                             <div style={{ marginBottom: '5px' }}>
@@ -404,7 +404,9 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
                                 </div>
                             </div>
                         </div>
-                    ) : (
+                    )}
+
+                    {activeTab === 'SKILLS' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                             <SkillCategory
                                 title="Gathering"
@@ -440,6 +442,10 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
                             />
                         </div>
                     )}
+
+                    {activeTab === 'RUNES' && (
+                        <RunesTabView equipment={equipment} onItemClick={onItemClick} />
+                    )}
                 </div>
 
                 {/* Footer Info */}
@@ -451,8 +457,7 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Shield size={14} style={{ color: '#60a5fa' }} />
                         <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                            DEF <span style={{ color: '#fff' }}>{stats.defense || 0}</span>
-                            <span style={{ fontSize: '0.6rem', color: '#60a5fa', opacity: 0.8 }}>({Math.min(75, (stats.defense || 0) / 100).toFixed(1)}%)</span>
+                            DEF <span style={{ color: '#fff' }}>{Math.min(75, (stats.defense || 0) / 100).toFixed(1)}%</span>
                         </span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -468,5 +473,233 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
         </motion.div>
     );
 });
+
+const RunesTabView = ({ equipment, onItemClick }) => {
+    const [activeRuneTab, setActiveRuneTab] = useState('GATHERING'); // GATHERING | REFINING | CRAFTING | COMBAT
+
+    const activeRuneBuffs = useMemo(() => {
+        const summary = {};
+        Object.entries(equipment).forEach(([slot, item]) => {
+            if (slot.startsWith('rune_') && item) {
+                const parts = slot.split('_');
+                const act = parts[1];
+                const eff = parts.slice(2).join('_');
+
+                const freshItem = resolveItem(item.id || item.item_id);
+                if (freshItem) {
+                    const bonusValue = calculateRuneBonus(freshItem.tier, freshItem.stars, eff);
+                    if (!summary[act]) summary[act] = {};
+                    summary[act][eff] = (summary[act][eff] || 0) + bonusValue;
+                }
+            }
+        });
+        return summary;
+    }, [equipment]);
+
+    const categories = {
+        GATHERING: [
+            { id: 'WOOD', label: 'Woodcutting', icon: <Wind size={16} /> },
+            { id: 'ORE', label: 'Mining', icon: <Pickaxe size={16} /> },
+            { id: 'HIDE', label: 'Skinning', icon: <Sword size={16} style={{ transform: 'rotate(45deg)' }} /> },
+            { id: 'FIBER', label: 'Fiber', icon: <Scissors size={16} /> },
+            { id: 'HERB', label: 'Herbalism', icon: <Apple size={16} /> },
+            { id: 'FISH', label: 'Fishing', icon: <Anchor size={16} /> }
+        ],
+        REFINING: [
+            { id: 'METAL', label: 'Bars', icon: <Layers size={16} /> },
+            { id: 'PLANK', label: 'Planks', icon: <Wind size={16} /> },
+            { id: 'LEATHER', label: 'Leather', icon: <Sword size={16} style={{ transform: 'rotate(45deg)' }} /> },
+            { id: 'CLOTH', label: 'Cloth', icon: <Scissors size={16} /> },
+            { id: 'EXTRACT', label: 'Extracts', icon: <Apple size={16} /> }
+        ],
+        CRAFTING: [
+            { id: 'WARRIOR', label: 'Warrior', icon: <Sword size={16} /> },
+            { id: 'HUNTER', label: 'Hunter', icon: <Target size={16} /> },
+            { id: 'MAGE', label: 'Mage', icon: <Star size={16} /> },
+            { id: 'TOOLS', label: 'Tools', icon: <Pickaxe size={16} /> },
+            { id: 'COOKING', label: 'Cooking', icon: <Apple size={16} /> },
+            { id: 'ALCHEMY', label: 'Alchemy', icon: <Zap size={16} /> }
+        ]
+    };
+
+    const RuneSlot = ({ slot, label, icon, item: rawItem }) => {
+        const item = rawItem ? { ...resolveItem(rawItem.id || rawItem.item_id), ...rawItem } : null;
+        const rarityColor = item && item.rarityColor ? item.rarityColor : 'rgba(255,255,255,0.05)';
+
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                <div
+                    onClick={() => item && onItemClick(item)}
+                    style={{
+                        width: '56px',
+                        height: '56px',
+                        background: 'rgba(0,0,0,0.3)',
+                        border: `1px solid ${item ? rarityColor : 'rgba(255,255,255,0.05)'}`,
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        position: 'relative',
+                        cursor: item ? 'pointer' : 'default',
+                        transition: '0.2s',
+                        boxShadow: item ? `0 0 10px ${rarityColor}33` : 'none'
+                    }}
+                >
+                    {item && (
+                        <div style={{ position: 'absolute', top: 2, left: 4, fontSize: '0.55rem', fontWeight: '900', color: rarityColor, opacity: 0.8 }}>
+                            T{item.tier}
+                        </div>
+                    )}
+                    {item && item.stars > 0 && (
+                        <div style={{ position: 'absolute', top: 2, right: 3, display: 'flex', gap: '1px' }}>
+                            {[...Array(item.stars)].map((_, i) => (
+                                <Star key={i} size={6} fill={rarityColor} stroke={rarityColor} />
+                            ))}
+                        </div>
+                    )}
+                    <div style={{ opacity: item ? 0.3 : 0.1, color: '#fff' }}>
+                        {icon}
+                    </div>
+                    {item && item.icon && (
+                        <img
+                            src={item.icon}
+                            alt=""
+                            style={{ position: 'absolute', width: '70%', height: '70%', objectFit: 'contain' }}
+                        />
+                    )}
+                </div>
+                <span style={{ fontSize: '0.5rem', fontWeight: 'bold', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    {label}
+                </span>
+            </div>
+        );
+    };
+
+    return (
+        <div style={{ width: '100%' }}>
+            <div style={{
+                display: 'flex',
+                background: 'rgba(0,0,0,0.3)',
+                borderRadius: '12px',
+                padding: '4px',
+                marginBottom: '20px',
+                border: '1px solid rgba(255,255,255,0.05)'
+            }}>
+                {['GATHERING', 'REFINING', 'CRAFTING', 'COMBAT'].map(t => (
+                    <button
+                        key={t}
+                        onClick={() => setActiveRuneTab(t)}
+                        style={{
+                            flex: 1,
+                            padding: '8px 4px',
+                            border: 'none',
+                            background: activeRuneTab === t ? 'var(--accent)' : 'transparent',
+                            color: activeRuneTab === t ? '#000' : 'rgba(255,255,255,0.4)',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontSize: '0.6rem',
+                            fontWeight: '950',
+                            transition: '0.2s',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px'
+                        }}
+                    >
+                        {t === 'GATHERING' ? 'GATHER' : t}
+                    </button>
+                ))}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {activeRuneTab === 'COMBAT' ? (
+                    <div style={{
+                        background: 'rgba(255,255,255,0.02)',
+                        borderRadius: '16px',
+                        padding: '16px',
+                        border: '1px solid rgba(255,255,255,0.05)'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                            <Sword size={14} /> Attack Runes
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+                            <RuneSlot slot="rune_ATTACK_ATTACK" label="DMG" icon={<Sword size={20} />} item={equipment.rune_ATTACK_ATTACK} />
+                            <RuneSlot slot="rune_ATTACK_ATTACK_SPEED" label="SPEED" icon={<Zap size={20} />} item={equipment.rune_ATTACK_ATTACK_SPEED} />
+                            <RuneSlot slot="rune_ATTACK_SAVE_FOOD" label="SAVE" icon={<Heart size={20} />} item={equipment.rune_ATTACK_SAVE_FOOD} />
+                            <RuneSlot slot="rune_ATTACK_BURST" label="BURST" icon={<Sparkles size={20} />} item={equipment.rune_ATTACK_BURST} />
+                        </div>
+                    </div>
+                ) : (
+                    categories[activeRuneTab]?.map(cat => (
+                        <div key={cat.id} style={{
+                            background: 'rgba(255,255,255,0.02)',
+                            borderRadius: '16px',
+                            padding: '16px',
+                            border: '1px solid rgba(255,255,255,0.05)'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                                {cat.icon} {cat.label}
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                                <RuneSlot slot={`rune_${cat.id}_XP`} label="XP" icon={<Award size={18} />} item={equipment[`rune_${cat.id}_XP`]} />
+                                <RuneSlot slot={`rune_${cat.id}_COPY`} label="DUPL" icon={<Layers size={18} />} item={equipment[`rune_${cat.id}_COPY`]} />
+                                <RuneSlot
+                                    slot={activeRuneTab === 'GATHERING' ? `rune_${cat.id}_SPEED` : `rune_${cat.id}_EFF`}
+                                    label={activeRuneTab === 'GATHERING' ? "AUTO" : "EFF"}
+                                    icon={<Zap size={18} />}
+                                    item={equipment[activeRuneTab === 'GATHERING' ? `rune_${cat.id}_SPEED` : `rune_${cat.id}_EFF`]}
+                                />
+                            </div>
+                        </div>
+                    ))
+                )}
+
+                <RuneBuffSummary activeRuneBuffs={activeRuneBuffs} activeRuneTab={activeRuneTab} />
+            </div>
+        </div>
+    );
+};
+
+const RuneBuffSummary = ({ activeRuneBuffs, activeRuneTab }) => {
+    const relevantBuffs = useMemo(() => {
+        const filter = {
+            GATHERING: ['WOOD', 'ORE', 'HIDE', 'FIBER', 'HERB', 'FISH'],
+            REFINING: ['METAL', 'PLANK', 'LEATHER', 'CLOTH', 'EXTRACT'],
+            CRAFTING: ['WARRIOR', 'HUNTER', 'MAGE', 'TOOLS', 'COOKING', 'ALCHEMY'],
+            COMBAT: ['ATTACK']
+        }[activeRuneTab];
+
+        return Object.entries(activeRuneBuffs).filter(([act]) => filter.includes(act));
+    }, [activeRuneBuffs, activeRuneTab]);
+
+    if (relevantBuffs.length === 0) return null;
+
+    return (
+        <div style={{
+            marginTop: '10px',
+            padding: '16px',
+            background: 'rgba(212, 175, 55, 0.05)',
+            borderRadius: '16px',
+            border: '1px solid rgba(212, 175, 55, 0.2)'
+        }}>
+            <h4 style={{ color: 'var(--accent)', fontSize: '0.75rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Zap size={14} fill="var(--accent)" /> Active Bonus
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {relevantBuffs.map(([act, buffs]) => (
+                    <div key={act} style={{ padding: '8px 12px', background: 'rgba(0,0,0,0.2)', borderRadius: '10px', display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 'bold', minWidth: '80px' }}>{act}:</span>
+                        <div style={{ display: 'flex', gap: '15px', flex: 1 }}>
+                            {Object.entries(buffs).map(([eff, val]) => (
+                                <div key={eff} style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#fff' }}>
+                                    <span style={{ color: 'rgba(255,255,255,0.3)', marginRight: '4px' }}>{eff}:</span>
+                                    <span style={{ color: eff === 'XP' ? 'var(--accent)' : eff === 'COPY' ? '#4ade80' : '#60a5fa' }}>+{val}%</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
 
 export default InspectModal;

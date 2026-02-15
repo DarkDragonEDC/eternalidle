@@ -223,7 +223,7 @@ function App() {
         setShowNotifications(false);
         setShowCombatHistory(false);
         setShowCurrencyDropdown(false);
-        setInspectData(null);
+        setInspectData(mockData);
       }
     };
     window.addEventListener('keydown', handleKeyDown);

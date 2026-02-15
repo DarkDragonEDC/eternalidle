@@ -2529,6 +2529,19 @@ export class GameManager {
         return publicData;
     }
 
+    _extractRunes(inventory) {
+        if (!inventory) return {};
+        const runes = {};
+        for (const [itemId, qty] of Object.entries(inventory)) {
+            // Filter only items that look like runes (e.g. T1_RUNE_MINING_XP_1STAR)
+            // exclude shards
+            if (itemId.includes('_RUNE_') && !itemId.includes('_SHARD') && (typeof qty === 'number' ? qty > 0 : qty.amount > 0)) {
+                runes[itemId] = qty;
+            }
+        }
+        return runes;
+    }
+
     _hydrateCharacterFromRaw(data) {
         if (!data) return null;
         if (!data.state) data.state = {};
