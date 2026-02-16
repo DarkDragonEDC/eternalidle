@@ -230,11 +230,16 @@ export class GameManager {
             if (error) return;
 
             const now = new Date();
-            const lastSnapshotAt = data.last_snapshot_at ? new Date(data.last_snapshot_at) : new Date(0);
-            const msSinceSnapshot = now.getTime() - lastSnapshotAt.getTime();
+            const lastSnapshotAt = data.last_snapshot_at ? new Date(data.last_snapshot_at) : null;
 
-            // If more than 24 hours (86,400,000 ms) passed, take a new snapshot
-            if (msSinceSnapshot >= 86400000 || !data.last_snapshot_at) {
+            // Determine if it's a new day in UTC (00:00 UTC Transition)
+            const isNewDay = !lastSnapshotAt || (
+                now.getUTCDate() !== lastSnapshotAt.getUTCDate() ||
+                now.getUTCMonth() !== lastSnapshotAt.getUTCMonth() ||
+                now.getUTCFullYear() !== lastSnapshotAt.getUTCFullYear()
+            );
+
+            if (isNewDay) {
                 const newTotal = Number(data.total_market_tax) || 0;
                 const oldTotal = Number(data.tax_24h_ago) || 0;
                 const dailyIncrease = Math.max(0, newTotal - oldTotal);
