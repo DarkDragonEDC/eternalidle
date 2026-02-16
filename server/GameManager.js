@@ -1270,16 +1270,13 @@ export class GameManager {
 
         if (fetchError || !char) throw new Error("Character not found or access denied.");
 
-        // 2. Cleanup related data (Market Listings)
-        // Note: seller_id is userId, but to be safe we should clean by character metadata if possible.
-        // Since seller_character_id column is missing, we use characterId in item_data workaround if we have it, 
-        // or just accept that listings stay until expiration if we only have userId.
-        // Actually, let's delete all listings by this character name or characterId in metadata
-        await this.supabase
-            .from('market_listings')
-            .delete()
-            .eq('seller_id', userId)
-            .eq('seller_name', char.name);
+        // 2. Cleanup related data (Fail-safe for missing CASCADE DELETE)
+        await Promise.all([
+            this.supabase.from('combat_history').delete().eq('character_id', characterId),
+            this.supabase.from('dungeon_history').delete().eq('character_id', characterId),
+            this.supabase.from('world_boss_attempts').delete().eq('character_id', characterId),
+            this.supabase.from('market_listings').delete().eq('seller_id', userId).eq('seller_name', char.name)
+        ]);
 
         // 3. Delete from database
         const { error: deleteError } = await this.supabase
