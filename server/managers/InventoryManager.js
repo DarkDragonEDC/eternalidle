@@ -349,34 +349,31 @@ export class InventoryManager {
                     state.equipment.food = { ...item, amount: amount };
                 }
             }
-        } else {
-            // Non-food items (decrement 1)
-            const entry = state.inventory[itemId];
-            if (typeof entry === 'object' && entry !== null) {
-                entry.amount--;
-                if (entry.amount <= 0) delete state.inventory[itemId];
-            } else {
-                state.inventory[itemId]--;
-                if (state.inventory[itemId] <= 0) delete state.inventory[itemId];
-            }
-
             const currentEquip = state.equipment[slotName];
             if (currentEquip && currentEquip.id) {
                 // Return old item to inventory with its metadata
                 const oldId = currentEquip.id;
-                // If it was an object (has metadata), pass it back
                 const { id: _, stats: __, ...metadata } = currentEquip;
                 this.addItemToInventory(char, oldId, 1, Object.keys(metadata).length > 0 ? metadata : null);
             }
 
             // Create equipment object with metadata from inventory
-            // Re-resolve item entry since state.inventory[itemId] might have changed above
-            const finalInventoryEntry = state.inventory[itemId];
-            const equipmentObject = { ...item }; // item is resolved from itemId (has stats, name, etc)
+            // CRITICAL FIX: We must capture the metadata BEFORE we decrement/delete the entry
+            const inventoryEntry = state.inventory[itemId];
+            const equipmentObject = { ...item }; // item is resolved from itemId
 
-            if (typeof finalInventoryEntry === 'object' && finalInventoryEntry !== null) {
-                const { amount, ...metadata } = finalInventoryEntry;
+            if (typeof inventoryEntry === 'object' && inventoryEntry !== null) {
+                const { amount, ...metadata } = inventoryEntry;
                 Object.assign(equipmentObject, metadata);
+            }
+
+            // Now safely decrement/delete from inventory
+            if (typeof inventoryEntry === 'object' && inventoryEntry !== null) {
+                inventoryEntry.amount--;
+                if (inventoryEntry.amount <= 0) delete state.inventory[itemId];
+            } else {
+                state.inventory[itemId]--;
+                if (state.inventory[itemId] <= 0) delete state.inventory[itemId];
             }
 
             state.equipment[slotName] = equipmentObject;
