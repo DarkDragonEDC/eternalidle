@@ -1410,7 +1410,6 @@ io.on('connection', (socket) => {
                         quantity: 1,
                     }],
                     mode: 'payment',
-                    automatic_payment_methods: { enabled: true },
                     success_url: `${CLIENT_URL}/?payment=success&package=${packageId}`,
                     cancel_url: `${CLIENT_URL}/?payment=cancel`,
                     metadata: {
