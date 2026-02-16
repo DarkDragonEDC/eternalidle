@@ -253,6 +253,13 @@ if (ITEMS.RAW.HERB[8]) ITEMS.RAW.HERB[8].icon = '/items/T8_HERB.webp';
 if (ITEMS.RAW.HERB[9]) ITEMS.RAW.HERB[9].icon = '/items/T9_HERB.webp';
 if (ITEMS.RAW.HERB[10]) ITEMS.RAW.HERB[10].icon = '/items/T10_HERB.webp';
 
+// Generate Refined
+genRefined('PLANK', 'PLANK', 'WOOD');
+genRefined('BAR', 'BAR', 'ORE');
+genRefined('LEATHER', 'LEATHER', 'HIDE');
+genRefined('CLOTH', 'CLOTH', 'FIBER');
+genRefined('EXTRACT', 'EXTRACT', 'HERB');
+
 // Icons for Herbs (Refined - Extract)
 if (ITEMS.REFINED.EXTRACT) {
     if (ITEMS.REFINED.EXTRACT[1]) ITEMS.REFINED.EXTRACT[1].icon = '/items/T1_EXTRACT.webp';
@@ -266,13 +273,6 @@ if (ITEMS.REFINED.EXTRACT) {
     if (ITEMS.REFINED.EXTRACT[9]) ITEMS.REFINED.EXTRACT[9].icon = '/items/T9_EXTRACT.webp';
     if (ITEMS.REFINED.EXTRACT[10]) ITEMS.REFINED.EXTRACT[10].icon = '/items/T10_EXTRACT.webp';
 }
-
-// Generate Refined
-genRefined('PLANK', 'PLANK', 'WOOD');
-genRefined('BAR', 'BAR', 'ORE');
-genRefined('LEATHER', 'LEATHER', 'HIDE');
-genRefined('CLOTH', 'CLOTH', 'FIBER');
-genRefined('EXTRACT', 'EXTRACT', 'HERB');
 
 // Generate Food
 for (const t of TIERS) {
@@ -568,7 +568,8 @@ for (const t of TIERS) {
         type: 'CONSUMABLE',
         rarityColor: '#ffffff',
         desc: 'An ordinary chest dropped by a World Boss.',
-        noIcon: true
+        icon: `/items/T${t}_WB_CHEST.webp`,
+        scale: '180%'
     };
     // Good (Green)
     ITEMS.SPECIAL.CHEST[`${t}_WORLDBOSS_GOOD`] = {
@@ -579,7 +580,8 @@ for (const t of TIERS) {
         type: 'CONSUMABLE',
         rarityColor: '#10b981', // Green
         desc: 'A good chest dropped by a World Boss.',
-        noIcon: true
+        icon: `/items/T${t}_WB_CHEST.webp`,
+        scale: '180%'
     };
 
     // Outstanding (Blue)
@@ -591,7 +593,8 @@ for (const t of TIERS) {
         type: 'CONSUMABLE',
         rarityColor: '#4a90e2',
         desc: 'An outstanding chest dropped by a World Boss.',
-        noIcon: true
+        icon: `/items/T${t}_WB_CHEST.webp`,
+        scale: '180%'
     };
     // Excellent (Purple)
     ITEMS.SPECIAL.CHEST[`${t}_WORLDBOSS_EXCELLENT`] = {
@@ -602,7 +605,8 @@ for (const t of TIERS) {
         type: 'CONSUMABLE',
         rarityColor: '#9013fe', // Purple
         desc: 'An excellent chest dropped by a World Boss.',
-        noIcon: true
+        icon: `/items/T${t}_WB_CHEST.webp`,
+        scale: '180%'
     };
     // Masterpiece (Orange)
     ITEMS.SPECIAL.CHEST[`${t}_WORLDBOSS_MASTERPIECE`] = {
@@ -613,7 +617,8 @@ for (const t of TIERS) {
         type: 'CONSUMABLE',
         rarityColor: '#f5a623', // Orange/Gold
         desc: 'A masterpiece chest dropped by a World Boss.',
-        noIcon: true
+        icon: `/items/T${t}_WB_CHEST.webp`,
+        scale: '180%'
     };
 }
 
@@ -898,7 +903,7 @@ const indexItems = (obj) => {
         }
     });
 };
-indexItems(ITEMS); // Populate it immediately
+indexItems(ITEMS); // Populate ITEM_LOOKUP so resolveItem works
 
 
 export const resolveItem = (itemId, overrideQuality = null) => {
@@ -1425,24 +1430,7 @@ for (const t of TIERS) {
 }
 
 
-// Generation for World Boss Chests (50 types: T1-T10 x 5 Qualities)
-for (let t = 1; t <= 10; t++) {
-    Object.entries(QUALITIES).forEach(([qId, q]) => {
-        const id = `T${t}_WORLDBOSS_CHEST_${q.name.toUpperCase()}`;
-        if (!ITEMS.SPECIAL.CHEST) ITEMS.SPECIAL.CHEST = {};
-        ITEMS.SPECIAL.CHEST[id] = {
-            id: id,
-            name: `T${t} World Boss Chest (${q.name})`,
-            tier: t,
-            quality: parseInt(qId),
-            type: 'CHEST',
-            description: `A heavy chest containing rewards from the World Boss.`,
-            rarity: q.name === 'Masterpiece' ? 'LEGENDARY' : (q.name === 'Excellent' ? 'EPIC' : (q.name === 'Outstanding' ? 'RARE' : 'COMMON')),
-            rarityColor: q.color,
-            icon: '/items/chest_worldboss.webp'
-        };
-    });
-}
+
 
 // Index items AFTER generation
 indexItems(ITEMS);

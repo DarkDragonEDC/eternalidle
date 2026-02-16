@@ -110,7 +110,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                         width: '70px', height: '70px', background: 'rgba(255,255,255,0.03)', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.05)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px', boxShadow: `0 0 20px ${tierColor}15`
                     }}>
-                        <img src={item.icon} style={{ width: item.scale || '70%', height: item.scale || '70%', objectFit: 'contain', filter: `drop-shadow(0 0 8px ${tierColor}40)` }} alt="" />
+                        <img src={item.icon} style={{ width: item.scale || '130%', height: item.scale || '130%', objectFit: 'contain', filter: `drop-shadow(0 0 8px ${tierColor}40)` }} alt="" />
                     </div>
 
                     <div style={{ textAlign: 'center' }}>

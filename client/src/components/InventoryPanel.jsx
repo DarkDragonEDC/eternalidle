@@ -312,10 +312,6 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                             item.icon = item.icon.replace('.png', '.webp');
                         }
 
-                        // FORCE REMOVE WORLD BOSS CHEST ICONS (Fix for cache)
-                        if (item && item.id && item.id.toUpperCase().includes('WORLDBOSS_CHEST')) {
-                            item.noIcon = true;
-                        }
 
                         if (!item) {
                             return (
@@ -440,10 +436,6 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                             setSelectedItemForModal(null);
                             const item = resolveItem(id);
 
-                            // FORCE FIX for World Boss Chests
-                            if (item && id.includes('WORLDBOSS_CHEST')) {
-                                item.noIcon = true;
-                            }
 
                             if (item?.type === 'POTION' || item?.type === 'CHEST' || id.includes('CHEST') || item?.type === 'CONSUMABLE') {
                                 setUsePotionModal({
@@ -651,7 +643,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                     border: '1px solid var(--border)'
                                 }}>
                                     {!usePotionModal.item.noIcon && (usePotionModal.item.icon ? (
-                                        <img src={usePotionModal.item.icon} alt="" style={{ width: usePotionModal.item.scale || '40px', height: usePotionModal.item.scale || '40px', objectFit: 'contain' }} />
+                                        <img src={usePotionModal.item.icon} alt="" style={{ width: usePotionModal.item.scale || '80px', height: usePotionModal.item.scale || '80px', objectFit: 'contain' }} />
                                     ) : (
                                         <Package size={32} color="#d4af37" />
                                     ))}

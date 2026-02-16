@@ -16,7 +16,12 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
         COOKING: <Utensils size={16} />,
         GEAR_CRAFTING: <Anvil size={16} />,
         COMBAT: <Sword size={16} />,
-        DUNGEONEERING: <Shield size={16} />
+        DUNGEONEERING: <Shield size={16} />,
+        MAGE_CRAFTER: <Zap size={16} />,
+        WARRIOR_CRAFTER: <Anvil size={16} />,
+        HUNTER_CRAFTER: <Scissors size={16} />,
+        TOOL_CRAFTER: <Hammer size={16} />,
+        DISTILLATION: <Zap size={16} />
     };
 
     const SKILL_NAMES = {
@@ -29,7 +34,12 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
         COOKING: 'Cooking',
         GEAR_CRAFTING: 'Gear Crafting',
         COMBAT: 'Combat',
-        DUNGEONEERING: 'Dungeoneering'
+        DUNGEONEERING: 'Dungeoneering',
+        MAGE_CRAFTER: 'Mage Crafter',
+        WARRIOR_CRAFTER: 'Warrior Crafter',
+        HUNTER_CRAFTER: 'Hunter Crafter',
+        TOOL_CRAFTER: 'Tool Crafter',
+        DISTILLATION: 'Distillation'
     };
 
     const [showFullNumbers, setShowFullNumbers] = useState(false);
