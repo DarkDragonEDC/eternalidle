@@ -254,7 +254,8 @@ export class WorldBossManager {
                     .from('messages')
                     .insert({
                         sender_name: '[SYSTEM]',
-                        content: announcement
+                        content: announcement,
+                        channel: 'SYSTEM'
                     })
                     .select()
                     .single();

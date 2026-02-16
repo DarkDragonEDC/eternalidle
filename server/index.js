@@ -874,9 +874,11 @@ io.on('connection', (socket) => {
 
     socket.on('get_chat_history', async () => {
         try {
+            // Fetch Global/PTBR/Trade messages + User's PRIVATE system messages + Public system messages (user_id is null)
             const { data, error } = await supabase
                 .from('messages')
                 .select('*')
+                .or(`channel.neq.SYSTEM,and(channel.eq.SYSTEM,user_id.eq.${socket.user.id}),and(channel.eq.SYSTEM,user_id.is.null)`)
                 .order('created_at', { ascending: false })
                 .limit(50);
             if (error) throw error;
@@ -997,7 +999,7 @@ io.on('connection', (socket) => {
     });
 
 
-    socket.on('send_message', async ({ content }) => {
+    socket.on('send_message', async ({ content, channel = 'GLOBAL' }) => {
         try {
             // Cooldown Check (10s)
             const lastChat = socket.data.lastChatTime || 0;
@@ -1022,19 +1024,47 @@ io.on('connection', (socket) => {
                 const result = await gameManager.adminManager.handleCommand(socket, command, args);
 
                 if (result.success) {
-                    // Send feedback as a system message in chat
-                    socket.emit('new_message', {
-                        id: 'sys-' + Date.now(),
+                    // 1. Create message object
+                    const sysMsg = {
+                        user_id: socket.user.id,
                         sender_name: '[SYSTEM]',
                         content: result.message || 'Command executed successfully.',
+                        channel: 'SYSTEM'
+                    };
+
+                    // 2. Persist to DB for history
+                    const { data, error } = await supabase
+                        .from('messages')
+                        .insert(sysMsg)
+                        .select()
+                        .single();
+
+                    // 3. Send feedback as a system message in chat
+                    socket.emit('new_message', data || {
+                        ...sysMsg,
+                        id: 'sys-' + Date.now(),
                         created_at: new Date().toISOString()
                     });
                 } else {
-                    // Send error as a system message in chat
-                    socket.emit('new_message', {
-                        id: 'err-' + Date.now(),
+                    // 1. Create error object
+                    const errMsg = {
+                        user_id: socket.user.id,
                         sender_name: '[ERROR]',
                         content: result.error || 'Command failed.',
+                        channel: 'SYSTEM'
+                    };
+
+                    // 2. Persist to DB for history
+                    const { data, error } = await supabase
+                        .from('messages')
+                        .insert(errMsg)
+                        .select()
+                        .single();
+
+                    // 3. Send error as a system message in chat
+                    socket.emit('new_message', data || {
+                        ...errMsg,
+                        id: 'err-' + Date.now(),
                         created_at: new Date().toISOString()
                     });
                 }
@@ -1051,17 +1081,40 @@ io.on('connection', (socket) => {
                 content = content.substring(0, 100);
             }
 
+            // We attempt to insert with channel. If it fails due to missing column, we fallback.
+            let insertData = {
+                user_id: socket.user.id,
+                sender_name: char.name,
+                content: content,
+                channel: channel
+            };
+
             const { data, error } = await supabase
                 .from('messages')
-                .insert({
-                    user_id: socket.user.id,
-                    sender_name: char.name,
-                    content: content
-                })
+                .insert(insertData)
                 .select()
                 .single();
-            if (error) throw error;
-            io.emit('new_message', data);
+
+            if (error) {
+                // If column doesn't exist, remove it and try again without channel persistence
+                if (error.code === '42703') { // undefined_column
+                    delete insertData.channel;
+                    const { data: retryData, error: retryError } = await supabase
+                        .from('messages')
+                        .insert(insertData)
+                        .select()
+                        .single();
+                    if (retryError) throw retryError;
+
+                    // Manually add channel to broadcast data even if not persisted
+                    retryData.channel = channel;
+                    io.emit('new_message', retryData);
+                } else {
+                    throw error;
+                }
+            } else {
+                io.emit('new_message', data);
+            }
         } catch (err) {
             console.error('Error sending message:', err);
             socket.emit('error', { message: 'Error sending message' });

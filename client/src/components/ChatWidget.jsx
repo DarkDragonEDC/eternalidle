@@ -10,6 +10,14 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
     const messagesEndRef = useRef(null);
     const isOpenRef = useRef(isOpen);
 
+    const [activeTab, setActiveTab] = useState('GLOBAL');
+    const TABS = [
+        { id: 'GLOBAL', label: 'Global' },
+        { id: 'PTBR', label: 'PTBR' },
+        { id: 'TRADE', label: 'Trade' },
+        { id: 'SYSTEM', label: 'System' }
+    ];
+
     useEffect(() => {
         let interval;
         if (cooldown > 0) {
@@ -25,7 +33,7 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
         if (isOpen && messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
-    }, [messages, isOpen]);
+    }, [messages, isOpen, activeTab]);
 
     useEffect(() => {
         const handleKeyDown = (e) => {
@@ -61,12 +69,22 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
 
     const handleSend = (e) => {
         e.preventDefault();
-        if (!message.trim() || !socket || cooldown > 0) return;
+        if (!message.trim() || !socket || cooldown > 0 || activeTab === 'SYSTEM') return;
 
-        socket.emit('send_message', { content: message.trim() });
+        socket.emit('send_message', { content: message.trim(), channel: activeTab });
         setMessage('');
         setCooldown(10);
     };
+
+    const filteredMessages = messages.filter(msg => {
+        if (activeTab === 'SYSTEM') {
+            return msg.sender_name === '[SYSTEM]' || msg.sender_name === '[ERROR]' || msg.channel === 'SYSTEM';
+        }
+        if (activeTab === 'GLOBAL') {
+            return (!msg.channel || msg.channel === 'GLOBAL') && msg.sender_name !== '[SYSTEM]' && msg.sender_name !== '[ERROR]';
+        }
+        return msg.channel === activeTab;
+    });
 
     if (!isOpen) {
         return (
@@ -135,7 +153,7 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
                 right: 'auto',
                 transform: isMobile ? 'translateX(-50%)' : 'none',
                 width: isMobile ? '90vw' : '320px',
-                height: '400px',
+                height: '450px',
                 background: '#1a1a2e',
                 border: '2px solid var(--accent)',
                 borderRadius: '12px',
@@ -156,7 +174,7 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <MessageSquare size={18} color="var(--accent)" />
-                        <span style={{ fontWeight: 'bold', fontSize: '1rem', color: 'var(--accent)' }}>Global Chat</span>
+                        <span style={{ fontWeight: 'bold', fontSize: '1rem', color: 'var(--accent)' }}>Chat</span>
                     </div>
                     <button
                         onClick={() => setIsOpen(false)}
@@ -164,6 +182,35 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
                     >
                         <Minus size={24} />
                     </button>
+                </div>
+
+                {/* Tabs Area */}
+                <div style={{
+                    display: 'flex',
+                    background: 'rgba(0,0,0,0.3)',
+                    borderBottom: '1px solid rgba(255,255,255,0.1)',
+                    padding: '0 5px'
+                }}>
+                    {TABS.map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            style={{
+                                flex: 1,
+                                padding: '10px 0',
+                                background: 'none',
+                                border: 'none',
+                                borderBottom: activeTab === tab.id ? '2px solid var(--accent)' : '2px solid transparent',
+                                color: activeTab === tab.id ? 'var(--accent)' : 'var(--text-dim)',
+                                fontSize: '0.75rem',
+                                fontWeight: activeTab === tab.id ? 'bold' : 'normal',
+                                cursor: 'pointer',
+                                transition: '0.2s'
+                            }}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
                 </div>
 
                 {/* Messages Area */}
@@ -176,19 +223,21 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
                     gap: '12px',
                     background: 'rgba(0,0,0,0.2)'
                 }}>
-                    {messages.length === 0 && (
+                    {filteredMessages.length === 0 && (
                         <div style={{ textAlign: 'center', color: '#555', fontSize: '0.85rem', marginTop: '20px' }}>
-                            No messages yet...
+                            No messages in {activeTab.toLowerCase()}...
                         </div>
                     )}
-                    {messages.map((msg) => (
+                    {filteredMessages.map((msg) => (
                         <div key={msg.id} style={{
                             alignSelf: msg.sender_name === characterName ? 'flex-end' : 'flex-start',
                             maxWidth: '85%'
                         }}>
                             <div style={{
                                 fontSize: '0.7rem',
-                                color: msg.sender_name === characterName ? 'var(--accent)' : '#4caf50',
+                                color: msg.sender_name === '[SYSTEM]' ? '#ffaa00' :
+                                    msg.sender_name === '[ERROR]' ? '#ff4444' :
+                                        msg.sender_name === characterName ? 'var(--accent)' : '#4caf50',
                                 display: 'flex',
                                 justifyContent: msg.sender_name === characterName ? 'flex-end' : 'flex-start',
                                 marginBottom: '4px',
@@ -207,9 +256,11 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
                                 background: msg.sender_name === characterName ? 'var(--accent-soft)' : 'rgba(255,255,255,0.05)',
                                 border: msg.sender_name === characterName ? '1px solid var(--border-active)' : '1px solid rgba(255,255,255,0.1)',
                                 borderRadius: '12px',
-                                color: '#fff',
-                                fontSize: '0.9rem',
-                                wordBreak: 'break-word'
+                                color: msg.sender_name === '[SYSTEM]' ? '#ffaa00' :
+                                    msg.sender_name === '[ERROR]' ? '#ff9999' : '#fff',
+                                fontSize: '0.85rem',
+                                wordBreak: 'break-word',
+                                fontStyle: (msg.sender_name === '[SYSTEM]' || msg.sender_name === '[ERROR]') ? 'italic' : 'normal'
                             }}>
                                 {msg.content}
                             </div>
@@ -219,51 +270,53 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
                 </div>
 
                 {/* Input Area */}
-                <form onSubmit={handleSend} style={{
-                    padding: '15px',
-                    borderTop: '1px solid rgba(255,255,255,0.1)',
-                    display: 'flex',
-                    gap: '10px',
-                    background: '#0f0f1a'
-                }}>
-                    <input
-                        type="text"
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        placeholder="Type your message..."
-                        maxLength={100}
-                        style={{
-                            flex: 1,
-                            background: 'rgba(255,255,255,0.05)',
-                            border: '1px solid #333',
-                            borderRadius: '6px',
-                            padding: '10px',
-                            color: '#fff',
-                            fontSize: '0.85rem',
-                            outline: 'none'
-                        }}
-                    />
-                    <button
-                        type="submit"
-                        disabled={!message.trim() || cooldown > 0}
-                        style={{
-                            background: (message.trim() && cooldown === 0) ? 'var(--accent)' : 'var(--accent-soft)',
-                            border: 'none',
-                            borderRadius: '6px',
-                            width: '40px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: (message.trim() && cooldown === 0) ? 'pointer' : 'default',
-                            color: '#000',
-                            transition: '0.2s',
-                            fontSize: '0.8rem',
-                            fontWeight: 'bold'
-                        }}
-                    >
-                        {cooldown > 0 ? cooldown : <Send size={18} />}
-                    </button>
-                </form>
+                {activeTab !== 'SYSTEM' && (
+                    <form onSubmit={handleSend} style={{
+                        padding: '15px',
+                        borderTop: '1px solid rgba(255,255,255,0.1)',
+                        display: 'flex',
+                        gap: '10px',
+                        background: '#0f0f1a'
+                    }}>
+                        <input
+                            type="text"
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            placeholder={`Message on ${activeTab.toLowerCase()}...`}
+                            maxLength={100}
+                            style={{
+                                flex: 1,
+                                background: 'rgba(255,255,255,0.05)',
+                                border: '1px solid #333',
+                                borderRadius: '6px',
+                                padding: '10px',
+                                color: '#fff',
+                                fontSize: '0.85rem',
+                                outline: 'none'
+                            }}
+                        />
+                        <button
+                            type="submit"
+                            disabled={!message.trim() || cooldown > 0}
+                            style={{
+                                background: (message.trim() && cooldown === 0) ? 'var(--accent)' : 'var(--accent-soft)',
+                                border: 'none',
+                                borderRadius: '6px',
+                                width: '40px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: (message.trim() && cooldown === 0) ? 'pointer' : 'default',
+                                color: '#000',
+                                transition: '0.2s',
+                                fontSize: '0.8rem',
+                                fontWeight: 'bold'
+                            }}
+                        >
+                            {cooldown > 0 ? cooldown : <Send size={18} />}
+                        </button>
+                    </form>
+                )}
             </div>
         </>
     );
