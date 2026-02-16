@@ -297,8 +297,8 @@ export class InventoryManager {
         if (isWeapon) {
             const newWeaponClass = getRequiredProficiencyGroup(itemId);
             if (newWeaponClass) {
+                const itemsToUnequip = [];
                 for (const slot of Object.keys(state.equipment)) {
-                    // Skip the weapon slot itself and utility slots
                     if (['mainHand', 'tool', 'tool_axe', 'tool_pickaxe', 'tool_knife', 'tool_sickle', 'tool_rod', 'tool_pouch', 'food'].includes(slot)) continue;
                     if (slot.startsWith('rune_')) continue;
 
@@ -306,12 +306,34 @@ export class InventoryManager {
                     if (equippedItem && equippedItem.id) {
                         const gearClass = getRequiredProficiencyGroup(equippedItem.id);
                         if (gearClass && gearClass !== newWeaponClass) {
-                            // Unequip incompatible item
-                            const oldId = equippedItem.id;
-                            const { id: _, stats: __, ...metadata } = equippedItem;
-                            this.addItemToInventory(char, oldId, 1, Object.keys(metadata).length > 0 ? metadata : null);
-                            delete state.equipment[slot];
+                            itemsToUnequip.push({ slot, ...equippedItem });
                         }
+                    }
+                }
+
+                if (itemsToUnequip.length > 0) {
+                    // Check if we have space. 
+                    // Note: Equipping the new weapon MIGHT free a slot if it was already in inventory, 
+                    // BUT we usually decrement it later. Let's be conservative.
+                    const currentUsed = this.getUsedSlots(char);
+                    const maxSlots = this.getMaxSlots(char);
+
+                    // How many NEW slots will be taken?
+                    let newSlotsNeeded = 0;
+                    itemsToUnequip.forEach(item => {
+                        if (!state.inventory[item.id]) newSlotsNeeded++;
+                    });
+
+                    if (currentUsed + newSlotsNeeded > maxSlots) {
+                        throw new Error(`Not enough inventory space to unequip incompatible gear (${itemsToUnequip.length} items)!`);
+                    }
+
+                    // Perform unequip
+                    for (const item of itemsToUnequip) {
+                        const oldId = item.id;
+                        const { slot: slotKey, id: _, stats: __, ...metadata } = item;
+                        this.addItemToInventory(char, oldId, 1, Object.keys(metadata).length > 0 ? metadata : null);
+                        delete state.equipment[slotKey];
                     }
                 }
             }
@@ -398,9 +420,16 @@ export class InventoryManager {
         }
 
         const item = state.equipment[slotName];
-        const amount = Number(item.amount) || 1;
-        // Fix: Use full ID to preserve quality
+        if (!item) throw new Error("Item not found in slot");
+
+        // --- INVENTORY SPACE CHECK ---
         const returnId = item.id;
+        if (!this.canAddItem(char, returnId)) {
+            throw new Error("Inventory Full! Cannot unequip item.");
+        }
+        // -----------------------------
+
+        const amount = Number(item.amount) || 1;
         this.addItemToInventory(char, returnId, amount);
 
         delete state.equipment[slotName];
