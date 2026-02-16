@@ -11,8 +11,8 @@ export const pruneState = (state) => {
                 // Keep only essential properties
                 state.equipment[slot] = {
                     id: item.id,
-                    quality: item.quality || 0,
-                    stars: item.stars || 0,
+                    quality: item.quality,
+                    stars: item.stars,
                     amount: item.amount || 1
                 };
             }
@@ -28,8 +28,8 @@ export const pruneState = (state) => {
                 const item = state.inventory[id];
                 state.inventory[id] = {
                     amount: item.amount || 1,
-                    quality: item.quality || 0,
-                    stars: item.stars || 0,
+                    quality: item.quality,
+                    stars: item.stars,
                     rarity: item.rarity
                 };
             }

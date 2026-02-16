@@ -365,7 +365,11 @@ export class InventoryManager {
 
             if (typeof inventoryEntry === 'object' && inventoryEntry !== null) {
                 const { amount, ...metadata } = inventoryEntry;
-                Object.assign(equipmentObject, metadata);
+                // Merge metadata but don't overwrite with falsy values for quality/stars
+                Object.entries(metadata).forEach(([key, val]) => {
+                    if ((key === 'quality' || key === 'stars') && !val) return;
+                    equipmentObject[key] = val;
+                });
             }
 
             // Now safely decrement/delete from inventory

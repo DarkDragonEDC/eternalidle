@@ -42,7 +42,7 @@ export class MarketManager {
             throw new Error("Insufficient quantity in inventory");
         }
 
-        const quality = typeof entry === 'object' ? (entry?.quality || 0) : 0;
+        const quality = typeof entry === 'object' ? entry.quality : undefined;
         const itemData = this.gameManager.inventoryManager.resolveItem(itemId, quality);
         if (!itemData) throw new Error("Invalid item");
 
@@ -103,8 +103,8 @@ export class MarketManager {
             throw new Error("Insufficient quantity in inventory");
         }
 
-        const quality = typeof entry === 'object' ? (entry?.quality || 0) : 0;
-        const stars = typeof entry === 'object' ? (entry?.stars || 0) : 0;
+        const quality = typeof entry === 'object' ? entry.quality : undefined;
+        const stars = typeof entry === 'object' ? entry.stars : undefined;
 
         const itemData = this.gameManager.inventoryManager.resolveItem(itemId, quality);
         if (!itemData) throw new Error("Invalid item");
@@ -114,8 +114,8 @@ export class MarketManager {
         delete sourceMetadata.amount; // Never store current balance in listing metadata
 
         // Merge stars/quality if they exist on server (already extracted above)
-        if (stars) sourceMetadata.stars = stars;
-        if (quality) sourceMetadata.quality = quality;
+        if (stars !== undefined) sourceMetadata.stars = stars;
+        if (quality !== undefined) sourceMetadata.quality = quality;
 
         const { error: insertError } = await this.gameManager.supabase
             .from('market_listings')
