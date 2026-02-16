@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { formatNumber, formatSilver } from '@utils/format';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Users, Star, Coins, Circle, ChevronDown } from 'lucide-react';
+import { Trophy, Users, Star, Coins, Circle, ChevronDown, Sword } from 'lucide-react';
 
 const CATEGORIES = {
     GENERAL: {
@@ -9,6 +9,14 @@ const CATEGORIES = {
         options: [
             { key: 'LEVEL', label: 'Total Level' },
             { key: 'TOTAL_XP', label: 'Total XP' }
+        ]
+    },
+    PROFICIENCIES: {
+        label: 'PROFICIENCIES',
+        options: [
+            { key: 'WARRIOR_PROFICIENCY', label: 'Warrior' },
+            { key: 'HUNTER_PROFICIENCY', label: 'Hunter' },
+            { key: 'MAGE_PROFICIENCY', label: 'Mage' }
         ]
     },
     COMBAT: {
@@ -53,6 +61,14 @@ const CATEGORIES = {
             { key: 'TOOL_CRAFTER', label: 'Toolmaker' },
             { key: 'COOKING', label: 'Cooking' },
             { key: 'ALCHEMY', label: 'Alchemy' }
+        ]
+    },
+    PROFICIENCIES: {
+        label: 'PROFICIENCIES',
+        options: [
+            { key: 'WARRIOR_PROFICIENCY', label: 'Warrior' },
+            { key: 'HUNTER_PROFICIENCY', label: 'Hunter' },
+            { key: 'MAGE_PROFICIENCY', label: 'Mage' }
         ]
     }
 };
@@ -237,6 +253,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                             >
                                 {key === 'COMBAT' && <Star size={14} />}
                                 {key === 'DUNGEON' && <Circle size={14} />}
+                                {key === 'PROFICIENCIES' && <Sword size={14} />}
                                 {CATEGORIES[key].label}
                             </button>
                         ))}
@@ -346,10 +363,13 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
 
                                     {/* Valor */}
                                     <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontSize: '1.1rem', fontWeight: '900', color: index === 0 ? 'var(--accent)' : 'var(--text-main)' }}>
+                                        <div style={{ fontSize: '1.1rem', fontWeight: '900', color: index === 0 ? 'var(--accent)' : 'var(--text-main)', lineHeight: 1 }}>
                                             {formatNumber(char.value)}
                                         </div>
-                                        <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: 'bold' }}>
+                                        <div style={{ fontSize: '0.65rem', color: index === 0 ? 'var(--accent)' : 'var(--text-dim)', fontWeight: 'bold', opacity: 0.8, marginTop: '2px' }}>
+                                            {subCategory === 'TOTAL_XP' ? `LVL ${formatNumber(char.subValue)}` : `${formatNumber(char.subValue)} XP`}
+                                        </div>
+                                        <div style={{ fontSize: '0.5rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '0.5px', marginTop: '4px', opacity: 0.5, textTransform: 'uppercase' }}>
                                             {char.label}
                                         </div>
                                     </div>
@@ -403,7 +423,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                             )}
                                         </div>
                                         <div style={{ textAlign: 'right' }}>
-                                            <div style={{ fontSize: '1.1rem', fontWeight: '900', color: 'var(--accent)' }}>
+                                            <div style={{ fontSize: '1.1rem', fontWeight: '900', color: 'var(--accent)', lineHeight: 1 }}>
                                                 {(() => {
                                                     const char = userRankData.character;
                                                     let val = 0;
@@ -412,6 +432,17 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                                     else val = (char.state.skills?.[subCategory]?.level || 1);
 
                                                     return formatNumber(val);
+                                                })()}
+                                            </div>
+                                            <div style={{ fontSize: '0.65rem', color: 'var(--accent)', fontWeight: 'bold', opacity: 0.8, marginTop: '2px' }}>
+                                                {(() => {
+                                                    const char = userRankData.character;
+                                                    let subVal = 0;
+                                                    if (subCategory === 'LEVEL') subVal = Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.xp || 0), 0);
+                                                    else if (subCategory === 'TOTAL_XP') subVal = Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.level || 1), 0);
+                                                    else subVal = (char.state.skills?.[subCategory]?.xp || 0);
+
+                                                    return subCategory === 'TOTAL_XP' ? `LVL ${formatNumber(subVal)}` : `${formatNumber(subVal)} XP`;
                                                 })()}
                                             </div>
                                         </div>
