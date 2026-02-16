@@ -945,6 +945,16 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('get_my_trade_history', async () => {
+        try {
+            const history = await gameManager.tradeManager.getPersonalTradeHistory(socket.user.id);
+            socket.emit('my_trade_history_update', history);
+        } catch (err) {
+            console.error('[SOCKET] Error getting personal trade history:', err);
+            socket.emit('error', { message: 'Failed to fetch your trade history.' });
+        }
+    });
+
     // --- DAILY SPIN EVENTS ---
     socket.on('request_daily_status', async () => {
         // FIX: Use executeLocked to prevent race condition with join_character catchup

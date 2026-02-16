@@ -289,6 +289,33 @@ export class TradeManager {
                 this.gameManager.markDirty(sender.id);
                 this.gameManager.markDirty(receiver.id);
 
+                // --- Record Trade History ---
+                try {
+                    const { error: historyError } = await this.supabase
+                        .from('trade_history')
+                        .insert([{
+                            trade_id: tradeId,
+                            sender_id: trade.sender_id,
+                            receiver_id: trade.receiver_id,
+                            sender_name: sender.name,
+                            receiver_name: receiver.name,
+                            sender_items: sOffer.items,
+                            sender_silver: sOffer.silver,
+                            sender_tax: sTax,
+                            receiver_items: rOffer.items,
+                            receiver_silver: rOffer.silver,
+                            receiver_tax: rTax,
+                            created_at: new Date().toISOString()
+                        }]);
+                    if (historyError) {
+                        console.error('[TradeManager] Error recording trade history:', historyError);
+                    } else {
+                        console.log(`[TradeManager] Recorded trade history for trade ${tradeId}`);
+                    }
+                } catch (historyErr) {
+                    console.error('[TradeManager] Exception recording trade history:', historyErr);
+                }
+
                 return { success: true, status: 'COMPLETED', sender_id: trade.sender_id, receiver_id: trade.receiver_id };
             });
         });
@@ -304,5 +331,20 @@ export class TradeManager {
 
         if (error) throw error;
         return { success: true, status: 'CANCELLED' };
+    }
+
+    async getPersonalTradeHistory(userId) {
+        const { data, error } = await this.supabase
+            .from('trade_history')
+            .select('*')
+            .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+            .order('created_at', { ascending: false })
+            .limit(50);
+
+        if (error) throw error;
+        return (data || []).map(tx => ({
+            ...tx,
+            role: tx.sender_id === userId ? 'SENDER' : 'RECEIVER'
+        }));
     }
 }

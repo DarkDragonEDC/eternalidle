@@ -1,12 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Users, Send, X, User, Shield } from 'lucide-react';
+import { Search, Users, Send, X, User, Shield, ArrowLeftRight, Clock, Coins } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { formatItemId } from '@shared/items';
+
+const formatNumber = (n) => {
+    if (n == null) return '0';
+    return Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 });
+};
+
+const getTimeAgo = (dateStr) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days}d ago`;
+};
 
 const SocialPanel = ({ socket, isOpen, onClose, onInvite, tradeInvites, gameState, onInspect }) => {
     const [searchNick, setSearchNick] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [searching, setSearching] = useState(false);
     const [error, setError] = useState('');
+    const [tradeHistory, setTradeHistory] = useState([]);
+    const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+    const [tradeTab, setTradeTab] = useState('TRADE'); // TRADE, HISTORY
 
     useEffect(() => {
         if (!socket) return;
@@ -28,11 +48,26 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, tradeInvites, gameStat
         socket.on('trade_search_result', handleResult);
         socket.on('error', handleError);
 
+        const handleTradeHistory = (history) => {
+            setTradeHistory(history || []);
+            setIsLoadingHistory(false);
+        };
+        socket.on('my_trade_history_update', handleTradeHistory);
+
         return () => {
             socket.off('trade_search_result', handleResult);
             socket.off('error', handleError);
+            socket.off('my_trade_history_update', handleTradeHistory);
         };
     }, [socket, searching]);
+
+    // Fetch trade history when History tab is active
+    useEffect(() => {
+        if (isOpen && socket && tradeTab === 'HISTORY') {
+            setIsLoadingHistory(true);
+            socket.emit('get_my_trade_history');
+        }
+    }, [isOpen, socket, tradeTab]);
 
     const handleSearch = () => {
         if (!searchNick.trim()) return;
@@ -122,9 +157,10 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, tradeInvites, gameStat
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 style={{
-                    width: '100%', maxWidth: '500px', background: 'var(--panel-bg)',
+                    width: '100%', maxWidth: '500px', maxHeight: '85vh', background: 'var(--panel-bg)',
                     borderRadius: '16px', border: '1px solid var(--border-active)',
-                    overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+                    overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+                    display: 'flex', flexDirection: 'column'
                 }}
             >
                 {/* Header */}
@@ -142,143 +178,302 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, tradeInvites, gameStat
                     </button>
                 </div>
 
-                <div style={{ padding: '20px' }}>
-                    {/* Search Box */}
-                    <div style={{ marginBottom: '25px' }}>
-                        <div style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--text-dim)', marginBottom: '8px', letterSpacing: '1px' }}>SEARCH PLAYER</div>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <div style={{ flex: 1, position: 'relative' }}>
-                                <input
-                                    type="text"
-                                    value={searchNick}
-                                    onChange={(e) => setSearchNick(e.target.value)}
-                                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                                    placeholder="Enter player's name"
-                                    style={{
-                                        width: '100%', padding: '12px 15px', borderRadius: '10px',
-                                        background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border)',
-                                        color: '#fff', outline: 'none', transition: '0.2s'
-                                    }}
-                                />
-                                <Search size={18} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.3 }} />
-                            </div>
-                            <button
-                                onClick={handleSearch}
-                                disabled={searching}
-                                style={{
-                                    padding: '0 20px', borderRadius: '10px', background: 'var(--accent)',
-                                    color: '#000', fontWeight: '800', border: 'none', cursor: 'pointer'
-                                }}
-                            >
-                                {searching ? '...' : 'FIND'}
-                            </button>
-                        </div>
-                        {error && <div style={{ color: '#ff4444', fontSize: '0.8rem', marginTop: '8px', fontWeight: 'bold' }}>{error}</div>}
-                    </div>
+                {/* Tab Navigation */}
+                <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', padding: '0 20px' }}>
+                    <button
+                        onClick={() => setTradeTab('TRADE')}
+                        style={{
+                            flex: 1, padding: '12px', background: 'transparent', border: 'none',
+                            borderBottom: tradeTab === 'TRADE' ? '2px solid var(--accent)' : '2px solid transparent',
+                            color: tradeTab === 'TRADE' ? 'var(--accent)' : 'var(--text-dim)',
+                            fontWeight: '800', fontSize: '0.8rem', cursor: 'pointer',
+                            letterSpacing: '1px', transition: '0.2s',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
+                        }}
+                    >
+                        <Send size={14} /> TRADE
+                    </button>
+                    <button
+                        onClick={() => setTradeTab('HISTORY')}
+                        style={{
+                            flex: 1, padding: '12px', background: 'transparent', border: 'none',
+                            borderBottom: tradeTab === 'HISTORY' ? '2px solid var(--accent)' : '2px solid transparent',
+                            color: tradeTab === 'HISTORY' ? 'var(--accent)' : 'var(--text-dim)',
+                            fontWeight: '800', fontSize: '0.8rem', cursor: 'pointer',
+                            letterSpacing: '1px', transition: '0.2s',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
+                        }}
+                    >
+                        <Clock size={14} /> HISTORY
+                    </button>
+                </div>
 
-                    {/* Search Results */}
-                    <AnimatePresence>
-                        {searchResults.length > 0 && (
-                            <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                style={{
-                                    display: 'flex', flexDirection: 'column', gap: '8px',
-                                    marginBottom: '25px', maxHeight: '200px', overflowY: 'auto',
-                                    paddingRight: '5px'
-                                }}
-                            >
-                                <div style={{ fontSize: '0.65rem', fontWeight: 'bold', color: 'var(--text-dim)', marginBottom: '4px' }}>MATCHING PLAYERS:</div>
-                                {searchResults.map(result => (
-                                    <div
-                                        key={result.id}
+                <div style={{ padding: '20px', flex: 1, overflowY: 'auto' }}>
+
+                    {/* TRADE TAB */}
+                    {tradeTab === 'TRADE' && (
+                        <>
+                            {/* Search Box */}
+                            <div style={{ marginBottom: '25px' }}>
+                                <div style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--text-dim)', marginBottom: '8px', letterSpacing: '1px' }}>SEARCH PLAYER</div>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <div style={{ flex: 1, position: 'relative' }}>
+                                        <input
+                                            type="text"
+                                            value={searchNick}
+                                            onChange={(e) => setSearchNick(e.target.value)}
+                                            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                                            placeholder="Enter player's name"
+                                            style={{
+                                                width: '100%', padding: '12px 15px', borderRadius: '10px',
+                                                background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border)',
+                                                color: '#fff', outline: 'none', transition: '0.2s'
+                                            }}
+                                        />
+                                        <Search size={18} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.3 }} />
+                                    </div>
+                                    <button
+                                        onClick={handleSearch}
+                                        disabled={searching}
                                         style={{
-                                            padding: '12px', background: 'rgba(255,255,255,0.02)',
-                                            borderRadius: '12px', border: '1px solid var(--border)',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                                            padding: '0 20px', borderRadius: '10px', background: 'var(--accent)',
+                                            color: '#000', fontWeight: '800', border: 'none', cursor: 'pointer'
                                         }}
                                     >
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                            <div style={{
-                                                width: '32px', height: '32px', borderRadius: '8px',
-                                                background: 'var(--accent-soft)', display: 'flex',
-                                                alignItems: 'center', justifyContent: 'center',
-                                                position: 'relative'
-                                            }}>
-                                                <User size={16} color="var(--accent)" />
-                                            </div>
-                                            <div>
-                                                <div
-                                                    style={{ fontSize: '0.85rem', fontWeight: '900', color: '#fff', cursor: 'pointer', textDecoration: 'underline' }}
-                                                    onClick={() => onInspect && onInspect(result.name)}
-                                                >
-                                                    {result.name}
-                                                </div>
-                                                <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>Level {result.level}</div>
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={() => !result.isIronman && onInvite(result.name)}
-                                            disabled={result.isIronman}
-                                            style={{
-                                                padding: '6px 12px', borderRadius: '8px',
-                                                background: result.isIronman ? 'rgba(255,255,255,0.05)' : 'var(--accent)',
-                                                color: result.isIronman ? 'var(--text-dim)' : '#000',
-                                                fontWeight: '800', fontSize: '0.7rem', border: 'none',
-                                                cursor: result.isIronman ? 'not-allowed' : 'pointer',
-                                                display: 'flex', alignItems: 'center', gap: '6px',
-                                                opacity: result.isIronman ? 0.5 : 1
-                                            }}
-                                            title={result.isIronman ? "Cannot trade with Ironman players" : "Invite to Trade"}
-                                        >
-                                            {result.isIronman ? <Shield size={12} /> : <Send size={12} />}
-                                            {result.isIronman ? 'IRONMAN' : 'INVITE'}
-                                        </button>
-                                    </div>
-                                ))}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                                        {searching ? '...' : 'FIND'}
+                                    </button>
+                                </div>
+                                {error && <div style={{ color: '#ff4444', fontSize: '0.8rem', marginTop: '8px', fontWeight: 'bold' }}>{error}</div>}
+                            </div>
 
-                    {/* Incoming Invites */}
-                    <div>
-                        <div style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--text-dim)', marginBottom: '12px', letterSpacing: '1px' }}>PENDING OFFERS</div>
-                        {(tradeInvites || []).length === 0 ? (
-                            <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-dim)', fontSize: '0.8rem', fontStyle: 'italic' }}>
-                                No pending trade offers.
-                            </div>
-                        ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflowY: 'auto' }}>
-                                {tradeInvites.map(trade => (
-                                    <div key={trade.id} style={{
-                                        padding: '12px', background: 'rgba(0,0,0,0.2)',
-                                        borderRadius: '10px', border: '1px solid var(--border)',
-                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                                    }}>
-                                        <span style={{ fontSize: '0.85rem', color: '#fff' }}>
-                                            Trade with <span
-                                                style={{ color: 'var(--accent)', fontWeight: '900', cursor: 'pointer', textDecoration: 'underline' }}
-                                                onClick={() => onInspect && onInspect(trade.partner_name)}
+                            {/* Search Results */}
+                            <AnimatePresence>
+                                {searchResults.length > 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        style={{
+                                            display: 'flex', flexDirection: 'column', gap: '8px',
+                                            marginBottom: '25px', maxHeight: '200px', overflowY: 'auto',
+                                            paddingRight: '5px'
+                                        }}
+                                    >
+                                        <div style={{ fontSize: '0.65rem', fontWeight: 'bold', color: 'var(--text-dim)', marginBottom: '4px' }}>MATCHING PLAYERS:</div>
+                                        {searchResults.map(result => (
+                                            <div
+                                                key={result.id}
+                                                style={{
+                                                    padding: '12px', background: 'rgba(255,255,255,0.02)',
+                                                    borderRadius: '12px', border: '1px solid var(--border)',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                                                }}
                                             >
-                                                {trade.partner_name || 'Unknown'}
-                                            </span>
-                                        </span>
-                                        <button
-                                            onClick={() => onInvite(trade.id)} // Reuse onInvite or handle specifically
-                                            style={{
-                                                padding: '6px 12px', borderRadius: '6px', background: 'rgba(255,255,255,0.05)',
-                                                color: 'var(--accent)', fontWeight: '800', fontSize: '0.75rem',
-                                                border: '1px solid var(--border-active)', cursor: 'pointer'
-                                            }}
-                                        >
-                                            OPEN
-                                        </button>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                    <div style={{
+                                                        width: '32px', height: '32px', borderRadius: '8px',
+                                                        background: 'var(--accent-soft)', display: 'flex',
+                                                        alignItems: 'center', justifyContent: 'center',
+                                                        position: 'relative'
+                                                    }}>
+                                                        <User size={16} color="var(--accent)" />
+                                                    </div>
+                                                    <div>
+                                                        <div
+                                                            style={{ fontSize: '0.85rem', fontWeight: '900', color: '#fff', cursor: 'pointer', textDecoration: 'underline' }}
+                                                            onClick={() => onInspect && onInspect(result.name)}
+                                                        >
+                                                            {result.name}
+                                                        </div>
+                                                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>Level {result.level}</div>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={() => !result.isIronman && onInvite(result.name)}
+                                                    disabled={result.isIronman}
+                                                    style={{
+                                                        padding: '6px 12px', borderRadius: '8px',
+                                                        background: result.isIronman ? 'rgba(255,255,255,0.05)' : 'var(--accent)',
+                                                        color: result.isIronman ? 'var(--text-dim)' : '#000',
+                                                        fontWeight: '800', fontSize: '0.7rem', border: 'none',
+                                                        cursor: result.isIronman ? 'not-allowed' : 'pointer',
+                                                        display: 'flex', alignItems: 'center', gap: '6px',
+                                                        opacity: result.isIronman ? 0.5 : 1
+                                                    }}
+                                                    title={result.isIronman ? "Cannot trade with Ironman players" : "Invite to Trade"}
+                                                >
+                                                    {result.isIronman ? <Shield size={12} /> : <Send size={12} />}
+                                                    {result.isIronman ? 'IRONMAN' : 'INVITE'}
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            {/* Incoming Invites */}
+                            <div>
+                                <div style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--text-dim)', marginBottom: '12px', letterSpacing: '1px' }}>PENDING OFFERS</div>
+                                {(tradeInvites || []).length === 0 ? (
+                                    <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-dim)', fontSize: '0.8rem', fontStyle: 'italic' }}>
+                                        No pending trade offers.
                                     </div>
-                                ))}
+                                ) : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflowY: 'auto' }}>
+                                        {tradeInvites.map(trade => (
+                                            <div key={trade.id} style={{
+                                                padding: '12px', background: 'rgba(0,0,0,0.2)',
+                                                borderRadius: '10px', border: '1px solid var(--border)',
+                                                display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                                            }}>
+                                                <span style={{ fontSize: '0.85rem', color: '#fff' }}>
+                                                    Trade with <span
+                                                        style={{ color: 'var(--accent)', fontWeight: '900', cursor: 'pointer', textDecoration: 'underline' }}
+                                                        onClick={() => onInspect && onInspect(trade.partner_name)}
+                                                    >
+                                                        {trade.partner_name || 'Unknown'}
+                                                    </span>
+                                                </span>
+                                                <button
+                                                    onClick={() => onInvite(trade.id)}
+                                                    style={{
+                                                        padding: '6px 12px', borderRadius: '6px', background: 'rgba(255,255,255,0.05)',
+                                                        color: 'var(--accent)', fontWeight: '800', fontSize: '0.75rem',
+                                                        border: '1px solid var(--border-active)', cursor: 'pointer'
+                                                    }}
+                                                >
+                                                    OPEN
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
+                        </>
+                    )}
+
+                    {/* HISTORY TAB */}
+                    {tradeTab === 'HISTORY' && (
+                        <>
+                            {isLoadingHistory ? (
+                                <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-dim)' }}>
+                                    <Clock size={24} style={{ marginBottom: '8px', opacity: 0.4 }} />
+                                    <p style={{ fontSize: '0.85rem' }}>Loading history...</p>
+                                </div>
+                            ) : tradeHistory.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-dim)' }}>
+                                    <ArrowLeftRight size={36} style={{ marginBottom: '10px', opacity: 0.3 }} />
+                                    <p style={{ fontSize: '0.85rem' }}>No trade history found.</p>
+                                    <p style={{ fontSize: '0.75rem', opacity: 0.6 }}>Completed trades will appear here.</p>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    {tradeHistory.map((tx, idx) => {
+                                        const timeAgo = getTimeAgo(tx.created_at);
+                                        const isSender = tx.role === 'SENDER';
+                                        const otherPlayer = isSender ? tx.receiver_name : tx.sender_name;
+                                        const myItems = isSender ? tx.sender_items : tx.receiver_items;
+                                        const mySilver = isSender ? tx.sender_silver : tx.receiver_silver;
+                                        const myTax = isSender ? tx.sender_tax : tx.receiver_tax;
+                                        const theirItems = isSender ? tx.receiver_items : tx.sender_items;
+                                        const theirSilver = isSender ? tx.receiver_silver : tx.sender_silver;
+
+                                        return (
+                                            <div key={tx.id || idx} style={{
+                                                background: 'rgba(0,0,0,0.2)',
+                                                border: '1px solid var(--border)',
+                                                borderRadius: '10px',
+                                                padding: '10px 12px',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                gap: '6px'
+                                            }}>
+                                                {/* Header */}
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                        <ArrowLeftRight size={12} style={{ color: 'var(--accent)' }} />
+                                                        <span style={{ fontWeight: 'bold', fontSize: '0.8rem', color: '#fff' }}>
+                                                            <span style={{ color: 'var(--accent)' }}>{otherPlayer || 'Unknown'}</span>
+                                                        </span>
+                                                    </div>
+                                                    <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{timeAgo}</span>
+                                                </div>
+
+                                                {/* Two columns: Sent / Received */}
+                                                <div style={{ display: 'flex', gap: '6px' }}>
+                                                    {/* Sent */}
+                                                    <div style={{
+                                                        flex: 1,
+                                                        background: 'rgba(239, 68, 68, 0.08)',
+                                                        border: '1px solid rgba(239, 68, 68, 0.15)',
+                                                        borderRadius: '6px',
+                                                        padding: '6px'
+                                                    }}>
+                                                        <div style={{ fontSize: '0.6rem', fontWeight: 'bold', color: '#ef4444', marginBottom: '3px' }}>SENT</div>
+                                                        {(myItems || []).map((it, i) => {
+                                                            const itemData = it || {};
+                                                            return (
+                                                                <div key={i} style={{ fontSize: '0.72rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '3px', marginBottom: '1px' }}>
+                                                                    {itemData.icon && (
+                                                                        <img src={itemData.icon} alt="" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
+                                                                    )}
+                                                                    <span>{it.amount}x {itemData.name || formatItemId(it.id)}</span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                        {mySilver > 0 && (
+                                                            <div style={{ fontSize: '0.72rem', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                                                <Coins size={10} /> {formatNumber(mySilver)}
+                                                            </div>
+                                                        )}
+                                                        {myTax > 0 && (
+                                                            <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', marginTop: '1px' }}>
+                                                                Tax: {formatNumber(myTax)}
+                                                            </div>
+                                                        )}
+                                                        {(!myItems || myItems.length === 0) && !mySilver && (
+                                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontStyle: 'italic' }}>Nothing</div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Received */}
+                                                    <div style={{
+                                                        flex: 1,
+                                                        background: 'rgba(34, 197, 94, 0.08)',
+                                                        border: '1px solid rgba(34, 197, 94, 0.15)',
+                                                        borderRadius: '6px',
+                                                        padding: '6px'
+                                                    }}>
+                                                        <div style={{ fontSize: '0.6rem', fontWeight: 'bold', color: '#22c55e', marginBottom: '3px' }}>RECEIVED</div>
+                                                        {(theirItems || []).map((it, i) => {
+                                                            const itemData = it || {};
+                                                            return (
+                                                                <div key={i} style={{ fontSize: '0.72rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '3px', marginBottom: '1px' }}>
+                                                                    {itemData.icon && (
+                                                                        <img src={itemData.icon} alt="" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
+                                                                    )}
+                                                                    <span>{it.amount}x {itemData.name || formatItemId(it.id)}</span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                        {theirSilver > 0 && (
+                                                            <div style={{ fontSize: '0.72rem', color: '#22c55e', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                                                <Coins size={10} /> {formatNumber(theirSilver)}
+                                                            </div>
+                                                        )}
+                                                        {(!theirItems || theirItems.length === 0) && !theirSilver && (
+                                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontStyle: 'italic' }}>Nothing</div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </>
+                    )}
+
                 </div>
             </motion.div>
         </div>

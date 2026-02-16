@@ -33,18 +33,12 @@ export class GameManager {
         this.userLocks = new Map(); // userId -> Promise (current task)
         this.cache = new Map(); // charId -> character object
         this.dirty = new Set(); // set of charIds that need persisting
-        this.globalStats = {
-            total_market_tax: 0,
-            market_tax_total: 0,
-            trade_tax_total: 0,
-            tax_24h_ago: 0,
-            history: []
-        };
+        this.globalStats = null;
         this.leaderboardCache = new Map(); // type+mode -> { data, timestamp }
         this.LEADERBOARD_CACHE_TTL = 30 * 60 * 1000; // 30 minutes in ms
 
-        // Load Global Stats initially
-        this.loadGlobalStats();
+        // Load Global Stats initially (Store promise to avoid race conditions)
+        this.statsPromise = this.loadGlobalStats();
 
         // Periodic Persistence Loop (Every 60 seconds) - REDUNDANT (Handled by index.js every 15s)
         /*
@@ -173,13 +167,12 @@ export class GameManager {
         if (!amount || amount <= 0) return;
 
         try {
+            // CRITICAL: Ensure stats are loaded before updating to prevent resetting to zero
+            if (this.statsPromise) await this.statsPromise;
+
             if (!this.globalStats) {
-                this.globalStats = {
-                    total_market_tax: 0,
-                    market_tax_total: 0,
-                    trade_tax_total: 0,
-                    tax_24h_ago: 0
-                };
+                console.warn('[GameManager] Cannot update tax, globalStats not initialized even after load attempt.');
+                return;
             }
 
             const taxAmount = Math.floor(amount);
@@ -225,6 +218,9 @@ export class GameManager {
 
     async checkTaxSnapshot() {
         try {
+            // Ensure stats are loaded
+            if (this.statsPromise) await this.statsPromise;
+
             const { data, error } = await this.supabase
                 .from('global_stats')
                 .select('*')
