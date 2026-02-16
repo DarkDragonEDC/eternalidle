@@ -11,7 +11,8 @@ const CharacterSelection = ({ onSelectCharacter }) => {
     const [creating, setCreating] = useState(null); // 'normal' or 'ironman' or null
     const [newCharName, setNewCharName] = useState('');
     const [error, setError] = useState(null);
-    const [confirmDelete, setConfirmDelete] = useState(null); // stores char.id if confirming
+    const [deleteConfirmationInput, setDeleteConfirmationInput] = useState('');
+    const [deletingCharacter, setDeletingCharacter] = useState(null); // stores the character object to be deleted
     const [showIronmanTooltip, setShowIronmanTooltip] = useState(false);
 
     const handleLogout = async () => {
@@ -99,12 +100,12 @@ const CharacterSelection = ({ onSelectCharacter }) => {
         }
     };
 
-    const handleDelete = async (e, charId) => {
-        e.stopPropagation();
-        if (confirmDelete !== charId) {
-            setConfirmDelete(charId);
-            return;
-        }
+    const handleDelete = async () => {
+        if (!deletingCharacter) return;
+        const requiredText = `Delete ${deletingCharacter.name}`;
+        if (deleteConfirmationInput !== requiredText) return;
+
+        const charId = deletingCharacter.id;
 
         try {
             const { data: { session } } = await supabase.auth.getSession();
@@ -124,7 +125,8 @@ const CharacterSelection = ({ onSelectCharacter }) => {
             }
 
             setCharacters(characters.filter(c => c.id !== charId));
-            setConfirmDelete(null);
+            setDeletingCharacter(null);
+            setDeleteConfirmationInput('');
             setError(null);
         } catch (err) {
             setError(err.message);
@@ -149,6 +151,34 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                 <LogOut size={20} />
                 <span>Logout</span>
             </button>
+
+            {/* Deletion Confirmation Modal */}
+            {deletingCharacter && (
+                <div className="modal-overlay" onClick={() => setDeletingCharacter(null)}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <h2>Confirm Deletion</h2>
+                        <p>To delete <strong>{deletingCharacter.name}</strong>, type <strong>Delete {deletingCharacter.name}</strong> in the field below:</p>
+                        <input
+                            type="text"
+                            value={deleteConfirmationInput}
+                            onChange={(e) => setDeleteConfirmationInput(e.target.value)}
+                            placeholder={`Delete ${deletingCharacter.name}`}
+                            className="modal-input"
+                            autoFocus
+                        />
+                        <div className="modal-actions">
+                            <button
+                                className="confirm-delete-btn"
+                                disabled={deleteConfirmationInput !== `Delete ${deletingCharacter.name}`}
+                                onClick={handleDelete}
+                            >
+                                Delete Character
+                            </button>
+                            <button className="cancel-btn" onClick={() => setDeletingCharacter(null)}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <h1>Select Your Character</h1>
 
@@ -215,11 +245,15 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                                             )}
                                             <h3 className="char-name">{char.name}</h3>
                                             <button
-                                                className={`delete-btn ${confirmDelete === char.id ? 'confirming' : ''}`}
-                                                onClick={(e) => handleDelete(e, char.id)}
-                                                title={confirmDelete === char.id ? "Click again to confirm" : "Delete character"}
+                                                className="delete-btn"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setDeletingCharacter(char);
+                                                    setDeleteConfirmationInput('');
+                                                }}
+                                                title="Delete character"
                                             >
-                                                {confirmDelete === char.id ? '?' : <Trash2 size={16} />}
+                                                <Trash2 size={16} />
                                             </button>
                                         </div>
                                         <div className="char-info">
@@ -351,6 +385,92 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                     visibility: visible;
                     opacity: 1;
                 }
+                
+                /* Modal Styles */
+                .modal-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.8);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1000;
+                    backdrop-filter: blur(4px);
+                }
+                .modal-content {
+                    background: #1a1f2e;
+                    border: 2px solid #d4af37;
+                    padding: 30px;
+                    border-radius: 12px;
+                    max-width: 400px;
+                    width: 90%;
+                    text-align: center;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+                }
+                .modal-content h2 {
+                    color: #d4af37;
+                    margin-bottom: 15px;
+                    font-size: 1.5rem;
+                }
+                .modal-content p {
+                    color: #94a3b8;
+                    margin-bottom: 20px;
+                    line-height: 1.5;
+                }
+                .modal-input {
+                    width: 100%;
+                    padding: 12px;
+                    background: #0f121d;
+                    border: 1px solid #2d3748;
+                    border-radius: 6px;
+                    color: #fff;
+                    margin-bottom: 20px;
+                    outline: none;
+                    font-family: inherit;
+                }
+                .modal-input:focus {
+                    border-color: #d4af37;
+                }
+                .modal-actions {
+                    display: flex;
+                    gap: 15px;
+                    justify-content: center;
+                }
+                .confirm-delete-btn {
+                    background: #ef4444;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 6px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: 0.2s;
+                }
+                .confirm-delete-btn:disabled {
+                    background: #2d3748;
+                    color: #4a5568;
+                    cursor: not-allowed;
+                }
+                .confirm-delete-btn:not(:disabled):hover {
+                    background: #dc2626;
+                }
+                .cancel-btn {
+                    background: transparent;
+                    color: #94a3b8;
+                    border: 1px solid #2d3748;
+                    padding: 10px 20px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    transition: 0.2s;
+                }
+                .cancel-btn:hover {
+                    background: rgba(255,255,255,0.05);
+                    color: white;
+                }
+
                 .char-card {
                     background: #1a1f2e;
                     border: 2px solid #2d3748;
