@@ -390,16 +390,16 @@ if (ITEMS.REFINED.PLANK[7]) { ITEMS.REFINED.PLANK[7].icon = '/items/T7_PLANK.png
 if (ITEMS.REFINED.PLANK[8]) { ITEMS.REFINED.PLANK[8].icon = '/items/T8_PLANK.png'; }
 if (ITEMS.REFINED.PLANK[9]) { ITEMS.REFINED.PLANK[9].icon = '/items/T9_PLANK.png'; }
 if (ITEMS.REFINED.PLANK[10]) { ITEMS.REFINED.PLANK[10].icon = '/items/T10_PLANK.png'; }
-if (ITEMS.REFINED.BAR[1]) { ITEMS.REFINED.BAR[1].icon = '/items/T1_BAR.png'; ITEMS.REFINED.BAR[1].scale = '200%'; }
-if (ITEMS.REFINED.BAR[2]) { ITEMS.REFINED.BAR[2].icon = '/items/T2_BAR.png'; ITEMS.REFINED.BAR[2].scale = '200%'; }
-if (ITEMS.REFINED.BAR[3]) { ITEMS.REFINED.BAR[3].icon = '/items/T3_BAR.png'; ITEMS.REFINED.BAR[3].scale = '200%'; }
-if (ITEMS.REFINED.BAR[4]) { ITEMS.REFINED.BAR[4].icon = '/items/T4_BAR.png'; ITEMS.REFINED.BAR[4].scale = '200%'; }
-if (ITEMS.REFINED.BAR[5]) { ITEMS.REFINED.BAR[5].icon = '/items/T5_BAR.png'; ITEMS.REFINED.BAR[5].scale = '200%'; }
-if (ITEMS.REFINED.BAR[6]) { ITEMS.REFINED.BAR[6].icon = '/items/T6_BAR.png'; ITEMS.REFINED.BAR[6].scale = '200%'; }
-if (ITEMS.REFINED.BAR[7]) { ITEMS.REFINED.BAR[7].icon = '/items/T7_BAR.png'; ITEMS.REFINED.BAR[7].scale = '200%'; }
-if (ITEMS.REFINED.BAR[8]) { ITEMS.REFINED.BAR[8].icon = '/items/T8_BAR.png'; ITEMS.REFINED.BAR[8].scale = '200%'; }
-if (ITEMS.REFINED.BAR[9]) { ITEMS.REFINED.BAR[9].icon = '/items/T9_BAR.png'; ITEMS.REFINED.BAR[9].scale = '200%'; }
-if (ITEMS.REFINED.BAR[10]) { ITEMS.REFINED.BAR[10].icon = '/items/T10_BAR.png'; ITEMS.REFINED.BAR[10].scale = '200%'; }
+if (ITEMS.REFINED.BAR[1]) { ITEMS.REFINED.BAR[1].icon = '/items/T1_BAR.png'; ITEMS.REFINED.BAR[1].scale = '120%'; }
+if (ITEMS.REFINED.BAR[2]) { ITEMS.REFINED.BAR[2].icon = '/items/T2_BAR.png'; ITEMS.REFINED.BAR[2].scale = '120%'; }
+if (ITEMS.REFINED.BAR[3]) { ITEMS.REFINED.BAR[3].icon = '/items/T3_BAR.png'; ITEMS.REFINED.BAR[3].scale = '120%'; }
+if (ITEMS.REFINED.BAR[4]) { ITEMS.REFINED.BAR[4].icon = '/items/T4_BAR.png'; ITEMS.REFINED.BAR[4].scale = '120%'; }
+if (ITEMS.REFINED.BAR[5]) { ITEMS.REFINED.BAR[5].icon = '/items/T5_BAR.png'; ITEMS.REFINED.BAR[5].scale = '120%'; }
+if (ITEMS.REFINED.BAR[6]) { ITEMS.REFINED.BAR[6].icon = '/items/T6_BAR.png'; ITEMS.REFINED.BAR[6].scale = '120%'; }
+if (ITEMS.REFINED.BAR[7]) { ITEMS.REFINED.BAR[7].icon = '/items/T7_BAR.png'; ITEMS.REFINED.BAR[7].scale = '120%'; }
+if (ITEMS.REFINED.BAR[8]) { ITEMS.REFINED.BAR[8].icon = '/items/T8_BAR.png'; ITEMS.REFINED.BAR[8].scale = '120%'; }
+if (ITEMS.REFINED.BAR[9]) { ITEMS.REFINED.BAR[9].icon = '/items/T9_BAR.png'; ITEMS.REFINED.BAR[9].scale = '120%'; }
+if (ITEMS.REFINED.BAR[10]) { ITEMS.REFINED.BAR[10].icon = '/items/T10_BAR.png'; ITEMS.REFINED.BAR[10].scale = '120%'; }
 
 // Override Icons for Leather
 if (ITEMS.REFINED.LEATHER[1]) { ITEMS.REFINED.LEATHER[1].icon = '/items/T1_LEATHER.png'; ITEMS.REFINED.LEATHER[1].scale = '110%'; }

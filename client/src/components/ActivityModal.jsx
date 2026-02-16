@@ -187,7 +187,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                             style={{
                                 width: '100%',
                                 maxWidth: '400px',
-                                padding: '2rem',
+                                padding: '1.25rem',
                                 background: 'var(--panel-bg)',
                                 borderRadius: '16px',
                                 boxShadow: 'var(--panel-shadow)',
@@ -198,8 +198,12 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 textAlign: 'center'
                             }}
                         >
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem', width: '100%', position: 'relative' }}>
-                                {item.icon && <img src={item.icon} style={{ width: item.scale || 64, height: item.scale || 64, objectFit: 'contain', marginBottom: '10px', filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.3))' }} alt={item.name} />}
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '0.75rem', width: '100%', position: 'relative' }}>
+                                {item.icon && (
+                                    <div style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}>
+                                        <img src={item.icon} style={{ maxWidth: '100%', maxHeight: '100%', width: item.scale || '64px', height: item.scale || '64px', objectFit: 'contain', filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.3))' }} alt={item.name} />
+                                    </div>
+                                )}
                                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
                                     <h3 style={{ color: 'var(--accent)', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
                                 </div>
@@ -211,7 +215,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 </button>
                             </div>
 
-                            <div style={{ marginBottom: '1.25rem', width: '100%' }}>
+                            <div style={{ marginBottom: '0.85rem', width: '100%' }}>
                                 <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '1px', fontWeight: 'bold' }}>Quantity</div>
                                 <div style={{ display: 'flex', gap: '6px' }}>
                                     <input
@@ -261,7 +265,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', marginTop: '3px' }}>Max: {formatNumber(maxQuantity)}</div>
                             </div>
 
-                            <div style={{ marginBottom: '1.25rem', width: '100%' }}>
+                            <div style={{ marginBottom: '0.85rem', width: '100%' }}>
                                 <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '1px', fontWeight: 'bold' }}>Required Materials</div>
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
                                     {Object.entries(reqs).map(([reqId, reqQty]) => {
@@ -279,7 +283,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                                 flex: isSingle ? '1 1 100%' : '1 1 calc(50% - 6px)',
                                                 minWidth: '140px',
                                                 background: 'var(--slot-bg)',
-                                                padding: '12px 15px',
+                                                padding: '8px 12px',
                                                 borderRadius: '8px',
                                                 border: `1px solid ${hasEnough ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255, 68, 68, 0.3)'} `,
                                                 cursor: 'pointer'
@@ -306,8 +310,8 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 </div>
                             </div>
 
-                            <div style={{ marginBottom: '1.25rem', padding: '16px', background: 'var(--slot-bg)', borderRadius: '12px', border: '1px solid var(--border)', width: '100%' }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <div style={{ marginBottom: '0.85rem', padding: '12px', background: 'var(--slot-bg)', borderRadius: '12px', border: '1px solid var(--border)', width: '100%' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                         <span style={{ color: 'var(--text-dim)', fontWeight: '600' }}>Efficiency</span>
                                         <span style={{ color: 'var(--t2)', fontWeight: '800', paddingRight: '4px' }}>+{efficiency}%</span>
@@ -508,7 +512,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                             style={{
                                 width: '100%',
                                 maxWidth: '400px',
-                                padding: '2rem',
+                                padding: '1.25rem',
                                 background: 'var(--panel-bg)',
                                 borderRadius: '16px',
                                 boxShadow: 'var(--panel-shadow)',
@@ -521,8 +525,12 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 textAlign: 'center'
                             }}
                         >
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem', width: '100%', position: 'relative' }}>
-                                {item.icon && <img src={item.icon} style={{ width: item.scale || 64, height: item.scale || 64, objectFit: 'contain', marginBottom: '10px', filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.3))' }} alt={item.name} />}
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '0.75rem', width: '100%', position: 'relative' }}>
+                                {item.icon && (
+                                    <div style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}>
+                                        <img src={item.icon} style={{ maxWidth: '100%', maxHeight: '100%', width: item.scale || '64px', height: item.scale || '64px', objectFit: 'contain', filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.3))' }} alt={item.name} />
+                                    </div>
+                                )}
                                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
                                     <h3 style={{ color: 'var(--accent)', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
                                 </div>
@@ -534,7 +542,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 </button>
                             </div>
 
-                            <div style={{ marginBottom: '1.25rem', width: '100%' }}>
+                            <div style={{ marginBottom: '0.85rem', width: '100%' }}>
                                 <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '1px', fontWeight: 'bold' }}>Quantity</div>
                                 <div style={{ display: 'flex', gap: '6px' }}>
                                     <input
@@ -620,8 +628,8 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 </div>
                             </div>
 
-                            <div style={{ marginBottom: '1.25rem', padding: '16px', background: 'var(--slot-bg)', borderRadius: '12px', border: '1px solid var(--border)', width: '100%' }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <div style={{ marginBottom: '0.85rem', padding: '12px', background: 'var(--slot-bg)', borderRadius: '12px', border: '1px solid var(--border)', width: '100%' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                         <span style={{ color: 'var(--text-dim)', fontWeight: '600' }}>Efficiency</span>
                                         <span style={{ color: 'var(--t2)', fontWeight: '800', paddingRight: '4px' }}>+{efficiency}%</span>
@@ -662,7 +670,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
 
                             {/* Description for Potions/Food */}
                             {(['FOOD', 'POTION'].includes(resolvedItem.type) || resolvedItem.id.includes('FOOD') || resolvedItem.id.includes('POTION')) && (
-                                <div style={{ marginBottom: '1.25rem', padding: '16px', background: 'var(--slot-bg)', borderRadius: '12px', border: '1px solid var(--border)', width: '100%' }}>
+                                <div style={{ marginBottom: '0.85rem', padding: '12px', background: 'var(--slot-bg)', borderRadius: '12px', border: '1px solid var(--border)', width: '100%' }}>
                                     <div style={{ color: 'var(--text-dim)', fontSize: '0.8rem', fontWeight: '600', marginBottom: '4px' }}>EFFECT</div>
                                     <div style={{ color: 'var(--text-main)', fontSize: '0.9rem', lineHeight: '1.5' }}>
                                         {resolvedItem.desc || resolvedItem.description || "No description available."}
@@ -824,7 +832,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                             style={{
                                 width: '100%',
                                 maxWidth: '400px',
-                                padding: '2rem',
+                                padding: '1.25rem',
                                 background: 'var(--panel-bg)',
                                 borderRadius: '16px',
                                 boxShadow: 'var(--panel-shadow)',
@@ -835,8 +843,12 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 textAlign: 'center'
                             }}
                         >
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem', width: '100%', position: 'relative' }}>
-                                {item.icon && <img src={item.icon} style={{ width: item.scale || 64, height: item.scale || 64, objectFit: 'contain', marginBottom: '10px', filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.3))' }} alt={item.name} />}
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '0.75rem', width: '100%', position: 'relative' }}>
+                                {item.icon && (
+                                    <div style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}>
+                                        <img src={item.icon} style={{ maxWidth: '100%', maxHeight: '100%', width: item.scale || '64px', height: item.scale || '64px', objectFit: 'contain', filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.3))' }} alt={item.name} />
+                                    </div>
+                                )}
                                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
                                     <h3 style={{ color: 'var(--accent)', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
                                 </div>
@@ -848,7 +860,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 </button>
                             </div>
 
-                            <div style={{ marginBottom: '1.25rem', width: '100%' }}>
+                            <div style={{ marginBottom: '0.85rem', width: '100%' }}>
                                 <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '1px', fontWeight: 'bold' }}>Quantity</div>
                                 <div style={{ display: 'flex', gap: '6px' }}>
                                     <input
@@ -898,8 +910,8 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                 <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', marginTop: '3px' }}>Max: {formatNumber(maxQuantity)}</div>
                             </div>
 
-                            <div style={{ marginBottom: '1.25rem', padding: '16px', background: 'var(--slot-bg)', borderRadius: '12px', border: '1px solid var(--border)', width: '100%' }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <div style={{ marginBottom: '0.85rem', padding: '12px', background: 'var(--slot-bg)', borderRadius: '12px', border: '1px solid var(--border)', width: '100%' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
                                         <span style={{ color: 'var(--text-dim)', fontWeight: '600' }}>Efficiency</span>
                                         <span style={{ color: 'var(--t2)', fontWeight: '800', paddingRight: '4px' }}>+{efficiency}%</span>
