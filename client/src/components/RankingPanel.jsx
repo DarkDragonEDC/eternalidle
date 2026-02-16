@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { XP_TABLE } from '../../../shared/skills.js';
 import { formatNumber, formatSilver } from '@utils/format';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Users, Star, Coins, Circle, ChevronDown, Sword } from 'lucide-react';
@@ -108,6 +109,15 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
         setSubCategory(CATEGORIES[key].options[0].key);
     };
 
+    // Helper to get total accumulated XP
+    const getTotalSkillXP = (skill) => {
+        if (!skill) return 0;
+        const level = skill.level || 1;
+        const currentXP = skill.xp || 0;
+        const xpFromPreviousLevels = XP_TABLE[level - 1] || 0;
+        return xpFromPreviousLevels + currentXP;
+    };
+
     const getSortedData = () => {
         if (!characters.length) return [];
 
@@ -120,12 +130,12 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
             if (subCategory === 'LEVEL') {
                 const skills = state.skills || {};
                 value = Object.values(skills).reduce((acc, s) => acc + (s.level || 1), 0);
-                subValue = Object.values(skills).reduce((acc, s) => acc + (s.xp || 0), 0);
+                subValue = Object.values(skills).reduce((acc, s) => acc + getTotalSkillXP(s), 0);
                 label = 'TOTAL LEVEL';
             } else if (subCategory === 'TOTAL_XP') {
                 const skills = state.skills || {};
-                // Value is Total XP
-                value = Object.values(skills).reduce((acc, s) => acc + (s.xp || 0), 0);
+                // Value is Total Accumulated XP
+                value = Object.values(skills).reduce((acc, s) => acc + getTotalSkillXP(s), 0);
                 // SubValue is Total Level (tiebreaker)
                 subValue = Object.values(skills).reduce((acc, s) => acc + (s.level || 1), 0);
                 label = 'TOTAL XP';
@@ -133,7 +143,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                 // Generic Skill Handler
                 const skill = (state.skills || {})[subCategory] || { level: 1, xp: 0 };
                 value = skill.level;
-                subValue = skill.xp;
+                subValue = getTotalSkillXP(skill);
                 label = subCategory.replace(/_/g, ' ') + ' LEVEL';
             }
 
@@ -428,7 +438,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                                     const char = userRankData.character;
                                                     let val = 0;
                                                     if (subCategory === 'LEVEL') val = Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.level || 1), 0);
-                                                    else if (subCategory === 'TOTAL_XP') val = Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.xp || 0), 0);
+                                                    else if (subCategory === 'TOTAL_XP') val = Object.values(char.state.skills || {}).reduce((acc, s) => acc + getTotalSkillXP(s), 0);
                                                     else val = (char.state.skills?.[subCategory]?.level || 1);
 
                                                     return formatNumber(val);
@@ -438,9 +448,9 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                                 {(() => {
                                                     const char = userRankData.character;
                                                     let subVal = 0;
-                                                    if (subCategory === 'LEVEL') subVal = Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.xp || 0), 0);
+                                                    if (subCategory === 'LEVEL') subVal = Object.values(char.state.skills || {}).reduce((acc, s) => acc + getTotalSkillXP(s), 0);
                                                     else if (subCategory === 'TOTAL_XP') subVal = Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.level || 1), 0);
-                                                    else subVal = (char.state.skills?.[subCategory]?.xp || 0);
+                                                    else subVal = getTotalSkillXP(char.state.skills?.[subCategory] || { level: 1, xp: 0 });
 
                                                     return subCategory === 'TOTAL_XP' ? `LVL ${formatNumber(subVal)}` : `${formatNumber(subVal)} XP`;
                                                 })()}

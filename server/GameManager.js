@@ -1,7 +1,7 @@
 ﻿import crypto from 'crypto';
 import { ITEMS, ALL_RUNE_TYPES, RUNES_BY_CATEGORY, ITEM_LOOKUP } from '../shared/items.js';
 import { CHEST_DROP_TABLE, WORLDBOSS_DROP_TABLE, getChestRuneShardRange } from '../shared/chest_drops.js';
-import { INITIAL_SKILLS, calculateNextLevelXP } from '../shared/skills.js';
+import { INITIAL_SKILLS, calculateNextLevelXP, XP_TABLE } from '../shared/skills.js';
 import { InventoryManager } from './managers/InventoryManager.js';
 import { ActivityManager } from './managers/ActivityManager.js';
 import { CombatManager } from './managers/CombatManager.js';
@@ -2003,19 +2003,33 @@ export class GameManager {
 
         const sortKey = type || 'COMBAT';
 
+        // Helper function to calculate total accumulated XP for a skill
+        const getTotalXP = (skill) => {
+            const level = skill.level || 1;
+            const currentXP = skill.xp || 0;
+
+            // Sum all XP from previous levels using XP_TABLE
+            // XP_TABLE[level-1] gives us the total XP needed to reach current level
+            const xpFromPreviousLevels = XP_TABLE[level - 1] || 0;
+
+            // Total XP = XP spent on previous levels + current level progress
+            return xpFromPreviousLevels + currentXP;
+        };
+
         const getVal = (char, key) => {
             if (key === 'LEVEL') {
                 // Total Level
                 return Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.level || 1), 0);
             }
             if (key === 'TOTAL_XP') {
-                return Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.xp || 0), 0);
+                // Total XP across all skills (accumulated)
+                return Object.values(char.state.skills || {}).reduce((acc, s) => acc + getTotalXP(s), 0);
             }
             // Specific Skill
             const skill = char.state.skills?.[key] || { level: 1, xp: 0 };
-            // Return a composite value for sorting: Level * 1Billion + XP
-            // This ensures Level is primary, XP is secondary
-            return (skill.level * 1000000000) + skill.xp;
+            // Return a composite value for sorting: Level * 1Billion + Total Accumulated XP
+            // This ensures Level is primary, Total XP is secondary (not just current level XP)
+            return (skill.level * 1000000000) + getTotalXP(skill);
         };
 
         const sorted = data
