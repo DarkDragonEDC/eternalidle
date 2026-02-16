@@ -1113,7 +1113,8 @@ io.on('connection', (socket) => {
                     throw error;
                 }
             } else {
-                io.emit('new_message', data);
+                // Force include channel in case select() didn't pick it up (schema cache)
+                io.emit('new_message', { ...data, channel: data.channel || channel });
             }
         } catch (err) {
             console.error('Error sending message:', err);
