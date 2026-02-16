@@ -1785,7 +1785,7 @@ function App() {
                       <div>
                         <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>SILVER</div>
                         <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--accent)', fontFamily: 'monospace' }}>
-                          {formatSilver(displayedGameState?.state?.silver || 0, true)}
+                          {formatSilver(displayedGameState?.state?.silver || 0, false)}
                         </div>
                       </div>
                     </div>
