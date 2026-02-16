@@ -484,7 +484,7 @@ for (const t of TIERS) {
         rarity: 'COMMON',
         type: 'CONSUMABLE',
         rarityColor: '#ffffff',
-        icon: `/items/T${t}_DG_CHEST.png`,
+        icon: `/items/T${t}_DG_CHEST.webp`,
         desc: 'Contains standard dungeon loot.'
     };
     // Good (Green)
@@ -495,7 +495,7 @@ for (const t of TIERS) {
         rarity: 'UNCOMMON',
         type: 'CONSUMABLE',
         rarityColor: '#10b981', // Green
-        icon: `/items/T${t}_DG_CHEST.png`,
+        icon: `/items/T${t}_DG_CHEST.webp`,
         desc: 'Contains better dungeon loot.'
     };
 
@@ -507,7 +507,7 @@ for (const t of TIERS) {
         rarity: 'RARE',
         type: 'CONSUMABLE',
         rarityColor: '#4a90e2',
-        icon: `/items/T${t}_DG_CHEST.png`,
+        icon: `/items/T${t}_DG_CHEST.webp`,
         desc: 'An outstanding chest with high value rewards.'
     };
     // Excellent (Purple)
@@ -518,7 +518,7 @@ for (const t of TIERS) {
         rarity: 'EPIC',
         type: 'CONSUMABLE',
         rarityColor: '#9013fe',
-        icon: `/items/T${t}_DG_CHEST.png`,
+        icon: `/items/T${t}_DG_CHEST.webp`,
         desc: 'An excellent reward for great feats.'
     };
     // Masterpiece (Orange)
@@ -529,7 +529,7 @@ for (const t of TIERS) {
         rarity: 'LEGENDARY',
         type: 'CONSUMABLE',
         rarityColor: '#f5a623', // Orange/Gold
-        icon: `/items/T${t}_DG_CHEST.png`,
+        icon: `/items/T${t}_DG_CHEST.webp`,
         desc: 'The highest quality chest with the best rewards.'
     };
     // Generic/Legacy Fallback
@@ -539,7 +539,7 @@ for (const t of TIERS) {
         tier: t,
         rarity: 'COMMON',
         type: 'CONSUMABLE',
-        icon: `/items/T${t}_DG_CHEST.png`,
+        icon: `/items/T${t}_DG_CHEST.webp`,
         desc: 'A standard dungeon chest.'
     };
 
@@ -1085,13 +1085,18 @@ export const resolveItem = (itemId, overrideQuality = null) => {
     // EMERGENCY GLOBAL FIX FOR AXE ICONS
     if (baseId.toUpperCase().includes('AXE') && !baseId.toUpperCase().includes('PICKAXE')) {
         const t = baseItem.tier || 1;
-        if (!finalItem.icon) finalItem.icon = `/items/T${t}_AXE.png`;
+        if (!finalItem.icon) finalItem.icon = `/items/T${t}_AXE.webp`;
         if (!finalItem.scale) finalItem.scale = '110%';
     }
 
     // Secondary emergency fix for ORE and LEATHER T1
     if (baseId === 'T1_ORE' && !finalItem.icon) finalItem.icon = '/items/T1_ORE.webp';
     if (baseId === 'T1_LEATHER' && !finalItem.icon) finalItem.icon = '/items/T1_LEATHER.webp';
+
+    // GLOBAL MIGRATION FIX: Force .webp for all item icons (Migration PNG -> WEBP)
+    if (finalItem.icon && typeof finalItem.icon === 'string' && finalItem.icon.endsWith('.png')) {
+        finalItem.icon = finalItem.icon.replace('.png', '.webp');
+    }
 
     return finalItem;
 };

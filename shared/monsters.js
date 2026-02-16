@@ -15,7 +15,7 @@ export const MONSTERS = {
                 275
             ],
             "tier": 1,
-            "image": "rabbit.png",
+            "image": "rabbit.webp",
             "flipCombat": true,
             "flipList": true
         },
@@ -34,7 +34,7 @@ export const MONSTERS = {
                 288
             ],
             "tier": 1,
-            "image": "goblin_scout.png"
+            "image": "goblin_scout.webp"
         },
         {
             "id": "WILD_HOG",
@@ -101,7 +101,7 @@ export const MONSTERS = {
             ],
             "tier": 1,
             "dungeonOnly": true,
-            "image": "rock_elemental_t1.png"
+            "image": "rock_elemental_t1.webp"
         },
         {
             "id": "GIANT_SPIDER_T1",
@@ -119,7 +119,7 @@ export const MONSTERS = {
             ],
             "tier": 1,
             "dungeonOnly": true,
-            "image": "giant_spider_t1.png"
+            "image": "giant_spider_t1.webp"
         },
         {
             "id": "BOSS_GOBLIN_KING",
@@ -137,7 +137,7 @@ export const MONSTERS = {
             ],
             "tier": 1,
             "dungeonOnly": true,
-            "image": "boss_goblin_king.png"
+            "image": "boss_goblin_king.webp"
         }
     ],
     "2": [
@@ -156,7 +156,7 @@ export const MONSTERS = {
                 351
             ],
             "tier": 2,
-            "image": "wolf.png"
+            "image": "wolf.webp"
         },
         {
             "id": "DIRE_RAT",
@@ -173,7 +173,7 @@ export const MONSTERS = {
                 368
             ],
             "tier": 2,
-            "image": "dire_rat.png"
+            "image": "dire_rat.webp"
         },
         {
             "id": "STAG",
@@ -240,7 +240,7 @@ export const MONSTERS = {
             ],
             "tier": 2,
             "dungeonOnly": true,
-            "image": "forest_spirit.png"
+            "image": "forest_spirit.webp"
         },
         {
             "id": "BANDIT_SCOUT",
@@ -258,7 +258,7 @@ export const MONSTERS = {
             ],
             "tier": 2,
             "dungeonOnly": true,
-            "image": "bandit_scout.png"
+            "image": "bandit_scout.webp"
         },
         {
             "id": "BOSS_WOLF_ALPHA",
@@ -276,7 +276,7 @@ export const MONSTERS = {
             ],
             "tier": 2,
             "dungeonOnly": true,
-            "image": "boss_wolf_alpha.png"
+            "image": "boss_wolf_alpha.webp"
         }
     ],
     "3": [
@@ -295,7 +295,7 @@ export const MONSTERS = {
                 447
             ],
             "tier": 3,
-            "image": "bear.png"
+            "image": "bear.webp"
         },
         {
             "id": "MOUNTAIN_GOBLIN",
@@ -312,7 +312,7 @@ export const MONSTERS = {
                 470
             ],
             "tier": 3,
-            "image": "mountain_goblin.png"
+            "image": "mountain_goblin.webp"
         },
         {
             "id": "HIGHLAND_COW",
@@ -379,7 +379,7 @@ export const MONSTERS = {
             ],
             "tier": 3,
             "dungeonOnly": true,
-            "image": "skeleton.png"
+            "image": "skeleton.webp"
         },
         {
             "id": "SKELETON_WARRIOR",
@@ -397,7 +397,7 @@ export const MONSTERS = {
             ],
             "tier": 3,
             "dungeonOnly": true,
-            "image": "skeleton_warrior.png"
+            "image": "skeleton_warrior.webp"
         },
         {
             "id": "BOSS_BEAR_ANCIENT",
@@ -415,7 +415,7 @@ export const MONSTERS = {
             ],
             "tier": 3,
             "dungeonOnly": true,
-            "image": "boss_bear_ancient.png"
+            "image": "boss_bear_ancient.webp"
         }
     ],
     "4": [
@@ -434,7 +434,7 @@ export const MONSTERS = {
                 571
             ],
             "tier": 4,
-            "image": "dire_wolf.png"
+            "image": "dire_wolf.webp"
         },
         {
             "id": "GHOST_KNIGHT",
@@ -451,7 +451,7 @@ export const MONSTERS = {
                 600
             ],
             "tier": 4,
-            "image": "ghost_knight.png"
+            "image": "ghost_knight.webp"
         },
         {
             "id": "SNOW_LEOPARD",
@@ -518,7 +518,7 @@ export const MONSTERS = {
             ],
             "tier": 4,
             "dungeonOnly": true,
-            "image": "undead_soldier.png"
+            "image": "undead_soldier.webp"
         },
         {
             "id": "CRYPT_WARDEN",
@@ -536,7 +536,7 @@ export const MONSTERS = {
             ],
             "tier": 4,
             "dungeonOnly": true,
-            "image": "crypt_warden.png"
+            "image": "crypt_warden.webp"
         },
         {
             "id": "BOSS_SKELETON_KING",
@@ -554,7 +554,7 @@ export const MONSTERS = {
             ],
             "tier": 4,
             "dungeonOnly": true,
-            "image": "boss_skeleton_king.png"
+            "image": "boss_skeleton_king.webp"
         }
     ],
     "5": [
@@ -573,7 +573,7 @@ export const MONSTERS = {
                 729
             ],
             "tier": 5,
-            "image": "ogre.png"
+            "image": "ogre.webp"
         },
         {
             "id": "WAR_OGRE",
@@ -590,7 +590,7 @@ export const MONSTERS = {
                 765
             ],
             "tier": 5,
-            "image": "war_ogre.png"
+            "image": "war_ogre.webp"
         },
         {
             "id": "SWAMP_TROC",
@@ -657,7 +657,7 @@ export const MONSTERS = {
             ],
             "tier": 5,
             "dungeonOnly": true,
-            "image": "lich.png"
+            "image": "lich.webp"
         },
         {
             "id": "LICH_LORD",
@@ -675,7 +675,7 @@ export const MONSTERS = {
             ],
             "tier": 5,
             "dungeonOnly": true,
-            "image": "lich_lord.png"
+            "image": "lich_lord.webp"
         },
         {
             "id": "BOSS_OGRE_CHIEFTAIN",
@@ -693,7 +693,7 @@ export const MONSTERS = {
             ],
             "tier": 5,
             "dungeonOnly": true,
-            "image": "boss_ogre_chieftain.png"
+            "image": "boss_ogre_chieftain.webp"
         }
     ],
     "6": [
@@ -712,7 +712,7 @@ export const MONSTERS = {
                 930
             ],
             "tier": 6,
-            "image": "troll.png"
+            "image": "troll.webp"
         },
         {
             "id": "ARMORED_TROLL",
@@ -729,7 +729,7 @@ export const MONSTERS = {
                 977
             ],
             "tier": 6,
-            "image": "armored_troll.png"
+            "image": "armored_troll.webp"
         },
         {
             "id": "TUNDRA_BEAR",
@@ -796,7 +796,7 @@ export const MONSTERS = {
             ],
             "tier": 6,
             "dungeonOnly": true,
-            "image": "fire_elemental.png"
+            "image": "fire_elemental.webp"
         },
         {
             "id": "INFERNAL_ELEMENTAL",
@@ -814,7 +814,7 @@ export const MONSTERS = {
             ],
             "tier": 6,
             "dungeonOnly": true,
-            "image": "infernal_elemental.png"
+            "image": "infernal_elemental.webp"
         },
         {
             "id": "BOSS_TROLL_ELDER",
@@ -832,7 +832,7 @@ export const MONSTERS = {
             ],
             "tier": 6,
             "dungeonOnly": true,
-            "image": "boss_troll_elder.png"
+            "image": "boss_troll_elder.webp"
         }
     ],
     "7": [
@@ -851,7 +851,7 @@ export const MONSTERS = {
                 1187
             ],
             "tier": 7,
-            "image": "dragon_whelp.png"
+            "image": "dragon_whelp.webp"
         },
         {
             "id": "FIRE_DRAKE",
@@ -868,7 +868,7 @@ export const MONSTERS = {
                 1247
             ],
             "tier": 7,
-            "image": "fire_drake.png"
+            "image": "fire_drake.webp"
         },
         {
             "id": "LAVA_HOUND",
@@ -935,7 +935,7 @@ export const MONSTERS = {
             ],
             "tier": 7,
             "dungeonOnly": true,
-            "image": "dark_knight.png"
+            "image": "dark_knight.webp"
         },
         {
             "id": "DEATH_KNIGHT",
@@ -953,7 +953,7 @@ export const MONSTERS = {
             ],
             "tier": 7,
             "dungeonOnly": true,
-            "image": "death_knight.png"
+            "image": "death_knight.webp"
         },
         {
             "id": "BOSS_DRAGON_MOTHER",
@@ -971,7 +971,7 @@ export const MONSTERS = {
             ],
             "tier": 7,
             "dungeonOnly": true,
-            "image": "boss_dragon_mother.png"
+            "image": "boss_dragon_mother.webp"
         }
     ],
     "8": [
@@ -990,7 +990,7 @@ export const MONSTERS = {
                 1515
             ],
             "tier": 8,
-            "image": "ancient_golem.png"
+            "image": "ancient_golem.webp"
         },
         {
             "id": "OBSIDIAN_GOLEM",
@@ -1007,7 +1007,7 @@ export const MONSTERS = {
                 1591
             ],
             "tier": 8,
-            "image": "obsidian_golem.png"
+            "image": "obsidian_golem.webp"
         },
         {
             "id": "GLACIER_GIANT",
@@ -1074,7 +1074,7 @@ export const MONSTERS = {
             ],
             "tier": 8,
             "dungeonOnly": true,
-            "image": "demon.png"
+            "image": "demon.webp"
         },
         {
             "id": "DEMON_WARRIOR",
@@ -1092,7 +1092,7 @@ export const MONSTERS = {
             ],
             "tier": 8,
             "dungeonOnly": true,
-            "image": "demon_warrior.png"
+            "image": "demon_warrior.webp"
         },
         {
             "id": "BOSS_GOLEM_PRIMORDIAL",
@@ -1110,7 +1110,7 @@ export const MONSTERS = {
             ],
             "tier": 8,
             "dungeonOnly": true,
-            "image": "boss_golem_primordial.png"
+            "image": "boss_golem_primordial.webp"
         }
     ],
     "9": [
@@ -1129,7 +1129,7 @@ export const MONSTERS = {
                 1934
             ],
             "tier": 9,
-            "image": "elder_dragon.png"
+            "image": "elder_dragon.webp"
         },
         {
             "id": "VOID_DRAGON",
@@ -1146,7 +1146,7 @@ export const MONSTERS = {
                 2031
             ],
             "tier": 9,
-            "image": "void_dragon.png"
+            "image": "void_dragon.webp"
         },
         {
             "id": "NEBULA_SERPENT",
@@ -1213,7 +1213,7 @@ export const MONSTERS = {
             ],
             "tier": 9,
             "dungeonOnly": true,
-            "image": "archdemon.png"
+            "image": "archdemon.webp"
         },
         {
             "id": "ABYSSAL_FIEND",
@@ -1231,7 +1231,7 @@ export const MONSTERS = {
             ],
             "tier": 9,
             "dungeonOnly": true,
-            "image": "abyssal_fiend.png"
+            "image": "abyssal_fiend.webp"
         },
         {
             "id": "BOSS_DEMON_PRINCE",
@@ -1249,7 +1249,7 @@ export const MONSTERS = {
             ],
             "tier": 9,
             "dungeonOnly": true,
-            "image": "boss_demon_prince.png"
+            "image": "boss_demon_prince.webp"
         }
     ],
     "10": [
@@ -1268,7 +1268,7 @@ export const MONSTERS = {
                 2468
             ],
             "tier": 10,
-            "image": "ancient_dragon.png"
+            "image": "ancient_dragon.webp"
         },
         {
             "id": "VOID_DRAGON_LORD",
@@ -1285,7 +1285,7 @@ export const MONSTERS = {
                 2592
             ],
             "tier": 10,
-            "image": "void_dragon_lord.png"
+            "image": "void_dragon_lord.webp"
         },
         {
             "id": "GALAXY_EATER",
@@ -1352,7 +1352,7 @@ export const MONSTERS = {
             ],
             "tier": 10,
             "dungeonOnly": true,
-            "image": "demon_lord.png"
+            "image": "demon_lord.webp"
         },
         {
             "id": "VOID_EXECUTIONER",
@@ -1370,7 +1370,7 @@ export const MONSTERS = {
             ],
             "tier": 10,
             "dungeonOnly": true,
-            "image": "void_executioner.png"
+            "image": "void_executioner.webp"
         },
         {
             "id": "BOSS_VOID_ENTITY",
@@ -1388,7 +1388,7 @@ export const MONSTERS = {
             ],
             "tier": 10,
             "dungeonOnly": true,
-            "image": "boss_void_entity.png"
+            "image": "boss_void_entity.webp"
         }
     ]
 };

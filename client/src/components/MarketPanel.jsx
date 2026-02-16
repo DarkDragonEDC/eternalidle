@@ -640,7 +640,11 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                 overflow: 'hidden'
                                             }}>
                                                 {l.item_data.icon ? (
-                                                    <img src={l.item_data.icon} alt={l.item_data.name} style={{ width: l.item_data.scale || '130%', height: l.item_data.scale || '130%', objectFit: 'contain', opacity: 1.0 }} />
+                                                    <img
+                                                        src={typeof l.item_data.icon === 'string' ? l.item_data.icon.replace('.png', '.webp') : l.item_data.icon}
+                                                        alt={l.item_data.name}
+                                                        style={{ width: l.item_data.scale || '130%', height: l.item_data.scale || '130%', objectFit: 'contain', opacity: 1.0 }}
+                                                    />
                                                 ) : (
                                                     <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{l.item_data.tier}</span>
                                                 )}

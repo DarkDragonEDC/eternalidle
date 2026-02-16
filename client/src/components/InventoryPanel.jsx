@@ -303,8 +303,13 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                         // RE-APPLYING FORCED ICON FIX (Bypassing persistent browser cache for items.js)
                         if (item && item.id && item.id.toUpperCase().includes('AXE')) {
                             const tier = item.tier || 1;
-                            if (!item.icon) item.icon = `/items/T${tier}_AXE.png`;
+                            if (!item.icon) item.icon = `/items/T${tier}_AXE.webp`;
                             if (!item.scale) item.scale = '110%';
+                        }
+
+                        // GLOBAL MIGRATION FIX: Force .webp for all icons (Legacy DB data)
+                        if (item && item.icon && typeof item.icon === 'string' && item.icon.endsWith('.png')) {
+                            item.icon = item.icon.replace('.png', '.webp');
                         }
 
                         // FORCE REMOVE WORLD BOSS CHEST ICONS (Fix for cache)

@@ -1,0 +1,5 @@
+v2.0.1 - Icon Optimization & Migration
+- Migrated all item and monster icons from .png to .webp for better performance and smaller load times.
+- Fixed 404 errors for various item icons (Dungeon Chests, Axes, Ore, Leather) by ensuring correct extension mapping.
+- Implemented global automatic .webp resolution for legacy item data.
+- Updated all monster assets and combat data to use high-efficiency .webp format.
