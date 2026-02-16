@@ -349,6 +349,7 @@ export class InventoryManager {
                     state.equipment.food = { ...item, amount: amount };
                 }
             }
+        } else {
             const currentEquip = state.equipment[slotName];
             if (currentEquip && currentEquip.id) {
                 // Return old item to inventory with its metadata
