@@ -947,7 +947,9 @@ io.on('connection', (socket) => {
 
     socket.on('get_my_trade_history', async () => {
         try {
-            const history = await gameManager.tradeManager.getPersonalTradeHistory(socket.user.id);
+            const charId = socket.data.characterId;
+            if (!charId) return;
+            const history = await gameManager.tradeManager.getPersonalTradeHistory(charId);
             socket.emit('my_trade_history_update', history);
         } catch (err) {
             console.error('[SOCKET] Error getting personal trade history:', err);

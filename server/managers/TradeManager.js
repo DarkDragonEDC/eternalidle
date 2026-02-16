@@ -333,18 +333,18 @@ export class TradeManager {
         return { success: true, status: 'CANCELLED' };
     }
 
-    async getPersonalTradeHistory(userId) {
+    async getPersonalTradeHistory(characterId) {
         const { data, error } = await this.supabase
             .from('trade_history')
             .select('*')
-            .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+            .or(`sender_id.eq.${characterId},receiver_id.eq.${characterId}`)
             .order('created_at', { ascending: false })
             .limit(50);
 
         if (error) throw error;
         return (data || []).map(tx => ({
             ...tx,
-            role: tx.sender_id === userId ? 'SENDER' : 'RECEIVER'
+            role: tx.sender_id === characterId ? 'SENDER' : 'RECEIVER'
         }));
     }
 }
