@@ -241,6 +241,13 @@ if (ITEMS.RAW.FIBER[8]) ITEMS.RAW.FIBER[8].icon = '/items/T8_FIBER.png';
 if (ITEMS.RAW.FIBER[9]) ITEMS.RAW.FIBER[9].icon = '/items/T9_FIBER.png';
 if (ITEMS.RAW.FIBER[10]) ITEMS.RAW.FIBER[10].icon = '/items/T10_FIBER.png';
 
+// Icons for Herbs
+for (const t of TIERS) {
+    if (ITEMS.RAW.HERB[t]) {
+        ITEMS.RAW.HERB[t].icon = `/items/T${t}_Herb.png`;
+    }
+}
+
 // Generate Refined
 genRefined('PLANK', 'PLANK', 'WOOD');
 genRefined('BAR', 'BAR', 'ORE');
