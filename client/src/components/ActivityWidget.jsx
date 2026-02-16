@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, CheckCircle, Clock, Square, Zap, Hammer, Pickaxe, Box, Loader, Hourglass, Sword, Skull, Heart, Apple } from 'lucide-react';
+import { Play, CheckCircle, Clock, Square, Zap, Hammer, Pickaxe, Box, Loader, Hourglass, Sword, Skull, Heart, Apple, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { resolveItem, formatItemId } from '@shared/items';
 import { MONSTERS } from '@shared/monsters';

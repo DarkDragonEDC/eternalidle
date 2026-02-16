@@ -220,7 +220,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                             <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '6px' : '10px' }}>
                                                 <div style={{ width: isMobile ? '28px' : '32px', height: isMobile ? '28px' : '32px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                                                     {Icon ? (
-                                                        typeof Icon === 'string' ? <img src={Icon} alt={def?.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <Icon size={isMobile ? 16 : 18} color={def.rarityColor || "var(--text-dim)"} />
+                                                        typeof Icon === 'string' ? <img src={Icon} alt={def?.name} style={{ width: def.scale || '100%', height: def.scale || '100%', objectFit: 'contain' }} /> : <Icon size={isMobile ? 16 : 18} color={def.rarityColor || "var(--text-dim)"} />
                                                     ) : <Package size={isMobile ? 16 : 18} color="var(--text-dim)" />}
                                                 </div>
                                                 <span style={{ color: def?.rarityColor || '#fff', fontSize: isMobile ? '0.8rem' : '0.9rem', fontWeight: '600' }}>{item.amount}x {def?.tier ? `T${def.tier} ` : ''}{def?.name || item.name || 'Unknown Item'}</span>
@@ -371,7 +371,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                                         {/* Icon */}
                                                         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
                                                             {item.icon ? (
-                                                                typeof item.icon === 'string' ? <img src={item.icon} alt={item.name} style={{ width: '70%', height: '70%', objectFit: 'contain' }} /> : <item.icon size={20} color={item.rarityColor || "var(--text-dim)"} />
+                                                                typeof item.icon === 'string' ? <img src={item.icon} alt={item.name} style={{ width: item.scale || '70%', height: item.scale || '70%', objectFit: 'contain' }} /> : <item.icon size={20} color={item.rarityColor || "var(--text-dim)"} />
                                                             ) : <Package size={20} color="var(--text-dim)" />}
                                                         </div>
 
@@ -420,7 +420,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                         <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '6px' : '10px', padding: isMobile ? '8px' : '12px', background: 'rgba(0,0,0,0.3)', borderRadius: '10px', border: `1px solid ${def?.rarityColor || 'rgba(255,255,255,0.1)'}` }}>
                                             <div style={{ width: isMobile ? '28px' : '32px', height: isMobile ? '28px' : '32px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                                                 {Icon ? (
-                                                    typeof Icon === 'string' ? <img src={Icon} alt={def?.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <Icon size={isMobile ? 16 : 18} color={def.rarityColor || "var(--text-dim)"} />
+                                                    typeof Icon === 'string' ? <img src={Icon} alt={def?.name} style={{ width: def.scale || '100%', height: def.scale || '100%', objectFit: 'contain' }} /> : <Icon size={isMobile ? 16 : 18} color={def.rarityColor || "var(--text-dim)"} />
                                                 ) : <Package size={isMobile ? 16 : 18} color="var(--text-dim)" />}
                                             </div>
                                             <span style={{ color: def?.rarityColor || '#fff', fontSize: isMobile ? '0.8rem' : '0.9rem', fontWeight: '600' }}>{item.amount}x {def?.tier ? `T${def.tier} ` : ''}{def?.name || item.name || 'Unknown Item'}</span>

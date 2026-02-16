@@ -646,7 +646,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                     border: '1px solid var(--border)'
                                 }}>
                                     {!usePotionModal.item.noIcon && (usePotionModal.item.icon ? (
-                                        <img src={usePotionModal.item.icon} alt="" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+                                        <img src={usePotionModal.item.icon} alt="" style={{ width: usePotionModal.item.scale || '40px', height: usePotionModal.item.scale || '40px', objectFit: 'contain' }} />
                                     ) : (
                                         <Package size={32} color="#d4af37" />
                                     ))}
@@ -812,7 +812,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                     border: '1px solid var(--border)'
                                 }}>
                                     {dismantleModal.item.icon ? (
-                                        <img src={dismantleModal.item.icon} alt="" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+                                        <img src={dismantleModal.item.icon} alt="" style={{ width: dismantleModal.item.scale || '40px', height: dismantleModal.item.scale || '40px', objectFit: 'contain' }} />
                                     ) : (
                                         <Package size={32} color="#8b5cf6" />
                                     )}

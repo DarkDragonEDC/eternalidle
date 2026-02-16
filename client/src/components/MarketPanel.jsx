@@ -640,7 +640,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                 overflow: 'hidden'
                                             }}>
                                                 {l.item_data.icon ? (
-                                                    <img src={l.item_data.icon} alt={l.item_data.name} style={{ width: '130%', height: '130%', objectFit: 'contain', opacity: 1.0 }} />
+                                                    <img src={l.item_data.icon} alt={l.item_data.name} style={{ width: l.item_data.scale || '130%', height: l.item_data.scale || '130%', objectFit: 'contain', opacity: 1.0 }} />
                                                 ) : (
                                                     <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{l.item_data.tier}</span>
                                                 )}
@@ -1034,7 +1034,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
                                                     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
                                                         {data.icon ? (
-                                                            <img src={data.icon} alt={data.name} style={{ width: '130%', height: '130%', objectFit: 'contain' }} />
+                                                            <img src={data.icon} alt={data.name} style={{ width: data.scale || '130%', height: data.scale || '130%', objectFit: 'contain' }} />
                                                         ) : (
                                                             <Package size={32} color="#666" style={{ opacity: 0.8 }} />
                                                         )}
@@ -1129,7 +1129,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                     overflow: 'hidden'
                                                 }}>
                                                     {l.item_data.icon ? (
-                                                        <img src={l.item_data.icon} alt={l.item_data.name} style={{ width: '130%', height: '130%', objectFit: 'contain', opacity: 1.0 }} />
+                                                        <img src={l.item_data.icon} alt={l.item_data.name} style={{ width: l.item_data.scale || '130%', height: l.item_data.scale || '130%', objectFit: 'contain', opacity: 1.0 }} />
                                                     ) : (
                                                         <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{l.item_data.tier}</span>
                                                     )}

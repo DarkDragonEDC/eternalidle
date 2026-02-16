@@ -745,7 +745,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                                     }}>
                                                         <div style={{ width: '100%', height: '100%', background: 'var(--bg-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                                                             {item?.icon ? (
-                                                                <img src={item.icon} alt={item.name} style={{ width: '120%', height: '120%', objectFit: 'contain' }} />
+                                                                <img src={item.icon} alt={item.name} style={{ width: item.scale || '120%', height: item.scale || '120%', objectFit: 'contain' }} />
                                                             ) : (
                                                                 <Package size={20} color={borderColor} />
                                                             )}

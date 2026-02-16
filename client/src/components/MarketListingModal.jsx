@@ -135,7 +135,11 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                         })()}`,
                         position: 'relative' // relative for absolute stars
                     }}>
-                        <span style={{ color: tierColor, fontWeight: 'bold' }}>T{itemData?.tier}</span>
+                        {itemData?.icon ? (
+                            <img src={itemData.icon} alt={itemData.name} style={{ width: itemData.scale || '100%', height: itemData.scale || '100%', objectFit: 'contain' }} />
+                        ) : (
+                            <span style={{ color: tierColor, fontWeight: 'bold' }}>T{itemData?.tier}</span>
+                        )}
                         {/* Rune Stars Overlay */}
                         {itemData?.stars > 0 && (
                             <div style={{

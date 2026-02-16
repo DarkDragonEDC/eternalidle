@@ -974,8 +974,8 @@ function App() {
                               src={item.icon}
                               alt={item.name}
                               style={{
-                                width: '100%',
-                                height: '100%',
+                                width: item.scale || '100%',
+                                height: item.scale || '100%',
                                 objectFit: 'contain',
                                 filter: locked ? 'grayscale(100%) opacity(0.5)' : 'none'
                               }}
@@ -1178,7 +1178,7 @@ function App() {
                           overflow: 'hidden'
                         }}>
                           {item.icon ? (
-                            <img src={item.icon} alt={item.name} style={{ width: '130%', height: '130%', objectFit: 'contain', filter: locked ? 'grayscale(100%) opacity(0.5)' : 'none' }} />
+                            <img src={item.icon} alt={item.name} style={{ width: item.scale || '130%', height: item.scale || '130%', objectFit: 'contain', filter: locked ? 'grayscale(100%) opacity(0.5)' : 'none' }} />
                           ) : (
                             locked ? <Lock size={20} color="#555" /> : <Layers size={20} style={{ opacity: 0.7 }} color="var(--accent)" />
                           )}

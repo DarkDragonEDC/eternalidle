@@ -241,11 +241,30 @@ if (ITEMS.RAW.FIBER[8]) ITEMS.RAW.FIBER[8].icon = '/items/T8_FIBER.png';
 if (ITEMS.RAW.FIBER[9]) ITEMS.RAW.FIBER[9].icon = '/items/T9_FIBER.png';
 if (ITEMS.RAW.FIBER[10]) ITEMS.RAW.FIBER[10].icon = '/items/T10_FIBER.png';
 
-// Icons for Herbs
-for (const t of TIERS) {
-    if (ITEMS.RAW.HERB[t]) {
-        ITEMS.RAW.HERB[t].icon = `/items/T${t}_Herb.png`;
-    }
+// Icons for Herbs (Raw)
+if (ITEMS.RAW.HERB[1]) ITEMS.RAW.HERB[1].icon = '/items/T1_HERB.png';
+if (ITEMS.RAW.HERB[2]) ITEMS.RAW.HERB[2].icon = '/items/T2_HERB.png';
+if (ITEMS.RAW.HERB[3]) ITEMS.RAW.HERB[3].icon = '/items/T3_HERB.png';
+if (ITEMS.RAW.HERB[4]) ITEMS.RAW.HERB[4].icon = '/items/T4_HERB.png';
+if (ITEMS.RAW.HERB[5]) ITEMS.RAW.HERB[5].icon = '/items/T5_HERB.png';
+if (ITEMS.RAW.HERB[6]) ITEMS.RAW.HERB[6].icon = '/items/T6_HERB.png';
+if (ITEMS.RAW.HERB[7]) ITEMS.RAW.HERB[7].icon = '/items/T7_HERB.png';
+if (ITEMS.RAW.HERB[8]) ITEMS.RAW.HERB[8].icon = '/items/T8_HERB.png';
+if (ITEMS.RAW.HERB[9]) ITEMS.RAW.HERB[9].icon = '/items/T9_HERB.png';
+if (ITEMS.RAW.HERB[10]) ITEMS.RAW.HERB[10].icon = '/items/T10_HERB.png';
+
+// Icons for Herbs (Refined - Extract)
+if (ITEMS.REFINED.EXTRACT) {
+    if (ITEMS.REFINED.EXTRACT[1]) ITEMS.REFINED.EXTRACT[1].icon = '/items/T1_EXTRACT.png';
+    if (ITEMS.REFINED.EXTRACT[2]) ITEMS.REFINED.EXTRACT[2].icon = '/items/T2_EXTRACT.png';
+    if (ITEMS.REFINED.EXTRACT[3]) ITEMS.REFINED.EXTRACT[3].icon = '/items/T3_EXTRACT.png';
+    if (ITEMS.REFINED.EXTRACT[4]) ITEMS.REFINED.EXTRACT[4].icon = '/items/T4_EXTRACT.png';
+    if (ITEMS.REFINED.EXTRACT[5]) ITEMS.REFINED.EXTRACT[5].icon = '/items/T5_EXTRACT.png';
+    if (ITEMS.REFINED.EXTRACT[6]) ITEMS.REFINED.EXTRACT[6].icon = '/items/T6_EXTRACT.png';
+    if (ITEMS.REFINED.EXTRACT[7]) ITEMS.REFINED.EXTRACT[7].icon = '/items/T7_EXTRACT.png';
+    if (ITEMS.REFINED.EXTRACT[8]) ITEMS.REFINED.EXTRACT[8].icon = '/items/T8_EXTRACT.png';
+    if (ITEMS.REFINED.EXTRACT[9]) ITEMS.REFINED.EXTRACT[9].icon = '/items/T9_EXTRACT.png';
+    if (ITEMS.REFINED.EXTRACT[10]) ITEMS.REFINED.EXTRACT[10].icon = '/items/T10_EXTRACT.png';
 }
 
 // Generate Refined
@@ -465,6 +484,7 @@ for (const t of TIERS) {
         rarity: 'COMMON',
         type: 'CONSUMABLE',
         rarityColor: '#ffffff',
+        icon: `/items/T${t}_DG_CHEST.png`,
         desc: 'Contains standard dungeon loot.'
     };
     // Good (Green)
@@ -475,6 +495,7 @@ for (const t of TIERS) {
         rarity: 'UNCOMMON',
         type: 'CONSUMABLE',
         rarityColor: '#10b981', // Green
+        icon: `/items/T${t}_DG_CHEST.png`,
         desc: 'Contains better dungeon loot.'
     };
 
@@ -486,6 +507,7 @@ for (const t of TIERS) {
         rarity: 'RARE',
         type: 'CONSUMABLE',
         rarityColor: '#4a90e2',
+        icon: `/items/T${t}_DG_CHEST.png`,
         desc: 'An outstanding chest with high value rewards.'
     };
     // Excellent (Purple)
@@ -496,6 +518,7 @@ for (const t of TIERS) {
         rarity: 'EPIC',
         type: 'CONSUMABLE',
         rarityColor: '#9013fe',
+        icon: `/items/T${t}_DG_CHEST.png`,
         desc: 'An excellent reward for great feats.'
     };
     // Masterpiece (Orange)
@@ -506,6 +529,7 @@ for (const t of TIERS) {
         rarity: 'LEGENDARY',
         type: 'CONSUMABLE',
         rarityColor: '#f5a623', // Orange/Gold
+        icon: `/items/T${t}_DG_CHEST.png`,
         desc: 'The highest quality chest with the best rewards.'
     };
     // Generic/Legacy Fallback
@@ -515,6 +539,7 @@ for (const t of TIERS) {
         tier: t,
         rarity: 'COMMON',
         type: 'CONSUMABLE',
+        icon: `/items/T${t}_DG_CHEST.png`,
         desc: 'A standard dungeon chest.'
     };
 
@@ -526,6 +551,11 @@ for (const t of TIERS) {
     ITEMS.SPECIAL.CHEST[`${t}_MYTHIC`] = { ...ITEMS.SPECIAL.CHEST[`${t}_MASTERPIECE`], id: `T${t}_CHEST_MYTHIC` };
 
 }
+
+// T10 Dungeon Chest scale override (+14%)
+['NORMAL', 'GOOD', 'OUTSTANDING', 'EXCELLENT', 'MASTERPIECE', 'GENERIC', 'COMMON', 'RARE', 'GOLD', 'MYTHIC'].forEach(q => {
+    if (ITEMS.SPECIAL.CHEST[`10_${q}`]) ITEMS.SPECIAL.CHEST[`10_${q}`].scale = '144%';
+});
 
 // Generate WorldBoss Chests
 for (const t of TIERS) {
@@ -807,14 +837,41 @@ if (ITEMS.GEAR.TOOLMAKER.SICKLE[7]) { ITEMS.GEAR.TOOLMAKER.SICKLE[7].icon = '/it
 if (ITEMS.GEAR.TOOLMAKER.SICKLE[8]) { ITEMS.GEAR.TOOLMAKER.SICKLE[8].icon = '/items/T8_SICKLE.png'; ITEMS.GEAR.TOOLMAKER.SICKLE[8].scale = '110%'; }
 if (ITEMS.GEAR.TOOLMAKER.SICKLE[9]) { ITEMS.GEAR.TOOLMAKER.SICKLE[9].icon = '/items/T9_SICKLE.png'; ITEMS.GEAR.TOOLMAKER.SICKLE[9].scale = '110%'; }
 if (ITEMS.GEAR.TOOLMAKER.SICKLE[10]) { ITEMS.GEAR.TOOLMAKER.SICKLE[10].icon = '/items/T10_SICKLE.png'; ITEMS.GEAR.TOOLMAKER.SICKLE[10].scale = '110%'; }
+
+// --- ICON OVERRIDES FOR SKINNING KNIVES ---
+if (ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[1]) { ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[1].icon = '/items/T1_KNIFE.png'; ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[1].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[2]) { ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[2].icon = '/items/T2_KNIFE.png'; ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[2].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[3]) { ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[3].icon = '/items/T3_KNIFE.png'; ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[3].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[4]) { ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[4].icon = '/items/T4_KNIFE.png'; ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[4].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[5]) { ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[5].icon = '/items/T5_KNIFE.png'; ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[5].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[6]) { ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[6].icon = '/items/T6_KNIFE.png'; ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[6].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[7]) { ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[7].icon = '/items/T7_KNIFE.png'; ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[7].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[8]) { ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[8].icon = '/items/T8_KNIFE.png'; ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[8].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[9]) { ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[9].icon = '/items/T9_KNIFE.png'; ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[9].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[10]) { ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[10].icon = '/items/T10_KNIFE.png'; ITEMS.GEAR.TOOLMAKER.SKINNING_KNIFE[10].scale = '110%'; }
 if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[1]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[1].icon = '/items/T1_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[1].scale = '110%'; }
 if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[2]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[2].icon = '/items/T2_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[2].scale = '110%'; }
-if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[3]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[3].icon = '/items/T3_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[3].scale = '110%'; }
-if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[4]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[4].icon = '/items/T4_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[4].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[3]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[3].icon = '/items/T3_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[3].scale = '170%'; }
+if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[4]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[4].icon = '/items/T4_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[4].scale = '170%'; }
 if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[5]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[5].icon = '/items/T5_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[5].scale = '110%'; }
 if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[6]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[6].icon = '/items/T6_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[6].scale = '110%'; }
 if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[7]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[7].icon = '/items/T7_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[7].scale = '110%'; }
 if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[8]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[8].icon = '/items/T8_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[8].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[9]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[9].icon = '/items/T9_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[9].scale = '110%'; }
+if (ITEMS.GEAR.TOOLMAKER.FISHING_ROD[10]) { ITEMS.GEAR.TOOLMAKER.FISHING_ROD[10].icon = '/items/T10_FISHING_ROD.png'; ITEMS.GEAR.TOOLMAKER.FISHING_ROD[10].scale = '110%'; }
+
+// --- ICON OVERRIDES FOR POUCHES ---
+if (ITEMS.GEAR.TOOLMAKER.POUCH[1]) { ITEMS.GEAR.TOOLMAKER.POUCH[1].icon = '/items/T1_POUCH.png'; ITEMS.GEAR.TOOLMAKER.POUCH[1].scale = '100%'; }
+if (ITEMS.GEAR.TOOLMAKER.POUCH[2]) { ITEMS.GEAR.TOOLMAKER.POUCH[2].icon = '/items/T2_POUCH.png'; ITEMS.GEAR.TOOLMAKER.POUCH[2].scale = '100%'; }
+if (ITEMS.GEAR.TOOLMAKER.POUCH[3]) { ITEMS.GEAR.TOOLMAKER.POUCH[3].icon = '/items/T3_POUCH.png'; ITEMS.GEAR.TOOLMAKER.POUCH[3].scale = '100%'; }
+if (ITEMS.GEAR.TOOLMAKER.POUCH[4]) { ITEMS.GEAR.TOOLMAKER.POUCH[4].icon = '/items/T4_POUCH.png'; ITEMS.GEAR.TOOLMAKER.POUCH[4].scale = '100%'; }
+if (ITEMS.GEAR.TOOLMAKER.POUCH[5]) { ITEMS.GEAR.TOOLMAKER.POUCH[5].icon = '/items/T5_POUCH.png'; ITEMS.GEAR.TOOLMAKER.POUCH[5].scale = '100%'; }
+if (ITEMS.GEAR.TOOLMAKER.POUCH[6]) { ITEMS.GEAR.TOOLMAKER.POUCH[6].icon = '/items/T6_POUCH.png'; ITEMS.GEAR.TOOLMAKER.POUCH[6].scale = '100%'; }
+if (ITEMS.GEAR.TOOLMAKER.POUCH[7]) { ITEMS.GEAR.TOOLMAKER.POUCH[7].icon = '/items/T7_POUCH.png'; ITEMS.GEAR.TOOLMAKER.POUCH[7].scale = '100%'; }
+if (ITEMS.GEAR.TOOLMAKER.POUCH[8]) { ITEMS.GEAR.TOOLMAKER.POUCH[8].icon = '/items/T8_POUCH.png'; ITEMS.GEAR.TOOLMAKER.POUCH[8].scale = '100%'; }
+if (ITEMS.GEAR.TOOLMAKER.POUCH[9]) { ITEMS.GEAR.TOOLMAKER.POUCH[9].icon = '/items/T9_POUCH.png'; ITEMS.GEAR.TOOLMAKER.POUCH[9].scale = '100%'; }
+if (ITEMS.GEAR.TOOLMAKER.POUCH[10]) { ITEMS.GEAR.TOOLMAKER.POUCH[10].icon = '/items/T10_POUCH.png'; ITEMS.GEAR.TOOLMAKER.POUCH[10].scale = '100%'; }
+
 // Generate Dungeon Chests
 for (const t of TIERS) {
     // ... existing chest code ...

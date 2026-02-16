@@ -199,7 +199,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                             }}
                         >
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem', width: '100%', position: 'relative' }}>
-                                {item.icon && <img src={item.icon} style={{ width: 64, height: 64, objectFit: 'contain', marginBottom: '10px', filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.3))' }} alt={item.name} />}
+                                {item.icon && <img src={item.icon} style={{ width: item.scale || 64, height: item.scale || 64, objectFit: 'contain', marginBottom: '10px', filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.3))' }} alt={item.name} />}
                                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
                                     <h3 style={{ color: 'var(--accent)', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
                                 </div>
@@ -522,7 +522,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                             }}
                         >
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem', width: '100%', position: 'relative' }}>
-                                {item.icon && <img src={item.icon} style={{ width: 64, height: 64, objectFit: 'contain', marginBottom: '10px', filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.3))' }} alt={item.name} />}
+                                {item.icon && <img src={item.icon} style={{ width: item.scale || 64, height: item.scale || 64, objectFit: 'contain', marginBottom: '10px', filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.3))' }} alt={item.name} />}
                                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
                                     <h3 style={{ color: 'var(--accent)', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
                                 </div>
@@ -836,7 +836,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                             }}
                         >
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem', width: '100%', position: 'relative' }}>
-                                {item.icon && <img src={item.icon} style={{ width: 64, height: 64, objectFit: 'contain', marginBottom: '10px', filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.3))' }} alt={item.name} />}
+                                {item.icon && <img src={item.icon} style={{ width: item.scale || 64, height: item.scale || 64, objectFit: 'contain', marginBottom: '10px', filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.3))' }} alt={item.name} />}
                                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
                                     <h3 style={{ color: 'var(--accent)', margin: '0px', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '0.5px' }}>{item.name}</h3>
                                 </div>
@@ -1049,7 +1049,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                     color: 'var(--accent)'
                                 }}>
                                     {item.icon ? (
-                                        <img src={item.icon} style={{ width: '130%', height: '130%', objectFit: 'contain' }} alt="" />
+                                        <img src={item.icon} style={{ width: item.scale || '130%', height: item.scale || '130%', objectFit: 'contain' }} alt="" />
                                     ) : (
                                         type === 'GATHERING' || type === 'REFINING' ? <Box size={24} /> : <Target size={24} />
                                     )}

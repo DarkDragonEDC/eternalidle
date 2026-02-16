@@ -421,7 +421,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                             </div>
                             <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 {item.icon ? (
-                                    <img src={item.icon} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="" />
+                                    <img src={item.icon} style={{ width: item.scale || '100%', height: item.scale || '100%', objectFit: 'contain' }} alt="" />
                                 ) : (
                                     <PackageIcon type={item.type} size={24} />
                                 )}

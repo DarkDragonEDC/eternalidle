@@ -227,7 +227,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                         position: 'relative'
                                     }}>
                                         {bestCandidate.icon ? (
-                                            <img src={bestCandidate.icon} style={{ width: '80%', height: '80%', objectFit: 'contain' }} alt="" />
+                                            <img src={bestCandidate.icon} style={{ width: bestCandidate.scale || '80%', height: bestCandidate.scale || '80%', objectFit: 'contain' }} alt="" />
                                         ) : (
                                             <Star size={24} color={bestCandidate.rarityColor || (bestCandidate.quality > 0 ? bestCandidate.rarityColor : 'var(--accent)')} />
                                         )}
@@ -310,7 +310,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                         flexShrink: 0
                                     }}>
                                         {resolvedCurrent?.icon ? (
-                                            <img src={resolvedCurrent.icon} style={{ width: '80%', height: '80%', objectFit: 'contain' }} alt="" />
+                                            <img src={resolvedCurrent.icon} style={{ width: resolvedCurrent.scale || '80%', height: resolvedCurrent.scale || '80%', objectFit: 'contain' }} alt="" />
                                         ) : (
                                             <Star size={24} color={resolvedCurrent?.rarityColor || "#666"} />
                                         )}
@@ -455,7 +455,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                                     overflow: 'hidden'
                                                 }}>
                                                     {item.icon ? (
-                                                        <img src={item.icon} style={{ width: '80%', height: '80%', objectFit: 'contain' }} alt="" />
+                                                        <img src={item.icon} style={{ width: item.scale || '80%', height: item.scale || '80%', objectFit: 'contain' }} alt="" />
                                                     ) : (
                                                         <Star size={20} color={item.rarityColor || '#aaa'} />
                                                     )}

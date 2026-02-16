@@ -1122,7 +1122,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, ac
 
                                             {/* Item Icon */}
                                             {item.icon && !item.id.includes('RUNE_SHARD') ? (
-                                                <img src={item.icon} alt={item.name} style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
+                                                <img src={item.icon} alt={item.name} style={{ width: item.scale || '130%', height: item.scale || '130%', objectFit: 'contain' }} />
                                             ) : (
                                                 <Package size={24} color={specificBorderColor} style={{ opacity: 0.8 }} />
                                             )}
