@@ -275,46 +275,62 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
                         padding: '15px',
                         borderTop: '1px solid rgba(255,255,255,0.1)',
                         display: 'flex',
+                        flexDirection: 'column',
                         gap: '10px',
                         background: '#0f0f1a'
                     }}>
-                        <input
-                            type="text"
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            placeholder={`Message on ${activeTab.toLowerCase()}...`}
-                            maxLength={100}
-                            style={{
-                                flex: 1,
-                                background: 'rgba(255,255,255,0.05)',
-                                border: '1px solid #333',
-                                borderRadius: '6px',
-                                padding: '10px',
-                                color: '#fff',
-                                fontSize: '0.85rem',
-                                outline: 'none'
-                            }}
-                        />
-                        <button
-                            type="submit"
-                            disabled={!message.trim() || cooldown > 0}
-                            style={{
-                                background: (message.trim() && cooldown === 0) ? 'var(--accent)' : 'var(--accent-soft)',
-                                border: 'none',
-                                borderRadius: '6px',
-                                width: '40px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                cursor: (message.trim() && cooldown === 0) ? 'pointer' : 'default',
-                                color: '#000',
-                                transition: '0.2s',
-                                fontSize: '0.8rem',
-                                fontWeight: 'bold'
-                            }}
-                        >
-                            {cooldown > 0 ? cooldown : <Send size={18} />}
-                        </button>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <input
+                                type="text"
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                placeholder={user?.is_anonymous ? "Register to chat..." : `Message on ${activeTab.toLowerCase()}...`}
+                                maxLength={100}
+                                disabled={user?.is_anonymous}
+                                style={{
+                                    flex: 1,
+                                    background: 'rgba(255,255,255,0.05)',
+                                    border: '1px solid #333',
+                                    borderRadius: '6px',
+                                    padding: '10px',
+                                    color: '#fff',
+                                    fontSize: '0.85rem',
+                                    outline: 'none',
+                                    opacity: user?.is_anonymous ? 0.5 : 1
+                                }}
+                            />
+                            <button
+                                type="submit"
+                                disabled={!message.trim() || cooldown > 0 || user?.is_anonymous}
+                                style={{
+                                    background: (message.trim() && cooldown === 0 && !user?.is_anonymous) ? 'var(--accent)' : 'var(--accent-soft)',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    width: '40px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: (message.trim() && cooldown === 0 && !user?.is_anonymous) ? 'pointer' : 'default',
+                                    color: '#000',
+                                    transition: '0.2s',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 'bold',
+                                    opacity: user?.is_anonymous ? 0.5 : 1
+                                }}
+                            >
+                                {cooldown > 0 ? cooldown : <Send size={18} />}
+                            </button>
+                        </div>
+                        {user?.is_anonymous && (
+                            <div style={{
+                                fontSize: '0.7rem',
+                                color: 'var(--accent)',
+                                textAlign: 'center',
+                                fontStyle: 'italic'
+                            }}>
+                                Link your account to start chatting!
+                            </div>
+                        )}
                     </form>
                 )}
             </div>

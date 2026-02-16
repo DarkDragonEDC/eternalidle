@@ -1001,6 +1001,12 @@ io.on('connection', (socket) => {
 
     socket.on('send_message', async ({ content, channel = 'GLOBAL' }) => {
         try {
+            // Guest check: Prevent anonymous users from sending messages
+            if (socket.user.is_anonymous) {
+                socket.emit('error', { message: "Guest accounts cannot send messages. Please register to chat!" });
+                return;
+            }
+
             // Cooldown Check (10s)
             const lastChat = socket.data.lastChatTime || 0;
             const now = Date.now();
