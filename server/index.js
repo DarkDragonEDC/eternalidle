@@ -1395,9 +1395,8 @@ io.on('connection', (socket) => {
 
                 console.log(`[STRIPE] Creating dynamic session for ${packageId} (User: ${socket.user.id}, Char: ${socket.data.characterId})`);
 
-                // Simple Card/USD checkout
+                // Stripe Checkout with automatic payment methods (multi-currency, Pix, etc.)
                 const session = await stripe.checkout.sessions.create({
-                    payment_method_types: ['card'],
                     line_items: [{
                         price_data: {
                             currency: 'usd',
@@ -1411,6 +1410,7 @@ io.on('connection', (socket) => {
                         quantity: 1,
                     }],
                     mode: 'payment',
+                    automatic_payment_methods: { enabled: true },
                     success_url: `${CLIENT_URL}/?payment=success&package=${packageId}`,
                     cancel_url: `${CLIENT_URL}/?payment=cancel`,
                     metadata: {
