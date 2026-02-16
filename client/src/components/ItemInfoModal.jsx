@@ -1,5 +1,6 @@
 import React from 'react';
-import { X, Sword, Shield, Heart, Star, Zap, Award } from 'lucide-react';
+import { X, Sword, Shield, Heart, Star, Zap, Award, Package, Clock, ShieldAlert, Info } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { QUALITIES, resolveItem, getSkillForItem, getLevelRequirement, getRequiredProficiencyGroup } from '@shared/items';
 import { CHEST_DROP_TABLE, getChestRuneShardRange, WORLDBOSS_DROP_TABLE } from '@shared/chest_drops';
 
@@ -7,31 +8,29 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
     if (!rawItem) return null;
 
     const resolved = resolveItem(rawItem.id || rawItem.item_id);
-
-    // For tools/gear, we want to prioritize the resolved (authentic) stats over stale stored stats
-    const mergedStats = { ...resolved?.stats };
-    // If it's not a tool, we can allow some merging if needed, but for tools specifically 
-    // we must ensure efficiency comes from the formula.
     const item = {
         ...resolved,
         ...rawItem,
-        stats: mergedStats // Primary source for gear/tools
+        stats: { ...resolved?.stats, ...rawItem.stats }
     };
 
     const handleBackdropClick = (e) => {
-        if (e.target === e.currentTarget) {
-            onClose();
-        }
+        if (e.target === e.currentTarget) onClose();
     };
 
     const baseStats = item.stats || {};
-    const statKeys = Object.keys(baseStats).filter(k =>
-        (typeof baseStats[k] === 'number' && ['damage', 'defense', 'hp', 'str', 'agi', 'int', 'critChance'].includes(k)) ||
-        (k === 'efficiency')
-    );
+    const statKeys = Object.keys(baseStats).filter(k => {
+        const val = baseStats[k];
+        if (['damage', 'defense', 'hp', 'str', 'agi', 'int', 'critChance', 'speed'].includes(k)) {
+            return typeof val === 'number' && val > 0;
+        }
+        if (k === 'efficiency') {
+            if (typeof val === 'number') return val > 0;
+            if (typeof val === 'object' && val !== null) return Object.values(val).some(v => v > 0);
+        }
+        return false;
+    });
 
-    // For comparison, we need the AUTHENTIC base stats of the item (Quality 0)
-    // otherwise we are scaling a scaled value.
     const baseItemResult = resolveItem(item.originalId || item.id);
     const comparisonBaseStats = baseItemResult?.stats || {};
     const comparisonStatKeys = Object.keys(comparisonBaseStats).filter(k =>
@@ -42,7 +41,6 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
     const rarityComparison = Object.values(QUALITIES).map(q => {
         const qResolved = resolveItem(item.originalId || item.id, q.id);
         const qStats = qResolved?.stats || {};
-
         const calculatedStats = {};
         comparisonStatKeys.forEach(key => {
             if (key === 'efficiency') {
@@ -52,444 +50,214 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                 calculatedStats[key] = qStats[key];
             }
         });
-
-        return {
-            ...q,
-            calculatedStats
-        };
+        return { ...q, calculatedStats };
     });
 
-    // Clean name: remove T{tier} from the name if we are going to append it manually
-    // Base name cleanup is handled in the render for titles
+    const tier = item.tier || 1;
+    const TIER_COLORS = {
+        1: '#a0a0a0', 2: '#4ade80', 3: '#60a5fa', 4: '#a855f7',
+        5: '#fbbf24', 6: '#f87171', 7: '#f0f0f0', 8: '#d4af37',
+    };
+    const tierColor = item.rarityColor || TIER_COLORS[tier] || '#90d5ff';
 
     const getItemDescription = (itm) => {
-        // Prioritize actual item description if it exists (for Runes, Chests, Potions)
         const desc = itm.description || itm.desc;
-        if (desc && desc !== "A useful item for your journey.") {
-            return desc;
-        }
-
+        if (desc && desc !== "A useful item for your journey.") return desc;
         if (['WEAPON'].includes(itm.type)) return "Offensive equipment. Increases your Damage.";
         if (['ARMOR', 'HELMET', 'BOOTS', 'GLOVES'].includes(itm.type)) return "Defensive equipment. Increases your Health and Defense.";
-        if (['OFF_HAND'].includes(itm.type)) {
-            if (itm.id.includes('SHIELD')) return "Secondary defensive equipment.";
-            return "Secondary equipment. Offers various bonuses.";
-        }
+        if (['OFF_HAND'].includes(itm.type)) return itm.id.includes('SHIELD') ? "Secondary defensive equipment." : "Secondary equipment. Offers various bonuses.";
         if (itm.type === 'CAPE') return "Special cape. Offers passive bonuses and global efficiency.";
         if (itm.type.startsWith('TOOL')) return "Gathering tool. Required to gather higher TIER resources.";
-
         if (itm.type === 'FOOD') return itm.description || `Consumable. Restores ${itm.heal || (itm.healPercent ? `${itm.healPercent}% ` : '') || 'Health'} Health over time.`;
-        if (itm.type === 'MAP') return "Dungeon Map. Use to access dangerous areas with valuable rewards.";
-        if (itm.type === 'CRAFTING_MATERIAL' && itm.id.includes('CREST')) return "Rare boss material. Used to craft prestige items.";
-
-        if (itm.type === 'RESOURCE' || itm.type === 'RAW' || itm.type === 'REFINED') {
-            if (itm.type === 'REFINED' || itm.req) return "Refined material. Used to craft equipment and structures.";
-            return "Raw material gathered in the world. Used to refine materials.";
-        }
-
+        if (itm.type === 'MAP') return "Dungeon Map. Use to access dangerous areas.";
         if (itm.type === 'POTION') return itm.desc || "Consumable potion with special effects.";
-
-        if (itm.type === 'RUNE') {
-            // Calculate actual bonus for display
-            // ID format: T{tier}_RUNE_{ACT}_{EFF}_{stars}STAR
-
-            // Safer parsing logic using regex to separate Tier and Stars from the core Type
-            // RUNE ID: T{t}_RUNE_{TYPE}_{stars}STAR
-            const match = itm.id.match(/^T\d+_RUNE_(.+)_(\d+)STAR$/);
-            if (match) {
-                const typeStr = match[1];
-                const typeParts = typeStr.split('_');
-                const activity = typeParts[0];
-                const effect = typeParts.slice(1).join('_');
-
-                const bonus = calculateRuneBonus(itm.tier, itm.stars, effect);
-
-                let bonusText = "";
-                if (effect === 'XP') bonusText = `+${bonus} XP per action`;
-                else if (effect === 'COPY') bonusText = `+${bonus}% Double Item Chance`;
-                else if (effect === 'SPEED') bonusText = `+${bonus} Speed`;
-                else if (effect === 'EFF') bonusText = `+${bonus}% Efficiency`;
-                else if (effect === 'ATTACK') bonusText = `+${bonus.toFixed(1)}% Damage`;
-                else if (effect === 'SAVE_FOOD') bonusText = `+${bonus}% Food Save Chance`;
-                else if (effect === 'BURST') bonusText = `+${bonus}% Critical Strike Chance`;
-                else if (effect === 'ATTACK_SPEED') bonusText = `+${bonus.toFixed(1)}% Attack Speed`;
-
-                return `Rune of ${activity.charAt(0) + activity.slice(1).toLowerCase()}. Gives: ${bonusText}.`;
-            }
-            return itm.description || "A magical rune with special power.";
-        }
-
+        if (itm.type === 'RUNE') return itm.description || "A magical rune with special power.";
         return itm.description || "A useful item for your journey.";
     };
 
+    const StatRow = ({ icon: Icon, label, value, color = 'var(--text-dim)', valColor = 'var(--text-main)' }) => (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color }}>
+                <Icon size={13} strokeWidth={2.5} />
+                <span style={{ fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</span>
+            </div>
+            <span style={{ fontSize: '0.85rem', fontWeight: '900', color: valColor }}>{value}</span>
+        </div>
+    );
+
     return (
-        <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            background: 'rgba(0,0,0,0.7)',
-            zIndex: 20000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backdropFilter: 'blur(8px)',
-            padding: '20px'
-        }} onClick={handleBackdropClick}>
-            <div style={{
-                background: 'var(--panel-bg)',
-                width: '95%',
-                maxWidth: '450px',
-                maxHeight: '90vh',
-                borderRadius: '12px',
-                border: '1px solid var(--border)',
-                display: 'flex',
-                flexDirection: 'column',
-                padding: '20px',
-                gap: '20px',
-                boxShadow: 'var(--panel-shadow)',
-                color: 'var(--text-main)',
-                overflow: 'hidden' // Fix overflow leaking
-            }}>
-                {/* Header */}
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    borderBottom: '1px solid var(--border)',
-                    paddingBottom: '12px',
-                    position: 'relative',
-                    flexShrink: 0 // Prevent header shrinking
+        <div style={{ position: 'fixed', inset: 0, zIndex: 20000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }} onClick={handleBackdropClick}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                style={{ position: 'absolute', inset: 0, background: 'rgba(5, 7, 10, 0.85)', backdropFilter: 'blur(8px)' }} />
+
+            <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                style={{
+                    width: '100%', maxWidth: '380px', background: 'linear-gradient(145deg, rgba(25, 30, 40, 0.95), rgba(10, 15, 20, 0.95))',
+                    borderRadius: '24px', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5), 0 0 40px rgba(144,213,255,0.05)',
+                    position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh'
                 }}>
+
+                {/* Glass Glow Header */}
+                <div style={{
+                    position: 'absolute', top: '-100px', left: '50%', transform: 'translateX(-50%)', width: '300px', height: '200px',
+                    background: `radial-gradient(circle, ${tierColor}20 0%, transparent 70%)`, pointerEvents: 'none'
+                }} />
+
+                <div style={{ padding: '20px 20px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+                    <button onClick={onClose} style={{ position: 'absolute', top: '12px', right: '12px', color: 'var(--text-dim)', border: 'none', background: 'none', cursor: 'pointer' }}><X size={22} /></button>
+
                     <div style={{
-                        position: 'absolute',
-                        top: -20,
-                        left: -20,
-                        right: -20,
-                        height: '4px',
-                        background: item.rarityColor || 'var(--accent)',
-                        borderRadius: '12px 12px 0 0'
-                    }}></div>
-                    <h3 style={{ margin: 0, color: item.rarityColor || 'var(--accent)', fontSize: '1.2rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {item.name}
-                        {item.stars > 0 && (
-                            <span style={{ display: 'inline-flex', gap: '2px', marginLeft: '4px' }}>
-                                {Array.from({ length: item.stars }).map((_, i) => (
-                                    <Star key={i} size={14} color="#fbbf24" fill="#fbbf24" strokeWidth={3} />
-                                ))}
-                            </span>
-                        )}
-                    </h3>
-                    <button
-                        onClick={onClose}
-                        style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', transition: '0.2s' }}
-                        onMouseEnter={(e) => e.currentTarget.style.color = '#fff'}
-                        onMouseLeave={(e) => e.currentTarget.style.color = '#888'}
-                    >
-                        <X size={24} />
-                    </button>
+                        width: '70px', height: '70px', background: 'rgba(255,255,255,0.03)', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.05)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px', boxShadow: `0 0 20px ${tierColor}15`
+                    }}>
+                        <img src={item.icon} style={{ width: item.scale || '70%', height: item.scale || '70%', objectFit: 'contain', filter: `drop-shadow(0 0 8px ${tierColor}40)` }} alt="" />
+                    </div>
+
+                    <div style={{ textAlign: 'center' }}>
+                        <h2 style={{ fontSize: '1.4rem', fontWeight: '900', color: tierColor, letterSpacing: '-0.5px', marginBottom: '4px' }}>{item.name}</h2>
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '8px' }}>
+                            {item.stars > 0 && Array.from({ length: item.stars }).map((_, i) => (
+                                <Star key={i} size={14} color="#fbbf24" fill="#fbbf24" strokeWidth={3} />
+                            ))}
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                        <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', fontWeight: '800', border: '1px solid rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '100px', textTransform: 'uppercase' }}>T{item.tier}</div>
+                        <div style={{ fontSize: '0.6rem', color: tierColor, fontWeight: '800', border: `1px solid ${tierColor}40`, padding: '2px 10px', borderRadius: '100px', textTransform: 'uppercase' }}>{item.type}</div>
+                        {item.ip > 0 && <div style={{ fontSize: '0.6rem', color: '#fbbf24', fontWeight: '800', border: '1px solid rgba(251, 191, 36, 0.3)', padding: '2px 8px', borderRadius: '100px' }}>IP {item.ip}</div>}
+                    </div>
                 </div>
 
-                {/* Scrollable Content Wrapper */}
-                <div style={{
-                    overflowY: 'auto',
-                    paddingRight: '5px',
-                    flex: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '20px',
-                    marginRight: '-10px', // Compensation for padding
-                    paddingRight: '10px' // Space for scrollbar
-                }}>
+                <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: '12px', overflowY: 'auto', flex: 1, paddingRight: '16px', margin: '0 4px 20px 0' }} className="custom-scrollbar">
 
                     {/* Description Section */}
-                    <div style={{
-                        padding: '12px',
-                        background: 'var(--accent-soft)',
-                        borderRadius: '8px',
-                        border: '1px solid var(--border)',
-                        fontSize: '0.9rem',
-                        color: 'var(--text-main)',
-                        fontStyle: 'italic',
-                        lineHeight: '1.4',
-                        textAlign: 'center'
-                    }}>
-                        "{getItemDescription(item)}"
+                    <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-main)', fontStyle: 'italic', lineHeight: '1.5', display: 'block' }}>"{getItemDescription(item)}"</span>
                     </div>
 
-                    {/* Signature Section */}
-                    {item.craftedBy && (
-                        <div style={{
-                            fontSize: '0.7rem',
-                            color: '#fbbf24', // Amber/Yellow
-                            fontWeight: 'bold',
-                            textAlign: 'center',
-                            marginTop: '-10px',
-                            textTransform: 'uppercase',
-                            letterSpacing: '1px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '4px'
-                        }}>
-                            <Award size={12} /> Crafted by {item.craftedBy}
-                        </div>
-                    )}
-
-                    {/* Compact Info Badges */}
-                    <div style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: '8px',
-                        background: 'rgba(0,0,0,0.2)',
-                        padding: '10px 12px',
-                        borderRadius: '8px',
-                        border: '1px solid var(--border)',
-                        justifyContent: 'center'
-                    }}>
-                        <div style={{ padding: '4px 10px', background: 'var(--accent-soft)', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid var(--border-active)' }}>
-                            <span style={{ color: '#888', marginRight: '4px' }}>T</span>{item.tier}
-                        </div>
-                        <div style={{ padding: '4px 10px', background: 'var(--accent-soft)', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid var(--border-active)', textTransform: 'uppercase' }}>
-                            {item.type}
-                        </div>
-                        {(() => {
-                            // FIX: Hide Requirement for Food and Potions
-                            if (item.type === 'FOOD' || item.type === 'POTION') return null;
-
-                            const reqLv = getLevelRequirement(item.tier);
-                            const profGroup = getRequiredProficiencyGroup(item.id);
-
-                            if (profGroup) {
-                                const groupName = profGroup.charAt(0).toUpperCase() + profGroup.slice(1);
-                                return (
-                                    <div style={{ padding: '4px 10px', background: 'rgba(255, 68, 68, 0.1)', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid rgba(255, 68, 68, 0.2)', color: '#ff4444' }}>
-                                        REQ: {groupName} Prof. Lv {reqLv}
-                                    </div>
-                                );
-                            }
-
-                            const skillKey = getSkillForItem(item.id, 'GATHERING') || getSkillForItem(item.id, 'CRAFTING');
-                            if (skillKey) {
-                                const skillName = skillKey.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
-                                return (
-                                    <div style={{ padding: '4px 10px', background: 'rgba(255, 68, 68, 0.1)', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid rgba(255, 68, 68, 0.2)', color: '#ff4444' }}>
-                                        REQ: {skillName} Lv {reqLv}
-                                    </div>
-                                );
-                            }
-                            return null;
-                        })()}
-                        {(item.type === 'FOOD' || (item.ip > 0 && !item.type.startsWith('TOOL'))) && (
-                            <div style={{ padding: '4px 10px', background: 'var(--accent-soft)', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', border: '1px solid var(--border-active)' }}>
-                                {item.type === 'FOOD' ? (
-                                    <><span style={{ color: '#4caf50', marginRight: '4px' }}>HEAL</span>{item.healPercent ? `${item.healPercent}%` : (item.heal || 0)}</>
-                                ) : (
-                                    <><span style={{ color: '#888', marginRight: '4px' }}>IP</span>{item.ip}</>
-                                )}
+                    {/* Requirement Alert */}
+                    {(() => {
+                        if (item.type === 'FOOD' || item.type === 'POTION') return null;
+                        const reqLv = getLevelRequirement(item.tier);
+                        const profGroup = getRequiredProficiencyGroup(item.id);
+                        let reqText = '';
+                        if (profGroup) reqText = `${profGroup.charAt(0).toUpperCase() + profGroup.slice(1)} Prof. Lv ${reqLv}`;
+                        else {
+                            const skillKey = getSkillForItem(item.id, 'GATHERING') || getSkillForItem(item.id, 'REFINING') || getSkillForItem(item.id, 'CRAFTING');
+                            if (skillKey) reqText = `${skillKey.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())} Lv ${reqLv}`;
+                        }
+                        if (!reqText) return null;
+                        return (
+                            <div style={{ background: 'rgba(248, 113, 113, 0.05)', border: '1px solid rgba(248, 113, 113, 0.2)', borderRadius: '12px', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <ShieldAlert size={14} color="#f87171" />
+                                <span style={{ fontSize: '0.7rem', fontWeight: '800', color: '#f87171', textTransform: 'uppercase' }}>Requires: {reqText}</span>
                             </div>
-                        )}
-                    </div>
+                        );
+                    })()}
 
-                    {/* Refined Attributes List */}
+                    {/* Attributes Section */}
                     {statKeys.length > 0 && (
-                        <div style={{
-                            background: 'var(--slot-bg)',
-                            padding: '12px',
-                            borderRadius: '8px',
-                            border: '1px solid var(--border)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '4px'
-                        }}>
-                            <div style={{ color: '#666', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 'bold', textAlign: 'center', marginBottom: '4px' }}>Attributes</div>
-                            <div style={{
-                                display: 'flex',
-                                flexWrap: 'wrap',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                gap: '12px 24px',
-                                width: '100%',
-                                padding: '4px 0'
-                            }}>
-                                {baseStats.damage && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ff4444', fontSize: '0.85rem', fontWeight: 'bold' }}><Sword size={14} /> {item.stats.damage} <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>DMG</span></div>}
-                                {baseStats.hp && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ff4d4d', fontSize: '0.85rem', fontWeight: 'bold' }}><Heart size={14} /> {item.stats.hp} <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>HP</span></div>}
-                                {baseStats.defense && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#4caf50', fontSize: '0.85rem', fontWeight: 'bold' }}><Shield size={14} /> {item.stats.defense} <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>DEF</span></div>}
-                                {baseStats.critChance && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#f59e0b', fontSize: '0.85rem', fontWeight: 'bold' }}><Star size={14} /> {item.stats.critChance.toFixed(2)}% <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>CRIT</span></div>}
-                                {baseStats.attackSpeed && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent)', fontSize: '0.85rem', fontWeight: 'bold' }}><Zap size={14} /> {(1000 / item.stats.attackSpeed).toFixed(1)} <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>/s</span></div>}
-                                {baseStats.speed && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent)', fontSize: '0.85rem', fontWeight: 'bold' }}><Zap size={14} /> {item.stats.speed} <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>SPD</span></div>}
-                                {(baseStats.warriorProf || baseStats.str) && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ff8888', fontSize: '0.85rem', fontWeight: 'bold' }}>War. Prof. <span style={{ marginLeft: '4px' }}>+{(item.stats.warriorProf || item.stats.str)}</span></div>}
-                                {(baseStats.hunterProf || baseStats.agi) && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#88ff88', fontSize: '0.85rem', fontWeight: 'bold' }}>Hun. Prof. <span style={{ marginLeft: '4px' }}>+{(item.stats.hunterProf || item.stats.agi)}</span></div>}
-                                {(baseStats.mageProf || baseStats.int) && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#8888ff', fontSize: '0.85rem', fontWeight: 'bold' }}>Mag. Prof. <span style={{ marginLeft: '4px' }}>+{(item.stats.mageProf || item.stats.int)}</span></div>}
-                                {item.heal && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#4caf50', fontSize: '0.85rem', fontWeight: 'bold' }}><Heart size={14} /> <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>HEAL</span> {item.heal}</div>}
-                                {item.type === 'POTION' && item.desc && <div style={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '6px', color: 'var(--accent)', fontSize: '0.8rem', fontStyle: 'italic', textAlign: 'center' }}>{item.desc}</div>}
-                                {baseStats.efficiency && typeof baseStats.efficiency === 'number' && <div style={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '6px', color: 'var(--accent)', fontSize: '0.8rem', fontWeight: 'bold', textAlign: 'center' }}>Efficiency +{item.stats.efficiency}%</div>}
-                                {baseStats.efficiency && typeof baseStats.efficiency === 'object' && baseStats.efficiency.GLOBAL && <div style={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '6px', color: 'var(--accent)', fontSize: '0.8rem', fontWeight: 'bold', textAlign: 'center' }}>Global Efficiency +{item.stats.efficiency.GLOBAL}%</div>}
+                        <div className="glass-panel" style={{ padding: '12px', borderRadius: '14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div style={{ fontSize: '0.6rem', fontWeight: '800', color: 'var(--text-dim)', marginBottom: '8px', letterSpacing: '1px' }}>ITEM ATTRIBUTES</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                {baseStats.damage && <StatRow icon={Sword} label="Damage" value={item.stats.damage} valColor="#f87171" />}
+                                {baseStats.hp && <StatRow icon={Heart} label="Health" value={item.stats.hp} valColor="#fb7185" />}
+                                {baseStats.defense && <StatRow icon={Shield} label="Defense" value={item.stats.defense} valColor="#4ade80" />}
+                                {baseStats.critChance && <StatRow icon={Star} label="Crit Chance" value={`${item.stats.critChance.toFixed(2)}%`} valColor="#fbbf24" />}
+                                {baseStats.attackSpeed && <StatRow icon={Zap} label="Attack Speed" value={(1000 / item.stats.attackSpeed).toFixed(1)} valColor="#90d5ff" />}
+                                {baseStats.speed && <StatRow icon={Zap} label="Speed" value={item.stats.speed} valColor="#90d5ff" />}
+                                {(baseStats.warriorProf || baseStats.str) && <StatRow icon={Award} label="War. Prof." value={`+${item.stats.warriorProf || item.stats.str}`} valColor="#ff8888" />}
+                                {(baseStats.hunterProf || baseStats.agi) && <StatRow icon={Award} label="Hun. Prof." value={`+${item.stats.hunterProf || item.stats.agi}`} valColor="#88ff88" />}
+                                {(baseStats.mageProf || baseStats.int) && <StatRow icon={Award} label="Mag. Prof." value={`+${item.stats.mageProf || item.stats.int}`} valColor="#8888ff" />}
+                                {item.heal && <StatRow icon={Heart} label="Heal" value={item.heal} valColor="#4ade80" />}
+                                {baseStats.efficiency && typeof baseStats.efficiency === 'number' && <StatRow icon={Info} label="Efficiency" value={`+${item.stats.efficiency}%`} valColor="#90d5ff" />}
+                                {baseStats.efficiency && typeof baseStats.efficiency === 'object' && baseStats.efficiency.GLOBAL && <StatRow icon={Info} label="Global Eff." value={`+${item.stats.efficiency.GLOBAL}%`} valColor="#90d5ff" />}
                             </div>
                         </div>
                     )}
 
-                    {/* Crafting Metadata (New) */}
+                    {/* Crafted By */}
                     {item.craftedBy && (
-                        <div style={{
-                            padding: '10px 15px',
-                            background: 'rgba(255, 215, 0, 0.03)',
-                            borderRadius: '8px',
-                            border: '1px solid rgba(255, 215, 0, 0.1)',
-                            fontSize: '0.75rem',
-                            color: '#aaa',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '2px'
-                        }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ color: '#888', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px', fontSize: '0.65rem' }}>Crafted By</span>
-                                <span style={{ color: 'var(--accent)', fontWeight: '900' }}>{item.craftedBy}</span>
+                        <div style={{ background: 'rgba(251, 191, 36, 0.05)', padding: '10px 14px', borderRadius: '12px', border: '1px solid rgba(251, 191, 36, 0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Award size={14} color="#fbbf24" />
+                                <span style={{ fontSize: '0.65rem', fontWeight: '800', color: '#fbbf24', textTransform: 'uppercase' }}>Crafted By</span>
                             </div>
-                            {item.craftedAt && (
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span style={{ color: '#666' }}>Date</span>
-                                    <span style={{ color: '#888' }}>{new Date(item.craftedAt).toLocaleDateString('pt-BR')}</span>
-                                </div>
-                            )}
+                            <span style={{ fontSize: '0.8rem', fontWeight: '900', color: '#fff' }}>{item.craftedBy}</span>
                         </div>
                     )}
 
-                    {/* Chest Drop Table */}
+                    {/* Chest Drops */}
                     {item.id.includes('CHEST') && (
-                        <div style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '12px',
-                            background: 'var(--slot-bg)',
-                            padding: '15px',
-                            borderRadius: '8px',
-                            border: '1px solid var(--border)'
-                        }}>
-                            <div style={{ color: '#888', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Possible Rewards</div>
+                        <div className="glass-panel" style={{ padding: '12px', borderRadius: '14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div style={{ fontSize: '0.6rem', fontWeight: '800', color: 'var(--text-dim)', marginBottom: '8px', letterSpacing: '1px' }}>POSSIBLE REWARDS</div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                {/* Rune Shards - Guaranteed */}
                                 {(() => {
                                     const isWorldBoss = item.id.includes('WORLDBOSS');
                                     const shardName = isWorldBoss ? 'Battle Rune Shard' : `Rune Shard (T${item.tier})`;
-
                                     if (isWorldBoss) {
                                         const qty = WORLDBOSS_DROP_TABLE[item.id] || 0;
                                         return (
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                                                    <span style={{ color: '#9013fe', fontWeight: 'bold' }}>{shardName}</span>
-                                                    <span style={{ color: '#9013fe', fontWeight: 'bold' }}>100%</span>
-                                                </div>
-                                                <div style={{ fontSize: '0.75rem', color: '#888', textAlign: 'right' }}>
-                                                    Quantity: {qty}
-                                                </div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#9013fe' }}>{shardName} x{qty}</span>
+                                                <span style={{ fontSize: '0.7rem', fontWeight: '900', color: '#4ade80' }}>100%</span>
                                             </div>
                                         );
                                     }
-
                                     const [min, max] = getChestRuneShardRange(item.tier, item.rarity);
                                     return (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                                                <span style={{ color: '#ddd' }}>{shardName}</span>
-                                                <span style={{ color: '#4a90e2', fontWeight: 'bold' }}>100%</span>
+                                        <>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#fff' }}>{shardName}</span>
+                                                <span style={{ fontSize: '0.7rem', fontWeight: '900', color: tierColor }}>100%</span>
                                             </div>
-                                            <div style={{ fontSize: '0.75rem', color: '#888', textAlign: 'right' }}>
-                                                {min} (80%) / {max} (20%)
-                                            </div>
-                                        </div>
+                                            <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textAlign: 'right', marginTop: '-4px' }}>{min} (80%) / {max} (20%)</div>
+                                        </>
                                     );
                                 })()}
-
                                 {!item.id.includes('WORLDBOSS') && CHEST_DROP_TABLE.RARITIES[item.rarity]?.crestChance > 0 && (
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', borderTop: '1px solid var(--border)', paddingTop: '8px', marginTop: '2px' }}>
-                                        <span style={{ color: 'var(--accent)' }}>Boss Crest (T{item.tier})</span>
-                                        <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{(CHEST_DROP_TABLE.RARITIES[item.rarity].crestChance * 100).toFixed(0)}%</span>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '4px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <span style={{ fontSize: '0.75rem', fontWeight: '800', color: tierColor }}>Boss Crest (T{item.tier})</span>
+                                        <span style={{ fontSize: '0.7rem', fontWeight: '900', color: tierColor }}>{(CHEST_DROP_TABLE.RARITIES[item.rarity].crestChance * 100).toFixed(0)}%</span>
                                     </div>
                                 )}
                             </div>
-                            <div style={{ marginTop: '5px', fontSize: '0.75rem', color: '#666', fontStyle: 'italic', textAlign: 'center' }}>
-                                {item.id.includes('WORLDBOSS') ? '* Yields guaranteed Battle Rune Shards.' : '* Yields guaranteed Rune Shards and a chance for Boss Crests.'}
+                        </div>
+                    )}
+
+                    {/* Quality Comparison */}
+                    {statKeys.length > 0 && !['FOOD', 'POTION'].includes(item.type) && !item.id.includes('CHEST') && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <div style={{ fontSize: '0.6rem', fontWeight: '800', color: 'var(--text-dim)', letterSpacing: '1px' }}>SCALING BY QUALITY</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                {rarityComparison.map(q => {
+                                    const isCurrent = q.id === (item.quality || 0);
+                                    return (
+                                        <div key={q.id} style={{
+                                            background: isCurrent ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.02)',
+                                            padding: '8px 12px', borderRadius: '10px',
+                                            border: `1px solid ${isCurrent ? q.color + '40' : 'rgba(255,255,255,0.05)'}`,
+                                            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                                        }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: q.color }} />
+                                                <span style={{ fontSize: '0.75rem', fontWeight: '800', color: q.color }}>{q.name}</span>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '8px', fontSize: '0.7rem', fontWeight: '900', color: isCurrent ? '#fff' : 'var(--text-dim)' }}>
+                                                {Object.entries(q.calculatedStats).map(([k, v]) => (
+                                                    <span key={k}>{k.slice(0, 3).toUpperCase()}: {v}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     )}
 
-                    {/* Rarity Comparison Section */}
-                    {statKeys.length > 0 && !['FOOD', 'POTION'].includes(item.type) && !item.id.includes('FOOD') && !item.id.includes('POTION') && (
-                        <div>
-                            <h4 style={{
-                                fontSize: '0.85rem',
-                                color: '#888',
-                                marginBottom: '10px',
-                                marginTop: '5px',
-                                textTransform: 'uppercase',
-                                letterSpacing: '1px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px'
-                            }}>
-                                Rarity Comparison <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>(Est. Stats)</span>
-                            </h4>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                {rarityComparison.map(q => (
-                                    <div key={q.id} style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        padding: '8px 12px',
-                                        borderRadius: '6px',
-                                        background: q.id === (item.quality || 0) ? 'var(--accent-soft)' : 'var(--slot-bg)',
-                                        border: q.id === (item.quality || 0) ? `1px solid ${q.color}` : '1px solid var(--border)',
-                                        transition: '0.2s',
-                                        boxShadow: q.id === (item.quality || 0) ? `0 0 15px ${q.color}20` : 'none'
-                                    }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: q.color }}></div>
-                                            <div style={{ fontWeight: 'bold', color: q.color, fontSize: '0.85rem' }}>{q.name}</div>
-                                            {q.id === (item.quality || 0) && (
-                                                <span style={{
-                                                    fontSize: '0.55rem',
-                                                    background: q.color,
-                                                    color: '#000',
-                                                    padding: '2px 5px',
-                                                    borderRadius: '3px',
-                                                    fontWeight: '900',
-                                                    marginLeft: '5px'
-                                                }}>
-                                                    CURRENT
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: q.id === (item.quality || 0) ? 'var(--text-main)' : 'var(--text-dim)', display: 'flex', gap: '8px', textAlign: 'right' }}>
-                                            {Object.entries(q.calculatedStats).map(([key, val]) => {
-                                                let label = key.toUpperCase();
-                                                if (key === 'damage') label = 'Dmg';
-                                                if (key === 'defense') label = 'Def';
-                                                if (key === 'critChance') label = 'Crit';
-                                                if (key === 'globalEff') label = 'Global Eff';
-                                                if (key === 'efficiency') label = 'Eff';
-                                                return (
-                                                    <span key={key}>
-                                                        {label}: {['globalEff', 'efficiency', 'critChance'].includes(key) ? '+' : ''}{val}{['globalEff', 'efficiency', 'critChance'].includes(key) ? '%' : ''}
-                                                    </span>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    <div style={{ textAlign: 'center', color: '#555', fontSize: '0.75rem', marginTop: '5px' }}>
-                        Click outside to close.
-                    </div>
-                </div> {/* End Scrollable Wrapper */}
-            </div>
+                </div>
+            </motion.div>
         </div>
     );
 };

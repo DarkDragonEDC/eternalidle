@@ -1,283 +1,193 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Shield, Coins, Tag, Trash2, ArrowRight, Zap } from 'lucide-react';
+import { X, Shield, Coins, Tag, Trash2, ArrowRight, Zap, Award, Info, Heart, Sword, Star } from 'lucide-react';
 import { getTierColor, calculateItemSellPrice, resolveItem } from '@shared/items';
 
 const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUse, onDismantle, customAction, isIronman }) => {
     if (!rawItem) return null;
 
-    // Robust resolution: ensure we have full details including qualityName
+    // Robust resolution: ensure we have full details
     const resolved = resolveItem(rawItem.id);
     const item = { ...rawItem, ...resolved, id: rawItem.id };
 
-
-    const tierColor = getTierColor(item.tier);
-    const borderColor = item.rarityColor || tierColor;
-
-    // Clean name: remove T{tier} from the name if we are going to append it manually
+    const tierColor = item.rarityColor || getTierColor(item.tier);
     const cleanBaseName = (item.name || '').replace(new RegExp(` T${item.tier}$`), '');
+
+    const hasMeaningfulStats = item.stats && (
+        (item.stats.damage || 0) > 0 ||
+        (item.stats.defense || 0) > 0 ||
+        (item.stats.hp || 0) > 0 ||
+        (item.stats.attackSpeed || 0) > 0 ||
+        (item.stats.str || 0) > 0 ||
+        (item.stats.agi || 0) > 0 ||
+        (item.stats.int || 0) > 0 ||
+        ((typeof item.stats.efficiency === 'number' && item.stats.efficiency > 0) || (typeof item.stats.efficiency === 'object' && item.stats.efficiency !== null))
+    );
+
+    const StatRow = ({ icon: Icon, label, value, color = 'var(--text-dim)', valColor = 'var(--text-main)' }) => (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color }}>
+                <Icon size={13} strokeWidth={2.5} />
+                <span style={{ fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</span>
+            </div>
+            <span style={{ fontSize: '0.85rem', fontWeight: '900', color: valColor }}>{value}</span>
+        </div>
+    );
+
+    const ActionButton = ({ onClick, icon: Icon, label, variant = 'primary', subLabel }) => {
+        const variants = {
+            primary: {
+                bg: 'var(--accent)',
+                color: 'var(--panel-bg)',
+                border: 'none',
+                shadow: '0 4px 15px rgba(144,213,255,0.2)'
+            },
+            outline: {
+                bg: 'rgba(144,213,255,0.05)',
+                color: 'var(--accent)',
+                border: '1px solid rgba(144,213,255,0.3)',
+                shadow: 'none'
+            },
+            soft: {
+                bg: 'rgba(255,255,255,0.03)',
+                color: 'var(--text-main)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                shadow: 'none'
+            },
+            dismantle: {
+                bg: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
+                color: '#fff',
+                border: 'none',
+                shadow: '0 4px 15px rgba(139, 92, 246, 0.3)'
+            }
+        };
+
+        const v = variants[variant] || variants.primary;
+
+        return (
+            <motion.button
+                whileHover={{ scale: 1.02, filter: 'brightness(1.1)' }}
+                whileTap={{ scale: 0.98 }}
+                onClick={onClick}
+                style={{
+                    padding: '12px 16px',
+                    borderRadius: '12px',
+                    background: v.bg,
+                    color: v.color,
+                    border: v.border,
+                    fontWeight: '900',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '12px',
+                    cursor: 'pointer',
+                    boxShadow: v.shadow,
+                    fontSize: '0.85rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                }}
+            >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Icon size={18} strokeWidth={2.5} />
+                    <span>{label}</span>
+                </div>
+                {subLabel && <span style={{ fontSize: '0.7rem', opacity: 0.8, fontWeight: '800' }}>{subLabel}</span>}
+            </motion.button>
+        );
+    };
 
     return (
         <AnimatePresence>
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                style={{
-                    position: 'fixed',
-                    top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0,0,0,0.4)',
-                    zIndex: 20000,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backdropFilter: 'blur(4px)'
-                }}
-                onClick={onClose}
-            >
-                <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.9, opacity: 0 }}
+            <div style={{ position: 'fixed', inset: 0, zIndex: 20000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}
+                    style={{ position: 'absolute', inset: 0, background: 'rgba(5, 7, 10, 0.85)', backdropFilter: 'blur(8px)' }} />
+
+                <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
                     onClick={(e) => e.stopPropagation()}
                     style={{
-                        background: 'var(--panel-bg)',
-                        border: `1px solid ${borderColor}`,
-                        borderRadius: '16px',
-                        padding: '24px',
-                        width: '90%',
-                        maxWidth: '350px',
-                        boxShadow: 'var(--panel-shadow)',
-                        position: 'relative'
-                    }}
-                >
-                    <button
-                        onClick={onClose}
-                        style={{
-                            position: 'absolute',
-                            top: '12px',
-                            right: '12px',
-                            background: 'none',
-                            border: 'none',
-                            color: '#888',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        <X size={20} />
-                    </button>
+                        width: '100%', maxWidth: '380px', background: 'linear-gradient(145deg, rgba(25, 30, 40, 0.95), rgba(10, 15, 20, 0.95))',
+                        borderRadius: '24px', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5), 0 0 40px rgba(144,213,255,0.05)',
+                        position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column'
+                    }}>
 
-                    {/* Header */}
-                    <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                    {/* Glass Glow Header */}
+                    <div style={{
+                        position: 'absolute', top: '-100px', left: '50%', transform: 'translateX(-50%)', width: '300px', height: '200px',
+                        background: `radial-gradient(circle, ${tierColor}20 0%, transparent 70%)`, pointerEvents: 'none'
+                    }} />
+
+                    <div style={{ padding: '24px 24px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+                        <button onClick={onClose} style={{ position: 'absolute', top: '12px', right: '12px', color: 'var(--text-dim)', border: 'none', background: 'none', cursor: 'pointer' }}><X size={22} /></button>
+
                         <div style={{
-                            fontSize: '1.2rem',
-                            fontWeight: 'bold',
-                            color: item.rarityColor || 'var(--text-main)',
-                            marginBottom: '4px'
+                            width: '70px', height: '70px', background: 'rgba(255,255,255,0.03)', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.05)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px', boxShadow: `0 0 20px ${tierColor}15`
                         }}>
-                            {cleanBaseName}
+                            <img src={item.icon} style={{ width: item.scale || '70%', height: item.scale || '70%', objectFit: 'contain', filter: `drop-shadow(0 0 8px ${tierColor}40)` }} alt="" />
                         </div>
-                        <div style={{
-                            fontSize: '0.8rem',
-                            color: tierColor,
-                            fontWeight: 'bold',
-                            border: `1px solid ${tierColor}`,
-                            display: 'inline-block',
-                            padding: '2px 8px',
-                            borderRadius: '4px'
-                        }}>
-                            TIER {item.tier}
+
+                        <h2 style={{ fontSize: '1.4rem', fontWeight: '900', color: tierColor, letterSpacing: '-0.5px', marginBottom: '4px', textAlign: 'center' }}>{cleanBaseName}</h2>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '800', border: `1px solid ${tierColor}40`, padding: '2px 10px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                            T{item.tier} Item
                         </div>
                     </div>
 
-                    {/* Stats Display */}
-                    {item.stats && (
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: '1fr 1fr',
-                            gap: '10px',
-                            background: 'var(--slot-bg)',
-                            padding: '15px',
-                            borderRadius: '10px',
-                            marginBottom: '20px',
-                            border: '1px solid var(--border)'
-                        }}>
-                            {/* Primary Stats */}
-                            {item.stats.damage > 0 && (
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase' }}>Damage</span>
-                                    <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#ff4444' }}>{item.stats.damage}</span>
+                    <div style={{ padding: '0 24px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        {/* Stats Display */}
+                        {hasMeaningfulStats && (
+                            <div className="glass-panel" style={{ padding: '14px', borderRadius: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <div style={{ fontSize: '0.6rem', fontWeight: '800', color: 'var(--text-dim)', marginBottom: '8px', letterSpacing: '1px' }}>ITEM ATTRIBUTES</div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                    {item.stats.damage > 0 && <StatRow icon={Sword} label="Damage" value={item.stats.damage} valColor="#f87171" />}
+                                    {item.stats.defense > 0 && <StatRow icon={Shield} label="Defense" value={item.stats.defense} valColor="#4ade80" />}
+                                    {item.stats.hp > 0 && <StatRow icon={Heart} label="Health" value={`+${item.stats.hp}`} valColor="#fb7185" />}
+                                    {item.stats.attackSpeed > 0 && <StatRow icon={Zap} label="Attack Speed" value={`${(1000 / item.stats.attackSpeed).toFixed(1)} /s`} valColor="#ffd700" />}
+
+                                    {(item.stats.str > 0 || item.stats.agi > 0 || item.stats.int > 0) && (
+                                        <div style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-around', gap: '8px' }}>
+                                            {item.stats.str > 0 && <div style={{ color: '#ff8888', fontWeight: '900', fontSize: '0.75rem' }}>+{item.stats.str} STR</div>}
+                                            {item.stats.agi > 0 && <div style={{ color: '#88ff88', fontWeight: '900', fontSize: '0.75rem' }}>+{item.stats.agi} AGI</div>}
+                                            {item.stats.int > 0 && <div style={{ color: '#8888ff', fontWeight: '900', fontSize: '0.75rem' }}>+{item.stats.int} INT</div>}
+                                        </div>
+                                    )}
+
+                                    {item.stats.efficiency && (
+                                        <div style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
+                                            <span style={{ color: '#d4af37', fontWeight: '900', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+                                                Efficiency: {typeof item.stats.efficiency === 'object' ? 'Global Bonus' : `+${item.stats.efficiency}%`}
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
+                            </div>
+                        )}
+
+                        {/* Actions Grid */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {customAction && (
+                                <ActionButton onClick={() => { customAction.onClick(item); onClose(); }} icon={customAction.icon ? () => customAction.icon : Zap} label={customAction.label} />
                             )}
-                            {item.stats.defense > 0 && (
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase' }}>Defense</span>
-                                    <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#44ff44' }}>{item.stats.defense}</span>
-                                </div>
-                            )}
-                            {item.stats.hp > 0 && (
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase' }}>Health</span>
-                                    <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#44ff44' }}>+{item.stats.hp}</span>
-                                </div>
-                            )}
-                            {item.stats.attackSpeed > 0 && (
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase' }}>Speed</span>
-                                    <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#ffd700' }}>
-                                        {(1000 / item.stats.attackSpeed).toFixed(1)} <span style={{ fontSize: '0.7rem' }}>/s</span>
-                                    </span>
-                                </div>
+                            {(['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFF_HAND', 'FOOD'].includes(item.type) || item.type.startsWith('TOOL')) && (
+                                <ActionButton onClick={() => { onEquip(item.id); onClose(); }} icon={Shield} label="Equip Item" />
                             )}
 
-                            {/* Attributes */}
-                            {(item.stats.str > 0 || item.stats.agi > 0 || item.stats.int > 0) && (
-                                <div style={{ gridColumn: '1 / -1', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-around' }}>
-                                    {item.stats.str > 0 && <span style={{ color: '#ff8888', fontWeight: 'bold', fontSize: '0.9rem' }}>+{item.stats.str} STR</span>}
-                                    {item.stats.agi > 0 && <span style={{ color: '#88ff88', fontWeight: 'bold', fontSize: '0.9rem' }}>+{item.stats.agi} AGI</span>}
-                                    {item.stats.int > 0 && <span style={{ color: '#8888ff', fontWeight: 'bold', fontSize: '0.9rem' }}>+{item.stats.int} INT</span>}
-                                </div>
+                            {((['POTION', 'CONSUMABLE', 'CHEST'].includes(item.type)) || (item.id && item.id.includes('CHEST'))) && (
+                                <ActionButton onClick={() => { onUse(item.id); onClose(); }} icon={Zap} label={item.type === 'POTION' ? 'Drink Potion' : (item.id.includes('CHEST') ? 'Open Chest' : 'Use Item')} />
                             )}
 
-                            {/* Efficiency */}
-                            {item.stats.efficiency && (
-                                <div style={{ gridColumn: '1 / -1', marginTop: '5px', textAlign: 'center' }}>
-                                    <span style={{ color: '#d4af37', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                                        Efficiency: {typeof item.stats.efficiency === 'object' ? 'Global Bonus' : item.stats.efficiency}
-                                    </span>
-                                </div>
+                            {(['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFF_HAND'].includes(item.type) || item.type.startsWith('TOOL_')) && (
+                                <ActionButton onClick={() => { onDismantle(item.id); onClose(); }} icon={Trash2} label="Dismantle" variant="dismantle" />
                             )}
+
+                            {!isIronman && (
+                                <ActionButton onClick={() => { onList(item.id, item); onClose(); }} icon={Tag} label="List on Market" variant="outline" />
+                            )}
+
+                            <ActionButton onClick={() => { onSell(item.id); onClose(); }} icon={Coins} label="Sell Quickly" variant="soft" subLabel={calculateItemSellPrice(item, item.id)} />
                         </div>
-                    )}
-
-                    {/* Actions */}
-                    <div style={{ display: 'grid', gap: '10px' }}>
-                        {customAction && (
-                            <button
-                                onClick={() => { customAction.onClick(item); onClose(); }}
-                                style={{
-                                    padding: '12px',
-                                    borderRadius: '8px',
-                                    border: 'none',
-                                    background: 'var(--accent)',
-                                    color: 'var(--panel-bg)',
-                                    fontWeight: 'bold',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '8px',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                {customAction.icon || <Zap size={18} />} {customAction.label}
-                            </button>
-                        )}
-                        {(['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFF_HAND', 'FOOD'].includes(item.type) || item.type.startsWith('TOOL')) && (
-                            <button
-                                onClick={() => { onEquip(item.id); onClose(); }}
-                                style={{
-                                    padding: '12px',
-                                    borderRadius: '8px',
-                                    border: 'none',
-                                    background: 'var(--accent)',
-                                    color: 'var(--panel-bg)',
-                                    fontWeight: 'bold',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '8px',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                <Shield size={18} /> EQUIP
-                            </button>
-                        )}
-
-                        {((['POTION', 'CONSUMABLE', 'CHEST'].includes(item.type)) || (item.id && item.id.includes('CHEST'))) && (
-                            <button
-                                onClick={() => { onUse(item.id); onClose(); }}
-                                style={{
-                                    padding: '12px',
-                                    borderRadius: '8px',
-                                    border: 'none',
-                                    background: 'var(--accent)',
-                                    color: 'var(--panel-bg)',
-                                    fontWeight: 'bold',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '8px',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                <Zap size={18} /> {item.type === 'POTION' ? 'DRINK' : (item.id.includes('CHEST') ? 'OPEN' : 'USE')}
-                            </button>
-                        )}
-
-                        {(['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFF_HAND'].includes(item.type) || item.type.startsWith('TOOL_')) && (
-                            <button
-                                onClick={() => { onDismantle(item.id); onClose(); }}
-                                style={{
-                                    padding: '12px',
-                                    borderRadius: '8px',
-                                    border: 'none',
-                                    background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
-                                    color: '#fff',
-                                    fontWeight: 'bold',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '8px',
-                                    cursor: 'pointer',
-                                    boxShadow: '0 4px 10px rgba(139, 92, 246, 0.2)'
-                                }}
-                            >
-                                <Trash2 size={18} /> DISMANTLE
-                            </button>
-                        )}
-
-                        {!isIronman && (
-                            <button
-                                onClick={() => { onList(item.id, item); onClose(); }}
-                                style={{
-                                    padding: '12px',
-                                    borderRadius: '8px',
-                                    border: '1px solid var(--accent)',
-                                    background: 'transparent',
-                                    color: 'var(--accent)',
-                                    fontWeight: 'bold',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '8px',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                <Tag size={18} /> LIST ON MARKET
-                            </button>
-                        )}
-
-                        <button
-                            onClick={() => { onSell(item.id); onClose(); }}
-                            style={{
-                                padding: '12px',
-                                borderRadius: '8px',
-                                border: '1px solid var(--border)',
-                                background: 'var(--accent-soft)',
-                                color: 'var(--text-main)',
-                                fontWeight: 'bold',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '8px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            <Coins size={18} /> SELL QUICKLY ({calculateItemSellPrice(item, item.id)})
-                        </button>
                     </div>
-
                 </motion.div>
-            </motion.div>
+            </div>
         </AnimatePresence>
     );
 };
