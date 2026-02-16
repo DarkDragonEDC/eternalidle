@@ -948,7 +948,13 @@ export const resolveItem = (itemId, overrideQuality = null) => {
     }
 
     if (overrideQuality !== null) {
-        qualityId = overrideQuality;
+        // AUTO-HEALING: If ID encodes a quality suffix (e.g. _Q3) but override is 0,
+        // we trust the ID quality instead of forcing the item to Common.
+        if (overrideQuality === 0 && qualityId > 0) {
+            // Keep detected qualityId
+        } else {
+            qualityId = overrideQuality;
+        }
     }
 
     if (!baseItem) return null;
