@@ -194,6 +194,33 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                             <div style={{ fontSize: '0.6rem', fontWeight: '800', color: 'var(--text-dim)', marginBottom: '8px', letterSpacing: '1px' }}>POSSIBLE REWARDS</div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                 {(() => {
+                                    if (item.id === 'NOOB_CHEST') {
+                                        return (
+                                            <>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#fff' }}>200x T1 Food</span>
+                                                    <span style={{ fontSize: '0.7rem', fontWeight: '900', color: '#4ade80' }}>100%</span>
+                                                </div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#fff' }}>1x T1 Sword</span>
+                                                    <span style={{ fontSize: '0.7rem', fontWeight: '900', color: '#4ade80' }}>100%</span>
+                                                </div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#fff' }}>1x T1 Bow</span>
+                                                    <span style={{ fontSize: '0.7rem', fontWeight: '900', color: '#4ade80' }}>100%</span>
+                                                </div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#fff' }}>1x T1 Staff</span>
+                                                    <span style={{ fontSize: '0.7rem', fontWeight: '900', color: '#4ade80' }}>100%</span>
+                                                </div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#fff' }}>50x T1 Rune Shards</span>
+                                                    <span style={{ fontSize: '0.7rem', fontWeight: '900', color: '#4ade80' }}>100%</span>
+                                                </div>
+                                            </>
+                                        );
+                                    }
+
                                     const isWorldBoss = item.id.includes('WORLDBOSS');
                                     const shardName = isWorldBoss ? 'Battle Rune Shard' : `Rune Shard (T${item.tier})`;
                                     if (isWorldBoss) {
@@ -216,7 +243,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                         </>
                                     );
                                 })()}
-                                {!item.id.includes('WORLDBOSS') && CHEST_DROP_TABLE.RARITIES[item.rarity]?.crestChance > 0 && (
+                                {!item.id.includes('WORLDBOSS') && item.id !== 'NOOB_CHEST' && CHEST_DROP_TABLE.RARITIES[item.rarity]?.crestChance > 0 && (
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '4px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                                         <span style={{ fontSize: '0.75rem', fontWeight: '800', color: tierColor }}>Boss Crest (T{item.tier})</span>
                                         <span style={{ fontSize: '0.7rem', fontWeight: '900', color: tierColor }}>{(CHEST_DROP_TABLE.RARITIES[item.rarity].crestChance * 100).toFixed(0)}%</span>

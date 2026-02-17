@@ -446,6 +446,24 @@ for (const t of TIERS) {
     };
 }
 
+// Add new special items
+ITEMS.SPECIAL.MINING_COMBAT_LUCKY = {
+    id: 'MINING_COMBAT_LUCKY',
+    name: 'Lucky Miner Bundle',
+    type: 'BUNDLE',
+    description: 'Contains: T1 Pickaxe, T1 Sword, 100x T1 Food',
+    icon: '/items/MINING_COMBAT_LUCKY.webp'
+};
+ITEMS.SPECIAL.NOOB_CHEST = {
+    id: 'NOOB_CHEST',
+    name: 'Noob Chest',
+    type: 'CONSUMABLE',
+    description: 'Contains starting gear and supplies for new adventurers.',
+    icon: '/items/NOOB_CHEST.webp', // Ensure this icon exists or use a placeholder
+    tier: 1,
+    rarity: 'COMMON'
+};
+
 // Override Icons for Potions (Reuse generic for now)
 for (const [key, data] of Object.entries(POTION_TYPES)) {
     if (ITEMS.CONSUMABLE[key]) {
