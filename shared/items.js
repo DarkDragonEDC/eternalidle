@@ -344,7 +344,9 @@ const genPotions = () => {
                     (key === 'GOLD' ? `/items/T${t}_SILVER_POTION.webp` :
                         (key === 'QUALITY' ? `/items/T${t}_QUALITY_POTION.webp` :
                             (key === 'GATHER_XP' ? `/items/T${t}_GATHERING_POTION.webp` :
-                                (key === 'CRAFT_XP' ? `/items/T${t}_CRAFTING_POTION.webp` : '')))),
+                                (key === 'CRAFT_XP' ? `/items/T${t}_CRAFTING_POTION.webp` :
+                                    (key === 'DROP' ? `/items/T${t}_LUCK_POTION.webp` :
+                                        (key === 'GLOBAL_XP' ? `/items/T${t}_KNOWLEDGE_POTION.webp` : '')))))),
                 req: {
                     [`T${t}_EXTRACT`]: 5
                 },
