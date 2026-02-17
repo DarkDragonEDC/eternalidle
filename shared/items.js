@@ -340,6 +340,11 @@ const genPotions = () => {
                 value: val,
                 desc: `${data.desc} by ${Math.round(val * 100)}%`,
                 duration: 3600, // 1 Hour Duration
+                icon: key === 'REFINE_XP' ? `/items/T${t}_REFINING_POTION.webp` :
+                    (key === 'GOLD' ? `/items/T${t}_SILVER_POTION.webp` :
+                        (key === 'QUALITY' ? `/items/T${t}_QUALITY_POTION.webp` :
+                            (key === 'GATHER_XP' ? `/items/T${t}_GATHERING_POTION.webp` :
+                                (key === 'CRAFT_XP' ? `/items/T${t}_CRAFTING_POTION.webp` : '')))),
                 req: {
                     [`T${t}_EXTRACT`]: 5
                 },
