@@ -683,8 +683,15 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                                 <div style={{ position: 'absolute', top: '-6px', right: '-6px', background: 'var(--slot-bg)', fontSize: '0.6rem', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border)', color: hasMap ? '#4caf50' : '#ff4444', fontWeight: 'bold', zIndex: 2 }}>
                                                     {formatNumber(mapQty)}/1
                                                 </div>
-                                                <div style={{ fontSize: '1.2rem', opacity: 0.8 }}>
-                                                    <MapIcon size={28} color="var(--text-dim)" />
+                                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                                                    {(() => {
+                                                        const item = resolveItem(mapId);
+                                                        return item?.icon ? (
+                                                            <img src={item.icon} alt={item.name} style={{ width: '120%', height: '120%', objectFit: 'contain' }} />
+                                                        ) : (
+                                                            <MapIcon size={28} color="var(--text-dim)" />
+                                                        );
+                                                    })()}
                                                 </div>
                                             </div>
 
