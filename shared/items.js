@@ -73,14 +73,16 @@ export const ITEMS = {
             name: 'Inventory Slot expansion',
             description: 'Permanently increases your inventory by 1 slot.',
             type: 'CONSUMABLE',
-            rarity: 'LEGENDARY'
+            rarity: 'LEGENDARY',
+            icon: '/items/INVENTORY_SLOT.webp'
         },
         NAME_CHANGE_TOKEN: {
             id: 'NAME_CHANGE_TOKEN',
             name: 'Name Change Token',
             description: 'Use to unlock a one-time character name change.',
             type: 'CONSUMABLE',
-            rarity: 'EPIC'
+            rarity: 'EPIC',
+            icon: '/items/CHANGE_NAME.webp'
         }
     },
     GEAR: {
@@ -434,7 +436,14 @@ if (ITEMS.REFINED.CLOTH[10]) { ITEMS.REFINED.CLOTH[10].icon = '/items/T10_CLOTH.
 
 // Generate Maps
 for (const t of TIERS) {
-    ITEMS.MAPS[t] = { id: `T${t}_DUNGEON_MAP`, name: 'Dungeon Map', tier: t, type: 'MAP', description: `A map to a Tier ${t} dungeon. Use to enter.` };
+    ITEMS.MAPS[t] = {
+        id: `T${t}_DUNGEON_MAP`,
+        name: 'Dungeon Map',
+        tier: t,
+        type: 'MAP',
+        description: `A map to a Tier ${t} dungeon. Use to enter.`,
+        icon: `/items/T${t}_DG_MAP.webp`
+    };
 }
 
 // Override Icons for Potions (Reuse generic for now)
@@ -895,7 +904,7 @@ ITEMS.SPECIAL.MEMBERSHIP = {
     description: 'Use to activate 30 days of VIP status and exclusive benefits.',
     type: 'CONSUMABLE',
     tier: 1,
-    icon: ''
+    icon: '/items/MEMBERSHIP.webp'
 };
 
 export const ITEM_LOOKUP = {};

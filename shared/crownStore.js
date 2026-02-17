@@ -58,7 +58,8 @@ export const CROWN_STORE = {
             description: 'Permanently increases your inventory by 1 slot.',
             cost: 50,
             category: 'CONVENIENCE',
-            permanent: true
+            permanent: true,
+            icon: '/items/INVENTORY_SLOT.webp'
         },
         NAME_CHANGE_TOKEN: {
             id: 'NAME_CHANGE_TOKEN',
@@ -66,7 +67,8 @@ export const CROWN_STORE = {
             description: 'Unlock a one-time name change.',
             cost: 500,
             category: 'CONVENIENCE',
-            permanent: false
+            permanent: false,
+            icon: '/items/CHANGE_NAME.webp'
         }
     },
     COSMETICS: {},
@@ -78,7 +80,7 @@ export const CROWN_STORE = {
             price: 6.99,
             priceBRL: 36.90,
             currency: 'USD',
-            icon: '🏆',
+            icon: '/items/MEMBERSHIP.webp',
             category: 'MEMBERSHIP',
             duration: 30 * 24 * 60 * 60 * 1000,
             permanent: false
