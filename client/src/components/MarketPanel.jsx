@@ -639,15 +639,20 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                 position: 'relative',
                                                 overflow: 'hidden'
                                             }}>
-                                                {l.item_data.icon ? (
-                                                    <img
-                                                        src={typeof l.item_data.icon === 'string' ? l.item_data.icon.replace('.png', '.webp') : l.item_data.icon}
-                                                        alt={l.item_data.name}
-                                                        style={{ width: l.item_data.scale || '130%', height: l.item_data.scale || '130%', objectFit: 'contain', opacity: 1.0 }}
-                                                    />
-                                                ) : (
-                                                    <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{l.item_data.tier}</span>
-                                                )}
+                                                {(() => {
+                                                    const resolved = resolveItem(l.item_id, l.item_data?.quality);
+                                                    const icon = resolved?.icon || l.item_data?.icon;
+                                                    const normalizedIcon = typeof icon === 'string' ? icon.replace('.png', '.webp') : icon;
+                                                    return normalizedIcon ? (
+                                                        <img
+                                                            src={normalizedIcon}
+                                                            alt={l.item_data.name}
+                                                            style={{ width: l.item_data.scale || '130%', height: l.item_data.scale || '130%', objectFit: 'contain', opacity: 1.0 }}
+                                                        />
+                                                    ) : (
+                                                        <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{l.item_data.tier}</span>
+                                                    );
+                                                })()}
                                                 <div style={{ position: 'absolute', top: 2, left: 2, fontSize: '0.6rem', fontWeight: '900', color: 'var(--text-main)', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>
                                                     T{l.item_data.tier}
                                                 </div>
@@ -1132,11 +1137,15 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                     position: 'relative',
                                                     overflow: 'hidden'
                                                 }}>
-                                                    {l.item_data.icon ? (
-                                                        <img src={l.item_data.icon} alt={l.item_data.name} style={{ width: l.item_data.scale || '130%', height: l.item_data.scale || '130%', objectFit: 'contain', opacity: 1.0 }} />
-                                                    ) : (
-                                                        <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{l.item_data.tier}</span>
-                                                    )}
+                                                    {(() => {
+                                                        const resolved = resolveItem(l.itemId, l.item_data?.quality);
+                                                        const icon = resolved?.icon || l.item_data?.icon;
+                                                        return icon ? (
+                                                            <img src={icon} alt={l.item_data.name} style={{ width: l.item_data.scale || '130%', height: l.item_data.scale || '130%', objectFit: 'contain', opacity: 1.0 }} />
+                                                        ) : (
+                                                            <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{l.item_data.tier}</span>
+                                                        );
+                                                    })()}
                                                     <div style={{ position: 'absolute', top: 2, left: 2, fontSize: '0.6rem', fontWeight: '900', color: 'var(--text-main)', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>
                                                         T{l.item_data.tier}
                                                     </div>
@@ -1246,8 +1255,9 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                 }
 
                                                 if (c.type !== 'SOLD_ITEM') {
-                                                    if (itemData.icon) {
-                                                        icon = <img src={itemData.icon} alt={itemData.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />;
+                                                    const iconUrl = itemData.icon || resolveItem(c.itemId, c.metadata?.quality)?.icon;
+                                                    if (iconUrl) {
+                                                        icon = <img src={iconUrl} alt={itemData.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />;
                                                     } else {
                                                         // Fallback to Tier text if NO icon exists (matching Buy tab behavior)
                                                         icon = <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{itemData.tier}</span>;
@@ -1480,11 +1490,15 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                             overflow: 'hidden',
                                                             position: 'relative'
                                                         }}>
-                                                            {itemInfo.icon ? (
-                                                                <img src={itemInfo.icon} alt={itemInfo.name || ''} style={{ width: '130%', height: '130%', objectFit: 'contain' }} />
-                                                            ) : (
-                                                                <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{itemInfo.tier || '?'}</span>
-                                                            )}
+                                                            {(() => {
+                                                                const resolved = resolveItem(tx.item_id, itemInfo.quality);
+                                                                const icon = resolved?.icon || itemInfo.icon;
+                                                                return icon ? (
+                                                                    <img src={icon} alt={itemInfo.name || ''} style={{ width: '130%', height: '130%', objectFit: 'contain' }} />
+                                                                ) : (
+                                                                    <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{itemInfo.tier || '?'}</span>
+                                                                );
+                                                            })()}
                                                         </div>
 
                                                         {/* Item info */}
@@ -1565,11 +1579,15 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                             overflow: 'hidden',
                                                             position: 'relative'
                                                         }}>
-                                                            {itemInfo.icon ? (
-                                                                <img src={itemInfo.icon} alt={itemInfo.name || ''} style={{ width: '130%', height: '130%', objectFit: 'contain' }} />
-                                                            ) : (
-                                                                <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{itemInfo.tier || '?'}</span>
-                                                            )}
+                                                            {(() => {
+                                                                const resolved = resolveItem(tx.item_id, itemInfo.quality);
+                                                                const icon = resolved?.icon || itemInfo.icon;
+                                                                return icon ? (
+                                                                    <img src={icon} alt={itemInfo.name || ''} style={{ width: '130%', height: '130%', objectFit: 'contain' }} />
+                                                                ) : (
+                                                                    <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#666' }}>T{itemInfo.tier || '?'}</span>
+                                                                );
+                                                            })()}
                                                         </div>
 
                                                         {/* Info */}

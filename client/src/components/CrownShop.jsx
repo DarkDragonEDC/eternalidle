@@ -279,7 +279,13 @@ const CrownShop = ({ socket, gameState, onClose }) => {
 
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                        <span style={{ fontSize: '1.5rem' }}>{item.icon}</span>
+                                                        <span style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px' }}>
+                                                            {typeof item.icon === 'string' && item.icon.startsWith('/') ? (
+                                                                <img src={item.icon} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                                            ) : (
+                                                                item.icon
+                                                            )}
+                                                        </span>
                                                         <div>
                                                             <div style={{ color: 'var(--text-main)', fontWeight: 'bold', fontSize: '0.9rem' }}>{item.name}</div>
                                                             {item.permanent && (
