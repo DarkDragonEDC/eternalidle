@@ -10,7 +10,7 @@ export const CROWN_STORE = {
             price: 6.99,
             priceBRL: 36.90,
             amount: 275,
-            icon: '💎',
+            icon: '/items/250_ORB.webp',
             category: 'PACKAGE',
             currency: 'USD'
         },
@@ -21,7 +21,7 @@ export const CROWN_STORE = {
             price: 13.99,
             priceBRL: 72.90,
             amount: 550,
-            icon: '💰',
+            icon: '/items/500_ORB.webp',
             category: 'PACKAGE',
             currency: 'USD',
             bestSeller: true
@@ -33,7 +33,7 @@ export const CROWN_STORE = {
             price: 25.99,
             priceBRL: 135.90,
             amount: 1100,
-            icon: '📦',
+            icon: '/items/1000_ORB.webp',
             category: 'PACKAGE',
             currency: 'USD'
         },
@@ -44,7 +44,7 @@ export const CROWN_STORE = {
             price: 64.99,
             priceBRL: 339.90,
             amount: 2750,
-            icon: '🔮',
+            icon: '/items/2500_ORB.webp',
             category: 'PACKAGE',
             currency: 'USD',
             premium: true

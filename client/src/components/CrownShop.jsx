@@ -72,7 +72,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
             case 'BOOST': return <Zap size={16} color="#ffd700" />;
             case 'CONVENIENCE': return <Package size={16} color="#4caf50" />;
             case 'COSMETIC': return <Sparkles size={16} color="#e040fb" />;
-            case 'PACKAGE': return <Circle size={16} color="#ffd700" />;
+            case 'PACKAGE': return <img src="/items/ORB.webp" alt="Orb" style={{ width: 16, height: 16, objectFit: 'contain' }} />;
             case 'MEMBERSHIP': return <Trophy size={16} color="#4fc3f7" />;
             default: return <Star size={16} />;
         }
@@ -130,7 +130,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                     alignItems: 'center'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <Circle size={28} color="var(--accent)" />
+                        <img src="/items/ORB.webp" alt="Orb" style={{ width: 32, height: 32, objectFit: 'contain', filter: 'drop-shadow(0 0 8px var(--accent))' }} />
                         <div>
                             <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.3rem', fontWeight: '900' }}>ORB SHOP</h2>
                             <div style={{ fontSize: '0.7rem', color: '#888', letterSpacing: '1px' }}>PREMIUM STORE</div>
@@ -146,7 +146,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                             alignItems: 'center',
                             gap: '8px'
                         }}>
-                            <Circle size={18} color="var(--accent)" />
+                            <img src="/items/ORB.webp" alt="Orb" style={{ width: 22, height: 22, objectFit: 'contain' }} />
                             <span style={{ color: 'var(--accent)', fontWeight: '900', fontSize: '1.1rem' }}>{crowns}</span>
                         </div>
                         <button onClick={onClose} style={{
@@ -197,198 +197,216 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                             Loading store...
                         </div>
                     ) : (
-                        Object.entries(groupedItems).map(([category, items]) => (
-                            <div key={category} style={{ marginBottom: '25px' }}>
-                                <div style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '8px',
-                                    marginBottom: '12px',
-                                    paddingBottom: '8px',
-                                    borderBottom: `1px solid ${getCategoryColor(category)}33`
-                                }}>
-                                    {getCategoryIcon(category)}
-                                    <span style={{
-                                        color: getCategoryColor(category),
-                                        fontSize: '0.75rem',
-                                        fontWeight: '900',
-                                        letterSpacing: '1px',
-                                        textTransform: 'uppercase'
+                        Object.entries(groupedItems)
+                            .sort(([catA], [catB]) => {
+                                const order = { 'MEMBERSHIP': 0, 'PACKAGE': 1, 'CONVENIENCE': 2, 'BOOST': 3, 'COSMETIC': 4 };
+                                const valA = order[catA] ?? 99;
+                                const valB = order[catB] ?? 99;
+                                return valA - valB;
+                            })
+                            .map(([category, items]) => (
+                                <div key={category} style={{ marginBottom: '25px' }}>
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        marginBottom: '12px',
+                                        paddingBottom: '8px',
+                                        borderBottom: `1px solid ${getCategoryColor(category)}33`
                                     }}>
-                                        {category === 'BOOST' ? 'Boosts (24h)' :
-                                            category === 'CONVENIENCE' ? 'Convenience' :
-                                                category === 'COSMETIC' ? 'Cosmetics' :
-                                                    category === 'PACKAGE' ? 'Orb Packages' :
-                                                        category === 'MEMBERSHIP' ? 'VIP Membership' : category}
-                                    </span>
-                                </div>
+                                        {getCategoryIcon(category)}
+                                        <span style={{
+                                            color: getCategoryColor(category),
+                                            fontSize: '0.75rem',
+                                            fontWeight: '900',
+                                            letterSpacing: '1px',
+                                            textTransform: 'uppercase'
+                                        }}>
+                                            {category === 'BOOST' ? 'Boosts (24h)' :
+                                                category === 'CONVENIENCE' ? 'Convenience' :
+                                                    category === 'COSMETIC' ? 'Cosmetics' :
+                                                        category === 'PACKAGE' ? 'Orb Packages' :
+                                                            category === 'MEMBERSHIP' ? 'VIP Membership' : category}
+                                        </span>
+                                    </div>
 
-                                <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-                                    gap: '12px'
-                                }}>
-                                    {items.map(item => {
-                                        const isRealMoney = item.category === 'PACKAGE' || item.category === 'MEMBERSHIP';
-                                        const isPackage = item.category === 'PACKAGE';
-                                        const isMembership = item.category === 'MEMBERSHIP';
-                                        const canAfford = isRealMoney ? true : (crowns >= item.cost);
-                                        const isPurchasing = purchasing === item.id;
+                                    <div style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+                                        gap: '12px'
+                                    }}>
+                                        {items.map(item => {
+                                            const isRealMoney = item.category === 'PACKAGE' || item.category === 'MEMBERSHIP';
+                                            const isPackage = item.category === 'PACKAGE';
+                                            const isMembership = item.category === 'MEMBERSHIP';
+                                            const canAfford = isRealMoney ? true : (crowns >= item.cost);
+                                            const isPurchasing = purchasing === item.id;
 
-                                        return (
-                                            <div key={item.id} style={{
-                                                background: 'var(--slot-bg)',
-                                                border: `1px solid ${isRealMoney ? 'var(--accent)' : (canAfford ? 'var(--border)' : 'rgba(255,0,0,0.2)')}`,
-                                                borderRadius: '12px',
-                                                padding: '15px',
-                                                opacity: canAfford ? 1 : 0.6,
-                                                transition: '0.2s',
-                                                position: 'relative',
-                                                overflow: 'hidden'
-                                            }}>
-                                                {item.bestSeller && (
-                                                    <div style={{
-                                                        position: 'absolute',
-                                                        top: '6px',
-                                                        right: '-32px',
-                                                        background: 'var(--accent)',
-                                                        color: '#000',
-                                                        padding: '4px 35px',
-                                                        fontSize: '0.6rem',
-                                                        fontWeight: 'bold',
-                                                        transform: 'rotate(45deg)',
-                                                        boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-                                                        zIndex: 1
-                                                    }}>BEST SELLER</div>
-                                                )}
-                                                {item.premium && (
-                                                    <div style={{
-                                                        position: 'absolute',
-                                                        top: '6px',
-                                                        right: '-32px',
-                                                        background: '#e040fb',
-                                                        color: '#fff',
-                                                        padding: '4px 35px',
-                                                        fontSize: '0.6rem',
-                                                        fontWeight: 'bold',
-                                                        transform: 'rotate(45deg)',
-                                                        boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-                                                        zIndex: 1
-                                                    }}>BEST VALUE</div>
-                                                )}
+                                            return (
+                                                <div key={item.id} style={{
+                                                    background: 'var(--slot-bg)',
+                                                    border: `1px solid ${isRealMoney ? 'var(--accent)' : (canAfford ? 'var(--border)' : 'rgba(255,0,0,0.2)')}`,
+                                                    borderRadius: '12px',
+                                                    padding: '15px',
+                                                    opacity: canAfford ? 1 : 0.6,
+                                                    transition: '0.2s',
+                                                    position: 'relative',
+                                                    overflow: 'hidden'
+                                                }}>
+                                                    {item.bestSeller && (
+                                                        <div style={{
+                                                            position: 'absolute',
+                                                            top: '6px',
+                                                            right: '-32px',
+                                                            background: 'var(--accent)',
+                                                            color: '#000',
+                                                            padding: '4px 35px',
+                                                            fontSize: '0.6rem',
+                                                            fontWeight: 'bold',
+                                                            transform: 'rotate(45deg)',
+                                                            boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+                                                            zIndex: 1
+                                                        }}>BEST SELLER</div>
+                                                    )}
+                                                    {item.premium && (
+                                                        <div style={{
+                                                            position: 'absolute',
+                                                            top: '6px',
+                                                            right: '-32px',
+                                                            background: '#e040fb',
+                                                            color: '#fff',
+                                                            padding: '4px 35px',
+                                                            fontSize: '0.6rem',
+                                                            fontWeight: 'bold',
+                                                            transform: 'rotate(45deg)',
+                                                            boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+                                                            zIndex: 1
+                                                        }}>BEST VALUE</div>
+                                                    )}
 
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                        <span style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px' }}>
-                                                            {typeof item.icon === 'string' && item.icon.startsWith('/') ? (
-                                                                <img src={item.icon} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                                                            ) : (
-                                                                item.icon
-                                                            )}
-                                                        </span>
-                                                        <div>
-                                                            <div style={{ color: 'var(--text-main)', fontWeight: 'bold', fontSize: '0.9rem' }}>{item.name}</div>
-                                                            {item.permanent && (
-                                                                <span style={{ fontSize: '0.6rem', color: '#4caf50', textTransform: 'uppercase' }}>Permanent</span>
-                                                            )}
-                                                            {item.duration && (
-                                                                <span style={{ fontSize: '0.6rem', color: 'var(--accent)', textTransform: 'uppercase' }}>
-                                                                    {item.duration >= 24 * 60 * 60 * 1000
-                                                                        ? `${Math.round(item.duration / (24 * 60 * 60 * 1000))} Days`
-                                                                        : `${Math.round(item.duration / (60 * 60 * 1000))} Hours`}
-                                                                </span>
-                                                            )}
-                                                            {isPackage && item.amount && (
-                                                                <span style={{ fontSize: '0.65rem', color: 'var(--accent)', fontWeight: 'bold' }}>{item.amount} ORBS</span>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                            <span style={{
+                                                                fontSize: '1.5rem',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                width: '64px',
+                                                                height: '64px',
+                                                                background: 'rgba(255,255,255,0.03)',
+                                                                borderRadius: '12px',
+                                                                padding: '8px',
+                                                                border: '1px solid rgba(255,255,255,0.05)'
+                                                            }}>
+                                                                {typeof item.icon === 'string' && item.icon.startsWith('/') ? (
+                                                                    <img src={item.icon} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.5))' }} />
+                                                                ) : (
+                                                                    item.icon
+                                                                )}
+                                                            </span>
+                                                            <div>
+                                                                <div style={{ color: 'var(--text-main)', fontWeight: 'bold', fontSize: '0.9rem' }}>{item.name}</div>
+                                                                {item.permanent && (
+                                                                    <span style={{ fontSize: '0.6rem', color: '#4caf50', textTransform: 'uppercase' }}>Permanent</span>
+                                                                )}
+                                                                {item.duration && (
+                                                                    <span style={{ fontSize: '0.6rem', color: 'var(--accent)', textTransform: 'uppercase' }}>
+                                                                        {item.duration >= 24 * 60 * 60 * 1000
+                                                                            ? `${Math.round(item.duration / (24 * 60 * 60 * 1000))} Days`
+                                                                            : `${Math.round(item.duration / (60 * 60 * 1000))} Hours`}
+                                                                    </span>
+                                                                )}
+                                                                {isPackage && item.amount && (
+                                                                    <span style={{ fontSize: '0.65rem', color: 'var(--accent)', fontWeight: 'bold' }}>{item.amount} ORBS</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div style={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '4px',
+                                                            background: 'var(--accent-soft)',
+                                                            padding: '4px 10px',
+                                                            borderRadius: '12px',
+                                                            border: `1px solid var(--border-active)`,
+                                                            position: 'relative',
+                                                            zIndex: 2
+                                                        }}>
+                                                            {!isRealMoney && <img src="/items/ORB.webp" alt="Orb" style={{ width: 14, height: 14, objectFit: 'contain' }} />}
+                                                            <span style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                                                                {isRealMoney
+                                                                    ? (isBR && item.priceBRL ? `R$ ${item.priceBRL.toFixed(2).replace('.', ',')}` : `$${item.price.toFixed(2)}`)
+                                                                    : item.cost}
+                                                            </span>
+                                                            {item.id === 'MEMBERSHIP' && (
+                                                                <button
+                                                                    onClick={(e) => { e.stopPropagation(); setShowMSInfo(true); }}
+                                                                    style={{
+                                                                        background: 'none',
+                                                                        border: 'none',
+                                                                        color: '#4fc3f7',
+                                                                        cursor: 'pointer',
+                                                                        padding: '2px',
+                                                                        display: 'flex',
+                                                                        marginLeft: '4px'
+                                                                    }}
+                                                                >
+                                                                    <Info size={16} />
+                                                                </button>
                                                             )}
                                                         </div>
                                                     </div>
-                                                    <div style={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '4px',
-                                                        background: 'var(--accent-soft)',
-                                                        padding: '4px 10px',
-                                                        borderRadius: '12px',
-                                                        border: `1px solid var(--border-active)`,
-                                                        position: 'relative',
-                                                        zIndex: 2
-                                                    }}>
-                                                        {!isRealMoney && <Circle size={12} color="var(--accent)" />}
-                                                        <span style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '0.85rem' }}>
-                                                            {isRealMoney
-                                                                ? (isBR && item.priceBRL ? `R$ ${item.priceBRL.toFixed(2).replace('.', ',')}` : `$${item.price.toFixed(2)}`)
-                                                                : item.cost}
-                                                        </span>
-                                                        {item.id === 'MEMBERSHIP' && (
-                                                            <button
-                                                                onClick={(e) => { e.stopPropagation(); setShowMSInfo(true); }}
-                                                                style={{
-                                                                    background: 'none',
-                                                                    border: 'none',
-                                                                    color: '#4fc3f7',
-                                                                    cursor: 'pointer',
-                                                                    padding: '2px',
-                                                                    display: 'flex',
-                                                                    marginLeft: '4px'
-                                                                }}
-                                                            >
-                                                                <Info size={16} />
-                                                            </button>
+
+                                                    <p style={{ color: '#888', fontSize: '0.75rem', margin: '0 0 12px 0', lineHeight: '1.4' }}>
+                                                        {item.description}
+                                                    </p>
+
+                                                    <button
+                                                        onClick={() => canAfford && !isPurchasing && handlePurchase(item)}
+                                                        disabled={!canAfford || isPurchasing}
+                                                        style={{
+                                                            width: '100%',
+                                                            padding: '10px',
+                                                            background: isRealMoney
+                                                                ? 'linear-gradient(90deg, rgba(76, 175, 80, 0.4), rgba(76, 175, 80, 0.1))'
+                                                                : (canAfford
+                                                                    ? 'linear-gradient(90deg, var(--accent), var(--accent-soft))'
+                                                                    : 'rgba(100,100,100,0.2)'),
+                                                            border: `1px solid ${isRealMoney ? 'rgba(76, 175, 80, 0.5)' : (canAfford ? 'var(--accent)' : 'rgba(100,100,100,0.3)')}`,
+                                                            borderRadius: '8px',
+                                                            color: isRealMoney ? '#4caf50' : (canAfford ? 'var(--accent)' : '#666'),
+                                                            fontWeight: 'bold',
+                                                            fontSize: '0.8rem',
+                                                            cursor: canAfford && !isPurchasing ? 'pointer' : 'not-allowed',
+                                                            transition: '0.2s',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            gap: '6px'
+                                                        }}
+                                                    >
+                                                        {isPurchasing ? (
+                                                            'Processing...'
+                                                        ) : isRealMoney ? (
+                                                            <>
+                                                                <ShoppingBag size={14} />
+                                                                {item.category === 'MEMBERSHIP' ? 'BUY MEMBERSHIP' : 'BUY ORBS'}
+                                                            </>
+                                                        ) : canAfford ? (
+                                                            <>
+                                                                <ShoppingBag size={14} />
+                                                                PURCHASE
+                                                            </>
+                                                        ) : (
+                                                            'Insufficient Orbs'
                                                         )}
-                                                    </div>
+                                                    </button>
                                                 </div>
-
-                                                <p style={{ color: '#888', fontSize: '0.75rem', margin: '0 0 12px 0', lineHeight: '1.4' }}>
-                                                    {item.description}
-                                                </p>
-
-                                                <button
-                                                    onClick={() => canAfford && !isPurchasing && handlePurchase(item)}
-                                                    disabled={!canAfford || isPurchasing}
-                                                    style={{
-                                                        width: '100%',
-                                                        padding: '10px',
-                                                        background: isRealMoney
-                                                            ? 'linear-gradient(90deg, rgba(76, 175, 80, 0.4), rgba(76, 175, 80, 0.1))'
-                                                            : (canAfford
-                                                                ? 'linear-gradient(90deg, var(--accent), var(--accent-soft))'
-                                                                : 'rgba(100,100,100,0.2)'),
-                                                        border: `1px solid ${isRealMoney ? 'rgba(76, 175, 80, 0.5)' : (canAfford ? 'var(--accent)' : 'rgba(100,100,100,0.3)')}`,
-                                                        borderRadius: '8px',
-                                                        color: isRealMoney ? '#4caf50' : (canAfford ? 'var(--accent)' : '#666'),
-                                                        fontWeight: 'bold',
-                                                        fontSize: '0.8rem',
-                                                        cursor: canAfford && !isPurchasing ? 'pointer' : 'not-allowed',
-                                                        transition: '0.2s',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        gap: '6px'
-                                                    }}
-                                                >
-                                                    {isPurchasing ? (
-                                                        'Processing...'
-                                                    ) : isRealMoney ? (
-                                                        <>
-                                                            <ShoppingBag size={14} />
-                                                            {item.category === 'MEMBERSHIP' ? 'BUY MEMBERSHIP' : 'BUY ORBS'}
-                                                        </>
-                                                    ) : canAfford ? (
-                                                        <>
-                                                            <ShoppingBag size={14} />
-                                                            PURCHASE
-                                                        </>
-                                                    ) : (
-                                                        'Insufficient Orbs'
-                                                    )}
-                                                </button>
-                                            </div>
-                                        );
-                                    })}
+                                            );
+                                        })}
+                                    </div>
                                 </div>
-                            </div>
-                        ))
+                            ))
                     )}
                 </div>
 
