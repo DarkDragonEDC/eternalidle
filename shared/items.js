@@ -464,7 +464,15 @@ for (const [key, data] of Object.entries(POTION_TYPES)) {
 
 // Generate Crests
 for (const t of TIERS) {
-    ITEMS.SPECIAL.CREST[t] = { id: `T${t}_CREST`, name: 'Boss Crest', tier: t, type: 'CRAFTING_MATERIAL', description: `A crest dropped by a Tier ${t} boss. Used for crafting Capes.` };
+    ITEMS.SPECIAL.CREST[t] = {
+        id: `T${t}_CREST`,
+        name: 'Boss Crest',
+        tier: t,
+        type: 'CRAFTING_MATERIAL',
+        icon: `/items/T${t}_CREST.webp`,
+        scale: '150%',
+        description: `A crest dropped by a Tier ${t} boss. Used for crafting Capes.`
+    };
 }
 
 // Generate T1 Rune Shards (Unified system)
