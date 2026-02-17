@@ -89,9 +89,27 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
                         </div>
                     )}
                 </div>
-                <span style={{ fontSize: '0.55rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.6 }}>
-                    {label}
-                </span>
+                {item ? (
+                    <span style={{
+                        fontSize: '0.55rem',
+                        color: '#bbb',
+                        textAlign: 'center',
+                        maxWidth: '80px',
+                        lineHeight: '1.1',
+                        minHeight: '2em',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        marginTop: '4px'
+                    }}>
+                        {item.name}
+                    </span>
+                ) : (
+                    <span style={{ fontSize: '0.55rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.6 }}>
+                        {label}
+                    </span>
+                )}
             </motion.div>
         );
     };

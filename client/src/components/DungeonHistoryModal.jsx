@@ -142,9 +142,7 @@ const DungeonHistoryModal = ({ isOpen, onClose, history }) => {
                                                             alignItems: 'center',
                                                             gap: '4px'
                                                         }}>
-                                                            {item?.icon && (
-                                                                <img src={item.icon} alt="" style={{ width: item.scale || '1.2em', height: item.scale || '1.2em', objectFit: 'contain' }} />
-                                                            )}
+
                                                             {displayStr}
                                                         </span>
                                                     );

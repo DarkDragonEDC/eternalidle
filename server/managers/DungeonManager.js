@@ -54,7 +54,13 @@ export class DungeonManager {
             repeatCount: repeatCount,
             initialRepeats: repeatCount,
             wave_started_at: Date.now(),
-            lootLog: []
+            lootLog: [],
+            sessionStats: {
+                totalXp: 0,
+                lootMap: {},
+                startTime: Date.now(),
+                runsCompleted: 0
+            }
         };
         char.last_saved = new Date().toISOString();
 
@@ -321,6 +327,31 @@ export class DungeonManager {
         const inventory = char.state.inventory || {};
         const mapId = config.reqItem;
 
+        // Update Session Stats
+        if (!char.state.dungeon.sessionStats) {
+            char.state.dungeon.sessionStats = {
+                totalXp: 0,
+                lootMap: {},
+                startTime: char.state.dungeon.started_at ? new Date(char.state.dungeon.started_at).getTime() : now,
+                runsCompleted: 0
+            };
+        }
+        const session = char.state.dungeon.sessionStats;
+        session.totalXp += rewards.xp;
+        session.runsCompleted++;
+
+        // Aggregate Loot
+        loot.forEach(lootStr => {
+            const match = lootStr.match(/^(\d+)x\s+(.+)$/);
+            if (match) {
+                const qty = parseInt(match[1]);
+                const itemId = match[2];
+                session.lootMap[itemId] = (session.lootMap[itemId] || 0) + qty;
+            } else {
+                session.lootMap[lootStr] = (session.lootMap[lootStr] || 0) + 1;
+            }
+        });
+
         const logEntry = {
             id: now,
             run: (char.state.dungeon.lootLog?.length || 0) + 1,
@@ -333,17 +364,15 @@ export class DungeonManager {
         char.state.dungeon.lootLog.unshift(logEntry);
         if (char.state.dungeon.lootLog.length > 50) char.state.dungeon.lootLog.pop();
 
-        await this.saveDungeonLog(char, config, 'COMPLETED', {
-            xp: rewards.xp,
-            loot: loot
-        });
-
+        // Check for Repeats
         if (char.state.dungeon.repeatCount > 0 && this.gameManager.inventoryManager.hasItems(char, { [mapId]: 1 })) {
             this.gameManager.inventoryManager.consumeItems(char, { [mapId]: 1 });
             char.state.dungeon.repeatCount--;
             char.state.dungeon.wave = 1;
             char.state.dungeon.status = 'PREPARING';
-            char.state.dungeon.started_at = new Date(now).toISOString();
+            // Do NOT reset started_at to keep session time valid?
+            // Actually, for individual run mechanics (wave timing), we might need to update wave_started_at.
+            // But sessionStats.startTime should remain the initial start time.
             char.state.dungeon.wave_started_at = now;
 
             return {
@@ -357,6 +386,9 @@ export class DungeonManager {
                 leveledUp
             };
         }
+
+        // Final Run Completed
+        await this.saveDungeonLog(char, config, 'COMPLETED');
 
         char.state.dungeon.status = 'COMPLETED';
 
@@ -392,12 +424,18 @@ export class DungeonManager {
             const dungeon = char.state.dungeon;
             if (!dungeon || !config) return;
 
-            const duration = Math.floor((Date.now() - new Date(dungeon.started_at).getTime()) / 1000);
+            if (dungeon.sessionStats) {
+                totalXp = dungeon.sessionStats.totalXp;
+                const sessionStart = dungeon.sessionStats.startTime || new Date(dungeon.started_at).getTime();
+                duration = Math.floor((Date.now() - sessionStart) / 1000);
 
-            let totalXp = runLoot ? runLoot.xp : 0;
-            let rawLoot = runLoot ? (runLoot.loot || []) : [];
-
-            if (!runLoot) {
+                // Convert session loot map to array
+                const lootArray = [];
+                for (const [itemId, qty] of Object.entries(dungeon.sessionStats.lootMap)) {
+                    lootArray.push(`${qty}x ${itemId}`);
+                }
+                rawLoot = lootArray;
+            } else if (!runLoot) {
                 (dungeon.lootLog || []).forEach(log => {
                     totalXp += (log.xp || 0);
                     (log.items || []).forEach(item => rawLoot.push(item));
@@ -423,7 +461,9 @@ export class DungeonManager {
             const initialRepeats = dungeon.initialRepeats || 0;
             const currentRepeatCount = dungeon.repeatCount || 0;
             const total_runs = initialRepeats + 1;
-            const runs_completed = (initialRepeats - currentRepeatCount) + 1;
+
+            // If sessionStats exists, use its runsCompleted, otherwise calculate
+            const runs_completed = dungeon.sessionStats ? dungeon.sessionStats.runsCompleted : ((initialRepeats - currentRepeatCount) + 1);
 
             const { error } = await this.gameManager.supabase.from('dungeon_history').insert({
                 character_id: char.id,

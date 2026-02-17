@@ -28,10 +28,11 @@ const CombatHistoryModal = ({ isOpen, onClose, socket }) => {
     if (!isOpen) return null;
 
     const formatDuration = (seconds) => {
-        if (!seconds) return '0s';
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}m ${secs}s`;
+        if (!seconds) return '00:00:00';
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = Math.floor(seconds % 60);
+        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     };
 
     return (
