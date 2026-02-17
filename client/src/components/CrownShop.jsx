@@ -10,6 +10,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
     const [showMSInfo, setShowMSInfo] = useState(false);
 
     const crowns = gameState?.state?.crowns || 0;
+    const isBR = (navigator.language || '').toLowerCase().startsWith('pt');
 
     useEffect(() => {
         const handleStoreUpdate = (items) => {
@@ -59,7 +60,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
         if (item.category === 'PACKAGE' || item.category === 'MEMBERSHIP') {
             setPurchasing(item.id);
             // Simulate payment gateway start
-            socket.emit('buy_crown_package', { packageId: item.id });
+            socket.emit('buy_crown_package', { packageId: item.id, locale: navigator.language || 'en-US' });
         } else {
             setPurchasing(item.id);
             socket.emit('purchase_crown_item', { itemId: item.id });
@@ -310,7 +311,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                                         {!isRealMoney && <Circle size={12} color="var(--accent)" />}
                                                         <span style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '0.85rem' }}>
                                                             {isRealMoney
-                                                                ? (item.currency === 'BRL' ? `R$ ${item.price.toFixed(2).replace('.', ',')}` : `$${item.price.toFixed(2)}`)
+                                                                ? (isBR && item.priceBRL ? `R$ ${item.priceBRL.toFixed(2).replace('.', ',')}` : `$${item.price.toFixed(2)}`)
                                                                 : item.cost}
                                                         </span>
                                                         {item.id === 'MEMBERSHIP' && (

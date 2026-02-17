@@ -1377,7 +1377,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('buy_crown_package', async ({ packageId }) => {
+    socket.on('buy_crown_package', async ({ packageId, locale }) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
                 const pkg = getStoreItem(packageId);
@@ -1393,19 +1393,28 @@ io.on('connection', (socket) => {
                     return socket.emit('crown_purchase_error', { error: 'Payments are not configured on this server.' });
                 }
 
-                console.log(`[STRIPE] Creating dynamic session for ${packageId} (User: ${socket.user.id}, Char: ${socket.data.characterId})`);
+                // Detect currency based on client locale
+                const isBR = (locale || '').toLowerCase().startsWith('pt');
+                const currency = isBR && pkg.priceBRL ? 'brl' : 'usd';
+                const unitAmount = currency === 'brl' ? Math.round(pkg.priceBRL * 100) : Math.round(pkg.price * 100);
 
-                // Stripe Checkout with automatic payment methods (multi-currency, Pix, etc.)
-                const session = await stripe.checkout.sessions.create({
+                console.log(`[STRIPE] Creating ${currency.toUpperCase()} session for ${packageId} (User: ${socket.user.id}, Char: ${socket.data.characterId}, Locale: ${locale})`);
+
+                // Build payment method types based on currency
+                const paymentMethodTypes = currency === 'brl'
+                    ? ['card', 'boleto', 'pix']
+                    : undefined; // undefined = Stripe uses Dashboard defaults
+
+                const sessionConfig = {
                     line_items: [{
                         price_data: {
-                            currency: 'usd',
+                            currency,
                             product_data: {
                                 name: pkg.name,
                                 description: pkg.description,
                                 images: ['https://raw.githubusercontent.com/lucide-react/lucide/main/icons/gem.svg'],
                             },
-                            unit_amount: Math.round(pkg.price * 100),
+                            unit_amount: unitAmount,
                         },
                         quantity: 1,
                     }],
@@ -1418,7 +1427,14 @@ io.on('connection', (socket) => {
                         packageId: packageId,
                         crownAmount: pkg.amount || 0
                     }
-                });
+                };
+
+                // Only set payment_method_types for BRL (to enable Pix/Boleto)
+                if (paymentMethodTypes) {
+                    sessionConfig.payment_method_types = paymentMethodTypes;
+                }
+
+                const session = await stripe.checkout.sessions.create(sessionConfig);
 
                 socket.emit('stripe_checkout_session', { url: session.url });
             });
