@@ -283,8 +283,8 @@ export class CombatManager {
                 roundDetails.xpGained = finalXp;
 
                 // --- NEW PROFICIENCY XP LOGIC ---
-                // 50% of Combat XP goes to the active weapon proficiency
-                const profXp = Math.floor(finalXp * 0.5);
+                // 10% of Combat XP goes to the active weapon proficiency
+                const profXp = Math.floor(finalXp * 0.1);
                 if (profXp > 0) {
                     const weaponObj = char.state.equipment?.mainHand; // Access directly from state
                     const weaponId = (weaponObj?.id || '').toUpperCase();

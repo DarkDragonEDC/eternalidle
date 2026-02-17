@@ -593,7 +593,7 @@ for (const t of TIERS) {
         rarityColor: '#ffffff',
         desc: 'An ordinary chest dropped by a World Boss.',
         icon: `/items/T${t}_WB_CHEST.webp`,
-        scale: '180%'
+        scale: '150%'
     };
     // Good (Green)
     ITEMS.SPECIAL.CHEST[`${t}_WORLDBOSS_GOOD`] = {
@@ -605,7 +605,7 @@ for (const t of TIERS) {
         rarityColor: '#10b981', // Green
         desc: 'A good chest dropped by a World Boss.',
         icon: `/items/T${t}_WB_CHEST.webp`,
-        scale: '180%'
+        scale: '150%'
     };
 
     // Outstanding (Blue)
@@ -618,7 +618,7 @@ for (const t of TIERS) {
         rarityColor: '#4a90e2',
         desc: 'An outstanding chest dropped by a World Boss.',
         icon: `/items/T${t}_WB_CHEST.webp`,
-        scale: '180%'
+        scale: '150%'
     };
     // Excellent (Purple)
     ITEMS.SPECIAL.CHEST[`${t}_WORLDBOSS_EXCELLENT`] = {
@@ -630,7 +630,7 @@ for (const t of TIERS) {
         rarityColor: '#9013fe', // Purple
         desc: 'An excellent chest dropped by a World Boss.',
         icon: `/items/T${t}_WB_CHEST.webp`,
-        scale: '180%'
+        scale: '150%'
     };
     // Masterpiece (Orange)
     ITEMS.SPECIAL.CHEST[`${t}_WORLDBOSS_MASTERPIECE`] = {
@@ -642,7 +642,7 @@ for (const t of TIERS) {
         rarityColor: '#f5a623', // Orange/Gold
         desc: 'A masterpiece chest dropped by a World Boss.',
         icon: `/items/T${t}_WB_CHEST.webp`,
-        scale: '180%'
+        scale: '150%'
     };
 }
 
