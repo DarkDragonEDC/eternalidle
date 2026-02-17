@@ -668,6 +668,7 @@ function App() {
 
   const startActivity = (type, itemId, quantity = 1) => {
     socket.emit('start_activity', { actionType: type, itemId, quantity });
+    setModalItem(null);
   };
 
   const claimReward = () => {
