@@ -1402,7 +1402,7 @@ io.on('connection', (socket) => {
 
                 // Build payment method types based on currency
                 const paymentMethodTypes = currency === 'brl'
-                    ? ['card', 'boleto', 'pix']
+                    ? ['card', 'boleto']
                     : undefined; // undefined = Stripe uses Dashboard defaults
 
                 const sessionConfig = {
