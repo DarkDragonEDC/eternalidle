@@ -1606,8 +1606,6 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                                     fontSize: '0.7rem'
                                                                 }}>{actionLabel}</span>
                                                                 <span>x{tx.quantity}</span>
-                                                                <span>•</span>
-                                                                <span>{isBuyer ? 'from' : 'to'} {otherParty}</span>
                                                             </div>
                                                         </div>
 
