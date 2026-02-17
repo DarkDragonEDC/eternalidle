@@ -1338,7 +1338,7 @@ export class GameManager {
             // Find all characters with any active activity
             const { data: allActive, error } = await this.supabase
                 .from('characters')
-                .select('id, user_id, name, current_activity, state, activity_started_at, combat, dungeon')
+                .select('id, user_id, name, current_activity, state, activity_started_at, combat, dungeon, info')
                 .or('current_activity.not.is.null,combat.not.is.null,dungeon.not.is.null');
 
             if (error) throw error;
@@ -1348,10 +1348,9 @@ export class GameManager {
                 return;
             }
 
-            // Inject combat/dungeon back into state for compatibility
+            // Inject combat/dungeon back into state for compatibility and hydrate info
             allActive.forEach(char => {
-                if (char.combat && char.state) char.state.combat = char.combat;
-                if (char.dungeon && char.state) char.state.dungeon = char.dungeon;
+                this._hydrateCharacterFromRaw(char);
             });
 
             const toCleanup = allActive.filter(char => {
