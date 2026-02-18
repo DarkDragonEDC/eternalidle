@@ -1061,7 +1061,8 @@ export const MONSTERS = {
                 877,
                 1754
             ],
-            "tier": 8
+            "tier": 8,
+            "image": "void_stalker.webp"
         },
         {
             "id": "ABYSSAL_KNIGHT",
