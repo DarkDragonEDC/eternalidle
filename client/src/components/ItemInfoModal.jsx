@@ -138,7 +138,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
 
                     {/* Requirement Alert */}
                     {(() => {
-                        if (item.type === 'FOOD' || item.type === 'POTION') return null;
+                        if (item.type === 'FOOD' || item.type === 'POTION' || item.type === 'RUNE') return null;
                         const reqLv = getLevelRequirement(item.tier);
                         const profGroup = getRequiredProficiencyGroup(item.id);
                         let reqText = '';
