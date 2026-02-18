@@ -760,7 +760,8 @@ export const MONSTERS = {
                 513,
                 1026
             ],
-            "tier": 6
+            "tier": 6,
+            "image": "tundra_bear.webp"
         },
         {
             "id": "SKY_STALKER",
@@ -776,7 +777,8 @@ export const MONSTERS = {
                 538,
                 1077
             ],
-            "tier": 6
+            "tier": 6,
+            "image": "sky_stalker.webp"
         },
         {
             "id": "EXECUTIONER",
@@ -792,7 +794,8 @@ export const MONSTERS = {
                 565,
                 1131
             ],
-            "tier": 6
+            "tier": 6,
+            "image": "executioner.webp"
         },
         {
             "id": "FIRE_ELEMENTAL",
@@ -899,7 +902,8 @@ export const MONSTERS = {
                 654,
                 1309
             ],
-            "tier": 7
+            "tier": 7,
+            "image": "lava_hound.webp"
         },
         {
             "id": "STORM_WRAITH",
@@ -915,7 +919,8 @@ export const MONSTERS = {
                 687,
                 1374
             ],
-            "tier": 7
+            "tier": 7,
+            "image": "storm_wraith.webp"
         },
         {
             "id": "RUNE_GUARDIAN",
@@ -931,7 +936,8 @@ export const MONSTERS = {
                 722,
                 1443
             ],
-            "tier": 7
+            "tier": 7,
+            "image": "rune_guardian.webp"
         },
         {
             "id": "DARK_KNIGHT",
@@ -1038,7 +1044,8 @@ export const MONSTERS = {
                 835,
                 1671
             ],
-            "tier": 8
+            "tier": 8,
+            "image": "glacier_giant.webp"
         },
         {
             "id": "VOID_STALKER",
@@ -1070,7 +1077,8 @@ export const MONSTERS = {
                 921,
                 1842
             ],
-            "tier": 8
+            "tier": 8,
+            "image": "abyssal_knight.webp"
         },
         {
             "id": "DEMON",
@@ -1177,7 +1185,8 @@ export const MONSTERS = {
                 1066,
                 2132
             ],
-            "tier": 9
+            "tier": 9,
+            "image": "nebula_serpent.webp"
         },
         {
             "id": "STAR_DEVOURER",
@@ -1193,7 +1202,8 @@ export const MONSTERS = {
                 1119,
                 2239
             ],
-            "tier": 9
+            "tier": 9,
+            "image": "star_devourer.webp"
         },
         {
             "id": "COSMIC_HORROR",
@@ -1209,7 +1219,8 @@ export const MONSTERS = {
                 1175,
                 2351
             ],
-            "tier": 9
+            "tier": 9,
+            "image": "cosmic_horror.webp"
         },
         {
             "id": "ARCHDEMON",
@@ -1316,7 +1327,8 @@ export const MONSTERS = {
                 1361,
                 2721
             ],
-            "tier": 10
+            "tier": 10,
+            "image": "galaxy_eater.webp"
         },
         {
             "id": "VOID_REAPER",
@@ -1332,7 +1344,8 @@ export const MONSTERS = {
                 1429,
                 2857
             ],
-            "tier": 10
+            "tier": 10,
+            "image": "void_reaper.webp"
         },
         {
             "id": "ETERNAL_WATCHER",
@@ -1348,7 +1361,8 @@ export const MONSTERS = {
                 1500,
                 3000
             ],
-            "tier": 10
+            "tier": 10,
+            "image": "eternal_watcher.webp"
         },
         {
             "id": "DEMON_LORD",
