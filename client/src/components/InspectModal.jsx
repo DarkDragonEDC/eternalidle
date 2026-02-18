@@ -49,20 +49,34 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
                     backdropFilter: 'blur(4px)',
                 }}>
                     {item && (
-                        <div style={{ position: 'absolute', top: 3, left: 5, fontSize: '0.6rem', fontWeight: '900', color: rarityColor, opacity: 0.8 }}>
+                        <div style={{ position: 'absolute', top: 3, left: 5, fontSize: '0.6rem', fontWeight: '900', color: rarityColor, opacity: 0.8, zIndex: 10 }}>
                             T{item.tier}
                         </div>
                     )}
                     {item && item.stars > 0 && (
-                        <div style={{ position: 'absolute', top: 3, right: 3, display: 'flex', gap: '1px' }}>
+                        <div style={{ position: 'absolute', top: 3, right: 3, display: 'flex', gap: '1px', zIndex: 10 }}>
                             {[...Array(item.stars)].map((_, i) => (
                                 <Star key={i} size={8} fill={rarityColor} stroke={rarityColor} />
                             ))}
                         </div>
                     )}
-                    <div style={{ opacity: item ? 0.3 : 0.1, color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        {icon}
-                    </div>
+                    {item && item.icon ? (
+                        <img
+                            src={item.icon}
+                            alt={item.name}
+                            style={{
+                                width: item.scale || '130%',
+                                height: item.scale || '130%',
+                                objectFit: 'contain',
+                                filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.5))',
+                                zIndex: 1
+                            }}
+                        />
+                    ) : (
+                        <div style={{ opacity: item ? 0.3 : 0.1, color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            {icon}
+                        </div>
+                    )}
 
                     {item && (
                         <div
@@ -80,7 +94,8 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                transition: '0.2s'
+                                transition: '0.2s',
+                                zIndex: 10
                             }}
                             onMouseOver={e => e.currentTarget.style.opacity = 1}
                             onMouseOut={e => e.currentTarget.style.opacity = 0.4}
