@@ -418,8 +418,8 @@ export class GameManager {
             }
             let elapsedSeconds = (now.getTime() - lastSaved) / 1000;
 
-            // Silenciar logs de catchup se o tempo for irrelevante (< 5s) e não houver atividade que exija processamento imediato
-            const isSignificantCatchup = elapsedSeconds >= 5 || (data.current_activity && elapsedSeconds >= (data.current_activity.time_per_action || 3));
+            // Silenciar logs de catchup se o tempo for irrelevante (< 60s) e não houver atividade que exija processamento imediato
+            const isSignificantCatchup = elapsedSeconds >= 60 || (data.current_activity && elapsedSeconds >= (data.current_activity.time_per_action || 3));
 
             // Simplified report structure for potential offline gains
             let finalReport = {
@@ -687,10 +687,10 @@ export class GameManager {
                         const doneQty = Math.max(0, iqty - actions_remaining);
                         const elapsedVirtual = doneQty * tpa;
 
-                        let newStartTs = Date.now() - (elapsedVirtual * 1000);
+                        let newStartTs = nextSavedTimestamp - (elapsedVirtual * 1000);
                         if (isNaN(newStartTs) || !isFinite(newStartTs)) {
                             console.error(`[CATCHUP-FIX] Invalid newStartTs detected. elapsedVirtual=${elapsedVirtual}, doneQty=${doneQty}`);
-                            newStartTs = Date.now();
+                            newStartTs = nextSavedTimestamp;
                         }
                         data.activity_started_at = new Date(newStartTs).toISOString();
 
@@ -732,7 +732,7 @@ export class GameManager {
                 }
 
                 // Only show the modal if total catchup was significant
-                const hasNotableGains = finalReport.totalTime > 300;
+                const hasNotableGains = finalReport.totalTime > 60;
                 if (hasNotableGains) {
                     data.offlineReport = finalReport;
 
@@ -869,7 +869,7 @@ export class GameManager {
                 state: (finalPrunedState && finalPrunedState.state) ? finalPrunedState.state : finalPrunedState,
                 current_activity: char.current_activity,
                 activity_started_at: char.activity_started_at,
-                last_saved: saveTime
+                last_saved: char.last_saved // CRITICAL: Use the char's internal timestamp
             })
             .eq('id', charId);
 
@@ -1429,9 +1429,8 @@ export class GameManager {
         const char = await this.getCharacter(userId, characterId);
         if (!char) return null;
 
-        // REMOVED: char.last_saved = new Date().toISOString();
-        // Constant updates here "eat" the offline progress time if the Ticker Loop 
-        // runs before the Socket's getStatus(..., catchup=true) can process it.
+        // Sync last_saved for online characters to progress the catchup window
+        char.last_saved = new Date().toISOString();
 
         const foodResult = this.processFood(char);
         const foodUsed = foodResult.used;

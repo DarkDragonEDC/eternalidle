@@ -178,7 +178,7 @@ export class DungeonManager {
                             if (dungeonState.wave < dungeonState.maxWaves) {
                                 dungeonState.wave++;
                                 dungeonState.status = 'WAITING_NEXT_WAVE';
-                                return this.startNextWave(char, dungeonConfig);
+                                return this.startNextWave(char, dungeonConfig, now);
                             } else {
                                 return this.completeDungeon(char, dungeonConfig);
                             }
@@ -388,7 +388,7 @@ export class DungeonManager {
         }
 
         // Final Run Completed
-        await this.saveDungeonLog(char, config, 'COMPLETED');
+        await this.saveDungeonLog(char, config, 'COMPLETED', null, now);
 
         char.state.dungeon.status = 'COMPLETED';
 
@@ -419,15 +419,20 @@ export class DungeonManager {
         return { success: true };
     }
 
-    async saveDungeonLog(char, config, outcome, runLoot = null) {
+    async saveDungeonLog(char, config, outcome, runLoot = null, virtualNow = null) {
         try {
             const dungeon = char.state.dungeon;
             if (!dungeon || !config) return;
 
+            let rawLoot = runLoot ? [...runLoot] : [];
+            let totalXp = 0;
+            let duration = 0;
+            const now = virtualNow || Date.now();
+
             if (dungeon.sessionStats) {
                 totalXp = dungeon.sessionStats.totalXp;
                 const sessionStart = dungeon.sessionStats.startTime || new Date(dungeon.started_at).getTime();
-                duration = Math.floor((Date.now() - sessionStart) / 1000);
+                duration = Math.floor((now - sessionStart) / 1000);
 
                 // Convert session loot map to array
                 const lootArray = [];
