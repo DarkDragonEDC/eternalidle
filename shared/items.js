@@ -1148,6 +1148,12 @@ export const resolveItem = (itemId, overrideQuality = null) => {
         if (!finalItem.scale) finalItem.scale = '110%';
     }
 
+    // Shield Icon Fix
+    if (baseId.toUpperCase().includes('SHIELD')) {
+        const t = baseItem.tier || 1;
+        if (!finalItem.icon) finalItem.icon = `/items/T${t}_SHIELD.webp`;
+    }
+
     // Secondary emergency fix for ORE and LEATHER T1
     if (baseId === 'T1_ORE' && !finalItem.icon) finalItem.icon = '/items/T1_ORE.webp';
     if (baseId === 'T1_LEATHER' && !finalItem.icon) finalItem.icon = '/items/T1_LEATHER.webp';

@@ -249,9 +249,6 @@ const BuffsDrawer = ({ gameState, isMobile }) => {
                                                         {key === 'GLOBAL_XP' && isPremium && (
                                                             <><span style={{ whiteSpace: 'nowrap' }}>MS: <span style={{ color: 'var(--accent)' }}>+10.0%</span></span> | </>
                                                         )}
-                                                        {key === 'GOLD' && isPremium && (
-                                                            <><span style={{ whiteSpace: 'nowrap' }}>MS: <span style={{ color: 'var(--accent)' }}>+10.0%</span></span> | </>
-                                                        )}
                                                         {key === 'GLOBAL_EFF' ? (
                                                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                                                                 {isPremium && <span style={{ whiteSpace: 'nowrap' }}>MS: <span style={{ color: 'var(--accent)' }}>+10.0%</span></span>}
