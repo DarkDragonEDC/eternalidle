@@ -418,6 +418,9 @@ export class GameManager {
             }
             let elapsedSeconds = (now.getTime() - lastSaved) / 1000;
 
+            // Silenciar logs de catchup se o tempo for irrelevante (< 5s) e não houver atividade que exija processamento imediato
+            const isSignificantCatchup = elapsedSeconds >= 5 || (data.current_activity && elapsedSeconds >= (data.current_activity.time_per_action || 3));
+
             // Simplified report structure for potential offline gains
             let finalReport = {
                 elapsedTime: elapsedSeconds,
@@ -526,7 +529,9 @@ export class GameManager {
 
             try {
                 if (catchup && (data.current_activity || data.state.combat || data.state.dungeon) && data.last_saved) {
-                    console.log(`[CATCHUP] ${data.name}: last_saved=${data.last_saved}, elapsed=${elapsedSeconds.toFixed(1)}s, hasActivity=${!!data.current_activity}, hasCombat=${!!data.state.combat}`);
+                    if (isSignificantCatchup) {
+                        console.log(`[CATCHUP] ${data.name}: last_saved=${data.last_saved}, elapsed=${elapsedSeconds.toFixed(1)}s, hasActivity=${!!data.current_activity}, hasCombat=${!!data.state.combat}`);
+                    }
 
                     if (data.current_activity && typeof data.current_activity === 'object' && data.activity_started_at) {
                         const timePerAction = data.current_activity.time_per_action || 3;
@@ -669,7 +674,9 @@ export class GameManager {
 
                     data.last_saved = new Date(nextSavedTimestamp).toISOString();
 
-                    console.log(`[CATCHUP] ${data.name} finished. Processed: ${finalReport.totalTime.toFixed(1)}s, Remaining in buffer: ${(elapsedSeconds - finalReport.totalTime).toFixed(1)}s. New last_saved: ${data.last_saved}`);
+                    if (finalReport.totalTime > 0) {
+                        console.log(`[CATCHUP] ${data.name} finished. Processed: ${finalReport.totalTime.toFixed(1)}s, Remaining in buffer: ${(elapsedSeconds - finalReport.totalTime).toFixed(1)}s. New last_saved: ${data.last_saved}`);
+                    }
 
                     // Sync activity_started_at with actual progress to prevent timer drift in UI
                     if (data.current_activity && typeof data.current_activity === 'object' && data.activity_started_at) {
@@ -1422,11 +1429,9 @@ export class GameManager {
         const char = await this.getCharacter(userId, characterId);
         if (!char) return null;
 
-        // Only sync last_saved if we aren't currently waiting for a persistence sync or a catchup just happened
-        // If we set it here inconditionally, we might stomp over the catchup leftovers
-        if (!this.isLocked(userId)) {
-            char.last_saved = new Date().toISOString();
-        }
+        // REMOVED: char.last_saved = new Date().toISOString();
+        // Constant updates here "eat" the offline progress time if the Ticker Loop 
+        // runs before the Socket's getStatus(..., catchup=true) can process it.
 
         const foodResult = this.processFood(char);
         const foodUsed = foodResult.used;
