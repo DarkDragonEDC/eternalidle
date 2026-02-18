@@ -956,17 +956,23 @@ const applyGlobalIconFixes = (obj) => {
                 const gearTypes = ['WEAPON', 'OFF_HAND', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'TOOL', 'TOOL_AXE', 'TOOL_PICKAXE', 'TOOL_KNIFE', 'TOOL_SICKLE', 'TOOL_ROD', 'TOOL_POUCH'];
 
                 if (!val.icon && gearTypes.includes(val.type)) {
-                    // Convention: /items/T{tier}_{NAME}.webp
-                    // Extract NAME from T1_SHIELD -> SHIELD
-                    const parts = id.split('_');
-                    if (parts[0].match(/^T\d+$/)) {
-                        const baseName = parts.slice(1).join('_');
-                        val.icon = `/items/T${val.tier}_${baseName}.webp`;
+                    // ONLY apply automatic guessing to items we KNOW have these assets
+                    // Currently: SHIELD and AXE
+                    const isShield = id.includes('SHIELD');
+                    const isAxe = id.includes('AXE') && !id.includes('PICKAXE');
 
-                        // Apply specific scales for better UI fit
-                        if (id.includes('AXE') && !id.includes('PICKAXE')) val.scale = '110%';
-                        if (id.includes('PLATE_ARMOR')) val.scale = '190%';
-                        if (id.includes('SHIELD')) val.scale = '190%';
+                    if (isShield || isAxe) {
+                        // Convention: /items/T{tier}_{NAME}.webp
+                        // Extract NAME from T1_SHIELD -> SHIELD
+                        const parts = id.split('_');
+                        if (parts[0].match(/^T\d+$/)) {
+                            const baseName = parts.slice(1).join('_');
+                            val.icon = `/items/T${val.tier}_${baseName}.webp`;
+
+                            // Apply specific scales for better UI fit
+                            if (isAxe) val.scale = '110%';
+                            if (isShield) val.scale = '190%';
+                        }
                     }
                 }
             } else {

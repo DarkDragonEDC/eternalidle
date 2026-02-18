@@ -64,7 +64,7 @@ export class GameManager {
         // SPECIAL: One-time check for all cached characters to grant "Pre-Alpha Player" title
         // ONLY for existing characters (Created before Feb 11, 2026)
         setTimeout(() => {
-            const CUTOFF_DATE = new Date('2026-02-11T15:10:00Z'); // 12:10 BRT
+            const CUTOFF_DATE = new Date('2026-02-18T23:59:59Z');
             const NEW_TITLE = 'Pre-Alpha Player';
             const OLD_TITLE = 'Pré-alpha player';
 
@@ -79,8 +79,9 @@ export class GameManager {
                     // 1. Convert old title to new
                     char.state.unlockedTitles = char.state.unlockedTitles.map(t => t === OLD_TITLE ? NEW_TITLE : t);
 
-                    // 2. Grant new title if missing and eligible
-                    if (charCreatedAt && charCreatedAt < CUTOFF_DATE && !char.state.unlockedTitles.includes(NEW_TITLE)) {
+                    // 2. Grant new title if missing and eligible (All existing players as of Feb 18, 2026)
+                    const CUTOFF_DATE_FINAL = new Date('2026-02-18T23:59:59Z');
+                    if (charCreatedAt && charCreatedAt < CUTOFF_DATE_FINAL && !char.state.unlockedTitles.includes(NEW_TITLE)) {
                         char.state.unlockedTitles.push(NEW_TITLE);
                     }
 
@@ -377,8 +378,8 @@ export class GameManager {
             // Use the shared hydration helper to ensure consistent data structures
             this._hydrateCharacterFromRaw(data);
 
-            // SPECIAL: Auto-grant "Pre-Alpha Player" title ONLY for existing characters (Created before Feb 11, 2026)
-            const CUTOFF_DATE = new Date('2026-02-11T15:10:00Z'); // 12:10 BRT
+            // SPECIAL: Auto-grant "Pre-Alpha Player" title for all current players
+            const CUTOFF_DATE = new Date('2026-02-18T23:59:59Z');
             const charCreatedAt = new Date(data.created_at);
             const NEW_TITLE = 'Pre-Alpha Player';
             const OLD_TITLE = 'Pré-alpha player';
