@@ -946,6 +946,39 @@ ITEMS.SPECIAL.MEMBERSHIP = {
 };
 
 export const ITEM_LOOKUP = {};
+// Global post-processing to link icons that follow standard naming: /items/T{tier}_{ID}.webp
+const applyGlobalIconFixes = (obj) => {
+    Object.values(obj).forEach(val => {
+        if (val && typeof val === 'object') {
+            if (val.id && val.tier) {
+                const id = val.id.toUpperCase();
+                // Apply to gear and tools that might be missing icons
+                const gearTypes = ['WEAPON', 'OFF_HAND', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'TOOL', 'TOOL_AXE', 'TOOL_PICKAXE', 'TOOL_KNIFE', 'TOOL_SICKLE', 'TOOL_ROD', 'TOOL_POUCH'];
+
+                if (!val.icon && gearTypes.includes(val.type)) {
+                    // Convention: /items/T{tier}_{NAME}.webp
+                    // Extract NAME from T1_SHIELD -> SHIELD
+                    const parts = id.split('_');
+                    if (parts[0].match(/^T\d+$/)) {
+                        const baseName = parts.slice(1).join('_');
+                        val.icon = `/items/T${val.tier}_${baseName}.webp`;
+
+                        // Apply specific scales for better UI fit
+                        if (id.includes('AXE') && !id.includes('PICKAXE')) val.scale = '110%';
+                        if (id.includes('PLATE_ARMOR')) val.scale = '190%';
+                        if (id.includes('SHIELD')) val.scale = '190%';
+                    }
+                }
+            } else {
+                applyGlobalIconFixes(val);
+            }
+        }
+    });
+};
+
+// Run global fixes before indexing
+applyGlobalIconFixes(ITEMS);
+
 const indexItems = (obj) => {
     Object.values(obj).forEach(val => {
         if (val && typeof val === 'object') {
@@ -1140,19 +1173,6 @@ export const resolveItem = (itemId, overrideQuality = null) => {
         stats: newStats
     };
 
-
-    // EMERGENCY GLOBAL FIX FOR AXE ICONS
-    if (baseId.toUpperCase().includes('AXE') && !baseId.toUpperCase().includes('PICKAXE')) {
-        const t = baseItem.tier || 1;
-        if (!finalItem.icon) finalItem.icon = `/items/T${t}_AXE.webp`;
-        if (!finalItem.scale) finalItem.scale = '110%';
-    }
-
-    // Shield Icon Fix
-    if (baseId.toUpperCase().includes('SHIELD')) {
-        const t = baseItem.tier || 1;
-        if (!finalItem.icon) finalItem.icon = `/items/T${t}_SHIELD.webp`;
-    }
 
     // Secondary emergency fix for ORE and LEATHER T1
     if (baseId === 'T1_ORE' && !finalItem.icon) finalItem.icon = '/items/T1_ORE.webp';
