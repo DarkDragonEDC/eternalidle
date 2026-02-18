@@ -50,7 +50,8 @@ export const MONSTERS = {
                 151,
                 303
             ],
-            "tier": 1
+            "tier": 1,
+            "image": "wild_hog.webp"
         },
         {
             "id": "FOX",
@@ -66,7 +67,8 @@ export const MONSTERS = {
                 159,
                 318
             ],
-            "tier": 1
+            "tier": 1,
+            "image": "fox.webp"
         },
         {
             "id": "SNAKE",
@@ -82,7 +84,8 @@ export const MONSTERS = {
                 167,
                 334
             ],
-            "tier": 1
+            "tier": 1,
+            "image": "snake.webp"
         },
         {
             "id": "ROCK_ELEMENTAL_T1",
@@ -189,7 +192,8 @@ export const MONSTERS = {
                 193,
                 387
             ],
-            "tier": 2
+            "tier": 2,
+            "image": "stag.webp"
         },
         {
             "id": "MOUNTAIN_GOAT",
@@ -205,7 +209,8 @@ export const MONSTERS = {
                 203,
                 406
             ],
-            "tier": 2
+            "tier": 2,
+            "image": "mountain_goat.webp"
         },
         {
             "id": "BANDIT_THUG",
@@ -221,7 +226,8 @@ export const MONSTERS = {
                 213,
                 426
             ],
-            "tier": 2
+            "tier": 2,
+            "image": "bandit_thug.webp"
         },
         {
             "id": "FOREST_SPIRIT",
@@ -328,7 +334,8 @@ export const MONSTERS = {
                 247,
                 493
             ],
-            "tier": 3
+            "tier": 3,
+            "image": "highland_cow.webp"
         },
         {
             "id": "HARPY",
@@ -344,7 +351,8 @@ export const MONSTERS = {
                 259,
                 518
             ],
-            "tier": 3
+            "tier": 3,
+            "image": "harpy.webp"
         },
         {
             "id": "ROGUE_KNIGHT",
@@ -360,7 +368,8 @@ export const MONSTERS = {
                 272,
                 544
             ],
-            "tier": 3
+            "tier": 3,
+            "image": "rogue_knight.webp"
         },
         {
             "id": "SKELETON",
@@ -467,7 +476,8 @@ export const MONSTERS = {
                 315,
                 630
             ],
-            "tier": 4
+            "tier": 4,
+            "image": "snow_leopard.webp"
         },
         {
             "id": "GIANT_EAGLE",
@@ -483,7 +493,8 @@ export const MONSTERS = {
                 331,
                 661
             ],
-            "tier": 4
+            "tier": 4,
+            "image": "giant_eagle.webp"
         },
         {
             "id": "ASH_GHOUL",
@@ -499,7 +510,8 @@ export const MONSTERS = {
                 347,
                 694
             ],
-            "tier": 4
+            "tier": 4,
+            "image": "ash_ghoul.webp"
         },
         {
             "id": "UNDEAD_SOLDIER",
@@ -606,7 +618,8 @@ export const MONSTERS = {
                 402,
                 804
             ],
-            "tier": 5
+            "tier": 5,
+            "image": "swamp_troc.webp"
         },
         {
             "id": "CRIMSON_BAT",
@@ -622,7 +635,8 @@ export const MONSTERS = {
                 422,
                 844
             ],
-            "tier": 5
+            "tier": 5,
+            "image": "crimson_bat.webp"
         },
         {
             "id": "CORRUPTED_PALADIN",
@@ -638,7 +652,8 @@ export const MONSTERS = {
                 443,
                 886
             ],
-            "tier": 5
+            "tier": 5,
+            "image": "corrupted_paladin.webp"
         },
         {
             "id": "LICH",
