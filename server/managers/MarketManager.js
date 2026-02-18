@@ -388,7 +388,14 @@ export class MarketManager {
             .limit(50);
 
         if (error) throw error;
-        return data || [];
+
+        // Sanitize data: Remove buyer info to prevent sniping/tracking
+        return (data || []).map(tx => {
+            const cleanTx = { ...tx };
+            delete cleanTx.buyer_id;
+            delete cleanTx.buyer_name;
+            return cleanTx;
+        });
     }
 
     async getPersonalHistory(userId) {

@@ -300,7 +300,7 @@ export const TownOverview = ({ onNavigate, gameState, canSpin, onOpenDailySpin, 
                 customStyle={isAnonymous ? { opacity: 0.7 } : {}}
             />
             <HubButton
-                label="Trade"
+                label="Social"
                 icon={isAnonymous ? <Lock /> : <ArrowLeftRight />}
                 color={isAnonymous ? "var(--text-dim)" : "#8b5cf6"}
                 onClick={() => {

@@ -1,25 +1,25 @@
-import { getStoreItem } from '../../shared/crownStore.js';
+import { getStoreItem } from '../../shared/orbStore.js';
 
-export class CrownsManager {
+export class OrbsManager {
     constructor(gameManager) {
         this.gameManager = gameManager;
     }
 
     /**
-     * Get current crown balance for a character
+     * Get current orb balance for a character
      */
-    getCrowns(char) {
-        return char?.state?.crowns || 0;
+    getOrbs(char) {
+        return char?.state?.orbs || 0;
     }
 
     /**
-     * Add crowns to a character (after payment confirmation)
+     * Add orbs to a character (after payment confirmation)
      * @param {Object} char - Character object
-     * @param {number} amount - Amount of crowns to add
-     * @param {string} source - Source of crowns (e.g., 'PURCHASE', 'ADMIN', 'GIFT')
+     * @param {number} amount - Amount of orbs to add
+     * @param {string} source - Source of orbs (e.g., 'PURCHASE', 'ADMIN', 'GIFT')
      * @returns {Object} Result with success status and new balance
      */
-    addCrowns(char, amount, source = 'ADMIN') {
+    addOrbs(char, amount, source = 'ADMIN') {
         if (!char?.state) {
             return { success: false, error: 'Invalid character' };
         }
@@ -28,12 +28,12 @@ export class CrownsManager {
             return { success: false, error: 'Invalid amount' };
         }
 
-        // Initialize crowns if not present
-        if (typeof char.state.crowns !== 'number') {
-            char.state.crowns = 0;
+        // Initialize orbs if not present
+        if (typeof char.state.orbs !== 'number') {
+            char.state.orbs = 0;
         }
 
-        char.state.crowns += amount;
+        char.state.orbs += amount;
 
         // Log transaction
         this.logTransaction(char, {
@@ -41,20 +41,20 @@ export class CrownsManager {
             amount,
             source,
             timestamp: Date.now(),
-            balanceAfter: char.state.crowns
+            balanceAfter: char.state.orbs
         });
 
-        console.log(`[CROWNS] Added ${amount} crowns to ${char.name} (source: ${source}). New balance: ${char.state.crowns}`);
+        console.log(`[ORBS] Added ${amount} orbs to ${char.name} (source: ${source}). New balance: ${char.state.orbs}`);
 
         return {
             success: true,
             amount,
-            newBalance: char.state.crowns
+            newBalance: char.state.orbs
         };
     }
 
     /**
-     * Spend crowns on a store item
+     * Spend orbs on a store item
      * @param {Object} char - Character object
      * @param {string} itemId - Store item ID
      * @returns {Object} Result with purchased item info
@@ -69,7 +69,7 @@ export class CrownsManager {
             return { success: false, error: 'Item not found' };
         }
 
-        const currentBalance = this.getCrowns(char);
+        const currentBalance = this.getOrbs(char);
         if (currentBalance < item.cost) {
             return {
                 success: false,
@@ -87,14 +87,14 @@ export class CrownsManager {
             }
         }
 
-        // Deduct crowns
-        char.state.crowns -= item.cost;
+        // Deduct orbs
+        char.state.orbs -= item.cost;
 
         // Apply item effect
         const applyResult = await this.applyItemEffect(char, item);
         if (!applyResult.success) {
             // Refund on failure
-            char.state.crowns += item.cost;
+            char.state.orbs += item.cost;
             return applyResult;
         }
 
@@ -104,18 +104,18 @@ export class CrownsManager {
             itemId,
             cost: item.cost,
             timestamp: Date.now(),
-            balanceAfter: char.state.crowns
+            balanceAfter: char.state.orbs
         });
 
         // Track purchase count
         this.incrementPurchaseCount(char, itemId);
 
-        console.log(`[CROWNS] ${char.name} purchased ${item.name} for ${item.cost} crowns. New balance: ${char.state.crowns}`);
+        console.log(`[ORBS] ${char.name} purchased ${item.name} for ${item.cost} orbs. New balance: ${char.state.orbs}`);
 
         return {
             success: true,
             item,
-            newBalance: char.state.crowns,
+            newBalance: char.state.orbs,
             ...applyResult
         };
     }
@@ -156,7 +156,7 @@ export class CrownsManager {
         buffs[item.effect] = {
             value: item.value,
             expiresAt: Date.now() + item.duration,
-            source: 'CROWN_PURCHASE'
+            source: 'ORB_PURCHASE'
         };
 
         char.state.active_buffs = buffs;
@@ -225,7 +225,7 @@ export class CrownsManager {
                 char.state.cosmetics.frame = 'golden';
                 return { success: true, message: 'Golden frame unlocked!' };
 
-            case 'TITLE_CROWN_OWNER':
+            case 'TITLE_ORB_OWNER':
                 char.state.cosmetics.title = 'Orb Owner';
                 return { success: true, message: 'Title "Orb Owner" unlocked!' };
 
@@ -278,45 +278,45 @@ export class CrownsManager {
     }
 
     /**
-     * Log crown transaction for audit
+     * Log orb transaction for audit
      */
     logTransaction(char, transaction) {
-        if (!char.state.crownTransactions) {
-            char.state.crownTransactions = [];
+        if (!char.state.orbTransactions) {
+            char.state.orbTransactions = [];
         }
 
         // Keep only last 100 transactions
-        if (char.state.crownTransactions.length >= 100) {
-            char.state.crownTransactions = char.state.crownTransactions.slice(-99);
+        if (char.state.orbTransactions.length >= 100) {
+            char.state.orbTransactions = char.state.orbTransactions.slice(-99);
         }
 
-        char.state.crownTransactions.push(transaction);
+        char.state.orbTransactions.push(transaction);
     }
 
     /**
      * Get purchase count for an item
      */
     getPurchaseCount(char, itemId) {
-        if (!char.state.crownPurchases) {
+        if (!char.state.orbPurchases) {
             return 0;
         }
-        return char.state.crownPurchases[itemId] || 0;
+        return char.state.orbPurchases[itemId] || 0;
     }
 
     /**
      * Increment purchase count
      */
     incrementPurchaseCount(char, itemId) {
-        if (!char.state.crownPurchases) {
-            char.state.crownPurchases = {};
+        if (!char.state.orbPurchases) {
+            char.state.orbPurchases = {};
         }
-        char.state.crownPurchases[itemId] = (char.state.crownPurchases[itemId] || 0) + 1;
+        char.state.orbPurchases[itemId] = (char.state.orbPurchases[itemId] || 0) + 1;
     }
 
     /**
      * Get transaction history
      */
     getTransactionHistory(char) {
-        return char.state.crownTransactions || [];
+        return char.state.orbTransactions || [];
     }
 }

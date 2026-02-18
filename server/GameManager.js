@@ -7,11 +7,12 @@ import { ActivityManager } from './managers/ActivityManager.js';
 import { CombatManager } from './managers/CombatManager.js';
 import { MarketManager } from './managers/MarketManager.js';
 import { DungeonManager } from './managers/DungeonManager.js';
-import { CrownsManager } from './managers/CrownsManager.js';
+import { OrbsManager } from './managers/OrbsManager.js';
 import { AdminManager } from './managers/AdminManager.js';
 import { DailyRewardManager } from './managers/DailyRewardManager.js';
 import { TradeManager } from './managers/TradeManager.js';
 import { WorldBossManager } from './managers/WorldBossManager.js';
+import { SocialManager } from './managers/SocialManager.js';
 import { pruneState, hydrateState } from './utils/statePruner.js';
 
 // Removed local ITEM_LOOKUP generation in favor of shared source of truth
@@ -25,11 +26,12 @@ export class GameManager {
         this.combatManager = new CombatManager(this);
         this.marketManager = new MarketManager(this);
         this.dungeonManager = new DungeonManager(this);
-        this.crownsManager = new CrownsManager(this);
+        this.orbsManager = new OrbsManager(this);
         this.adminManager = new AdminManager(this);
         this.dailyRewardManager = new DailyRewardManager(this);
         this.tradeManager = new TradeManager(this);
         this.worldBossManager = new WorldBossManager(this);
+        this.socialManager = new SocialManager(this);
         this.userLocks = new Map(); // userId -> Promise (current task)
         this.cache = new Map(); // charId -> character object
         this.dirty = new Set(); // set of charIds that need persisting
@@ -106,6 +108,23 @@ export class GameManager {
 
     setSocketServer(io) {
         this.io = io;
+    }
+
+    async broadcastToCharacter(characterId, event, data) {
+        if (!this.io) return;
+
+        // Find if character is online (associated with a socket)
+        // Note: index.js joins sockets to 'user:userId' rooms.
+        // We need to know the userId of this character.
+        const { data: charData } = await this.supabase
+            .from('characters')
+            .select('user_id')
+            .eq('id', characterId)
+            .single();
+
+        if (charData && charData.user_id) {
+            this.io.to(`user:${charData.user_id}`).emit(event, data);
+        }
     }
 
     async loadGlobalStats() {
@@ -828,7 +847,7 @@ export class GameManager {
             stats: prunedState.stats || {},
             health: prunedState.health || 0,
             silver: prunedState.silver || 0,
-            crowns: prunedState.crowns || 0,
+            orbs: prunedState.orbs || 0,
             membership: prunedState.membership || null,
             active_buffs: prunedState.active_buffs || {},
             inventorySlots: prunedState.inventorySlots || 30,
@@ -838,7 +857,7 @@ export class GameManager {
         delete prunedState.stats;
         delete prunedState.health;
         delete prunedState.silver;
-        delete prunedState.crowns;
+        delete prunedState.orbs;
         delete prunedState.membership;
         delete prunedState.active_buffs;
         delete prunedState.inventorySlots;
@@ -2171,7 +2190,7 @@ export class GameManager {
 
             if (itemData.id === 'MEMBERSHIP' || itemData.id === 'ETERNAL_MEMBERSHIP') {
                 const membershipItem = { duration: (itemData.duration || 30 * 24 * 60 * 60 * 1000) * safeQty };
-                const result = this.crownsManager.applyMembership(char, membershipItem);
+                const result = this.orbsManager.applyMembership(char, membershipItem);
                 if (result.success) {
                     // message = result.message;
                 } else {
@@ -2735,7 +2754,7 @@ export class GameManager {
             if (data.info.stats) data.state.stats = data.info.stats;
             if (data.info.health !== undefined) data.state.health = data.info.health;
             if (data.info.silver !== undefined) data.state.silver = data.info.silver;
-            if (data.info.crowns !== undefined) data.state.crowns = data.info.crowns;
+            if (data.info.orbs !== undefined) data.state.orbs = data.info.orbs;
             if (data.info.membership) data.state.membership = data.info.membership;
             if (data.info.active_buffs) data.state.active_buffs = data.info.active_buffs;
             if (data.info.inventorySlots !== undefined) data.state.inventorySlots = data.info.inventorySlots;

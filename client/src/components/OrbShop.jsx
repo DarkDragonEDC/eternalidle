@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Circle, Zap, Package, Sparkles, Star, ShoppingBag, Check, Trophy, Info } from 'lucide-react';
 
-const CrownShop = ({ socket, gameState, onClose }) => {
+const OrbShop = ({ socket, gameState, onClose }) => {
     const [storeItems, setStoreItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [purchasing, setPurchasing] = useState(null);
@@ -9,7 +9,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
 
     const [showMSInfo, setShowMSInfo] = useState(false);
 
-    const crowns = gameState?.state?.crowns || 0;
+    const orbs = gameState?.state?.orbs || 0;
     const isBR = (navigator.language || '').toLowerCase().startsWith('pt');
 
     useEffect(() => {
@@ -40,18 +40,18 @@ const CrownShop = ({ socket, gameState, onClose }) => {
             }
         };
 
-        socket.on('crown_store_update', handleStoreUpdate);
-        socket.on('crown_purchase_success', handlePurchaseSuccess);
-        socket.on('crown_purchase_error', handlePurchaseError);
+        socket.on('orb_store_update', handleStoreUpdate);
+        socket.on('orb_purchase_success', handlePurchaseSuccess);
+        socket.on('orb_purchase_error', handlePurchaseError);
         socket.on('stripe_checkout_session', handleStripeSession);
 
         // Request store items AFTER registering listeners
-        socket.emit('get_crown_store');
+        socket.emit('get_orb_store');
 
         return () => {
-            socket.off('crown_store_update', handleStoreUpdate);
-            socket.off('crown_purchase_success', handlePurchaseSuccess);
-            socket.off('crown_purchase_error', handlePurchaseError);
+            socket.off('orb_store_update', handleStoreUpdate);
+            socket.off('orb_purchase_success', handlePurchaseSuccess);
+            socket.off('orb_purchase_error', handlePurchaseError);
             socket.off('stripe_checkout_session', handleStripeSession);
         };
     }, [socket]);
@@ -60,10 +60,10 @@ const CrownShop = ({ socket, gameState, onClose }) => {
         if (item.category === 'PACKAGE' || item.category === 'MEMBERSHIP') {
             setPurchasing(item.id);
             // Simulate payment gateway start
-            socket.emit('buy_crown_package', { packageId: item.id, locale: navigator.language || 'en-US' });
+            socket.emit('buy_orb_package', { packageId: item.id, locale: navigator.language || 'en-US' });
         } else {
             setPurchasing(item.id);
-            socket.emit('purchase_crown_item', { itemId: item.id });
+            socket.emit('purchase_orb_item', { itemId: item.id });
         }
     };
 
@@ -147,7 +147,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                             gap: '8px'
                         }}>
                             <img src="/items/ORB.webp" alt="Orb" style={{ width: 22, height: 22, objectFit: 'contain' }} />
-                            <span style={{ color: 'var(--accent)', fontWeight: '900', fontSize: '1.1rem' }}>{crowns}</span>
+                            <span style={{ color: 'var(--accent)', fontWeight: '900', fontSize: '1.1rem' }}>{orbs}</span>
                         </div>
                         <button onClick={onClose} style={{
                             background: 'var(--accent-soft)',
@@ -239,7 +239,7 @@ const CrownShop = ({ socket, gameState, onClose }) => {
                                             const isRealMoney = item.category === 'PACKAGE' || item.category === 'MEMBERSHIP';
                                             const isPackage = item.category === 'PACKAGE';
                                             const isMembership = item.category === 'MEMBERSHIP';
-                                            const canAfford = isRealMoney ? true : (crowns >= item.cost);
+                                            const canAfford = isRealMoney ? true : (orbs >= item.cost);
                                             const isPurchasing = purchasing === item.id;
 
                                             return (
@@ -497,4 +497,4 @@ const CrownShop = ({ socket, gameState, onClose }) => {
     );
 };
 
-export default CrownShop;
+export default OrbShop;

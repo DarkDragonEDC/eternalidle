@@ -1,10 +1,10 @@
-// Crown Store - Premium items purchasable with Crowns
+// Orb Store - Premium items purchasable with Orbs
 
-export const CROWN_STORE = {
-    // Real money packages to get Crowns
+export const ORB_STORE = {
+    // Real money packages to get Orbs
     PACKAGES: {
-        CROWNS_250: {
-            id: 'CROWNS_250',
+        ORBS_250: {
+            id: 'ORBS_250',
             name: '250 Orbs',
             description: 'Pack with +25 Bonus Orbs!',
             price: 6.99,
@@ -14,8 +14,8 @@ export const CROWN_STORE = {
             category: 'PACKAGE',
             currency: 'USD'
         },
-        CROWNS_500: {
-            id: 'CROWNS_500',
+        ORBS_500: {
+            id: 'ORBS_500',
             name: '500 Orbs',
             description: 'Pack with +50 Bonus Orbs!',
             price: 13.99,
@@ -26,8 +26,8 @@ export const CROWN_STORE = {
             currency: 'USD',
             bestSeller: true
         },
-        CROWNS_1000: {
-            id: 'CROWNS_1000',
+        ORBS_1000: {
+            id: 'ORBS_1000',
             name: '1000 Orbs',
             description: 'Pack with +100 Bonus Orbs!',
             price: 25.99,
@@ -37,8 +37,8 @@ export const CROWN_STORE = {
             category: 'PACKAGE',
             currency: 'USD'
         },
-        CROWNS_2500: {
-            id: 'CROWNS_2500',
+        ORBS_2500: {
+            id: 'ORBS_2500',
             name: '2500 Orbs',
             description: 'Pack with +250 Bonus Orbs! (Best Value)',
             price: 64.99,
@@ -91,7 +91,7 @@ export const CROWN_STORE = {
 // Helper to get all store items as flat array
 export const getAllStoreItems = () => {
     const items = [];
-    Object.values(CROWN_STORE).forEach(category => {
+    Object.values(ORB_STORE).forEach(category => {
         Object.values(category).forEach(item => {
             items.push(item);
         });
@@ -101,7 +101,7 @@ export const getAllStoreItems = () => {
 
 // Get item by ID
 export const getStoreItem = (itemId) => {
-    for (const category of Object.values(CROWN_STORE)) {
+    for (const category of Object.values(ORB_STORE)) {
         for (const item of Object.values(category)) {
             if (item.id === itemId) return item;
         }

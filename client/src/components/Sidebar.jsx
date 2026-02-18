@@ -248,7 +248,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
                         { id: 'profile', label: 'PROFILE', icon: <User size={14} /> },
                         { id: 'inventory', label: 'BAG', icon: <Package size={14} /> },
                         { id: 'market', label: 'MARKET', icon: <Tag size={14} />, restricted: isAnonymous },
-                        { id: 'trade', label: 'TRADE', icon: <Users size={14} />, restricted: isAnonymous }
+                        { id: 'trade', label: 'SOCIAL', icon: <Users size={14} />, restricted: isAnonymous }
                     ].map(item => (
                         <button
                             key={item.id}

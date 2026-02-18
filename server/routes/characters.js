@@ -37,7 +37,7 @@ export const characterRoutes = (gameManager) => {
                     if (char.info.stats) char.state.stats = char.info.stats;
                     if (char.info.health !== undefined) char.state.health = char.info.health;
                     if (char.info.silver !== undefined) char.state.silver = char.info.silver;
-                    if (char.info.crowns !== undefined) char.state.crowns = char.info.crowns;
+                    if (char.info.orbs !== undefined) char.state.orbs = char.info.orbs;
                     if (char.info.membership) char.state.membership = char.info.membership;
                     if (char.info.active_buffs) char.state.active_buffs = char.info.active_buffs;
                     if (char.info.inventorySlots !== undefined) char.state.inventorySlots = char.info.inventorySlots;

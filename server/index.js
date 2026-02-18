@@ -6,14 +6,14 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import fs from 'fs';
 import Stripe from 'stripe';
-import { getStoreItem, getAllStoreItems } from '../shared/crownStore.js';
+import { getStoreItem, getAllStoreItems } from '../shared/orbStore.js';
 
 dotenv.config();
 
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 if (!stripe) {
-    console.warn("WARNING: STRIPE_SECRET_KEY not found. Crown Store purchases will be disabled.");
+    console.warn("WARNING: STRIPE_SECRET_KEY not found. Orb Store purchases will be disabled.");
 }
 
 process.on('unhandledRejection', (reason, promise) => {
@@ -67,10 +67,10 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
     // Handle the event
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object;
-        let { userId, characterId, crownAmount, packageId } = session.metadata || {};
+        let { userId, characterId, orbAmount, packageId } = session.metadata || {};
 
         // Deliver based on metadata - dynamic sessions ALWAYS have these
-        console.log(`[STRIPE] Delivery started: User=${userId}, Char=${characterId}, Crowns=${crownAmount}, Package=${packageId}`);
+        console.log(`[STRIPE] Delivery started: User=${userId}, Char=${characterId}, Orbs=${orbAmount}, Package=${packageId}`);
 
         if (!userId || !characterId) {
             console.error('[STRIPE] Error: Missing critical metadata in session', session.metadata);
@@ -87,7 +87,7 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
                     return;
                 }
 
-                console.log(`[STRIPE] Character found: ${char.name}. Current Crowns: ${char.state.crowns || 0}`);
+                console.log(`[STRIPE] Character found: ${char.name}. Current Orbs: ${char.state.orbs || 0}`);
 
                 let result;
                 let deliveryMessage = '';
@@ -110,9 +110,9 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
                     }
                     deliveryMessage = result.message;
                 } else {
-                    // Standard crowns package
-                    result = gameManager.crownsManager.addCrowns(char, parseInt(crownAmount), `STRIPE_${packageId}`);
-                    deliveryMessage = `Payment confirmed! Added ${crownAmount} Orbs.`;
+                    // Standard orbs package
+                    result = gameManager.orbsManager.addOrbs(char, parseInt(orbAmount), `STRIPE_${packageId}`);
+                    deliveryMessage = `Payment confirmed! Added ${orbAmount} Orbs.`;
                 }
 
                 console.log(`[STRIPE] Delivery result: ${JSON.stringify(result)}`);
@@ -128,9 +128,9 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
                     console.log(`[STRIPE] Found ${userSockets.length} active sockets to notify`);
 
                     userSockets.forEach(s => {
-                        s.emit('crown_purchase_success', {
+                        s.emit('orb_purchase_success', {
                             message: deliveryMessage,
-                            newBalance: char.state.crowns
+                            newBalance: char.state.orbs
                         });
                         // Also trigger a full status update
                         gameManager.getStatus(userId, true, characterId).then(status => {
@@ -138,7 +138,7 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
                         });
                     });
                 } else {
-                    console.error(`[STRIPE] addCrowns failed: ${result.error}`);
+                    console.error(`[STRIPE] addOrbs failed: ${result.error}`);
                 }
             });
         } catch (err) {
@@ -1273,6 +1273,78 @@ io.on('connection', (socket) => {
         }
     });
 
+    // --- SOCIAL / FRIENDS EVENTS ---
+    socket.on('get_friends', async () => {
+        try {
+            const charId = socket.data.characterId;
+            if (!charId) return;
+            const friends = await gameManager.socialManager.getFriends(charId);
+            socket.emit('friends_list_update', friends);
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('add_friend', async ({ friendName }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                await gameManager.socialManager.sendFriendRequest(char, friendName);
+                socket.emit('friend_action_success', { message: `Request sent to ${friendName}!` });
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('respond_friend_request', async ({ requestId, accept }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const charId = socket.data.characterId;
+                const result = await gameManager.socialManager.respondToRequest(charId, requestId, accept);
+                socket.emit('friend_action_success', { message: accept ? 'Request accepted!' : 'Request rejected.' });
+
+                // Refresh list
+                const friends = await gameManager.socialManager.getFriends(charId);
+                socket.emit('friends_list_update', friends);
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('remove_friend', async ({ friendId }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const charId = socket.data.characterId;
+                await gameManager.socialManager.removeFriend(charId, friendId);
+                socket.emit('friend_action_success', { message: 'Friend removed.' });
+
+                // Refresh list
+                const friends = await gameManager.socialManager.getFriends(charId);
+                socket.emit('friends_list_update', friends);
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('cancel_friend_request', async ({ requestId }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const charId = socket.data.characterId;
+                await gameManager.socialManager.cancelFriendRequest(charId, requestId);
+                socket.emit('friend_action_success', { message: 'Request cancelled.' });
+
+                // Refresh list
+                const friends = await gameManager.socialManager.getFriends(charId);
+                socket.emit('friends_list_update', friends);
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
 
 
     socket.on('acknowledge_offline_report', async () => {
@@ -1342,31 +1414,31 @@ io.on('connection', (socket) => {
 
     // ===== CROWN STORE EVENTS =====
 
-    // Get crown store items
-    socket.on('get_crown_store', async () => {
+    // Get orb store items
+    socket.on('get_orb_store', async () => {
         try {
-            console.log(`[CROWN STORE] Request from ${socket.user?.email}`);
+            console.log(`[ORB STORE] Request from ${socket.user?.email}`);
             const items = getAllStoreItems();
-            console.log(`[CROWN STORE] Sending ${items.length} items to client`);
-            socket.emit('crown_store_update', items);
+            console.log(`[ORB STORE] Sending ${items.length} items to client`);
+            socket.emit('orb_store_update', items);
         } catch (err) {
             console.error('Error getting crown store:', err);
             socket.emit('error', { message: err.message });
         }
     });
 
-    // Purchase item with crowns
-    socket.on('purchase_crown_item', async ({ itemId }) => {
+    // Purchase item with orbs
+    socket.on('purchase_orb_item', async ({ itemId }) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
                 const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
-                const result = await gameManager.crownsManager.purchaseItem(char, itemId);
+                const result = await gameManager.orbsManager.purchaseItem(char, itemId);
 
                 if (result.success) {
                     await gameManager.saveState(char.id, char.state);
-                    socket.emit('crown_purchase_success', result);
+                    socket.emit('orb_purchase_success', result);
                 } else {
-                    socket.emit('crown_purchase_error', result);
+                    socket.emit('orb_purchase_error', result);
                 }
 
                 socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
@@ -1377,20 +1449,20 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('buy_crown_package', async ({ packageId, locale }) => {
+    socket.on('buy_orb_package', async ({ packageId, locale }) => {
         try {
             await gameManager.executeLocked(socket.user.id, async () => {
                 const pkg = getStoreItem(packageId);
 
                 if (!pkg) {
-                    return socket.emit('crown_purchase_error', { error: 'Package not found' });
+                    return socket.emit('orb_purchase_error', { error: 'Package not found' });
                 }
 
                 const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
                 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
                 if (!stripe) {
-                    return socket.emit('crown_purchase_error', { error: 'Payments are not configured on this server.' });
+                    return socket.emit('orb_purchase_error', { error: 'Payments are not configured on this server.' });
                 }
 
                 // Detect currency based on client locale
@@ -1425,7 +1497,7 @@ io.on('connection', (socket) => {
                         userId: socket.user.id,
                         characterId: socket.data.characterId,
                         packageId: packageId,
-                        crownAmount: pkg.amount || 0
+                        orbAmount: pkg.amount || 0
                     }
                 };
 
@@ -1441,39 +1513,39 @@ io.on('connection', (socket) => {
         } catch (err) {
             console.error('Error creating checkout session:', err);
             // Send actual error message to client for easier debugging
-            socket.emit('crown_purchase_error', { error: err.message || 'Failed to initiate payment' });
+            socket.emit('orb_purchase_error', { error: err.message || 'Failed to initiate payment' });
         }
     });
 
-    // Get crown balance
-    socket.on('get_crown_balance', async () => {
+    // Get orb balance
+    socket.on('get_orb_balance', async () => {
         try {
             const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
-            const balance = gameManager.crownsManager.getCrowns(char);
-            socket.emit('crown_balance_update', { crowns: balance });
+            const balance = gameManager.orbsManager.getOrbs(char);
+            socket.emit('orb_balance_update', { orbs: balance });
         } catch (err) {
-            console.error('Error getting crown balance:', err);
+            console.error('Error getting orb balance:', err);
             socket.emit('error', { message: err.message });
         }
     });
 
-    // ADMIN: Add crowns (for testing - should be protected in production)
-    socket.on('admin_add_crowns', async ({ amount }) => {
+    // ADMIN: Add orbs (for testing - should be protected in production)
+    socket.on('admin_add_orbs', async ({ amount }) => {
         try {
             // TODO: Add admin check in production
             await gameManager.executeLocked(socket.user.id, async () => {
                 const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
-                const result = gameManager.crownsManager.addCrowns(char, amount, 'ADMIN');
+                const result = gameManager.orbsManager.addOrbs(char, amount, 'ADMIN');
 
                 if (result.success) {
                     await gameManager.saveState(char.id, char.state);
-                    socket.emit('crown_balance_update', { crowns: result.newBalance });
+                    socket.emit('orb_balance_update', { orbs: result.newBalance });
                 }
 
                 socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
             });
         } catch (err) {
-            console.error('Error adding crowns:', err);
+            console.error('Error adding orbs:', err);
             socket.emit('error', { message: err.message });
         }
     });

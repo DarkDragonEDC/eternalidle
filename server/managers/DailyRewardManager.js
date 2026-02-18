@@ -1,23 +1,22 @@
-
 import { ITEMS } from '../../shared/items.js';
-import { getStoreItem } from '../../shared/crownStore.js';
+import { getStoreItem } from '../../shared/orbStore.js';
 
 const LOOT_TABLE = [
-    // COMMON (50%)
-    { id: 'T1_RUNE_SHARD', qty: 3000, chance: 0.25, type: 'ITEM' },
-    { id: 'T5_FOOD', qty: 500, chance: 0.25, type: 'ITEM' },
+    // COMMON (60.30%)
+    { id: 'T3_POTION_SILVER', qty: 2, chance: 0.3015, type: 'ITEM' },
+    { id: 'T3_POTION_XP', qty: 2, chance: 0.3015, type: 'ITEM' },
 
-    // UNCOMMON (40%)
-    { id: 'T3_POTION_QUALITY', qty: 1, chance: 0.133, type: 'ITEM' },
-    { id: 'T3_POTION_LUCK', qty: 1, chance: 0.133, type: 'ITEM' },
-    { id: 'T3_POTION_XP', qty: 1, chance: 0.134, type: 'ITEM' },
+    // UNCOMMON (34.00%)
+    { id: 'T1_RUNE_SHARD', qty: 500, chance: 0.17, type: 'ITEM' },
+    { id: 'T5_FOOD', qty: 100, chance: 0.17, type: 'ITEM' },
 
-    // RARE (9%)
-    { id: 'CROWNS', qty: 25, chance: 0.09, type: 'CURRENCY' },
+    // RARE (5.00%)
+    { id: 'ORBS', qty: 25, chance: 0.05, type: 'CURRENCY' },
 
-    // LEGENDARY (1%)
-    { id: 'CROWNS', qty: 100, chance: 0.005, type: 'CURRENCY' }, // 0.5%
-    { id: 'MEMBERSHIP', qty: 1, chance: 0.005, type: 'STORE_ITEM' } // 0.5%
+    // LEGENDARY (0.70%)
+    { id: 'T1_BATTLE_RUNE_SHARD', qty: 50, chance: 0.005, type: 'ITEM' },
+    { id: 'ORBS', qty: 100, chance: 0.001, type: 'CURRENCY' },
+    { id: 'MEMBERSHIP', qty: 1, chance: 0.001, type: 'STORE_ITEM' }
 ];
 
 export class DailyRewardManager {
@@ -37,17 +36,16 @@ export class DailyRewardManager {
 
         if (error && error.code !== 'PGRST116') {
             console.error('[DAILY] Error checking spin status:', error);
-            return false; // Fail safe? Or true? Let's assume false to prevent exploit on error
+            return false;
         }
 
-        if (!data) return true; // No record means never spun
+        if (!data) return true;
 
         const lastSpin = new Date(data.last_spin);
         const now = new Date();
         const lastDate = lastSpin.toISOString().split('T')[0];
         const nowDate = now.toISOString().split('T')[0];
         const canSpin = lastDate !== nowDate;
-        console.log(`[DAILY] User ${char.user_id} spin check: lastDate=${lastDate}, nowDate=${nowDate}, canSpin=${canSpin}`);
         return canSpin;
     }
 
@@ -70,7 +68,6 @@ export class DailyRewardManager {
             }
         }
 
-        // Fallback
         if (!reward) reward = LOOT_TABLE[0];
 
         // Process Reward
@@ -79,36 +76,39 @@ export class DailyRewardManager {
 
         if (reward.type === 'ITEM') {
             this.gameManager.inventoryManager.addItemToInventory(char, reward.id, reward.qty);
-            // Format Friendly Name
-            const friendlyName = reward.id === 'T1_RUNE_SHARD' ? 'Rune Shards' :
-                reward.id === 'T5_FOOD' ? 'Food' :
-                    reward.id.replace(/_/g, ' ').replace('T3 POTION ', '') + ' Potion';
+
+            // Refined Friendly Name Logic
+            let friendlyName = reward.id;
+            if (reward.id === 'T1_RUNE_SHARD') friendlyName = 'Rune Shards';
+            else if (reward.id === 'T1_BATTLE_RUNE_SHARD') friendlyName = 'Combat Shards';
+            else if (reward.id === 'T5_FOOD') friendlyName = 'Food';
+            else {
+                friendlyName = reward.id
+                    .replace(/^T\d+_/, '') // Remove T1_
+                    .replace(/_/g, ' ')    // Replace _ with space
+                    .toLowerCase()
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+            }
 
             message = `Won ${reward.qty}x ${friendlyName}`;
         } else if (reward.type === 'CURRENCY') {
-            this.gameManager.crownsManager.addCrowns(char, reward.qty, 'DAILY_SPIN');
+            this.gameManager.orbsManager.addOrbs(char, reward.qty, 'DAILY_SPIN');
             message = `Won ${reward.qty} Orbs`;
         } else if (reward.type === 'STORE_ITEM') {
-            // Give Membership Item
             this.gameManager.inventoryManager.addItemToInventory(char, reward.id, reward.qty);
             message = `Won ${reward.qty}x Membership!`;
         }
 
-        // Update DB - Account Level
-        const { error } = await this.gameManager.supabase
+        // Update DB
+        await this.gameManager.supabase
             .from('daily_rewards')
             .upsert({
                 user_id: char.user_id,
                 last_spin: new Date().toISOString()
             });
 
-        if (error) {
-            console.error('[DAILY] Error saving spin state:', error);
-            // We still return success because the player got the item, but they might get to spin again if DB fails.
-            // Ideally we'd transact this but we can't easily here.
-        }
-
-        // Save char state for the item changes
         await this.gameManager.saveState(char.id, char.state);
 
         return {

@@ -31,14 +31,14 @@ import LootModal from './components/LootModal';
 import BuffsDrawer from './components/BuffsDrawer';
 import NotificationCenter from './components/NotificationCenter';
 import ToastContainer from './components/ToastContainer';
-import CrownShop from './components/CrownShop';
+import OrbShop from './components/OrbShop';
 import DailySpinModal from './components/DailySpinModal';
 import SocialPanel from './components/SocialPanel';
 import TradePanel from './components/TradePanel';
 import {
   Zap, Package, User, Trophy, Coins,
   Axe, Pickaxe, Target, Shield, Sword, Skull,
-  Star, Layers, Box, Castle, Lock, Menu, X, Tag, Clock, Heart, LogOut, ChevronDown, Crown, Circle, Users, Gift
+  Star, Layers, Box, Castle, Lock, Menu, X, Tag, Clock, Heart, LogOut, ChevronDown, Circle, Users, Gift
 } from 'lucide-react';
 import { ITEMS, resolveItem, getSkillForItem, getLevelRequirement, formatItemId } from '@shared/items';
 import { calculateNextLevelXP, XP_TABLE } from '@shared/skills';
@@ -322,7 +322,7 @@ function App() {
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
   const [lootModalData, setLootModalData] = useState(null);
-  const [showCrownShop, setShowCrownShop] = useState(false);
+  const [showOrbShop, setShowOrbShop] = useState(false);
   const [showDailySpin, setShowDailySpin] = useState(false);
   const [isWorldBossFight, setIsWorldBossFight] = useState(false);
 
@@ -1831,7 +1831,7 @@ function App() {
                   <div
                     onClick={() => {
                       setShowCurrencyDropdown(false);
-                      setShowCrownShop(true);
+                      setShowOrbShop(true);
                     }}
                     style={{
                       display: 'flex',
@@ -1852,7 +1852,7 @@ function App() {
                       <div>
                         <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>ORBS</div>
                         <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--accent)', fontFamily: 'monospace' }}>
-                          {formatNumber(displayedGameState?.state?.crowns || 0)}
+                          {formatNumber(displayedGameState?.state?.orbs || 0)}
                         </div>
                       </div>
                     </div>
@@ -2017,11 +2017,11 @@ function App() {
       />
 
       {
-        showCrownShop && (
-          <CrownShop
+        showOrbShop && (
+          <OrbShop
             socket={socket}
             gameState={displayedGameState}
-            onClose={() => setShowCrownShop(false)}
+            onClose={() => setShowOrbShop(false)}
           />
         )
       }

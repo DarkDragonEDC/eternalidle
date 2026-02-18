@@ -4,13 +4,13 @@ import { resolveItem, formatItemId } from '@shared/items'; // Ensure correct pat
 
 // Matches Server LOOT_TABLE
 const SEGMENTS = [
-    { id: 'T1_RUNE_SHARD', label: '3k Shards', color: '#a0aec0', icon: '💎' }, // Common
-    { id: 'T5_FOOD', label: '500x Food', color: '#48bb78', icon: '🍖' }, // Common
-    { id: 'T3_POTION_QUALITY', label: 'Quality Pot', color: '#4299e1', icon: '⚗️' }, // Uncommon
-    { id: 'T3_POTION_LUCK', label: 'Luck Pot', color: '#ed8936', icon: '🍀' }, // Uncommon
-    { id: 'T3_POTION_XP', label: 'XP Pot', color: '#9f7aea', icon: '✨' }, // Uncommon
-    { id: 'CROWNS_25', label: '25 Orbs', color: '#ecc94b', icon: '🔮' }, // Rare
-    { id: 'CROWNS_100', label: '100 Orbs!', color: '#d69e2e', icon: '🔮' }, // Legendary
+    { id: 'T3_POTION_SILVER', label: 'Silver Potion', color: '#a0aec0', icon: '🧪' }, // Common
+    { id: 'T3_POTION_XP', label: 'XP Potion', color: '#9f7aea', icon: '✨' }, // Common
+    { id: 'T1_RUNE_SHARD', label: '500 Shards', color: '#a0aec0', icon: '💎' }, // Uncommon
+    { id: 'T5_FOOD', label: '100 Cooked Food', color: '#48bb78', icon: '🍖' }, // Uncommon
+    { id: 'ORBS_25', label: '25 Orbs', color: '#ecc94b', icon: '🔮' }, // Rare
+    { id: 'T1_BATTLE_RUNE_SHARD', label: '50 Combat Shards', color: '#f56565', icon: '⚔️' }, // Legendary
+    { id: 'ORBS_100', label: '100 Orbs!', color: '#d69e2e', icon: '🔮' }, // Legendary
     { id: 'MEMBERSHIP', label: 'Membership', color: '#805ad5', icon: '🎖️' }  // Legendary
 ];
 

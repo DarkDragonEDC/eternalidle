@@ -1,0 +1,9 @@
+Reward,Quantity,Probability,Category
+T1_RUNE_SHARD,3000,25.0%,Common
+T5_FOOD,500,25.0%,Common
+T3_POTION_QUALITY,1,13.3%,Uncommon
+T3_POTION_LUCK,1,13.3%,Uncommon
+T3_POTION_XP,1,13.4%,Uncommon
+CROWNS (Orbs),25,9.0%,Rare
+CROWNS (Orbs),100,0.5%,Legendary
+MEMBERSHIP,1,0.5%,Legendary

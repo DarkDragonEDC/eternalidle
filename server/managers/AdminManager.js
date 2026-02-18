@@ -1,5 +1,5 @@
 import { ITEMS, resolveItem } from '../../shared/items.js';
-import { getStoreItem } from '../../shared/crownStore.js';
+import { getStoreItem } from '../../shared/orbStore.js';
 
 export class AdminManager {
     constructor(gameManager) {
@@ -17,7 +17,8 @@ export class AdminManager {
             switch (command) {
                 case 'give': return await this.cmdGive(socket, args);
                 case 'heal': return await this.cmdHeal(socket, args);
-                case 'add_crowns': return await this.cmdAddCrowns(socket, args);
+                case 'add_orbs': return await this.cmdAddOrbs(socket, args);
+                case 'add_crowns': return await this.cmdAddOrbs(socket, args); // Alias for backward compatibility during transition
                 case 'xp': return await this.cmdAddXp(socket, args);
                 case 'resetdaily': return await this.cmdResetDaily(socket, args);
                 case 'help': return await this.cmdHelp(socket);
@@ -35,7 +36,6 @@ export class AdminManager {
             return await this.gameManager.getCharacter(socket.user.id, socket.data.characterId);
         }
 
-        // Search for character by name (case-insensitive)
         const { data, error } = await this.gameManager.supabase
             .from('characters')
             .select('*')
@@ -44,52 +44,19 @@ export class AdminManager {
 
         if (error || !data) throw new Error(`Player '${targetName}' not found.`);
 
-        // Hydrate state just in case we need to modify it
-        // Note: If the player is ONLINE, we should try to find them in the GameManager cache first to edit "hot" memory
-        // But getCharacter handles cache lookup by ID. We found ID via DB.
-        // So we call getCharacter with the found ID.
         return await this.gameManager.getCharacter(data.user_id, data.id);
     }
 
     async cmdGive(socket, args) {
-        // Usage: /give [target?] [itemId] [qty] [quality?] [signature?]
-        // Examples: 
-        // /give gold 100
-        // /give me T5_FIRE_STAFF 1 4 <EternoDev>
-
         let targetName, itemId, qty, quality, signature;
-
-        // Argument Parsing Logic
-        // We know [itemId] is mandatory. [qty] is mandatory.
-        // If args[0] is 'me' or a player name, it's target.
-        // But player names can be anything.
-        // Heuristic: If args[1] is a number, args[0] is likely ItemId and Target is 'me'. 
-        // Wait, qty is usually number. ItemId is string.
-
-        // Let's stick to strict structure or try to be smart.
-        // Strict: /give [player] [item] [qty] [quality] [signature] (5 args)
-        // Strict: /give [item] [qty] [quality] [signature] (4 args -> target=me)
-
-        // If args[0] matches a connected player or 'me', assume target.
-        // BUT item IDs look different from player names usually?
 
         let startIndex = 0;
         if (args.length >= 2) {
-            // Check if first arg is target
-            // If args[1] is NOT a number, then args[0] might be target and args[1] item?
-            // Or if args[1] IS a number, args[0] is item (target=me).
-            // Let's assume standard format:
-            // 2 args: [item] [qty] (target=me)
-            // 3 args: [target] [item] [qty]   OR   [item] [qty] [quality] (ambiguous if target is number? unlikely)
-
-            // Let's try to resolve target from first arg.
             const likelyTarget = args[0];
             let isTarget = (likelyTarget.toLowerCase() === 'me');
             if (!isTarget) {
-                // Check if it looks like a user? 
-                // If 3 args, usually target item qty.
                 if (args.length === 3) isTarget = true;
-                if (args.length >= 4 && isNaN(parseInt(args[1]))) isTarget = true; // [target] [item] [qty] [q]...
+                if (args.length >= 4 && isNaN(parseInt(args[1]))) isTarget = true;
             }
 
             if (isTarget) {
@@ -107,15 +74,13 @@ export class AdminManager {
             return { success: false, error: "Usage: /give [player?] [item] [qty] [quality?] [signature?]" };
         }
 
-        // Optional args
         if (args.length > startIndex) quality = parseInt(args[startIndex]);
-        if (args.length > startIndex + 1) signature = args.slice(startIndex + 1).join(' '); // Signature might have spaces?
+        if (args.length > startIndex + 1) signature = args.slice(startIndex + 1).join(' ');
 
         if (isNaN(qty) || qty <= 0) return { success: false, error: "Invalid quantity." };
 
         const char = await this.resolveTarget(socket, targetName);
 
-        // Handle Gold
         if (itemId.toLowerCase() === 'gold' || itemId.toLowerCase() === 'silver') {
             char.state.silver = (char.state.silver || 0) + qty;
             await this.saveAndNotify(char);
@@ -132,7 +97,6 @@ export class AdminManager {
         const baseItem = resolveItem(itemId);
         if (!baseItem) return { success: false, error: `Invalid item ID: ${itemId}` };
 
-        // Construct custom item if quality/signature present
         let customItem = null;
         let finalItemId = itemId;
 
@@ -141,7 +105,6 @@ export class AdminManager {
 
             if (quality !== undefined && !isNaN(quality)) {
                 customItem.quality = quality;
-                // Append _Q suffix if not already present
                 if (quality > 0 && !finalItemId.includes('_Q')) {
                     finalItemId += `_Q${quality}`;
                 }
@@ -149,20 +112,11 @@ export class AdminManager {
 
             if (signature) {
                 customItem.craftedBy = signature;
-                // We typically use <Name> format, ensuring brackets if user forgot? 
-                // Let's trust user input but maybe trim.
-                // customItem.craftedBy = signature.startsWith('<') ? signature : `<${signature}>`; 
-                customItem.craftedBy = signature;
             }
-            // Add timestamp if signed?
             if (customItem.craftedBy) {
                 customItem.craftedAt = new Date().toISOString();
             }
         }
-
-        // addItemToInventory(char, itemId, amount, customMetadata/ItemObject)
-        // If we pass customItem as 4th arg, it should merge/use it.
-        // InventoryManager logic: if 4th arg is object, uses it as metadata source.
 
         const added = this.gameManager.inventoryManager.addItemToInventory(char, finalItemId, qty, customItem);
         if (!added) return { success: false, error: "Failed to add item. Inventory likely full." };
@@ -177,8 +131,8 @@ export class AdminManager {
         return { success: true, message: msg };
     }
 
-    async cmdAddCrowns(socket, args) {
-        // Usage: /add_crowns [target?] [amount]
+    async cmdAddOrbs(socket, args) {
+        // Usage: /add_orbs [target?] [amount]
         let targetName, amount;
 
         if (args.length === 1) {
@@ -188,20 +142,18 @@ export class AdminManager {
             targetName = args[0];
             amount = parseInt(args[1]);
         } else {
-            return { success: false, error: "Usage: /add_crowns [player?] [amount]" };
             return { success: false, error: "Usage: /add_orbs [player?] [amount]" };
         }
 
         if (isNaN(amount)) return { success: false, error: "Invalid amount." };
 
         const char = await this.resolveTarget(socket, targetName);
-        this.gameManager.crownsManager.addCrowns(char, amount, 'ADMIN_CMD');
+        this.gameManager.orbsManager.addOrbs(char, amount, 'ADMIN_CMD');
         await this.saveAndNotify(char);
         return { success: true, message: `Added ${amount} Orbs to ${char.name}.` };
     }
 
     async cmdHeal(socket, args) {
-        // Usage: /heal [target?]
         let targetName = args[0] || 'me';
         const char = await this.resolveTarget(socket, targetName);
 
@@ -211,9 +163,6 @@ export class AdminManager {
     }
 
     async cmdAddXp(socket, args) {
-        // Usage: /xp [target?] [skill] [amount]
-        // Ex: /xp MINING 500  or  /xp PlayerTwo MINING 500
-
         let targetName, skill, amount;
         if (args.length === 2) {
             targetName = 'me';
@@ -238,11 +187,9 @@ export class AdminManager {
     }
 
     async cmdResetDaily(socket, args) {
-        // Usage: /resetdaily [target?]
         let targetName = args[0] || 'me';
         const char = await this.resolveTarget(socket, targetName);
 
-        // Delete from DB to allow re-spin
         const { error } = await this.gameManager.supabase
             .from('daily_rewards')
             .delete()
@@ -258,27 +205,12 @@ export class AdminManager {
     async cmdHelp(socket) {
         return {
             success: true,
-            message: "Commands: /give, /heal, /add_crowns, /xp. (Optional target argument supported)"
+            message: "Commands: /give, /heal, /add_orbs, /xp. (Optional target argument supported)"
         };
     }
 
     async saveAndNotify(char) {
-        // Save state
         await this.gameManager.saveState(char.id, char.state);
-
-        // Notify the target player immediately if they are online
-        // We find the socket associated with this user/char via the connectedSockets map in index.js
-        // BUT, since we don't have direct access to 'io' or 'connectedSockets' here easily without passing them down,
-        // we can rely on `getStatus` broadcasting if the user is the one who triggered it.
-        // For remote formatting, we relies on the Ticker to pick up changes or we force a push?
-
-        // Actually best way: The `handleCommand` return value is sent to the ADMIN. 
-        // The TARGET needs a status, update.
-        // We can access 'gameManager' which has methods to broadcast updates ideally, OR
-        // we assume the Ticker (1s loop) will pick up the state change and broadcast it, 
-        // but for instantaneous feedback we might want to force it.
-
-        // Let's force a dirty mark so Ticker saves it, but for UI update:
         this.gameManager.markDirty(char.id);
     }
 }

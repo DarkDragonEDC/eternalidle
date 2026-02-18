@@ -47,9 +47,9 @@ export const pruneState = (state) => {
     }
 
     // 4. Prune Transactions (Keep last 20)
-    if (state.crownTransactions && Array.isArray(state.crownTransactions)) {
-        if (state.crownTransactions.length > 20) {
-            state.crownTransactions = state.crownTransactions.slice(-20);
+    if (state.orbTransactions && Array.isArray(state.orbTransactions)) {
+        if (state.orbTransactions.length > 20) {
+            state.orbTransactions = state.orbTransactions.slice(-20);
         }
     }
 

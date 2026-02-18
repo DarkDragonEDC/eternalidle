@@ -1,0 +1,25 @@
+[
+  {
+    "name": "<EternoDev>",
+    "id": "95323ca3-85c9-4b5e-b4af-08aafa64c6ff",
+    "totalLevel": 0,
+    "currentActivity": {
+      "req": {
+        "T10_EXTRACT": 5
+      },
+      "type": "CRAFTING",
+      "item_id": "T10_POTION_XP",
+      "sessionXp": 8344,
+      "sessionItems": {
+        "T10_POTION_XP": 15
+      },
+      "next_action_at": 1771445793422,
+      "autoRefineCount": 0,
+      "time_per_action": 942.4,
+      "duplicationCount": 1,
+      "initial_quantity": 45,
+      "actions_remaining": 31
+    },
+    "rawSkillsLength": 0
+  }
+]
