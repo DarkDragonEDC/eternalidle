@@ -731,8 +731,8 @@ export class GameManager {
                     updated = true;
                 }
 
-                // Only show the modal if total catchup was significant
-                const hasNotableGains = finalReport.totalTime > 60;
+                // Only show the modal if total catchup was significant (based on wall-clock time)
+                const hasNotableGains = elapsedSeconds > 60;
                 if (hasNotableGains) {
                     data.offlineReport = finalReport;
 

@@ -14,6 +14,7 @@ const CharacterSelection = ({ onSelectCharacter }) => {
     const [deleteConfirmationInput, setDeleteConfirmationInput] = useState('');
     const [deletingCharacter, setDeletingCharacter] = useState(null); // stores the character object to be deleted
     const [showIronmanTooltip, setShowIronmanTooltip] = useState(false);
+    const [termsAccepted, setTermsAccepted] = useState(false);
 
     const handleLogout = async () => {
         try {
@@ -275,9 +276,38 @@ const CharacterSelection = ({ onSelectCharacter }) => {
                                                     maxLength={12}
                                                     autoFocus
                                                 />
+                                                <div style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '10px',
+                                                    margin: '10px 0',
+                                                    textAlign: 'left',
+                                                    fontSize: '0.75rem',
+                                                    color: '#94a3b8',
+                                                    lineHeight: '1.4',
+                                                    cursor: 'pointer'
+                                                }} onClick={() => setTermsAccepted(!termsAccepted)}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={termsAccepted}
+                                                        onChange={(e) => setTermsAccepted(e.target.checked)}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        style={{ width: 'auto', margin: 0, cursor: 'pointer' }}
+                                                    />
+                                                    <span>I agree with the terms and guarantee this will be my only account.</span>
+                                                </div>
                                                 <div className="create-actions">
-                                                    <button onClick={handleCreate}>Create</button>
-                                                    <button className="cancel" onClick={() => setCreating(null)}>Cancel</button>
+                                                    <button
+                                                        onClick={handleCreate}
+                                                        disabled={!newCharName.trim() || !termsAccepted}
+                                                        style={{ opacity: (!newCharName.trim() || !termsAccepted) ? 0.5 : 1 }}
+                                                    >
+                                                        Create
+                                                    </button>
+                                                    <button className="cancel" onClick={() => {
+                                                        setCreating(null);
+                                                        setTermsAccepted(false);
+                                                    }}>Cancel</button>
                                                 </div>
                                             </div>
                                         ) : (
