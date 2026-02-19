@@ -761,6 +761,13 @@ genWarriorGear('PLATE_BOOTS', 'BOOTS', 'PLATE_BOOTS', 'BAR', 'Plate Boots');
 genWarriorGear('PLATE_GLOVES', 'GLOVES', 'PLATE_GLOVES', 'BAR', 'Plate Gloves');
 genWarriorGear('PLATE_CAPE', 'CAPE', 'PLATE_CAPE', 'BAR', 'Warrior Cape');
 
+// Override Icons for Sheaths
+for (const t of TIERS) {
+    if (ITEMS.GEAR.WARRIORS_FORGE.SHEATH[t]) {
+        ITEMS.GEAR.WARRIORS_FORGE.SHEATH[t].icon = `/items/T${t}_SHEATH.webp`;
+    }
+}
+
 // --- HUNTER GEAR (FIXED LOOKUP) ---
 const genHunterGear = (slot, type, idSuffix, matType, lookupName) => {
     for (const t of TIERS) {
