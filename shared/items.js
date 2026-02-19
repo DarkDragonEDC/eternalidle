@@ -295,7 +295,7 @@ const POTION_TYPES = {
     GATHER_XP: { name: 'Gathering Potion', suffix: '_POTION_GATHER', desc: 'Increases Gathering XP', scale: 0.03, base: 0.02 }, // T1: 5%, T10: 32% (Approx) -> Formula TBD
     REFINE_XP: { name: 'Refining Potion', suffix: '_POTION_REFINE', desc: 'Increases Refining XP', scale: 0.03, base: 0.02 },
     CRAFT_XP: { name: 'Crafting Potion', suffix: '_POTION_CRAFT', desc: 'Increases Crafting XP', scale: 0.03, base: 0.02 },
-    GOLD: { name: 'Silver Potion', suffix: '_POTION_GOLD', desc: 'Increases Silver gain', scale: 0.02, base: 0.00 }, // T1: 2%, T10: 20%
+    SILVER: { name: 'Silver Potion', suffix: '_POTION_SILVER', desc: 'Increases Silver gain', scale: 0.02, base: 0.00 }, // T1: 2%, T10: 20%
     QUALITY: { name: 'Quality Potion', suffix: '_POTION_QUALITY', desc: 'Increases Craft Quality Chance', scale: 0.005, base: 0.005 }, // T1: 1%, T10: 5.5%
     DROP: { name: 'Luck Potion', suffix: '_POTION_LUCK', desc: 'Increases Drop Rate', scale: 0.02, base: 0.00 },
     GLOBAL_XP: { name: 'Knowledge Potion', suffix: '_POTION_XP', desc: 'Increases Global XP', scale: 0.02, base: 0.00 }
@@ -343,7 +343,7 @@ const genPotions = () => {
                 desc: `${data.desc} by ${Math.round(val * 100)}%`,
                 duration: 3600, // 1 Hour Duration
                 icon: key === 'REFINE_XP' ? `/items/T${t}_REFINING_POTION.webp` :
-                    (key === 'GOLD' ? `/items/T${t}_SILVER_POTION.webp` :
+                    (key === 'SILVER' ? `/items/T${t}_SILVER_POTION.webp` :
                         (key === 'QUALITY' ? `/items/T${t}_QUALITY_POTION.webp` :
                             (key === 'GATHER_XP' ? `/items/T${t}_GATHERING_POTION.webp` :
                                 (key === 'CRAFT_XP' ? `/items/T${t}_CRAFTING_POTION.webp` :

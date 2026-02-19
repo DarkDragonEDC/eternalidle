@@ -4,7 +4,7 @@ import { resolveItem, formatItemId } from '@shared/items'; // Ensure correct pat
 
 // Matches Server LOOT_TABLE
 const SEGMENTS = [
-    { id: 'T3_POTION_GOLD', label: 'Silver Potion', color: '#a0aec0', icon: '🧪' }, // Common
+    { id: 'T3_POTION_SILVER', label: 'Silver Potion', color: '#a0aec0', icon: '🧪' }, // Common
     { id: 'T3_POTION_XP', label: 'XP Potion', color: '#9f7aea', icon: '✨' }, // Common
     { id: 'T1_RUNE_SHARD', label: '500 Shards', color: '#a0aec0', icon: '💎' }, // Uncommon
     { id: 'T5_FOOD', label: '100 Cooked Food', color: '#48bb78', icon: '🍖' }, // Uncommon

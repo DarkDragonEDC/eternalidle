@@ -673,7 +673,7 @@ export class InventoryManager {
                             case 'GLOBAL_XP':
                                 globals.xpYield += valPc;
                                 break;
-                            case 'GOLD':
+                            case 'SILVER':
                                 globals.silverYield += valPc;
                                 break;
                             case 'DROP':
