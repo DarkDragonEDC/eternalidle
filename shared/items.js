@@ -765,6 +765,7 @@ genWarriorGear('PLATE_CAPE', 'CAPE', 'PLATE_CAPE', 'BAR', 'Warrior Cape');
 for (const t of TIERS) {
     if (ITEMS.GEAR.WARRIORS_FORGE.SHEATH[t]) {
         ITEMS.GEAR.WARRIORS_FORGE.SHEATH[t].icon = `/items/T${t}_SHEATH.webp`;
+        ITEMS.GEAR.WARRIORS_FORGE.SHEATH[t].scale = '190%';
     }
 }
 
