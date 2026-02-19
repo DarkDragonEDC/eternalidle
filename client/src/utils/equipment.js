@@ -1,4 +1,4 @@
-import { resolveItem, calculateRuneBonus, getRequiredProficiencyGroup } from '@shared/items';
+import { resolveItem, calculateRuneBonus, getRequiredProficiencyGroup, getLevelRequirement } from '@shared/items';
 
 /**
  * Checks if a candidate item is better than the currently equipped item.
@@ -46,19 +46,57 @@ export const isBetterItem = (candidate, current) => {
 };
 
 /**
+ * Helper to determine which skill controls the level requirement for an item.
+ */
+const getEquipSkillRequirement = (item) => {
+    if (!item) return null;
+    const id = (item.id || '').toUpperCase();
+    const type = item.type;
+
+    // 1. Combat Gear
+    const profGroup = getRequiredProficiencyGroup(id);
+    if (profGroup === 'warrior') return 'WARRIOR_PROFICIENCY';
+    if (profGroup === 'hunter') return 'HUNTER_PROFICIENCY';
+    if (profGroup === 'mage') return 'MAGE_PROFICIENCY';
+
+    // 2. Tools
+    if (type === 'TOOL_ROD' || id.includes('_ROD')) return 'FISHING';
+    if (type === 'TOOL_AXE' || id.includes('_AXE')) return 'LUMBERJACK';
+    if (type === 'TOOL_PICKAXE' || id.includes('_PICKAXE')) return 'ORE_MINER';
+    if (type === 'TOOL_KNIFE' || id.includes('_KNIFE')) return 'ANIMAL_SKINNER';
+    if (type === 'TOOL_SICKLE' || id.includes('_SICKLE')) return 'FIBER_HARVESTER';
+    if (type === 'TOOL_POUCH' || id.includes('_POUCH')) return 'HERBALISM';
+
+    // 3. Fallback (e.g. Food? Runes?)
+    // Runes typically handled by their own logic or have no level req for equipping other than slot unlock
+    return null;
+};
+
+/**
  * Finds the best item in the inventory for a specific slot.
  * @param {String} slot - The equipment slot (e.g., 'mainHand', 'rune_WOOD_XP').
  * @param {Object} inventory - The character's inventory.
  * @param {String} weaponClass - The current weapon class (warrior/hunter/mage).
+ * @param {Object} skills - The player's skills object (for level requirements).
  * @returns {Object|null} - The best item or null.
  */
-export const getBestItemForSlot = (slot, inventory, weaponClass = null) => {
+export const getBestItemForSlot = (slot, inventory, weaponClass = null, skills = {}) => {
     const candidates = [];
 
     Object.entries(inventory).forEach(([itemId, qty]) => {
         if (qty <= 0) return;
         const item = resolveItem(itemId);
         if (!item) return;
+
+        // Level Requirement Check
+        if (item.tier) {
+            const skillKey = getEquipSkillRequirement(item);
+            if (skillKey) {
+                const reqLevel = getLevelRequirement(item.tier);
+                const playerSkillLevel = skills[skillKey]?.level || 1;
+                if (reqLevel > playerSkillLevel) return;
+            }
+        }
 
         let matches = false;
         if (slot.startsWith('rune_')) {

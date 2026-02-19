@@ -65,7 +65,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
         if (desc && desc !== "A useful item for your journey.") return desc;
         if (['WEAPON'].includes(itm.type)) return "Offensive equipment. Increases your Damage.";
         if (['ARMOR', 'HELMET', 'BOOTS', 'GLOVES'].includes(itm.type)) return "Defensive equipment. Increases your Health and Defense.";
-        if (['OFF_HAND'].includes(itm.type)) return itm.id.includes('SHIELD') ? "Secondary defensive equipment." : "Secondary equipment. Offers various bonuses.";
+        if (['OFF_HAND'].includes(itm.type)) return itm.id.includes('SHEATH') ? "Secondary defensive equipment." : "Secondary equipment. Offers various bonuses.";
         if (itm.type === 'CAPE') return "Special cape. Offers passive bonuses and global efficiency.";
         if (itm.type.startsWith('TOOL')) return "Gathering tool. Required to gather higher TIER resources.";
         if (itm.type === 'FOOD') return itm.description || `Consumable. Restores ${itm.heal || (itm.healPercent ? `${itm.healPercent}% ` : '') || 'Health'} Health over time.`;

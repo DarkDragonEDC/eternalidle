@@ -4,7 +4,7 @@ import { ITEMS, TIERS, QUALITIES, resolveItem } from '../shared/items.js';
 
 const WARRIOR_TYPES = [
     'SWORD',
-    'SHIELD',
+    'SHEATH',
     'PLATE_ARMOR',
     'PLATE_HELMET',
     'PLATE_BOOTS',

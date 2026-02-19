@@ -86,7 +86,7 @@ export const ITEMS = {
         }
     },
     GEAR: {
-        WARRIORS_FORGE: { SWORD: {}, SHIELD: {}, PLATE_ARMOR: {}, PLATE_HELMET: {}, PLATE_BOOTS: {}, PLATE_GLOVES: {}, PLATE_CAPE: {}, PICKAXE: {} },
+        WARRIORS_FORGE: { SWORD: {}, SHEATH: {}, PLATE_ARMOR: {}, PLATE_HELMET: {}, PLATE_BOOTS: {}, PLATE_GLOVES: {}, PLATE_CAPE: {}, PICKAXE: {} },
         HUNTERS_LODGE: { BOW: {}, TORCH: {}, LEATHER_ARMOR: {}, LEATHER_HELMET: {}, LEATHER_BOOTS: {}, LEATHER_GLOVES: {}, LEATHER_CAPE: {}, AXE: {}, SKINNING_KNIFE: {} },
         MAGES_TOWER: { FIRE_STAFF: {}, TOME: {}, CLOTH_ARMOR: {}, CLOTH_HELMET: {}, CLOTH_BOOTS: {}, CLOTH_GLOVES: {}, CAPE: {} },
         TOOLMAKER: { PICKAXE: {}, AXE: {}, SKINNING_KNIFE: {}, SICKLE: {}, FISHING_ROD: {} },
@@ -754,7 +754,7 @@ const genWarriorGear = (slot, type, idSuffix, matType, lookupName) => {
 
 // --- WARRIOR GEAR ---
 genWarriorGear('SWORD', 'WEAPON', 'SWORD', 'BAR', 'Sword');
-genWarriorGear('SHIELD', 'OFF_HAND', 'SHIELD', 'BAR', 'Shield');
+genWarriorGear('SHEATH', 'OFF_HAND', 'SHEATH', 'BAR', 'Sheath');
 genWarriorGear('PLATE_ARMOR', 'ARMOR', 'PLATE_ARMOR', 'BAR', 'Plate Armor');
 genWarriorGear('PLATE_HELMET', 'HELMET', 'PLATE_HELMET', 'BAR', 'Plate Helmet');
 genWarriorGear('PLATE_BOOTS', 'BOOTS', 'PLATE_BOOTS', 'BAR', 'Plate Boots');
@@ -965,25 +965,23 @@ const applyGlobalIconFixes = (obj) => {
             if (val.id && val.tier) {
                 const id = val.id.toUpperCase();
                 // Apply to gear and tools that might be missing icons
-                const gearTypes = ['WEAPON', 'OFF_HAND', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'TOOL', 'TOOL_AXE', 'TOOL_PICKAXE', 'TOOL_KNIFE', 'TOOL_SICKLE', 'TOOL_ROD', 'TOOL_POUCH'];
+                const gearTypes = ['WEAPON', 'OFF_HAND', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE',
+                    'TOOL', 'TOOL_AXE', 'TOOL_PICKAXE', 'TOOL_KNIFE', 'TOOL_SICKLE', 'TOOL_ROD', 'TOOL_POUCH'];
 
                 if (!val.icon && gearTypes.includes(val.type)) {
                     // ONLY apply automatic guessing to items we KNOW have these assets
-                    // Currently: SHIELD and AXE
-                    const isShield = id.includes('SHIELD');
+                    // Currently: AXE
                     const isAxe = id.includes('AXE') && !id.includes('PICKAXE');
 
-                    if (isShield || isAxe) {
+                    if (isAxe) {
                         // Convention: /items/T{tier}_{NAME}.webp
-                        // Extract NAME from T1_SHIELD -> SHIELD
                         const parts = id.split('_');
                         if (parts[0].match(/^T\d+$/)) {
                             const baseName = parts.slice(1).join('_');
                             val.icon = `/items/T${val.tier}_${baseName}.webp`;
 
                             // Apply specific scales for better UI fit
-                            if (isAxe) val.scale = '110%';
-                            if (isShield) val.scale = '190%';
+                            val.scale = '110%';
                         }
                     }
                 }
@@ -1134,7 +1132,7 @@ export const resolveItem = (itemId, overrideQuality = null) => {
                         // For Gear: Base (e.g. 5) + Bonus. High = Fast.
 
                         if (baseItem.type === 'WEAPON') {
-                            // Weapon Bonus: ((Tier - 1) * 15) + (QualityId * 3)
+                            // Weapon Bonus: ((Tier - 1) * 15) + (effectiveQualityId * 3)
                             // Added to base Speed.
                             const bonus = ((baseItem.tier - 1) * 15) + (effectiveQualityId * 3);
                             newStats[key] = baseItem.stats[key] + bonus;
@@ -1278,11 +1276,11 @@ export const getSkillForItem = (itemId, actionType) => {
     const type = String(actionType).toUpperCase();
 
     if (type === 'GATHERING') {
+        if (id.includes('FISH') || id.includes('ROD')) return 'FISHING';
         if (id.includes('ORE') || id.includes('PICKAXE')) return 'ORE_MINER';
         if (id.includes('WOOD') || id.includes('AXE')) return 'LUMBERJACK';
         if (id.includes('HIDE') || id.includes('KNIFE')) return 'ANIMAL_SKINNER';
         if (id.includes('FIBER') || id.includes('SICKLE')) return 'FIBER_HARVESTER';
-        if (id.includes('FISH') || id.includes('ROD')) return 'FISHING';
         if (id.includes('HERB') || id.includes('POUCH')) return 'HERBALISM';
     }
 
@@ -1300,8 +1298,8 @@ export const getSkillForItem = (itemId, actionType) => {
             return 'TOOL_CRAFTER';
         }
         // Warrior
-        // Warrior - Includes PLATE (Armor, Boots, Helm, Gloves), SWORD, SHIELD, CAPE
-        if (id.includes('SWORD') || id.includes('PLATE') || id.includes('SHIELD') || id.includes('WARRIOR_CAPE')) {
+        // Warrior - Includes PLATE (Armor, Boots, Helm, Gloves), SWORD, SHEATH, CAPE
+        if (id.includes('SWORD') || id.includes('PLATE') || id.includes('SHEATH') || id.includes('WARRIOR_CAPE')) {
             return 'WARRIOR_CRAFTER';
         }
         // Hunter - Includes LEATHER (Armor, Boots, Helm, Gloves), BOW, TORCH
@@ -1341,8 +1339,8 @@ export const getRequiredProficiencyGroup = (itemId) => {
     const id = String(itemId).toUpperCase();
     if (id.includes('_RUNE_')) return null;
 
-    // Warrior: PLATE, SWORD, SHIELD
-    if (id.includes('SWORD') || id.includes('PLATE') || id.includes('SHIELD') || id.includes('WARRIOR_CAPE')) {
+    // Warrior: PLATE, SWORD, SHEATH
+    if (id.includes('SWORD') || id.includes('PLATE') || id.includes('SHEATH') || id.includes('WARRIOR_CAPE')) {
         return 'warrior';
     }
     // Hunter: LEATHER, BOW, TORCH
@@ -1366,12 +1364,22 @@ export const calculateRuneBonus = (tier, stars, effType = null) => {
         bonus = Math.max(1, Math.floor(bonus / 2));
     }
 
-    // ATTACK (Combat) runes: Scale 1% (T1 1*) to 30% (T10 3*)
-    // Formula: Base Points * 0.6. Allows decimals.
-    // Also applies to ATTACK_SPEED
+    // ATTACK (Combat) and ATTACK_SPEED runes: Specific linear growth requested by user
     if (effType === 'ATTACK' || effType === 'ATTACK_SPEED') {
-        const raw = bonus * 0.6;
-        bonus = Math.max(1, Number(raw.toFixed(1)));
+        const combatBonusMap = {
+            1: { 1: 0.5, 2: 1.2, 3: 1.8 },
+            2: { 1: 2.5, 2: 3.2, 3: 3.9 },
+            3: { 1: 4.5, 2: 5.2, 3: 5.9 },
+            4: { 1: 6.6, 2: 7.2, 3: 7.9 },
+            5: { 1: 8.6, 2: 9.2, 3: 9.9 },
+            6: { 1: 10.6, 2: 11.3, 3: 11.9 },
+            7: { 1: 12.6, 2: 13.3, 3: 14.0 },
+            8: { 1: 14.6, 2: 15.3, 3: 16.0 },
+            9: { 1: 16.6, 2: 17.3, 3: 18.0 },
+            10: { 1: 18.7, 2: 19.3, 3: 20.0 }
+        };
+        const tierData = combatBonusMap[tier] || combatBonusMap[1];
+        return tierData[stars] || tierData[1];
     }
 
     // Food Saving runes give 30% bonus (max ~15% instead of ~50%)

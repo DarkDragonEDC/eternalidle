@@ -22,10 +22,22 @@ export class MarketManager {
         if (error) throw error;
 
         // Map data to ensure seller_character_id is available even if column is missing
-        return (data || []).map(l => ({
-            ...l,
-            seller_character_id: l.seller_character_id || l.item_data?.seller_character_id
-        }));
+        return (data || []).map(l => {
+            let itemId = l.item_id;
+            if (itemId && itemId.includes('SHIELD')) {
+                itemId = itemId.replace('SHIELD', 'SHEATH');
+                if (l.item_data) {
+                    if (l.item_data.id) l.item_data.id = l.item_data.id.replace('SHIELD', 'SHEATH');
+                    if (l.item_data.name) l.item_data.name = l.item_data.name.replace('Shield', 'Sheath');
+                }
+            }
+
+            return {
+                ...l,
+                item_id: itemId,
+                seller_character_id: l.seller_character_id || l.item_data?.seller_character_id
+            };
+        });
     }
 
     async sellItem(userId, characterId, itemId, quantity) {
@@ -161,6 +173,16 @@ export class MarketManager {
             .single();
 
         if (fetchError || !listing) throw new Error("Listing not found or expired");
+
+        // ITEM MIGRATION: Shield -> Sheath
+        if (listing.item_id && listing.item_id.includes('SHIELD')) {
+            listing.item_id = listing.item_id.replace('SHIELD', 'SHEATH');
+            if (listing.item_data) {
+                if (listing.item_data.id) listing.item_data.id = listing.item_data.id.replace('SHIELD', 'SHEATH');
+                if (listing.item_data.name) listing.item_data.name = listing.item_data.name.replace('Shield', 'Sheath');
+            }
+        }
+
         const sellerCharId = listing.seller_character_id || listing.item_data?.seller_character_id;
         if (sellerCharId === buyer.id) throw new Error("Current character cannot buy its own item");
 

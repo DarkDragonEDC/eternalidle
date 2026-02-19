@@ -70,8 +70,10 @@ export class GameManager {
             const NEW_TITLE = 'Pre-Alpha Player';
             const OLD_TITLE = 'Pré-alpha player';
 
-            console.log('[GameManager] Running title migration/grant for online characters...');
+            console.log('[GameManager] Running title and item migration for online characters...');
             this.cache.forEach((char, charId) => {
+                this._migrateShieldToSheath(char);
+
                 const charCreatedAt = char.created_at ? new Date(char.created_at) : null;
                 if (char.state) {
                     if (!char.state.unlockedTitles) char.state.unlockedTitles = [];
@@ -2772,8 +2774,65 @@ export class GameManager {
             data.state.dungeon = data.dungeon;
         }
 
-        // Rehydrate the state after loading from database (AFTER injecting columns)
+        // ITEM MIGRATION: Shield -> Sheath (MUST be before hydration so resolveItem finds it)
+        this._migrateShieldToSheath(data);
+
+        // Rehydrate the state after loading from database (AFTER injecting columns and migration)
         data.state = hydrateState(data.state || {});
+
         return data;
+    }
+
+    _migrateShieldToSheath(char) {
+        if (!char || !char.state) return;
+        const state = char.state;
+        let changed = false;
+
+        // 1. Migrate Inventory
+        if (state.inventory) {
+            const inv = state.inventory;
+            for (const key of Object.keys(inv)) {
+                if (key.includes('SHIELD')) {
+                    const newKey = key.replace('SHIELD', 'SHEATH');
+                    console.log(`[MIGRATION-ITEM] Converting Inventory Item: ${key} -> ${newKey} for ${char.name}`);
+
+                    if (inv[newKey]) {
+                        // Merge quantities
+                        const oldVal = inv[key];
+                        const newVal = inv[newKey];
+                        const oldQty = (typeof oldVal === 'object' && oldVal !== null) ? (Number(oldVal.amount) || 0) : (Number(oldVal) || 0);
+
+                        if (typeof newVal === 'object' && newVal !== null) {
+                            newVal.amount = (Number(newVal.amount) || 0) + oldQty;
+                        } else {
+                            inv[newKey] = (Number(newVal) || 0) + oldQty;
+                        }
+                    } else {
+                        inv[newKey] = inv[key];
+                    }
+                    delete inv[key];
+                    changed = true;
+                }
+            }
+        }
+
+        // 2. Migrate Equipment
+        if (state.equipment) {
+            const eq = state.equipment;
+            for (const slot of Object.keys(eq)) {
+                const item = eq[slot];
+                if (item && item.id && item.id.includes('SHIELD')) {
+                    const oldId = item.id;
+                    item.id = item.id.replace('SHIELD', 'SHEATH');
+                    if (item.name) item.name = item.name.replace('Shield', 'Sheath');
+                    console.log(`[MIGRATION-ITEM] Converting Equipped Item in slot ${slot}: ${oldId} -> ${item.id} for ${char.name}`);
+                    changed = true;
+                }
+            }
+        }
+
+        if (changed) {
+            this.markDirty(char.id);
+        }
     }
 }

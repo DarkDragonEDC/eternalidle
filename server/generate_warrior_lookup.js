@@ -59,7 +59,7 @@ for (let i = 1; i < lines.length; i++) {
     // SWORD, SHIELD, PLATE_ARMOR, PLATE_HELMET, PLATE_BOOTS, PLATE_GLOVES, PLATE_CAPE
     let lookupName = '';
     if (itemId.includes('SWORD')) lookupName = 'Sword';
-    else if (itemId.includes('SHIELD')) lookupName = 'Shield';
+    else if (itemId.includes('SHEATH')) lookupName = 'Sheath';
     else if (itemId.includes('PLATE_ARMOR')) lookupName = 'Plate Armor';
     else if (itemId.includes('PLATE_HELMET')) lookupName = 'Plate Helmet';
     else if (itemId.includes('PLATE_BOOTS')) lookupName = 'Plate Boots';

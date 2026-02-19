@@ -40,7 +40,7 @@ async function elevate() {
 
     const endgameItems = {
         mainHand: 'T10_SWORD_Q4',
-        offHand: 'T10_SHIELD_Q4',
+        offHand: 'T10_SHEATH_Q4',
         chest: 'T10_PLATE_ARMOR_Q4',
         helmet: 'T10_PLATE_HELMET_Q4',
         boots: 'T10_PLATE_BOOTS_Q4',

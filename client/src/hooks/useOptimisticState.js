@@ -16,7 +16,7 @@ const getSkillKey = (type, itemId) => {
         if (itemId.includes('CLOTH')) return 'CLOTH_REFINER';
     }
     if (type === 'CRAFTING') {
-        if (itemId.includes('SWORD') || itemId.includes('PLATE') || itemId.includes('PICKAXE') || itemId.includes('SHIELD')) return 'WARRIOR_CRAFTER';
+        if (itemId.includes('SWORD') || itemId.includes('PLATE') || itemId.includes('PICKAXE') || itemId.includes('SHEATH')) return 'WARRIOR_CRAFTER';
         if (itemId.includes('BOW') || itemId.includes('LEATHER') || itemId.includes('AXE') || itemId.includes('TORCH')) return 'HUNTER_CRAFTER';
         if (itemId.includes('STAFF') || itemId.includes('CLOTH') || itemId.includes('SICKLE') || itemId.includes('TOME')) return 'MAGE_CRAFTER';
         if (itemId.includes('FOOD')) return 'COOKING';

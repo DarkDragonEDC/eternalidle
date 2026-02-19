@@ -41,7 +41,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
             REFINING: { PLANK: 'PLANK', BAR: 'METAL', LEATHER: 'LEATHER', CLOTH: 'CLOTH', EXTRACT: 'EXTRACT' },
             CRAFTING: {
                 PICKAXE: 'TOOLS', AXE: 'TOOLS', KNIFE: 'TOOLS', SICKLE: 'TOOLS', ROD: 'TOOLS', POUCH: 'TOOLS',
-                SWORD: 'WARRIOR', PLATE: 'WARRIOR', SHIELD: 'WARRIOR', BOW: 'HUNTER', LEATHER: 'HUNTER',
+                SWORD: 'WARRIOR', PLATE: 'WARRIOR', SHEATH: 'WARRIOR', BOW: 'HUNTER', LEATHER: 'HUNTER',
                 TORCH: 'HUNTER', STAFF: 'MAGE', CLOTH: 'MAGE', TOME: 'MAGE', CAPE: 'WARRIOR', FOOD: 'COOKING', POTION: 'ALCHEMY'
             }
         };

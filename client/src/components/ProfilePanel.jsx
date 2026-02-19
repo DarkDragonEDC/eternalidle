@@ -320,9 +320,9 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         // Upgrade Detection
         const hasUpgrade = useMemo(() => {
             if (isLocked) return false;
-            const best = getBestItemForSlot(slot, state.inventory || {}, weaponClass);
+            const best = getBestItemForSlot(slot, state.inventory || {}, weaponClass, skills);
             return isBetterItem(best, item);
-        }, [slot, state.inventory, item, isLocked, weaponClass]);
+        }, [slot, state.inventory, item, isLocked, weaponClass, skills]);
 
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
