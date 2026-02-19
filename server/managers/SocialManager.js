@@ -117,6 +117,18 @@ export class SocialManager {
         return count;
     }
 
+    async _getBestFriendCount(characterId) {
+        const { count, error } = await this.supabase
+            .from('friends')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', 'ACCEPTED')
+            .eq('is_best_friend', true)
+            .or(`sender_id.eq.${characterId},receiver_id.eq.${characterId}`);
+
+        if (error) throw error;
+        return count;
+    }
+
     async sendFriendRequest(sender, receiverName) {
         // 0. Check Friend Limit (Sender)
         const myCount = await this._getFriendCount(sender.id);
@@ -247,6 +259,10 @@ export class SocialManager {
         if (data.is_best_friend) throw new Error("You are already best friends!");
         if (data.best_friend_request_sender) throw new Error("A best friend request is already pending.");
 
+        // Check limit
+        const bestFriendCount = await this._getBestFriendCount(senderId);
+        if (bestFriendCount >= 5) throw new Error("You have reached the maximum limit of 5 best friends.");
+
         const { error: updateError } = await this.supabase
             .from('friends')
             .update({ best_friend_request_sender: senderId })
@@ -273,6 +289,13 @@ export class SocialManager {
 
         let updates = {};
         if (accept) {
+            // Check limits for both parties before accepting
+            const myBestFriends = await this._getBestFriendCount(userId);
+            if (myBestFriends >= 5) throw new Error("You have reached the maximum limit of 5 best friends.");
+
+            const senderBestFriends = await this._getBestFriendCount(data.best_friend_request_sender);
+            if (senderBestFriends >= 5) throw new Error("The sender has reached the maximum limit of 5 best friends.");
+
             updates = { is_best_friend: true, best_friend_request_sender: null };
         } else {
             updates = { best_friend_request_sender: null }; // Just clear the request

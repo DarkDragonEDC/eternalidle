@@ -6,7 +6,43 @@ export class TradeManager {
         this.supabase = gameManager.supabase;
     }
 
-    calculateOfferTax(offer) {
+    async _getTradeTaxRate(senderId, receiverId) {
+        // Default tax is 15%
+        const BASE_TAX = 0.15;
+
+        try {
+            // Check if they are Best Friends
+            const { data, error } = await this.supabase
+                .from('friends')
+                .select('is_best_friend, created_at')
+                .or(`and(sender_id.eq.${senderId},receiver_id.eq.${receiverId}),and(sender_id.eq.${receiverId},receiver_id.eq.${senderId})`)
+                .eq('status', 'ACCEPTED')
+                .maybeSingle();
+
+            if (error || !data || !data.is_best_friend) return BASE_TAX;
+
+            // Calculate days of friendship
+            const friendsSince = new Date(data.created_at);
+            const daysDiff = Math.floor((Date.now() - friendsSince.getTime()) / (1000 * 60 * 60 * 24));
+
+            // Logic: Base 15%, -2% every 20 days
+            if (daysDiff >= 165) return 0;
+            if (daysDiff >= 140) return 0.01;
+            if (daysDiff >= 120) return 0.03;
+            if (daysDiff >= 100) return 0.05;
+            if (daysDiff >= 80) return 0.07;
+            if (daysDiff >= 60) return 0.09;
+            if (daysDiff >= 40) return 0.11;
+            if (daysDiff >= 20) return 0.13;
+
+            return BASE_TAX;
+        } catch (err) {
+            console.error("[TRADE-TAX] Error fetching friendship for tax rate:", err);
+            return BASE_TAX;
+        }
+    }
+
+    calculateOfferTax(offer, rate = 0.15) {
         if (!offer) return 0;
         let totalValue = offer.silver || 0;
 
@@ -19,8 +55,8 @@ export class TradeManager {
             });
         }
 
-        const tax = Math.floor(totalValue * 0.15);
-        console.log(`[TRADE-TAX] Calculated tax for offer: ${tax} (Items+Silver Value: ${totalValue})`);
+        const tax = Math.floor(totalValue * rate);
+        console.log(`[TRADE-TAX] Calculated tax for offer at ${rate * 100}% rate: ${tax} (Value: ${totalValue})`);
         return tax;
     }
 
@@ -85,6 +121,10 @@ export class TradeManager {
             .eq('id', tradeId)
             .single();
         if (error) throw error;
+
+        // Inject tax rate for the client
+        data.tax_rate = await this._getTradeTaxRate(data.sender_id, data.receiver_id);
+
         return data;
     }
 
@@ -204,16 +244,17 @@ export class TradeManager {
                 const sOffer = trade.sender_offer;
                 const rOffer = trade.receiver_offer;
 
-                // Calculate Taxes
-                const sTax = this.calculateOfferTax(sOffer);
-                const rTax = this.calculateOfferTax(rOffer);
+                // Calculate Taxes relative to friendship
+                const taxRate = await this._getTradeTaxRate(sender.id, receiver.id);
+                const sTax = this.calculateOfferTax(sOffer, taxRate);
+                const rTax = this.calculateOfferTax(rOffer, taxRate);
 
-                console.log(`[TRADE-EXECUTE] ${sender.name} offer: ${sOffer.silver} silver, ${sOffer.items.length} items. Tax: ${sTax}`);
-                console.log(`[TRADE-EXECUTE] ${receiver.name} offer: ${rOffer.silver} silver, ${rOffer.items.length} items. Tax: ${rTax}`);
+                console.log(`[TRADE-EXECUTE] ${sender.name} offer: ${sOffer.silver} silver, ${sOffer.items.length} items. Tax Rate: ${taxRate * 100}%, Tax: ${sTax}`);
+                console.log(`[TRADE-EXECUTE] ${receiver.name} offer: ${rOffer.silver} silver, ${rOffer.items.length} items. Tax Rate: ${taxRate * 100}%, Tax: ${rTax}`);
 
                 // Validate Silver (Price + Tax)
-                if ((sOffer.silver + sTax) > (sender.state.silver || 0)) throw new Error(`${sender.name} has insufficient silver to cover offer + 15% tax (${sTax.toLocaleString()} Silver tax).`);
-                if ((rOffer.silver + rTax) > (receiver.state.silver || 0)) throw new Error(`${receiver.name} has insufficient silver to cover offer + 15% tax (${rTax.toLocaleString()} Silver tax).`);
+                if ((sOffer.silver + sTax) > (sender.state.silver || 0)) throw new Error(`${sender.name} has insufficient silver to cover offer + ${taxRate * 100}% tax (${sTax.toLocaleString()} Silver tax).`);
+                if ((rOffer.silver + rTax) > (receiver.state.silver || 0)) throw new Error(`${receiver.name} has insufficient silver to cover offer + ${taxRate * 100}% tax (${rTax.toLocaleString()} Silver tax).`);
 
                 // ... item validation ...
                 const sItemsReq = {};

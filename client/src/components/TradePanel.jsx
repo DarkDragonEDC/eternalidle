@@ -38,11 +38,13 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
             }
         });
 
-        return Math.floor(totalValue * 0.15);
+        const rate = trade?.tax_rate !== undefined ? trade.tax_rate : 0.15;
+        return Math.floor(totalValue * rate);
     };
 
     const myTax = calculateTax(myOffer);
     const partnerTax = calculateTax(partnerOffer);
+    const displayTaxRate = (trade?.tax_rate !== undefined ? trade.tax_rate : 0.15) * 100;
 
     const handleUpdateOffer = (newItems, newSilver) => {
         socket.emit('trade_update_offer', {
@@ -92,10 +94,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
     };
 
     const removeItem = (itemId) => {
-        const newItems = localOffer.items.map(it => {
-            if (it.id === itemId) return { ...it, amount: it.amount - 1 };
-            return it;
-        }).filter(it => it.amount > 0);
+        const newItems = localOffer.items.filter(it => it.id !== itemId);
         handleUpdateOffer(newItems, localOffer.silver);
     };
 
@@ -241,7 +240,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                 {(myOffer.items.length > 0 || myOffer.silver > 0) && (
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', marginTop: '5px', borderTop: '1px dashed var(--border)' }}>
                                         <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                            <Clock size={12} /> TRADE FEE (15%)
+                                            <Clock size={12} /> TRADE FEE ({displayTaxRate}%)
                                         </span>
                                         <span style={{ fontSize: '0.85rem', color: '#ff4444', fontWeight: 'bold' }}>-{myTax.toLocaleString()} Silver</span>
                                     </div>
@@ -436,7 +435,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                 {(partnerOffer.items.length > 0 || partnerOffer.silver > 0) && (
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', marginTop: '5px', borderTop: '1px dashed var(--border)' }}>
                                         <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                            <Clock size={12} /> TRADE FEE (15%)
+                                            <Clock size={12} /> TRADE FEE ({displayTaxRate}%)
                                         </span>
                                         <span style={{ fontSize: '0.85rem', color: '#ff4444', fontWeight: 'bold' }}>-{partnerTax.toLocaleString()} Silver</span>
                                     </div>

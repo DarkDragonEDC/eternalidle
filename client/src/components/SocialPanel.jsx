@@ -26,6 +26,34 @@ const formatFriendsSince = (dateStr) => {
     return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 };
 
+const formatBondDuration = (dateStr) => {
+    if (!dateStr) return '0H';
+    const start = new Date(dateStr).getTime();
+    const now = Date.now();
+    const diff = Math.max(0, now - start);
+
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    const months = Math.floor(days / 30);
+    const years = Math.floor(days / 365);
+
+    const parts = [];
+
+    const yy = years;
+    const mm = months % 12;
+    const dd = days % 30;
+    const hh = hours % 24;
+
+    if (yy > 0) parts.push(`${yy}Y`);
+    if (mm > 0) parts.push(`${mm}M`);
+    if (dd > 0) parts.push(`${dd}D`);
+    if (hh > 0 || parts.length === 0) parts.push(`${hh}H`);
+
+    return parts.join(':');
+};
+
 const formatNumber = (n) => {
     if (n == null) return '0';
     return Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 });
@@ -299,8 +327,9 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, tradeInvites, gameStat
                                     { key: 'LIST', label: `ADDED (${friends.filter(f => f.status === 'ACCEPTED').length}/50)`, icon: <Users size={12} />, limitReached: friends.filter(f => f.status === 'ACCEPTED').length >= 50 },
                                     {
                                         key: 'BEST',
-                                        label: 'BEST FRIENDS',
+                                        label: `BEST FRIENDS (${friends.filter(f => f.isBestFriend).length}/5)`,
                                         icon: <Star size={12} fill="var(--accent)" color="var(--accent)" />,
+                                        limitReached: friends.filter(f => f.isBestFriend).length >= 5,
                                         badge: friends.filter(f => f.status === 'ACCEPTED' && f.bestFriendRequestSender && f.bestFriendRequestSender === f.friendId).length
                                     },
                                     { key: 'REQUESTS', label: 'REQUESTS', icon: <Send size={12} />, badge: friends.filter(f => f.status === 'PENDING' && !f.isSender).length }
@@ -399,8 +428,8 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, tradeInvites, gameStat
                                                                         Best Friend
                                                                     </div>
                                                                     {friend.friendsSince && (
-                                                                        <div style={{ fontSize: '0.55rem', color: 'rgba(255,215,0,0.4)', fontStyle: 'italic' }}>
-                                                                            Bonded since {formatFriendsSince(friend.friendsSince)}
+                                                                        <div style={{ fontSize: '0.65rem', color: '#FFD700', fontWeight: '900', letterSpacing: '2px', textShadow: '0 0 5px rgba(255, 215, 0, 0.3)' }}>
+                                                                            {formatBondDuration(friend.friendsSince)}
                                                                         </div>
                                                                     )}
 
@@ -664,9 +693,11 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, tradeInvites, gameStat
                                                                 setBestFriendToConfirm(friend);
                                                             }}
                                                             style={{
-                                                                background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px',
-                                                                color: friend.isBestFriend ? "#FFD700" : (friend.bestFriendRequestSender ? "var(--accent)" : "rgba(255,255,255,0.4)")
+                                                                background: 'transparent', border: 'none', cursor: friend.isBestFriend || friend.bestFriendRequestSender || friends.filter(f => f.isBestFriend).length >= 5 ? 'default' : 'pointer', padding: '4px',
+                                                                color: friend.isBestFriend ? "#FFD700" : (friend.bestFriendRequestSender ? "var(--accent)" : (friends.filter(f => f.isBestFriend).length >= 5 ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.4)")),
+                                                                opacity: (friends.filter(f => f.isBestFriend).length >= 5 && !friend.isBestFriend && !friend.bestFriendRequestSender) ? 0.3 : 1
                                                             }}
+                                                            title={friends.filter(f => f.isBestFriend).length >= 5 ? "Limit reached (5/5)" : "Add Best Friend"}
                                                         >
                                                             <Star size={16} fill={friend.isBestFriend ? "#FFD700" : "none"} />
                                                         </button>
