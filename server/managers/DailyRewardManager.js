@@ -3,7 +3,7 @@ import { getStoreItem } from '../../shared/orbStore.js';
 
 const LOOT_TABLE = [
     // COMMON (60.30%)
-    { id: 'T3_POTION_SILVER', qty: 2, chance: 0.3015, type: 'ITEM' },
+    { id: 'T3_POTION_GOLD', qty: 2, chance: 0.3015, type: 'ITEM' },
     { id: 'T3_POTION_XP', qty: 2, chance: 0.3015, type: 'ITEM' },
 
     // UNCOMMON (34.00%)
@@ -82,6 +82,7 @@ export class DailyRewardManager {
             if (reward.id === 'T1_RUNE_SHARD') friendlyName = 'Rune Shards';
             else if (reward.id === 'T1_BATTLE_RUNE_SHARD') friendlyName = 'Combat Shards';
             else if (reward.id === 'T5_FOOD') friendlyName = 'Food';
+            else if (reward.id === 'T3_POTION_GOLD') friendlyName = 'Silver Potion';
             else {
                 friendlyName = reward.id
                     .replace(/^T\d+_/, '') // Remove T1_

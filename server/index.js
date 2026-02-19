@@ -1651,7 +1651,7 @@ io.on('connection', (socket) => {
                 socket.emit('action_result', {
                     success: result.success,
                     message: "You challenge the World Boss!",
-                    worldBossUpdate: await gameManager.worldBossManager.getStatus(char.id)
+                    worldBossStatus: await gameManager.worldBossManager.getStatus(char.id)
                 });
             });
         } catch (err) {
@@ -1674,7 +1674,7 @@ io.on('connection', (socket) => {
                 socket.emit('action_result', {
                     success: result.success,
                     message: result.message,
-                    worldBossUpdate: await gameManager.worldBossManager.getStatus(char.id)
+                    worldBossStatus: await gameManager.worldBossManager.getStatus(char.id)
                 });
 
                 // And status update

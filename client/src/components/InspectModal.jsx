@@ -15,10 +15,24 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
     const hunterProf = stats.hunterProf || stats.agi || 0;
     const mageProf = stats.mageProf || stats.int || 0;
 
-    const totalIP = Math.floor(Object.values(equipment).reduce((acc, item) => {
-        if (!item) return acc;
-        return acc + (resolveItem(item.id || item.item_id)?.ip || 0);
-    }, 0) / 7);
+    const totalIP = useMemo(() => {
+        const combatSlots = ['helmet', 'chest', 'boots', 'gloves', 'cape', 'mainHand', 'offHand'];
+        let total = 0;
+        const hasWeapon = !!equipment.mainHand;
+
+        combatSlots.forEach(slot => {
+            const rawItem = equipment[slot];
+            if (rawItem) {
+                // Return early if no weapon and it's a combat gear slot (match ProfilePanel logic)
+                if (!hasWeapon && slot !== 'mainHand') return;
+
+                const itemIP = resolveItem(rawItem.id || rawItem.item_id)?.ip || 0;
+                total += itemIP;
+            }
+        });
+
+        return Math.floor(total / 7);
+    }, [equipment]);
 
     const totalLevel = Object.values(skills).reduce((acc, s) => acc + (s.level || 0), 0);
 

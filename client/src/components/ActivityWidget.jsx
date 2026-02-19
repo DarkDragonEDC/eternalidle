@@ -131,7 +131,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
     useEffect(() => {
         if (!socket) return;
         const handleUpdate = (result) => {
-            if (result.worldBossUpdate) {
+            if (result.worldBossUpdate && result.worldBossUpdate.status) {
                 setWorldBossData(result.worldBossUpdate);
             }
         };
@@ -881,7 +881,9 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                             </div>
                                             <div>
                                                 <div style={{ fontSize: '0.55rem', color: '#ff4d4d', fontWeight: '900', letterSpacing: '1px' }}>WORLD BOSS</div>
-                                                <div style={{ fontSize: '0.85rem', color: '#fff', fontWeight: '900' }}>Active Fight</div>
+                                                <div style={{ fontSize: '0.85rem', color: '#fff', fontWeight: '900' }}>
+                                                    {worldBossData.status === 'FINISHED' ? 'Fight Finished' : 'Active Fight'}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
