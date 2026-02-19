@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Package, Coins, CheckCircle, Clock, X, ArrowLeftRight, ChevronRight, Search, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { resolveItem, calculateItemSellPrice } from '@shared/items';
+import { resolveItem, calculateItemSellPrice, formatItemId } from '@shared/items';
 
 
 const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, isMobile }) => {
@@ -25,6 +25,27 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
     useEffect(() => {
         setLocalOffer(myOffer);
     }, [trade]);
+
+    // Persist active trade ID
+    useEffect(() => {
+        if (trade && trade.id) {
+            localStorage.setItem('lastActiveTradeId', trade.id);
+        }
+        return () => {
+            // Only clear if we're actually closing/cancelling, not just unmounting due to refresh (refresh keeps LS)
+            // But React unmounts on refresh too. 
+            // Better strategy: The onClose prop usually means "user closed it".
+            // Let's rely on the onClose handler to clear it if needed, or just keep it until 
+            // App.jsx decides it's invalid.
+            // Actually, we should probably clear it when the trade is explicitly finished/cancelled/closed by user.
+        };
+    }, [trade]);
+
+    // Clear persistence on explicit close
+    const handleExplicitClose = () => {
+        localStorage.removeItem('lastActiveTradeId');
+        onClose();
+    };
 
     const calculateTax = (offer) => {
         if (!offer) return 0;
@@ -60,7 +81,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
 
     const handleCancel = () => {
         socket.emit('trade_cancel', { tradeId: trade.id });
-        onClose();
+        handleExplicitClose();
     };
 
     const handleItemClick = (itemId, item, currentAmount) => {
@@ -112,7 +133,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
 
     return (
         <>
-            <div style={{ position: 'fixed', inset: 0, zIndex: 11999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }} onClick={onClose} />
+            <div style={{ position: 'fixed', inset: 0, zIndex: 11999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }} onClick={handleExplicitClose} />
             <div style={{
                 position: 'fixed',
                 zIndex: 12000,
@@ -146,7 +167,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                         <button onClick={handleCancel} style={{ background: 'rgba(255,68,68,0.1)', color: '#ff4444', border: '1px solid rgba(255,68,68,0.2)', padding: '8px 12px', borderRadius: '8px', fontWeight: '900', cursor: 'pointer', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
                             CANCEL TRADE
                         </button>
-                        <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <button onClick={handleExplicitClose} style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <X size={18} />
                         </button>
                     </div>
@@ -193,7 +214,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                 }}>
                     {/* YOUR SIDE */}
                     {(!isMobile || mobileTab === 'OFFER') && (
-                        <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.02)', padding: isMobile ? '10px' : '15px', borderRadius: '16px', border: '1px solid var(--border)' }}>
+                        <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.02)', padding: isMobile ? '10px' : '15px', borderRadius: '16px', border: '1px solid var(--border)', height: '100%', overflow: 'hidden' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? '10px' : '15px' }}>
                                 <h3 style={{ margin: 0, fontSize: isMobile ? '0.9rem' : '0.9rem', fontWeight: '900', color: 'var(--accent)', letterSpacing: '1px' }}>YOUR OFFER</h3>
                                 {myAccepted ? (
@@ -268,7 +289,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
 
                     {/* INVENTORY / SELECTIONS */}
                     {(!isMobile || mobileTab === 'INVENTORY') && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '10px' : '15px', overflow: 'hidden' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '10px' : '15px', overflow: 'hidden', height: '100%' }}>
                             <div className="glass-panel" style={{ padding: isMobile ? '10px' : '15px', borderRadius: '16px', border: '1px solid var(--border)', background: 'rgba(0,0,0,0.3)' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? '5px' : '10px' }}>
                                     <div style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--text-dim)', letterSpacing: '1px' }}>ADD SILVER</div>
@@ -390,10 +411,9 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
 
                     {/* PARTNER SIDE */}
                     {(!isMobile || mobileTab === 'OFFER') && (
-                        <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', background: 'rgba(144,213,255,0.02)', padding: isMobile ? '10px' : '15px', borderRadius: '16px', border: '1px solid rgba(144,213,255,0.1)' }}>
+                        <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', background: 'rgba(144,213,255,0.02)', padding: isMobile ? '10px' : '15px', borderRadius: '16px', border: '1px solid rgba(144,213,255,0.1)', height: '100%', overflow: 'hidden' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? '10px' : '15px' }}>
-                                <h3 style={{ margin: 0, fontSize: isMobile ? '0.9rem' : '0.9rem', fontWeight: '900', color: '#90d5ff', letterSpacing: '1px' }}>
-                                    {isSender ? (trade.receiver_name || 'THEIR OFFER') : (trade.sender_name || 'THEIR OFFER')}
+                                    {trade.partner_name || (isSender ? trade.receiver_name : trade.sender_name) || 'THEIR OFFER'}
                                 </h3>
                                 {partnerAccepted ? (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#44ff44', fontSize: '0.8rem', fontWeight: 'bold' }}>
@@ -422,7 +442,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                                     typeof Icon === 'string' ? <img src={Icon} alt={def?.name} style={{ width: def.scale || '100%', height: def.scale || '100%', objectFit: 'contain' }} /> : <Icon size={isMobile ? 16 : 18} color={def.rarityColor || "var(--text-dim)"} />
                                                 ) : <Package size={isMobile ? 16 : 18} color="var(--text-dim)" />}
                                             </div>
-                                            <span style={{ color: def?.rarityColor || '#fff', fontSize: isMobile ? '0.8rem' : '0.9rem', fontWeight: '600' }}>{item.amount}x {def?.tier ? `T${def.tier} ` : ''}{def?.name || item.name || 'Unknown Item'}</span>
+                                            <span style={{ color: def?.rarityColor || '#fff', fontSize: isMobile ? '0.8rem' : '0.9rem', fontWeight: '600' }}>{item.amount}x {def?.tier ? `T${def.tier} ` : ''}{def?.name || item.name || formatItemId(item.id) || 'Unknown Item'}</span>
                                         </div>
                                     );
                                 })}
@@ -443,105 +463,105 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                             </div>
 
                             {partnerAccepted && !myAccepted && (
-                                <div style={{ marginTop: '20px', padding: '15px', background: 'rgba(68,255,68,0.1)', borderRadius: '12px', border: '1px solid rgba(68,255,68,0.3)', textAlign: 'center' }}>
-                                    <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#44ff44', marginBottom: '4px' }}>Offer Accepted!</div>
-                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Review the items and accept to finalize the trade.</div>
-                                </div>
-                            )}
+                        <div style={{ marginTop: '20px', padding: '15px', background: 'rgba(68,255,68,0.1)', borderRadius: '12px', border: '1px solid rgba(68,255,68,0.3)', textAlign: 'center' }}>
+                            <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#44ff44', marginBottom: '4px' }}>Offer Accepted!</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Review the items and accept to finalize the trade.</div>
                         </div>
                     )}
                 </div>
+                    )}
+            </div>
 
-                <style>{`
+            <style>{`
                 .glass-panel {
                     backdrop-filter: blur(5px);
                 }
             `}</style>
 
-                <AnimatePresence>
-                    {quantityModal.isOpen && (
-                        <div style={{
-                            position: 'fixed', inset: 0, zIndex: 20100,
-                            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)',
-                            display: 'flex', justifyContent: 'center', alignItems: 'center'
-                        }}>
-                            <motion.div
-                                initial={{ scale: 0.9, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                exit={{ scale: 0.9, opacity: 0 }}
-                                style={{
-                                    background: '#1a1a1a', borderRadius: '16px', border: '1px solid var(--border)',
-                                    padding: '16px', width: '90%', maxWidth: '360px',
-                                    boxSizing: 'border-box',
-                                    display: 'flex', flexDirection: 'column', gap: '12px',
-                                    boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
-                                }}
-                            >
-                                <h3 style={{ margin: 0, color: '#fff', fontSize: '1.2rem', textAlign: 'center' }}>Add Quantity</h3>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'center', color: 'var(--text-dim)', fontSize: '0.9rem' }}>
-                                    <span style={{ maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={quantityModal.item?.name}>
-                                        {quantityModal.item?.name}
-                                    </span>
-                                    <span style={{ opacity: 0.5 }}>|</span>
-                                    <span>Max: {quantityModal.max}</span>
-                                </div>
+            <AnimatePresence>
+                {quantityModal.isOpen && (
+                    <div style={{
+                        position: 'fixed', inset: 0, zIndex: 20100,
+                        background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)',
+                        display: 'flex', justifyContent: 'center', alignItems: 'center'
+                    }}>
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            style={{
+                                background: '#1a1a1a', borderRadius: '16px', border: '1px solid var(--border)',
+                                padding: '16px', width: '90%', maxWidth: '360px',
+                                boxSizing: 'border-box',
+                                display: 'flex', flexDirection: 'column', gap: '12px',
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+                            }}
+                        >
+                            <h3 style={{ margin: 0, color: '#fff', fontSize: '1.2rem', textAlign: 'center' }}>Add Quantity</h3>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'center', color: 'var(--text-dim)', fontSize: '0.9rem' }}>
+                                <span style={{ maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={quantityModal.item?.name}>
+                                    {quantityModal.item?.name}
+                                </span>
+                                <span style={{ opacity: 0.5 }}>|</span>
+                                <span>Max: {quantityModal.max}</span>
+                            </div>
 
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    <input
-                                        type="number"
-                                        value={quantityInput}
-                                        onChange={(e) => setQuantityInput(e.target.value)}
-                                        onFocus={(e) => e.target.select()}
-                                        autoFocus
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') confirmAddItem();
-                                            if (e.key === 'Escape') setQuantityModal({ ...quantityModal, isOpen: false });
-                                        }}
-                                        style={{
-                                            flex: 1, minWidth: 0, padding: '10px', borderRadius: '8px', border: '1px solid var(--border)',
-                                            background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '1.2rem', textAlign: 'center',
-                                            fontWeight: 'bold', outline: 'none'
-                                        }}
-                                    />
-                                    <button
-                                        onClick={() => setQuantityInput(quantityModal.max.toString())}
-                                        style={{
-                                            padding: '0 12px', borderRadius: '8px', border: '1px solid var(--accent)',
-                                            background: 'rgba(212,175,55,0.1)', color: 'var(--accent)', fontWeight: 'bold',
-                                            cursor: 'pointer', whiteSpace: 'nowrap'
-                                        }}
-                                    >
-                                        MAX
-                                    </button>
-                                </div>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <input
+                                    type="number"
+                                    value={quantityInput}
+                                    onChange={(e) => setQuantityInput(e.target.value)}
+                                    onFocus={(e) => e.target.select()}
+                                    autoFocus
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') confirmAddItem();
+                                        if (e.key === 'Escape') setQuantityModal({ ...quantityModal, isOpen: false });
+                                    }}
+                                    style={{
+                                        flex: 1, minWidth: 0, padding: '10px', borderRadius: '8px', border: '1px solid var(--border)',
+                                        background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '1.2rem', textAlign: 'center',
+                                        fontWeight: 'bold', outline: 'none'
+                                    }}
+                                />
+                                <button
+                                    onClick={() => setQuantityInput(quantityModal.max.toString())}
+                                    style={{
+                                        padding: '0 12px', borderRadius: '8px', border: '1px solid var(--accent)',
+                                        background: 'rgba(212,175,55,0.1)', color: 'var(--accent)', fontWeight: 'bold',
+                                        cursor: 'pointer', whiteSpace: 'nowrap'
+                                    }}
+                                >
+                                    MAX
+                                </button>
+                            </div>
 
-                                <div style={{ display: 'flex', gap: '8px', marginTop: '5px' }}>
-                                    <button
-                                        onClick={() => setQuantityModal({ ...quantityModal, isOpen: false })}
-                                        style={{
-                                            flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)',
-                                            background: 'rgba(255,255,255,0.05)', color: '#ccc', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap'
-                                        }}
-                                    >
-                                        CANCEL
-                                    </button>
-                                    <button
-                                        onClick={confirmAddItem}
-                                        style={{
-                                            flex: 1, padding: '12px', borderRadius: '8px', border: 'none',
-                                            background: 'var(--accent)', color: '#000', fontWeight: '900', cursor: 'pointer',
-                                            boxShadow: '0 4px 15px rgba(212,175,55,0.2)', whiteSpace: 'nowrap'
-                                        }}
-                                    >
-                                        ADD
-                                    </button>
-                                </div>
-                            </motion.div>
-                        </div>
-                    )
-                    }
-                </AnimatePresence >
-            </div >
+                            <div style={{ display: 'flex', gap: '8px', marginTop: '5px' }}>
+                                <button
+                                    onClick={() => setQuantityModal({ ...quantityModal, isOpen: false })}
+                                    style={{
+                                        flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)',
+                                        background: 'rgba(255,255,255,0.05)', color: '#ccc', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap'
+                                    }}
+                                >
+                                    CANCEL
+                                </button>
+                                <button
+                                    onClick={confirmAddItem}
+                                    style={{
+                                        flex: 1, padding: '12px', borderRadius: '8px', border: 'none',
+                                        background: 'var(--accent)', color: '#000', fontWeight: '900', cursor: 'pointer',
+                                        boxShadow: '0 4px 15px rgba(212,175,55,0.2)', whiteSpace: 'nowrap'
+                                    }}
+                                >
+                                    ADD
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )
+                }
+            </AnimatePresence >
+        </div >
         </>
     );
 };

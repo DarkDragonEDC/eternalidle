@@ -139,6 +139,18 @@ export class TradeManager {
         // Inject tax rate for the client
         data.tax_rate = await this._getTradeTaxRate(data.sender_id, data.receiver_id);
 
+        // Refresh Names (In case they changed or were 'Unknown')
+        const { data: chars } = await this.supabase
+            .from('characters')
+            .select('id, name')
+            .in('id', [data.sender_id, data.receiver_id]);
+
+        if (chars) {
+            const sMap = new Map(chars.map(c => [c.id, c.name]));
+            if (sMap.has(data.sender_id)) data.sender_name = sMap.get(data.sender_id);
+            if (sMap.has(data.receiver_id)) data.receiver_name = sMap.get(data.receiver_id);
+        }
+
         return data;
     }
 
@@ -164,17 +176,24 @@ export class TradeManager {
                 // Enrich with Metadata from Inventory
                 // The client sends { id, amount }, but we want { id, amount, craftedAt, ... }
                 // We trust the client's ID to find the inventory slot.
-                const inventoryItem = char.state.inventory[it.id];
+                let merged = { ...it };
+                const inventoryItem = char.state.inventory[it.id]; // We assume check happening before or here
 
                 if (inventoryItem && typeof inventoryItem === 'object') {
                     // It's a metadata object in inventory. Merge it.
                     // We must preserve the transaction amount, but take other metadata.
                     // Avoid overwriting 'amount' from the trade offer with 'amount' from inventory (total stock).
                     const { amount: stockAmount, ...metadata } = inventoryItem;
-                    return { ...metadata, ...it };
+                    merged = { ...metadata, ...it };
                 }
 
-                return it;
+                // Ensure name exists if possible
+                if (!merged.name) {
+                    const def = ITEMS[baseId] || resolveItem(baseId);
+                    if (def) merged.name = def.name;
+                }
+
+                return merged;
             });
 
             if (!this.gameManager.inventoryManager.hasItems(char, req)) {

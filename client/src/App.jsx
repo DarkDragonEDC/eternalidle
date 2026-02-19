@@ -756,6 +756,19 @@ function App() {
 
     newSocket.on('trade_list', (list) => {
       setTradeInvites(list);
+
+      // Auto-resume trade if we have a persisted ID
+      const lastId = localStorage.getItem('lastActiveTradeId');
+      if (lastId) {
+        const found = list.find(t => t.id === lastId);
+        if (found) {
+          console.log("Resuming trade:", found.id);
+          setActiveTrade(found);
+        } else {
+          // Trade no longer exists or is not pending
+          localStorage.removeItem('lastActiveTradeId');
+        }
+      }
     });
 
     newSocket.on('trade_success', (data) => {
