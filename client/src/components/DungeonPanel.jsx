@@ -856,7 +856,22 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                                             <input
                                                 type="number"
                                                 value={repeatCount}
-                                                onChange={(e) => setRepeatCount(Math.min(effectiveMax, Math.max(1, parseInt(e.target.value) || 1)))}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    if (val === '') {
+                                                        setRepeatCount('');
+                                                    } else {
+                                                        const parsed = parseInt(val);
+                                                        if (!isNaN(parsed)) {
+                                                            setRepeatCount(Math.min(effectiveMax, parsed));
+                                                        }
+                                                    }
+                                                }}
+                                                onBlur={() => {
+                                                    if (repeatCount === '' || repeatCount === 0) {
+                                                        setRepeatCount(1);
+                                                    }
+                                                }}
                                                 style={{
                                                     width: '60px',
                                                     padding: '5px',

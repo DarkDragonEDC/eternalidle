@@ -356,7 +356,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                                         title={`${item.tier ? `T${item.tier} ` : ''}${item.name}${stars ? ` (${stars}★)` : ''}`}
                                                     >
                                                         {/* Tier Badge */}
-                                                        {item.tier && <div style={{ position: 'absolute', top: '2px', left: '4px', fontSize: '0.5rem', fontWeight: '900', color: '#fff', textShadow: '0 0 3px #000' }}>T{item.tier}</div>}
+                                                        {item.tier && <div style={{ position: 'absolute', top: '2px', left: '4px', fontSize: '0.5rem', fontWeight: '900', color: '#fff', textShadow: '0 0 3px #000', zIndex: 10 }}>T{item.tier}</div>}
 
                                                         {/* Star Rating for Runes */}
                                                         {isRune && stars > 0 && (
@@ -375,7 +375,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                                         </div>
 
                                                         {/* Quantity */}
-                                                        <div style={{ position: 'absolute', bottom: '2px', right: '4px', fontSize: '0.55rem', fontWeight: 'bold', color: '#fff', textShadow: '0 0 3px #000' }}>{amount}</div>
+                                                        <div style={{ position: 'absolute', bottom: '2px', right: '4px', fontSize: '0.55rem', fontWeight: 'bold', color: '#fff', textShadow: '0 0 3px #000', zIndex: 10 }}>{amount}</div>
 
                                                         {/* Item Name */}
                                                         <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textAlign: 'center', width: '100%', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', fontWeight: '600', lineHeight: '1.2' }}>{item.name}</div>

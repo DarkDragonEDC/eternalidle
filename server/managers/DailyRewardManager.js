@@ -2,21 +2,14 @@ import { ITEMS } from '../../shared/items.js';
 import { getStoreItem } from '../../shared/orbStore.js';
 
 const LOOT_TABLE = [
-    // COMMON (60.30%)
-    { id: 'T3_POTION_SILVER', qty: 2, chance: 0.3015, type: 'ITEM' },
-    { id: 'T3_POTION_XP', qty: 2, chance: 0.3015, type: 'ITEM' },
-
-    // UNCOMMON (34.00%)
-    { id: 'T1_RUNE_SHARD', qty: 500, chance: 0.17, type: 'ITEM' },
-    { id: 'T5_FOOD', qty: 100, chance: 0.17, type: 'ITEM' },
-
-    // RARE (5.00%)
-    { id: 'ORBS', qty: 25, chance: 0.05, type: 'CURRENCY' },
-
-    // LEGENDARY (0.70%)
-    { id: 'T1_BATTLE_RUNE_SHARD', qty: 50, chance: 0.005, type: 'ITEM' },
-    { id: 'ORBS', qty: 100, chance: 0.001, type: 'CURRENCY' },
-    { id: 'MEMBERSHIP', qty: 1, chance: 0.001, type: 'STORE_ITEM' }
+    { id: 'T1_RUNE_SHARD', qty: 3000, chance: 0.25, type: 'ITEM' },      // Index 0: 3k Shards
+    { id: 'T5_FOOD', qty: 500, chance: 0.25, type: 'ITEM' },            // Index 1: 500 Food
+    { id: 'T3_POTION_QUALITY', qty: 1, chance: 0.133, type: 'ITEM' },   // Index 2: Quality Potion
+    { id: 'T3_POTION_SILVER', qty: 2, chance: 0.133, type: 'ITEM' },    // Index 3: Silver Potion (Replaced Luck for sync)
+    { id: 'T3_POTION_XP', qty: 1, chance: 0.134, type: 'ITEM' },        // Index 4: XP Potion
+    { id: 'ORBS', qty: 25, chance: 0.09, type: 'CURRENCY' },            // Index 5: 25 Orbs
+    { id: 'ORBS', qty: 100, chance: 0.005, type: 'CURRENCY' },          // Index 6: 100 Orbs
+    { id: 'MEMBERSHIP', qty: 1, chance: 0.005, type: 'STORE_ITEM' }     // Index 7: Membership
 ];
 
 export class DailyRewardManager {

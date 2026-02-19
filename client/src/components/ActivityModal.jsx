@@ -149,8 +149,27 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                             <span style={{ fontSize: '0.6rem', fontWeight: '800', color: tierColor }}>REMAINTING: {formatNumber(maxQuantity)}</span>
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
-                            <input type="number" value={quantity} onChange={e => setQuantity(Math.min(maxQuantity, Math.max(1, parseInt(e.target.value) || '')))}
-                                style={{ flex: 1, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '6px 8px', color: '#fff', fontSize: '1rem', fontWeight: 'bold', outline: 'none' }} />
+                            <input
+                                type="number"
+                                value={quantity}
+                                onChange={e => {
+                                    const val = e.target.value;
+                                    if (val === '') {
+                                        setQuantity('');
+                                    } else {
+                                        const parsed = parseInt(val);
+                                        if (!isNaN(parsed)) {
+                                            setQuantity(Math.min(maxQuantity, parsed));
+                                        }
+                                    }
+                                }}
+                                onBlur={() => {
+                                    if (quantity === '' || quantity === 0) {
+                                        setQuantity(1);
+                                    }
+                                }}
+                                style={{ flex: 1, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '6px 8px', color: '#fff', fontSize: '1rem', fontWeight: 'bold', outline: 'none' }}
+                            />
                             <button onClick={() => setQuantity(maxQuantity)} style={{ padding: '0 10px', background: 'var(--accent-soft)', color: 'var(--accent)', borderRadius: '8px', fontWeight: '900', fontSize: '0.65rem' }}>MAX</button>
                         </div>
                     </div>

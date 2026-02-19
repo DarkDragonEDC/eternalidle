@@ -189,13 +189,23 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                             </button>
                         </div>
                         <input
-                            min="1"
-                            max={maxQty}
                             type="number"
                             value={amount}
                             onChange={(e) => {
-                                const val = Math.min(maxQty, parseInt(e.target.value) || 0);
-                                setAmount(String(val || ''));
+                                const val = e.target.value;
+                                if (val === '') {
+                                    setAmount('');
+                                } else {
+                                    const parsed = parseInt(val);
+                                    if (!isNaN(parsed)) {
+                                        setAmount(String(Math.min(maxQty, parsed)));
+                                    }
+                                }
+                            }}
+                            onBlur={() => {
+                                if (amount === '' || amount === '0' || parseInt(amount) === 0) {
+                                    setAmount('1');
+                                }
                             }}
                             style={{
                                 width: '100%',

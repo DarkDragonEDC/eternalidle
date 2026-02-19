@@ -1038,8 +1038,8 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                         minHeight: '80px'
                                                     }}
                                                 >
-                                                    <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: 'var(--text-main)', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>T{data.tier}</div>
-                                                    <div style={{ position: 'absolute', top: 6, right: 6, fontSize: '0.7rem', color: 'var(--text-main)', fontWeight: 'bold' }}>x{qty}</div>
+                                                    <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: 'var(--text-main)', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)', zIndex: 10 }}>T{data.tier}</div>
+                                                    <div style={{ position: 'absolute', top: 6, right: 6, fontSize: '0.7rem', color: 'var(--text-main)', fontWeight: 'bold', zIndex: 10 }}>x{qty}</div>
 
                                                     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
                                                         {data.icon ? (
@@ -1786,8 +1786,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                 } else {
                                                     const parsed = parseInt(val);
                                                     if (!isNaN(parsed)) {
-                                                        // Clamp between 1 and max
-                                                        const clamped = Math.max(1, Math.min(buyModal.max, parsed));
+                                                        const clamped = Math.min(buyModal.max, parsed);
                                                         setBuyModal(prev => ({ ...prev, quantity: clamped }));
                                                     }
                                                 }

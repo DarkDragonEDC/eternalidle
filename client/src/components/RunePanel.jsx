@@ -682,8 +682,8 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, ac
                                             transform: isSelected ? 'scale(1.05)' : 'scale(1)'
                                         }}
                                     >
-                                        <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: 'var(--text-main)', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>T{item.tier}</div>
-                                        <div style={{ position: 'absolute', top: 6, right: 6, fontSize: '0.7rem', color: 'var(--text-main)', fontWeight: 'bold' }}>x{item.qty}</div>
+                                        <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: 'var(--text-main)', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)', zIndex: 10 }}>T{item.tier}</div>
+                                        <div style={{ position: 'absolute', top: 6, right: 6, fontSize: '0.7rem', color: 'var(--text-main)', fontWeight: 'bold', zIndex: 10 }}>x{item.qty}</div>
 
                                         {/* Star Rating */}
                                         {/* Star Rating based on Rarity (Runes Only) */}
