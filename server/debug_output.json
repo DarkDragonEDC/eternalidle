@@ -9,16 +9,16 @@
       },
       "type": "CRAFTING",
       "item_id": "T10_POTION_XP",
-      "sessionXp": 8344,
+      "sessionXp": 19072,
       "sessionItems": {
-        "T10_POTION_XP": 15
+        "T10_POTION_XP": 34
       },
-      "next_action_at": 1771445793422,
+      "next_action_at": 1771462756622,
       "autoRefineCount": 0,
       "time_per_action": 942.4,
-      "duplicationCount": 1,
+      "duplicationCount": 2,
       "initial_quantity": 45,
-      "actions_remaining": 31
+      "actions_remaining": 13
     },
     "rawSkillsLength": 0
   }

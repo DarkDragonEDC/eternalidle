@@ -1,3 +1,7 @@
+v2.0.2 - Social Activity Enhancements
+- Friends list now displays multiple concurrent activities (Combat, Dungeon, Crafting, and Gathering) instead of just one.
+- Improved visual clarity for active and offline friend statuses in the Social Center.
+
 v2.0.1 - Icon Optimization & Migration
 - Migrated all item and monster icons from .png to .webp for better performance and smaller load times.
 - Fixed 404 errors for various item icons (Dungeon Chests, Axes, Ore, Leather) by ensuring correct extension mapping.

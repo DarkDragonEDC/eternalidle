@@ -1,3 +1,4 @@
+// Force Reload Trigger (Social Activity Debug) - 2026-02-18 21:40
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -1339,6 +1340,86 @@ io.on('connection', (socket) => {
                 // Refresh list
                 const friends = await gameManager.socialManager.getFriends(charId);
                 socket.emit('friends_list_update', friends);
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('request_best_friend', async ({ friendId }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const charId = socket.data.characterId;
+                await gameManager.socialManager.requestBestFriend(charId, friendId);
+                socket.emit('friend_action_success', { message: 'Best Friend Request Sent!' });
+
+                // Refresh lists for both
+                const myFriends = await gameManager.socialManager.getFriends(charId);
+                socket.emit('friends_list_update', myFriends);
+
+                // Notify friend if online
+                const friendSockets = Array.from(connectedSockets.values())
+                    .filter(s => s.data.characterId === friendId);
+
+                if (friendSockets.length > 0) {
+                    const friendFriends = await gameManager.socialManager.getFriends(friendId);
+                    friendSockets.forEach(s => {
+                        s.emit('friends_list_update', friendFriends);
+                        s.emit('friend_action_success', { message: 'New Best Friend Request!' });
+                    });
+                }
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('respond_best_friend', async ({ friendId, accept }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const charId = socket.data.characterId;
+                await gameManager.socialManager.respondBestFriend(charId, friendId, accept);
+                socket.emit('friend_action_success', { message: accept ? 'Best Friend Accepted!' : 'Request Declined.' });
+
+                // Refresh lists for both
+                const myFriends = await gameManager.socialManager.getFriends(charId);
+                socket.emit('friends_list_update', myFriends);
+
+                // Notify friend if online
+                const otherSockets = Array.from(connectedSockets.values())
+                    .filter(s => s.data.characterId === friendId);
+
+                if (otherSockets.length > 0) {
+                    const otherFriends = await gameManager.socialManager.getFriends(friendId);
+                    otherSockets.forEach(s => {
+                        s.emit('friends_list_update', otherFriends);
+                        if (accept) s.emit('friend_action_success', { message: 'You are now Best Friends!' });
+                    });
+                }
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('remove_best_friend', async ({ friendId }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const charId = socket.data.characterId;
+                await gameManager.socialManager.removeBestFriend(charId, friendId);
+                socket.emit('friend_action_success', { message: 'Best Friend removed.' });
+
+                // Refresh lists
+                const myFriends = await gameManager.socialManager.getFriends(charId);
+                socket.emit('friends_list_update', myFriends);
+
+                const otherSockets = Array.from(connectedSockets.values())
+                    .filter(s => s.data.characterId === friendId);
+
+                if (otherSockets.length > 0) {
+                    const otherFriends = await gameManager.socialManager.getFriends(friendId);
+                    otherSockets.forEach(s => s.emit('friends_list_update', otherFriends));
+                }
             });
         } catch (err) {
             socket.emit('error', { message: err.message });
