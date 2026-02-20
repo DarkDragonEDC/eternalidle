@@ -144,7 +144,12 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                         let reqText = '';
                         if (profGroup) reqText = `${profGroup.charAt(0).toUpperCase() + profGroup.slice(1)} Prof. Lv ${reqLv}`;
                         else {
-                            const skillKey = getSkillForItem(item.id, 'GATHERING') || getSkillForItem(item.id, 'REFINING') || getSkillForItem(item.id, 'CRAFTING');
+                            const TOOL_TYPE_TO_SKILL = {
+                                'TOOL_AXE': 'LUMBERJACK', 'TOOL_PICKAXE': 'ORE_MINER',
+                                'TOOL_KNIFE': 'ANIMAL_SKINNER', 'TOOL_SICKLE': 'FIBER_HARVESTER',
+                                'TOOL_ROD': 'FISHING', 'TOOL_POUCH': 'HERBALISM'
+                            };
+                            const skillKey = TOOL_TYPE_TO_SKILL[item.type] || getSkillForItem(item.id, 'GATHERING') || getSkillForItem(item.id, 'REFINING') || getSkillForItem(item.id, 'CRAFTING');
                             if (skillKey) reqText = `${skillKey.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())} Lv ${reqLv}`;
                         }
                         if (!reqText) return null;

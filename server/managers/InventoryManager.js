@@ -243,7 +243,16 @@ export class InventoryManager {
             }
         } else if (item.type !== 'FOOD' && item.type !== 'RUNE') {
             // Check Individual Skill Level (Tools, etc.)
-            const skillKey = getSkillForItem(itemId, 'GATHERING') || getSkillForItem(itemId, 'CRAFTING');
+            // Use direct type mapping for tools (more reliable than string matching on IDs)
+            const TOOL_TYPE_TO_SKILL = {
+                'TOOL_AXE': 'LUMBERJACK',
+                'TOOL_PICKAXE': 'ORE_MINER',
+                'TOOL_KNIFE': 'ANIMAL_SKINNER',
+                'TOOL_SICKLE': 'FIBER_HARVESTER',
+                'TOOL_ROD': 'FISHING',
+                'TOOL_POUCH': 'HERBALISM'
+            };
+            const skillKey = TOOL_TYPE_TO_SKILL[item.type] || getSkillForItem(itemId, 'GATHERING') || getSkillForItem(itemId, 'CRAFTING');
             if (skillKey) {
                 const userLevel = char.state.skills[skillKey]?.level || 1;
                 if (userLevel < requiredLevel) {
