@@ -1,10 +1,29 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Bell, X, Star, Info, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onMarkAllAsRead, onClearAll, onClickTrigger }) => {
     const [activeTab, setActiveTab] = React.useState('LEVEL_UP');
     const unreadCount = notifications.filter(n => !n.read).length;
+
+    const panelRef = useRef(null);
+    const triggerRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (isOpen && panelRef.current && !panelRef.current.contains(event.target) && triggerRef.current && !triggerRef.current.contains(event.target)) {
+                onClose();
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen, onClose]);
 
     const getIcon = (type) => {
         switch (type) {
@@ -18,8 +37,8 @@ const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onMa
     return (
         <div style={{ position: 'relative' }}>
             <button
+                ref={triggerRef}
                 onClick={(e) => {
-
                     onClickTrigger(e);
                 }}
                 className="notification-trigger"
@@ -55,167 +74,155 @@ const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onMa
 
             <AnimatePresence>
                 {isOpen && (
-                    <>
-                        <div
-                            onClick={onClose}
-                            style={{
-                                position: 'fixed',
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                zIndex: 999
-                            }}
-                        />
-                        <motion.div
-                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                            className="notification-panel"
-                        >
-                            <div style={{
-                                padding: '15px',
-                                borderBottom: '1px solid rgba(255,255,255,0.05)',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center'
-                            }}>
-                                <h3 style={{ margin: 0, fontSize: '0.9rem', color: '#fff', fontWeight: 'bold' }}>Notifications</h3>
-                                <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                                    {notifications.length > 0 && (
-                                        <div style={{ display: 'flex', gap: '12px' }}>
-                                            {unreadCount > 0 && (
-                                                <button
-                                                    onClick={onMarkAllAsRead}
-                                                    style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: '0.7rem', cursor: 'pointer', fontWeight: 'bold', opacity: 0.8 }}
-                                                    onMouseEnter={(e) => e.target.style.opacity = '1'}
-                                                    onMouseLeave={(e) => e.target.style.opacity = '0.8'}
-                                                >
-                                                    Mark all read
-                                                </button>
-                                            )}
+                    <motion.div
+                        ref={panelRef}
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="notification-panel"
+                    >
+                        <div style={{
+                            padding: '15px',
+                            borderBottom: '1px solid rgba(255,255,255,0.05)',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                        }}>
+                            <h3 style={{ margin: 0, fontSize: '0.9rem', color: '#fff', fontWeight: 'bold' }}>Notifications</h3>
+                            <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                                {notifications.length > 0 && (
+                                    <div style={{ display: 'flex', gap: '12px' }}>
+                                        {unreadCount > 0 && (
                                             <button
-                                                onClick={onClearAll}
-                                                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', cursor: 'pointer' }}
-                                                onMouseEnter={(e) => e.target.style.color = '#ff4d4d'}
-                                                onMouseLeave={(e) => e.target.style.color = 'rgba(255,255,255,0.4)'}
+                                                onClick={onMarkAllAsRead}
+                                                style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: '0.7rem', cursor: 'pointer', fontWeight: 'bold', opacity: 0.8 }}
+                                                onMouseEnter={(e) => e.target.style.opacity = '1'}
+                                                onMouseLeave={(e) => e.target.style.opacity = '0.8'}
                                             >
-                                                Clear All
+                                                Mark all read
                                             </button>
-                                        </div>
-                                    )}
-                                    <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                                        <X size={16} />
-                                    </button>
-                                </div>
+                                        )}
+                                        <button
+                                            onClick={onClearAll}
+                                            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', cursor: 'pointer' }}
+                                            onMouseEnter={(e) => e.target.style.color = '#ff4d4d'}
+                                            onMouseLeave={(e) => e.target.style.color = 'rgba(255,255,255,0.4)'}
+                                        >
+                                            Clear All
+                                        </button>
+                                    </div>
+                                )}
+                                <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                                    <X size={16} />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                {['LEVEL_UP', 'MARKET', 'SYSTEM'].map(tab => {
+                                    const count = notifications.filter(n => {
+                                        if (n.read) return false;
+                                        if (tab === 'LEVEL_UP') return n.type === 'LEVEL_UP';
+                                        if (tab === 'MARKET') return n.type === 'SUCCESS';
+                                        if (tab === 'SYSTEM') return n.type !== 'LEVEL_UP' && n.type !== 'SUCCESS';
+                                        return false;
+                                    }).length;
+
+                                    return (
+                                        <button
+                                            key={tab}
+                                            onClick={() => setActiveTab(tab)}
+                                            style={{
+                                                flex: 1,
+                                                padding: '10px 0',
+                                                background: 'transparent',
+                                                border: 'none',
+                                                borderBottom: activeTab === tab ? '2px solid var(--accent)' : '2px solid transparent',
+                                                color: activeTab === tab ? '#fff' : 'rgba(255,255,255,0.4)',
+                                                fontSize: '0.7rem',
+                                                fontWeight: 'bold',
+                                                cursor: 'pointer',
+                                                transition: '0.2s',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '6px'
+                                            }}
+                                        >
+                                            {tab.replace('_', ' ')}
+                                            {count > 0 && (
+                                                <span style={{
+                                                    background: 'var(--accent)',
+                                                    color: '#000',
+                                                    borderRadius: '10px',
+                                                    padding: '1px 5px',
+                                                    fontSize: '0.6rem',
+                                                    minWidth: '16px',
+                                                    textAlign: 'center'
+                                                }}>
+                                                    {count}
+                                                </span>
+                                            )}
+                                        </button>
+                                    );
+                                })}
                             </div>
 
-                            <div>
-                                <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                    {['LEVEL_UP', 'MARKET', 'SYSTEM'].map(tab => {
-                                        const count = notifications.filter(n => {
-                                            if (n.read) return false;
-                                            if (tab === 'LEVEL_UP') return n.type === 'LEVEL_UP';
-                                            if (tab === 'MARKET') return n.type === 'SUCCESS';
-                                            if (tab === 'SYSTEM') return n.type !== 'LEVEL_UP' && n.type !== 'SUCCESS';
-                                            return false;
-                                        }).length;
-
-                                        return (
-                                            <button
-                                                key={tab}
-                                                onClick={() => setActiveTab(tab)}
-                                                style={{
-                                                    flex: 1,
-                                                    padding: '10px 0',
-                                                    background: 'transparent',
-                                                    border: 'none',
-                                                    borderBottom: activeTab === tab ? '2px solid var(--accent)' : '2px solid transparent',
-                                                    color: activeTab === tab ? '#fff' : 'rgba(255,255,255,0.4)',
-                                                    fontSize: '0.7rem',
-                                                    fontWeight: 'bold',
-                                                    cursor: 'pointer',
-                                                    transition: '0.2s',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    gap: '6px'
-                                                }}
-                                            >
-                                                {tab.replace('_', ' ')}
-                                                {count > 0 && (
-                                                    <span style={{
-                                                        background: 'var(--accent)',
-                                                        color: '#000',
-                                                        borderRadius: '10px',
-                                                        padding: '1px 5px',
-                                                        fontSize: '0.6rem',
-                                                        minWidth: '16px',
-                                                        textAlign: 'center'
-                                                    }}>
-                                                        {count}
-                                                    </span>
-                                                )}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-
-                                <div className="scroll-container" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                                    {notifications
+                            <div className="scroll-container" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                {notifications
+                                    .filter(n => {
+                                        if (activeTab === 'LEVEL_UP') return n.type === 'LEVEL_UP';
+                                        if (activeTab === 'MARKET') return n.type === 'SUCCESS';
+                                        if (activeTab === 'SYSTEM') return n.type !== 'LEVEL_UP' && n.type !== 'SUCCESS';
+                                        return true;
+                                    })
+                                    .length === 0 ? (
+                                    <div style={{ padding: '30px', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>
+                                        No {activeTab.toLowerCase().replace('_', ' ')} notifications
+                                    </div>
+                                ) : (
+                                    notifications
                                         .filter(n => {
                                             if (activeTab === 'LEVEL_UP') return n.type === 'LEVEL_UP';
                                             if (activeTab === 'MARKET') return n.type === 'SUCCESS';
                                             if (activeTab === 'SYSTEM') return n.type !== 'LEVEL_UP' && n.type !== 'SUCCESS';
                                             return true;
                                         })
-                                        .length === 0 ? (
-                                        <div style={{ padding: '30px', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>
-                                            No {activeTab.toLowerCase().replace('_', ' ')} notifications
-                                        </div>
-                                    ) : (
-                                        notifications
-                                            .filter(n => {
-                                                if (activeTab === 'LEVEL_UP') return n.type === 'LEVEL_UP';
-                                                if (activeTab === 'MARKET') return n.type === 'SUCCESS';
-                                                if (activeTab === 'SYSTEM') return n.type !== 'LEVEL_UP' && n.type !== 'SUCCESS';
-                                                return true;
-                                            })
-                                            .map(notif => (
-                                                <div
-                                                    key={notif.id}
-                                                    onClick={() => onMarkAsRead(notif.id)}
-                                                    style={{
-                                                        padding: '12px 15px',
-                                                        borderBottom: '1px solid rgba(255,255,255,0.03)',
-                                                        background: notif.read ? 'transparent' : 'var(--accent-soft)',
-                                                        display: 'flex',
-                                                        gap: '12px',
-                                                        cursor: 'pointer',
-                                                        transition: '0.2s'
-                                                    }}
-                                                >
-                                                    <div style={{ marginTop: '2px' }}>
-                                                        {getIcon(notif.type)}
-                                                    </div>
-                                                    <div style={{ flex: 1 }}>
-                                                        <div style={{ fontSize: '0.85rem', color: '#fff', lineHeight: '1.4', whiteSpace: 'pre-wrap' }}>
-                                                            {notif.message}
-                                                        </div>
-                                                        <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', marginTop: '4px' }}>
-                                                            {new Date(notif.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                        </div>
-                                                    </div>
-                                                    {!notif.read && (
-                                                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent)', marginTop: '6px' }} />
-                                                    )}
+                                        .map(notif => (
+                                            <div
+                                                key={notif.id}
+                                                onClick={() => onMarkAsRead(notif.id)}
+                                                style={{
+                                                    padding: '12px 15px',
+                                                    borderBottom: '1px solid rgba(255,255,255,0.03)',
+                                                    background: notif.read ? 'transparent' : 'var(--accent-soft)',
+                                                    display: 'flex',
+                                                    gap: '12px',
+                                                    cursor: 'pointer',
+                                                    transition: '0.2s'
+                                                }}
+                                            >
+                                                <div style={{ marginTop: '2px' }}>
+                                                    {getIcon(notif.type)}
                                                 </div>
-                                            ))
-                                    )}
-                                </div>
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ fontSize: '0.85rem', color: '#fff', lineHeight: '1.4', whiteSpace: 'pre-wrap' }}>
+                                                        {notif.message}
+                                                    </div>
+                                                    <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', marginTop: '4px' }}>
+                                                        {new Date(notif.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </div>
+                                                </div>
+                                                {!notif.read && (
+                                                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent)', marginTop: '6px' }} />
+                                                )}
+                                            </div>
+                                        ))
+                                )}
                             </div>
-                        </motion.div>
-                    </>
+                        </div>
+                    </motion.div>
                 )}
             </AnimatePresence>
         </div>

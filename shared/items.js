@@ -368,25 +368,25 @@ const genPotions = () => {
 genPotions();
 
 // Override Icon for T1 Food
-if (ITEMS.CONSUMABLE.FOOD[1]) { ITEMS.CONSUMABLE.FOOD[1].icon = '/items/T1_FOOD.webp'; ITEMS.CONSUMABLE.FOOD[1].scale = '200%'; }
+if (ITEMS.CONSUMABLE.FOOD[1]) { ITEMS.CONSUMABLE.FOOD[1].icon = '/items/T1_FOOD.webp'; }
 // Override Icon for T2 Food
-if (ITEMS.CONSUMABLE.FOOD[2]) { ITEMS.CONSUMABLE.FOOD[2].icon = '/items/T2_FOOD.webp'; ITEMS.CONSUMABLE.FOOD[2].scale = '200%'; }
+if (ITEMS.CONSUMABLE.FOOD[2]) { ITEMS.CONSUMABLE.FOOD[2].icon = '/items/T2_FOOD.webp'; }
 // Override Icon for T3 Food
-if (ITEMS.CONSUMABLE.FOOD[3]) { ITEMS.CONSUMABLE.FOOD[3].icon = '/items/T3_FOOD_v2.webp'; ITEMS.CONSUMABLE.FOOD[3].scale = '200%'; }
+if (ITEMS.CONSUMABLE.FOOD[3]) { ITEMS.CONSUMABLE.FOOD[3].icon = '/items/T3_FOOD.webp'; }
 // Override Icon for T4 Food
-if (ITEMS.CONSUMABLE.FOOD[4]) { ITEMS.CONSUMABLE.FOOD[4].icon = '/items/T4_FOOD_v2.webp'; ITEMS.CONSUMABLE.FOOD[4].scale = '200%'; }
+if (ITEMS.CONSUMABLE.FOOD[4]) { ITEMS.CONSUMABLE.FOOD[4].icon = '/items/T4_FOOD.webp'; }
 // Override Icon for T5 Food
-if (ITEMS.CONSUMABLE.FOOD[5]) { ITEMS.CONSUMABLE.FOOD[5].icon = '/items/T5_FOOD.webp'; ITEMS.CONSUMABLE.FOOD[5].scale = '200%'; }
+if (ITEMS.CONSUMABLE.FOOD[5]) { ITEMS.CONSUMABLE.FOOD[5].icon = '/items/T5_FOOD.webp'; }
 // Override Icon for T6 Food
-if (ITEMS.CONSUMABLE.FOOD[6]) { ITEMS.CONSUMABLE.FOOD[6].icon = '/items/T6_FOOD.webp'; ITEMS.CONSUMABLE.FOOD[6].scale = '200%'; }
+if (ITEMS.CONSUMABLE.FOOD[6]) { ITEMS.CONSUMABLE.FOOD[6].icon = '/items/T6_FOOD.webp'; }
 // Override Icon for T7 Food
-if (ITEMS.CONSUMABLE.FOOD[7]) { ITEMS.CONSUMABLE.FOOD[7].icon = '/items/T7_FOOD.webp'; ITEMS.CONSUMABLE.FOOD[7].scale = '200%'; }
+if (ITEMS.CONSUMABLE.FOOD[7]) { ITEMS.CONSUMABLE.FOOD[7].icon = '/items/T7_FOOD.webp'; }
 // Override Icon for T8 Food
-if (ITEMS.CONSUMABLE.FOOD[8]) { ITEMS.CONSUMABLE.FOOD[8].icon = '/items/T8_FOOD.webp'; ITEMS.CONSUMABLE.FOOD[8].scale = '200%'; }
+if (ITEMS.CONSUMABLE.FOOD[8]) { ITEMS.CONSUMABLE.FOOD[8].icon = '/items/T8_FOOD.webp'; }
 // Override Icon for T9 Food
-if (ITEMS.CONSUMABLE.FOOD[9]) { ITEMS.CONSUMABLE.FOOD[9].icon = '/items/T9_FOOD.webp'; ITEMS.CONSUMABLE.FOOD[9].scale = '200%'; }
+if (ITEMS.CONSUMABLE.FOOD[9]) { ITEMS.CONSUMABLE.FOOD[9].icon = '/items/T9_FOOD.webp'; }
 // Override Icon for T10 Food
-if (ITEMS.CONSUMABLE.FOOD[10]) { ITEMS.CONSUMABLE.FOOD[10].icon = '/items/T10_FOOD.webp'; ITEMS.CONSUMABLE.FOOD[10].scale = '90%'; }
+if (ITEMS.CONSUMABLE.FOOD[10]) { ITEMS.CONSUMABLE.FOOD[10].icon = '/items/T10_FOOD.webp'; }
 
 // Override Icons for Refined Items
 if (ITEMS.REFINED.PLANK[1]) { ITEMS.REFINED.PLANK[1].icon = '/items/T1_PLANK.webp'; }

@@ -916,15 +916,40 @@ io.on('connection', (socket) => {
 
     socket.on('get_chat_history', async () => {
         try {
-            // Fetch Global/PTBR/Trade messages + User's PRIVATE system messages + Public system messages (user_id is null)
-            const { data, error } = await supabase
+            // Fetch 50 messages for each main channel separately so slow channels don't get buried
+            const channels = ['GLOBAL', 'PTBR', 'TRADE'];
+            const queries = channels.map(ch =>
+                supabase
+                    .from('messages')
+                    .select('*')
+                    .eq('channel', ch)
+                    .order('created_at', { ascending: false })
+                    .limit(50)
+            );
+
+            // Fetch System messages specifically meant for this user or public
+            const systemQuery = supabase
                 .from('messages')
                 .select('*')
-                .or(`channel.neq.SYSTEM,and(channel.eq.SYSTEM,user_id.eq.${socket.user.id}),and(channel.eq.SYSTEM,user_id.is.null)`)
+                .or(`and(channel.eq.SYSTEM,user_id.eq.${socket.user.id}),and(channel.eq.SYSTEM,user_id.is.null)`)
                 .order('created_at', { ascending: false })
                 .limit(50);
-            if (error) throw error;
-            socket.emit('chat_history', data.reverse());
+
+            queries.push(systemQuery);
+
+            const results = await Promise.all(queries);
+
+            // Collect all data, flattening the results
+            let allMessages = [];
+            for (const res of results) {
+                if (res.error) console.error('Error fetching chat channel history:', res.error);
+                if (res.data) allMessages = allMessages.concat(res.data);
+            }
+
+            // Sort everything chronologically before sending
+            allMessages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+            socket.emit('chat_history', allMessages);
         } catch (err) {
             console.error('Error fetching chat history:', err);
         }
