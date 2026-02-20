@@ -708,8 +708,8 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                     const isReady = progress >= 1;
 
                                     // SVG circular progress
-                                    const size = isMobile ? 36 : 44;
-                                    const stroke = 3;
+                                    const size = isMobile ? 48 : 64;
+                                    const stroke = 3.5;
                                     const radius = (size / 2) - stroke;
                                     const circumference = 2 * Math.PI * radius;
                                     const dashOffset = circumference * (1 - progress);
@@ -754,8 +754,8 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                                         src={food.icon || `/items/${food.id}.webp`}
                                                         alt="Food"
                                                         style={{
-                                                            width: isMobile ? 18 : 24,
-                                                            height: isMobile ? 18 : 24,
+                                                            width: isMobile ? 28 : 36,
+                                                            height: isMobile ? 28 : 36,
                                                             objectFit: 'contain',
                                                             opacity: isReady ? 1 : 0.5,
                                                             transition: 'opacity 0.3s',
@@ -766,7 +766,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                             </div>
                                             {/* Tier + Quantity label */}
                                             <div style={{
-                                                fontSize: isMobile ? '0.55rem' : '0.65rem',
+                                                fontSize: isMobile ? '0.65rem' : '0.8rem',
                                                 fontWeight: '900',
                                                 color: isReady ? '#4caf50' : '#ff6b6b',
                                                 letterSpacing: '0.5px',
