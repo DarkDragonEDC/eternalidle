@@ -241,7 +241,6 @@ export class CombatManager {
                 const result = this.gameManager.processFood(char, virtualTime);
                 if (result.used) {
                     foodEaten += (result.eaten || 0);
-                    combat.savedFoodCount = (combat.savedFoodCount || 0) + (result.savedCount || 0);
                 }
 
                 if (combat.playerHealth <= 0) break;
@@ -249,7 +248,6 @@ export class CombatManager {
 
             combat.totalMobDmg = (combat.totalMobDmg || 0) + mitigatedMobDmg;
             combat.foodEatenInRound = (combat.foodEatenInRound || 0) + foodEaten;
-            combat.foodConsumed = (combat.foodConsumed || 0) + foodEaten;
 
             // Advance the timer by the EXACT amount of time covered by these attacks
             // This maintains the rhythm/average DPS

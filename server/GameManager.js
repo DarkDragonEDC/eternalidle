@@ -1061,12 +1061,6 @@ export class GameManager {
             // Check food before each round (reactive healing)
             const foodResult = this.processFood(char, currentTime);
             foodConsumed += foodResult.eaten || 0;
-            if (foodResult.savedCount && char.state.combat) {
-                char.state.combat.savedFoodCount = (char.state.combat.savedFoodCount || 0) + foodResult.savedCount;
-            }
-            if (foodResult.eaten && char.state.combat) {
-                char.state.combat.foodConsumed = (char.state.combat.foodConsumed || 0) + foodResult.eaten;
-            }
 
             const result = await this.combatManager.processCombatRound(char, currentTime);
             if (!result || !char.state.combat) {
@@ -1670,16 +1664,8 @@ export class GameManager {
                         // We take the last one as the primary combatResult for basic compatibility
                         combatResult = roundResult;
 
-                        // COMIDA ONLINE: Consumir comida ENTRE os rounds de uma Ãºnica tick para evitar morte por burst
-                        const foodRes = this.processFood(char);
-                        if (foodRes.savedCount > 0) {
-                            combat.savedFoodCount = (combat.savedFoodCount || 0) + foodRes.savedCount;
-                            stateChanged = true;
-                        }
-                        if (foodRes.eaten > 0) {
-                            combat.foodConsumed = (combat.foodConsumed || 0) + foodRes.eaten;
-                            stateChanged = true;
-                        }
+                        // COMIDA ONLINE: Consumir comida ENTRE os rounds de uma única tick para evitar morte por burst
+                        this.processFood(char);
                     }
 
                     // Advance the timer by exactly one interval
@@ -1892,87 +1878,86 @@ export class GameManager {
 
     processFood(char, nowOverride = null) {
         if (!char.state.equipment || !char.state.equipment.food) return { used: false, amount: 0 };
-        // Get the equipped food object (which might be stale)
-        let food = char.state.equipment.food;
-
-        // RESOLVE FRESH ITEM DATA: 
-        // The equipped object might be a stale copy from the DB with old 'heal' values.
-        // We must fetch the latest definition from shared/items.js to get the new 'healPercent'.
-        const freshItem = this.inventoryManager.resolveItem(food.id);
-
-        // Merge fresh stats onto the food object temporarily for calculation (preserve amount)
-        if (freshItem) {
-            food = { ...freshItem, amount: food.amount };
-        }
+        const food = char.state.equipment.food;
 
         // Support both old flat heal and new percent heal (freshItem handles this)
-        if (!food.heal && !food.healPercent && !food.amount) return { used: false, amount: 0 };
+        const freshDef = ITEM_LOOKUP[food.id || food.item_id];
+        if (!freshDef || (!freshDef.heal && !freshDef.healPercent)) return { used: false, amount: 0 };
 
         const inCombat = !!char.state.combat;
         const stats = this.inventoryManager.calculateStats(char, nowOverride);
         const maxHp = stats.maxHP;
         let currentHp = inCombat ? (char.state.combat.playerHealth || 0) : (char.state.health || 0);
-        let eatenCount = 0;
-        let savedCount = 0;
-        let totalHealed = 0;
-        const MAX_EATS_PER_TICK = 50;
 
-        const foodSaver = stats.foodSaver || 0;
-
-        // Calculate Heal Amount per unit
-        let unitHeal = 0;
-        if (food.healPercent) {
-            unitHeal = Math.floor(maxHp * (food.healPercent / 100));
-        } else {
-            unitHeal = food.heal || 0;
-        }
-
-        // Safety minimum 1 if it's supposed to heal
-        if (unitHeal < 1) unitHeal = 1;
-
+        // COOLDOWN LOGIC: 5 seconds between eats
         const COOLDOWN_MS = 5000;
         const lastFoodAt = char.state.lastFoodAt || 0;
         const now = nowOverride || Date.now();
 
         if (now - lastFoodAt < COOLDOWN_MS) return { used: false, amount: 0 };
+        if (currentHp >= maxHp) return { used: false, amount: 0 };
+
+        // Calculate Heal Amount per unit
+        let unitHeal = 0;
+        if (freshDef.healPercent) {
+            unitHeal = Math.floor(maxHp * (freshDef.healPercent / 100));
+        } else {
+            unitHeal = freshDef.heal || 0;
+        }
+        if (unitHeal < 1) unitHeal = 1;
 
         const missing = maxHp - currentHp;
         const hpPercent = (currentHp / maxHp) * 100;
 
+        // NO WASTE RULE:
         // Eat if the heal fits entirely OR if HP is dangerously low (< 40%)
         if (food.amount > 0 && (missing >= unitHeal || hpPercent < 40)) {
             const actualHeal = Math.min(unitHeal, missing);
 
-            // Safety break if somehow normalized to non-positive
+            // Safety break
             if (actualHeal <= 0 && hpPercent >= 40) return { used: false, amount: 0 };
 
-            currentHp = currentHp + actualHeal;
+            currentHp += actualHeal;
 
+            // Food Saver Proficiency
+            const foodSaver = stats.foodSaver || 0;
+            let savedCount = 0;
             const savedFood = foodSaver > 0 && Math.random() * 100 < foodSaver;
+
             if (!savedFood) {
                 char.state.equipment.food.amount--;
-                food.amount--;
             } else {
                 savedCount++;
             }
 
-            eatenCount = 1;
-            totalHealed = actualHeal;
+            // Persistence
+            char.state.health = currentHp;
             char.state.lastFoodAt = now;
 
-            // Update state
-            char.state.health = currentHp;
             if (inCombat) {
-                char.state.combat.playerHealth = currentHp;
+                const combat = char.state.combat;
+                combat.playerHealth = currentHp;
+                combat.foodConsumed = (combat.foodConsumed || 0) + 1;
+                combat.savedFoodCount = (combat.savedFoodCount || 0) + savedCount;
+                char._stateChanged = true;
             }
+
+            // Auto-remove food if empty
+            if (char.state.equipment.food.amount <= 0) {
+                delete char.state.equipment.food;
+            }
+
+            return {
+                used: true,
+                amount: actualHeal,
+                eaten: 1,
+                savedCount
+            };
         }
 
-        if (char.state.equipment.food.amount <= 0) {
-            delete char.state.equipment.food;
-        }
-
-        return { used: eatenCount > 0, amount: totalHealed, eaten: eatenCount, savedCount };
+        return { used: false, amount: 0 };
     }
+
 
     async getLeaderboard(type = 'COMBAT', requesterId = null, mode = 'NORMAL') {
         const cacheKey = `${type}_${mode}`;
