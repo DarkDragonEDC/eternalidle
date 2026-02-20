@@ -744,13 +744,24 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                                         style={{ transition: 'stroke-dashoffset 0.2s linear, stroke 0.3s' }}
                                                     />
                                                 </svg>
-                                                {/* Center icon */}
+                                                {/* Center icon - actual food image */}
                                                 <div style={{
                                                     position: 'absolute',
                                                     top: 0, left: 0, width: '100%', height: '100%',
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center'
                                                 }}>
-                                                    <Apple size={isMobile ? 14 : 18} color={isReady ? '#4caf50' : '#ff6b6b'} style={{ transition: 'color 0.3s' }} />
+                                                    <img
+                                                        src={food.icon || `/items/${food.id}.webp`}
+                                                        alt="Food"
+                                                        style={{
+                                                            width: isMobile ? 18 : 24,
+                                                            height: isMobile ? 18 : 24,
+                                                            objectFit: 'contain',
+                                                            opacity: isReady ? 1 : 0.5,
+                                                            transition: 'opacity 0.3s',
+                                                            filter: isReady ? 'none' : 'grayscale(50%)'
+                                                        }}
+                                                    />
                                                 </div>
                                             </div>
                                             {/* Tier + Quantity label */}
