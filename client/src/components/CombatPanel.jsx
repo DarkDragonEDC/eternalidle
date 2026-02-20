@@ -46,6 +46,8 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
     const [currentTime, setCurrentTime] = useState(Date.now());
     const [isPlayerHit, setIsPlayerHit] = useState(false);
     const [isMobHit, setIsMobHit] = useState(false);
+    const prevFoodAmtRef = useRef(null);
+    const [lastFoodEatClient, setLastFoodEatClient] = useState(0);
     // Removed floatingTexts state and logic as requested
 
 
@@ -701,10 +703,17 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                     const food = gameState.state.equipment.food;
                                     const amt = typeof food.amount === 'object' ? (food.amount.amount || 0) : (Number(food.amount) || 0);
                                     const tier = food.tier || (food.id ? parseInt(food.id.match(/T(\d+)/)?.[1] || '0') : 0);
-                                    const lastFoodAt = gameState.state.lastFoodAt || 0;
+                                    // Client-side cooldown tracking: detect when food amount changes
+                                    const currentAmt = amt;
+                                    if (prevFoodAmtRef.current !== null && currentAmt < prevFoodAmtRef.current) {
+                                        // Food was just consumed - record client timestamp
+                                        setLastFoodEatClient(Date.now());
+                                    }
+                                    prevFoodAmtRef.current = currentAmt;
+
                                     const COOLDOWN_MS = 5000;
-                                    const elapsed = currentTime - lastFoodAt;
-                                    const progress = Math.min(1, elapsed / COOLDOWN_MS); // 0 = just ate, 1 = ready
+                                    const elapsed = currentTime - lastFoodEatClient;
+                                    const progress = lastFoodEatClient === 0 ? 1 : Math.min(1, elapsed / COOLDOWN_MS);
                                     const isReady = progress >= 1;
 
                                     // SVG circular progress
