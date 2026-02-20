@@ -741,4 +741,229 @@ export class InventoryManager {
             xpBonus // Return detailed XP bonuses
         };
     }
+
+    async unequipAllRunes(userId, characterId, type) {
+        const char = await this.gameManager.getCharacter(userId, characterId);
+        if (!char) throw new Error("Character not found");
+
+        const state = char.state;
+        if (!state.equipment) return { success: true };
+
+        const typeMap = {
+            'GATHERING': ['WOOD', 'ORE', 'HIDE', 'FIBER', 'HERB', 'FISH'],
+            'REFINING': ['METAL', 'PLANK', 'LEATHER', 'CLOTH', 'EXTRACT'],
+            'CRAFTING': ['WARRIOR', 'HUNTER', 'MAGE', 'TOOLS', 'COOKING', 'ALCHEMY'],
+            'COMBAT': ['ATTACK']
+        };
+
+        const targetActs = typeMap[type];
+        if (!targetActs) throw new Error("Invalid Rune Type");
+
+        const slotsToUnequip = [];
+
+        Object.keys(state.equipment).forEach(slot => {
+            if (slot.startsWith('rune_')) {
+                // slot: rune_{ACT}_{EFF}
+                const parts = slot.split('_');
+                const act = parts[1]; // WOOD, ORE, ATTACK, etc.
+                if (targetActs.includes(act)) {
+                    slotsToUnequip.push(slot);
+                }
+            }
+        });
+
+        // Use standard unequipItem logic to ensure inventory space checks and state saving
+        // We do this sequentially to avoid race conditions on inventory state
+        for (const slot of slotsToUnequip) {
+            try {
+                // We could optimize by batching, but reusing unequipItem is safer
+                // However, unequipItem saves state every time. 
+                // Optimization: We manually move items here and save ONCE.
+                if (state.equipment[slot]) {
+                    const item = state.equipment[slot];
+                    const returnId = item.id;
+                    const amount = Number(item.amount) || 1;
+
+                    // We can reuse addItemToInventory, checks space there
+                    const added = this.addItemToInventory(char, returnId, amount);
+                    if (added) {
+                        delete state.equipment[slot];
+                    } else {
+                        console.warn(`[RUNE-UNEQUIP] Inventory full for ${returnId}`);
+                        // If full, we stop unequipping to prevent loss, simply break
+                        break;
+                    }
+                }
+            } catch (err) {
+                console.error(`[RUNE-UNEQUIP] Error unequipping ${slot}:`, err);
+            }
+        }
+
+        await this.gameManager.saveState(char.id, state);
+        return { success: true };
+    }
+
+    async autoEquipRunes(userId, characterId, type) {
+        const char = await this.gameManager.getCharacter(userId, characterId);
+        if (!char) throw new Error("Character not found");
+
+        // 1. Unequip current runes of this type to free up best runes if they are currently equipped
+        await this.unequipAllRunes(userId, characterId, type);
+
+        // Reload char state after unequip (though objects are ref passed, explicit save was called)
+        // char.state is modified in place by unequipAllRunes (mostly), but let's trust the reference.
+
+        const state = char.state;
+        const inv = state.inventory || {};
+
+        const typeMap = {
+            'GATHERING': ['WOOD', 'ORE', 'HIDE', 'FIBER', 'HERB', 'FISH'],
+            'REFINING': ['METAL', 'PLANK', 'LEATHER', 'CLOTH', 'EXTRACT'],
+            'CRAFTING': ['WARRIOR', 'HUNTER', 'MAGE', 'TOOLS', 'COOKING', 'ALCHEMY'],
+            'COMBAT': ['ATTACK']
+        };
+
+        const targetActs = typeMap[type];
+        if (!targetActs) throw new Error("Invalid Rune Type");
+
+        // 2. Find all relevant runes in inventory
+        // We need to group them by their target slot capability.
+        // ID format: T{tier}_RUNE_{ACT}_{EFF}_{stars}STAR
+
+        const availableRunes = [];
+        Object.entries(inv).forEach(([key, entry]) => {
+            const baseId = key.split('::')[0];
+            const item = this.resolveItem(baseId);
+
+            if (item && item.type === 'RUNE') {
+                const match = baseId.match(/^T(\d+)_RUNE_(.+)_(\d+)STAR$/);
+                if (match) {
+                    const tier = parseInt(match[1]);
+                    const rest = match[2]; // ACT_EFF, e.g. WOOD_XP or ATTACK_ATTACK
+                    const stars = parseInt(match[3]);
+
+                    // complex parsing for ACT and EFF
+                    // ACT is variable length (WOOD vs ATTACK), EFF is suffix
+                    // Standard types: WOOD_XP, WOOD_COPY, WOOD_SPEED
+                    // Combat: ATTACK_ATTACK, ATTACK_ATTACK_SPEED, ATTACK_SAVE_FOOD, ATTACK_BURST
+
+                    // Let's try to match known Acts
+                    let act = null;
+                    let eff = null;
+
+                    for (const knownAct of targetActs) {
+                        if (rest.startsWith(knownAct + '_')) {
+                            act = knownAct;
+                            eff = rest.substring(knownAct.length + 1);
+                            break;
+                        }
+                    }
+
+                    if (act && eff) {
+                        const qty = typeof entry === 'object' ? (entry.amount || 0) : (Number(entry) || 0);
+                        if (qty > 0) {
+                            availableRunes.push({
+                                id: baseId,
+                                act,
+                                eff,
+                                tier,
+                                stars,
+                                qty,
+                                fullKey: key
+                            });
+                        }
+                    }
+                }
+            }
+        });
+
+        // Sort by power: Tier Desc, Stars Desc
+        availableRunes.sort((a, b) => {
+            if (b.tier !== a.tier) return b.tier - a.tier;
+            return b.stars - a.stars;
+        });
+
+        // 3. Equip logic
+        if (type === 'COMBAT') {
+            // Combat Limit: 3 Max
+            // Priority: ATTACK > ATTACK_SPEED > BURST > SAVE_FOOD
+            const priority = ['ATTACK', 'ATTACK_SPEED', 'BURST', 'SAVE_FOOD'];
+            let equippedCount = 0;
+            const MAX_COMBAT = 3;
+
+            for (const eff of priority) {
+                if (equippedCount >= MAX_COMBAT) break;
+
+                // Find best rune for this effect
+                const bestRune = availableRunes.find(r => r.act === 'ATTACK' && r.eff === eff && r.qty > 0);
+
+                if (bestRune) {
+                    const slotName = `rune_ATTACK_${eff}`;
+                    // Equip it
+                    // Manual equip to avoid "item not found" due to async race or multiple calls
+
+                    // Remove 1 from inventory
+                    const invEntry = inv[bestRune.fullKey];
+                    if (typeof invEntry === 'object') {
+                        invEntry.amount--;
+                        if (invEntry.amount <= 0) delete inv[bestRune.fullKey];
+                    } else {
+                        inv[bestRune.fullKey]--;
+                        if (inv[bestRune.fullKey] <= 0) delete inv[bestRune.fullKey];
+                    }
+                    bestRune.qty--;
+
+                    // Add to equipment
+                    const itemDef = this.resolveItem(bestRune.id);
+                    state.equipment[slotName] = { ...itemDef };
+
+                    equippedCount++;
+                }
+            }
+        } else {
+            // Standard types (Gathering, etc.) - One slot per Act+Eff combo
+            // Target slots: rune_{ACT}_{EFF}
+            // For each Act in this type, we have specific Effects
+            // Gathering: XP, COPY, SPEED (Auto-Refine)
+            // Refining: XP, COPY, EFF (Efficiency)
+            // Crafting: XP, COPY, EFF
+
+            // We iterate all available runes and fill slots if empty
+            // Since they are sorted by best, the first one usage logic works naturally 
+            // BUT we must ensure we don't try to equip same rune to multiple slots if we only have 1 qty?
+            // Actually, we iterate defined slots and find best rune for that slot.
+
+            const effects = type === 'GATHERING' ? ['XP', 'COPY', 'SPEED']
+                : ['XP', 'COPY', 'EFF'];
+
+            targetActs.forEach(act => {
+                effects.forEach(eff => {
+                    const slotName = `rune_${act}_${eff}`;
+                    // Find best rune for this slot
+                    const bestRune = availableRunes.find(r => r.act === act && r.eff === eff && r.qty > 0);
+
+                    if (bestRune) {
+                        // Remove 1 from inventory
+                        const invEntry = inv[bestRune.fullKey];
+                        if (typeof invEntry === 'object') {
+                            invEntry.amount--;
+                            if (invEntry.amount <= 0) delete inv[bestRune.fullKey];
+                        } else {
+                            inv[bestRune.fullKey]--;
+                            if (inv[bestRune.fullKey] <= 0) delete inv[bestRune.fullKey];
+                        }
+                        bestRune.qty--;
+
+                        // Add to equipment
+                        const itemDef = this.resolveItem(bestRune.id);
+                        state.equipment[slotName] = { ...itemDef };
+                    }
+                });
+            });
+        }
+
+        await this.gameManager.saveState(char.id, state);
+        return { success: true };
+
+    }
 }

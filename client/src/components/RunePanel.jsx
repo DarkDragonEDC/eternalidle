@@ -5,7 +5,7 @@ import { Package, Info, Sparkles, ArrowRight, Hammer, Coins, Star, Search, Filte
 import { motion } from 'framer-motion';
 import ItemActionModal from './ItemActionModal';
 
-const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, activeCategory }) => {
+const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, onOpenShop, activeCategory }) => {
     const [activeTab, setActiveTab] = useState('shards');
     const [selectedShard, setSelectedShard] = useState(null);
     const [isShardSelectionOpen, setIsShardSelectionOpen] = useState(false);
@@ -339,7 +339,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, ac
 
                 const pairs = Math.floor(qty / 2);
                 if (pairs > 0) {
-                    const costPerPair = 2500 * tier;
+                    const costPerPair = 2 * tier;
                     totalSilverCost += costPerPair * pairs;
                     totalUpgrades += pairs;
 
@@ -1010,7 +1010,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, ac
                                 width: '100%'
                             }}
                         >
-                            {isCrafting ? (activeTab === 'shards' ? 'Forging...' : 'Merging...') : (activeTab === 'shards' ? `Forge (100 Silver)` : `Merge (2 × T${selectedShard?.tier} Silver)`)}
+                            {isCrafting ? (activeTab === 'shards' ? 'Forging...' : 'Merging...') : (activeTab === 'shards' ? 'Forge' : 'Merge')}
                         </button>
 
                         {activeTab === 'runes' && (
@@ -1059,16 +1059,14 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, ac
                                 }}
                             >
                                 {(gameState?.state?.membership?.active && new Date(gameState.state.membership.expiresAt) > new Date()) ? <Sparkles size={18} /> : <Lock size={16} />}
-                                Auto Merge All Runes (2.5k × Tier per merge)
+                                Auto Merge All Runes
                             </button>
                         )}
                     </div>
                 )
             }
 
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555', fontSize: '0.9rem', fontStyle: 'italic', border: '1px dashed var(--border)', borderRadius: '12px' }}>
-                More {activeTab === 'shards' ? 'forging' : 'merging'} activities coming soon...
-            </div>
+
 
             {/* SHARD SELECTION MODAL */}
             {
@@ -1368,7 +1366,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, ac
                                 <div>
                                     <div style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>{batchModal.item.name}</div>
                                     <div style={{ fontSize: '0.8rem', color: 'var(--accent)' }}>
-                                        {batchModal.type === 'FORGE' ? 'Forge Cost' : 'Merge Cost'}: {formatNumber(batchModal.type === 'FORGE' ? 1000 : 2500 * batchModal.item.tier)} Silver
+                                        {batchModal.type === 'FORGE' ? 'Forge Cost' : 'Merge Cost'}: {formatNumber(batchModal.type === 'FORGE' ? 1000 : 2 * batchModal.item.tier)} Silver
                                     </div>
                                 </div>
                             </div>
@@ -1683,14 +1681,25 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, ac
                             </div>
 
                             <button
-                                onClick={() => setShowPremiumModal(false)}
+                                onClick={() => {
+                                    if (onOpenShop) onOpenShop();
+                                    setShowPremiumModal(false);
+                                }}
                                 style={{
-                                    padding: '12px', background: 'var(--accent)', border: 'none',
-                                    color: 'var(--bg-dark)', borderRadius: '10px', fontWeight: 'bold',
-                                    cursor: 'pointer', fontSize: '1rem'
+                                    padding: '12px',
+                                    background: 'linear-gradient(135deg, var(--accent) 0%, #2196f3 100%)',
+                                    border: 'none',
+                                    color: '#000',
+                                    borderRadius: '10px',
+                                    fontWeight: '900',
+                                    cursor: 'pointer',
+                                    fontSize: '0.9rem',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '1px',
+                                    boxShadow: '0 4px 15px rgba(33, 150, 243, 0.3)'
                                 }}
                             >
-                                GOT IT
+                                GO TO ORB SHOP
                             </button>
                         </div>
                     </div>

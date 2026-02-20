@@ -2582,7 +2582,7 @@ export class GameManager {
 
                 const pairs = Math.floor(qty / 2);
                 if (pairs > 0) {
-                    const costPerPair = 2500 * tier;
+                    const costPerPair = 2 * tier;
                     totalSilverCost += costPerPair * pairs;
                     totalUpgrades += pairs;
 

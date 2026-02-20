@@ -1048,7 +1048,7 @@ function App() {
           isMobile={isMobile}
           theme={theme}
           toggleTheme={toggleTheme}
-
+          onOpenShop={() => setShowOrbShop(true)}
           onOpenRenameModal={() => {
             setIsRenameModalOpen(true);
           }} />;
@@ -1583,7 +1583,15 @@ function App() {
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <SkillProgressHeader tab="merging" category={activeCategory} />
             <div className="scroll-container" style={{ flex: 1, overflowY: 'auto' }}>
-              <RunePanel gameState={displayedGameState} onShowInfo={setInfoItem} isMobile={isMobile} socket={socket} onListOnMarket={handleListOnMarket} activeCategory={activeCategory} />
+              <RunePanel
+                gameState={displayedGameState}
+                onShowInfo={setInfoItem}
+                isMobile={isMobile}
+                socket={socket}
+                onListOnMarket={handleListOnMarket}
+                onOpenShop={() => setShowOrbShop(true)}
+                activeCategory={activeCategory}
+              />
             </div>
           </div>
         );

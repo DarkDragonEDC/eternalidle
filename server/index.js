@@ -857,6 +857,34 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('unequip_all_runes', async ({ type }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.inventoryManager.unequipAllRunes(socket.user.id, socket.data.characterId, type);
+                if (result.success) {
+                    socket.emit('action_success', { message: `Unequipped all ${type} runes.` });
+                    socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+                }
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('auto_equip_runes', async ({ type }) => {
+        try {
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.inventoryManager.autoEquipRunes(socket.user.id, socket.data.characterId, type);
+                if (result.success) {
+                    socket.emit('action_success', { message: `Auto-equipped best ${type} runes.` });
+                    socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+                }
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
     socket.on('claim_market_item', async ({ claimId }) => {
         try {
             if (socket.user.is_anonymous) throw new Error("Market is locked for Guest accounts.");

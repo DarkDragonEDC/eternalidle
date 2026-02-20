@@ -5,7 +5,7 @@ import {
     Heart, Shield, Sword, Zap,
     User, Target, Star, Layers,
     Axe, Pickaxe, Scissors, Anchor, Apple, Info, ShoppingBag, Edit, Droplets,
-    Hammer, Zap as EfficiencyIcon
+    Hammer, Zap as EfficiencyIcon, Trash2, AlertTriangle
 } from 'lucide-react';
 import { calculateNextLevelXP } from '../utils/xpTable';
 import { resolveItem, getTierColor, calculateRuneBonus, getRequiredProficiencyGroup } from '@shared/items';
@@ -17,7 +17,7 @@ import { supabase } from '../supabase';
 import ProficiencyDetailsModal from './ProficiencyDetailsModal';
 
 
-const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpenRenameModal, theme, toggleTheme }) => {
+const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpenRenameModal, onOpenShop, theme, toggleTheme }) => {
     const isPremium = gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > (gameState?._clientTime || Date.now());
     const [selectedSlot, setSelectedSlot] = useState(null);
     const [infoModal, setInfoModal] = useState(null);
@@ -37,6 +37,9 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
     const [isLinking, setIsLinking] = useState(false);
     const [linkError, setLinkError] = useState('');
     const [linkSuccess, setLinkSuccess] = useState('');
+
+    // Confirmation Modal State
+    const [confirmModal, setConfirmModal] = useState(null); // { message, onConfirm, onCancel }
 
     // Sync title from gameState when it updates
     React.useEffect(() => {
@@ -1483,6 +1486,133 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                                 ))}
                             </div>
 
+                            {/* Rune Controls */}
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: isMobile ? 'center' : 'flex-end',
+                                gap: isMobile ? '12px' : '10px',
+                                marginBottom: isMobile ? '20px' : '15px'
+                            }}>
+                                <button
+                                    onClick={() => {
+                                        if (!isPremium) {
+                                            setInfoModal({
+                                                title: 'Premium Feature',
+                                                isPremium: true,
+                                                desc: 'Auto-equipping best runes is a membership-exclusive feature.\n\nActive members enjoy several quality-of-life perks including rune management, increased health, reduced trade taxes and more!'
+                                            });
+                                            return;
+                                        }
+                                        setConfirmModal({
+                                            message: `Auto-equip best ${activeRuneTab} runes? This will replace current setup.`,
+                                            onConfirm: () => {
+                                                socket.emit('auto_equip_runes', { type: activeRuneTab });
+                                                setConfirmModal(null);
+                                            },
+                                            onCancel: () => setConfirmModal(null)
+                                        });
+                                    }}
+                                    style={{
+                                        background: !isPremium
+                                            ? 'rgba(68, 71, 90, 0.2)'
+                                            : isMobile ? 'rgba(33, 150, 243, 0.15)' : 'linear-gradient(135deg, var(--accent) 0%, #2196f3 100%)',
+                                        color: !isPremium ? '#6272a4' : isMobile ? '#2196f3' : '#000',
+                                        border: !isPremium
+                                            ? '1px solid rgba(98, 114, 164, 0.2)'
+                                            : isMobile ? '1px solid rgba(33, 150, 243, 0.4)' : 'none',
+                                        borderRadius: isMobile ? '20px' : '8px',
+                                        padding: isMobile ? '6px 14px' : '10px 16px',
+                                        fontSize: isMobile ? '0.6rem' : '0.8rem',
+                                        fontWeight: '800',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: isMobile ? '6px' : '8px',
+                                        boxShadow: isPremium && !isMobile ? '0 0 15px rgba(33, 150, 243, 0.4), inset 0 1px 0 rgba(255,255,255,0.3)' : 'none',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.8px',
+                                        transition: 'all 0.2s ease',
+                                        position: 'relative',
+                                        overflow: 'hidden',
+                                        filter: isPremium ? 'none' : 'grayscale(0.5)'
+                                    }}
+                                    onMouseOver={(e) => {
+                                        if (isMobile || !isPremium) return;
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                        e.currentTarget.style.boxShadow = '0 5px 20px rgba(33, 150, 243, 0.6), inset 0 1px 0 rgba(255,255,255,0.4)';
+                                    }}
+                                    onMouseOut={(e) => {
+                                        if (isMobile || !isPremium) return;
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = '0 0 15px rgba(33, 150, 243, 0.4), inset 0 1px 0 rgba(255,255,255,0.3)';
+                                    }}
+                                >
+                                    <Zap size={isMobile ? 14 : 16} fill={!isPremium ? 'none' : (isMobile ? 'none' : '#000')} />
+                                    {isMobile ? 'AUTO' : 'Auto Equip Best'}
+                                    {!isPremium && <Star size={12} style={{ marginLeft: '4px', fill: 'currentColor' }} />}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        if (!isPremium) {
+                                            setInfoModal({
+                                                title: 'Premium Feature',
+                                                isPremium: true,
+                                                desc: 'Unequipping all runes at once is a membership-exclusive feature.\n\nActive members enjoy various convenience features to speed up their progress!'
+                                            });
+                                            return;
+                                        }
+                                        setConfirmModal({
+                                            message: `Unequip all ${activeRuneTab} runes?`,
+                                            onConfirm: () => {
+                                                socket.emit('unequip_all_runes', { type: activeRuneTab });
+                                                setConfirmModal(null);
+                                            },
+                                            onCancel: () => setConfirmModal(null)
+                                        });
+                                    }}
+                                    style={{
+                                        background: !isPremium
+                                            ? 'rgba(68, 71, 90, 0.1)'
+                                            : isMobile ? 'rgba(255, 68, 68, 0.1)' : 'linear-gradient(135deg, rgba(255, 68, 68, 0.1) 0%, rgba(100, 0, 0, 0.3) 100%)',
+                                        color: !isPremium ? '#6272a4' : '#ff4444',
+                                        border: !isPremium
+                                            ? '1px solid rgba(98, 114, 164, 0.2)'
+                                            : '1px solid rgba(255, 68, 68, 0.4)',
+                                        borderRadius: isMobile ? '20px' : '8px',
+                                        padding: isMobile ? '6px 14px' : '10px 16px',
+                                        fontSize: isMobile ? '0.6rem' : '0.8rem',
+                                        fontWeight: '800',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: isMobile ? '6px' : '8px',
+                                        boxShadow: isPremium && !isMobile ? '0 0 10px rgba(255, 68, 68, 0.1)' : 'none',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.8px',
+                                        transition: 'all 0.2s ease',
+                                        filter: isPremium ? 'none' : 'grayscale(0.5)'
+                                    }}
+                                    onMouseOver={(e) => {
+                                        if (isMobile || !isPremium) return;
+                                        e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 68, 68, 0.2) 0%, rgba(100, 0, 0, 0.4) 100%)';
+                                        e.currentTarget.style.borderColor = '#ff4444';
+                                        e.currentTarget.style.boxShadow = '0 0 15px rgba(255, 68, 68, 0.3)';
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                    }}
+                                    onMouseOut={(e) => {
+                                        if (isMobile || !isPremium) return;
+                                        e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 68, 68, 0.1) 0%, rgba(100, 0, 0, 0.3) 100%)';
+                                        e.currentTarget.style.borderColor = 'rgba(255, 68, 68, 0.4)';
+                                        e.currentTarget.style.boxShadow = '0 0 10px rgba(255, 68, 68, 0.1)';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                    }}
+                                >
+                                    <Trash2 size={isMobile ? 14 : 16} />
+                                    {isMobile ? 'UNEQUIP' : 'Unequip All'}
+                                    {!isPremium && <Star size={12} style={{ marginLeft: '4px', fill: 'currentColor' }} />}
+                                </button>
+                            </div>
+
                             {activeRuneTab === 'GATHERING' ? (
                                 <>
                                     <h3 style={{
@@ -1964,24 +2094,154 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                             <h3 style={{ color: 'var(--accent)', marginTop: 0 }}>{infoModal.title}</h3>
                             <p style={{ color: 'var(--text-main)', fontSize: '0.9rem', whiteSpace: 'pre-line' }}>{infoModal.desc}</p>
                             <button
-                                onClick={() => setInfoModal(null)}
+                                onClick={() => {
+                                    if (infoModal.isPremium && onOpenShop) {
+                                        onOpenShop();
+                                    }
+                                    setInfoModal(null);
+                                }}
                                 style={{
                                     marginTop: '10px',
                                     width: '100%',
-                                    padding: '8px',
-                                    background: 'var(--accent)',
+                                    padding: '10px',
+                                    background: 'linear-gradient(135deg, var(--accent) 0%, #2196f3 100%)',
                                     border: 'none',
-                                    borderRadius: '6px',
-                                    fontWeight: 'bold',
-                                    cursor: 'pointer'
+                                    borderRadius: '8px',
+                                    color: '#000',
+                                    fontWeight: '900',
+                                    fontSize: '0.85rem',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '1px',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 4px 15px rgba(33, 150, 243, 0.3)'
                                 }}
                             >
-                                Got it
+                                {infoModal.isPremium ? 'Go to Orb Shop' : 'Got it'}
                             </button>
                         </div>
                     </div>
                 )
             }
+            {/* Confirmation Modal */}
+            {confirmModal && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    background: 'rgba(0,0,0,0.8)',
+                    backdropFilter: 'blur(5px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 10000
+                }} onClick={() => setConfirmModal(null)}>
+                    <div style={{
+                        background: 'linear-gradient(145deg, rgba(20, 25, 40, 0.95) 0%, rgba(10, 12, 18, 0.98) 100%)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '16px',
+                        padding: '25px',
+                        width: '90%',
+                        maxWidth: '450px',
+                        boxShadow: '0 10px 40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.1)',
+                        position: 'relative',
+                        overflow: 'hidden'
+                    }} onClick={(e) => e.stopPropagation()}>
+                        {/* Decorative glow */}
+                        <div style={{
+                            position: 'absolute',
+                            top: '-50px',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: '200px',
+                            height: '100px',
+                            background: 'radial-gradient(ellipse at center, rgba(33, 150, 243, 0.15) 0%, transparent 70%)',
+                            pointerEvents: 'none'
+                        }} />
+
+                        <h3 style={{
+                            color: '#fff',
+                            margin: '0 0 15px 0',
+                            fontSize: '1.2rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px',
+                            borderBottom: '1px solid rgba(255,255,255,0.05)',
+                            paddingBottom: '15px'
+                        }}>
+                            <AlertTriangle size={20} color="var(--accent)" />
+                            Confirmation
+                        </h3>
+                        <p style={{
+                            color: '#e2e8f0',
+                            marginBottom: '30px',
+                            lineHeight: '1.6',
+                            fontSize: '0.95rem'
+                        }}>
+                            {confirmModal.message}
+                        </p>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                            <button
+                                onClick={confirmModal.onCancel}
+                                style={{
+                                    background: 'transparent',
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    color: '#ccc',
+                                    padding: '10px 20px',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.85rem',
+                                    fontWeight: '600',
+                                    transition: 'all 0.2s',
+                                    letterSpacing: '0.5px'
+                                }}
+                                onMouseOver={(e) => {
+                                    e.currentTarget.style.borderColor = '#fff';
+                                    e.currentTarget.style.color = '#fff';
+                                    e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                                }}
+                                onMouseOut={(e) => {
+                                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                                    e.currentTarget.style.color = '#ccc';
+                                    e.currentTarget.style.background = 'transparent';
+                                }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmModal.onConfirm}
+                                style={{
+                                    background: 'linear-gradient(135deg, var(--accent) 0%, #2196f3 100%)',
+                                    border: 'none',
+                                    color: '#000',
+                                    padding: '10px 24px',
+                                    borderRadius: '8px',
+                                    fontWeight: '800',
+                                    cursor: 'pointer',
+                                    fontSize: '0.85rem',
+                                    boxShadow: '0 0 15px rgba(33, 150, 243, 0.4)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseOver={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 5px 20px rgba(33, 150, 243, 0.6)';
+                                }}
+                                onMouseOut={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '0 0 15px rgba(33, 150, 243, 0.4)';
+                                }}
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 };

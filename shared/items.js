@@ -470,8 +470,8 @@ for (const [key, data] of Object.entries(POTION_TYPES)) {
         for (const t of TIERS) {
             if (ITEMS.CONSUMABLE[key][t]) {
                 // Use generic potion icon or specific if available. 
-                // T1_POTION_XP.png, T1_POTION_GOLD.png etc would be ideal.
-                // For now, let's try to map to T{t}_POTION.png as a generic base, or specific if user provided.
+                // T1_POTION_XP.webp, T1_POTION_GOLD.webp etc would be ideal.
+                // For now, let's try to map to T{t}_POTION.webp as a generic base, or specific if user provided.
                 // Given user said "remove broken icons", we'll leave them blank/default OR use a known working one?
                 // User said "remove broken image, leave like others without icons".
                 // So we DO NOT add overrides here. Logic stays clean.
