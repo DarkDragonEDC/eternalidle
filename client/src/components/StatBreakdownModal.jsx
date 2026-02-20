@@ -46,7 +46,7 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                 return acc;
             }, 0);
 
-            breakdown.push({ label: 'Base', value: 5 });
+
             if (activeProfLabel && activeProfDmg > 0) {
                 breakdown.push({ label: `${activeProfLabel} Prof. Bonus`, value: fmt(activeProfDmg), sub: `(Total from Level)` });
             } else if (!activeProf) {
@@ -55,7 +55,7 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
 
             breakdown.push({ label: 'Gear Damage', value: fmt(gearDamage) });
 
-            const rawTotal = 5 + activeProfDmg + gearDamage;
+            const rawTotal = activeProfDmg + gearDamage;
 
             if (gearDmgBonus > 0 || damageRuneBonus > 0) {
                 breakdown.push({ label: 'Raw Total', value: fmt(rawTotal), isTotal: true });
@@ -68,7 +68,7 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
             const activeProfDefense = profData.def || 0;
             const gearDefense = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.defense || 0), 0);
 
-            breakdown.push({ label: 'Base', value: 0 });
+
             if (activeProfDefense > 0) {
                 const label = activeProf === 'hunter' ? 'Hunter' : activeProf === 'mage' ? 'Mage' : 'Warrior';
                 breakdown.push({ label: `${label} Prof. Bonus`, value: fmt(activeProfDefense), sub: `(Total from Level)` });
@@ -232,7 +232,7 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                 return acc;
             }, 0);
 
-            breakdown.push({ label: 'Base Crit Rate', value: '0%' });
+
             if (gearCritChance > 0) breakdown.push({ label: 'Gear Crit Chance', value: `+${gearCritChance.toFixed(2)}%` });
             if (burstRuneBonus > 0) breakdown.push({ label: 'Burst Rune Bonus', value: `+${burstRuneBonus.toFixed(2)}%` });
             value = `${(gearCritChance + burstRuneBonus).toFixed(2)}%`;

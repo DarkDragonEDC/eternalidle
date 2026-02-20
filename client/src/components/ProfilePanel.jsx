@@ -272,7 +272,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         return {
             hp: health !== undefined ? health : (100 + activeHP + gearHP),
             maxHp: 100 + activeHP + gearHP,
-            damage: Math.floor((5 + activeProfDmg + gearDamage) * (1 + (gearDmgBonus || 0)) * (1 + (damageRuneBonus / 100))),
+            damage: Math.floor((activeProfDmg + gearDamage) * (1 + (gearDmgBonus || 0)) * (1 + (damageRuneBonus / 100))),
             defense: gearDefense + activeProfDefense,
             attackSpeed: finalAttackSpeed,
             warriorProf: calculatedStats.warriorProf,

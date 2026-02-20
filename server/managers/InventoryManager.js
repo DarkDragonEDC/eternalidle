@@ -726,7 +726,7 @@ export class InventoryManager {
             warriorProf, hunterProf, mageProf,
             activeProf, // 'warrior' | 'hunter' | 'mage' | null
             maxHP: parseFloat((100 + activeHP + gearHP).toFixed(1)),
-            damage: parseFloat(((5 + activeProfDmg + gearDamage) * (1 + gearDmgBonus) * (1 + (combatRunes.ATTACK / 100))).toFixed(1)),
+            damage: parseFloat(((activeProfDmg + gearDamage) * (1 + gearDmgBonus) * (1 + (combatRunes.ATTACK / 100))).toFixed(1)),
             defense: parseFloat((gearDefense + activeProfDefense).toFixed(1)),
             attackSpeed: finalAttackSpeed,
             dmgBonus: gearDmgBonus,
