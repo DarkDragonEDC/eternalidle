@@ -689,37 +689,35 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                         zIndex: 2
                                     }}>
                                     <User size={isMobile ? 25 : 50} color="#000" />
-                                    {/* Food Badge */}
-                                    {gameState?.state?.equipment?.food?.amount > 0 && (
-                                        <div style={{
-                                            position: 'absolute',
-                                            top: -5,
-                                            right: -5,
-                                            background: '#ff4d4d',
-                                            color: '#fff',
-                                            fontSize: '0.6rem',
-                                            fontWeight: '900',
-                                            padding: '2px 6px',
-                                            borderRadius: '10px',
-                                            border: '1px solid #fff',
-                                            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                                            zIndex: 2,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '2px'
-                                        }}>
-                                            <Apple size={10} /> {(() => {
-                                                const amt = gameState.state.equipment.food.amount;
-                                                return typeof amt === 'object' ? (amt.amount || 0) : (Number(amt) || 0);
-                                            })()}
-                                        </div>
-                                    )}
+
                                 </motion.div>
                                 <div style={{ fontSize: isMobile ? '0.6rem' : '0.9rem', fontWeight: '900', color: 'var(--text-main)' }}>{gameState?.name?.toUpperCase()}</div>
                                 <div style={{ fontSize: isMobile ? '0.9rem' : '1.3rem', fontWeight: '900', color: '#4caf50', marginTop: '2px' }}>{formatNumber(Math.round(combat.playerHealth))} HP</div>
                             </div>
 
-                            <div style={{ fontSize: isMobile ? '1rem' : '1.5rem', fontWeight: '900', color: 'var(--text-dim)', opacity: 0.2 }}>VS</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                {/* Food Badge - Centered above VS */}
+                                {gameState?.state?.equipment?.food?.amount > 0 && (
+                                    <div style={{
+                                        background: 'rgba(255, 77, 77, 0.15)',
+                                        color: '#ff6b6b',
+                                        fontSize: isMobile ? '0.6rem' : '0.7rem',
+                                        fontWeight: '900',
+                                        padding: '3px 8px',
+                                        borderRadius: '12px',
+                                        border: '1px solid rgba(255, 77, 77, 0.3)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px'
+                                    }}>
+                                        <Apple size={12} /> {(() => {
+                                            const amt = gameState.state.equipment.food.amount;
+                                            return typeof amt === 'object' ? (amt.amount || 0) : (Number(amt) || 0);
+                                        })()}
+                                    </div>
+                                )}
+                                <div style={{ fontSize: isMobile ? '1rem' : '1.5rem', fontWeight: '900', color: 'var(--text-dim)', opacity: 0.2 }}>VS</div>
+                            </div>
 
                             {/* Mob Side */}
                             <div style={{ textAlign: 'center', position: 'relative' }}>
