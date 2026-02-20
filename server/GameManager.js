@@ -2134,6 +2134,7 @@ export class GameManager {
 
     async startDungeon(u, c, d, r) { return this.dungeonManager.startDungeon(u, c, d, r); }
     async stopDungeon(u, c) { return this.dungeonManager.stopDungeon(u, c); }
+    async stopDungeonQueue(u, c) { return this.dungeonManager.stopQueue(u, c); }
     async consumeItem(userId, characterId, itemId, quantity = 1) {
         console.log(`[DEBUG-POTION] consumeItem called for ${characterId}, item: ${itemId}, qty:`, quantity);
         const char = await this.getCharacter(userId, characterId);

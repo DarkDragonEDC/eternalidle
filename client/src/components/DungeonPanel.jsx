@@ -14,6 +14,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
     const [repeatCount, setRepeatCount] = useState(1);
     const [history, setHistory] = useState([]);
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+    const [showAbandonModal, setShowAbandonModal] = useState(false);
 
     React.useEffect(() => {
         if (socket) {
@@ -289,6 +290,178 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
     };
 
     const estimatedTime = getEstimatedTime();
+    const inventory = gameState?.state?.inventory || {};
+
+    // Shared Modals
+    const modals = (
+        <>
+            {/* Enter Dungeon Modal */}
+            {showModal && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.7)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    zIndex: 1000
+                }}>
+                    <div className="glass-panel" style={{
+                        padding: '30px',
+                        width: '360px',
+                        display: 'flex', flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '20px',
+                        borderRadius: '24px',
+                        border: '1px solid var(--accent)',
+                        background: 'var(--panel-bg)',
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.4)'
+                    }}>
+                        {(() => {
+                            const dungeon = Object.values(DUNGEONS).find(d => d.tier === pendingTier);
+                            const mapId = dungeon?.reqItem;
+                            const mapEntry = inventory[mapId];
+                            const availableMaps = (mapEntry && typeof mapEntry === 'object') ? (mapEntry.amount || 0) : (Number(mapEntry) || 0);
+
+                            const maxRunsIn12h = calculateMaxRunsIn12Hours(pendingTier);
+                            const effectiveMax = Math.min(availableMaps, maxRunsIn12h);
+
+                            const survival = calculateSurvival(pendingTier, repeatCount);
+                            const food = gameState?.state?.equipment?.food;
+                            const freshFood = food ? resolveItem(food.id) : null;
+                            const hasFood = food && food.amount > 0;
+
+                            return (
+                                <>
+                                    <h3 style={{ margin: 0, color: 'var(--text-main)', textAlign: 'center', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '1px' }}>TOTAL RUNS T{pendingTier}</h3>
+
+                                    <div style={{
+                                        display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'space-between',
+                                        background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '16px',
+                                        border: '1px solid rgba(174, 0, 255, 0.2)', width: '100%'
+                                    }}>
+                                        <button onClick={() => setRepeatCount(1)} style={{ padding: '8px 12px', background: 'rgba(255,255,255,0.05)', color: '#888', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.7rem', fontWeight: 'bold', cursor: 'pointer', flexShrink: 0 }}>MIN</button>
+                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                            <button onClick={() => setRepeatCount(prev => Math.max(1, (parseInt(prev) || 0) - 1))} style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--slot-bg)', color: 'var(--text-main)', borderRadius: '10px', border: '1px solid var(--border)', fontWeight: 'bold', cursor: 'pointer' }}>-</button>
+                                            <input type="number" value={repeatCount} onChange={(e) => { const val = e.target.value; if (val === '') { setRepeatCount(''); } else { const parsed = parseInt(val); if (!isNaN(parsed)) { setRepeatCount(Math.min(effectiveMax, parsed)); } } }} onBlur={() => { if (repeatCount === '' || repeatCount === 0) { setRepeatCount(1); } }} style={{ width: '60px', padding: '5px', background: 'transparent', border: 'none', color: 'var(--text-main)', textAlign: 'center', fontWeight: 'bold', fontSize: '1.4rem', outline: 'none' }} />
+                                            <button onClick={() => setRepeatCount(prev => Math.min(effectiveMax, (parseInt(prev) || 0) + 1))} style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--slot-bg)', color: 'var(--text-main)', borderRadius: '10px', border: '1px solid var(--border)', fontWeight: 'bold', cursor: 'pointer' }}>+</button>
+                                        </div>
+                                        <button onClick={() => setRepeatCount(effectiveMax)} style={{ padding: '8px 12px', background: 'rgba(174, 0, 255, 0.1)', color: '#ae00ff', borderRadius: '8px', border: '1px solid rgba(174, 0, 255, 0.3)', fontSize: '0.7rem', fontWeight: 'bold', cursor: 'pointer', flexShrink: 0 }}>MAX</button>
+                                    </div>
+
+                                    <div style={{ padding: '10px', background: 'var(--accent-soft)', borderRadius: '12px', border: '1px solid var(--accent)', width: '100%', textAlign: 'center' }}>
+                                        <div style={{ fontSize: '0.65rem', color: 'var(--accent)', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px', marginBottom: '4px' }}>Estimated Time</div>
+                                        <div style={{ fontSize: '1.2rem', color: 'var(--text-main)', fontWeight: '900' }}>{formatDuration(calculateEstimatedTime(pendingTier, repeatCount))}</div>
+                                        <div style={{ fontSize: '0.6rem', color: '#888', marginTop: '4px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
+                                            <span>MAPS: {availableMaps}</span>
+                                            <span>|</span>
+                                            <span>MAX 12H: {maxRunsIn12h}</span>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ padding: '12px', background: survival.survives ? 'rgba(76, 175, 80, 0.08)' : 'rgba(255, 68, 68, 0.08)', borderRadius: '12px', border: `1px solid ${survival.survives ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255, 68, 68, 0.3)'}`, width: '100%', textAlign: 'center' }}>
+                                        <div style={{ fontSize: '0.65rem', color: survival.survives ? '#4caf50' : '#ff4444', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}><Heart size={12} />Survival Prediction</div>
+                                        <div style={{ fontSize: '1rem', color: survival.survives ? '#4caf50' : '#ff4444', fontWeight: '900' }}>{survival.survives ? `✓ SURVIVES ALL ${repeatCount} RUNS` : `✗ DIES AT RUN ${survival.runsBeforeDeath}`}</div>
+                                        <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', marginTop: '6px', display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                            <span>HP: {formatNumber(Math.floor(survival.totalEffectiveHp))}</span>
+                                            <span>|</span>
+                                            <span>DMG/RUN: {formatNumber(survival.totalDamagePerRun)}</span>
+                                            {hasFood && (
+                                                <><span>|</span><span style={{ color: '#ff9800' }}>🍖 {food.amount}x ({freshFood?.heal || (freshFood?.healPercent ? `${freshFood.healPercent}%` : 0)} HP)</span></>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
+                                        <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: '12px', background: 'var(--slot-bg)', color: 'var(--text-dim)', borderRadius: '12px', border: '1px solid var(--border)', fontWeight: 'bold', cursor: 'pointer' }}>CANCEL</button>
+                                        <button onClick={confirmEnterDungeon} style={{ flex: 1, padding: '12px', background: 'linear-gradient(to bottom, #ae00ff, #8a00cc)', color: '#fff', borderRadius: '12px', border: 'none', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 15px rgba(174, 0, 255, 0.3)' }}>START</button>
+                                    </div>
+                                </>
+                            );
+                        })()}
+                    </div>
+                </div>
+            )}
+
+            {/* Abandon Confirmation Modal */}
+            {showAbandonModal && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.85)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    zIndex: 2000,
+                    backdropFilter: 'blur(4px)'
+                }}>
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        style={{
+                            padding: '30px',
+                            width: '320px',
+                            display: 'flex', flexDirection: 'column',
+                            gap: '20px',
+                            borderRadius: '24px',
+                            border: '1px solid rgba(255, 68, 68, 0.2)',
+                            background: '#121212',
+                            boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+                            position: 'relative'
+                        }}
+                    >
+                        <div style={{ textAlign: 'center' }}>
+                            <Skull size={32} color="#ff4444" style={{ marginBottom: '15px' }} />
+                            <h3 style={{ margin: 0, color: '#fff', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '1px' }}>ABANDON?</h3>
+                            <p style={{ color: '#aaa', fontSize: '0.8rem', marginTop: '8px', lineHeight: '1.4' }}>
+                                How would you like to proceed with your current run?
+                            </p>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <button
+                                onClick={() => {
+                                    socket.emit('stop_dungeon_queue');
+                                    setShowAbandonModal(false);
+                                }}
+                                style={{
+                                    padding: '12px', borderRadius: '12px', background: 'rgba(174, 0, 255, 0.05)', border: '1px solid rgba(174, 0, 255, 0.3)',
+                                    color: '#ae00ff', fontWeight: '900', cursor: 'pointer', transition: '0.2s', fontSize: '0.9rem'
+                                }}
+                            >
+                                Finish Current Run
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    socket.emit('stop_dungeon');
+                                    setShowAbandonModal(false);
+                                }}
+                                style={{
+                                    padding: '12px', borderRadius: '12px', background: 'rgba(255, 68, 68, 0.05)', border: '1px solid rgba(255, 68, 68, 0.3)',
+                                    color: '#ff4444', fontWeight: '900', cursor: 'pointer', transition: '0.2s', fontSize: '0.9rem'
+                                }}
+                            >
+                                Abandon Now
+                            </button>
+                        </div>
+
+                        <button
+                            onClick={() => setShowAbandonModal(false)}
+                            style={{
+                                background: 'none', border: 'none', color: '#555',
+                                fontWeight: '900', cursor: 'pointer', fontSize: '0.75rem',
+                                letterSpacing: '1px', marginTop: '5px'
+                            }}
+                        >
+                            CANCEL
+                        </button>
+                    </motion.div>
+                </div>
+            )}
+
+            <DungeonHistoryModal
+                isOpen={isHistoryOpen}
+                onClose={() => setIsHistoryOpen(false)}
+                history={history}
+            />
+        </>
+    );
 
     // If inside a dungeon, show status
     if (dungeonState && dungeonState.active) {
@@ -436,6 +609,25 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                     })()}
                 </div>
 
+                {dungeonState.stopping && (
+                    <div style={{
+                        padding: '6px 14px',
+                        background: 'rgba(255, 152, 0, 0.15)',
+                        borderRadius: '12px',
+                        border: '1px solid rgba(255, 152, 0, 0.4)',
+                        color: '#ff9800',
+                        fontSize: '0.8rem',
+                        fontWeight: '900',
+                        zIndex: 1,
+                        marginTop: '8px',
+                        animation: 'pulse 1.5s infinite',
+                        letterSpacing: '0.5px',
+                        boxShadow: '0 0 10px rgba(255, 152, 0, 0.2)'
+                    }}>
+                        STOPPING AFTER THIS RUN
+                    </div>
+                )}
+
                 {/* Real-time Loot Summary (Aggregated) */}
                 <div
                     style={{
@@ -518,7 +710,13 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                 </div>
 
                 <button
-                    onClick={() => socket.emit('stop_dungeon')}
+                    onClick={() => {
+                        if (dungeonState.status === 'COMPLETED') {
+                            socket.emit('stop_dungeon');
+                        } else {
+                            setShowAbandonModal(true);
+                        }
+                    }}
                     style={{
                         padding: '8px 20px',
                         background: dungeonState.status === 'COMPLETED' ? 'rgba(76, 175, 80, 0.05)' : 'rgba(255, 68, 68, 0.05)',
@@ -530,16 +728,17 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                         fontWeight: '900',
                         fontSize: '0.75rem',
                         zIndex: 1,
-                        transition: '0.2s'
+                        transition: '0.2s',
+                        opacity: 1,
+                        pointerEvents: 'auto'
                     }}
                 >
-                    {dungeonState.status === 'COMPLETED' ? 'FINISH' : 'ABANDON'}
+                    {dungeonState.status === 'COMPLETED' ? 'FINISH' : dungeonState.stopping ? 'STOPPING...' : 'ABANDON'}
                 </button>
+                {modals}
             </motion.div>
         );
     }
-
-    const inventory = gameState?.state?.inventory || {};
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '10px', gap: '15px', overflow: 'hidden' }}>
@@ -776,220 +975,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0 }) => 
                 {/* Bottom Spacer for Scroll */}
                 <div style={{ height: '80px', flexShrink: 0 }}></div>
             </div>
-
-            {/* Modal Overlay */}
-            {showModal && (
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0,0,0,0.7)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    zIndex: 1000
-                }}>
-                    <div className="glass-panel" style={{
-                        padding: '30px',
-                        width: '360px',
-                        display: 'flex', flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '20px',
-                        borderRadius: '24px',
-                        border: '1px solid var(--accent)',
-                        background: 'var(--panel-bg)',
-                        boxShadow: '0 20px 40px rgba(0,0,0,0.4)'
-                    }}>
-                        {(() => {
-                            const dungeon = Object.values(DUNGEONS).find(d => d.tier === pendingTier);
-                            const mapId = dungeon?.reqItem;
-                            const mapEntry = inventory[mapId];
-                            const availableMaps = (mapEntry && typeof mapEntry === 'object') ? (mapEntry.amount || 0) : (Number(mapEntry) || 0);
-
-                            // Calculate max runs based on 12h limit
-                            const maxRunsIn12h = calculateMaxRunsIn12Hours(pendingTier);
-                            const effectiveMax = Math.min(availableMaps, maxRunsIn12h);
-
-                            // Survival calculation
-                            const survival = calculateSurvival(pendingTier, repeatCount);
-                            const food = gameState?.state?.equipment?.food;
-                            const freshFood = food ? resolveItem(food.id) : null;
-                            const hasFood = food && food.amount > 0;
-
-                            return (
-                                <>
-                                    <h3 style={{ margin: 0, color: 'var(--text-main)', textAlign: 'center', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '1px' }}>TOTAL RUNS T{pendingTier}</h3>
-
-                                    <div style={{
-                                        display: 'flex',
-                                        gap: '10px',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        background: 'rgba(0,0,0,0.3)',
-                                        padding: '12px',
-                                        borderRadius: '16px',
-                                        border: '1px solid rgba(174, 0, 255, 0.2)',
-                                        width: '100%'
-                                    }}>
-                                        <button
-                                            onClick={() => setRepeatCount(1)}
-                                            style={{
-                                                padding: '8px 12px',
-                                                background: 'rgba(255,255,255,0.05)',
-                                                color: '#888',
-                                                borderRadius: '8px',
-                                                border: '1px solid rgba(255,255,255,0.1)',
-                                                fontSize: '0.7rem',
-                                                fontWeight: 'bold',
-                                                cursor: 'pointer',
-                                                flexShrink: 0
-                                            }}
-                                        >
-                                            MIN
-                                        </button>
-
-                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                            <button
-                                                onClick={() => setRepeatCount(prev => Math.max(1, (parseInt(prev) || 0) - 1))}
-                                                style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--slot-bg)', color: 'var(--text-main)', borderRadius: '10px', border: '1px solid var(--border)', fontWeight: 'bold', cursor: 'pointer' }}
-                                            >
-                                                -
-                                            </button>
-
-                                            <input
-                                                type="number"
-                                                value={repeatCount}
-                                                onChange={(e) => {
-                                                    const val = e.target.value;
-                                                    if (val === '') {
-                                                        setRepeatCount('');
-                                                    } else {
-                                                        const parsed = parseInt(val);
-                                                        if (!isNaN(parsed)) {
-                                                            setRepeatCount(Math.min(effectiveMax, parsed));
-                                                        }
-                                                    }
-                                                }}
-                                                onBlur={() => {
-                                                    if (repeatCount === '' || repeatCount === 0) {
-                                                        setRepeatCount(1);
-                                                    }
-                                                }}
-                                                style={{
-                                                    width: '60px',
-                                                    padding: '5px',
-                                                    background: 'transparent',
-                                                    border: 'none',
-                                                    color: 'var(--text-main)',
-                                                    textAlign: 'center',
-                                                    fontWeight: 'bold',
-                                                    fontSize: '1.4rem',
-                                                    outline: 'none',
-                                                    WebkitAppearance: 'none',
-                                                    MozAppearance: 'textfield',
-                                                    appearance: 'textfield'
-                                                }}
-                                            />
-
-                                            <button
-                                                onClick={() => setRepeatCount(prev => Math.min(effectiveMax, (parseInt(prev) || 0) + 1))}
-                                                style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--slot-bg)', color: 'var(--text-main)', borderRadius: '10px', border: '1px solid var(--border)', fontWeight: 'bold', cursor: 'pointer' }}
-                                            >
-                                                +
-                                            </button>
-                                        </div>
-
-                                        <button
-                                            onClick={() => setRepeatCount(effectiveMax)}
-                                            style={{
-                                                padding: '8px 12px',
-                                                background: 'rgba(174, 0, 255, 0.1)',
-                                                color: '#ae00ff',
-                                                borderRadius: '8px',
-                                                border: '1px solid rgba(174, 0, 255, 0.3)',
-                                                fontSize: '0.7rem',
-                                                fontWeight: 'bold',
-                                                cursor: 'pointer',
-                                                flexShrink: 0
-                                            }}
-                                        >
-                                            MAX
-                                        </button>
-                                    </div>
-
-                                    {/* Time and Limits Info */}
-                                    <div style={{ padding: '10px', background: 'var(--accent-soft)', borderRadius: '12px', border: '1px solid var(--accent)', width: '100%', textAlign: 'center' }}>
-                                        <div style={{ fontSize: '0.65rem', color: 'var(--accent)', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px', marginBottom: '4px' }}>Estimated Time</div>
-                                        <div style={{ fontSize: '1.2rem', color: 'var(--text-main)', fontWeight: '900' }}>{formatDuration(calculateEstimatedTime(pendingTier, repeatCount))}</div>
-                                        <div style={{ fontSize: '0.6rem', color: '#888', marginTop: '4px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
-                                            <span>MAPS: {availableMaps}</span>
-                                            <span>|</span>
-                                            <span>MAX 12H: {maxRunsIn12h}</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Survival Prediction */}
-                                    <div style={{
-                                        padding: '12px',
-                                        background: survival.survives ? 'rgba(76, 175, 80, 0.08)' : 'rgba(255, 68, 68, 0.08)',
-                                        borderRadius: '12px',
-                                        border: `1px solid ${survival.survives ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255, 68, 68, 0.3)'}`,
-                                        width: '100%',
-                                        textAlign: 'center'
-                                    }}>
-                                        <div style={{
-                                            fontSize: '0.65rem',
-                                            color: survival.survives ? '#4caf50' : '#ff4444',
-                                            textTransform: 'uppercase',
-                                            fontWeight: '900',
-                                            letterSpacing: '1px',
-                                            marginBottom: '4px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            gap: '6px'
-                                        }}>
-                                            <Heart size={12} />
-                                            Survival Prediction
-                                        </div>
-                                        <div style={{
-                                            fontSize: '1rem',
-                                            color: survival.survives ? '#4caf50' : '#ff4444',
-                                            fontWeight: '900'
-                                        }}>
-                                            {survival.survives ? (
-                                                <>✓ SURVIVES ALL {repeatCount} RUNS</>
-                                            ) : (
-                                                <>✗ DIES AT RUN {survival.runsBeforeDeath}</>
-                                            )}
-                                        </div>
-                                        <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', marginTop: '6px', display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                            <span>HP: {formatNumber(Math.floor(survival.totalEffectiveHp))}</span>
-                                            <span>|</span>
-                                            <span>DMG/RUN: {formatNumber(survival.totalDamagePerRun)}</span>
-                                            {hasFood && (
-                                                <>
-                                                    <span>|</span>
-                                                    <span style={{ color: '#ff9800' }}>🍖 {food.amount}x ({freshFood?.heal || (freshFood?.healPercent ? `${freshFood.healPercent}%` : 0)} HP)</span>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
-                                        <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: '12px', background: 'var(--slot-bg)', color: 'var(--text-dim)', borderRadius: '12px', border: '1px solid var(--border)', fontWeight: 'bold', cursor: 'pointer' }}>CANCEL</button>
-                                        <button onClick={confirmEnterDungeon} style={{ flex: 1, padding: '12px', background: 'linear-gradient(to bottom, #ae00ff, #8a00cc)', color: '#fff', borderRadius: '12px', border: 'none', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 15px rgba(174, 0, 255, 0.3)' }}>START</button>
-                                    </div>
-                                </>
-                            );
-                        })()}
-                    </div>
-                </div>
-            )
-            }
-
-            <DungeonHistoryModal
-                isOpen={isHistoryOpen}
-                onClose={() => setIsHistoryOpen(false)}
-                history={history}
-            />
+            {modals}
         </div>
     );
 };

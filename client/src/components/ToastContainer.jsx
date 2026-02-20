@@ -37,14 +37,24 @@ const ToastContainer = ({ socket }) => {
             addToast(data.message || 'Trade completed!', 'success');
         };
 
+        const handleDungeonQueueStop = (data) => {
+            if (data.success) {
+                addToast(data.message || 'Dungeon will stop after this run', 'success');
+            } else {
+                addToast(data.message || 'Failed to stop dungeon queue', 'error');
+            }
+        };
+
         socket.on('action_result', handleActionResult);
         socket.on('error', handleError);
         socket.on('trade_success', handleTradeSuccess);
+        socket.on('stop_dungeon_queue_result', handleDungeonQueueStop);
 
         return () => {
             socket.off('action_result', handleActionResult);
             socket.off('error', handleError);
             socket.off('trade_success', handleTradeSuccess);
+            socket.off('stop_dungeon_queue_result', handleDungeonQueueStop);
         };
     }, [socket]);
 

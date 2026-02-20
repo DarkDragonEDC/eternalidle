@@ -419,6 +419,17 @@ export class DungeonManager {
         return { success: true };
     }
 
+    async stopQueue(userId, characterId) {
+        const char = await this.gameManager.getCharacter(userId, characterId);
+        if (char && char.state && char.state.dungeon) {
+            char.state.dungeon.repeatCount = 0;
+            char.state.dungeon.stopping = true; // Flag for UI feedback
+            await this.gameManager.saveState(char.id, char.state);
+            return { success: true, message: "Queue stopped. Dungeon will finish after this run." };
+        }
+        return { success: false, message: "No active dungeon found." };
+    }
+
     async saveDungeonLog(char, config, outcome, runLoot = null, virtualNow = null) {
         try {
             const dungeon = char.state.dungeon;

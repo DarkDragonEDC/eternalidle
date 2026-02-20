@@ -564,6 +564,19 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('stop_dungeon_queue', async () => {
+        try {
+            if (!socket.data.characterId || socket.data.characterId === 'undefined') return;
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const result = await gameManager.stopDungeonQueue(socket.user.id, socket.data.characterId);
+                socket.emit('dungeon_queue_stopped', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            });
+        } catch (err) {
+            socket.emit('error', { message: err.message });
+        }
+    });
+
     socket.on('start_combat', async ({ tier, mobId }) => {
         try {
             if (!socket.data.characterId || socket.data.characterId === 'undefined') return;

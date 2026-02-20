@@ -13,6 +13,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
     const [syncedElapsed, setSyncedElapsed] = useState(0);
     const [smoothProgress, setSmoothProgress] = useState(0);
     const [worldBossData, setWorldBossData] = useState(null);
+    const [showDungeonAbandonConfirm, setShowDungeonAbandonConfirm] = useState(false);
 
     const activity = gameState?.current_activity;
     const combat = gameState?.state?.combat;
@@ -340,7 +341,10 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                             flexDirection: 'column',
                             gap: '15px',
                             zIndex: 1001,
-                            alignItems: 'flex-end' // Alinha à direita
+                            alignItems: 'flex-end', // Alinha à direita
+                            transition: '0.2s',
+                            opacity: 1,
+                            pointerEvents: 'auto'
                         }}>
 
                             {/* --- CARD DE ATIVIDADE (Se houver) --- */}
@@ -753,11 +757,11 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                 border: '1px solid rgba(174, 0, 255, 0.3)',
                                             }}>
-                                                <Skull size={18} color="#ae00ff" />
+                                                <Skull size={24} color={dungeonState.status === 'BOSS_FIGHT' ? '#ff4444' : '#ae00ff'} />
                                             </div>
-                                            <div>
-                                                <div style={{ fontSize: '0.55rem', color: '#ae00ff', fontWeight: '900', letterSpacing: '0.5px' }}>ACTIVE DUNGEON</div>
-                                                <div style={{ fontSize: '0.8rem', color: '#fff', fontWeight: '900' }}>Tier {dungeonState.tier}</div>
+                                            <div style={{ textAlign: 'left' }}>
+                                                <div style={{ color: '#fff', fontSize: '0.8rem', fontWeight: '900' }}>T{dungeonState.tier} DUNGEON</div>
+                                                <div style={{ color: dungeonState.status === 'BOSS_FIGHT' ? '#ff4444' : '#ae00ff', fontSize: '0.65rem', fontWeight: 'bold' }}>{dungeonState.status}</div>
                                             </div>
                                         </div>
                                         <div style={{ textAlign: 'right', display: 'flex', gap: '15px' }}>
@@ -791,7 +795,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                                         dungeonState.status === 'BOSS_FIGHT' ? `BOSS FIGHT (${formatNumber(dungeonState.activeMob?.health || 0)}/${formatNumber(dungeonState.activeMob?.maxHealth || 0)})` :
                                                             dungeonState.status}
                                             </span>
-                                            {dungeonState.repeatCount > 0 && (
+                                            {dungeonState.repeatCount > 0 && !dungeonState.stopping && (
                                                 <span style={{ fontSize: '0.7rem', color: '#aaa' }}>
                                                     {(() => {
                                                         let total, current;
@@ -809,14 +813,22 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                                     })()}
                                                 </span>
                                             )}
+                                            {dungeonState.stopping && (
+                                                <span style={{ fontSize: '0.65rem', color: '#ff9800', fontWeight: '900', animation: 'pulse 1.5s infinite', background: 'rgba(255, 152, 0, 0.1)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(255, 152, 0, 0.3)' }}>
+                                                    STOPPING AFTER RUN
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
 
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            if (socket) socket.emit('stop_dungeon');
-                                            setIsOpen(false);
+                                            if (dungeonState.status === 'COMPLETED') {
+                                                if (socket) socket.emit('stop_dungeon');
+                                            } else {
+                                                setShowDungeonAbandonConfirm(true);
+                                            }
                                         }}
                                         style={{
                                             width: '100%',
@@ -834,11 +846,13 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                             justifyContent: 'center',
                                             gap: '8px',
                                             transition: '0.2s',
-                                            boxShadow: dungeonState.status === 'COMPLETED' ? '0 4px 12px rgba(76, 175, 80, 0.3)' : '0 4px 12px rgba(255, 68, 68, 0.3)'
+                                            boxShadow: dungeonState.status === 'COMPLETED' ? '0 4px 12px rgba(76, 175, 80, 0.3)' : '0 4px 12px rgba(255, 68, 68, 0.3)',
+                                            opacity: 1,
+                                            pointerEvents: 'auto'
                                         }}
                                     >
                                         <Skull size={14} />
-                                        {dungeonState.status === 'COMPLETED' ? "CLAIM & EXIT" : "ABANDON"}
+                                        {dungeonState.status === 'COMPLETED' ? "CLAIM & EXIT" : dungeonState.stopping ? "STOPPING..." : "ABANDON"}
                                     </button>
                                 </motion.div>
                             )}
@@ -985,6 +999,82 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                 )
                 }
             </AnimatePresence>
+
+            {/* Custom Abandon Confirmation Modal for Dungeon */}
+            {showDungeonAbandonConfirm && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.85)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    zIndex: 2000,
+                    backdropFilter: 'blur(4px)'
+                }}>
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        style={{
+                            padding: '30px',
+                            width: '320px',
+                            display: 'flex', flexDirection: 'column',
+                            gap: '20px',
+                            borderRadius: '24px',
+                            border: '1px solid rgba(255, 68, 68, 0.2)',
+                            background: '#121212',
+                            boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+                            position: 'relative'
+                        }}
+                    >
+                        <div style={{ textAlign: 'center' }}>
+                            <Skull size={32} color="#ff4444" style={{ marginBottom: '15px' }} />
+                            <h3 style={{ margin: 0, color: '#fff', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '1px' }}>ABANDON?</h3>
+                            <p style={{ color: '#aaa', fontSize: '0.8rem', marginTop: '8px', lineHeight: '1.4' }}>
+                                How would you like to proceed with your current run?
+                            </p>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <button
+                                onClick={() => {
+                                    if (socket) socket.emit('stop_dungeon_queue');
+                                    setShowDungeonAbandonConfirm(false);
+                                    setIsOpen(false);
+                                }}
+                                style={{
+                                    padding: '12px', borderRadius: '12px', background: 'rgba(174, 0, 255, 0.05)', border: '1px solid rgba(174, 0, 255, 0.3)',
+                                    color: '#ae00ff', fontWeight: '900', cursor: 'pointer', transition: '0.2s', fontSize: '0.9rem'
+                                }}
+                            >
+                                Finish Current Run
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    if (socket) socket.emit('stop_dungeon');
+                                    setShowDungeonAbandonConfirm(false);
+                                    setIsOpen(false);
+                                }}
+                                style={{
+                                    padding: '12px', borderRadius: '12px', background: 'rgba(255, 68, 68, 0.05)', border: '1px solid rgba(255, 68, 68, 0.3)',
+                                    color: '#ff4444', fontWeight: '900', cursor: 'pointer', transition: '0.2s', fontSize: '0.9rem'
+                                }}
+                            >
+                                Abandon Now
+                            </button>
+                        </div>
+
+                        <button
+                            onClick={() => setShowDungeonAbandonConfirm(false)}
+                            style={{
+                                background: 'none', border: 'none', color: '#555',
+                                fontWeight: '900', cursor: 'pointer', fontSize: '0.75rem',
+                                letterSpacing: '1px', marginTop: '5px'
+                            }}
+                        >
+                            CANCEL
+                        </button>
+                    </motion.div>
+                </div>
+            )}
         </>
     );
 };
