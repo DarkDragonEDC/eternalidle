@@ -1490,8 +1490,8 @@ for (const t of TIERS) {
                 WARRIOR: 'Warrior', HUNTER: 'Hunter', MAGE: 'Mage', TOOLS: 'Tools', COOKING: 'Cooking', ALCHEMY: 'Alchemy',
                 ATTACK: 'Combat'
             };
-            const EFF_NAME_MAP = { XP: 'XP', COPY: 'Duplication', SPEED: 'Auto-Refine', EFF: 'Efficiency', ATTACK: 'Attack', SAVE_FOOD: 'Food Saving', BURST: 'Burst' };
-            const EFF_LABEL_MAP = { XP: 'Experience', COPY: 'Duplication', SPEED: 'Auto-Refine Chance', EFF: 'Speed', ATTACK: 'Damage', SAVE_FOOD: 'Conservation', BURST: 'Critical Chance' };
+            const EFF_NAME_MAP = { XP: 'XP', COPY: 'Duplication', SPEED: 'Auto-Refine', EFF: 'Efficiency', ATTACK: 'Attack', SAVE_FOOD: 'Food Saving', BURST: 'Burst', ATTACK_SPEED: 'Attack Speed' };
+            const EFF_LABEL_MAP = { XP: 'Experience', COPY: 'Duplication', SPEED: 'Auto-Refine Chance', EFF: 'Speed', ATTACK: 'Damage', SAVE_FOOD: 'Conservation', BURST: 'Critical Chance', ATTACK_SPEED: 'Attack Speed' };
 
             const actName = ACT_NAME_MAP[act] || act;
             let effName = EFF_NAME_MAP[eff] || eff;

@@ -1,0 +1,86 @@
+{
+  "characters": {
+    "prod_status": "Has Data",
+    "hom_status": "NO DATA / ROW EMPTY",
+    "missing_in_prod": [],
+    "missing_in_homolog": []
+  },
+  "market_listings": {
+    "prod_status": "Has Data",
+    "hom_status": "NO DATA / ROW EMPTY",
+    "missing_in_prod": [],
+    "missing_in_homolog": []
+  },
+  "market_history": {
+    "prod_status": "Has Data",
+    "hom_status": "NO DATA / ROW EMPTY",
+    "missing_in_prod": [],
+    "missing_in_homolog": []
+  },
+  "messages": {
+    "prod_status": "Has Data",
+    "hom_status": "NO DATA / ROW EMPTY",
+    "missing_in_prod": [],
+    "missing_in_homolog": []
+  },
+  "combat_history": {
+    "prod_status": "Has Data",
+    "hom_status": "NO DATA / ROW EMPTY",
+    "missing_in_prod": [],
+    "missing_in_homolog": []
+  },
+  "dungeon_history": {
+    "prod_status": "Has Data",
+    "hom_status": "NO DATA / ROW EMPTY",
+    "missing_in_prod": [],
+    "missing_in_homolog": []
+  },
+  "user_sessions": {
+    "prod_status": "Matches Data",
+    "hom_status": "Matches Data",
+    "missing_in_prod": [],
+    "missing_in_homolog": []
+  },
+  "trade_sessions": {
+    "prod_status": "Has Data",
+    "hom_status": "NO DATA / ROW EMPTY",
+    "missing_in_prod": [],
+    "missing_in_homolog": []
+  },
+  "guilds": {
+    "prod_status": "ERROR: Could not find the table 'public.guilds' in the schema cache",
+    "hom_status": "NO DATA / ROW EMPTY",
+    "missing_in_prod": [],
+    "missing_in_homolog": []
+  },
+  "guild_members": {
+    "prod_status": "ERROR: Could not find the table 'public.guild_members' in the schema cache",
+    "hom_status": "NO DATA / ROW EMPTY",
+    "missing_in_prod": [],
+    "missing_in_homolog": []
+  },
+  "guild_invites": {
+    "prod_status": "ERROR: Could not find the table 'public.guild_invites' in the schema cache",
+    "hom_status": "NO DATA / ROW EMPTY",
+    "missing_in_prod": [],
+    "missing_in_homolog": []
+  },
+  "friends": {
+    "prod_status": "Has Data",
+    "hom_status": "NO DATA / ROW EMPTY",
+    "missing_in_prod": [],
+    "missing_in_homolog": []
+  },
+  "world_boss_history": {
+    "prod_status": "ERROR: Could not find the table 'public.world_boss_history' in the schema cache",
+    "hom_status": "NO DATA / ROW EMPTY",
+    "missing_in_prod": [],
+    "missing_in_homolog": []
+  },
+  "trade_names": {
+    "prod_status": "ERROR: Could not find the table 'public.trade_names' in the schema cache",
+    "hom_status": "NO DATA / ROW EMPTY",
+    "missing_in_prod": [],
+    "missing_in_homolog": []
+  }
+}
