@@ -1767,8 +1767,9 @@ export class GameManager {
             }
         }
 
-        if (itemsGained > 0 || combatResult || foodUsed || activityFinished || stateChanged || dungeonResult || worldBossResult) {
+        if (itemsGained > 0 || combatResult || foodUsed || activityFinished || stateChanged || dungeonResult || worldBossResult || char._stateChanged) {
             this.markDirty(char.id);
+            if (char._stateChanged) delete char._stateChanged; // Reset flag after marking dirty
         }
 
         if (char.current_activity || char.state.combat || itemsGained > 0 || combatResult || dungeonResult || worldBossResult) {
@@ -1929,40 +1930,40 @@ export class GameManager {
         // Safety minimum 1 if it's supposed to heal
         if (unitHeal < 1) unitHeal = 1;
 
-        // Eat while HP is missing and we haven't hit the massive limit
-        // STRICT RULE: Only eat if the heal fits entirely (No Waste)
-        while (food.amount > 0 && eatenCount < MAX_EATS_PER_TICK) {
-            const missing = maxHp - currentHp;
-            const hpPercent = (currentHp / maxHp) * 100;
+        const COOLDOWN_MS = 5000;
+        const lastFoodAt = char.state.lastFoodAt || 0;
+        const now = nowOverride || Date.now();
 
-            // SAFETY RULE: Eat if the heal fits entirely OR if HP is dangerously low (< 40%)
-            // "unitHeal" is the standardized amount now
-            if (missing >= unitHeal || hpPercent < 40) {
-                const actualHeal = Math.min(unitHeal, missing);
-                if (actualHeal <= 0 && hpPercent >= 40) break; // Safety break
+        if (now - lastFoodAt < COOLDOWN_MS) return { used: false, amount: 0 };
 
-                currentHp = currentHp + actualHeal;
+        const missing = maxHp - currentHp;
+        const hpPercent = (currentHp / maxHp) * 100;
 
-                // Sync if too far behind
-                const savedFood = foodSaver > 0 && Math.random() * 100 < foodSaver;
-                if (!savedFood) {
-                    // CRITICAL FIX: Decrement from the REAL state object, not the local copy
-                    char.state.equipment.food.amount--;
-                    food.amount--; // Keep local copy in sync for the loop check
-                } else {
-                    savedCount++;
-                }
+        // Eat if the heal fits entirely OR if HP is dangerously low (< 40%)
+        if (food.amount > 0 && (missing >= unitHeal || hpPercent < 40)) {
+            const actualHeal = Math.min(unitHeal, missing);
 
-                eatenCount++;
-                totalHealed += actualHeal;
+            // Safety break if somehow normalized to non-positive
+            if (actualHeal <= 0 && hpPercent >= 40) return { used: false, amount: 0 };
 
-                // Update instantly to recalculate 'missing' for next loop iteration
-                char.state.health = currentHp;
-                if (inCombat) {
-                    char.state.combat.playerHealth = currentHp;
-                }
+            currentHp = currentHp + actualHeal;
+
+            const savedFood = foodSaver > 0 && Math.random() * 100 < foodSaver;
+            if (!savedFood) {
+                char.state.equipment.food.amount--;
+                food.amount--;
             } else {
-                break;
+                savedCount++;
+            }
+
+            eatenCount = 1;
+            totalHealed = actualHeal;
+            char.state.lastFoodAt = now;
+
+            // Update state
+            char.state.health = currentHp;
+            if (inCombat) {
+                char.state.combat.playerHealth = currentHp;
             }
         }
 

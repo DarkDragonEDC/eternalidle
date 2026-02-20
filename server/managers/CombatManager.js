@@ -1,4 +1,5 @@
 import { MONSTERS } from '../../shared/monsters.js';
+import fs from 'fs';
 
 const MAX_XP_PER_KILL = 10_000_000; // 10M
 const MAX_SILVER_PER_KILL = 100_000_000; // 100M
@@ -113,20 +114,36 @@ export class CombatManager {
         }
         combat.tier = currentTier; // Sanitização em tempo de execução
 
+        // SYNC: Update active combat stats if config changed (and not custom/dungeon)
+        try {
+            if (mobData && !combat.isDungeon && !combat.isBoss) {
+                if (combat.mobMaxHealth !== mobData.health || combat.mobDamage !== mobData.damage) {
+                    fs.appendFileSync('sync_log.txt', `[SYNC] Char: ${char.name}, Mob: ${combat.mobId}, OldHP: ${combat.mobMaxHealth}, NewHP: ${mobData.health}\n`);
+                    combat.mobMaxHealth = mobData.health;
+                    combat.mobHealth = mobData.health;
+                    combat.mobDamage = mobData.damage;
+                    combat.mobDefense = mobData.defense || 0;
+                    char._stateChanged = true;
+                }
+            }
+        } catch (e) {
+            fs.appendFileSync('sync_log.txt', `[ERROR] ${e.message}\n`);
+        }
+
         let mobDmg = combat.mobDamage;
         if (typeof mobDmg === 'undefined') {
             mobDmg = mobData ? mobData.damage : 5;
         }
 
         // Restore Mitigation Calculations
-        // NEW FORMULA: 1% Mitigation per 10 Defense (Linear). Capped at 90%
-        const playerMitigation = Math.min(0.9, playerStats.defense / 1000);
+        // NEW FORMULA: 1% Mitigation per 100 Defense (Linear). Capped at 75% (Matches UI)
+        const playerMitigation = Math.min(0.75, playerStats.defense / 10000);
 
         let mobDef = combat.mobDefense;
         if (typeof mobDef === 'undefined') {
             mobDef = mobData ? (mobData.defense || 0) : 0;
         }
-        const mobMitigation = Math.min(0.9, mobDef / 1000);
+        const mobMitigation = Math.min(0.75, mobDef / 10000);
 
         if (!combat.player_next_attack_at) combat.player_next_attack_at = now + (playerStats.attackSpeed || 2000);
 
@@ -220,7 +237,8 @@ export class CombatManager {
                 mobHitList.push(singleHitDmg);
 
                 // REACTIVE HEALING: Check food after each hit to prevent burst deaths
-                const result = this.gameManager.processFood(char);
+                const virtualTime = (combat.mob_next_attack_at || now) + (a * mobSpeed);
+                const result = this.gameManager.processFood(char, virtualTime);
                 if (result.used) {
                     foodEaten += (result.eaten || 0);
                     combat.savedFoodCount = (combat.savedFoodCount || 0) + (result.savedCount || 0);

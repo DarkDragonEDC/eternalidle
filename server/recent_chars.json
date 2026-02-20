@@ -1,0 +1,238 @@
+[
+  {
+    "id": "95323ca3-85c9-4b5e-b4af-08aafa64c6ff",
+    "name": "EternoDev",
+    "state": {
+      "claims": [],
+      "cosmetics": {
+        "frame": "golden",
+        "title": "Elite Member"
+      },
+      "daily_spin": {
+        "total_spins": 9,
+        "last_spin_date": "2026-02-07T05:31:11.602Z"
+      },
+      "notifications": [
+        {
+          "id": 1771616470957.8127,
+          "read": false,
+          "type": "SYSTEM",
+          "message": "📜 Combat Summary\n⌛ 7s\n💀 3 Kills\n✨ +189 COMBAT\n💰 +1.655 Silver",
+          "timestamp": 1771616470957
+        },
+        {
+          "id": 1771616451668.6064,
+          "read": false,
+          "type": "SYSTEM",
+          "message": "📜 Combat Summary\n⌛ 4m 48s\n💀 133 Kills\n✨ +8379 COMBAT\n💰 +69.346 Silver\n📦 Loot:\n • 1x T4 DUNGEON MAP",
+          "timestamp": 1771616451668
+        },
+        {
+          "id": 1771616149718.4285,
+          "read": false,
+          "type": "SYSTEM",
+          "message": "📜 Combat Summary\n⌛ 6s\n💀 2 Kills\n✨ +126 COMBAT\n💰 +1.238 Silver",
+          "timestamp": 1771616149718
+        },
+        {
+          "id": 1771616028309.3318,
+          "read": false,
+          "type": "SYSTEM",
+          "message": "📜 Combat Summary\n⌛ 5s\n💀 2 Kills\n✨ +126 COMBAT\n💰 +962 Silver",
+          "timestamp": 1771616028309
+        },
+        {
+          "id": 1771616014754.1113,
+          "read": false,
+          "type": "SYSTEM",
+          "message": "📜 Offline Progress Summary\n⌛ 1m 5s",
+          "timestamp": 1771616014754
+        },
+        {
+          "id": 1771615950670.969,
+          "read": false,
+          "type": "SYSTEM",
+          "message": "📜 Combat Summary\n⌛ 2m 30s\n💀 68 Kills\n✨ +4284 COMBAT\n💰 +35.286 Silver\n📦 Loot:\n • 1x T4 DUNGEON MAP",
+          "timestamp": 1771615950670
+        },
+        {
+          "id": 1771615794974.8582,
+          "read": false,
+          "type": "SYSTEM",
+          "message": "📜 Combat Summary\n⌛ 29s\n💀 11 Kills\n✨ +693 COMBAT\n💰 +5.579 Silver\n📦 Loot:\n • 1x T4 DUNGEON MAP",
+          "timestamp": 1771615794974
+        },
+        {
+          "id": 1771615740158.0024,
+          "read": false,
+          "type": "SYSTEM",
+          "message": "📜 Offline Progress Summary\n⌛ 11h 0m",
+          "timestamp": 1771615740158
+        },
+        {
+          "id": 1771577847894.9128,
+          "read": false,
+          "type": "SYSTEM",
+          "message": "📜 Offline Progress Summary\n⌛ 5h 29m\n🍀 x1 Duplication\n✨ +12516 ALCHEMY\n📦 Loot:\n • 22x T10 POTION GATHER",
+          "timestamp": 1771577847894
+        },
+        {
+          "id": 1771556277439.6118,
+          "read": false,
+          "type": "SYSTEM",
+          "message": "📜 Offline Progress Summary\n⌛ 4m 21s",
+          "timestamp": 1771556277439
+        }
+      ],
+      "selectedTitle": "<Game Dev>",
+      "crownPurchases": {
+        "NAME_CHANGE_TOKEN": 4,
+        "ETERNAL_MEMBERSHIP": 5,
+        "INVENTORY_SLOT_TICKET": 14
+      },
+      "crownTransactions": [
+        {
+          "cost": 500,
+          "type": "PURCHASE",
+          "itemId": "NAME_CHANGE_TOKEN",
+          "timestamp": 1769989036889,
+          "balanceAfter": 3475
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770005014510,
+          "balanceAfter": 3450
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770005015550,
+          "balanceAfter": 3425
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770005016391,
+          "balanceAfter": 3400
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770005017275,
+          "balanceAfter": 3375
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770005018039,
+          "balanceAfter": 3350
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770005018799,
+          "balanceAfter": 3325
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770005019571,
+          "balanceAfter": 3300
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770005020278,
+          "balanceAfter": 3275
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770005021089,
+          "balanceAfter": 3250
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770005022170,
+          "balanceAfter": 3225
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770380252988,
+          "balanceAfter": 3200
+        },
+        {
+          "type": "ADD",
+          "amount": 10,
+          "source": "ADMIN_CMD",
+          "timestamp": 1770429065573,
+          "balanceAfter": 3210
+        },
+        {
+          "type": "ADD",
+          "amount": 25,
+          "source": "DAILY_SPIN",
+          "timestamp": 1770433730930,
+          "balanceAfter": 3235
+        },
+        {
+          "type": "ADD",
+          "amount": 25,
+          "source": "DAILY_SPIN",
+          "timestamp": 1770437825517,
+          "balanceAfter": 3260
+        },
+        {
+          "type": "ADD",
+          "amount": 25,
+          "source": "DAILY_SPIN",
+          "timestamp": 1770442271602,
+          "balanceAfter": 3285
+        },
+        {
+          "type": "ADD",
+          "amount": 25,
+          "source": "DAILY_SPIN",
+          "timestamp": 1770520700143,
+          "balanceAfter": 3310
+        },
+        {
+          "cost": 50,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1771286154730,
+          "balanceAfter": 9949
+        },
+        {
+          "cost": 50,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1771287531429,
+          "balanceAfter": 9899
+        },
+        {
+          "cost": 500,
+          "type": "PURCHASE",
+          "itemId": "NAME_CHANGE_TOKEN",
+          "timestamp": 1771358014934,
+          "balanceAfter": 9399
+        }
+      ],
+      "pendingNameChange": false
+    }
+  }
+]
