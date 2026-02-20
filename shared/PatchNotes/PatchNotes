@@ -1,9 +1,12 @@
-- Corrigido IP errado no perfil publico.
+- Removido visual dos atributos base que nao causavam efeitos.
 
-- Corrigido bug no card de wb.
+- Adicionada a opção de interromper dungeon após finalizar a run atual.
 
-- Corrigido bug onde os itens ganhos na roleta nao vinham para a bag.
+- Corrigido erro que pedia mining lvl ao equipar sickle.
 
+- Modal de notificações corrigido para fechar ao clickar fora.
 
+- Cada aba do chat agora salva as ultimas 50 mensagens recebidas.
 
+- Novos icones de food adicionados.
 
