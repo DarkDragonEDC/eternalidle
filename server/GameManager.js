@@ -1664,8 +1664,8 @@ export class GameManager {
                         // We take the last one as the primary combatResult for basic compatibility
                         combatResult = roundResult;
 
-                        // COMIDA ONLINE: Consumir comida ENTRE os rounds de uma única tick para evitar morte por burst
-                        this.processFood(char);
+                        // Food is already consumed reactively inside CombatManager.processCombatRound
+                        // No additional processFood call needed here
                     }
 
                     // Advance the timer by exactly one interval
