@@ -1878,11 +1878,21 @@ export class GameManager {
 
     processFood(char, nowOverride = null) {
         if (!char.state.equipment || !char.state.equipment.food) return { used: false, amount: 0 };
-        const food = char.state.equipment.food;
+        // Get the equipped food object (which might be stale)
+        let food = char.state.equipment.food;
 
-        // Support both old flat heal and new percent heal (freshItem handles this)
-        const freshDef = ITEM_LOOKUP[food.id || food.item_id];
-        if (!freshDef || (!freshDef.heal && !freshDef.healPercent)) return { used: false, amount: 0 };
+        // RESOLVE FRESH ITEM DATA: 
+        // The equipped object might be a stale copy from the DB with old 'heal' values.
+        // We must fetch the latest definition from shared/items.js to get the new 'healPercent'.
+        const freshItem = this.inventoryManager.resolveItem(food.id);
+
+        // Merge fresh stats onto the food object temporarily for calculation (preserve amount)
+        if (freshItem) {
+            food = { ...freshItem, amount: food.amount };
+        }
+
+        // Support both old flat heal and new percent heal
+        if (!food.heal && !food.healPercent && !food.amount) return { used: false, amount: 0 };
 
         const inCombat = !!char.state.combat;
         const stats = this.inventoryManager.calculateStats(char, nowOverride);
@@ -1897,12 +1907,14 @@ export class GameManager {
         if (now - lastFoodAt < COOLDOWN_MS) return { used: false, amount: 0 };
         if (currentHp >= maxHp) return { used: false, amount: 0 };
 
+        const foodSaver = stats.foodSaver || 0;
+
         // Calculate Heal Amount per unit
         let unitHeal = 0;
-        if (freshDef.healPercent) {
-            unitHeal = Math.floor(maxHp * (freshDef.healPercent / 100));
+        if (food.healPercent) {
+            unitHeal = Math.floor(maxHp * (food.healPercent / 100));
         } else {
-            unitHeal = freshDef.heal || 0;
+            unitHeal = food.heal || 0;
         }
         if (unitHeal < 1) unitHeal = 1;
 
@@ -1914,31 +1926,27 @@ export class GameManager {
         if (food.amount > 0 && (missing >= unitHeal || hpPercent < 40)) {
             const actualHeal = Math.min(unitHeal, missing);
 
-            // Safety break
+            // Safety break if somehow normalized to non-positive
             if (actualHeal <= 0 && hpPercent >= 40) return { used: false, amount: 0 };
 
-            currentHp += actualHeal;
+            currentHp = currentHp + actualHeal;
 
-            // Food Saver Proficiency
-            const foodSaver = stats.foodSaver || 0;
             let savedCount = 0;
             const savedFood = foodSaver > 0 && Math.random() * 100 < foodSaver;
-
             if (!savedFood) {
                 char.state.equipment.food.amount--;
             } else {
                 savedCount++;
             }
 
-            // Persistence
-            char.state.health = currentHp;
             char.state.lastFoodAt = now;
 
+            // Update state
+            char.state.health = currentHp;
             if (inCombat) {
-                const combat = char.state.combat;
-                combat.playerHealth = currentHp;
-                combat.foodConsumed = (combat.foodConsumed || 0) + 1;
-                combat.savedFoodCount = (combat.savedFoodCount || 0) + savedCount;
+                char.state.combat.playerHealth = currentHp;
+                char.state.combat.foodConsumed = (char.state.combat.foodConsumed || 0) + 1;
+                char.state.combat.savedFoodCount = (char.state.combat.savedFoodCount || 0) + savedCount;
                 char._stateChanged = true;
             }
 
@@ -1947,17 +1955,11 @@ export class GameManager {
                 delete char.state.equipment.food;
             }
 
-            return {
-                used: true,
-                amount: actualHeal,
-                eaten: 1,
-                savedCount
-            };
+            return { used: true, amount: actualHeal, eaten: 1, savedCount };
         }
 
         return { used: false, amount: 0 };
     }
-
 
     async getLeaderboard(type = 'COMBAT', requesterId = null, mode = 'NORMAL') {
         const cacheKey = `${type}_${mode}`;
