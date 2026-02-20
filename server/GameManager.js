@@ -1451,7 +1451,11 @@ export class GameManager {
         const foodResult = this.processFood(char);
         const foodUsed = foodResult.used;
 
-        if (!char.current_activity && !char.state.combat && !foodUsed && !char.state.dungeon && !this.worldBossManager.activeFights.has(char.id)) return null;
+        // Don't skip processing if character needs healing (HP < max and has food)
+        const needsHealing = char.state.equipment?.food?.amount > 0 &&
+            (char.state.health || 0) < (this.inventoryManager.calculateStats(char).maxHP || 100);
+
+        if (!char.current_activity && !char.state.combat && !foodUsed && !needsHealing && !char.state.dungeon && !this.worldBossManager.activeFights.has(char.id)) return null;
 
         const now = Date.now();
         const IDLE_LIMIT_MS = this.getMaxIdleTime(char);
