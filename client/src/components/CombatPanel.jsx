@@ -696,26 +696,76 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                                {/* Food Badge - Centered above VS */}
-                                {gameState?.state?.equipment?.food?.amount > 0 && (
-                                    <div style={{
-                                        background: 'rgba(255, 77, 77, 0.15)',
-                                        color: '#ff6b6b',
-                                        fontSize: isMobile ? '0.6rem' : '0.7rem',
-                                        fontWeight: '900',
-                                        padding: '3px 8px',
-                                        borderRadius: '12px',
-                                        border: '1px solid rgba(255, 77, 77, 0.3)',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '4px'
-                                    }}>
-                                        <Apple size={12} /> {(() => {
-                                            const amt = gameState.state.equipment.food.amount;
-                                            return typeof amt === 'object' ? (amt.amount || 0) : (Number(amt) || 0);
-                                        })()}
-                                    </div>
-                                )}
+                                {/* Food Badge - Circular Cooldown + Tier + Quantity */}
+                                {gameState?.state?.equipment?.food?.amount > 0 && (() => {
+                                    const food = gameState.state.equipment.food;
+                                    const amt = typeof food.amount === 'object' ? (food.amount.amount || 0) : (Number(food.amount) || 0);
+                                    const tier = food.tier || (food.id ? parseInt(food.id.match(/T(\d+)/)?.[1] || '0') : 0);
+                                    const lastFoodAt = gameState.state.lastFoodAt || 0;
+                                    const COOLDOWN_MS = 5000;
+                                    const elapsed = currentTime - lastFoodAt;
+                                    const progress = Math.min(1, elapsed / COOLDOWN_MS); // 0 = just ate, 1 = ready
+                                    const isReady = progress >= 1;
+
+                                    // SVG circular progress
+                                    const size = isMobile ? 36 : 44;
+                                    const stroke = 3;
+                                    const radius = (size / 2) - stroke;
+                                    const circumference = 2 * Math.PI * radius;
+                                    const dashOffset = circumference * (1 - progress);
+
+                                    return (
+                                        <div style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            gap: '2px',
+                                            position: 'relative'
+                                        }}>
+                                            {/* Circular ring with icon */}
+                                            <div style={{ position: 'relative', width: size, height: size }}>
+                                                <svg width={size} height={size} style={{ position: 'absolute', top: 0, left: 0, transform: 'rotate(-90deg)' }}>
+                                                    {/* Background ring */}
+                                                    <circle
+                                                        cx={size / 2} cy={size / 2} r={radius}
+                                                        fill="none"
+                                                        stroke="rgba(255,255,255,0.08)"
+                                                        strokeWidth={stroke}
+                                                    />
+                                                    {/* Progress ring */}
+                                                    <circle
+                                                        cx={size / 2} cy={size / 2} r={radius}
+                                                        fill="none"
+                                                        stroke={isReady ? '#4caf50' : '#ff6b6b'}
+                                                        strokeWidth={stroke}
+                                                        strokeDasharray={circumference}
+                                                        strokeDashoffset={dashOffset}
+                                                        strokeLinecap="round"
+                                                        style={{ transition: 'stroke-dashoffset 0.2s linear, stroke 0.3s' }}
+                                                    />
+                                                </svg>
+                                                {/* Center icon */}
+                                                <div style={{
+                                                    position: 'absolute',
+                                                    top: 0, left: 0, width: '100%', height: '100%',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                }}>
+                                                    <Apple size={isMobile ? 14 : 18} color={isReady ? '#4caf50' : '#ff6b6b'} style={{ transition: 'color 0.3s' }} />
+                                                </div>
+                                            </div>
+                                            {/* Tier + Quantity label */}
+                                            <div style={{
+                                                fontSize: isMobile ? '0.55rem' : '0.65rem',
+                                                fontWeight: '900',
+                                                color: isReady ? '#4caf50' : '#ff6b6b',
+                                                letterSpacing: '0.5px',
+                                                transition: 'color 0.3s'
+                                            }}>
+                                                T{tier} × {amt}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
                                 <div style={{ fontSize: isMobile ? '1rem' : '1.5rem', fontWeight: '900', color: 'var(--text-dim)', opacity: 0.2 }}>VS</div>
                             </div>
 
