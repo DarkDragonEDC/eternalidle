@@ -17,7 +17,7 @@ import { supabase } from '../supabase';
 import ProficiencyDetailsModal from './ProficiencyDetailsModal';
 
 
-const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpenRenameModal, onOpenShop, theme, toggleTheme }) => {
+const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpenRenameModal, onOpenShop, theme, toggleTheme, onTutorialComplete }) => {
     const isPremium = gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > (gameState?._clientTime || Date.now());
     const [selectedSlot, setSelectedSlot] = useState(null);
     const [infoModal, setInfoModal] = useState(null);
@@ -328,23 +328,31 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
         }, [slot, state.inventory, item, isLocked, weaponClass, skills]);
 
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                <div style={{
-                    width: '64px',
-                    height: '64px',
-                    background: 'rgba(0,0,0,0.3)',
-                    border: `2px solid ${borderColor}`,
-                    borderRadius: '10px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    position: 'relative',
-                    cursor: isLocked ? 'not-allowed' : 'pointer',
-                    transition: '0.2s',
-                    boxShadow: hasQuality ? `0 0 10px ${borderColor}66` : 'none',
-                    filter: isLocked ? 'grayscale(0.8) brightness(0.7)' : 'none'
-                }}
-                    onClick={isLocked ? null : onClick}
+            <div id={`slot-${slot}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                <div
+                    style={{
+                        width: '64px',
+                        height: '64px',
+                        background: 'rgba(0,0,0,0.3)',
+                        border: `2px solid ${borderColor}`,
+                        borderRadius: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        position: 'relative',
+                        cursor: isLocked ? 'not-allowed' : 'pointer',
+                        transition: '0.2s',
+                        boxShadow: hasQuality ? `0 0 10px ${borderColor}66` : 'none',
+                        filter: isLocked ? 'grayscale(0.8) brightness(0.7)' : 'none'
+                    }}
+                    onClick={() => {
+                        if (isLocked) return;
+                        if (gameState?.state?.tutorialStep === 'SELECT_RUNE_SLOT' && !item && slot.startsWith('rune_')) {
+                            onTutorialComplete?.('CONFIRM_EQUIP_RUNE');
+                        }
+                        onClick?.();
+                    }}
+                    className={gameState?.state?.tutorialStep === 'SELECT_RUNE_SLOT' && !item && slot.startsWith('rune_') ? 'tutorial-rune-slot-empty' : ''}
                 >
                     {isLocked && !item && (
                         <div style={{
@@ -1040,7 +1048,13 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                             <Sword size={16} /> EQUIPMENT
                         </button>
                         <button
-                            onClick={() => setActiveProfileTab('RUNES')}
+                            id="profile-rune-tab"
+                            onClick={() => {
+                                if (activeProfileTab !== 'RUNES' && gameState?.state?.tutorialStep === 'PROFILE_RUNE_TAB') {
+                                    onTutorialComplete?.('SELECT_RUNE_SLOT');
+                                }
+                                setActiveProfileTab('RUNES');
+                            }}
                             style={{
                                 flex: 1,
                                 padding: '10px',
@@ -2044,6 +2058,8 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                     onShowInfo={onShowInfo}
                     charStats={stats}
                     weaponClass={currentWeaponClass}
+                    onTutorialComplete={onTutorialComplete}
+                    gameState={gameState}
                 />
             )
             }

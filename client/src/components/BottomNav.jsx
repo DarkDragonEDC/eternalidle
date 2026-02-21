@@ -1,7 +1,7 @@
 import React from 'react';
 import { Home, User, Package, Zap, Castle, Map, Skull, Trophy, ShoppingBag, Lock } from 'lucide-react';
 
-const BottomNav = ({ gameState, activeTab, setActiveTab, onNavigate, canSpin, hasActiveTrade, isAnonymous, onShowGuestModal }) => {
+const BottomNav = ({ gameState, activeTab, setActiveTab, onNavigate, canSpin, hasActiveTrade, isAnonymous, onShowGuestModal, onTutorialComplete }) => {
     const navItems = [
         { id: 'profile', label: 'Profile', icon: <User size={20} /> }, // Using Profile as Home/Dashboard
         { id: 'inventory', label: 'Inventory', icon: <Package size={20} /> },
@@ -23,6 +23,9 @@ const BottomNav = ({ gameState, activeTab, setActiveTab, onNavigate, canSpin, ha
     const currentNav = getActiveNav();
 
     const handleNavClick = (id) => {
+        if (id === 'profile' && gameState?.state?.tutorialStep === 'EQUIP_RUNE_PROFILE') {
+            onTutorialComplete?.('PROFILE_RUNE_TAB');
+        }
         if (id === 'skills') {
             setActiveTab('skills_overview');
         } else if (id === 'town') {
@@ -53,6 +56,7 @@ const BottomNav = ({ gameState, activeTab, setActiveTab, onNavigate, canSpin, ha
                 return (
                     <button
                         key={item.id}
+                        id={`tab-${item.id}`}
                         onClick={() => handleNavClick(item.id)}
                         style={{
                             background: 'transparent',

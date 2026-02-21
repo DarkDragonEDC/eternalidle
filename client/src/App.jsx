@@ -21,6 +21,7 @@ import WorldBossPanel from './components/WorldBossPanel';
 import WorldBossFight from './components/WorldBossFight';
 import InspectModal from './components/InspectModal';
 import LeaderboardModal from './components/LeaderboardModal';
+import TutorialOverlay from './components/TutorialOverlay';
 
 import CombatPanel from './components/CombatPanel';
 import RunePanel from './components/RunePanel';
@@ -831,6 +832,85 @@ function App() {
     setSelectedCharacter(null);
   };
 
+  const handleTutorialStepComplete = useCallback((step) => {
+    if (socket) {
+      socket.emit('complete_tutorial_step', { step });
+    }
+  }, [socket]);
+
+  // Automated Tutorial Advancement Logic
+  useEffect(() => {
+    const step = gameState?.state?.tutorialStep;
+    if (!step) return;
+
+    if (step === 'OPEN_INVENTORY' && activeTab === 'inventory') {
+      handleTutorialStepComplete('SELECT_CHEST');
+    }
+
+    if (step === 'SELECT_CHEST' && infoItem?.id === 'NOOB_CHEST') {
+      handleTutorialStepComplete('OPEN_CHEST');
+    }
+
+    if (step === 'OPEN_CHEST' && lootModalData) {
+      handleTutorialStepComplete('CLAIM_LOOT');
+    }
+
+    if (step === 'CLAIM_LOOT' && !lootModalData) {
+      handleTutorialStepComplete('OPEN_PROFILE');
+    }
+
+    if (step === 'OPEN_PROFILE' && activeTab === 'profile') {
+      handleTutorialStepComplete('EQUIP_WEAPON');
+    }
+
+    // Automated skip: if we have rewards but are stuck on earlier steps
+    const inventory = gameState?.state?.inventory || {};
+    const hasSword = inventory['T1_SWORD_Q0'] || inventory['T1_SWORD'];
+    const hasBow = inventory['T1_BOW_Q0'] || inventory['T1_BOW'];
+
+    const isStuckBeforeClaim = step === 'SELECT_CHEST' || step === 'OPEN_INVENTORY';
+
+    if ((hasSword || hasBow) && isStuckBeforeClaim) {
+      if (lootModalData) {
+        handleTutorialStepComplete('CLAIM_LOOT');
+      } else {
+        handleTutorialStepComplete('OPEN_PROFILE');
+      }
+    }
+
+    if (step === 'SELECT_WEAPON' && gameState?.state?.equipment?.mainHand) {
+      handleTutorialStepComplete('EQUIP_FOOD');
+    }
+
+    if (step === 'SELECT_FOOD' && gameState?.state?.equipment?.food) {
+      handleTutorialStepComplete('MERGE_RUNES_1');
+    }
+
+    if (step === 'MERGE_RUNES_1' && activeTab === 'skills_overview') {
+      handleTutorialStepComplete('OPEN_RUNE_FORGE');
+    }
+
+    if (step === 'OPEN_RUNE_FORGE' && activeTab === 'merging') {
+      handleTutorialStepComplete('CREATE_RUNE');
+    }
+
+    if (step === 'CONFIRM_EQUIP_RUNE' && gameState?.state?.equipment?.runes?.some(r => r !== null)) {
+      handleTutorialStepComplete('GO_TO_COMBAT');
+    }
+
+    if (step === 'GO_TO_COMBAT' && activeTab === 'combat_overview') {
+      handleTutorialStepComplete('SELECT_COMBAT_CATEGORY');
+    }
+
+    if (step === 'SELECT_COMBAT_CATEGORY' && activeTab === 'combat') {
+      handleTutorialStepComplete('START_FIRST_MOB');
+    }
+
+    if (step === 'START_FIRST_MOB' && gameState?.state?.combat?.mobId) {
+      handleTutorialStepComplete('MERGE_RUNES_2');
+    }
+  }, [gameState?.state?.tutorialStep, activeTab, infoItem, gameState?.state?.inventory, lootModalData, gameState?.state?.equipment, gameState?.state?.combat]);
+
   const handleEquip = (itemId) => {
     if (socket) {
       socket.emit('equip_item', { itemId });
@@ -1049,6 +1129,7 @@ function App() {
           theme={theme}
           toggleTheme={toggleTheme}
           onOpenShop={() => setShowOrbShop(true)}
+          onTutorialComplete={handleTutorialStepComplete}
           onOpenRenameModal={() => {
             setIsRenameModalOpen(true);
           }} />;
@@ -1442,7 +1523,20 @@ function App() {
         );
       }
       case 'inventory':
-        return <InventoryPanel gameState={displayedGameState} socket={socket} onEquip={handleEquip} onShowInfo={setInfoItem} onListOnMarket={handleListOnMarket} onUse={handleUseItem} isMobile={isMobile} />;
+        return <InventoryPanel
+          gameState={displayedGameState}
+          socket={socket}
+          onEquip={handleEquip}
+          onShowInfo={setInfoItem}
+          onListOnMarket={handleListOnMarket}
+          onUse={handleUseItem}
+          isMobile={isMobile}
+          onSelectItem={(item) => {
+            if (gameState?.state?.tutorialStep === 'SELECT_CHEST' && item?.id === 'NOOB_CHEST') {
+              handleTutorialStepComplete('OPEN_CHEST');
+            }
+          }}
+        />;
       case 'ranking':
         return <RankingPanel gameState={displayedGameState} isMobile={isMobile} socket={socket} onInspect={handleInspectPlayer} />;
       case 'world_boss':
@@ -1591,6 +1685,7 @@ function App() {
                 onListOnMarket={handleListOnMarket}
                 onOpenShop={() => setShowOrbShop(true)}
                 activeCategory={activeCategory}
+                onTutorialComplete={handleTutorialStepComplete}
               />
             </div>
           </div>
@@ -1714,6 +1809,7 @@ function App() {
           hasActiveTrade={tradeInvites?.length > 0 || !!activeTrade}
           isAnonymous={session?.user?.is_anonymous}
           onShowGuestModal={() => setShowGuestModal(true)}
+          onTutorialComplete={handleTutorialStepComplete}
         />
       )}
 
@@ -1726,6 +1822,7 @@ function App() {
         hasActiveTrade={tradeInvites?.length > 0 || !!activeTrade}
         isAnonymous={session?.user?.is_anonymous}
         onShowGuestModal={() => setShowGuestModal(true)}
+        onTutorialComplete={handleTutorialStepComplete}
       />}
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', minHeight: 0 }}>
@@ -2260,6 +2357,11 @@ function App() {
           <GuestRestrictionModal onClose={() => setShowGuestModal(false)} />
         )}
       </AnimatePresence>
+
+      <TutorialOverlay
+        currentStep={gameState?.state?.tutorialStep}
+        onCompleteStep={handleTutorialStepComplete}
+      />
     </div>
   );
 }

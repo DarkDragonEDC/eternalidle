@@ -188,6 +188,7 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                     </div>
 
                     <motion.button
+                        id="loot-claim-button"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={onClose}

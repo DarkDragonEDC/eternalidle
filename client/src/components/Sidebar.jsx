@@ -8,7 +8,7 @@ import {
 import DailySpinModal from './DailySpinModal';
 import { calculateNextLevelXP } from '@shared/skills';
 
-const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategory, setActiveCategory, isMobile, isOpen, onClose, onSwitchCharacter, theme, toggleTheme, socket, canSpin, onOpenDailySpin, hasActiveTrade, isAnonymous, onShowGuestModal }) => {
+const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategory, setActiveCategory, isMobile, isOpen, onClose, onSwitchCharacter, theme, toggleTheme, socket, canSpin, onOpenDailySpin, hasActiveTrade, isAnonymous, onShowGuestModal, onTutorialComplete }) => {
     const [expanded, setExpanded] = useState({
         gathering: true,
         refining: false,
@@ -252,10 +252,14 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
                     ].map(item => (
                         <button
                             key={item.id}
+                            id={`tab-${item.id}`}
                             onClick={() => {
                                 if (item.restricted) {
                                     onShowGuestModal();
                                     return;
+                                }
+                                if (item.id === 'profile' && gameState?.state?.tutorialStep === 'EQUIP_RUNE_PROFILE') {
+                                    onTutorialComplete?.('PROFILE_RUNE_TAB');
                                 }
                                 if (item.id === 'trade' && onNavigate) {
                                     onNavigate('trade');
@@ -373,6 +377,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
 
                             <div style={{ marginBottom: '4px' }}>
                                 <button
+                                    id={`sidebar-item-${item.id}`}
                                     onClick={() => {
                                         if (isGroupHeader) {
                                             toggleExpand(item.id);
@@ -414,6 +419,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
                                             return (
                                                 <button
                                                     key={child.id}
+                                                    id={`sidebar-child-${child.id}`}
                                                     onClick={() => {
                                                         setActiveTab(item.id);
                                                         setActiveCategory(child.id);

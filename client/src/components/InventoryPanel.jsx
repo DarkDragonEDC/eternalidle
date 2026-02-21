@@ -4,7 +4,7 @@ import { resolveItem, getTierColor, calculateItemSellPrice } from '@shared/items
 import { Package, Shield, Coins, Tag, Trash2, Info, ChevronDown, ChevronUp, ArrowUpAZ, ArrowDownZA, Search, Hammer, Zap } from 'lucide-react';
 import ItemActionModal from './ItemActionModal';
 
-const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo, onUse, isMobile }) => {
+const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo, onUse, isMobile, onSelectItem }) => {
     const [selectedItemForModal, setSelectedItemForModal] = useState(null);
     const [sellModal, setSellModal] = useState(null);
     const [filter, setFilter] = useState('ALL');
@@ -17,6 +17,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
 
     const handleItemClick = (item) => {
         setSelectedItemForModal(item);
+        if (onSelectItem) onSelectItem(item);
     };
 
     const handleQuickSell = (itemId) => {
@@ -351,6 +352,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                         return (
                             <div
                                 key={item.id}
+                                id={`item-${item.id}`}
                                 onClick={() => handleItemClick(item)}
                                 style={{
                                     background: 'var(--slot-bg)',
@@ -436,6 +438,10 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                             setSelectedItemForModal(null);
                             const item = resolveItem(id);
 
+                            if (id === 'NOOB_CHEST') {
+                                onUse(id);
+                                return;
+                            }
 
                             if (item?.type === 'POTION' || item?.type === 'CHEST' || id.includes('CHEST') || item?.type === 'CONSUMABLE') {
                                 setUsePotionModal({

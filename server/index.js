@@ -729,6 +729,62 @@ io.on('connection', (socket) => {
         }
     });
 
+    const TUTORIAL_STEP_ORDER = [
+        'OPEN_INVENTORY',
+        'SELECT_CHEST',
+        'OPEN_CHEST',
+        'CLAIM_LOOT',
+        'OPEN_PROFILE',
+        'EQUIP_WEAPON',
+        'SELECT_WEAPON',
+        'EQUIP_FOOD',
+        'SELECT_FOOD',
+        'MERGE_RUNES_1',
+        'OPEN_RUNE_FORGE',
+        'CREATE_RUNE',
+        'FORGE_SELECT_MAX',
+        'FORGE_SELECT_GATHERING',
+        'FORGE_CONFIRM',
+        'CLAIM_FORGE_RESULTS',
+        'OPEN_RUNE_TAB',
+        'SELECT_MERGE_RUNE',
+        'CONFIRM_MERGE_SELECTION',
+        'FINAL_MERGE_CLICK',
+        'VIEW_MERGE_RESULTS',
+        'CLOSE_FINAL_MODAL',
+        'EQUIP_RUNE_PROFILE',
+        'PROFILE_RUNE_TAB',
+        'SELECT_RUNE_SLOT',
+        'CONFIRM_EQUIP_RUNE',
+        'GO_TO_COMBAT',
+        'SELECT_COMBAT_CATEGORY',
+        'START_FIRST_MOB',
+        'MERGE_RUNES_2',
+        'COMPLETED'
+    ];
+
+    socket.on('complete_tutorial_step', async ({ step }) => {
+        try {
+            if (!socket.data.characterId || socket.data.characterId === 'undefined') return;
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                if (!char) throw new Error("Character not found");
+
+                const currentIndex = TUTORIAL_STEP_ORDER.indexOf(char.state.tutorialStep || 'OPEN_INVENTORY');
+                const nextIndex = TUTORIAL_STEP_ORDER.indexOf(step);
+
+                if (nextIndex > currentIndex) {
+                    char.state.tutorialStep = step;
+                    await gameManager.saveState(char.id, char.state);
+                    socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+                }
+            });
+        } catch (err) {
+            console.error("Tutorial Step Error:", err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
     socket.on('get_market_listings', async (filters) => {
         try {
             // Note: getMarketListings does NOT require a characterId.

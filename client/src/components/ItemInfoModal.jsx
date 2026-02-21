@@ -203,6 +203,10 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                         return (
                                             <>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#fbbf24' }}>5.000 Silver</span>
+                                                    <span style={{ fontSize: '0.7rem', fontWeight: '900', color: '#4ade80' }}>100%</span>
+                                                </div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                     <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#fff' }}>200x T1 Food</span>
                                                     <span style={{ fontSize: '0.7rem', fontWeight: '900', color: '#4ade80' }}>100%</span>
                                                 </div>

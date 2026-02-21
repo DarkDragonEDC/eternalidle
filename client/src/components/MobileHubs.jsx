@@ -190,6 +190,7 @@ export const SkillsOverview = ({ onNavigate, gameState }) => {
                                 return (
                                     <button
                                         key={item.id}
+                                        id={item.id === 'RUNE_FORGE' ? 'skill-RUNE_FORGE' : undefined}
                                         onClick={() => item.isSpecial ? onNavigate('merging', 'RUNE') : onNavigate(cat.id, item.id)}
                                         style={{
                                             position: 'relative',
@@ -373,6 +374,7 @@ export const CombatOverview = ({ onNavigate, gameState }) => {
     return (
         <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <HubButton
+                id="combat-adventure-btn"
                 label={adventureLabel}
                 icon={adventureIcon}
                 color="#ef4444"

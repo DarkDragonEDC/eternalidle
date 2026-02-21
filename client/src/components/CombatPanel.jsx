@@ -998,6 +998,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 {/* Action Button (Mobile: Right align on first row) */}
                                 <div style={{ flex: isMobile ? '0 0 auto' : '0.8', display: 'flex', justifyContent: 'flex-end', order: isMobile ? 2 : 10 }}>
                                     <button
+                                        id={`fight-button-${mob.id}`}
                                         onClick={() => !isLocked && handleFight(mob)}
                                         disabled={isLocked}
                                         style={{

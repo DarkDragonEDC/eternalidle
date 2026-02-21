@@ -5,7 +5,7 @@ import { Package, Info, Sparkles, ArrowRight, Hammer, Coins, Star, Search, Filte
 import { motion } from 'framer-motion';
 import ItemActionModal from './ItemActionModal';
 
-const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, onOpenShop, activeCategory }) => {
+const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, onOpenShop, activeCategory, onTutorialComplete }) => {
     const [activeTab, setActiveTab] = useState('shards');
     const [selectedShard, setSelectedShard] = useState(null);
     const [isShardSelectionOpen, setIsShardSelectionOpen] = useState(false);
@@ -223,12 +223,27 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                 // Single result
                 const item = resolveItem(result.item);
                 setCraftResult(item);
-                setResultsModal(null);
+
+                // For tutorial, we MUST use resultsModal to show the highlight on the item
+                if (gameState?.state?.tutorialStep === 'FORGE_CONFIRM' || gameState?.state?.tutorialStep === 'FINAL_MERGE_CLICK') {
+                    setResultsModal({
+                        items: [{ ...item, id: result.item, qty: result.qty || 1 }]
+                    });
+                } else {
+                    setResultsModal(null);
+                }
 
                 // Auto-select for next merge if in runes tab
                 if (activeTab === 'runes' && item) {
                     setSelectedShard({ ...item, id: result.item });
                 }
+            }
+
+            // Tutorial Advance Fallback: Ensure the step moves forward when the results appear
+            if (gameState?.state?.tutorialStep === 'FORGE_CONFIRM') {
+                onTutorialComplete?.('CLAIM_FORGE_RESULTS');
+            } else if (gameState?.state?.tutorialStep === 'FINAL_MERGE_CLICK') {
+                onTutorialComplete?.('VIEW_MERGE_RESULTS');
             }
         };
 
@@ -388,7 +403,14 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                     Shards
                 </button>
                 <button
-                    onClick={() => { setActiveTab('runes'); setSelectedShard(null); }}
+                    id="tutorial-rune-tab"
+                    onClick={() => {
+                        setActiveTab('runes');
+                        if (gameState?.state?.tutorialStep === 'OPEN_RUNE_TAB') {
+                            onTutorialComplete?.('SELECT_MERGE_RUNE');
+                        }
+                        setSelectedShard(null);
+                    }}
                     style={{
                         flex: 1,
                         padding: '12px',
@@ -659,11 +681,18 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                 }
 
                                 const isSelected = selectedShard && selectedShard.id === item.id;
+                                const isMergeCandidate = (gameState?.state?.tutorialStep === 'SELECT_MERGE_RUNE' || gameState?.state?.tutorialStep === 'MERGE_RUNES_2') && item.qty >= 2;
 
                                 return (
                                     <div
                                         key={item.id}
-                                        onClick={() => setSelectedItemForModal(item)}
+                                        onClick={() => {
+                                            setSelectedItemForModal(item);
+                                            if (gameState?.state?.tutorialStep === 'SELECT_MERGE_RUNE' && item.qty >= 2) {
+                                                onTutorialComplete?.('CONFIRM_MERGE_SELECTION');
+                                            }
+                                        }}
+                                        className={isMergeCandidate ? 'tutorial-merge-candidate' : ''}
                                         style={{
                                             background: isSelected ? 'rgba(var(--accent-rgb), 0.2)' : 'var(--slot-bg)',
                                             border: isSelected ? '2px solid var(--accent)' : `1px solid ${specificBorderColor}`,
@@ -779,6 +808,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                             {/* Square 1: Input */}
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
                                 <div
+                                    id="rune-shard-slot"
                                     onClick={() => activeTab === 'runes' && setIsShardSelectionOpen(true)}
                                     style={{
                                         width: '80px', height: '80px',
@@ -964,6 +994,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                         )}
 
                         <button
+                            id="tutorial-rune-merge-button"
                             onClick={() => {
                                 if (!selectedShard || isCrafting) return;
                                 const shardId = activeTab === 'shards' ? selectedShard.id : selectedShard.id;
@@ -973,7 +1004,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
 
                                 if (maxBatch <= 0) return;
 
-                                if (maxBatch === 1) {
+                                if (maxBatch === 1 && activeTab !== 'shards') {
                                     handleCraft(1);
                                 } else {
                                     setBatchModal({
@@ -1105,9 +1136,13 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
 
                                     return (
                                         <div key={item.id}
+                                            id={gameState?.state?.tutorialStep === 'SELECT_MERGE_RUNE' && item.qty >= 2 ? 'tutorial-select-merge-rune' : undefined}
                                             onClick={() => {
                                                 setSelectedShard(item);
                                                 setIsShardSelectionOpen(false);
+                                                if (gameState?.state?.tutorialStep === 'SELECT_MERGE_RUNE') {
+                                                    onTutorialComplete?.('CONFIRM_MERGE_SELECTION');
+                                                }
                                             }}
                                             style={{
                                                 background: 'var(--slot-bg)',
@@ -1191,8 +1226,12 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                         onList={onListOnMarket ? (id, item) => onListOnMarket(item) : undefined}
                         customAction={selectedItemForModal.id.includes('RUNE_') ? {
                             label: selectedItemForModal.id.includes('SHARD') ? 'USE IN FORGE' : 'USE IN MERGE',
+                            id: 'tutorial-rune-use-merge',
                             icon: <Hammer size={18} />,
                             onClick: (item) => {
+                                if (gameState?.state?.tutorialStep === 'CONFIRM_MERGE_SELECTION') {
+                                    onTutorialComplete?.('FINAL_MERGE_CLICK');
+                                }
                                 if (item.id.includes('RUNE_') && !item.id.includes('SHARD')) {
                                     const starsMatch = item.id.match(/_(\d+)STAR$/);
                                     const tierMatch = item.id.match(/^T(\d+)_/);
@@ -1413,7 +1452,13 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                         }}
                                     />
                                     <button
-                                        onClick={() => setBatchModal({ ...batchModal, quantity: batchModal.max })}
+                                        id="tutorial-forge-max"
+                                        onClick={() => {
+                                            setBatchModal({ ...batchModal, quantity: batchModal.max });
+                                            if (gameState?.state?.tutorialStep === 'FORGE_SELECT_MAX') {
+                                                onTutorialComplete?.('FORGE_SELECT_GATHERING');
+                                            }
+                                        }}
                                         style={{ padding: '8px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#ccc', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.7rem' }}
                                     >
                                         MAX
@@ -1445,7 +1490,13 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                         }).map(cat => (
                                             <button
                                                 key={cat.id}
-                                                onClick={() => setForgeCategory(cat.id)}
+                                                id={cat.id === 'GATHERING' ? 'tutorial-forge-gathering' : undefined}
+                                                onClick={() => {
+                                                    setForgeCategory(cat.id);
+                                                    if (gameState?.state?.tutorialStep === 'FORGE_SELECT_GATHERING' && cat.id === 'GATHERING') {
+                                                        onTutorialComplete?.('FORGE_CONFIRM');
+                                                    }
+                                                }}
                                                 style={{
                                                     display: 'flex',
                                                     alignItems: 'center',
@@ -1494,10 +1545,17 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                     CANCEL
                                 </button>
                                 <button
+                                    id={batchModal.type === 'MERGE' ? 'tutorial-rune-merge-button' : 'tutorial-forge-confirm'}
                                     onClick={() => {
                                         if (batchModal.type === 'FORGE' && (!forgeCategory || forgeCategory === 'RUNE')) return;
                                         handleCraft(batchModal.quantity);
                                         setBatchModal(null);
+                                        if (gameState?.state?.tutorialStep === 'FORGE_CONFIRM') {
+                                            // Let TutorialOverlay handle the transition to CLAIM_FORGE_RESULTS
+                                            // when the results modal appears.
+                                        } else if (gameState?.state?.tutorialStep === 'FINAL_MERGE_CLICK') {
+                                            // Let TutorialOverlay handle transition to VIEW_MERGE_RESULTS
+                                        }
                                     }}
                                     disabled={batchModal.type === 'FORGE' && (!forgeCategory || forgeCategory === 'RUNE')}
                                     style={{
@@ -1563,12 +1621,18 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                 {resultsModal.items.map((item, idx) => (
                                     <motion.div
                                         key={idx}
+                                        id={idx === 0 ? 'tutorial-merge-result-item' : undefined}
                                         initial={{ scale: 0, opacity: 0 }}
                                         animate={{ scale: 1, opacity: 1 }}
-                                        transition={{ delay: idx * 0.04 }}
+                                        onClick={() => {
+                                            if (gameState?.state?.tutorialStep === 'VIEW_MERGE_RESULTS') {
+                                                onTutorialComplete?.('CLOSE_FINAL_MODAL');
+                                            }
+                                        }}
                                         style={{
                                             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
-                                            minWidth: 0
+                                            minWidth: 0,
+                                            cursor: gameState?.state?.tutorialStep === 'VIEW_MERGE_RESULTS' ? 'pointer' : 'default'
                                         }}
                                     >
                                         <div style={{
@@ -1631,7 +1695,15 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                             </div>
 
                             <button
-                                onClick={() => setResultsModal(null)}
+                                id="tutorial-forge-results-awesome"
+                                onClick={() => {
+                                    setResultsModal(null);
+                                    if (gameState?.state?.tutorialStep === 'CLAIM_FORGE_RESULTS') {
+                                        onTutorialComplete?.('OPEN_RUNE_TAB');
+                                    } else if (gameState?.state?.tutorialStep === 'CLOSE_FINAL_MODAL') {
+                                        onTutorialComplete?.('EQUIP_RUNE_PROFILE');
+                                    }
+                                }}
                                 style={{
                                     width: '100%', padding: '14px', background: 'var(--accent)', border: 'none',
                                     color: 'var(--bg-dark)', borderRadius: '10px', fontWeight: 'bold',

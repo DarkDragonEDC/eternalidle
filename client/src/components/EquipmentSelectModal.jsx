@@ -4,7 +4,7 @@ import { X, Sword, Shield, Heart, Zap, Play, Layers, User, Pickaxe, Target, Appl
 import { resolveItem, getTierColor, calculateRuneBonus, getRequiredProficiencyGroup, getLevelRequirement } from '@shared/items';
 import { getBestItemForSlot, isBetterItem } from '../utils/equipment';
 
-const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, inventory, onShowInfo, charStats, weaponClass }) => {
+const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, inventory, onShowInfo, charStats, weaponClass, onTutorialComplete, gameState }) => {
 
     // Filter candidates from inventory based on slot
     const { candidates, bestCandidate } = React.useMemo(() => {
@@ -122,18 +122,21 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
             justifyContent: 'center',
             backdropFilter: 'blur(5px)'
         }} onClick={handleBackdropClick}>
-            <div style={{
-                background: 'var(--panel-bg)',
-                border: '1px solid var(--border)',
-                borderRadius: '16px',
-                width: '90%',
-                maxWidth: '500px',
-                maxHeight: '80vh',
-                display: 'flex',
-                flexDirection: 'column',
-                boxShadow: 'var(--panel-shadow)',
-                overflow: 'hidden'
-            }}>
+            <div
+                id="equipment-select-modal"
+                style={{
+                    background: 'var(--panel-bg)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '16px',
+                    width: '90%',
+                    maxWidth: '500px',
+                    maxHeight: '80vh',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    boxShadow: 'var(--panel-shadow)',
+                    overflow: 'hidden'
+                }}
+            >
                 {/* Header */}
                 <div style={{
                     padding: '20px',
@@ -188,6 +191,9 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                                 : 100; // default pass if no group
 
                                     if (userLv < reqLv) return; // Prevent click if not meeting req
+                                    if (bestCandidate.type === 'RUNE' && gameState?.state?.tutorialStep === 'CONFIRM_EQUIP_RUNE') {
+                                        onTutorialComplete?.('MERGE_RUNES_2');
+                                    }
                                     onEquip(bestCandidate.id);
                                     onClose();
                                 }}
@@ -272,7 +278,11 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                         })()}
                                     </div>
                                 </div>
-                                <div style={{ background: 'var(--accent)', color: 'var(--panel-bg)', padding: '6px 12px', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.75rem' }}>
+                                <div
+                                    id="equip-best-button"
+                                    className="tutorial-equip-item"
+                                    style={{ background: 'var(--accent)', color: 'var(--panel-bg)', padding: '6px 12px', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.75rem' }}
+                                >
                                     EQUIP BEST
                                 </div>
                             </div>
@@ -401,6 +411,9 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                                             : 100;
 
                                                 if (userLv < reqLv && profGroup) return;
+                                                if (item.type === 'RUNE' && gameState?.state?.tutorialStep === 'CONFIRM_EQUIP_RUNE') {
+                                                    onTutorialComplete?.('MERGE_RUNES_2');
+                                                }
                                                 onEquip(item.id);
                                                 onClose();
                                             }}
@@ -528,7 +541,13 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                                     })()}
                                                 </div>
                                             </div>
-                                            <div style={{ color: isItemRecommended ? 'var(--accent)' : '#4caf50', fontSize: '0.8rem', fontWeight: 'bold' }}>EQUIP</div>
+                                            <div
+                                                id={`equip-${item.id}`}
+                                                className="tutorial-equip-item"
+                                                style={{ color: isItemRecommended ? 'var(--accent)' : '#4caf50', fontSize: '0.8rem', fontWeight: 'bold' }}
+                                            >
+                                                EQUIP
+                                            </div>
                                         </div>
                                     );
                                 })}

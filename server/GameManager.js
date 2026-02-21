@@ -1283,7 +1283,8 @@ export class GameManager {
             silver: 0,
             notifications: [],
             unlockedTitles: [],
-            isIronman: !!isIronman // USE THE FLAG PROVIDED
+            isIronman: !!isIronman, // USE THE FLAG PROVIDED
+            tutorialStep: 'OPEN_INVENTORY'
         };
 
         // Add Noob Chest
@@ -2255,17 +2256,18 @@ export class GameManager {
                 // message = "Name Change Unlocked! You can now change your name in the Profile panel.";
             } else if (itemData.id === 'NOOB_CHEST') {
                 // NOOB CHEST LOGIC
-                // Rewards: 200x Food, 1x Sword, 1x Bow, 1x Staff, 50x Shards
                 const rewards = [
-                    { id: 'T1_FOOD', qty: 200 },
-                    { id: 'T1_SWORD', qty: 1 },
-                    { id: 'T1_BOW', qty: 1 },
-                    { id: 'T1_FIRE_STAFF', qty: 1 },
-                    { id: 'T1_RUNE_SHARD', qty: 50 }
+                    { id: 'T1_FOOD', qty: 200 * safeQty },
+                    { id: 'T1_SWORD', qty: 1 * safeQty },
+                    { id: 'T1_BOW', qty: 1 * safeQty },
+                    { id: 'T1_FIRE_STAFF', qty: 1 * safeQty },
+                    { id: 'T1_RUNE_SHARD', qty: 100 * safeQty }
                 ];
 
-                // Check Space (Approximation - we are removing 1 chest and adding 4 equipment slots + 2 stackables)
-                // Existing logic handles this gracefully usually, but let's just force add
+                // Add Silver
+                const addedSilver = 5000 * safeQty;
+                char.state.silver = parseInt(char.state.silver || 0) + addedSilver;
+
                 for (const reward of rewards) {
                     this.inventoryManager.addItemToInventory(char, reward.id, reward.qty);
                 }
@@ -2273,10 +2275,10 @@ export class GameManager {
                 // Consume Chest
                 this.inventoryManager.consumeItems(char, { [itemId]: safeQty });
 
-                const message = "You opened the Noob Chest!\nReceived:\n• 200x Food\n• 1x Sword\n• 1x Bow\n• 1x Fire Staff\n• 50x Rune Shards";
+                const message = "You opened the Noob Chest!\nReceived:\n• 5.000 Silver\n• 200x Food\n• 1x Sword\n• 1x Bow\n• 1x Fire Staff\n• 100x Rune Shards";
 
                 await this.saveState(char.id, char.state);
-                return { success: true, message, itemId, rewards: { items: rewards } };
+                return { success: true, message, itemId, rewards: { items: rewards, silver: addedSilver } };
 
             } else if (itemData.id.includes('CHEST')) {
                 // Chest Logic

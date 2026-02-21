@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Shield, Coins, Tag, Trash2, ArrowRight, Zap, Award, Info, Heart, Sword, Star } from 'lucide-react';
+import { X, Shield, Coins, Tag, Trash2, ArrowRight, Zap, Award, Info, Heart, Sword, Star, Sparkles } from 'lucide-react';
 import { getTierColor, calculateItemSellPrice, resolveItem } from '@shared/items';
 
 const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUse, onDismantle, customAction, isIronman }) => {
@@ -34,7 +34,7 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUs
         </div>
     );
 
-    const ActionButton = ({ onClick, icon: Icon, label, variant = 'primary', subLabel }) => {
+    const ActionButton = ({ onClick, icon: Icon, label, variant = 'primary', subLabel, id }) => {
         const variants = {
             primary: {
                 bg: 'var(--accent)',
@@ -66,6 +66,7 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUs
 
         return (
             <motion.button
+                id={id}
                 whileHover={{ scale: 1.02, filter: 'brightness(1.1)' }}
                 whileTap={{ scale: 0.98 }}
                 onClick={onClick}
@@ -165,25 +166,27 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onSell, onList, onUs
                         {/* Actions Grid */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             {customAction && (
-                                <ActionButton onClick={() => { customAction.onClick(item); onClose(); }} icon={customAction.icon ? () => customAction.icon : Zap} label={customAction.label} />
+                                <ActionButton id={customAction.id} onClick={() => { customAction.onClick(item); onClose(); }} icon={customAction.id === 'tutorial-rune-use-merge' ? Sparkles : (customAction.icon ? () => customAction.icon : Zap)} label={customAction.label} />
                             )}
                             {(['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFF_HAND', 'FOOD'].includes(item.type) || item.type.startsWith('TOOL')) && (
                                 <ActionButton onClick={() => { onEquip(item.id); onClose(); }} icon={Shield} label="Equip Item" />
                             )}
 
                             {((['POTION', 'CONSUMABLE', 'CHEST'].includes(item.type)) || (item.id && item.id.includes('CHEST'))) && (
-                                <ActionButton onClick={() => { onUse(item.id); onClose(); }} icon={Zap} label={item.type === 'POTION' ? 'Drink Potion' : (item.id.includes('CHEST') ? 'Open Chest' : 'Use Item')} />
+                                <ActionButton id="open-chest-button" onClick={() => { onUse(item.id); onClose(); }} icon={Zap} label={item.type === 'POTION' ? 'Drink Potion' : (item.id.includes('CHEST') ? 'Open Chest' : 'Use Item')} />
                             )}
 
                             {(['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFF_HAND'].includes(item.type) || item.type.startsWith('TOOL_')) && (
                                 <ActionButton onClick={() => { onDismantle(item.id); onClose(); }} icon={Trash2} label="Dismantle" variant="dismantle" />
                             )}
 
-                            {!isIronman && (
+                            {!isIronman && item.id !== 'NOOB_CHEST' && (
                                 <ActionButton onClick={() => { onList(item.id, item); onClose(); }} icon={Tag} label="List on Market" variant="outline" />
                             )}
 
-                            <ActionButton onClick={() => { onSell(item.id); onClose(); }} icon={Coins} label="Sell Quickly" variant="soft" subLabel={calculateItemSellPrice(item, item.id)} />
+                            {item.id !== 'NOOB_CHEST' && (
+                                <ActionButton onClick={() => { onSell(item.id); onClose(); }} icon={Coins} label="Sell Quickly" variant="soft" subLabel={calculateItemSellPrice(item, item.id)} />
+                            )}
                         </div>
                     </div>
                 </motion.div>
