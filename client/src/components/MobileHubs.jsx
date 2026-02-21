@@ -103,14 +103,14 @@ export const SkillsOverview = ({ onNavigate, gameState }) => {
     const categories = [
         {
             id: 'gathering',
-            label: 'Gather.',
+            label: 'Gather',
             icon: <Pickaxe size={14} />,
             color: '#4ade80',
             items: [
                 { id: 'WOOD', label: 'Lumberjack' },
                 { id: 'ORE', label: 'Mining' },
                 { id: 'HIDE', label: 'Skinning' },
-                { id: 'FIBER', label: 'Harvasting' },
+                { id: 'FIBER', label: 'Harvesting' },
                 { id: 'HERB', label: 'Herbalism' },
                 { id: 'FISH', label: 'Fishing' }
             ]
