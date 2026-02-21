@@ -907,9 +907,9 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                     {(MONSTERS[activeTier] || []).filter(m => !m.id.startsWith('BOSS_') && !m.dungeonOnly).map(mob => {
                         const playerDmg = stats.damage;
 
-                        // 1. Calculate Mitigation (Server-side formula: 10 def = 1% [def/1000])
+                        // 1. Calculate Mitigation (Server-side formula: 100 def = 1% [def/10000])
                         const mobDef = mob.defense || 0;
-                        const mobMitigation = Math.min(0.9, mobDef / 1000);
+                        const mobMitigation = Math.min(0.75, mobDef / 10000);
 
                         // 2. Include average Burst Damage in the calculation
                         const burstChance = stats.burstChance || 0;
@@ -920,6 +920,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                         const mitigatedDmg = baseMitigatedDmg * avgDmgMultiplier;
 
                         // 3. Calculate Time per Cycle
+                        // Server: Hit happens at start of round. Fight ends at lethal blow.
                         const roundsToKill = Math.ceil(mob.health / mitigatedDmg);
                         const interval = (stats.attackSpeed || 1000) / 1000;
                         const killTime = roundsToKill * interval;
