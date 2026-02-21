@@ -1762,7 +1762,7 @@ export class GameManager {
             if (char._stateChanged) delete char._stateChanged; // Reset flag after marking dirty
         }
 
-        if (char.current_activity || char.state.combat || itemsGained > 0 || combatResult || dungeonResult || worldBossResult) {
+        if (char.current_activity || char.state.combat || itemsGained > 0 || combatResult || dungeonResult || worldBossResult || foodUsed || needsHealing) {
             const returnObj = {
                 success: true,
                 message: lastActivityResult?.message || combatResult?.message || dungeonResult?.dungeonUpdate?.message || worldBossResult?.worldBossUpdate?.message || (foodUsed ? "Food consumed" : ""),
