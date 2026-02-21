@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Play, CheckCircle, Clock, Square, Zap, Hammer, Pickaxe, Box, Loader, Hourglass, Sword, Skull, Heart, Apple, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { resolveItem, formatItemId } from '@shared/items';
 import { MONSTERS } from '@shared/monsters';
 import { formatNumber } from '@utils/format';
+import { calculateSurvivalTime } from '../utils/combat';
 
 const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serverTimeOffset = 0, skillProgress = 0 }) => { // Added skillProgress prop
     const [isOpen, setIsOpen] = useState(false);
@@ -29,6 +30,11 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
 
     const doneQty = Math.max(0, effectiveInitialQty - remainingQty);
     const timePerAction = activity?.time_per_action || 3;
+
+    // Cálculo de Stats (Replicado do ProfilePanel para consistência)
+    const stats = useMemo(() => {
+        return gameState?.calculatedStats || { hp: 100, damage: 5, attackSpeed: 1000, defense: 0 };
+    }, [gameState?.calculatedStats]);
 
     // Timer para Atividade (Legacy/Fallback)
     useEffect(() => {
@@ -564,82 +570,18 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                                         const tier = combat.tier || 1;
                                                         const activeMob = (MONSTERS[tier] || []).find(m => m.id === combat.mobId);
 
-                                                        // Fallback for mob stats
-                                                        const mobHp = combat.mobMaxHealth || (activeMob?.health * (tier === 1 ? 1 : 1.5)) || 100; // Rough estimate if missing
-                                                        const mobDmgRaw = activeMob?.damage || 0;
-                                                        const mobDef = activeMob?.defense || 0;
-
-                                                        const playerStats = gameState?.calculatedStats || {};
-                                                        const defense = playerStats.defense || 0;
-                                                        const playerDmg = playerStats.damage || 1;
-                                                        const playerAtkSpeed = playerStats.attackSpeed || 1000;
-
-                                                        // Mitigation
-                                                        const playerMitigation = Math.min(0.75, defense / 10000);
-                                                        const mobMitigation = Math.min(0.75, mobDef / 10000);
-
-                                                        // Fight Dynamics: Player vs Mob
-                                                        const dmgToMob = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
-                                                        const hitsToKillMob = Math.ceil(mobHp / dmgToMob);
-                                                        const fightDurationMs = hitsToKillMob * playerAtkSpeed;
-
-                                                        // Fight Dynamics: Mob vs Player
-                                                        const dmgToPlayer = Math.max(1, Math.floor(mobDmgRaw * (1 - playerMitigation)));
-                                                        // Assume 1:1 attacks (Mob attacks once per Player attack cycle)
-                                                        const damageTakenPerFight = hitsToKillMob * dmgToPlayer;
-
-                                                        // Food Logic (using resolveItem for accurate heal)
-                                                        const food = gameState?.state?.equipment?.food;
-                                                        let foodTotalHeal = 0;
-                                                        if (food && food.amount > 0) {
-                                                            const freshFood = resolveItem(food.id);
-                                                            const healAmount = freshFood?.heal ||
-                                                                (freshFood?.healPercent ? Math.floor((playerStats.hp || 100) * freshFood.healPercent / 100) : 0);
-                                                            foodTotalHeal = food.amount * healAmount;
-                                                        }
-
-                                                        const currentHp = combat.playerHealth || 1;
-                                                        const totalEffectiveHp = currentHp + foodTotalHeal;
-
-                                                        let survivalText = "∞";
-                                                        let survivalColor = "#4caf50";
-
-                                                        // If we take damage, calculate how many fights and total time
-                                                        if (damageTakenPerFight > 0) {
-                                                            const fightsBeforeDeath = Math.floor(totalEffectiveHp / damageTakenPerFight);
-
-                                                            // Total Survival Time = Fights * (Fight Time + Respawn Gap)
-                                                            // Use 1000ms as approximate gap/respawn
-                                                            const totalSurvivalMs = fightsBeforeDeath * (fightDurationMs + 1000);
-                                                            const secondsToDie = totalSurvivalMs / 1000;
-
-                                                            const isPremium = gameState?.state?.isPremium || gameState?.state?.membership?.active;
-                                                            const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
-
-                                                            if (fightsBeforeDeath >= 10000 || secondsToDie > idleLimitSeconds) {
-                                                                survivalText = "∞";
-                                                                survivalColor = "#4caf50";
-                                                            } else {
-                                                                const hrs = Math.floor(secondsToDie / 3600);
-                                                                const mins = Math.floor((secondsToDie % 3600) / 60);
-                                                                const secs = Math.floor(secondsToDie % 60);
-
-                                                                if (hrs > 0) {
-                                                                    survivalText = `${hrs}h ${mins}m ${secs}s`;
-                                                                    survivalColor = "#ff9800";
-                                                                } else if (mins > 0) {
-                                                                    survivalText = `${mins}m ${secs}s`;
-                                                                    survivalColor = "#ff9800";
-                                                                } else {
-                                                                    survivalText = `${secs}s`;
-                                                                    survivalColor = "#ff4444";
-                                                                }
-                                                            }
-                                                        }
+                                                        const survival = calculateSurvivalTime(
+                                                            stats,
+                                                            activeMob,
+                                                            gameState?.state?.equipment?.food ? resolveItem(gameState.state.equipment.food.id) : null,
+                                                            gameState?.state?.equipment?.food?.amount || 0,
+                                                            combat.playerHealth || 1,
+                                                            gameState?.state?.isPremium || gameState?.state?.membership?.active
+                                                        );
 
                                                         return (
-                                                            <span style={{ color: survivalColor }}>
-                                                                {survivalText}
+                                                            <span style={{ color: survival.color }}>
+                                                                {survival.text}
                                                             </span>
                                                         );
                                                     })()}
@@ -667,7 +609,12 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                         <div style={{ marginBottom: '8px' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
                                                 <span style={{ fontSize: '0.7rem', color: '#ff4444', fontWeight: 'bold' }}>Enemy</span>
-                                                <span style={{ fontSize: '0.7rem', color: '#fff' }}>{Math.ceil(combat.mobHealth)} HP</span>
+                                                <div style={{ fontSize: '0.7rem', color: '#fff', fontVariantNumeric: 'tabular-nums', display: 'flex', gap: '2px' }}>
+                                                    <span style={{ minWidth: '35px', textAlign: 'right' }}>{Math.ceil(combat.mobHealth)}</span>
+                                                    <span>/</span>
+                                                    <span style={{ minWidth: '35px', textAlign: 'left' }}>{Math.ceil(combat.mobMaxHealth)}</span>
+                                                    <span style={{ marginLeft: '2px' }}>HP</span>
+                                                </div>
                                             </div>
                                             <div style={{ height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
                                                 <div style={{
@@ -683,11 +630,16 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                         <div>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
                                                 <span style={{ fontSize: '0.7rem', color: '#4caf50', fontWeight: 'bold' }}>You</span>
-                                                <span style={{ fontSize: '0.7rem', color: '#fff' }}>{Math.ceil(combat.playerHealth)} HP</span>
+                                                <div style={{ fontSize: '0.7rem', color: '#fff', fontVariantNumeric: 'tabular-nums', display: 'flex', gap: '2px' }}>
+                                                    <span style={{ minWidth: '35px', textAlign: 'right' }}>{Math.ceil(combat.playerHealth)}</span>
+                                                    <span>/</span>
+                                                    <span style={{ minWidth: '35px', textAlign: 'left' }}>{Math.ceil(stats.maxHP || stats.hp)}</span>
+                                                    <span style={{ marginLeft: '2px' }}>HP</span>
+                                                </div>
                                             </div>
                                             <div style={{ height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
                                                 <div style={{
-                                                    width: `${Math.min(100, (combat.playerHealth / 100) * 100)}% `, // TODO: Usar maxHealth real se disponível no state
+                                                    width: `${Math.min(100, (combat.playerHealth / (stats.maxHP || stats.hp || 100)) * 100)}% `,
                                                     height: '100%',
                                                     background: '#4caf50',
                                                     transition: 'width 0.2s'

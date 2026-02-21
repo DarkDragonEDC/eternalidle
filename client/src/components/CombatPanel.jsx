@@ -4,6 +4,7 @@ import { Sword, Shield, Skull, Coins, Zap, Clock, Trophy, ChevronRight, User, Te
 import { motion, AnimatePresence } from 'framer-motion';
 import { MONSTERS } from '@shared/monsters';
 import { resolveItem } from '@shared/items';
+import { calculateSurvivalTime } from '../utils/combat';
 
 const AnimatedCounter = ({ value, maxValue, triggerKey }) => {
     const [displayValue, setDisplayValue] = useState(value);
@@ -53,102 +54,22 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
 
     // Cálculo de Stats (Replicado do ProfilePanel para consistência)
     const stats = useMemo(() => {
-        if (!gameState?.state) return { str: 0, agi: 0, int: 0, hp: 100, damage: 5, attackSpeed: 1000, defense: 0 };
-        const skills = gameState.state.skills || {};
-        const equipment = gameState.state.equipment || {};
-
-        let str = 0;
-        let agi = 0;
-        let int = 0;
-
-        const getLvl = (key) => (skills[key]?.level || 1);
-
-        // STR: Warrior Class + Cooking/Fishing
-        str += getLvl('ORE_MINER');
-        str += getLvl('METAL_BAR_REFINER');
-        str += getLvl('WARRIOR_CRAFTER');
-        str += getLvl('COOKING');
-        str += getLvl('FISHING');
-
-        // AGI: Hunter Class + Woodcutting
-        agi += getLvl('ANIMAL_SKINNER');
-        agi += getLvl('LEATHER_REFINER');
-        agi += getLvl('HUNTER_CRAFTER');
-        agi += getLvl('LUMBERJACK');
-        agi += getLvl('PLANK_REFINER');
-
-        // INT: Mage Class
-        int += getLvl('FIBER_HARVESTER');
-        int += getLvl('CLOTH_REFINER');
-        int += getLvl('MAGE_CRAFTER');
-        int += getLvl('HERBALISM');
-        int += getLvl('DISTILLATION');
-        int += getLvl('ALCHEMY');
-
-        // Apply Multipliers & Cap
-        str = Math.min(100, str * 0.2);
-        agi = Math.min(100, agi * 0.2);
-        int = Math.min(100, int * (1 / 6));
-
-        // Gear Bonuses (STR/AGI/INT)
-        Object.values(equipment).forEach(item => {
-            if (item) {
-                const fresh = resolveItem(item.id || item.item_id);
-                const statsToUse = fresh?.stats || item.stats;
-                if (statsToUse) {
-                    if (statsToUse.str) str += statsToUse.str;
-                    if (statsToUse.agi) agi += statsToUse.agi;
-                    if (statsToUse.int) int += statsToUse.int;
-                }
-            }
-        });
-
-        const gearDamage = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.damage || 0), 0);
-        const gearDefense = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.defense || 0), 0);
-        const gearHP = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.hp || 0), 0);
-        const gearDmgBonus = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.dmgBonus || 0), 0);
-
-        // Resolve Weapon Speed
-        const weapon = equipment.mainHand;
-        const freshWeapon = weapon ? resolveItem(weapon.id || weapon.item_id) : null;
-        const weaponSpeed = freshWeapon?.stats?.speed || 0; // No weapon = no speed bonus
-
-        // Resolve Gear Speed (excluding weapon)
-        const gearSpeedBonus = Object.entries(equipment).reduce((acc, [slot, item]) => {
-            if (!item || slot === 'mainHand') return acc;
-            const fresh = resolveItem(item.id || item.item_id);
-            return acc + (fresh?.stats?.speed || 0);
-        }, 0);
-
-        const weaponId = (freshWeapon?.id || weapon?.id || '').toUpperCase();
-        let activeProf = null;
-        if (weaponId.includes('SWORD')) activeProf = 'warrior';
-        else if (weaponId.includes('BOW')) activeProf = 'hunter';
-        else if (weaponId.includes('STAFF')) activeProf = 'mage';
-
-        const activeProfDefense = activeProf === 'hunter' ? agi * 25 : 0;
-
-        const totalSpeed = weaponSpeed + gearSpeedBonus + (agi * 2);
-        const finalAttackSpeed = Math.max(200, 2000 - totalSpeed);
-
-        const baseDmg = 5 + str + agi + int + gearDamage;
-        const finalDmg = baseDmg * (1 + gearDmgBonus);
-
-        return {
-            str, agi, int,
-            hp: 100 + (str * 10) + gearHP,
-            damage: Math.floor(finalDmg),
-            defense: gearDefense + activeProfDefense,
-            attackSpeed: finalAttackSpeed,
-            globals: {
-                xpYield: int * 1,
-                silverYield: int * 1
-            }
-        };
-    }, [gameState?.state]);
+        return gameState?.calculatedStats || { hp: 100, damage: 5, attackSpeed: 1000, defense: 0 };
+    }, [gameState?.calculatedStats]);
 
     const combat = gameState?.state?.combat;
     const activeMobName = combat ? combat.mobName : null;
+
+    // Track health for shake animation
+    const prevMobHealthRef = useRef(combat?.mobHealth);
+    const [shakeKey, setShakeKey] = useState(0);
+
+    useEffect(() => {
+        if (combat?.mobHealth < prevMobHealthRef.current) {
+            setShakeKey(prev => prev + 1);
+        }
+        prevMobHealthRef.current = combat?.mobHealth;
+    }, [combat?.mobHealth]);
 
     // Reset ou Restauração de stats quando o combate muda/inicia
     // Initialize session loot from server state whenever it updates (e.g. initial load or background update)
@@ -519,143 +440,18 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 const activeMob = (MONSTERS[combat.tier] || []).find(m => m.id === combat.mobId);
                                 if (!activeMob) return <span style={{ fontSize: '1rem', fontWeight: 'bold', fontFamily: 'monospace', color: '#888' }}>-</span>;
 
-                                const defense = stats.defense;
-                                const mitigation = Math.min(0.75, defense / 10000);
-                                const mobBaseDmg = combat.mobDamage || activeMob.damage || 1;
-                                const mobDmg = Math.max(1, Math.floor(mobBaseDmg * (1 - mitigation)));
-
-                                // Mob attacks every 1000ms (server constant)
-                                const MOB_ATTACK_INTERVAL = 1000;
-
-                                // Player attack speed (for food consumption rate)
-                                const playerAtkSpeed = stats.attackSpeed;
-
-                                // Food Logic
-                                const food = gameState?.state?.equipment?.food;
-                                const foodAmount = (food && food.amount > 0) ? food.amount : 0;
-                                const maxHp = stats.hp;
-
-                                // RESOLVE FRESH ITEM DATA: Ensure we have the latest heal/healPercent
-                                const freshFood = food ? resolveItem(food.id) : null;
-                                const foodHealPerUse = (freshFood && (freshFood.heal || (freshFood.healPercent && Math.floor(maxHp * freshFood.healPercent / 100)))) || 0;
-
-                                // Player HP
-                                const playerHp = combat.playerHealth || 1;
-
-                                // Calculate food consumption rate
-                                // Food is consumed when player takes damage and needs healing
-                                // Player attacks every playerAtkSpeed ms, mob attacks every 1000ms
-                                // Food is processed each tick (every player attack)
-
-                                // Net damage per mob attack cycle:
-                                // - Mob does mobDmg every 1000ms
-                                // - Food heals when HP is missing by >= foodHealPerUse
-                                // 
-                                // Simplified model: per second
-                                const mobDmgPerSecond = mobDmg * (1000 / MOB_ATTACK_INTERVAL);
-
-                                // Better Survival Formula:
-                                // 1. How much can we heal per second? (Max 1 food per player attack)
-                                const maxHealsPerSecond = 1000 / Math.max(100, playerAtkSpeed);
-                                const maxFoodHealPerSecond = foodHealPerUse * maxHealsPerSecond;
-
-                                // 2. Real healing rate is the lesser of (what we need) and (what we can do)
-                                const foodHealRate = foodAmount > 0
-                                    ? Math.min(mobDmgPerSecond, maxFoodHealPerSecond)
-                                    : 0;
-
-                                const netDmgPerSecond = mobDmgPerSecond - foodHealRate;
-                                const isPremium = gameState?.state?.isPremium || gameState?.state?.membership?.active;
-                                const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
-                                let survivalText = "∞";
-                                let survivalColor = "#4caf50";
-
-                                if (netDmgPerSecond > 0) {
-                                    // Player is losing HP even with food
-                                    // Time to die = Current HP / (Net Damage)
-                                    const totalSeconds = playerHp / netDmgPerSecond;
-
-                                    if (totalSeconds > idleLimitSeconds) {
-                                        survivalText = "∞";
-                                        survivalColor = "#4caf50";
-                                    } else {
-                                        const hrs = Math.floor(totalSeconds / 3600);
-                                        const mins = Math.floor((totalSeconds % 3600) / 60);
-                                        const secs = Math.floor(totalSeconds % 60);
-
-                                        if (hrs > 0) {
-                                            survivalText = `${hrs}h ${mins}m ${secs}s`;
-                                            survivalColor = "#ff9800";
-                                        } else if (mins > 0) {
-                                            survivalText = `${mins}m ${secs}s`;
-                                            survivalColor = "#ff9800";
-                                        } else {
-                                            survivalText = `${secs}s`;
-                                            survivalColor = "#ff4444";
-                                        }
-                                    }
-                                } else if (netDmgPerSecond <= 0 && foodAmount > 0 && mobDmgPerSecond > 0) {
-                                    // Food heals faster than damage - but food will run out eventually
-                                    // How long until food runs out?
-                                    // In this case, each "hit" takes 1 food (or less if we heal more than 1 hit worth, but server consumes 1 per hit)
-                                    // Actually server consumes 1 food per player attack if HP < MaxHP.
-                                    // If mob hits for 100 every 1s, and we heal 100 every 1s, we use 1 food every 1s.
-                                    const foodConsumptionRate = mobDmgPerSecond / foodHealPerUse;
-                                    const secondsOfFood = foodAmount / Math.max(0.001, foodConsumptionRate);
-
-                                    // Then player dies in playerHp / mobDmgPerSecond more seconds
-                                    const secondsAfterFood = playerHp / mobDmgPerSecond;
-                                    const totalSeconds = secondsOfFood + secondsAfterFood;
-
-                                    if (totalSeconds > idleLimitSeconds) {
-                                        survivalText = "∞";
-                                        survivalColor = "#4caf50";
-                                    } else {
-                                        const hrs = Math.floor(totalSeconds / 3600);
-                                        const mins = Math.floor((totalSeconds % 3600) / 60);
-                                        const secs = Math.floor(totalSeconds % 60);
-
-                                        if (hrs > 0) {
-                                            survivalText = `${hrs}h ${mins}m`;
-                                            survivalColor = "#4caf50";
-                                        } else if (mins > 0) {
-                                            survivalText = `${mins}m ${secs}s`;
-                                            survivalColor = "#ff9800";
-                                        } else {
-                                            survivalText = `${secs}s`;
-                                            survivalColor = "#ff4444";
-                                        }
-                                    }
-                                } else {
-                                    // No food, or food heals 0, or mob does 0 damage
-                                    // If mob does 0 damage, survival is infinite
-                                    // If mob does damage and no food, survival is playerHp / mobDmgPerSecond
-                                    const secondsToDie = mobDmgPerSecond > 0 ? playerHp / mobDmgPerSecond : Infinity;
-
-                                    if (secondsToDie > idleLimitSeconds) {
-                                        survivalText = "∞";
-                                        survivalColor = "#4caf50";
-                                    } else {
-                                        const hrs = Math.floor(secondsToDie / 3600);
-                                        const mins = Math.floor((secondsToDie % 3600) / 60);
-                                        const secs = Math.floor(secondsToDie % 60);
-
-                                        if (hrs > 0) {
-                                            survivalText = `${hrs}h ${mins}m ${secs}s`;
-                                            survivalColor = "#ff9800";
-                                        } else if (mins > 0) {
-                                            survivalText = `${mins}m ${secs}s`;
-                                            survivalColor = "#ff9800";
-                                        } else {
-                                            survivalText = `${secs}s`;
-                                            survivalColor = "#ff4444";
-                                        }
-                                    }
-                                }
+                                const survival = calculateSurvivalTime(
+                                    stats,
+                                    activeMob,
+                                    gameState?.state?.equipment?.food ? resolveItem(gameState.state.equipment.food.id) : null,
+                                    gameState?.state?.equipment?.food?.amount || 0,
+                                    combat.playerHealth || 1,
+                                    gameState?.state?.isPremium || gameState?.state?.membership?.active
+                                );
 
                                 return (
-                                    <div style={{ fontSize: '1rem', fontWeight: 'bold', fontFamily: 'monospace', color: survivalColor }}>
-                                        {survivalText}
+                                    <div style={{ fontSize: '1rem', fontWeight: 'bold', fontFamily: 'monospace', color: survival.color }}>
+                                        {survival.text}
                                     </div>
                                 );
                             })()}
@@ -671,14 +467,27 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                 </div>
 
                 {/* Main Battle Area */}
-                <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '20px', flex: isMobile ? 'none' : 1, minHeight: 0 }}>
+                <motion.div
+                    animate={shakeKey > 0 ? {
+                        x: [-2, 2, -2, 2, 0],
+                        y: [0, -3, 0],
+                    } : {}}
+                    transition={{ duration: 0.2 }}
+                    style={{
+                        display: 'flex',
+                        flexDirection: isMobile ? 'column' : 'row',
+                        gap: '20px',
+                        flex: isMobile ? 'none' : 1,
+                        minHeight: 0
+                    }}
+                >
                     {/* Visual Arena */}
                     <div className="glass-panel" style={{ flex: isMobile ? 'none' : 1, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden', minHeight: isMobile ? '180px' : '150px' }}>
                         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(circle at center, rgba(255, 68, 68, 0.1) 0%, transparent 70%)', zIndex: 0 }} />
 
                         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-around', zIndex: 1, padding: isMobile ? '10px' : '15px' }}>
                             {/* Player Side */}
-                            <div style={{ textAlign: 'center', position: 'relative' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', position: 'relative' }}>
                                 <motion.div
                                     style={{
                                         width: isMobile ? '50px' : '100px', height: isMobile ? '50px' : '100px',
@@ -693,8 +502,24 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                     <User size={isMobile ? 25 : 50} color="#000" />
 
                                 </motion.div>
-                                <div style={{ fontSize: isMobile ? '0.6rem' : '0.9rem', fontWeight: '900', color: 'var(--text-main)' }}>{gameState?.name?.toUpperCase()}</div>
-                                <div style={{ fontSize: isMobile ? '0.9rem' : '1.3rem', fontWeight: '900', color: '#4caf50', marginTop: '2px' }}>{formatNumber(Math.round(combat.playerHealth))} HP</div>
+                                <div style={{ fontSize: isMobile ? '0.6rem' : '0.9rem', fontWeight: '900', color: 'var(--text-main)', textAlign: 'center', width: '100%' }}>{gameState?.name?.toUpperCase()}</div>
+                                <div style={{
+                                    fontSize: isMobile ? '0.9rem' : '1.3rem',
+                                    fontWeight: '900',
+                                    color: '#4caf50',
+                                    marginTop: '2px',
+                                    textAlign: 'center',
+                                    fontVariantNumeric: 'tabular-nums',
+                                    minWidth: isMobile ? '120px' : '200px',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    gap: '4px'
+                                }}>
+                                    <span>{formatNumber(Math.round(combat.playerHealth))}</span>
+                                    <span>/</span>
+                                    <span>{formatNumber(Math.round(stats.maxHP || stats.hp))}</span>
+                                    <span style={{ marginLeft: '4px' }}>HP</span>
+                                </div>
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
@@ -790,7 +615,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                             </div>
 
                             {/* Mob Side */}
-                            <div style={{ textAlign: 'center', position: 'relative' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', position: 'relative' }}>
                                 <motion.div
                                     style={{
                                         width: isMobile ? '50px' : '100px', height: isMobile ? '50px' : '100px',
@@ -808,9 +633,23 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                         <Skull size={isMobile ? 25 : 50} color="#ff4444" />
                                     )}
                                 </motion.div>
-                                <div style={{ fontSize: isMobile ? '0.6rem' : '0.9rem', fontWeight: '900', color: 'var(--text-main)' }}>{combat.mobName.toUpperCase()}</div>
-                                <div style={{ fontSize: isMobile ? '0.9rem' : '1.3rem', fontWeight: '900', color: '#ff4444', marginTop: '2px' }}>
-                                    <AnimatedCounter value={combat.mobHealth} maxValue={combat.mobMaxHealth} triggerKey={combat.kills} /> HP
+                                <div style={{ fontSize: isMobile ? '0.6rem' : '0.9rem', fontWeight: '900', color: 'var(--text-main)', textAlign: 'center', width: '100%' }}>{combat.mobName.toUpperCase()}</div>
+                                <div style={{
+                                    fontSize: isMobile ? '0.9rem' : '1.3rem',
+                                    fontWeight: '900',
+                                    color: '#ff4444',
+                                    marginTop: '2px',
+                                    textAlign: 'center',
+                                    fontVariantNumeric: 'tabular-nums',
+                                    minWidth: isMobile ? '120px' : '200px',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    gap: '4px'
+                                }}>
+                                    <AnimatedCounter value={combat.mobHealth} maxValue={combat.mobMaxHealth} triggerKey={combat.kills} />
+                                    <span>/</span>
+                                    <span>{formatNumber(combat.mobMaxHealth)}</span>
+                                    <span style={{ marginLeft: '4px' }}>HP</span>
                                 </div>
                             </div>
 
@@ -823,7 +662,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 <div style={{ flex: 1, minWidth: '120px' }}>
                                     <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', marginBottom: '3px' }}>CHARACTER HEALTH</div>
                                     <div style={{ height: '8px', background: 'var(--slot-bg)', borderRadius: '4px', overflow: 'hidden' }}>
-                                        <div style={{ width: `${(combat.playerHealth / stats.hp) * 100}%`, height: '100%', background: '#4caf50', transition: 'width 0.3s' }} />
+                                        <div style={{ width: `${(combat.playerHealth / (stats.maxHP || stats.hp || 100)) * 100}%`, height: '100%', background: '#4caf50', transition: 'width 0.3s' }} />
                                     </div>
                                 </div>
                                 <div style={{ flex: 1, minWidth: '120px' }}>
@@ -841,184 +680,184 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                             </div>
                         </div>
                     </div>
+                </motion.div>
 
-                    {/* Combat Console & Stats */}
-                    <div style={{ flex: isMobile ? 'none' : 1.5, display: 'flex', flexDirection: 'column', gap: '8px', minHeight: 0, overflow: 'hidden' }}>
-                        {/* Stats Dashboard */}
-                        <div className="glass-panel" style={{
-                            padding: '8px',
-                            display: 'grid',
-                            gridTemplateColumns: isMobile ? 'repeat(6, 1fr)' : 'repeat(3, 1fr)',
-                            gap: '5px',
-                            flexShrink: 0
-                        }}>
-                            <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
-                                <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <Activity size={10} /> DPS
-                                </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4a90e2' }}>{formatCompactNumber(dps)}</div>
+                {/* Combat Console & Stats */}
+                <div style={{ flex: isMobile ? 'none' : 1.5, display: 'flex', flexDirection: 'column', gap: '8px', minHeight: 0, overflow: 'hidden' }}>
+                    {/* Stats Dashboard */}
+                    <div className="glass-panel" style={{
+                        padding: '8px',
+                        display: 'grid',
+                        gridTemplateColumns: isMobile ? 'repeat(6, 1fr)' : 'repeat(3, 1fr)',
+                        gap: '5px',
+                        flexShrink: 0
+                    }}>
+                        <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
+                            <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Activity size={10} /> DPS
                             </div>
-                            <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
-                                <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <Trophy size={10} /> KILLS
-                                </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4caf50' }}>{formatCompactNumber(kills)}</div>
+                            <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4a90e2' }}>{formatCompactNumber(dps)}</div>
+                        </div>
+                        <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
+                            <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Trophy size={10} /> KILLS
                             </div>
-                            <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
-                                <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <Heart size={10} /> FOOD USE / SAVED
-                                </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#ff4444' }}>{formatCompactNumber(foodConsumed)} / {formatCompactNumber(savedFoodCount)}</div>
+                            <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4caf50' }}>{formatCompactNumber(kills)}</div>
+                        </div>
+                        <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
+                            <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Heart size={10} /> FOOD USE / SAVED
                             </div>
-                            <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
-                                <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <TrendingUp size={10} /> TOTAL DAMAGE
-                                </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{formatCompactNumber(totalDmgDealt)}</div>
+                            <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#ff4444' }}>{formatCompactNumber(foodConsumed)} / {formatCompactNumber(savedFoodCount)}</div>
+                        </div>
+                        <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
+                            <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <TrendingUp size={10} /> TOTAL DAMAGE
                             </div>
-                            <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
-                                <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <Zap size={10} /> DMG / CRIT
-                                </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>
-                                    <span>{formatCompactNumber(normalDmg)}</span>
-                                    <span style={{ color: '#ff8c00', marginLeft: '4px' }}>/ {formatCompactNumber(totalBurstDmg)}</span>
-                                </div>
+                            <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{formatCompactNumber(totalDmgDealt)}</div>
+                        </div>
+                        <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
+                            <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Zap size={10} /> DMG / CRIT
                             </div>
-                            <div style={{ background: 'var(--accent-soft)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-active)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
-                                <div style={{ fontSize: '0.55rem', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <Coins size={10} /> SILVER
-                                </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--accent)' }}>{formatCompactNumber(silverGained)}</div>
-                            </div>
-                            <div style={{ background: 'rgba(76, 175, 80, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(76, 175, 80, 0.2)', gridColumn: isMobile ? 'span 3' : 'span 1' }}>
-                                <div style={{ fontSize: '0.55rem', color: '#4caf50', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <Star size={10} /> TOTAL XP
-                                </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{formatCompactNumber(xpGained)}</div>
-                            </div>
-                            <div style={{ background: 'rgba(76, 175, 80, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(76, 175, 80, 0.2)', gridColumn: isMobile ? 'span 3' : 'span 1' }}>
-                                <div style={{ fontSize: '0.55rem', color: '#4caf50', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <Activity size={10} /> XP/H
-                                </div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4caf50' }}>{formatCompactNumber(Math.floor(xph))}</div>
+                            <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>
+                                <span>{formatCompactNumber(normalDmg)}</span>
+                                <span style={{ color: '#ff8c00', marginLeft: '4px' }}>/ {formatCompactNumber(totalBurstDmg)}</span>
                             </div>
                         </div>
-
-                        {/* Session Loot */}
-                        <div className="glass-panel" style={{ padding: '8px', background: 'rgba(174, 0, 255, 0.05)', border: '1px solid rgba(174, 0, 255, 0.2)', flexShrink: 0 }}>
-                            <div style={{ fontSize: '0.65rem', fontWeight: '900', color: '#ae00ff', letterSpacing: '1px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                <Zap size={12} /> SESSION LOOT_
+                        <div style={{ background: 'var(--accent-soft)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-active)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
+                            <div style={{ fontSize: '0.55rem', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Coins size={10} /> SILVER
                             </div>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                                {Object.entries(sessionLoot).length === 0 ? (
-                                    <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontStyle: 'italic' }}>Waiting for drops...</span>
-                                ) : (
-                                    Object.entries(sessionLoot).map(([id, qty]) => {
-                                        const itemData = resolveItem(id);
-                                        return (
-                                            <div key={id} style={{
-                                                background: 'var(--slot-bg)',
-                                                padding: '2px 8px',
-                                                borderRadius: '4px',
-                                                border: '1px solid var(--border)',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '5px'
-                                            }}>
-                                                <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{qty}x</span>
-                                                <span style={{ fontSize: '0.7rem', color: '#ae00ff', textTransform: 'capitalize' }}>{itemData ? (itemData.tier ? `T${itemData.tier} ${itemData.name}` : itemData.name) : formatItemId(id)}</span>
-                                            </div>
-                                        );
-                                    })
-                                )}
-                            </div>
+                            <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--accent)' }}>{formatCompactNumber(silverGained)}</div>
                         </div>
-
-                        {/* Battle Console */}
-                        <div className="glass-panel" style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            overflowY: 'hidden',
-                            background: 'var(--bg-dark)',
-                            border: '1px solid var(--border)',
-                            flex: isMobile ? 1 : 'none',
-                            height: isMobile ? 'auto' : '140px',
-                            minHeight: isMobile ? '150px' : '100px',
-                            maxHeight: isMobile ? '300px' : '500px',
-                            position: 'relative'
-                        }}>
-                            <div style={{ padding: '6px 12px', background: 'var(--accent-soft)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                                <Terminal size={10} color="var(--accent)" />
-                                <span style={{ fontSize: '0.55rem', fontWeight: '900', color: 'var(--accent)', letterSpacing: '1px' }}>LOG_</span>
+                        <div style={{ background: 'rgba(76, 175, 80, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(76, 175, 80, 0.2)', gridColumn: isMobile ? 'span 3' : 'span 1' }}>
+                            <div style={{ fontSize: '0.55rem', color: '#4caf50', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Star size={10} /> TOTAL XP
                             </div>
-                            <div
-                                className="scroll-container"
-                                ref={scrollContainerRef}
-                                style={{ flex: 1, height: '100%', padding: '10px', fontFamily: 'monospace', fontSize: isMobile ? '0.7rem' : '0.85rem', color: 'var(--text-main)', overflowY: 'scroll' }}
-                            >
-                                {battleLogs.map(log => (
-                                    <div key={log.id} style={{ marginBottom: '3px', borderLeft: `2px solid ${log.color || '#333'}`, paddingLeft: '6px' }}>
-                                        <span style={{ color: log.color || 'var(--text-main)', opacity: 0.5 }}>[{log.timestamp || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span> {log.content}
-                                    </div>
-                                ))}
-                                <div ref={logsEndRef} />
+                            <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{formatCompactNumber(xpGained)}</div>
+                        </div>
+                        <div style={{ background: 'rgba(76, 175, 80, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(76, 175, 80, 0.2)', gridColumn: isMobile ? 'span 3' : 'span 1' }}>
+                            <div style={{ fontSize: '0.55rem', color: '#4caf50', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Activity size={10} /> XP/H
                             </div>
+                            <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4caf50' }}>{formatCompactNumber(Math.floor(xph))}</div>
+                        </div>
+                    </div>
 
-                            {/* Scroll to Bottom Button */}
-                            {showScrollButton && (
-                                <button
-                                    onClick={scrollToBottom}
-                                    style={{
-                                        position: 'absolute',
-                                        bottom: '10px',
-                                        left: '50%',
-                                        transform: 'translateX(-50%)',
-                                        background: 'var(--accent)',
-                                        color: '#000',
-                                        border: 'none',
-                                        padding: '4px 10px',
-                                        borderRadius: '20px',
-                                        fontSize: '0.55rem',
-                                        fontWeight: 'bold',
-                                        cursor: 'pointer',
-                                        boxShadow: '0 2px 10px rgba(0,0,0,0.5)',
-                                        zIndex: 10,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '5px'
-                                    }}
-                                >
-                                    <Clock size={10} /> NEW MESSAGES ↓
-                                </button>
+                    {/* Session Loot */}
+                    <div className="glass-panel" style={{ padding: '8px', background: 'rgba(174, 0, 255, 0.05)', border: '1px solid rgba(174, 0, 255, 0.2)', flexShrink: 0 }}>
+                        <div style={{ fontSize: '0.65rem', fontWeight: '900', color: '#ae00ff', letterSpacing: '1px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <Zap size={12} /> SESSION LOOT_
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                            {Object.entries(sessionLoot).length === 0 ? (
+                                <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontStyle: 'italic' }}>Waiting for drops...</span>
+                            ) : (
+                                Object.entries(sessionLoot).map(([id, qty]) => {
+                                    const itemData = resolveItem(id);
+                                    return (
+                                        <div key={id} style={{
+                                            background: 'var(--slot-bg)',
+                                            padding: '2px 8px',
+                                            borderRadius: '4px',
+                                            border: '1px solid var(--border)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '5px'
+                                        }}>
+                                            <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{qty}x</span>
+                                            <span style={{ fontSize: '0.7rem', color: '#ae00ff', textTransform: 'capitalize' }}>{itemData ? (itemData.tier ? `T${itemData.tier} ${itemData.name}` : itemData.name) : formatItemId(id)}</span>
+                                        </div>
+                                    );
+                                })
                             )}
                         </div>
-
-                        {/* Flee Button */}
-                        <button
-                            onClick={handleStopCombat}
-                            style={{
-                                width: '100%',
-                                padding: isMobile ? '12px' : '15px',
-                                background: 'rgba(255, 68, 68, 0.1)',
-                                border: '1px solid #ff4444',
-                                color: '#ff4444',
-                                borderRadius: '8px',
-                                fontWeight: '900',
-                                fontSize: '0.8rem',
-                                cursor: 'pointer',
-                                letterSpacing: '2px',
-                                transition: '0.2s',
-                                flexShrink: 0
-                            }}
-                            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255, 68, 68, 0.2)'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255, 68, 68, 0.1)'; }}
-                        >
-                            FLEE FROM BATTLE
-                        </button>
                     </div>
-                </div >
-            </div >
+
+                    {/* Battle Console */}
+                    <div className="glass-panel" style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        overflowY: 'hidden',
+                        background: 'var(--bg-dark)',
+                        border: '1px solid var(--border)',
+                        flex: isMobile ? 1 : 'none',
+                        height: isMobile ? 'auto' : '140px',
+                        minHeight: isMobile ? '150px' : '100px',
+                        maxHeight: isMobile ? '300px' : '500px',
+                        position: 'relative'
+                    }}>
+                        <div style={{ padding: '6px 12px', background: 'var(--accent-soft)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                            <Terminal size={10} color="var(--accent)" />
+                            <span style={{ fontSize: '0.55rem', fontWeight: '900', color: 'var(--accent)', letterSpacing: '1px' }}>LOG_</span>
+                        </div>
+                        <div
+                            className="scroll-container"
+                            ref={scrollContainerRef}
+                            style={{ flex: 1, height: '100%', padding: '10px', fontFamily: 'monospace', fontSize: isMobile ? '0.7rem' : '0.85rem', color: 'var(--text-main)', overflowY: 'scroll' }}
+                        >
+                            {battleLogs.map(log => (
+                                <div key={log.id} style={{ marginBottom: '3px', borderLeft: `2px solid ${log.color || '#333'}`, paddingLeft: '6px' }}>
+                                    <span style={{ color: log.color || 'var(--text-main)', opacity: 0.5 }}>[{log.timestamp || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span> {log.content}
+                                </div>
+                            ))}
+                            <div ref={logsEndRef} />
+                        </div>
+
+                        {/* Scroll to Bottom Button */}
+                        {showScrollButton && (
+                            <button
+                                onClick={scrollToBottom}
+                                style={{
+                                    position: 'absolute',
+                                    bottom: '10px',
+                                    left: '50%',
+                                    transform: 'translateX(-50%)',
+                                    background: 'var(--accent)',
+                                    color: '#000',
+                                    border: 'none',
+                                    padding: '4px 10px',
+                                    borderRadius: '20px',
+                                    fontSize: '0.55rem',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 2px 10px rgba(0,0,0,0.5)',
+                                    zIndex: 10,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '5px'
+                                }}
+                            >
+                                <Clock size={10} /> NEW MESSAGES ↓
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Flee Button */}
+                    <button
+                        onClick={handleStopCombat}
+                        style={{
+                            width: '100%',
+                            padding: isMobile ? '12px' : '15px',
+                            background: 'rgba(255, 68, 68, 0.1)',
+                            border: '1px solid #ff4444',
+                            color: '#ff4444',
+                            borderRadius: '8px',
+                            fontWeight: '900',
+                            fontSize: '0.8rem',
+                            cursor: 'pointer',
+                            letterSpacing: '2px',
+                            transition: '0.2s',
+                            flexShrink: 0
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255, 68, 68, 0.2)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255, 68, 68, 0.1)'; }}
+                    >
+                        FLEE FROM BATTLE
+                    </button>
+                </div>
+            </div>
         );
     }
 
@@ -1187,65 +1026,18 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)' }}>SURVIVAL</div>
                                         {(() => {
-                                            const defense = stats.defense;
-                                            const mitigation = Math.min(0.9, defense / 1000);
-                                            const mobDmg = Math.max(1, Math.floor(mob.damage * (1 - mitigation)));
-
-                                            // Food Logic
-                                            const food = gameState?.state?.equipment?.food;
-                                            const freshFood = food ? resolveItem(food.id) : null;
-                                            const maxHp = stats.hp;
-                                            const foodHealPerUse = (freshFood && (freshFood.heal || (freshFood.healPercent && Math.floor(maxHp * freshFood.healPercent / 100)))) || 0;
-                                            const foodAmount = (food && food.amount) || 0;
-
-                                            const playerHp = gameState?.state?.health || 1;
-                                            const playerAtkSpeed = stats.attackSpeed;
-                                            const mobDmgPerSecond = mobDmg; // Mobs attack every 1s
-
-                                            const maxHealsPerSecond = 1000 / Math.max(100, playerAtkSpeed);
-                                            const maxFoodHealPerSecond = foodHealPerUse * maxHealsPerSecond;
-
-                                            const foodHealRate = foodAmount > 0
-                                                ? Math.min(mobDmgPerSecond, maxFoodHealPerSecond)
-                                                : 0;
-
-                                            const netDmgPerSecond = mobDmgPerSecond - foodHealRate;
-                                            const isPremium = gameState?.state?.isPremium || gameState?.state?.membership?.active;
-                                            const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
-
-                                            let survivalText = "∞";
-                                            let survivalColor = "#4caf50";
-                                            let totalSeconds = Infinity;
-
-                                            if (netDmgPerSecond > 0) {
-                                                totalSeconds = playerHp / netDmgPerSecond;
-                                            } else if (foodAmount > 0 && mobDmgPerSecond > 0) {
-                                                const foodConsumptionRate = mobDmgPerSecond / foodHealPerUse;
-                                                const secondsOfFood = foodAmount / Math.max(0.001, foodConsumptionRate);
-                                                totalSeconds = secondsOfFood + (playerHp / mobDmgPerSecond);
-                                            }
-
-                                            if (totalSeconds !== Infinity) {
-                                                const secondsToDie = totalSeconds;
-
-                                                if (secondsToDie > idleLimitSeconds) {
-                                                    survivalText = "∞";
-                                                } else {
-                                                    const hrs = Math.floor(secondsToDie / 3600);
-                                                    const mins = Math.floor((secondsToDie % 3600) / 60);
-                                                    if (hrs > 0) survivalText = `${hrs}h${mins}m`;
-                                                    else survivalText = `${mins}m`;
-                                                    survivalColor = "#ff9800";
-                                                    if (hrs === 0 && mins === 0) {
-                                                        survivalText = `${Math.floor(secondsToDie % 60)}s`;
-                                                        survivalColor = "#ff4444";
-                                                    }
-                                                }
-                                            }
+                                            const survival = calculateSurvivalTime(
+                                                stats,
+                                                mob,
+                                                gameState?.state?.equipment?.food ? resolveItem(gameState.state.equipment.food.id) : null,
+                                                gameState?.state?.equipment?.food?.amount || 0,
+                                                gameState?.state?.health || 1,
+                                                gameState?.state?.isPremium || gameState?.state?.membership?.active
+                                            );
 
                                             return (
-                                                <div style={{ fontSize: isMobile ? '0.75rem' : '0.85rem', fontWeight: 'bold', color: survivalColor }}>
-                                                    {survivalText}
+                                                <div style={{ fontSize: isMobile ? '0.75rem' : '0.85rem', fontWeight: 'bold', color: survival.color }}>
+                                                    {survival.text}
                                                 </div>
                                             );
                                         })()}
