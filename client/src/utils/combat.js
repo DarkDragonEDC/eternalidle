@@ -7,10 +7,12 @@
  * - Idle Limit (8h normal / 12h premium)
  */
 
-export const calculateSurvivalTime = (playerStats, mobData, foodItem, foodAmount, currentHp, isPremium = false) => {
+export const calculateSurvivalTime = (playerStats, mobData, foodItem, foodAmountInput, currentHp, isPremium = false) => {
     if (!mobData) return { seconds: Infinity, text: "∞", color: "#4caf50" };
 
-    const maxHp = playerStats.hp || 100;
+    const foodAmount = typeof foodAmountInput === 'object' ? (foodAmountInput.amount || 0) : (Number(foodAmountInput) || 0);
+
+    const maxHp = playerStats.maxHP || playerStats.hp || 100;
     const defense = playerStats.defense || 0;
     const playerDmg = playerStats.damage || 1;
     const playerAtkSpeed = Math.max(200, playerStats.attackSpeed || 1000);
@@ -46,8 +48,9 @@ export const calculateSurvivalTime = (playerStats, mobData, foodItem, foodAmount
     const actualFightDurationMs = Math.max(0, (hitsToKillMob - 1) * playerAtkSpeed);
     const totalCycleMs = actualFightDurationMs + 1000; // +1s respawn
 
-    // Damage per Cycle
-    const mobAttacksPerCycle = Math.floor(actualFightDurationMs / mobAtkSpeed);
+    // Damage per Cycle - Mob only hits if it survives past the attack time
+    // Server: Player hits first. If mob dies at T=1000, it doesn't attack at T=1000.
+    const mobAttacksPerCycle = Math.max(0, Math.floor((actualFightDurationMs - 1) / mobAtkSpeed));
     const dmgPerCycle = mobAttacksPerCycle * dmgToPlayer;
 
     // Rates for easier math
@@ -103,13 +106,13 @@ const formatSurvival = (totalSeconds) => {
     let color = "#ff9800";
 
     if (hrs > 0) {
-        text = `${hrs}h ${mins}m`;
+        text = `${hrs}h ${mins}m*`;
         color = "#ff9800";
     } else if (mins > 0) {
-        text = `${mins}m ${secs}s`;
+        text = `${mins}m ${secs}s*`;
         color = "#ff9800";
     } else {
-        text = `${secs}s`;
+        text = `${secs}s*`;
         color = "#ff4444";
     }
 

@@ -570,11 +570,14 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                                         const tier = combat.tier || 1;
                                                         const activeMob = (MONSTERS[tier] || []).find(m => m.id === combat.mobId);
 
+                                                        const foodItem = gameState?.state?.equipment?.food;
+                                                        const foodAmount = typeof foodItem?.amount === 'object' ? (foodItem.amount.amount || 0) : (Number(foodItem?.amount) || 0);
+
                                                         const survival = calculateSurvivalTime(
                                                             stats,
                                                             activeMob,
-                                                            gameState?.state?.equipment?.food ? resolveItem(gameState.state.equipment.food.id) : null,
-                                                            gameState?.state?.equipment?.food?.amount || 0,
+                                                            foodItem ? resolveItem(foodItem.id) : null,
+                                                            foodAmount,
                                                             combat.playerHealth || 1,
                                                             gameState?.state?.isPremium || gameState?.state?.membership?.active
                                                         );

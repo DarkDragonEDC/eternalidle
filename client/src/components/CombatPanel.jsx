@@ -440,11 +440,14 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                 const activeMob = (MONSTERS[combat.tier] || []).find(m => m.id === combat.mobId);
                                 if (!activeMob) return <span style={{ fontSize: '1rem', fontWeight: 'bold', fontFamily: 'monospace', color: '#888' }}>-</span>;
 
+                                const foodItem = gameState?.state?.equipment?.food;
+                                const foodAmount = typeof foodItem?.amount === 'object' ? (foodItem.amount.amount || 0) : (Number(foodItem?.amount) || 0);
+
                                 const survival = calculateSurvivalTime(
                                     stats,
                                     activeMob,
-                                    gameState?.state?.equipment?.food ? resolveItem(gameState.state.equipment.food.id) : null,
-                                    gameState?.state?.equipment?.food?.amount || 0,
+                                    foodItem ? resolveItem(foodItem.id) : null,
+                                    foodAmount,
                                     combat.playerHealth || 1,
                                     gameState?.state?.isPremium || gameState?.state?.membership?.active
                                 );
@@ -1026,11 +1029,14 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                     <div style={{ textAlign: 'center' }}>
                                         <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)' }}>SURVIVAL</div>
                                         {(() => {
+                                            const foodItem = gameState?.state?.equipment?.food;
+                                            const foodAmount = typeof foodItem?.amount === 'object' ? (foodItem.amount.amount || 0) : (Number(foodItem?.amount) || 0);
+
                                             const survival = calculateSurvivalTime(
                                                 stats,
                                                 mob,
-                                                gameState?.state?.equipment?.food ? resolveItem(gameState.state.equipment.food.id) : null,
-                                                gameState?.state?.equipment?.food?.amount || 0,
+                                                foodItem ? resolveItem(foodItem.id) : null,
+                                                foodAmount,
                                                 gameState?.state?.health || 1,
                                                 gameState?.state?.isPremium || gameState?.state?.membership?.active
                                             );
