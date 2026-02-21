@@ -1369,7 +1369,7 @@ export const calculateRuneBonus = (tier, stars, effType = null) => {
 
     // SPEED (Auto-Refine) runes give half bonus (max ~25% instead of ~50%)
     if (effType === 'SPEED') {
-        bonus = Math.max(1, Math.floor(bonus / 2));
+        bonus = Math.max(0.5, parseFloat((bonus / 2).toFixed(1)));
     }
 
     // ATTACK (Combat) and ATTACK_SPEED runes: Specific linear growth requested by user
@@ -1392,13 +1392,13 @@ export const calculateRuneBonus = (tier, stars, effType = null) => {
 
     // Food Saving runes give 30% bonus (max ~15% instead of ~50%)
     if (effType === 'SAVE_FOOD') {
-        bonus = Math.max(1, Math.floor(bonus * 0.3));
+        bonus = Math.max(0.5, parseFloat((bonus * 0.3).toFixed(1)));
     }
 
     // BURST (Critical Strike) runes give 30% bonus (max 15% instead of ~50%)
     // Fix: Burst Chance shouldn't be too high (cap at 15%)
     if (effType === 'BURST') {
-        bonus = Math.max(1, Math.floor(bonus * 0.3));
+        bonus = Math.max(0.5, parseFloat((bonus * 0.3).toFixed(1)));
     }
 
     return bonus;
