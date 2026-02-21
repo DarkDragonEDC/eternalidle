@@ -923,7 +923,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                         // Server: Hit happens at start of round. Fight ends at lethal blow.
                         const roundsToKill = Math.ceil(mob.health / mitigatedDmg);
                         const interval = (stats.attackSpeed || 1000) / 1000;
-                        const killTime = roundsToKill * interval;
+                        const killTime = Math.max(0, (roundsToKill - 1) * interval);
                         const cycleTime = killTime + 1.0; // +1s Respawn Delay
 
                         const killsPerHour = 3600 / cycleTime;
