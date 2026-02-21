@@ -496,24 +496,40 @@ const InspectModal = React.memo(({ data, onClose, onItemClick }) => {
                 </div>
 
                 {/* Footer Info */}
-                <div style={{ padding: '20px', background: 'rgba(0,0,0,0.3)', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Crosshair size={14} style={{ color: '#ef4444' }} />
-                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)' }}>DMG <span style={{ color: '#fff' }}>{stats.damage || 0}</span></span>
+                <div style={{ padding: '15px 20px', background: 'rgba(0,0,0,0.3)', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', opacity: 0.5 }}>
+                            <Crosshair size={12} style={{ color: '#ef4444' }} />
+                            <span style={{ fontSize: '0.6rem', fontWeight: '900', color: 'var(--text-dim)', letterSpacing: '0.5px' }}>DMG</span>
+                        </div>
+                        <span style={{ fontSize: '0.9rem', fontWeight: '950', color: '#fff' }}>{stats.damage || 0}</span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Shield size={14} style={{ color: '#60a5fa' }} />
-                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                            DEF <span style={{ color: '#fff' }}>{Math.min(75, (stats.defense || 0) / 100).toFixed(1)}%</span>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', opacity: 0.5 }}>
+                            <Shield size={12} style={{ color: '#60a5fa' }} />
+                            <span style={{ fontSize: '0.6rem', fontWeight: '900', color: 'var(--text-dim)', letterSpacing: '0.5px' }}>DEF</span>
+                        </div>
+                        <span style={{ fontSize: '0.9rem', fontWeight: '950', color: '#fff' }}>{Math.min(75, (stats.defense || 0) / 100).toFixed(1)}%</span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', opacity: 0.5 }}>
+                            <Zap size={12} style={{ color: '#facc15' }} />
+                            <span style={{ fontSize: '0.6rem', fontWeight: '900', color: 'var(--text-dim)', letterSpacing: '0.5px' }}>SPD</span>
+                        </div>
+                        <span style={{ fontSize: '0.9rem', fontWeight: '950', color: '#fff' }}>
+                            {stats.attackSpeed ? (1000 / stats.attackSpeed).toFixed(2) : '1.00'}
+                            <span style={{ fontSize: '0.55rem', opacity: 0.4, marginLeft: '2px' }}>hit/s</span>
                         </span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Zap size={14} style={{ color: '#facc15' }} />
-                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)' }}>SPD <span style={{ color: '#fff' }}>{stats.attackSpeed ? `${(1000 / stats.attackSpeed).toFixed(2)} hit/s` : '1.00 hit/s'}</span></span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Star size={14} style={{ color: '#f59e0b' }} />
-                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)' }}>CRIT <span style={{ color: '#fff' }}>{(stats.burstChance || 0).toFixed(1)}%</span></span>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', opacity: 0.5 }}>
+                            <Star size={12} style={{ color: '#f59e0b' }} />
+                            <span style={{ fontSize: '0.6rem', fontWeight: '900', color: 'var(--text-dim)', letterSpacing: '0.5px' }}>CRIT</span>
+                        </div>
+                        <span style={{ fontSize: '0.9rem', fontWeight: '950', color: '#fff' }}>{(stats.burstChance || 0).toFixed(1)}%</span>
                     </div>
                 </div>
             </motion.div>
@@ -732,13 +748,39 @@ const RuneBuffSummary = ({ activeRuneBuffs, activeRuneTab }) => {
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {relevantBuffs.map(([act, buffs]) => (
-                    <div key={act} style={{ padding: '8px 12px', background: 'rgba(0,0,0,0.2)', borderRadius: '10px', display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-                        <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 'bold', minWidth: '80px' }}>{act}:</span>
-                        <div style={{ display: 'flex', gap: '15px', flex: 1 }}>
+                    <div key={act} style={{
+                        padding: '12px',
+                        background: 'rgba(255,255,255,0.02)',
+                        borderRadius: '12px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '10px',
+                        border: '1px solid rgba(255,255,255,0.03)'
+                    }}>
+                        <div style={{
+                            fontSize: '0.6rem',
+                            color: 'rgba(255,255,255,0.3)',
+                            fontWeight: '900',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px',
+                            borderBottom: '1px solid rgba(255,255,255,0.05)',
+                            paddingBottom: '6px'
+                        }}>
+                            {act}
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
                             {Object.entries(buffs).map(([eff, val]) => (
-                                <div key={eff} style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#fff' }}>
-                                    <span style={{ color: 'rgba(255,255,255,0.3)', marginRight: '4px' }}>{eff}:</span>
-                                    <span style={{ color: eff === 'XP' ? 'var(--accent)' : eff === 'COPY' ? '#4ade80' : '#60a5fa' }}>+{val}%</span>
+                                <div key={eff} style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                    <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', fontWeight: '800', textTransform: 'uppercase' }}>
+                                        {eff.replace(/_/g, ' ')}
+                                    </span>
+                                    <span style={{
+                                        fontSize: '0.85rem',
+                                        fontWeight: '950',
+                                        color: eff === 'XP' ? 'var(--accent)' : eff === 'COPY' ? '#4ade80' : '#60a5fa'
+                                    }}>
+                                        +{val.toFixed(1)}%
+                                    </span>
                                 </div>
                             ))}
                         </div>
