@@ -2799,7 +2799,13 @@ export class GameManager {
             if (data.info.stats) data.state.stats = data.info.stats;
             if (data.info.health !== undefined) data.state.health = data.info.health;
             if (data.info.silver !== undefined) data.state.silver = data.info.silver;
-            if (data.info.orbs !== undefined) data.state.orbs = data.info.orbs;
+            if (data.info.orbs !== undefined) {
+                data.state.orbs = data.info.orbs;
+            } else if (data.info.crowns !== undefined) {
+                // Legacy support/Migration: move crowns to orbs
+                data.state.orbs = data.info.crowns;
+                console.log(`[MIGRATION-ORBS] Migrated ${data.info.crowns} crowns to orbs for ${data.name}`);
+            }
             if (data.info.membership) data.state.membership = data.info.membership;
             if (data.info.active_buffs) data.state.active_buffs = data.info.active_buffs;
             if (data.info.inventorySlots !== undefined) data.state.inventorySlots = data.info.inventorySlots;

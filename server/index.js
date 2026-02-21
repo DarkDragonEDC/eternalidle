@@ -1053,7 +1053,8 @@ io.on('connection', (socket) => {
                 if (result.success) {
                     // Return result to client
                     socket.emit('daily_spin_result', result);
-                    // Also update status immediately
+                    // Also update status immediately (crucial for showing new orbs/items)
+                    socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
                     socket.emit('daily_status', { canSpin: false });
                 } else {
                     socket.emit('error', { message: result.error });
