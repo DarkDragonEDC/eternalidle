@@ -1422,19 +1422,17 @@ export class GameManager {
 
             const toCleanup = allActive.filter(char => {
                 const limitMs = this.getMaxIdleTime(char);
-                let startTime = null;
-                if (char.state.dungeon && char.state.dungeon.started_at) {
-                    startTime = new Date(char.state.dungeon.started_at);
-                } else if (char.state.combat && char.state.combat.started_at) {
-                    startTime = new Date(char.state.combat.started_at);
-                } else if (char.current_activity && char.activity_started_at) {
-                    startTime = new Date(char.activity_started_at);
-                }
 
-                if (startTime && !isNaN(startTime.getTime())) {
-                    return (nowMs - startTime.getTime()) > limitMs;
-                }
-                return false;
+                // Check each activity independently — if ANY exceeds the limit, the char needs cleanup
+                const combatStart = char.state.combat?.started_at ? new Date(char.state.combat.started_at).getTime() : null;
+                const dungeonStart = char.state.dungeon?.started_at ? new Date(char.state.dungeon.started_at).getTime() : null;
+                const activityStart = (char.current_activity && char.activity_started_at) ? new Date(char.activity_started_at).getTime() : null;
+
+                const combatExceeded = combatStart && (nowMs - combatStart > limitMs);
+                const dungeonExceeded = dungeonStart && (nowMs - dungeonStart > limitMs);
+                const activityExceeded = activityStart && (nowMs - activityStart > limitMs);
+
+                return combatExceeded || dungeonExceeded || activityExceeded;
             });
 
             if (toCleanup.length === 0) {
@@ -1446,31 +1444,42 @@ export class GameManager {
 
             for (const char of toCleanup) {
                 console.log(`[MAINTENANCE] Cleaning up ${char.name} (${char.id})...`);
-                // Calling getCharacter with catchup=true will process gains up to 12h
+                // Calling getCharacter with catchup=true will process gains up to limit
                 await this.executeLocked(char.user_id, async () => {
                     const fullChar = await this.getCharacter(char.user_id, char.id, true);
 
-                    // Force Stop activities if they are still running (exceeded limit)
                     if (fullChar) {
+                        const limitMs = this.getMaxIdleTime(fullChar);
                         let stopped = false;
-                        if (fullChar.state.combat) {
-                            console.log(`[MAINTENANCE] Stopping combat for ${fullChar.name} (limit reached)`);
-                            await this.combatManager.stopCombat(fullChar.user_id, fullChar.id);
-                            stopped = true;
+
+                        // Stop ONLY the activities that individually exceeded their limit
+                        if (fullChar.state.combat?.started_at) {
+                            const combatAge = nowMs - new Date(fullChar.state.combat.started_at).getTime();
+                            if (combatAge > limitMs) {
+                                console.log(`[MAINTENANCE] Stopping combat for ${fullChar.name} (${Math.floor(combatAge / 3600000)}h exceeded limit)`);
+                                await this.combatManager.stopCombat(fullChar.user_id, fullChar.id);
+                                stopped = true;
+                            }
                         }
-                        if (fullChar.state.dungeon) {
-                            console.log(`[MAINTENANCE] Stopping dungeon for ${fullChar.name} (limit reached)`);
-                            await this.dungeonManager.stopDungeon(fullChar.user_id, fullChar.id);
-                            stopped = true;
+                        if (fullChar.state.dungeon?.started_at) {
+                            const dungeonAge = nowMs - new Date(fullChar.state.dungeon.started_at).getTime();
+                            if (dungeonAge > limitMs) {
+                                console.log(`[MAINTENANCE] Stopping dungeon for ${fullChar.name} (${Math.floor(dungeonAge / 3600000)}h exceeded limit)`);
+                                await this.dungeonManager.stopDungeon(fullChar.user_id, fullChar.id);
+                                stopped = true;
+                            }
                         }
-                        if (fullChar.current_activity) {
-                            console.log(`[MAINTENANCE] Stopping activity for ${fullChar.name} (limit reached)`);
-                            await this.activityManager.stopActivity(fullChar.user_id, fullChar.id);
-                            stopped = true;
+                        if (fullChar.current_activity && fullChar.activity_started_at) {
+                            const activityAge = nowMs - new Date(fullChar.activity_started_at).getTime();
+                            if (activityAge > limitMs) {
+                                console.log(`[MAINTENANCE] Stopping activity for ${fullChar.name} (${Math.floor(activityAge / 3600000)}h exceeded limit)`);
+                                await this.activityManager.stopActivity(fullChar.user_id, fullChar.id);
+                                stopped = true;
+                            }
                         }
 
                         if (stopped) {
-                            console.log(`[MAINTENANCE] Character ${fullChar.name} is now parked.`);
+                            console.log(`[MAINTENANCE] Character ${fullChar.name} cleanup complete.`);
                         }
                     }
                 });
