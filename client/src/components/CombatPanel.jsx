@@ -932,11 +932,26 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                         const xpBonus = stats.globals?.xpYield || 0;
                         const silverBonus = stats.globals?.silverYield || 0;
 
-                        const xpPerKill = Math.floor(mob.xp * (1 + xpBonus / 100));
+                        // Farm Cap: Proficiency Overleveling Penalty
+                        const mobTierLevel = activeTier <= 1 ? 1 : (activeTier - 1) * 10;
+                        const weaponObj = gameState?.state?.equipment?.mainHand;
+                        const weaponId = (weaponObj?.id || '').toUpperCase();
+                        let profKey = null;
+                        if (weaponId.includes('SWORD')) profKey = 'WARRIOR_PROFICIENCY';
+                        else if (weaponId.includes('BOW')) profKey = 'HUNTER_PROFICIENCY';
+                        else if (weaponId.includes('STAFF')) profKey = 'MAGE_PROFICIENCY';
+                        const profLevel = profKey ? (gameState?.state?.skills?.[profKey]?.level || 1) : 1;
+                        const levelDiff = profLevel - mobTierLevel;
+
+                        let farmCapPenalty = 1.0;
+                        if (levelDiff >= 20) farmCapPenalty = 0.2;
+                        else if (levelDiff >= 10) farmCapPenalty = 0.5;
+
+                        const xpPerKill = Math.floor(mob.xp * (1 + xpBonus / 100) * farmCapPenalty);
                         const xpHour = killsPerHour * xpPerKill;
 
                         const avgSilver = (mob.silver[0] + mob.silver[1]) / 2;
-                        const silverPerKill = Math.floor(avgSilver * (1 + silverBonus / 100));
+                        const silverPerKill = Math.floor(avgSilver * (1 + silverBonus / 100) * farmCapPenalty);
                         const silverHour = killsPerHour * silverPerKill;
 
                         const isLocked = ((activeTier === 1 ? 1 : (activeTier - 1) * 10) > (gameState?.state?.skills?.COMBAT?.level || 1));
@@ -1015,14 +1030,18 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                     marginTop: isMobile ? '4px' : '0'
                                 }}>
                                     <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)' }}>XP/H</div>
-                                        <div style={{ fontSize: isMobile ? '0.75rem' : '0.85rem', fontWeight: 'bold', color: '#4caf50' }}>
+                                        <div style={{ fontSize: '0.55rem', color: farmCapPenalty < 1 ? '#ff4444' : 'var(--text-dim)' }}>
+                                            XP/H{farmCapPenalty < 1 ? ` -${Math.round((1 - farmCapPenalty) * 100)}%` : ''}
+                                        </div>
+                                        <div style={{ fontSize: isMobile ? '0.75rem' : '0.85rem', fontWeight: 'bold', color: farmCapPenalty < 1 ? '#ff6666' : '#4caf50' }}>
                                             {formatNumber(xpHour)}
                                         </div>
                                     </div>
                                     <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)' }}>SILVER/H</div>
-                                        <div style={{ fontSize: isMobile ? '0.75rem' : '0.85rem', fontWeight: 'bold', color: '#d4af37' }}>
+                                        <div style={{ fontSize: '0.55rem', color: farmCapPenalty < 1 ? '#ff4444' : 'var(--text-dim)' }}>
+                                            SILVER/H{farmCapPenalty < 1 ? ` -${Math.round((1 - farmCapPenalty) * 100)}%` : ''}
+                                        </div>
+                                        <div style={{ fontSize: isMobile ? '0.75rem' : '0.85rem', fontWeight: 'bold', color: farmCapPenalty < 1 ? '#ff6666' : '#d4af37' }}>
                                             {formatNumber(silverHour)}
                                         </div>
                                     </div>

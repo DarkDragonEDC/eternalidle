@@ -292,24 +292,39 @@ export class CombatManager {
                 const xpBonus = playerStats.globals?.xpYield || 0;
                 let finalXp = Math.floor(baseXp * (1 + xpBonus / 100)); // +1% per point
 
+                // --- FARM CAP: Proficiency Overleveling Penalty ---
+                // Tier-to-Level: T1=1, T2=10, T3=20 ... T10=90
+                const mobTierLevel = currentTier <= 1 ? 1 : (currentTier - 1) * 10;
+                const weaponObj = char.state.equipment?.mainHand;
+                const weaponId = (weaponObj?.id || '').toUpperCase();
+                let profSkillKey = null;
+                if (weaponId.includes('SWORD')) profSkillKey = 'WARRIOR_PROFICIENCY';
+                else if (weaponId.includes('BOW')) profSkillKey = 'HUNTER_PROFICIENCY';
+                else if (weaponId.includes('STAFF')) profSkillKey = 'MAGE_PROFICIENCY';
+
+                const profLevel = profSkillKey ? (char.state.skills?.[profSkillKey]?.level || 1) : 1;
+                const levelDiff = profLevel - mobTierLevel;
+
+                let farmCapPenalty = 1.0; // 1.0 = no penalty
+                if (levelDiff >= 20) {
+                    farmCapPenalty = 0.2; // 80% penalty
+                } else if (levelDiff >= 10) {
+                    farmCapPenalty = 0.5; // 50% penalty
+                }
+
+                finalXp = Math.floor(finalXp * farmCapPenalty);
+
                 // Safety Cap
                 if (finalXp > MAX_XP_PER_KILL) finalXp = MAX_XP_PER_KILL;
 
                 leveledUp = this.gameManager.addXP(char, 'COMBAT', finalXp);
                 roundDetails.xpGained = finalXp;
 
-                // --- NEW PROFICIENCY XP LOGIC ---
+                // --- PROFICIENCY XP LOGIC ---
                 // 10% of Combat XP goes to the active weapon proficiency
                 const profXp = Math.floor(finalXp * 0.1);
                 if (profXp > 0) {
-                    const weaponObj = char.state.equipment?.mainHand; // Access directly from state
-                    const weaponId = (weaponObj?.id || '').toUpperCase();
-                    let profSkillKey = null;
-
-                    if (weaponId.includes('SWORD')) profSkillKey = 'WARRIOR_PROFICIENCY';
-                    else if (weaponId.includes('BOW')) profSkillKey = 'HUNTER_PROFICIENCY';
-                    else if (weaponId.includes('STAFF')) profSkillKey = 'MAGE_PROFICIENCY';
-
+                    // profSkillKey already determined above for farm cap
                     if (profSkillKey) {
                         const profLeveled = this.gameManager.addXP(char, profSkillKey, profXp);
                         if (profLeveled) {
@@ -336,6 +351,9 @@ export class CombatManager {
 
                     const silverBonus = playerStats.globals?.silverYield || 0;
                     finalSilver = Math.floor(baseSilver * (1 + silverBonus / 100));
+
+                    // Apply farm cap penalty to silver too
+                    finalSilver = Math.floor(finalSilver * farmCapPenalty);
 
                     // Safety Cap
                     if (finalSilver > MAX_SILVER_PER_KILL) finalSilver = MAX_SILVER_PER_KILL;
