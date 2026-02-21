@@ -157,10 +157,7 @@ export class DungeonManager {
                         // Mob Defeated!
                         const mobConfig = MONSTERS[dungeonConfig.tier]?.find(m => m.id === dungeonState.activeMob.id);
 
-                        // Grant Dungeoneering XP only
-                        if (mobConfig && mobConfig.xp) {
-                            await this.gameManager.addXP(char, 'DUNGEONEERING', Math.floor(mobConfig.xp * 0.5));
-                        }
+                        // XP is only granted on dungeon completion, not per mob
 
                         // Advance to next state
                         const waveElapsed = now - (dungeonState.wave_started_at || now);
