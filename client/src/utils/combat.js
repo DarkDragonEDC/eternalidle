@@ -33,6 +33,17 @@ export const calculateSurvivalTime = (playerStats, mobData, foodItem, foodAmount
     // Fight Dynamics
     const hitsToKillMob = Math.ceil(mobMaxHp / dmgToMob);
 
+    // Food Healing
+    let unitHeal = 0;
+    if (foodItem) {
+        if (foodItem.healPercent) {
+            unitHeal = Math.floor(maxHp * (foodItem.healPercent / 100));
+        } else {
+            unitHeal = foodItem.heal || 0;
+        }
+    }
+    if (unitHeal < 1) unitHeal = 0;
+
     // Precise Rates
     // Server logic: Mob hit timer is persistent across kills and respawns.
     // This means the player takes exactly 1 hit per mobAtkSpeed (1000ms) on average.
