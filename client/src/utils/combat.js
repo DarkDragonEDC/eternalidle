@@ -102,13 +102,13 @@ const formatSurvival = (totalSeconds) => {
     let color = "#ff9800";
 
     if (hrs > 0) {
-        text = `${hrs}h ${mins}m***`;
+        text = `${hrs}h ${mins}m`;
         color = "#ff9800";
     } else if (mins > 0) {
-        text = `${mins}m ${secs}s***`;
+        text = `${mins}m ${secs}s`;
         color = "#ff9800";
     } else {
-        text = `${secs}s***`;
+        text = `${secs}s`;
         color = "#ff4444";
     }
 
