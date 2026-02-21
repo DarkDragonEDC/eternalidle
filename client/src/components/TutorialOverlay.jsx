@@ -103,7 +103,7 @@ const TutorialStepData = {
         title: 'Your Collection',
         text: 'Open the Runes tab to see all your collected Runes.',
         targetId: 'tutorial-rune-tab',
-        position: 'top'
+        position: 'middle'
     },
     'SELECT_MERGE_RUNE': {
         title: 'Evolution Ready',
@@ -181,7 +181,7 @@ const TutorialStepData = {
         title: 'First Battle',
         text: 'Start a fight with a Rabbit to begin your journey!',
         targetId: 'fight-button-RABBIT',
-        position: 'bottom'
+        position: 'middle'
     }
 };
 
@@ -368,7 +368,7 @@ const TutorialOverlay = ({ currentStep, onCompleteStep }) => {
                     style={{
                         position: 'absolute',
                         left: '50%',
-                        top: step.position === 'very-top' ? '10px' : (step.position === 'top-lower' ? '180px' : (step.position === 'top' ? '10%' : 'auto')),
+                        top: step.position === 'very-top' ? '10px' : (step.position === 'top-lower' ? '180px' : (step.position === 'middle' ? '45%' : (step.position === 'top' ? '10%' : 'auto'))),
                         bottom: step.position === 'bottom' ? '40px' : 'auto',
                         width: 'calc(100% - 40px)',
                         maxWidth: '360px',
