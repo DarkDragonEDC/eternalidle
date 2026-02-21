@@ -550,9 +550,10 @@ export class GameManager {
             */
 
             try {
-                if (catchup && (data.current_activity || data.state.combat || data.state.dungeon) && data.last_saved) {
+                const needsHealing = (data.state.health || 0) < (this.inventoryManager.calculateStats(data).maxHP || 100) && (data.state.equipment?.food?.amount > 0);
+                if (catchup && (data.current_activity || data.state.combat || data.state.dungeon || needsHealing) && data.last_saved) {
                     if (isSignificantCatchup) {
-                        console.log(`[CATCHUP] ${data.name}: last_saved=${data.last_saved}, elapsed=${elapsedSeconds.toFixed(1)}s, hasActivity=${!!data.current_activity}, hasCombat=${!!data.state.combat}`);
+                        console.log(`[CATCHUP] ${data.name}: last_saved=${data.last_saved}, elapsed=${elapsedSeconds.toFixed(1)}s, hasActivity=${!!data.current_activity}, hasCombat=${!!data.state.combat}, needsHealing=${needsHealing}`);
                     }
 
                     if (data.current_activity && typeof data.current_activity === 'object' && data.activity_started_at) {
@@ -681,6 +682,40 @@ export class GameManager {
                                 finalReport.xpGained[skill] = (finalReport.xpGained[skill] || 0) + qty;
                             }
                             updated = true;
+                        }
+                    }
+                    // Idle Healing: If any offline time remains, use it for healing if needed
+                    let remainingSeconds = elapsedSeconds - finalReport.totalTime;
+                    const canHealIdle = (data.state.health || 0) < (this.inventoryManager.calculateStats(data).maxHP || 100) && (data.state.equipment?.food?.amount > 0);
+
+                    if (remainingSeconds >= 1 && canHealIdle) {
+                        const startTimeTs = lastSaved + (finalReport.totalTime * 1000);
+                        const ticks = Math.floor(remainingSeconds / 5);
+                        let healedAny = false;
+
+                        for (let t = 0; t < ticks; t++) {
+                            const virtualTime = startTimeTs + (t * 5000);
+                            const healResult = this.processFood(data, virtualTime);
+
+                            if (healResult.used) {
+                                healedAny = true;
+                                finalReport.totalTime += 5;
+                                remainingSeconds -= 5;
+                                updated = true;
+                                if (healResult.eaten) {
+                                    finalReport.foodConsumed = (finalReport.foodConsumed || 0) + healResult.eaten;
+                                }
+
+                                // Stop if full
+                                if ((data.state.health || 0) >= (this.inventoryManager.calculateStats(data).maxHP || 100)) break;
+                            } else {
+                                // No food used (maybe on cooldown or not needed anymore)
+                                break;
+                            }
+                        }
+
+                        if (healedAny) {
+                            console.log(`[CATCHUP] ${data.name}: Idle healing processed. New HP: ${data.state.health}`);
                         }
                     }
 
