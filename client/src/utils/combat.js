@@ -30,10 +30,6 @@ export const calculateSurvivalTime = (playerStats, mobData, foodItem, foodAmount
 
     // Fight Dynamics
     const hitsToKillMob = Math.ceil(mobMaxHp / dmgToMob);
-    const fightDurationMs = hitsToKillMob * playerAtkSpeed;
-    const totalCycleMs = fightDurationMs + 1000; // +1s respawn
-    const mobAttacksPerCycle = Math.max(1, Math.floor(fightDurationMs / mobAtkSpeed));
-    const dmgPerCycle = mobAttacksPerCycle * dmgToPlayer;
 
     // Food Healing
     let unitHeal = 0;
@@ -46,68 +42,56 @@ export const calculateSurvivalTime = (playerStats, mobData, foodItem, foodAmount
     }
     if (unitHeal < 1) unitHeal = 0;
 
-    // Max potential healing per cycle (5s cooldown)
-    const maxHealsPerCycle = Math.floor(totalCycleMs / 5000) || (totalCycleMs > 0 ? 0.2 : 0); // Handle cycles < 5s as fraction
-    const potentialHealPerCycle = maxHealsPerCycle * unitHeal;
+    // Fight Dynamics - Precise Calculations
+    const actualFightDurationMs = Math.max(0, (hitsToKillMob - 1) * playerAtkSpeed);
+    const totalCycleMs = actualFightDurationMs + 1000; // +1s respawn
+
+    // Damage per Cycle
+    const mobAttacksPerCycle = Math.floor(actualFightDurationMs / mobAtkSpeed);
+    const dmgPerCycle = mobAttacksPerCycle * dmgToPlayer;
+
+    // Rates for easier math
+    const dmgRate = dmgPerCycle / (totalCycleMs / 1000);
+    const healRate = (unitHeal / 5000) * 1000; // unitHeal every 5s
 
     const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
 
-    // SCENARIO A: Damage per cycle is 0 or less (Impossible, but for safety)
-    if (dmgPerCycle <= 0) return { seconds: Infinity, text: "∞", color: "#4caf50" };
+    // SCENARIO A: No damage (Infinite survival)
+    if (dmgRate <= 0) return { seconds: Infinity, text: "∞", color: "#4caf50" };
 
-    // SCENARIO B: Damage > Potential Heal (Losing HP even with food)
-    if (dmgPerCycle > potentialHealPerCycle || unitHeal === 0) {
-        const netDmgPerCycle = dmgPerCycle - potentialHealPerCycle;
+    // SCENARIO B: Losing HP (Heal < Damage)
+    if (healRate < dmgRate || unitHeal === 0) {
+        const netDmgRate = dmgRate - healRate;
+        const foodDuration = foodAmount * 5; // Total time food lasts
+        const hpLostWithFood = netDmgRate * foodDuration;
 
-        let totalCycles = 0;
-        if (unitHeal > 0 && foodAmount > 0) {
-            const maxHealsPerCycle = Math.floor(totalCycleMs / 5000) || (totalCycleMs > 0 ? 0.2 : 0);
-            const cyclesUntilFoodOut = foodAmount / maxHealsPerCycle;
-            const hpLostWithFood = netDmgPerCycle * cyclesUntilFoodOut;
-
-            if (hpLostWithFood >= currentHp) {
-                // Dies before food runs out
-                totalCycles = currentHp / netDmgPerCycle;
-            } else {
-                // Food runs out, then dies with full damage
-                const remainingHp = currentHp - hpLostWithFood;
-                totalCycles = cyclesUntilFoodOut + (remainingHp / dmgPerCycle);
-            }
+        let totalSeconds = 0;
+        if (hpLostWithFood >= currentHp) {
+            totalSeconds = currentHp / netDmgRate;
         } else {
-            // No food from the start
-            totalCycles = currentHp / dmgPerCycle;
+            const remainingHp = currentHp - hpLostWithFood;
+            totalSeconds = foodDuration + (remainingHp / dmgRate);
         }
 
-        const totalSeconds = (totalCycles * totalCycleMs) / 1000;
-        if (totalSeconds > idleLimitSeconds) {
-            return { seconds: totalSeconds, text: "∞", color: "#4caf50" };
-        }
+        if (totalSeconds > idleLimitSeconds) return { seconds: totalSeconds, text: "∞", color: "#4caf50" };
         return formatSurvival(totalSeconds);
     }
 
-    // SCENARIO C: Heal >= Damage (HP is stable or increasing until food runs out)
+    // SCENARIO C: Stable/Gaining HP (Heal >= Damage)
     if (unitHeal > 0 && foodAmount > 0) {
-        // Treat Current HP and Total Food Heal as a single pool of "Effective HP"
-        // This handles cases where user starts with low HP but has enough food to reach Max HP
-        const foodNeededPerCycle = dmgPerCycle / unitHeal;
-        const cyclesUntilFoodOut = foodAmount / foodNeededPerCycle;
+        const foodDuration = foodAmount * 5;
+        // HP when food runs out, capped at maxHp
+        const hpAtEnd = Math.min(maxHp, currentHp + (healRate - dmgRate) * foodDuration);
+        const totalSeconds = foodDuration + (hpAtEnd / dmgRate);
 
-        // After food is out, player starts losing HP from full (or current, if higher than max? no, clamped at server)
-        // However, most accurate is: (CurrentHP + TotalFoodHeal) / dmgPerCycle
-        const totalEffectiveHp = currentHp + (foodAmount * unitHeal);
-        const totalCycles = totalEffectiveHp / dmgPerCycle;
-
-        const totalSeconds = (totalCycles * totalCycleMs) / 1000;
-
-        if (totalSeconds > idleLimitSeconds) {
-            return { seconds: totalSeconds, text: "∞", color: "#4caf50" };
-        }
+        if (totalSeconds > idleLimitSeconds) return { seconds: totalSeconds, text: "∞", color: "#4caf50" };
         return formatSurvival(totalSeconds);
     }
 
     // Default Fallback
-    const totalSeconds = (currentHp / dmgPerCycle) * totalCycleMs / 1000;
-    return formatSurvival(totalSeconds > idleLimitSeconds ? Infinity : totalSeconds);
+    const totalSeconds = currentHp / dmgRate;
+    if (totalSeconds > idleLimitSeconds) return { seconds: totalSeconds, text: "∞", color: "#4caf50" };
+    return formatSurvival(totalSeconds);
 };
 
 const formatSurvival = (totalSeconds) => {
