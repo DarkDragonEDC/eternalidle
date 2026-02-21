@@ -1578,6 +1578,45 @@ for (const t of TIERS) {
     }
 }
 
+// --- HUNTER GEAR ICON & SCALE OVERRIDES ---
+for (const t of TIERS) {
+    // Bows
+    if (ITEMS.GEAR.HUNTERS_LODGE.BOW[t]) {
+        ITEMS.GEAR.HUNTERS_LODGE.BOW[t].icon = `/items/T${t}_BOW.webp`;
+        ITEMS.GEAR.HUNTERS_LODGE.BOW[t].scale = '190%';
+    }
+    // Torches
+    if (ITEMS.GEAR.HUNTERS_LODGE.TORCH[t]) {
+        ITEMS.GEAR.HUNTERS_LODGE.TORCH[t].icon = `/items/T${t}_TORCH.webp`;
+        ITEMS.GEAR.HUNTERS_LODGE.TORCH[t].scale = '190%';
+    }
+    // Leather Armor
+    if (ITEMS.GEAR.HUNTERS_LODGE.LEATHER_ARMOR[t]) {
+        ITEMS.GEAR.HUNTERS_LODGE.LEATHER_ARMOR[t].icon = `/items/T${t}_LEATHER_ARMOR.webp`;
+        ITEMS.GEAR.HUNTERS_LODGE.LEATHER_ARMOR[t].scale = '190%';
+    }
+    // Leather Helmets
+    if (ITEMS.GEAR.HUNTERS_LODGE.LEATHER_HELMET[t]) {
+        ITEMS.GEAR.HUNTERS_LODGE.LEATHER_HELMET[t].icon = `/items/T${t}_LEATHER_HELMET.webp`;
+        ITEMS.GEAR.HUNTERS_LODGE.LEATHER_HELMET[t].scale = '190%';
+    }
+    // Leather Boots
+    if (ITEMS.GEAR.HUNTERS_LODGE.LEATHER_BOOTS[t]) {
+        ITEMS.GEAR.HUNTERS_LODGE.LEATHER_BOOTS[t].icon = `/items/T${t}_LEATHER_BOOTS.webp`;
+        ITEMS.GEAR.HUNTERS_LODGE.LEATHER_BOOTS[t].scale = '190%';
+    }
+    // Leather Gloves
+    if (ITEMS.GEAR.HUNTERS_LODGE.LEATHER_GLOVES[t]) {
+        ITEMS.GEAR.HUNTERS_LODGE.LEATHER_GLOVES[t].icon = `/items/T${t}_LEATHER_GLOVES.webp`;
+        ITEMS.GEAR.HUNTERS_LODGE.LEATHER_GLOVES[t].scale = '190%';
+    }
+    // Leather Cape
+    if (ITEMS.GEAR.HUNTERS_LODGE.LEATHER_CAPE[t]) {
+        ITEMS.GEAR.HUNTERS_LODGE.LEATHER_CAPE[t].icon = `/items/T${t}_LEATHER_CAPE.webp`;
+        ITEMS.GEAR.HUNTERS_LODGE.LEATHER_CAPE[t].scale = '190%';
+    }
+}
+
 // Index items AFTER generation
 indexItems(ITEMS);
 
