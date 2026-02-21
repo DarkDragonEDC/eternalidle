@@ -4,14 +4,14 @@ import { resolveItem, formatItemId } from '@shared/items'; // Ensure correct pat
 
 // Matches Server LOOT_TABLE
 const SEGMENTS = [
-    { id: 'T1_RUNE_SHARD', label: '3k Shards', color: '#a0aec0', icon: '💎' }, // Index 0 (Grey)
-    { id: 'T5_FOOD', label: '500 Food', color: '#48bb78', icon: '🍖' }, // Index 1 (Green)
-    { id: 'T3_POTION_QUALITY', label: 'Quality Potion', color: '#63b3ed', icon: '🧪' }, // Index 2 (Blue)
-    { id: 'T3_POTION_SILVER', label: 'Silver Potion', color: '#cbd5e0', icon: '🧪' }, // Index 3 (Silver)
-    { id: 'T3_POTION_XP', label: 'XP Potion', color: '#9f7aea', icon: '✨' }, // Index 4 (Purple)
-    { id: 'ORBS_25', label: '25 Orbs', color: '#ecc94b', icon: '🔮' }, // Index 5 (Yellow)
-    { id: 'ORBS_100', label: '100 Orbs!', color: '#d69e2e', icon: '🔮' }, // Index 6 (Gold)
-    { id: 'MEMBERSHIP', label: 'Membership', color: '#805ad5', icon: '🎖️' }  // Index 7 (Purple)
+    { id: 'T3_POTION_SILVER', label: '2x Silver Pot', color: '#cbd5e0', icon: '🧪' },       // Index 0 (Common)
+    { id: 'T3_POTION_XP', label: '2x XP Pot', color: '#9f7aea', icon: '✨' },                // Index 1 (Common)
+    { id: 'T1_RUNE_SHARD', label: '500 Shards', color: '#a0aec0', icon: '💎' },              // Index 2 (Uncommon)
+    { id: 'T5_FOOD', label: '100 Food', color: '#48bb78', icon: '🍖' },                      // Index 3 (Uncommon)
+    { id: 'ORBS_25', label: '25 Orbs', color: '#ecc94b', icon: '🔮' },                       // Index 4 (Rare)
+    { id: 'COMBAT_SHARD', label: '50 Combat Shards', color: '#ff4444', icon: '⚔️' },         // Index 5 (Legendary)
+    { id: 'ORBS_100', label: '100 Orbs!', color: '#d69e2e', icon: '🔮' },                    // Index 6 (Legendary)
+    { id: 'MEMBERSHIP', label: 'Membership', color: '#805ad5', icon: '🎖️' }                  // Index 7 (Legendary)
 ];
 
 const SEGMENT_ANGLE = 360 / SEGMENTS.length;
