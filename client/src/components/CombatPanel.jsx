@@ -1037,7 +1037,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory }) => {
                                                 mob,
                                                 foodItem ? resolveItem(foodItem.id) : null,
                                                 foodAmount,
-                                                gameState?.state?.health || 1,
+                                                combat?.playerHealth || gameState?.state?.health || 1,
                                                 gameState?.state?.isPremium || gameState?.state?.membership?.active
                                             );
 

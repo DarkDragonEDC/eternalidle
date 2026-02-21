@@ -33,28 +33,10 @@ export const calculateSurvivalTime = (playerStats, mobData, foodItem, foodAmount
     // Fight Dynamics
     const hitsToKillMob = Math.ceil(mobMaxHp / dmgToMob);
 
-    // Food Healing
-    let unitHeal = 0;
-    if (foodItem) {
-        if (foodItem.healPercent) {
-            unitHeal = Math.floor(maxHp * (foodItem.healPercent / 100));
-        } else {
-            unitHeal = foodItem.heal || 0;
-        }
-    }
-    if (unitHeal < 1) unitHeal = 0;
-
-    // Fight Dynamics - Precise Calculations
-    const actualFightDurationMs = Math.max(0, (hitsToKillMob - 1) * playerAtkSpeed);
-    const totalCycleMs = actualFightDurationMs + 1000; // +1s respawn
-
-    // Damage per Cycle - Mob only hits if it survives past the attack time
-    // Server: Player hits first. If mob dies at T=1000, it doesn't attack at T=1000.
-    const mobAttacksPerCycle = Math.max(0, Math.floor((actualFightDurationMs - 1) / mobAtkSpeed));
-    const dmgPerCycle = mobAttacksPerCycle * dmgToPlayer;
-
-    // Rates for easier math
-    const dmgRate = dmgPerCycle / (totalCycleMs / 1000);
+    // Precise Rates
+    // Server logic: Mob hit timer is persistent across kills and respawns.
+    // This means the player takes exactly 1 hit per mobAtkSpeed (1000ms) on average.
+    const dmgRate = dmgToPlayer / (mobAtkSpeed / 1000); // Usually dmgToPlayer / 1
     const healRate = (unitHeal / 5000) * 1000; // unitHeal every 5s
 
     const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
@@ -70,8 +52,10 @@ export const calculateSurvivalTime = (playerStats, mobData, foodItem, foodAmount
 
         let totalSeconds = 0;
         if (hpLostWithFood >= currentHp) {
+            // Player loses HP even while eating food on cooldown
             totalSeconds = currentHp / netDmgRate;
         } else {
+            // Survives until food runs out, then loses HP at full dmgRate
             const remainingHp = currentHp - hpLostWithFood;
             totalSeconds = foodDuration + (remainingHp / dmgRate);
         }
@@ -83,7 +67,8 @@ export const calculateSurvivalTime = (playerStats, mobData, foodItem, foodAmount
     // SCENARIO C: Stable/Gaining HP (Heal >= Damage)
     if (unitHeal > 0 && foodAmount > 0) {
         const foodDuration = foodAmount * 5;
-        // HP when food runs out, capped at maxHp
+        // HP when food runs out, capped at maxHP
+        // (Note: Uses healRate-dmgRate for net gain during food duration)
         const hpAtEnd = Math.min(maxHp, currentHp + (healRate - dmgRate) * foodDuration);
         const totalSeconds = foodDuration + (hpAtEnd / dmgRate);
 
@@ -106,13 +91,13 @@ const formatSurvival = (totalSeconds) => {
     let color = "#ff9800";
 
     if (hrs > 0) {
-        text = `${hrs}h ${mins}m*`;
+        text = `${hrs}h ${mins}m**`;
         color = "#ff9800";
     } else if (mins > 0) {
-        text = `${mins}m ${secs}s*`;
+        text = `${mins}m ${secs}s**`;
         color = "#ff9800";
     } else {
-        text = `${secs}s*`;
+        text = `${secs}s**`;
         color = "#ff4444";
     }
 
