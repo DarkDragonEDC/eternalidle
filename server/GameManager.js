@@ -890,7 +890,8 @@ export class GameManager {
             stats: prunedState.stats || {},
             health: prunedState.health || 0,
             silver: prunedState.silver || 0,
-            orbs: prunedState.orbs || 0,
+            orbs: (prunedState.orbs !== undefined) ? prunedState.orbs : 0,
+            crowns: (prunedState.orbs !== undefined) ? prunedState.orbs : 0, // Dual-support for compatibility
             membership: prunedState.membership || null,
             active_buffs: prunedState.active_buffs || {},
             inventorySlots: prunedState.inventorySlots || 30,
@@ -901,6 +902,7 @@ export class GameManager {
         delete prunedState.health;
         delete prunedState.silver;
         delete prunedState.orbs;
+        delete prunedState.crowns; // Migration: ensure legacy key is removed from state column
         delete prunedState.membership;
         delete prunedState.active_buffs;
         delete prunedState.inventorySlots;
@@ -2799,12 +2801,19 @@ export class GameManager {
             if (data.info.stats) data.state.stats = data.info.stats;
             if (data.info.health !== undefined) data.state.health = data.info.health;
             if (data.info.silver !== undefined) data.state.silver = data.info.silver;
-            if (data.info.orbs !== undefined) {
-                data.state.orbs = data.info.orbs;
-            } else if (data.info.crowns !== undefined) {
-                // Legacy support/Migration: move crowns to orbs
-                data.state.orbs = data.info.crowns;
-                console.log(`[MIGRATION-ORBS] Migrated ${data.info.crowns} crowns to orbs for ${data.name}`);
+            // Ensure Orbs/Crowns are migrated from all possible sources (info.orbs, info.crowns, state.orbs, state.crowns)
+            // Taking Math.max is the safest way to ensure no balance is lost during this transition phase.
+            const infoOrbs = Number(data.info.orbs) || 0;
+            const infoCrowns = Number(data.info.crowns) || 0;
+            const stateOrbs = Number(data.state.orbs) || 0;
+            const stateCrowns = Number(data.state.crowns) || 0;
+
+            const finalBalance = Math.max(infoOrbs, infoCrowns, stateOrbs, stateCrowns);
+            data.state.orbs = finalBalance;
+            data.state.crowns = finalBalance; // Mirror for runtime compatibility
+
+            if (finalBalance > 0 && infoOrbs === 0) {
+                console.log(`[MIGRATION-ORBS] Recovered/Migrated ${finalBalance} units for ${data.name}`);
             }
             if (data.info.membership) data.state.membership = data.info.membership;
             if (data.info.active_buffs) data.state.active_buffs = data.info.active_buffs;
