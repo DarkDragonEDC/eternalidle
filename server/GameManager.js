@@ -689,33 +689,40 @@ export class GameManager {
                     const canHealIdle = (data.state.health || 0) < (this.inventoryManager.calculateStats(data).maxHP || 100) && (data.state.equipment?.food?.amount > 0);
 
                     if (remainingSeconds >= 1 && canHealIdle) {
+                        if (isSignificantCatchup) console.log(`[CATCHUP] ${data.name}: Starting idle healing. remainingSeconds=${remainingSeconds.toFixed(1)}, health=${data.state.health}`);
                         const startTimeTs = lastSaved + (finalReport.totalTime * 1000);
                         const ticks = Math.floor(remainingSeconds / 5);
                         let healedAny = false;
 
+                        let ticksProcessed = 0;
                         for (let t = 0; t < ticks; t++) {
+                            ticksProcessed = t + 1;
                             const virtualTime = startTimeTs + (t * 5000);
                             const healResult = this.processFood(data, virtualTime);
 
                             if (healResult.used) {
                                 healedAny = true;
-                                finalReport.totalTime += 5;
-                                remainingSeconds -= 5;
                                 updated = true;
                                 if (healResult.eaten) {
                                     finalReport.foodConsumed = (finalReport.foodConsumed || 0) + healResult.eaten;
                                 }
+                            }
 
-                                // Stop if full
-                                if ((data.state.health || 0) >= (this.inventoryManager.calculateStats(data).maxHP || 100)) break;
-                            } else {
-                                // No food used (maybe on cooldown or not needed anymore)
+                            // Stop condition: Full health or out of food
+                            const currentMax = this.inventoryManager.calculateStats(data).maxHP || 100;
+                            const isFull = (data.state.health || 0) >= currentMax;
+                            const hasFood = (data.state.equipment?.food?.amount > 0);
+
+                            if (isFull || !hasFood) {
                                 break;
                             }
                         }
 
+                        // Add the actual time processed in the healing phase to the total catchup time
+                        finalReport.totalTime += (ticksProcessed * 5);
+
                         if (healedAny) {
-                            console.log(`[CATCHUP] ${data.name}: Idle healing processed. New HP: ${data.state.health}`);
+                            console.log(`[CATCHUP] ${data.name}: Idle healing processed. New HP: ${data.state.health}, Food consumed: ${finalReport.foodConsumed}`);
                         }
                     }
 
@@ -759,65 +766,64 @@ export class GameManager {
 
                     // Add wall-clock elapsed time to report for UI accuracy
                     finalReport.elapsedTime = elapsedSeconds;
-                }
 
-                // Shard Migration Logic
-                let migrationHappened = false;
-                Object.keys(data.state.inventory).forEach(itemId => {
-                    if (itemId.includes('_RUNE_SHARD') && !itemId.startsWith('T1_')) {
-                        const qty = data.state.inventory[itemId];
-                        if (qty > 0) {
-                            data.state.inventory['T1_RUNE_SHARD'] = (data.state.inventory['T1_RUNE_SHARD'] || 0) + qty;
-                            delete data.state.inventory[itemId];
-                            migrationHappened = true;
-                            console.log(`[MIGRATION] Converted ${qty} of ${itemId} to T1_RUNE_SHARD for ${data.name}`);
+                    // Shard Migration Logic (inside catchup block because it uses elapsedSeconds logic/updated flag)
+                    let migrationHappened = false;
+                    Object.keys(data.state.inventory).forEach(itemId => {
+                        if (itemId.includes('_RUNE_SHARD') && !itemId.startsWith('T1_')) {
+                            const qty = data.state.inventory[itemId];
+                            if (qty > 0) {
+                                data.state.inventory['T1_RUNE_SHARD'] = (data.state.inventory['T1_RUNE_SHARD'] || 0) + qty;
+                                delete data.state.inventory[itemId];
+                                migrationHappened = true;
+                                console.log(`[MIGRATION] Converted ${qty} of ${itemId} to T1_RUNE_SHARD for ${data.name}`);
+                            }
                         }
-                    }
-                });
-
-                // Membership Migration
-                if (data.state.inventory['ETERNAL_MEMBERSHIP']) {
-                    const qty = data.state.inventory['ETERNAL_MEMBERSHIP'];
-                    data.state.inventory['MEMBERSHIP'] = (data.state.inventory['MEMBERSHIP'] || 0) + qty;
-                    delete data.state.inventory['ETERNAL_MEMBERSHIP'];
-                    migrationHappened = true;
-                    console.log(`[MIGRATION] Converted ${qty} ETERNAL_MEMBERSHIP to MEMBERSHIP for ${data.name}`);
-                }
-
-                if (migrationHappened) {
-                    updated = true;
-                }
-
-                // Only show the modal if total catchup was significant (based on wall-clock time)
-                const hasNotableGains = elapsedSeconds > 60;
-                if (hasNotableGains) {
-                    data.offlineReport = finalReport;
-
-                    this.addActionSummaryNotification(data, 'Offline Progress', {
-                        itemsGained: finalReport.itemsGained,
-                        xpGained: finalReport.xpGained,
-                        totalTime: finalReport.totalTime,
-                        elapsedTime: elapsedSeconds,
-                        kills: finalReport.combat?.kills || 0,
-                        silverGained: finalReport.combat?.silverGained || 0,
-                        duplicationCount: finalReport.duplicationCount,
-                        autoRefineCount: finalReport.autoRefineCount
                     });
-                }
 
-                if (updated) {
-                    this.markDirty(data.id);
-                    await this.persistCharacter(data.id);
-                    this.cache.set(data.id, data);
-                }
+                    // Membership Migration
+                    if (data.state.inventory['ETERNAL_MEMBERSHIP']) {
+                        const qty = data.state.inventory['ETERNAL_MEMBERSHIP'];
+                        data.state.inventory['MEMBERSHIP'] = (data.state.inventory['MEMBERSHIP'] || 0) + qty;
+                        delete data.state.inventory['ETERNAL_MEMBERSHIP'];
+                        migrationHappened = true;
+                        console.log(`[MIGRATION] Converted ${qty} ETERNAL_MEMBERSHIP to MEMBERSHIP for ${data.name}`);
+                    }
+
+                    if (migrationHappened) {
+                        updated = true;
+                    }
+
+                    // Only show the modal if total catchup was significant (based on wall-clock time)
+                    const hasNotableGains = elapsedSeconds > 60;
+                    if (hasNotableGains) {
+                        data.offlineReport = finalReport;
+
+                        this.addActionSummaryNotification(data, 'Offline Progress', {
+                            itemsGained: finalReport.itemsGained,
+                            xpGained: finalReport.xpGained,
+                            totalTime: finalReport.totalTime,
+                            elapsedTime: elapsedSeconds,
+                            kills: finalReport.combat?.kills || 0,
+                            silverGained: finalReport.combat?.silverGained || 0,
+                            duplicationCount: finalReport.duplicationCount,
+                            autoRefineCount: finalReport.autoRefineCount
+                        });
+                    }
+
+                    if (updated) {
+                        this.markDirty(data.id);
+                        await this.persistCharacter(data.id);
+                        this.cache.set(data.id, data);
+                    }
+                } // End if (catchup)
             } catch (err) {
                 console.error(`[CATCHUP-CRASH] Critical error processing character ${data.name}:`, err);
                 const fs = await import('fs');
                 fs.appendFileSync('catchup_errors.log', `[${new Date().toISOString()}] Error for ${data.name}: ${err.message}\n${err.stack}\n---\n`);
                 // Continue despite catchup error to allow login
             }
-
-        }
+        } // End if (data)
         return data;
     }
 
@@ -849,11 +855,11 @@ export class GameManager {
             .select('last_saved')
             .eq('id', charId)
             .single();
-
+ 
         if (!fetchError && remote && char.last_saved) {
             const dbTime = new Date(remote.last_saved).getTime();
             const cacheTime = new Date(char.last_saved).getTime();
-
+ 
             if (dbTime > cacheTime) {
                 console.warn(`[DB] PERSISTENCE CONFLICT for ${char.name}! DB has newer data (${remote.last_saved}) than Cache (${char.last_saved}). Aborting save and clearing stale cache.`);
                 this.dirty.delete(charId);
