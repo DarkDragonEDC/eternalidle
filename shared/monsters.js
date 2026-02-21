@@ -838,7 +838,7 @@ export const MONSTERS = {
             "id": "BOSS_TROLL_ELDER",
             "name": "Elder Troll",
             "health": 12153,
-            "damage": 256,
+            "damage": 150,
             "defense": 133,
             "xp": 480,
             "loot": {
@@ -1085,7 +1085,7 @@ export const MONSTERS = {
             "id": "DEMON",
             "name": "Lesser Demon",
             "health": 11509,
-            "damage": 297,
+            "damage": 150,
             "defense": 243,
             "xp": 0,
             "loot": {
@@ -1104,7 +1104,7 @@ export const MONSTERS = {
             "id": "DEMON_WARRIOR",
             "name": "Demon Warrior",
             "health": 12466,
-            "damage": 334,
+            "damage": 150,
             "defense": 262,
             "xp": 0,
             "loot": {
@@ -1122,7 +1122,7 @@ export const MONSTERS = {
             "id": "BOSS_GOLEM_PRIMORDIAL",
             "name": "Primordial Golem",
             "health": 27004,
-            "damage": 375,
+            "damage": 310,
             "defense": 283,
             "xp": 652,
             "loot": {
@@ -1227,7 +1227,7 @@ export const MONSTERS = {
             "id": "ARCHDEMON",
             "name": "Archdemon",
             "health": 17156,
-            "damage": 531,
+            "damage": 100,
             "defense": 354,
             "xp": 0,
             "loot": {
@@ -1246,7 +1246,7 @@ export const MONSTERS = {
             "id": "ABYSSAL_FIEND",
             "name": "Abyssal Fiend",
             "health": 18582,
-            "damage": 597,
+            "damage": 100,
             "defense": 382,
             "xp": 0,
             "loot": {
@@ -1264,7 +1264,7 @@ export const MONSTERS = {
             "id": "BOSS_DEMON_PRINCE",
             "name": "Demon Prince",
             "health": 40252,
-            "damage": 671,
+            "damage": 550,
             "defense": 412,
             "xp": 740,
             "loot": {
@@ -1369,7 +1369,7 @@ export const MONSTERS = {
             "id": "DEMON_LORD",
             "name": "Demon Lord",
             "health": 25573,
-            "damage": 951,
+            "damage": 100,
             "defense": 516,
             "xp": 0,
             "loot": {
@@ -1388,7 +1388,7 @@ export const MONSTERS = {
             "id": "VOID_EXECUTIONER",
             "name": "Void Executioner",
             "health": 27698,
-            "damage": 1068,
+            "damage": 100,
             "defense": 556,
             "xp": 0,
             "loot": {
@@ -1406,7 +1406,7 @@ export const MONSTERS = {
             "id": "BOSS_VOID_ENTITY",
             "name": "Void Entity",
             "health": 60000,
-            "damage": 1200,
+            "damage": 730,
             "defense": 600,
             "xp": 830,
             "loot": {
