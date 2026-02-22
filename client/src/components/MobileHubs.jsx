@@ -1,8 +1,9 @@
 import React from 'react';
 import { Pickaxe, Box, Hammer, Sword, Castle, Trophy, ShoppingBag, Zap, Coins, Gift, ArrowLeftRight, Skull, Lock } from 'lucide-react';
 
-const HubButton = ({ label, icon, onClick, color = 'var(--text-main)', level, progress, showBadge, customStyle = {} }) => (
+const HubButton = ({ id, label, icon, onClick, color = 'var(--text-main)', level, progress, showBadge, customStyle = {} }) => (
     <button
+        id={id}
         onClick={onClick}
         style={{
             display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start',
