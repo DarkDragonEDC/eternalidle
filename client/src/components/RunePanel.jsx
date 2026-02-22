@@ -688,7 +688,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                         key={item.id}
                                         onClick={() => {
                                             setSelectedItemForModal(item);
-                                             if (gameState?.state?.tutorialStep === 'SELECT_MERGE_RUNE' && item.qty >= 2 && item.qty <= 3) {
+                                            if (gameState?.state?.tutorialStep === 'SELECT_MERGE_RUNE' && item.qty >= 2 && item.qty <= 3) {
                                                 onTutorialComplete?.('CONFIRM_MERGE_SELECTION');
                                             }
                                         }}
@@ -759,7 +759,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                         </div>
 
                                         <div
-                                            onClick={(e) => { e.stopPropagation(); onShowInfo(item); }}
+                                            onClick={(e) => { e.stopPropagation(); if (gameState?.state?.tutorialStep && gameState.state.tutorialStep !== 'COMPLETED') return; onShowInfo(item); }}
                                             style={{
                                                 position: 'absolute',
                                                 bottom: 22,

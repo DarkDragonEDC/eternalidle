@@ -425,6 +425,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                                 }}
                                 onClick={(e) => {
                                     e.stopPropagation();
+                                    if (gameState?.state?.tutorialStep && gameState.state.tutorialStep !== 'COMPLETED') return;
                                     onShowInfo(item);
                                 }}
                             >

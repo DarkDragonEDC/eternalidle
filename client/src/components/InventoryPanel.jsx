@@ -376,7 +376,7 @@ const InventoryPanel = ({ gameState, socket, onEquip, onListOnMarket, onShowInfo
                                     x{(item.qty && typeof item.qty === 'object') ? (item.qty.amount || 0) : (item.qty || 0)}
                                 </div>
                                 <div
-                                    onClick={(e) => { e.stopPropagation(); onShowInfo(item); }}
+                                    onClick={(e) => { e.stopPropagation(); if (gameState?.state?.tutorialStep && gameState.state.tutorialStep !== 'COMPLETED') return; onShowInfo(item); }}
                                     style={{
                                         position: 'absolute',
                                         bottom: 22,
