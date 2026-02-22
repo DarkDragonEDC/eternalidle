@@ -823,6 +823,10 @@ const genMageGear = (slot, type, idSuffix, matType, lookupName) => {
         // Default to Normal quality stats for the base item view
         const stats = MAGE_STATS_FIXED[lookupName][t][0];
 
+        let iconName = idSuffix;
+        if (idSuffix === 'FIRE_STAFF') iconName = 'STAFF';
+        else if (idSuffix === 'MAGE_CAPE') iconName = 'CLOTH_CAPE';
+
         const gear = {
             id: `T${t}_${idSuffix}`,
             name: toTitleCase(idSuffix),
@@ -835,6 +839,8 @@ const genMageGear = (slot, type, idSuffix, matType, lookupName) => {
             stats,
             isMageLookup: true,
             lookupName: lookupName,
+            icon: `/items/T${t}_${iconName}.webp`,
+            scale: '190%',
             description: `A Tier ${t} ${toTitleCase(idSuffix)}. Specialized Mage gear.`
         };
 
