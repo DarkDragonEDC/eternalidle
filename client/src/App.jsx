@@ -902,6 +902,11 @@ function App() {
       handleTutorialStepComplete('SELECT_COMBAT_CATEGORY');
     }
 
+    // Skip combat category selection on desktop
+    if (step === 'GO_TO_COMBAT' && activeTab === 'combat') {
+      handleTutorialStepComplete('START_FIRST_MOB');
+    }
+
     if (step === 'SELECT_COMBAT_CATEGORY' && activeTab === 'combat') {
       handleTutorialStepComplete('START_FIRST_MOB');
     }

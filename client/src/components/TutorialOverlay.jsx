@@ -61,12 +61,14 @@ const TutorialStepData = {
         title: 'Skills & Forging',
         text: 'You found some Rune Shards! Open the Skills tab to find the Rune Forge.',
         targetId: 'tab-skills',
+        targetIdDesktop: 'sidebar-item-merging',
         position: 'bottom'
     },
     'OPEN_RUNE_FORGE': {
         title: 'Rune Forge',
         text: 'Click on the Rune Forge tile to start creating your first power-up!',
         targetId: 'skill-RUNE_FORGE',
+        targetIdDesktop: 'sidebar-child-RUNE',
         position: 'top'
     },
     'CREATE_RUNE': {
@@ -169,6 +171,7 @@ const TutorialStepData = {
         title: 'Basic Training',
         text: 'It is time to test your power. Go to the Combat tab.',
         targetId: 'tab-combat',
+        targetIdDesktop: 'sidebar-item-combat',
         position: 'bottom'
     },
     'SELECT_COMBAT_CATEGORY': {
@@ -178,7 +181,7 @@ const TutorialStepData = {
         position: 'bottom'
     },
     'START_FIRST_MOB': {
-        title: 'First Battle',
+        title: 'Hunt the Rabbit',
         text: 'Start a fight with a Rabbit to begin your journey!',
         targetId: 'fight-button-RABBIT',
         position: 'top'
@@ -243,24 +246,35 @@ const TutorialOverlay = ({ currentStep, onCompleteStep }) => {
             if (step.targetClass) {
                 const elements = document.getElementsByClassName(step.targetClass);
                 for (const el of elements) {
-                    const r = el.getBoundingClientRect();
-                    if (r.width > 0 && r.height > 0) newRects.push(r);
+                    if (el) {
+                        const r = el.getBoundingClientRect();
+                        if (r && r.width > 0 && r.height > 0) newRects.push(r);
+                    }
                 }
-            } else if (step.targetId) {
-                const el = document.getElementById(step.targetId);
-                if (el) {
-                    const r = el.getBoundingClientRect();
-                    if (r.width > 0 && r.height > 0) newRects.push(r);
+            } else {
+                const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
+                const actualTargetId = isDesktop && step.targetIdDesktop ? step.targetIdDesktop : step.targetId;
+
+                if (actualTargetId) {
+                    const el = document.getElementById(actualTargetId);
+                    if (el) {
+                        const r = el.getBoundingClientRect();
+                        if (r.width > 0 && r.height > 0) newRects.push(r);
+                    }
                 }
             }
 
             setTargetRects(newRects);
 
             if (newRects.length > 0 && lastScrolledStep !== currentStep) {
-                const els = step.targetClass ? document.getElementsByClassName(step.targetClass) : [document.getElementById(step.targetId)];
+                const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
+                const actualTargetId = isDesktop && step.targetIdDesktop ? step.targetIdDesktop : step.targetId;
+                const els = step.targetClass ? document.getElementsByClassName(step.targetClass) : [document.getElementById(actualTargetId)];
+
                 const first = Array.from(els).find(el => {
+                    if (!el) return false;
                     const r = el.getBoundingClientRect();
-                    return r.width > 0 && r.height > 0;
+                    return r && r.width > 0 && r.height > 0;
                 });
                 if (first) {
                     first.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -415,14 +429,9 @@ const TutorialOverlay = ({ currentStep, onCompleteStep }) => {
 
             {/* AAA Glassmorphism Dialog */}
             <AnimatePresence mode="wait">
-                <motion.div
-                    ref={dialogRef}
-                    key={currentStep}
-                    initial={{ opacity: 0, y: 10, scale: 0.98, x: "-50%" }}
-                    animate={{ opacity: 1, y: 0, scale: 1, x: "-50%" }}
-                    exit={{ opacity: 0, y: -10, scale: 0.98, x: "-50%" }}
-                    transition={{ duration: 0.15, ease: 'easeOut' }}
-                    style={{
+                {(() => {
+                    const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
+                    let dialogStyle = {
                         position: 'absolute',
                         left: '50%',
                         top: step.position === 'very-top' ? '20px' :
@@ -444,102 +453,145 @@ const TutorialOverlay = ({ currentStep, onCompleteStep }) => {
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '8px'
-                    }}
-                >
-                    {/* Header with Step indicator */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            background: 'rgba(var(--accent-rgb), 0.15)',
-                            padding: '2px 8px',
-                            borderRadius: '100px',
-                            border: '1px solid var(--accent-soft)'
-                        }}>
-                            <Sparkles size={10} color="var(--accent)" />
-                            <span style={{
-                                color: 'var(--accent)',
-                                fontSize: '0.55rem',
-                                fontWeight: 'bold',
-                                letterSpacing: '1px',
-                                textTransform: 'uppercase'
-                            }}>
-                                {stepIndex}/{totalSteps}
-                            </span>
-                        </div>
-                    </div>
+                    };
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <h3 style={{
-                            margin: 0,
-                            color: '#fff',
-                            fontSize: '0.9rem',
-                            fontWeight: '900',
-                            letterSpacing: '-0.3px'
-                        }}>
-                            {step.title}
-                        </h3>
-                        <p style={{
-                            margin: 0,
-                            color: 'rgba(255,255,255,0.7)',
-                            lineHeight: '1.4',
-                            fontSize: '0.75rem',
-                            fontWeight: '500'
-                        }}>
-                            {step.text}
-                        </p>
-                    </div>
+                    let animateProps = {
+                        initial: { opacity: 0, y: 10, scale: 0.98, x: "-50%" },
+                        animate: { opacity: 1, y: 0, scale: 1, x: "-50%" },
+                        exit: { opacity: 0, y: -10, scale: 0.98, x: "-50%" },
+                    };
 
-                    {/* Action Button */}
-                    {!step.targetId && !step.targetClass && (
-                        <motion.button
-                            whileHover={{ scale: 1.02, backgroundColor: 'var(--accent-bright)' }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => onCompleteStep(currentStep === 'TUTORIAL_FINAL_MESSAGE' ? 'COMPLETED' : currentStep)}
-                            style={{
-                                marginTop: '4px',
-                                width: '100%',
-                                padding: '10px',
-                                background: 'var(--accent)',
-                                border: 'none',
-                                borderRadius: '10px',
-                                color: '#000',
-                                fontWeight: '900',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '6px',
-                                fontSize: '0.8rem',
-                                letterSpacing: '0.5px',
-                                boxShadow: '0 4px 12px rgba(var(--accent-rgb), 0.3)',
-                                transition: 'all 0.2s ease',
-                                position: 'relative',
-                                overflow: 'hidden'
-                            }}
+                    // Smart desktop positioning
+                    if (isDesktop && targetRects.length > 0) {
+                        const rect = targetRects[0];
+
+                        // Default to right side of element
+                        if (rect.left < window.innerWidth / 2) {
+                            dialogStyle.left = `${rect.right + 20}px`;
+                            dialogStyle.top = `${Math.max(20, rect.top - 20)}px`;
+                            dialogStyle.bottom = 'auto';
+                        } else {
+                            // Element is on the right, show dialog on its left
+                            dialogStyle.left = `${rect.left - 280}px`; // 240px max width + padding
+                            dialogStyle.top = `${Math.max(20, rect.top - 20)}px`;
+                            dialogStyle.bottom = 'auto';
+                        }
+
+                        // Disable center translation on desktop when attached to a target
+                        animateProps.initial.x = "0%";
+                        animateProps.animate.x = "0%";
+                        animateProps.exit.x = "0%";
+                    } else if (isDesktop) {
+                        // For steps without targets on desktop (like select class), keep it centered but maybe larger
+                        dialogStyle.maxWidth = '320px';
+                    }
+
+                    return (
+                        <motion.div
+                            ref={dialogRef}
+                            key={currentStep}
+                            initial={animateProps.initial}
+                            animate={animateProps.animate}
+                            exit={animateProps.exit}
+                            transition={{ duration: 0.15, ease: 'easeOut' }}
+                            style={dialogStyle}
                         >
-                            {/* Shine Effect Animation Overlay */}
-                            <motion.div
-                                style={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: '-100%',
-                                    width: '100%',
-                                    height: '100%',
-                                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
-                                }}
-                                animate={{ left: '200%' }}
-                                transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 3 }}
-                            />
+                            {/* Header with Step indicator */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    background: 'rgba(var(--accent-rgb), 0.15)',
+                                    padding: '2px 8px',
+                                    borderRadius: '100px',
+                                    border: '1px solid var(--accent-soft)'
+                                }}>
+                                    <Sparkles size={10} color="var(--accent)" />
+                                    <span style={{
+                                        color: 'var(--accent)',
+                                        fontSize: '0.55rem',
+                                        fontWeight: 'bold',
+                                        letterSpacing: '1px',
+                                        textTransform: 'uppercase'
+                                    }}>
+                                        {stepIndex}/{totalSteps}
+                                    </span>
+                                </div>
+                            </div>
 
-                            <span style={{ position: 'relative', zIndex: 1 }}>
-                                {currentStep === 'TUTORIAL_FINAL_MESSAGE' ? 'START YOUR JOURNEY' : 'CONTINUE'}
-                            </span>
-                            {currentStep !== 'TUTORIAL_FINAL_MESSAGE' && <ChevronRight size={20} />}
-                        </motion.button>
-                    )}
-                </motion.div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <h3 style={{
+                                    margin: 0,
+                                    color: '#fff',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '900',
+                                    letterSpacing: '-0.3px'
+                                }}>
+                                    {step.title}
+                                </h3>
+                                <p style={{
+                                    margin: 0,
+                                    color: 'rgba(255,255,255,0.7)',
+                                    lineHeight: '1.4',
+                                    fontSize: '0.75rem',
+                                    fontWeight: '500'
+                                }}>
+                                    {step.text}
+                                </p>
+                            </div>
+
+                            {/* Action Button */}
+                            {!step.targetId && !step.targetClass && (
+                                <motion.button
+                                    whileHover={{ scale: 1.02, backgroundColor: 'var(--accent-bright)' }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => onCompleteStep(currentStep === 'TUTORIAL_FINAL_MESSAGE' ? 'COMPLETED' : currentStep)}
+                                    style={{
+                                        marginTop: '4px',
+                                        width: '100%',
+                                        padding: '10px',
+                                        background: 'var(--accent)',
+                                        border: 'none',
+                                        borderRadius: '10px',
+                                        color: '#000',
+                                        fontWeight: '900',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '6px',
+                                        fontSize: '0.8rem',
+                                        letterSpacing: '0.5px',
+                                        boxShadow: '0 4px 12px rgba(var(--accent-rgb), 0.3)',
+                                        transition: 'all 0.2s ease',
+                                        position: 'relative',
+                                        overflow: 'hidden'
+                                    }}
+                                >
+                                    {/* Shine Effect Animation Overlay */}
+                                    <motion.div
+                                        style={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: '-100%',
+                                            width: '100%',
+                                            height: '100%',
+                                            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
+                                        }}
+                                        animate={{ left: '200%' }}
+                                        transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 3 }}
+                                    />
+
+                                    <span style={{ position: 'relative', zIndex: 1 }}>
+                                        {currentStep === 'TUTORIAL_FINAL_MESSAGE' ? 'START YOUR JOURNEY' : 'CONTINUE'}
+                                    </span>
+                                    {currentStep !== 'TUTORIAL_FINAL_MESSAGE' && <ChevronRight size={20} />}
+                                </motion.button>
+                            )}
+                        </motion.div>
+                    );
+                })()}
             </AnimatePresence>
         </div>
     );

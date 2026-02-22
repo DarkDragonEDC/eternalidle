@@ -381,6 +381,10 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
                                     onClick={() => {
                                         if (isGroupHeader) {
                                             toggleExpand(item.id);
+                                            // Advance tutorial when expanding Merging on desktop
+                                            if (item.id === 'merging' && gameState?.state?.tutorialStep === 'MERGE_RUNES_1') {
+                                                onTutorialComplete?.('OPEN_RUNE_FORGE');
+                                            }
                                         } else {
                                             setActiveTab(item.id);
                                             if (isMobile) onClose();
