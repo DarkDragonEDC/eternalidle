@@ -43,7 +43,7 @@ const TutorialStepData = {
         title: 'Choose Your Class',
         text: 'The weapon you select defines your playstyle! A Sword makes you a Warrior, a Bow a Hunter, and a Staff a Mage.',
         targetClass: 'tutorial-equip-item',
-        position: 'top-lower'
+        position: 'top'
     },
     'EQUIP_FOOD': {
         title: 'Don\'t Starve',
@@ -55,7 +55,7 @@ const TutorialStepData = {
         title: 'Select Food',
         text: 'Click on the EQUIP button to add food to your active slot.',
         targetClass: 'tutorial-equip-item',
-        position: 'top-lower'
+        position: 'top'
     },
     'MERGE_RUNES_1': {
         title: 'Skills & Forging',
@@ -163,7 +163,7 @@ const TutorialStepData = {
         title: 'Final Surge',
         text: 'Select your new Rune and click EQUIP to gain its power!',
         targetClass: 'tutorial-equip-item',
-        position: 'top-lower'
+        position: 'top'
     },
     'GO_TO_COMBAT': {
         title: 'Basic Training',
