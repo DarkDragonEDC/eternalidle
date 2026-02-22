@@ -350,7 +350,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                         <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
                                             <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{resolvedCurrent?.name || currentItem.name || currentItem.id}</span>
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); onShowInfo(currentItem); }}
+                                                onClick={(e) => { e.stopPropagation(); if (gameState?.state?.tutorialStep && gameState.state.tutorialStep !== 'COMPLETED') return; onShowInfo(currentItem); }}
                                                 style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.5, flexShrink: 0 }}
                                             >
                                                 <Info size={14} color="var(--text-main)" />
@@ -520,7 +520,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
                                                             <span style={{ fontSize: '0.6rem', background: 'var(--accent)', color: '#000', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>BEST</span>
                                                         )}
                                                         <button
-                                                            onClick={(e) => { e.stopPropagation(); onShowInfo(item); }}
+                                                            onClick={(e) => { e.stopPropagation(); if (gameState?.state?.tutorialStep && gameState.state.tutorialStep !== 'COMPLETED') return; onShowInfo(item); }}
                                                             style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.5 }}
                                                         >
                                                             <Info size={14} color="#fff" />
