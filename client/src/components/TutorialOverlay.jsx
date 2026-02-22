@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronRight, Info } from 'lucide-react';
+import { X, ChevronRight, Info, Sparkles } from 'lucide-react';
 
 const TutorialStepData = {
     'OPEN_INVENTORY': {
@@ -218,45 +218,25 @@ const TutorialOverlay = ({ currentStep, onCompleteStep }) => {
 
         const updateRects = () => {
             // Auto-advance logic for modals
-            if (document.getElementById('equipment-select-modal')) {
-                if (currentStep === 'EQUIP_WEAPON') {
-                    onCompleteStep('SELECT_WEAPON');
-                    return;
-                }
-                if (currentStep === 'EQUIP_FOOD') {
-                    onCompleteStep('SELECT_FOOD');
-                    return;
-                }
+            const modalEq = document.getElementById('equipment-select-modal');
+            if (modalEq) {
+                if (currentStep === 'EQUIP_WEAPON') { onCompleteStep('SELECT_WEAPON'); return; }
+                if (currentStep === 'EQUIP_FOOD') { onCompleteStep('SELECT_FOOD'); return; }
             }
-            if (document.getElementById('tutorial-forge-max')) {
-                if (currentStep === 'CREATE_RUNE') {
-                    onCompleteStep('FORGE_SELECT_MAX');
-                    return;
-                }
+            if (document.getElementById('tutorial-forge-max') && currentStep === 'CREATE_RUNE') {
+                onCompleteStep('FORGE_SELECT_MAX'); return;
             }
-            if (document.getElementById('loot-claim-button')) {
-                if (currentStep === 'OPEN_CHEST') {
-                    onCompleteStep('CLAIM_LOOT');
-                    return;
-                }
+            if (document.getElementById('loot-claim-button') && currentStep === 'OPEN_CHEST') {
+                onCompleteStep('CLAIM_LOOT'); return;
             }
-            if (document.getElementById('tutorial-forge-results-awesome')) {
-                if (currentStep === 'FORGE_CONFIRM') {
-                    onCompleteStep('CLAIM_FORGE_RESULTS');
-                    return;
-                }
+            if (document.getElementById('tutorial-forge-results-awesome') && currentStep === 'FORGE_CONFIRM') {
+                onCompleteStep('CLAIM_FORGE_RESULTS'); return;
             }
-            if (document.getElementById('tutorial-rune-use-merge')) {
-                if (currentStep === 'SELECT_MERGE_RUNE') {
-                    onCompleteStep('CONFIRM_MERGE_SELECTION');
-                    return;
-                }
+            if (document.getElementById('tutorial-rune-use-merge') && currentStep === 'SELECT_MERGE_RUNE') {
+                onCompleteStep('CONFIRM_MERGE_SELECTION'); return;
             }
-            if (document.getElementById('tutorial-merge-result-item')) {
-                if (currentStep === 'FINAL_MERGE_CLICK') {
-                    onCompleteStep('VIEW_MERGE_RESULTS');
-                    return;
-                }
+            if (document.getElementById('tutorial-merge-result-item') && currentStep === 'FINAL_MERGE_CLICK') {
+                onCompleteStep('VIEW_MERGE_RESULTS'); return;
             }
 
             const newRects = [];
@@ -264,45 +244,39 @@ const TutorialOverlay = ({ currentStep, onCompleteStep }) => {
                 const elements = document.getElementsByClassName(step.targetClass);
                 for (const el of elements) {
                     const r = el.getBoundingClientRect();
-                    if (r.width > 0 && r.height > 0) {
-                        newRects.push(r);
-                    }
+                    if (r.width > 0 && r.height > 0) newRects.push(r);
                 }
             } else if (step.targetId) {
                 const el = document.getElementById(step.targetId);
                 if (el) {
                     const r = el.getBoundingClientRect();
-                    if (r.width > 0 && r.height > 0) {
-                        newRects.push(r);
-                    }
+                    if (r.width > 0 && r.height > 0) newRects.push(r);
                 }
             }
 
             setTargetRects(newRects);
 
-            // Auto-scroll logic (only for the first found element)
             if (newRects.length > 0 && lastScrolledStep !== currentStep) {
-                const elements = step.targetClass ? document.getElementsByClassName(step.targetClass) : [document.getElementById(step.targetId)];
-                const firstVisible = Array.from(elements).find(el => {
+                const els = step.targetClass ? document.getElementsByClassName(step.targetClass) : [document.getElementById(step.targetId)];
+                const first = Array.from(els).find(el => {
                     const r = el.getBoundingClientRect();
                     return r.width > 0 && r.height > 0;
                 });
-                if (firstVisible) {
-                    firstVisible.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (first) {
+                    first.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     setLastScrolledStep(currentStep);
                 }
             }
         };
 
         updateRects();
-        const interval = setInterval(updateRects, 500); // Poll for layout changes
+        const interval = setInterval(updateRects, 300);
         window.addEventListener('resize', updateRects);
-
         return () => {
             clearInterval(interval);
             window.removeEventListener('resize', updateRects);
         };
-    }, [step, currentStep, lastScrolledStep]);
+    }, [step, currentStep, lastScrolledStep, onCompleteStep]);
 
     if (!step) return null;
 
@@ -317,116 +291,192 @@ const TutorialOverlay = ({ currentStep, onCompleteStep }) => {
             zIndex: 30000,
             overflow: 'hidden'
         }}>
-            {/* Dark Overlay with Hole */}
-            <svg style={{ width: '100%', height: '100%' }}>
+            {/* SVG Mask with Smooth Transitions */}
+            <svg style={{ width: '100%', height: '100%', position: 'absolute' }}>
                 <defs>
-                    <mask id="hole">
+                    <mask id="tutorial-mask">
                         <rect width="100%" height="100%" fill="white" />
-                        {targetRects.map((rect, i) => (
-                            <rect
-                                key={`hole-${i}`}
-                                x={rect.left - 4}
-                                y={rect.top - 4}
-                                width={rect.width + 8}
-                                height={rect.height + 8}
-                                rx="8"
-                                fill="black"
-                            />
-                        ))}
+                        <AnimatePresence>
+                            {targetRects.map((rect, i) => (
+                                <motion.rect
+                                    key={currentStep + i}
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 1.1 }}
+                                    x={rect.left - 6}
+                                    y={rect.top - 6}
+                                    width={rect.width + 12}
+                                    height={rect.height + 12}
+                                    rx="12"
+                                    fill="black"
+                                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                />
+                            ))}
+                        </AnimatePresence>
                     </mask>
                 </defs>
-                <rect
+                <motion.rect
                     width="100%"
                     height="100%"
-                    fill="rgba(0,0,0,0.7)"
-                    mask="url(#hole)"
+                    fill="rgba(0,0,0,0.75)"
+                    mask="url(#tutorial-mask)"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     style={{ pointerEvents: 'none' }}
                 />
             </svg>
 
-            {/* Highlight Border */}
-            {targetRects.map((rect, i) => (
-                <motion.div
-                    key={`border-${i}`}
-                    initial={{ opacity: 0, scale: 1.1 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    style={{
-                        position: 'absolute',
-                        left: rect.left - 6,
-                        top: rect.top - 6,
-                        width: rect.width + 12,
-                        height: rect.height + 12,
-                        border: '3px solid var(--accent)',
-                        borderRadius: '12px',
-                        boxShadow: '0 0 20px var(--accent)',
-                        pointerEvents: 'none'
-                    }}
-                />
-            ))}
-
-            {/* Dialog Box */}
+            {/* Glowing Highlights */}
             <AnimatePresence>
+                {targetRects.map((rect, i) => (
+                    <motion.div
+                        key={`highlight-${currentStep}-${i}`}
+                        initial={{ opacity: 0, scale: 1.2 }}
+                        animate={{
+                            opacity: [0.8, 1, 0.8],
+                            scale: [1, 1.02, 1],
+                        }}
+                        transition={{
+                            opacity: { duration: 2, repeat: Infinity },
+                            scale: { duration: 2, repeat: Infinity },
+                            initial: { type: 'spring', damping: 20 }
+                        }}
+                        style={{
+                            position: 'absolute',
+                            left: rect.left - 10,
+                            top: rect.top - 10,
+                            width: rect.width + 20,
+                            height: rect.height + 20,
+                            border: '3px solid var(--accent)',
+                            borderRadius: '16px',
+                            boxShadow: '0 0 30px var(--accent)',
+                            pointerEvents: 'none'
+                        }}
+                    />
+                ))}
+            </AnimatePresence>
+
+            {/* AAA Glassmorphism Dialog */}
+            <AnimatePresence mode="wait">
                 <motion.div
-                    initial={{ opacity: 0, y: 20, x: "-50%" }}
-                    animate={{ opacity: 1, y: 0, x: "-50%" }}
-                    exit={{ opacity: 0, y: 20, x: "-50%" }}
+                    key={currentStep}
+                    initial={{ opacity: 0, y: 30, scale: 0.95, x: "-50%" }}
+                    animate={{ opacity: 1, y: 0, scale: 1, x: "-50%" }}
+                    exit={{ opacity: 0, y: -20, scale: 0.95, x: "-50%" }}
+                    transition={{ type: 'spring', damping: 20, stiffness: 150 }}
                     style={{
                         position: 'absolute',
                         left: '50%',
-                        top: step.position === 'very-top' ? '10px' : (step.position === 'top-lower' ? '180px' : (step.position === 'middle' ? '45%' : (step.position === 'top' ? '10%' : 'auto'))),
-                        bottom: step.position === 'bottom' ? '40px' : 'auto',
+                        top: step.position === 'very-top' ? '20px' : (step.position === 'top-lower' ? '180px' : (step.position === 'middle' ? '42%' : (step.position === 'top' ? '12%' : 'auto'))),
+                        bottom: step.position === 'bottom' ? '60px' : 'auto',
                         width: 'calc(100% - 40px)',
-                        maxWidth: '360px',
-                        background: 'var(--panel-bg)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '16px',
-                        padding: '16px',
-                        boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                        maxWidth: '380px',
+                        background: 'rgba(20, 20, 25, 0.85)',
+                        backdropFilter: 'blur(16px) saturate(180%)',
+                        WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+                        border: '1px solid rgba(255, 255, 255, 0.12)',
+                        borderRadius: '24px',
+                        padding: '24px',
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.05)',
                         pointerEvents: 'auto',
-                        zIndex: 30001
+                        zIndex: 30001,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '12px'
                     }}
                 >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                        <Info size={20} color="var(--accent)" />
-                        <h3 style={{ margin: 0, color: 'var(--text-bright)', fontSize: '1.1rem' }}>
-                            {stepIndex > 0 ? `(${stepIndex}/${totalSteps}) ` : ''}{step.title}
-                        </h3>
+                    {/* Header with Step indicator */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            background: 'rgba(var(--accent-rgb), 0.15)',
+                            padding: '4px 12px',
+                            borderRadius: '100px',
+                            border: '1px solid var(--accent-soft)'
+                        }}>
+                            <Sparkles size={14} color="var(--accent)" />
+                            <span style={{
+                                color: 'var(--accent)',
+                                fontSize: '0.7rem',
+                                fontWeight: 'bold',
+                                letterSpacing: '1.5px',
+                                textTransform: 'uppercase'
+                            }}>
+                                Tutorial {stepIndex}/{totalSteps}
+                            </span>
+                        </div>
                     </div>
-                    <p style={{ margin: 0, color: 'var(--text-dim)', lineHeight: '1.5', fontSize: '0.95rem' }}>
-                        {step.text}
-                    </p>
 
-                    {/* Progress Helper (Conditional Finish Button if not clicking target) */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <h3 style={{
+                            margin: 0,
+                            color: '#fff',
+                            fontSize: '1.25rem',
+                            fontWeight: '900',
+                            letterSpacing: '-0.5px'
+                        }}>
+                            {step.title}
+                        </h3>
+                        <p style={{
+                            margin: 0,
+                            color: 'rgba(255,255,255,0.7)',
+                            lineHeight: '1.6',
+                            fontSize: '0.95rem',
+                            fontWeight: '500'
+                        }}>
+                            {step.text}
+                        </p>
+                    </div>
+
+                    {/* Action Button */}
                     {!step.targetId && !step.targetClass && (
-                        <button
-                            onClick={() => {
-                                if (currentStep === 'TUTORIAL_FINAL_MESSAGE') {
-                                    onCompleteStep('COMPLETED');
-                                } else {
-                                    onCompleteStep(currentStep);
-                                }
-                            }}
+                        <motion.button
+                            whileHover={{ scale: 1.02, backgroundColor: 'var(--accent-bright)' }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => onCompleteStep(currentStep === 'TUTORIAL_FINAL_MESSAGE' ? 'COMPLETED' : currentStep)}
                             style={{
-                                marginTop: '15px',
+                                marginTop: '8px',
                                 width: '100%',
-                                padding: '12px',
-                                background: currentStep === 'TUTORIAL_FINAL_MESSAGE' ? 'var(--accent)' : 'var(--accent)',
+                                padding: '14px',
+                                background: 'var(--accent)',
                                 border: 'none',
-                                borderRadius: '8px',
-                                color: 'var(--bg-dark)',
+                                borderRadius: '14px',
+                                color: '#000',
                                 fontWeight: '900',
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                gap: '8px',
-                                fontSize: '0.9rem',
-                                letterSpacing: '1px'
+                                gap: '10px',
+                                fontSize: '0.95rem',
+                                letterSpacing: '0.5px',
+                                boxShadow: '0 8px 20px rgba(var(--accent-rgb), 0.3)',
+                                transition: 'all 0.2s ease',
+                                position: 'relative',
+                                overflow: 'hidden'
                             }}
                         >
-                            {currentStep === 'TUTORIAL_FINAL_MESSAGE' ? 'FINISH TUTORIAL' : 'CONTINUE'}
-                            {currentStep !== 'TUTORIAL_FINAL_MESSAGE' && <ChevronRight size={18} />}
-                        </button>
+                            {/* Shine Effect Animation Overlay */}
+                            <motion.div
+                                style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: '-100%',
+                                    width: '100%',
+                                    height: '100%',
+                                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
+                                }}
+                                animate={{ left: '200%' }}
+                                transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 3 }}
+                            />
+
+                            <span style={{ position: 'relative', zIndex: 1 }}>
+                                {currentStep === 'TUTORIAL_FINAL_MESSAGE' ? 'START YOUR JOURNEY' : 'CONTINUE'}
+                            </span>
+                            {currentStep !== 'TUTORIAL_FINAL_MESSAGE' && <ChevronRight size={20} />}
+                        </motion.button>
                     )}
                 </motion.div>
             </AnimatePresence>
