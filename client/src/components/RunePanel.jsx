@@ -681,7 +681,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                 }
 
                                 const isSelected = selectedShard && selectedShard.id === item.id;
-                                const isMergeCandidate = (gameState?.state?.tutorialStep === 'SELECT_MERGE_RUNE' || gameState?.state?.tutorialStep === 'MERGE_RUNES_2') && item.qty >= 2;
+                                const isMergeCandidate = (gameState?.state?.tutorialStep === 'SELECT_MERGE_RUNE') && item.qty >= 2;
 
                                 return (
                                     <div

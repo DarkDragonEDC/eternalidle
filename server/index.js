@@ -759,7 +759,7 @@ io.on('connection', (socket) => {
         'GO_TO_COMBAT',
         'SELECT_COMBAT_CATEGORY',
         'START_FIRST_MOB',
-        'MERGE_RUNES_2',
+        'TUTORIAL_FINAL_MESSAGE',
         'COMPLETED'
     ];
 

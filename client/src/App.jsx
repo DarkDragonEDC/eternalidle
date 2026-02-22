@@ -907,7 +907,7 @@ function App() {
     }
 
     if (step === 'START_FIRST_MOB' && gameState?.state?.combat?.mobId) {
-      handleTutorialStepComplete('MERGE_RUNES_2');
+      handleTutorialStepComplete('TUTORIAL_FINAL_MESSAGE');
     }
   }, [gameState?.state?.tutorialStep, activeTab, infoItem, gameState?.state?.inventory, lootModalData, gameState?.state?.equipment, gameState?.state?.combat]);
 

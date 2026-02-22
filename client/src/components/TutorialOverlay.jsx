@@ -182,6 +182,11 @@ const TutorialStepData = {
         text: 'Start a fight with a Rabbit to begin your journey!',
         targetId: 'fight-button-RABBIT',
         position: 'middle'
+    },
+    'TUTORIAL_FINAL_MESSAGE': {
+        title: 'Journey Begins',
+        text: 'Congratulations! You have mastered the basics. You are now ready to explore the world and claim your glory!',
+        position: 'middle'
     }
 };
 
@@ -194,7 +199,7 @@ const TUTORIAL_ORDER = [
     'CONFIRM_MERGE_SELECTION', 'FINAL_MERGE_CLICK', 'VIEW_MERGE_RESULTS',
     'CLOSE_FINAL_MODAL', 'EQUIP_RUNE_PROFILE', 'PROFILE_RUNE_TAB',
     'SELECT_RUNE_SLOT', 'CONFIRM_EQUIP_RUNE', 'GO_TO_COMBAT',
-    'SELECT_COMBAT_CATEGORY', 'START_FIRST_MOB', 'MERGE_RUNES_2'
+    'SELECT_COMBAT_CATEGORY', 'START_FIRST_MOB', 'TUTORIAL_FINAL_MESSAGE'
 ];
 
 const TutorialOverlay = ({ currentStep, onCompleteStep }) => {
@@ -394,24 +399,33 @@ const TutorialOverlay = ({ currentStep, onCompleteStep }) => {
                     {/* Progress Helper (Conditional Finish Button if not clicking target) */}
                     {!step.targetId && !step.targetClass && (
                         <button
-                            onClick={() => onCompleteStep(currentStep)}
+                            onClick={() => {
+                                if (currentStep === 'TUTORIAL_FINAL_MESSAGE') {
+                                    onCompleteStep('COMPLETED');
+                                } else {
+                                    onCompleteStep(currentStep);
+                                }
+                            }}
                             style={{
                                 marginTop: '15px',
                                 width: '100%',
-                                padding: '10px',
-                                background: 'var(--accent)',
+                                padding: '12px',
+                                background: currentStep === 'TUTORIAL_FINAL_MESSAGE' ? 'var(--accent)' : 'var(--accent)',
                                 border: 'none',
                                 borderRadius: '8px',
                                 color: 'var(--bg-dark)',
-                                fontWeight: 'bold',
+                                fontWeight: '900',
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                gap: '5px'
+                                gap: '8px',
+                                fontSize: '0.9rem',
+                                letterSpacing: '1px'
                             }}
                         >
-                            CONTINUE <ChevronRight size={18} />
+                            {currentStep === 'TUTORIAL_FINAL_MESSAGE' ? 'FINISH TUTORIAL' : 'CONTINUE'}
+                            {currentStep !== 'TUTORIAL_FINAL_MESSAGE' && <ChevronRight size={18} />}
                         </button>
                     )}
                 </motion.div>
