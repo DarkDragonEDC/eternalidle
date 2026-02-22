@@ -280,22 +280,35 @@ const TutorialOverlay = ({ currentStep, onCompleteStep }) => {
 
     const dialogRef = React.useRef(null);
 
-    // Native capture-phase click blocker — blocks ALL clicks except on targets and dialog
+    // Native capture-phase click blocker — blocks ALL interactions except on targets and dialog
     useEffect(() => {
         if (!step) return;
 
-        const blockClick = (e) => {
-            // Allow clicks inside the tutorial dialog
+        const blockEvent = (e) => {
+            // Allow interactions inside the tutorial dialog
             if (dialogRef.current && dialogRef.current.contains(e.target)) return;
 
-            // Allow clicks inside target areas
+            // Get coordinates (touch events use touches/changedTouches)
+            let clientX, clientY;
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else if (e.changedTouches && e.changedTouches.length > 0) {
+                clientX = e.changedTouches[0].clientX;
+                clientY = e.changedTouches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            // Allow interactions inside target areas
             const padding = 10;
             for (const rect of targetRects) {
                 if (
-                    e.clientX >= rect.left - padding &&
-                    e.clientX <= rect.left + rect.width + padding &&
-                    e.clientY >= rect.top - padding &&
-                    e.clientY <= rect.top + rect.height + padding
+                    clientX >= rect.left - padding &&
+                    clientX <= rect.left + rect.width + padding &&
+                    clientY >= rect.top - padding &&
+                    clientY <= rect.top + rect.height + padding
                 ) {
                     return; // Let it through
                 }
@@ -303,21 +316,22 @@ const TutorialOverlay = ({ currentStep, onCompleteStep }) => {
 
             // Block everything else
             e.stopPropagation();
-            e.preventDefault();
+            if (e.cancelable) e.preventDefault();
         };
 
-        document.addEventListener('click', blockClick, true);
-        document.addEventListener('mousedown', blockClick, true);
-        document.addEventListener('mouseup', blockClick, true);
-        document.addEventListener('touchstart', blockClick, true);
-        document.addEventListener('touchend', blockClick, true);
+        const opts = { capture: true, passive: false };
+        document.addEventListener('click', blockEvent, opts);
+        document.addEventListener('mousedown', blockEvent, opts);
+        document.addEventListener('mouseup', blockEvent, opts);
+        document.addEventListener('touchstart', blockEvent, opts);
+        document.addEventListener('touchend', blockEvent, opts);
 
         return () => {
-            document.removeEventListener('click', blockClick, true);
-            document.removeEventListener('mousedown', blockClick, true);
-            document.removeEventListener('mouseup', blockClick, true);
-            document.removeEventListener('touchstart', blockClick, true);
-            document.removeEventListener('touchend', blockClick, true);
+            document.removeEventListener('click', blockEvent, opts);
+            document.removeEventListener('mousedown', blockEvent, opts);
+            document.removeEventListener('mouseup', blockEvent, opts);
+            document.removeEventListener('touchstart', blockEvent, opts);
+            document.removeEventListener('touchend', blockEvent, opts);
         };
     }, [step, targetRects]);
 
