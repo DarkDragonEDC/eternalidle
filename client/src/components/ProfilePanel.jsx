@@ -352,7 +352,7 @@ const ProfilePanel = ({ gameState, session, socket, onShowInfo, isMobile, onOpen
                         }
                         onClick?.();
                     }}
-                    className={gameState?.state?.tutorialStep === 'SELECT_RUNE_SLOT' && !item && slot.startsWith('rune_') ? 'tutorial-rune-slot-empty' : ''}
+                    className={gameState?.state?.tutorialStep === 'SELECT_RUNE_SLOT' && !item && slot.startsWith('rune_') && hasUpgrade ? 'tutorial-rune-slot-empty' : ''}
                 >
                     {isLocked && !item && (
                         <div style={{

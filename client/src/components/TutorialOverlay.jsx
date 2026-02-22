@@ -7,7 +7,7 @@ const TutorialStepData = {
         title: 'Welcome to Eternal Idle!',
         text: 'Let\'s start by checking your items. Open your inventory.',
         targetId: 'tab-inventory',
-        position: 'top'
+        position: 'bottom'
     },
     'SELECT_CHEST': {
         title: 'A Gift for You',
@@ -31,7 +31,7 @@ const TutorialStepData = {
         title: 'Equip Your Gear',
         text: 'Go to your Profile to equip your new weapon!',
         targetId: 'tab-profile',
-        position: 'top'
+        position: 'bottom'
     },
     'EQUIP_WEAPON': {
         title: 'Gear Up',
@@ -43,7 +43,7 @@ const TutorialStepData = {
         title: 'Choose Your Class',
         text: 'The weapon you select defines your playstyle! A Sword makes you a Warrior, a Bow a Hunter, and a Staff a Mage.',
         targetClass: 'tutorial-equip-item',
-        position: 'top'
+        position: 'cover-best'
     },
     'EQUIP_FOOD': {
         title: 'Don\'t Starve',
@@ -55,13 +55,13 @@ const TutorialStepData = {
         title: 'Select Food',
         text: 'Click on the EQUIP button to add food to your active slot.',
         targetClass: 'tutorial-equip-item',
-        position: 'top'
+        position: 'cover-best'
     },
     'MERGE_RUNES_1': {
         title: 'Skills & Forging',
         text: 'You found some Rune Shards! Open the Skills tab to find the Rune Forge.',
         targetId: 'tab-skills',
-        position: 'top'
+        position: 'bottom'
     },
     'OPEN_RUNE_FORGE': {
         title: 'Rune Forge',
@@ -145,7 +145,7 @@ const TutorialStepData = {
         title: 'More Power',
         text: 'Now that you have evolved your Runes, let\'s equip them. Go to your Profile.',
         targetId: 'tab-profile',
-        position: 'top'
+        position: 'bottom'
     },
     'PROFILE_RUNE_TAB': {
         title: 'Rune Slots',
@@ -163,13 +163,13 @@ const TutorialStepData = {
         title: 'Final Surge',
         text: 'Select your new Rune and click EQUIP to gain its power!',
         targetClass: 'tutorial-equip-item',
-        position: 'top'
+        position: 'cover-best'
     },
     'GO_TO_COMBAT': {
         title: 'Basic Training',
         text: 'It is time to test your power. Go to the Combat tab.',
         targetId: 'tab-combat',
-        position: 'top'
+        position: 'bottom'
     },
     'SELECT_COMBAT_CATEGORY': {
         title: 'Adventure Awaits',
@@ -278,6 +278,49 @@ const TutorialOverlay = ({ currentStep, onCompleteStep }) => {
         };
     }, [step, currentStep, lastScrolledStep, onCompleteStep]);
 
+    const dialogRef = React.useRef(null);
+
+    // Native capture-phase click blocker — blocks ALL clicks except on targets and dialog
+    useEffect(() => {
+        if (!step) return;
+
+        const blockClick = (e) => {
+            // Allow clicks inside the tutorial dialog
+            if (dialogRef.current && dialogRef.current.contains(e.target)) return;
+
+            // Allow clicks inside target areas
+            const padding = 10;
+            for (const rect of targetRects) {
+                if (
+                    e.clientX >= rect.left - padding &&
+                    e.clientX <= rect.left + rect.width + padding &&
+                    e.clientY >= rect.top - padding &&
+                    e.clientY <= rect.top + rect.height + padding
+                ) {
+                    return; // Let it through
+                }
+            }
+
+            // Block everything else
+            e.stopPropagation();
+            e.preventDefault();
+        };
+
+        document.addEventListener('click', blockClick, true);
+        document.addEventListener('mousedown', blockClick, true);
+        document.addEventListener('mouseup', blockClick, true);
+        document.addEventListener('touchstart', blockClick, true);
+        document.addEventListener('touchend', blockClick, true);
+
+        return () => {
+            document.removeEventListener('click', blockClick, true);
+            document.removeEventListener('mousedown', blockClick, true);
+            document.removeEventListener('mouseup', blockClick, true);
+            document.removeEventListener('touchstart', blockClick, true);
+            document.removeEventListener('touchend', blockClick, true);
+        };
+    }, [step, targetRects]);
+
     if (!step) return null;
 
     return (
@@ -359,6 +402,7 @@ const TutorialOverlay = ({ currentStep, onCompleteStep }) => {
             {/* AAA Glassmorphism Dialog */}
             <AnimatePresence mode="wait">
                 <motion.div
+                    ref={dialogRef}
                     key={currentStep}
                     initial={{ opacity: 0, y: 30, scale: 0.95, x: "-50%" }}
                     animate={{ opacity: 1, y: 0, scale: 1, x: "-50%" }}
@@ -367,7 +411,10 @@ const TutorialOverlay = ({ currentStep, onCompleteStep }) => {
                     style={{
                         position: 'absolute',
                         left: '50%',
-                        top: step.position === 'very-top' ? '20px' : (step.position === 'top' ? '12%' : (step.position === 'middle' ? '42%' : 'auto')),
+                        top: step.position === 'very-top' ? '20px' :
+                            (step.position === 'cover-best' ? '28%' :
+                                (step.position === 'top' ? '12%' :
+                                    (step.position === 'middle' ? '42%' : 'auto'))),
                         bottom: step.position === 'bottom' ? '60px' : 'auto',
                         width: 'calc(100% - 80px)',
                         maxWidth: '240px',

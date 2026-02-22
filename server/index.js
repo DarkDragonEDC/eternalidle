@@ -357,6 +357,46 @@ io.on('connection', (socket) => {
 
             // Immediately send status for this character (with catchup=true for offline progress)
             await gameManager.executeLocked(userId, async () => {
+                const char = await gameManager.getCharacter(userId, characterId);
+
+                // TUTORIAL RESET: If player disconnected mid-tutorial, reset their account
+                if (char && char.state.tutorialStep &&
+                    char.state.tutorialStep !== 'COMPLETED' &&
+                    char.state.tutorialStep !== 'OPEN_INVENTORY') {
+
+                    console.log(`[TUTORIAL] Resetting mid-tutorial character ${characterId} (was at step: ${char.state.tutorialStep})`);
+
+                    const isIronman = char.state.isIronman || false;
+
+                    // Reset state to initial values
+                    char.state = {
+                        inventory: { 'NOOB_CHEST': 1 },
+                        skills: char.state.skills, // Keep skills structure
+                        stats: { str: 0, agi: 0, int: 0 },
+                        silver: 0,
+                        notifications: [],
+                        unlockedTitles: [],
+                        isIronman: isIronman,
+                        tutorialStep: 'OPEN_INVENTORY',
+                        equipment: {},
+                        health: 100,
+                        maxHealth: 100
+                    };
+
+                    // Reset skills XP but keep the structure
+                    if (char.state.skills) {
+                        for (const key of Object.keys(char.state.skills)) {
+                            if (char.state.skills[key] && typeof char.state.skills[key] === 'object') {
+                                char.state.skills[key].level = 1;
+                                char.state.skills[key].xp = 0;
+                            }
+                        }
+                    }
+
+                    await gameManager.saveState(char.id, char.state);
+                    console.log(`[TUTORIAL] Character ${characterId} reset successfully.`);
+                }
+
                 const status = await gameManager.getStatus(socket.user.id, true, characterId, true);
 
                 // CRITICAL FIX: Only assign characterId to socket AFTER catchup ensures state is valid.
