@@ -181,7 +181,7 @@ const TutorialStepData = {
         title: 'First Battle',
         text: 'Start a fight with a Rabbit to begin your journey!',
         targetId: 'fight-button-RABBIT',
-        position: 'middle'
+        position: 'top'
     },
     'TUTORIAL_FINAL_MESSAGE': {
         title: 'Journey Begins',
