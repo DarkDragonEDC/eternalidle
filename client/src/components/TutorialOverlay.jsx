@@ -79,25 +79,25 @@ const TutorialStepData = {
         title: 'Maximum Power',
         text: 'Click MAX to use all available shards for your Rune.',
         targetId: 'tutorial-forge-max',
-        position: 'top'
+        position: 'very-top'
     },
     'FORGE_SELECT_GATHERING': {
         title: 'Choose a Path',
         text: 'Select Gathering to create a Rune that boosts your gathering skills.',
         targetId: 'tutorial-forge-gathering',
-        position: 'top'
+        position: 'very-top'
     },
     'FORGE_CONFIRM': {
         title: 'Forge It!',
         text: 'Click Confirm to forge your very first Rune!',
         targetId: 'tutorial-forge-confirm',
-        position: 'top'
+        position: 'very-top'
     },
     'CLAIM_FORGE_RESULTS': {
         title: 'Gained Power',
         text: 'Click AWESOME! to see your newly created Runes.',
         targetId: 'tutorial-forge-results-awesome',
-        position: 'top'
+        position: 'very-top'
     },
     'OPEN_RUNE_TAB': {
         title: 'Your Collection',
