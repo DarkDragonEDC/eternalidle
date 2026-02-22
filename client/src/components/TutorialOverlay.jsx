@@ -367,22 +367,22 @@ const TutorialOverlay = ({ currentStep, onCompleteStep }) => {
                     style={{
                         position: 'absolute',
                         left: '50%',
-                        top: step.position === 'very-top' ? '20px' : (step.position === 'top-lower' ? '180px' : (step.position === 'middle' ? '42%' : (step.position === 'top' ? '12%' : 'auto'))),
+                        top: step.position === 'very-top' ? '20px' : (step.position === 'top' ? '12%' : (step.position === 'middle' ? '42%' : 'auto')),
                         bottom: step.position === 'bottom' ? '60px' : 'auto',
-                        width: 'calc(100% - 40px)',
-                        maxWidth: '380px',
+                        width: 'calc(100% - 80px)',
+                        maxWidth: '240px',
                         background: 'rgba(20, 20, 25, 0.85)',
-                        backdropFilter: 'blur(16px) saturate(180%)',
-                        WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+                        backdropFilter: 'blur(12px) saturate(180%)',
+                        WebkitBackdropFilter: 'blur(12px) saturate(180%)',
                         border: '1px solid rgba(255, 255, 255, 0.12)',
-                        borderRadius: '24px',
-                        padding: '24px',
-                        boxShadow: '0 20px 60px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.05)',
+                        borderRadius: '16px',
+                        padding: '12px 16px',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.05)',
                         pointerEvents: 'auto',
                         zIndex: 30001,
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '12px'
+                        gap: '8px'
                     }}
                 >
                     {/* Header with Step indicator */}
@@ -390,40 +390,40 @@ const TutorialOverlay = ({ currentStep, onCompleteStep }) => {
                         <div style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '8px',
+                            gap: '6px',
                             background: 'rgba(var(--accent-rgb), 0.15)',
-                            padding: '4px 12px',
+                            padding: '2px 8px',
                             borderRadius: '100px',
                             border: '1px solid var(--accent-soft)'
                         }}>
-                            <Sparkles size={14} color="var(--accent)" />
+                            <Sparkles size={10} color="var(--accent)" />
                             <span style={{
                                 color: 'var(--accent)',
-                                fontSize: '0.7rem',
+                                fontSize: '0.55rem',
                                 fontWeight: 'bold',
-                                letterSpacing: '1.5px',
+                                letterSpacing: '1px',
                                 textTransform: 'uppercase'
                             }}>
-                                Tutorial {stepIndex}/{totalSteps}
+                                {stepIndex}/{totalSteps}
                             </span>
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                         <h3 style={{
                             margin: 0,
                             color: '#fff',
-                            fontSize: '1.25rem',
+                            fontSize: '0.9rem',
                             fontWeight: '900',
-                            letterSpacing: '-0.5px'
+                            letterSpacing: '-0.3px'
                         }}>
                             {step.title}
                         </h3>
                         <p style={{
                             margin: 0,
                             color: 'rgba(255,255,255,0.7)',
-                            lineHeight: '1.6',
-                            fontSize: '0.95rem',
+                            lineHeight: '1.4',
+                            fontSize: '0.75rem',
                             fontWeight: '500'
                         }}>
                             {step.text}
@@ -437,22 +437,22 @@ const TutorialOverlay = ({ currentStep, onCompleteStep }) => {
                             whileTap={{ scale: 0.98 }}
                             onClick={() => onCompleteStep(currentStep === 'TUTORIAL_FINAL_MESSAGE' ? 'COMPLETED' : currentStep)}
                             style={{
-                                marginTop: '8px',
+                                marginTop: '4px',
                                 width: '100%',
-                                padding: '14px',
+                                padding: '10px',
                                 background: 'var(--accent)',
                                 border: 'none',
-                                borderRadius: '14px',
+                                borderRadius: '10px',
                                 color: '#000',
                                 fontWeight: '900',
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                gap: '10px',
-                                fontSize: '0.95rem',
+                                gap: '6px',
+                                fontSize: '0.8rem',
                                 letterSpacing: '0.5px',
-                                boxShadow: '0 8px 20px rgba(var(--accent-rgb), 0.3)',
+                                boxShadow: '0 4px 12px rgba(var(--accent-rgb), 0.3)',
                                 transition: 'all 0.2s ease',
                                 position: 'relative',
                                 overflow: 'hidden'
