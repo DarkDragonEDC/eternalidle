@@ -95,6 +95,12 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
         return { ...resolveItem(currentItem.id), ...currentItem };
     }, [currentItem]);
 
+    React.useEffect(() => {
+        if (gameState?.state?.tutorialStep === 'SELECT_RUNE_SLOT' && slot?.startsWith('rune_')) {
+            onTutorialComplete?.('CONFIRM_EQUIP_RUNE');
+        }
+    }, [slot, gameState?.state?.tutorialStep, onTutorialComplete]);
+
     // Check if the best candidate is actually better than current
     const isRecommended = React.useCallback((candidate) => {
         return isBetterItem(candidate, currentItem);
@@ -192,7 +198,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
 
                                     if (userLv < reqLv) return; // Prevent click if not meeting req
                                     if (bestCandidate.type === 'RUNE' && gameState?.state?.tutorialStep === 'CONFIRM_EQUIP_RUNE') {
-                                        onTutorialComplete?.('MERGE_RUNES_2');
+                                        onTutorialComplete?.('GO_TO_COMBAT');
                                     }
                                     onEquip(bestCandidate.id);
                                     onClose();
@@ -412,7 +418,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onUnequip, 
 
                                                 if (userLv < reqLv && profGroup) return;
                                                 if (item.type === 'RUNE' && gameState?.state?.tutorialStep === 'CONFIRM_EQUIP_RUNE') {
-                                                    onTutorialComplete?.('MERGE_RUNES_2');
+                                                    onTutorialComplete?.('GO_TO_COMBAT');
                                                 }
                                                 onEquip(item.id);
                                                 onClose();

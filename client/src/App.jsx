@@ -894,7 +894,7 @@ function App() {
       handleTutorialStepComplete('CREATE_RUNE');
     }
 
-    if (step === 'CONFIRM_EQUIP_RUNE' && gameState?.state?.equipment?.runes?.some(r => r !== null)) {
+    if (step === 'CONFIRM_EQUIP_RUNE' && Object.keys(gameState?.state?.equipment || {}).some(k => k.startsWith('rune_') && gameState.state.equipment[k])) {
       handleTutorialStepComplete('GO_TO_COMBAT');
     }
 
