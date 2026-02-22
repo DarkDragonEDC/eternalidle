@@ -429,7 +429,7 @@ const TutorialOverlay = ({ currentStep, onCompleteStep }) => {
                             (step.position === 'cover-best' ? '28%' :
                                 (step.position === 'top' ? '12%' :
                                     (step.position === 'middle' ? '42%' : 'auto'))),
-                        bottom: step.position === 'bottom' ? '85px' : 'auto',
+                        bottom: step.position === 'bottom' ? '110px' : 'auto',
                         width: 'calc(100% - 80px)',
                         maxWidth: '240px',
                         background: 'rgba(20, 20, 25, 0.85)',
