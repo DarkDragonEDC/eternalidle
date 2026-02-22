@@ -418,10 +418,10 @@ const TutorialOverlay = ({ currentStep, onCompleteStep }) => {
                 <motion.div
                     ref={dialogRef}
                     key={currentStep}
-                    initial={{ opacity: 0, y: 30, scale: 0.95, x: "-50%" }}
+                    initial={{ opacity: 0, y: 10, scale: 0.98, x: "-50%" }}
                     animate={{ opacity: 1, y: 0, scale: 1, x: "-50%" }}
-                    exit={{ opacity: 0, y: -20, scale: 0.95, x: "-50%" }}
-                    transition={{ type: 'spring', damping: 20, stiffness: 150 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.98, x: "-50%" }}
+                    transition={{ duration: 0.15, ease: 'easeOut' }}
                     style={{
                         position: 'absolute',
                         left: '50%',
