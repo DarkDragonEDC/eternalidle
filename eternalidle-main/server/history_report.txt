@@ -1,0 +1,42 @@
+RPC failed, trying raw query...
+Top 40 characters by history count:
+Char: DIABLO (0c32843c-c1d2-4460-af29-991a62ddd4fc) - Count: 84
+Char: Korea (c5fae475-9ebc-4c26-a1a1-64d138141181) - Count: 67
+Char: Immortal (bdeef73b-8870-4017-b374-edbbd9d453d5) - Count: 32
+Char: brianmendes (708e6137-2ef7-458d-8410-9c2a60bfc1db) - Count: 23
+Char: Cyber (567dfffc-e5eb-4092-9255-d38e47491ea5) - Count: 21
+Char: MagpieMalice (0988cb42-d587-4ad9-ad0a-502cea6784c8) - Count: 18
+Char: GUTS (d76fed10-6987-4a7a-871b-2b7d7c799f00) - Count: 15
+Char: Aayen (76cb63d7-5c3d-407c-b23c-a087f80031fd) - Count: 14
+Char: Orange (4148ca85-a565-4100-bbe6-fd404ab4035d) - Count: 13
+Char: Ronny (36fc1a41-a1be-4f99-91d5-a3713fce6942) - Count: 10
+Char: akgaurav (5cf1fa8c-dc8a-4509-b09f-bc2630a83880) - Count: 8
+Char: Hex Havoc (3e0dd7e7-71e4-4e73-991c-befd90696064) - Count: 7
+Char: Alvin (0d58d936-e500-4215-8d7c-157a12a7b194) - Count: 7
+Char: Guthiix (84ebb3aa-671d-4cea-8189-6a24d9faa4af) - Count: 7
+Char: Mirolune (4674a233-39aa-442a-904c-1a6c52d7d9d9) - Count: 6
+Char: Cardeal (8313fa57-3267-4dd6-834b-2c3e1a54d948) - Count: 6
+Char: DarkDragon (3ec05682-3886-46fd-9137-f9cb655842b6) - Count: 6
+Char: <EternoDev> (95323ca3-85c9-4b5e-b4af-08aafa64c6ff) - Count: 5
+Char: reSu (fb6f017e-6c75-438e-b4ea-b433924bec6c) - Count: 4
+Char: Benni (bf64daa1-fe94-4c50-8f5c-9cc541be3832) - Count: 4
+Char: Deathbloom (6897794c-3122-479c-bac5-08d937b0c016) - Count: 4
+Char: Pomim (a04a99af-b443-44d3-86dd-72800b9106df) - Count: 4
+Char: Queost (f6baec4d-298e-4627-8b97-08fa1b9804d2) - Count: 4
+Char: Teu pai (9e0e697d-8caa-4231-ab30-58582f539a8c) - Count: 4
+Char: Igibys (a402b7dc-cc79-408b-bd39-26e2d0534172) - Count: 4
+Char: Roflelf (8a5fd278-af64-4cf7-8ef9-95305fef5719) - Count: 3
+Char: Tiago (a8bd17b7-6c0b-4e99-9e1b-6c1c242a8886) - Count: 3
+Char: Kaladin (e4271c6c-3dcc-4ce0-bf8f-abbc51a25c5a) - Count: 3
+Char: Eugene Lionheart (ee9940ff-3a29-4931-986d-1224ddb5f922) - Count: 3
+Char: Pure (6ba55255-cf2e-473c-acf6-6cc74be1ac85) - Count: 3
+Char: Rudo (02d4b6a8-380c-4c4f-8a58-de9dd59965f9) - Count: 3
+Char: Hex Ironman (0fb131ff-e5de-4349-9921-7dae12fd1e30) - Count: 3
+Char: Brola (83765d12-84ca-46c3-9754-d572295ba701) - Count: 3
+Char: Seise Onibus (981448a5-833a-4a05-864a-82f2d9219c37) - Count: 3
+Char: MSU (787c5f6f-d37f-4c1b-9b39-4a26d2280f9e) - Count: 3
+Char: Sabonete (f938d183-97fd-4e15-ad27-5078a8a9de5c) - Count: 3
+Char: platzbill (94c922be-3b78-4153-83ef-ad23d3182574) - Count: 3
+Char: Suss Pitious (4d795b40-7c2f-42ca-9b9e-b6a42a69e198) - Count: 3
+Char: Rustyspoon (dcc4fed0-a5a4-4ad9-bb7a-01e70cc8686d) - Count: 3
+Char: FuturoMago (442138a2-3c3c-4516-a199-b35b20146ad5) - Count: 2

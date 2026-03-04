@@ -1,0 +1,9 @@
+Records in DB: [
+  {
+    "user_id": "5093ffaa-4770-4123-a83b-fca97a30601b",
+    "last_spin": "2026-02-25T12:01:27.644+00:00",
+    "created_at": "2026-02-25T12:01:27.671478+00:00"
+  }
+]
+
+User 5093ffaa-4770-4123-a83b-fca97a30601b: last_spin=2026-02-25T12:01:27.644+00:00, canSpin=false

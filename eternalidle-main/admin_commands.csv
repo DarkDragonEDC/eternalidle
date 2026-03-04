@@ -1,0 +1,10 @@
+Comando,Descrição,Exemplo
+/give,"Dá itens, prata ou itens da loja a um jogador.","/give me T1_POTION_DAMAGE 5"
+/heal,Recupera toda a vida (HP) do jogador.,/heal PlayerName
+/add_orbs,Adiciona Orbs (moeda premium) à conta.,/add_orbs 100
+/add_crowns,Alias para /add_orbs.,/add_crowns 100
+/xp,Adiciona experiência a uma skill específica.,/xp mining 5000
+/resetdaily,Reseta o tempo de espera do Giro Diário.,/resetdaily
+/ban,Aplica um banimento ao jogador.,/ban PlayerName Motivo
+/title,Concede um título a um jogador.,/title PlayerName Pre-Alpha Player
+/help,Lista os comandos básicos.,/help

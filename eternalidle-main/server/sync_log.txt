@@ -1,0 +1,4 @@
+[SYNC] Char: Kaladin, Mob: RABBIT, OldHP: 1694, NewHP: 1185
+[SYNC] Char: PureIron, Mob: RABBIT, OldHP: 1694, NewHP: 1185
+[SYNC] Char: Hex Havoc, Mob: RABBIT, OldHP: 1694, NewHP: 1264
+[SYNC] Char: Kyjux, Mob: RABBIT, OldHP: 1694, NewHP: 1264

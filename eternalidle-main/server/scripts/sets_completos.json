@@ -1,0 +1,2734 @@
+{
+  "Set_1": {
+    "cape": {
+      "id": "T1_MAGE_CAPE",
+      "amount": 1,
+      "quality": 0
+    },
+    "boots": {
+      "id": "T1_CLOTH_BOOTS",
+      "amount": 1,
+      "quality": 0
+    },
+    "chest": {
+      "id": "T1_CLOTH_ARMOR",
+      "amount": 1,
+      "quality": 0
+    },
+    "gloves": {
+      "id": "T1_CLOTH_GLOVES",
+      "amount": 1,
+      "quality": 0
+    },
+    "helmet": {
+      "id": "T1_CLOTH_HELMET",
+      "amount": 1,
+      "quality": 0
+    },
+    "offHand": {
+      "id": "T1_TOME",
+      "amount": 1,
+      "quality": 0
+    },
+    "mainHand": {
+      "id": "T1_FIRE_STAFF",
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_2": {
+    "cape": {
+      "id": "T1_MAGE_CAPE_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "boots": {
+      "id": "T1_CLOTH_BOOTS_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "chest": {
+      "id": "T1_CLOTH_ARMOR_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "gloves": {
+      "id": "T1_CLOTH_GLOVES_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "helmet": {
+      "id": "T1_CLOTH_HELMET_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "offHand": {
+      "id": "T1_TOME_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "mainHand": {
+      "id": "T1_FIRE_STAFF_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T1_RUNE_ATTACK_BURST_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T1_RUNE_ATTACK_ATTACK_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T1_RUNE_ATTACK_ATTACK_SPEED_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_3": {
+    "cape": {
+      "id": "T1_MAGE_CAPE_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "boots": {
+      "id": "T1_CLOTH_BOOTS_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "chest": {
+      "id": "T1_CLOTH_ARMOR_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "gloves": {
+      "id": "T1_CLOTH_GLOVES_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "helmet": {
+      "id": "T1_CLOTH_HELMET_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "offHand": {
+      "id": "T1_TOME_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "mainHand": {
+      "id": "T1_FIRE_STAFF_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T1_RUNE_ATTACK_BURST_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T1_RUNE_ATTACK_ATTACK_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T1_RUNE_ATTACK_ATTACK_SPEED_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_4": {
+    "cape": {
+      "id": "T1_MAGE_CAPE_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "boots": {
+      "id": "T1_CLOTH_BOOTS_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "chest": {
+      "id": "T1_CLOTH_ARMOR_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "gloves": {
+      "id": "T1_CLOTH_GLOVES_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "helmet": {
+      "id": "T1_CLOTH_HELMET_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "offHand": {
+      "id": "T1_TOME_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "mainHand": {
+      "id": "T1_FIRE_STAFF_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T1_RUNE_ATTACK_BURST_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T1_RUNE_ATTACK_ATTACK_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T1_RUNE_ATTACK_ATTACK_SPEED_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_5": {
+    "cape": {
+      "id": "T1_MAGE_CAPE_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "boots": {
+      "id": "T1_CLOTH_BOOTS_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "chest": {
+      "id": "T1_CLOTH_ARMOR_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "gloves": {
+      "id": "T1_CLOTH_GLOVES_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "helmet": {
+      "id": "T1_CLOTH_HELMET_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "offHand": {
+      "id": "T1_TOME_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "mainHand": {
+      "id": "T1_FIRE_STAFF_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T1_RUNE_ATTACK_BURST_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T1_RUNE_ATTACK_ATTACK_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T1_RUNE_ATTACK_ATTACK_SPEED_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_6": {
+    "cape": {
+      "id": "T2_MAGE_CAPE",
+      "amount": 1,
+      "quality": 0
+    },
+    "boots": {
+      "id": "T2_CLOTH_BOOTS",
+      "amount": 1,
+      "quality": 0
+    },
+    "chest": {
+      "id": "T2_CLOTH_ARMOR",
+      "amount": 1,
+      "quality": 0
+    },
+    "gloves": {
+      "id": "T2_CLOTH_GLOVES",
+      "amount": 1,
+      "quality": 0
+    },
+    "helmet": {
+      "id": "T2_CLOTH_HELMET",
+      "amount": 1,
+      "quality": 0
+    },
+    "offHand": {
+      "id": "T2_TOME",
+      "amount": 1,
+      "quality": 0
+    },
+    "mainHand": {
+      "id": "T2_FIRE_STAFF",
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T1_RUNE_ATTACK_BURST_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T1_RUNE_ATTACK_ATTACK_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T1_RUNE_ATTACK_ATTACK_SPEED_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_7": {
+    "cape": {
+      "id": "T2_MAGE_CAPE_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "boots": {
+      "id": "T2_CLOTH_BOOTS_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "chest": {
+      "id": "T2_CLOTH_ARMOR_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "gloves": {
+      "id": "T2_CLOTH_GLOVES_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "helmet": {
+      "id": "T2_CLOTH_HELMET_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "offHand": {
+      "id": "T2_TOME_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "mainHand": {
+      "id": "T2_FIRE_STAFF_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T2_RUNE_ATTACK_BURST_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T2_RUNE_ATTACK_ATTACK_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T2_RUNE_ATTACK_ATTACK_SPEED_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_8": {
+    "cape": {
+      "id": "T2_MAGE_CAPE_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "boots": {
+      "id": "T2_CLOTH_BOOTS_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "chest": {
+      "id": "T2_CLOTH_ARMOR_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "gloves": {
+      "id": "T2_CLOTH_GLOVES_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "helmet": {
+      "id": "T2_CLOTH_HELMET_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "offHand": {
+      "id": "T2_TOME_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "mainHand": {
+      "id": "T2_FIRE_STAFF_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T2_RUNE_ATTACK_BURST_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T2_RUNE_ATTACK_ATTACK_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T2_RUNE_ATTACK_ATTACK_SPEED_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_9": {
+    "cape": {
+      "id": "T2_MAGE_CAPE_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "boots": {
+      "id": "T2_CLOTH_BOOTS_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "chest": {
+      "id": "T2_CLOTH_ARMOR_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "gloves": {
+      "id": "T2_CLOTH_GLOVES_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "helmet": {
+      "id": "T2_CLOTH_HELMET_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "offHand": {
+      "id": "T2_TOME_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "mainHand": {
+      "id": "T2_FIRE_STAFF_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T2_RUNE_ATTACK_BURST_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T2_RUNE_ATTACK_ATTACK_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T2_RUNE_ATTACK_ATTACK_SPEED_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_10": {
+    "cape": {
+      "id": "T2_MAGE_CAPE_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "boots": {
+      "id": "T2_CLOTH_BOOTS_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "chest": {
+      "id": "T2_CLOTH_ARMOR_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "gloves": {
+      "id": "T2_CLOTH_GLOVES_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "helmet": {
+      "id": "T2_CLOTH_HELMET_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "offHand": {
+      "id": "T2_TOME_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "mainHand": {
+      "id": "T2_FIRE_STAFF_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T2_RUNE_ATTACK_BURST_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T2_RUNE_ATTACK_ATTACK_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T2_RUNE_ATTACK_ATTACK_SPEED_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_11": {
+    "cape": {
+      "id": "T3_MAGE_CAPE",
+      "amount": 1,
+      "quality": 0
+    },
+    "boots": {
+      "id": "T3_CLOTH_BOOTS",
+      "amount": 1,
+      "quality": 0
+    },
+    "chest": {
+      "id": "T3_CLOTH_ARMOR",
+      "amount": 1,
+      "quality": 0
+    },
+    "gloves": {
+      "id": "T3_CLOTH_GLOVES",
+      "amount": 1,
+      "quality": 0
+    },
+    "helmet": {
+      "id": "T3_CLOTH_HELMET",
+      "amount": 1,
+      "quality": 0
+    },
+    "offHand": {
+      "id": "T3_TOME",
+      "amount": 1,
+      "quality": 0
+    },
+    "mainHand": {
+      "id": "T3_FIRE_STAFF",
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T2_RUNE_ATTACK_BURST_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T2_RUNE_ATTACK_ATTACK_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T2_RUNE_ATTACK_ATTACK_SPEED_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_12": {
+    "cape": {
+      "id": "T3_MAGE_CAPE_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "boots": {
+      "id": "T3_CLOTH_BOOTS_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "chest": {
+      "id": "T3_CLOTH_ARMOR_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "gloves": {
+      "id": "T3_CLOTH_GLOVES_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "helmet": {
+      "id": "T3_CLOTH_HELMET_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "offHand": {
+      "id": "T3_TOME_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "mainHand": {
+      "id": "T3_FIRE_STAFF_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T3_RUNE_ATTACK_BURST_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T3_RUNE_ATTACK_ATTACK_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T3_RUNE_ATTACK_ATTACK_SPEED_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_13": {
+    "cape": {
+      "id": "T3_MAGE_CAPE_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "boots": {
+      "id": "T3_CLOTH_BOOTS_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "chest": {
+      "id": "T3_CLOTH_ARMOR_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "gloves": {
+      "id": "T3_CLOTH_GLOVES_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "helmet": {
+      "id": "T3_CLOTH_HELMET_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "offHand": {
+      "id": "T3_TOME_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "mainHand": {
+      "id": "T3_FIRE_STAFF_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T3_RUNE_ATTACK_BURST_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T3_RUNE_ATTACK_ATTACK_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T3_RUNE_ATTACK_ATTACK_SPEED_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_14": {
+    "cape": {
+      "id": "T3_MAGE_CAPE_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "boots": {
+      "id": "T3_CLOTH_BOOTS_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "chest": {
+      "id": "T3_CLOTH_ARMOR_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "gloves": {
+      "id": "T3_CLOTH_GLOVES_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "helmet": {
+      "id": "T3_CLOTH_HELMET_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "offHand": {
+      "id": "T3_TOME_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "mainHand": {
+      "id": "T3_FIRE_STAFF_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T3_RUNE_ATTACK_BURST_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T3_RUNE_ATTACK_ATTACK_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T3_RUNE_ATTACK_ATTACK_SPEED_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_15": {
+    "cape": {
+      "id": "T3_MAGE_CAPE_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "boots": {
+      "id": "T3_CLOTH_BOOTS_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "chest": {
+      "id": "T3_CLOTH_ARMOR_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "gloves": {
+      "id": "T3_CLOTH_GLOVES_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "helmet": {
+      "id": "T3_CLOTH_HELMET_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "offHand": {
+      "id": "T3_TOME_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "mainHand": {
+      "id": "T3_FIRE_STAFF_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T3_RUNE_ATTACK_BURST_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T3_RUNE_ATTACK_ATTACK_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T3_RUNE_ATTACK_ATTACK_SPEED_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_16": {
+    "cape": {
+      "id": "T4_MAGE_CAPE",
+      "amount": 1,
+      "quality": 0
+    },
+    "boots": {
+      "id": "T4_CLOTH_BOOTS",
+      "amount": 1,
+      "quality": 0
+    },
+    "chest": {
+      "id": "T4_CLOTH_ARMOR",
+      "amount": 1,
+      "quality": 0
+    },
+    "gloves": {
+      "id": "T4_CLOTH_GLOVES",
+      "amount": 1,
+      "quality": 0
+    },
+    "helmet": {
+      "id": "T4_CLOTH_HELMET",
+      "amount": 1,
+      "quality": 0
+    },
+    "offHand": {
+      "id": "T4_TOME",
+      "amount": 1,
+      "quality": 0
+    },
+    "mainHand": {
+      "id": "T4_FIRE_STAFF",
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T3_RUNE_ATTACK_BURST_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T3_RUNE_ATTACK_ATTACK_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T3_RUNE_ATTACK_ATTACK_SPEED_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_17": {
+    "cape": {
+      "id": "T4_MAGE_CAPE_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "boots": {
+      "id": "T4_CLOTH_BOOTS_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "chest": {
+      "id": "T4_CLOTH_ARMOR_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "gloves": {
+      "id": "T4_CLOTH_GLOVES_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "helmet": {
+      "id": "T4_CLOTH_HELMET_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "offHand": {
+      "id": "T4_TOME_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "mainHand": {
+      "id": "T4_FIRE_STAFF_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T4_RUNE_ATTACK_BURST_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T4_RUNE_ATTACK_ATTACK_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T4_RUNE_ATTACK_ATTACK_SPEED_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_18": {
+    "cape": {
+      "id": "T4_MAGE_CAPE_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "boots": {
+      "id": "T4_CLOTH_BOOTS_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "chest": {
+      "id": "T4_CLOTH_ARMOR_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "gloves": {
+      "id": "T4_CLOTH_GLOVES_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "helmet": {
+      "id": "T4_CLOTH_HELMET_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "offHand": {
+      "id": "T4_TOME_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "mainHand": {
+      "id": "T4_FIRE_STAFF_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T4_RUNE_ATTACK_BURST_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T4_RUNE_ATTACK_ATTACK_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T4_RUNE_ATTACK_ATTACK_SPEED_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_19": {
+    "cape": {
+      "id": "T4_MAGE_CAPE_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "boots": {
+      "id": "T4_CLOTH_BOOTS_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "chest": {
+      "id": "T4_CLOTH_ARMOR_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "gloves": {
+      "id": "T4_CLOTH_GLOVES_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "helmet": {
+      "id": "T4_CLOTH_HELMET_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "offHand": {
+      "id": "T4_TOME_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "mainHand": {
+      "id": "T4_FIRE_STAFF_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T4_RUNE_ATTACK_BURST_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T4_RUNE_ATTACK_ATTACK_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T4_RUNE_ATTACK_ATTACK_SPEED_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_20": {
+    "cape": {
+      "id": "T4_MAGE_CAPE_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "boots": {
+      "id": "T4_CLOTH_BOOTS_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "chest": {
+      "id": "T4_CLOTH_ARMOR_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "gloves": {
+      "id": "T4_CLOTH_GLOVES_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "helmet": {
+      "id": "T4_CLOTH_HELMET_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "offHand": {
+      "id": "T4_TOME_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "mainHand": {
+      "id": "T4_FIRE_STAFF_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T4_RUNE_ATTACK_BURST_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T4_RUNE_ATTACK_ATTACK_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T4_RUNE_ATTACK_ATTACK_SPEED_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_21": {
+    "cape": {
+      "id": "T5_MAGE_CAPE",
+      "amount": 1,
+      "quality": 0
+    },
+    "boots": {
+      "id": "T5_CLOTH_BOOTS",
+      "amount": 1,
+      "quality": 0
+    },
+    "chest": {
+      "id": "T5_CLOTH_ARMOR",
+      "amount": 1,
+      "quality": 0
+    },
+    "gloves": {
+      "id": "T5_CLOTH_GLOVES",
+      "amount": 1,
+      "quality": 0
+    },
+    "helmet": {
+      "id": "T5_CLOTH_HELMET",
+      "amount": 1,
+      "quality": 0
+    },
+    "offHand": {
+      "id": "T5_TOME",
+      "amount": 1,
+      "quality": 0
+    },
+    "mainHand": {
+      "id": "T5_FIRE_STAFF",
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T4_RUNE_ATTACK_BURST_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T4_RUNE_ATTACK_ATTACK_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T4_RUNE_ATTACK_ATTACK_SPEED_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_22": {
+    "cape": {
+      "id": "T5_MAGE_CAPE_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "boots": {
+      "id": "T5_CLOTH_BOOTS_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "chest": {
+      "id": "T5_CLOTH_ARMOR_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "gloves": {
+      "id": "T5_CLOTH_GLOVES_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "helmet": {
+      "id": "T5_CLOTH_HELMET_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "offHand": {
+      "id": "T5_TOME_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "mainHand": {
+      "id": "T5_FIRE_STAFF_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T5_RUNE_ATTACK_BURST_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T5_RUNE_ATTACK_ATTACK_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T5_RUNE_ATTACK_ATTACK_SPEED_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_23": {
+    "cape": {
+      "id": "T5_MAGE_CAPE_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "boots": {
+      "id": "T5_CLOTH_BOOTS_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "chest": {
+      "id": "T5_CLOTH_ARMOR_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "gloves": {
+      "id": "T5_CLOTH_GLOVES_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "helmet": {
+      "id": "T5_CLOTH_HELMET_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "offHand": {
+      "id": "T5_TOME_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "mainHand": {
+      "id": "T5_FIRE_STAFF_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T5_RUNE_ATTACK_BURST_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T5_RUNE_ATTACK_ATTACK_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T5_RUNE_ATTACK_ATTACK_SPEED_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_24": {
+    "cape": {
+      "id": "T5_MAGE_CAPE_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "boots": {
+      "id": "T5_CLOTH_BOOTS_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "chest": {
+      "id": "T5_CLOTH_ARMOR_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "gloves": {
+      "id": "T5_CLOTH_GLOVES_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "helmet": {
+      "id": "T5_CLOTH_HELMET_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "offHand": {
+      "id": "T5_TOME_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "mainHand": {
+      "id": "T5_FIRE_STAFF_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T5_RUNE_ATTACK_BURST_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T5_RUNE_ATTACK_ATTACK_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T5_RUNE_ATTACK_ATTACK_SPEED_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_25": {
+    "cape": {
+      "id": "T5_MAGE_CAPE_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "boots": {
+      "id": "T5_CLOTH_BOOTS_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "chest": {
+      "id": "T5_CLOTH_ARMOR_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "gloves": {
+      "id": "T5_CLOTH_GLOVES_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "helmet": {
+      "id": "T5_CLOTH_HELMET_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "offHand": {
+      "id": "T5_TOME_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "mainHand": {
+      "id": "T5_FIRE_STAFF_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T5_RUNE_ATTACK_BURST_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T5_RUNE_ATTACK_ATTACK_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T5_RUNE_ATTACK_ATTACK_SPEED_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_26": {
+    "cape": {
+      "id": "T6_MAGE_CAPE",
+      "amount": 1,
+      "quality": 0
+    },
+    "boots": {
+      "id": "T6_CLOTH_BOOTS",
+      "amount": 1,
+      "quality": 0
+    },
+    "chest": {
+      "id": "T6_CLOTH_ARMOR",
+      "amount": 1,
+      "quality": 0
+    },
+    "gloves": {
+      "id": "T6_CLOTH_GLOVES",
+      "amount": 1,
+      "quality": 0
+    },
+    "helmet": {
+      "id": "T6_CLOTH_HELMET",
+      "amount": 1,
+      "quality": 0
+    },
+    "offHand": {
+      "id": "T6_TOME",
+      "amount": 1,
+      "quality": 0
+    },
+    "mainHand": {
+      "id": "T6_FIRE_STAFF",
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T5_RUNE_ATTACK_BURST_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T5_RUNE_ATTACK_ATTACK_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T5_RUNE_ATTACK_ATTACK_SPEED_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_27": {
+    "cape": {
+      "id": "T6_MAGE_CAPE_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "boots": {
+      "id": "T6_CLOTH_BOOTS_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "chest": {
+      "id": "T6_CLOTH_ARMOR_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "gloves": {
+      "id": "T6_CLOTH_GLOVES_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "helmet": {
+      "id": "T6_CLOTH_HELMET_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "offHand": {
+      "id": "T6_TOME_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "mainHand": {
+      "id": "T6_FIRE_STAFF_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T6_RUNE_ATTACK_BURST_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T6_RUNE_ATTACK_ATTACK_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T6_RUNE_ATTACK_ATTACK_SPEED_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_28": {
+    "cape": {
+      "id": "T6_MAGE_CAPE_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "boots": {
+      "id": "T6_CLOTH_BOOTS_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "chest": {
+      "id": "T6_CLOTH_ARMOR_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "gloves": {
+      "id": "T6_CLOTH_GLOVES_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "helmet": {
+      "id": "T6_CLOTH_HELMET_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "offHand": {
+      "id": "T6_TOME_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "mainHand": {
+      "id": "T6_FIRE_STAFF_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T6_RUNE_ATTACK_BURST_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T6_RUNE_ATTACK_ATTACK_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T6_RUNE_ATTACK_ATTACK_SPEED_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_29": {
+    "cape": {
+      "id": "T6_MAGE_CAPE_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "boots": {
+      "id": "T6_CLOTH_BOOTS_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "chest": {
+      "id": "T6_CLOTH_ARMOR_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "gloves": {
+      "id": "T6_CLOTH_GLOVES_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "helmet": {
+      "id": "T6_CLOTH_HELMET_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "offHand": {
+      "id": "T6_TOME_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "mainHand": {
+      "id": "T6_FIRE_STAFF_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T6_RUNE_ATTACK_BURST_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T6_RUNE_ATTACK_ATTACK_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T6_RUNE_ATTACK_ATTACK_SPEED_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_30": {
+    "cape": {
+      "id": "T6_MAGE_CAPE_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "boots": {
+      "id": "T6_CLOTH_BOOTS_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "chest": {
+      "id": "T6_CLOTH_ARMOR_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "gloves": {
+      "id": "T6_CLOTH_GLOVES_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "helmet": {
+      "id": "T6_CLOTH_HELMET_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "offHand": {
+      "id": "T6_TOME_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "mainHand": {
+      "id": "T6_FIRE_STAFF_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T6_RUNE_ATTACK_BURST_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T6_RUNE_ATTACK_ATTACK_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T6_RUNE_ATTACK_ATTACK_SPEED_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_31": {
+    "cape": {
+      "id": "T7_MAGE_CAPE",
+      "amount": 1,
+      "quality": 0
+    },
+    "boots": {
+      "id": "T7_CLOTH_BOOTS",
+      "amount": 1,
+      "quality": 0
+    },
+    "chest": {
+      "id": "T7_CLOTH_ARMOR",
+      "amount": 1,
+      "quality": 0
+    },
+    "gloves": {
+      "id": "T7_CLOTH_GLOVES",
+      "amount": 1,
+      "quality": 0
+    },
+    "helmet": {
+      "id": "T7_CLOTH_HELMET",
+      "amount": 1,
+      "quality": 0
+    },
+    "offHand": {
+      "id": "T7_TOME",
+      "amount": 1,
+      "quality": 0
+    },
+    "mainHand": {
+      "id": "T7_FIRE_STAFF",
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T6_RUNE_ATTACK_BURST_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T6_RUNE_ATTACK_ATTACK_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T6_RUNE_ATTACK_ATTACK_SPEED_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_32": {
+    "cape": {
+      "id": "T7_MAGE_CAPE_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "boots": {
+      "id": "T7_CLOTH_BOOTS_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "chest": {
+      "id": "T7_CLOTH_ARMOR_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "gloves": {
+      "id": "T7_CLOTH_GLOVES_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "helmet": {
+      "id": "T7_CLOTH_HELMET_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "offHand": {
+      "id": "T7_TOME_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "mainHand": {
+      "id": "T7_FIRE_STAFF_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T7_RUNE_ATTACK_BURST_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T7_RUNE_ATTACK_ATTACK_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T7_RUNE_ATTACK_ATTACK_SPEED_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_33": {
+    "cape": {
+      "id": "T7_MAGE_CAPE_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "boots": {
+      "id": "T7_CLOTH_BOOTS_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "chest": {
+      "id": "T7_CLOTH_ARMOR_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "gloves": {
+      "id": "T7_CLOTH_GLOVES_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "helmet": {
+      "id": "T7_CLOTH_HELMET_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "offHand": {
+      "id": "T7_TOME_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "mainHand": {
+      "id": "T7_FIRE_STAFF_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T7_RUNE_ATTACK_BURST_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T7_RUNE_ATTACK_ATTACK_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T7_RUNE_ATTACK_ATTACK_SPEED_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_34": {
+    "cape": {
+      "id": "T7_MAGE_CAPE_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "boots": {
+      "id": "T7_CLOTH_BOOTS_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "chest": {
+      "id": "T7_CLOTH_ARMOR_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "gloves": {
+      "id": "T7_CLOTH_GLOVES_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "helmet": {
+      "id": "T7_CLOTH_HELMET_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "offHand": {
+      "id": "T7_TOME_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "mainHand": {
+      "id": "T7_FIRE_STAFF_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T7_RUNE_ATTACK_BURST_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T7_RUNE_ATTACK_ATTACK_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T7_RUNE_ATTACK_ATTACK_SPEED_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_35": {
+    "cape": {
+      "id": "T7_MAGE_CAPE_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "boots": {
+      "id": "T7_CLOTH_BOOTS_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "chest": {
+      "id": "T7_CLOTH_ARMOR_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "gloves": {
+      "id": "T7_CLOTH_GLOVES_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "helmet": {
+      "id": "T7_CLOTH_HELMET_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "offHand": {
+      "id": "T7_TOME_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "mainHand": {
+      "id": "T7_FIRE_STAFF_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T7_RUNE_ATTACK_BURST_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T7_RUNE_ATTACK_ATTACK_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T7_RUNE_ATTACK_ATTACK_SPEED_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_36": {
+    "cape": {
+      "id": "T8_MAGE_CAPE",
+      "amount": 1,
+      "quality": 0
+    },
+    "boots": {
+      "id": "T8_CLOTH_BOOTS",
+      "amount": 1,
+      "quality": 0
+    },
+    "chest": {
+      "id": "T8_CLOTH_ARMOR",
+      "amount": 1,
+      "quality": 0
+    },
+    "gloves": {
+      "id": "T8_CLOTH_GLOVES",
+      "amount": 1,
+      "quality": 0
+    },
+    "helmet": {
+      "id": "T8_CLOTH_HELMET",
+      "amount": 1,
+      "quality": 0
+    },
+    "offHand": {
+      "id": "T8_TOME",
+      "amount": 1,
+      "quality": 0
+    },
+    "mainHand": {
+      "id": "T8_FIRE_STAFF",
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T7_RUNE_ATTACK_BURST_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T7_RUNE_ATTACK_ATTACK_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T7_RUNE_ATTACK_ATTACK_SPEED_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_37": {
+    "cape": {
+      "id": "T8_MAGE_CAPE_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "boots": {
+      "id": "T8_CLOTH_BOOTS_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "chest": {
+      "id": "T8_CLOTH_ARMOR_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "gloves": {
+      "id": "T8_CLOTH_GLOVES_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "helmet": {
+      "id": "T8_CLOTH_HELMET_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "offHand": {
+      "id": "T8_TOME_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "mainHand": {
+      "id": "T8_FIRE_STAFF_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T8_RUNE_ATTACK_BURST_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T8_RUNE_ATTACK_ATTACK_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T8_RUNE_ATTACK_ATTACK_SPEED_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_38": {
+    "cape": {
+      "id": "T8_MAGE_CAPE_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "boots": {
+      "id": "T8_CLOTH_BOOTS_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "chest": {
+      "id": "T8_CLOTH_ARMOR_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "gloves": {
+      "id": "T8_CLOTH_GLOVES_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "helmet": {
+      "id": "T8_CLOTH_HELMET_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "offHand": {
+      "id": "T8_TOME_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "mainHand": {
+      "id": "T8_FIRE_STAFF_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T8_RUNE_ATTACK_BURST_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T8_RUNE_ATTACK_ATTACK_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T8_RUNE_ATTACK_ATTACK_SPEED_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_39": {
+    "cape": {
+      "id": "T8_MAGE_CAPE_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "boots": {
+      "id": "T8_CLOTH_BOOTS_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "chest": {
+      "id": "T8_CLOTH_ARMOR_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "gloves": {
+      "id": "T8_CLOTH_GLOVES_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "helmet": {
+      "id": "T8_CLOTH_HELMET_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "offHand": {
+      "id": "T8_TOME_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "mainHand": {
+      "id": "T8_FIRE_STAFF_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T8_RUNE_ATTACK_BURST_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T8_RUNE_ATTACK_ATTACK_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T8_RUNE_ATTACK_ATTACK_SPEED_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_40": {
+    "cape": {
+      "id": "T8_MAGE_CAPE_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "boots": {
+      "id": "T8_CLOTH_BOOTS_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "chest": {
+      "id": "T8_CLOTH_ARMOR_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "gloves": {
+      "id": "T8_CLOTH_GLOVES_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "helmet": {
+      "id": "T8_CLOTH_HELMET_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "offHand": {
+      "id": "T8_TOME_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "mainHand": {
+      "id": "T8_FIRE_STAFF_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T8_RUNE_ATTACK_BURST_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T8_RUNE_ATTACK_ATTACK_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T8_RUNE_ATTACK_ATTACK_SPEED_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_41": {
+    "cape": {
+      "id": "T9_MAGE_CAPE",
+      "amount": 1,
+      "quality": 0
+    },
+    "boots": {
+      "id": "T9_CLOTH_BOOTS",
+      "amount": 1,
+      "quality": 0
+    },
+    "chest": {
+      "id": "T9_CLOTH_ARMOR",
+      "amount": 1,
+      "quality": 0
+    },
+    "gloves": {
+      "id": "T9_CLOTH_GLOVES",
+      "amount": 1,
+      "quality": 0
+    },
+    "helmet": {
+      "id": "T9_CLOTH_HELMET",
+      "amount": 1,
+      "quality": 0
+    },
+    "offHand": {
+      "id": "T9_TOME",
+      "amount": 1,
+      "quality": 0
+    },
+    "mainHand": {
+      "id": "T9_FIRE_STAFF",
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T8_RUNE_ATTACK_BURST_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T8_RUNE_ATTACK_ATTACK_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T8_RUNE_ATTACK_ATTACK_SPEED_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_42": {
+    "cape": {
+      "id": "T9_MAGE_CAPE_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "boots": {
+      "id": "T9_CLOTH_BOOTS_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "chest": {
+      "id": "T9_CLOTH_ARMOR_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "gloves": {
+      "id": "T9_CLOTH_GLOVES_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "helmet": {
+      "id": "T9_CLOTH_HELMET_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "offHand": {
+      "id": "T9_TOME_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "mainHand": {
+      "id": "T9_FIRE_STAFF_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T9_RUNE_ATTACK_BURST_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T9_RUNE_ATTACK_ATTACK_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T9_RUNE_ATTACK_ATTACK_SPEED_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_43": {
+    "cape": {
+      "id": "T9_MAGE_CAPE_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "boots": {
+      "id": "T9_CLOTH_BOOTS_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "chest": {
+      "id": "T9_CLOTH_ARMOR_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "gloves": {
+      "id": "T9_CLOTH_GLOVES_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "helmet": {
+      "id": "T9_CLOTH_HELMET_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "offHand": {
+      "id": "T9_TOME_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "mainHand": {
+      "id": "T9_FIRE_STAFF_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T9_RUNE_ATTACK_BURST_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T9_RUNE_ATTACK_ATTACK_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T9_RUNE_ATTACK_ATTACK_SPEED_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_44": {
+    "cape": {
+      "id": "T9_MAGE_CAPE_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "boots": {
+      "id": "T9_CLOTH_BOOTS_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "chest": {
+      "id": "T9_CLOTH_ARMOR_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "gloves": {
+      "id": "T9_CLOTH_GLOVES_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "helmet": {
+      "id": "T9_CLOTH_HELMET_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "offHand": {
+      "id": "T9_TOME_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "mainHand": {
+      "id": "T9_FIRE_STAFF_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T9_RUNE_ATTACK_BURST_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T9_RUNE_ATTACK_ATTACK_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T9_RUNE_ATTACK_ATTACK_SPEED_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_45": {
+    "cape": {
+      "id": "T9_MAGE_CAPE_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "boots": {
+      "id": "T9_CLOTH_BOOTS_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "chest": {
+      "id": "T9_CLOTH_ARMOR_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "gloves": {
+      "id": "T9_CLOTH_GLOVES_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "helmet": {
+      "id": "T9_CLOTH_HELMET_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "offHand": {
+      "id": "T9_TOME_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "mainHand": {
+      "id": "T9_FIRE_STAFF_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T9_RUNE_ATTACK_BURST_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T9_RUNE_ATTACK_ATTACK_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T9_RUNE_ATTACK_ATTACK_SPEED_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_46": {
+    "cape": {
+      "id": "T10_MAGE_CAPE",
+      "amount": 1,
+      "quality": 0
+    },
+    "boots": {
+      "id": "T10_CLOTH_BOOTS",
+      "amount": 1,
+      "quality": 0
+    },
+    "chest": {
+      "id": "T10_CLOTH_ARMOR",
+      "amount": 1,
+      "quality": 0
+    },
+    "gloves": {
+      "id": "T10_CLOTH_GLOVES",
+      "amount": 1,
+      "quality": 0
+    },
+    "helmet": {
+      "id": "T10_CLOTH_HELMET",
+      "amount": 1,
+      "quality": 0
+    },
+    "offHand": {
+      "id": "T10_TOME",
+      "amount": 1,
+      "quality": 0
+    },
+    "mainHand": {
+      "id": "T10_FIRE_STAFF",
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T9_RUNE_ATTACK_BURST_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T9_RUNE_ATTACK_ATTACK_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T9_RUNE_ATTACK_ATTACK_SPEED_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_47": {
+    "cape": {
+      "id": "T10_MAGE_CAPE_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "boots": {
+      "id": "T10_CLOTH_BOOTS_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "chest": {
+      "id": "T10_CLOTH_ARMOR_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "gloves": {
+      "id": "T10_CLOTH_GLOVES_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "helmet": {
+      "id": "T10_CLOTH_HELMET_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "offHand": {
+      "id": "T10_TOME_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "mainHand": {
+      "id": "T10_FIRE_STAFF_Q1",
+      "amount": 1,
+      "quality": 1
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T10_RUNE_ATTACK_BURST_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T10_RUNE_ATTACK_ATTACK_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T10_RUNE_ATTACK_ATTACK_SPEED_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_48": {
+    "cape": {
+      "id": "T10_MAGE_CAPE_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "boots": {
+      "id": "T10_CLOTH_BOOTS_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "chest": {
+      "id": "T10_CLOTH_ARMOR_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "gloves": {
+      "id": "T10_CLOTH_GLOVES_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "helmet": {
+      "id": "T10_CLOTH_HELMET_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "offHand": {
+      "id": "T10_TOME_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "mainHand": {
+      "id": "T10_FIRE_STAFF_Q2",
+      "amount": 1,
+      "quality": 2
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T10_RUNE_ATTACK_BURST_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T10_RUNE_ATTACK_ATTACK_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T10_RUNE_ATTACK_ATTACK_SPEED_1STAR",
+      "stars": 1,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_49": {
+    "cape": {
+      "id": "T10_MAGE_CAPE_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "boots": {
+      "id": "T10_CLOTH_BOOTS_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "chest": {
+      "id": "T10_CLOTH_ARMOR_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "gloves": {
+      "id": "T10_CLOTH_GLOVES_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "helmet": {
+      "id": "T10_CLOTH_HELMET_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "offHand": {
+      "id": "T10_TOME_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "mainHand": {
+      "id": "T10_FIRE_STAFF_Q3",
+      "amount": 1,
+      "quality": 3
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T10_RUNE_ATTACK_BURST_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T10_RUNE_ATTACK_ATTACK_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T10_RUNE_ATTACK_ATTACK_SPEED_2STAR",
+      "stars": 2,
+      "amount": 1,
+      "quality": 0
+    }
+  },
+  "Set_50": {
+    "cape": {
+      "id": "T10_MAGE_CAPE_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "boots": {
+      "id": "T10_CLOTH_BOOTS_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "chest": {
+      "id": "T10_CLOTH_ARMOR_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "gloves": {
+      "id": "T10_CLOTH_GLOVES_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "helmet": {
+      "id": "T10_CLOTH_HELMET_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "offHand": {
+      "id": "T10_TOME_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "mainHand": {
+      "id": "T10_FIRE_STAFF_Q4",
+      "amount": 1,
+      "quality": 4
+    },
+    "rune_ATTACK_BURST": {
+      "id": "T10_RUNE_ATTACK_BURST_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK": {
+      "id": "T10_RUNE_ATTACK_ATTACK_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    },
+    "rune_ATTACK_ATTACK_SPEED": {
+      "id": "T10_RUNE_ATTACK_ATTACK_SPEED_3STAR",
+      "stars": 3,
+      "amount": 1,
+      "quality": 0
+    }
+  }
+}

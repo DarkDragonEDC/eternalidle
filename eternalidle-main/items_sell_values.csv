@@ -1,0 +1,3344 @@
+Type,Item Name,Item ID,Tier,Quick Sell Value
+ARMOR,Cloth Armor,T1_CLOTH_ARMOR,1,40
+ARMOR,Cloth Armor (Excellent),T1_CLOTH_ARMOR_Q3,1,60
+ARMOR,Cloth Armor (Good),T1_CLOTH_ARMOR_Q1,1,80
+ARMOR,Cloth Armor (Masterpiece),T1_CLOTH_ARMOR_Q4,1,100
+ARMOR,Cloth Armor (Outstanding),T1_CLOTH_ARMOR_Q2,1,120
+ARMOR,Leather Armor,T1_LEATHER_ARMOR,1,40
+ARMOR,Leather Armor (Excellent),T1_LEATHER_ARMOR_Q3,1,60
+ARMOR,Leather Armor (Good),T1_LEATHER_ARMOR_Q1,1,80
+ARMOR,Leather Armor (Masterpiece),T1_LEATHER_ARMOR_Q4,1,100
+ARMOR,Leather Armor (Outstanding),T1_LEATHER_ARMOR_Q2,1,120
+ARMOR,Plate Armor,T1_PLATE_ARMOR,1,40
+ARMOR,Plate Armor (Excellent),T1_PLATE_ARMOR_Q3,1,60
+ARMOR,Plate Armor (Good),T1_PLATE_ARMOR_Q1,1,80
+ARMOR,Plate Armor (Masterpiece),T1_PLATE_ARMOR_Q4,1,100
+ARMOR,Plate Armor (Outstanding),T1_PLATE_ARMOR_Q2,1,120
+ARMOR,Cloth Armor,T2_CLOTH_ARMOR,2,80
+ARMOR,Cloth Armor (Excellent),T2_CLOTH_ARMOR_Q3,2,120
+ARMOR,Cloth Armor (Good),T2_CLOTH_ARMOR_Q1,2,160
+ARMOR,Cloth Armor (Masterpiece),T2_CLOTH_ARMOR_Q4,2,200
+ARMOR,Cloth Armor (Outstanding),T2_CLOTH_ARMOR_Q2,2,240
+ARMOR,Leather Armor,T2_LEATHER_ARMOR,2,80
+ARMOR,Leather Armor (Excellent),T2_LEATHER_ARMOR_Q3,2,120
+ARMOR,Leather Armor (Good),T2_LEATHER_ARMOR_Q1,2,160
+ARMOR,Leather Armor (Masterpiece),T2_LEATHER_ARMOR_Q4,2,200
+ARMOR,Leather Armor (Outstanding),T2_LEATHER_ARMOR_Q2,2,240
+ARMOR,Plate Armor,T2_PLATE_ARMOR,2,80
+ARMOR,Plate Armor (Excellent),T2_PLATE_ARMOR_Q3,2,120
+ARMOR,Plate Armor (Good),T2_PLATE_ARMOR_Q1,2,160
+ARMOR,Plate Armor (Masterpiece),T2_PLATE_ARMOR_Q4,2,200
+ARMOR,Plate Armor (Outstanding),T2_PLATE_ARMOR_Q2,2,240
+ARMOR,Cloth Armor,T3_CLOTH_ARMOR,3,160
+ARMOR,Cloth Armor (Excellent),T3_CLOTH_ARMOR_Q3,3,240
+ARMOR,Cloth Armor (Good),T3_CLOTH_ARMOR_Q1,3,320
+ARMOR,Cloth Armor (Masterpiece),T3_CLOTH_ARMOR_Q4,3,400
+ARMOR,Cloth Armor (Outstanding),T3_CLOTH_ARMOR_Q2,3,480
+ARMOR,Leather Armor,T3_LEATHER_ARMOR,3,160
+ARMOR,Leather Armor (Excellent),T3_LEATHER_ARMOR_Q3,3,240
+ARMOR,Leather Armor (Good),T3_LEATHER_ARMOR_Q1,3,320
+ARMOR,Leather Armor (Masterpiece),T3_LEATHER_ARMOR_Q4,3,400
+ARMOR,Leather Armor (Outstanding),T3_LEATHER_ARMOR_Q2,3,480
+ARMOR,Plate Armor,T3_PLATE_ARMOR,3,160
+ARMOR,Plate Armor (Excellent),T3_PLATE_ARMOR_Q3,3,240
+ARMOR,Plate Armor (Good),T3_PLATE_ARMOR_Q1,3,320
+ARMOR,Plate Armor (Masterpiece),T3_PLATE_ARMOR_Q4,3,400
+ARMOR,Plate Armor (Outstanding),T3_PLATE_ARMOR_Q2,3,480
+ARMOR,Cloth Armor,T4_CLOTH_ARMOR,4,280
+ARMOR,Cloth Armor (Excellent),T4_CLOTH_ARMOR_Q3,4,420
+ARMOR,Cloth Armor (Good),T4_CLOTH_ARMOR_Q1,4,560
+ARMOR,Cloth Armor (Masterpiece),T4_CLOTH_ARMOR_Q4,4,700
+ARMOR,Cloth Armor (Outstanding),T4_CLOTH_ARMOR_Q2,4,840
+ARMOR,Leather Armor,T4_LEATHER_ARMOR,4,280
+ARMOR,Leather Armor (Excellent),T4_LEATHER_ARMOR_Q3,4,420
+ARMOR,Leather Armor (Good),T4_LEATHER_ARMOR_Q1,4,560
+ARMOR,Leather Armor (Masterpiece),T4_LEATHER_ARMOR_Q4,4,700
+ARMOR,Leather Armor (Outstanding),T4_LEATHER_ARMOR_Q2,4,840
+ARMOR,Plate Armor,T4_PLATE_ARMOR,4,280
+ARMOR,Plate Armor (Excellent),T4_PLATE_ARMOR_Q3,4,420
+ARMOR,Plate Armor (Good),T4_PLATE_ARMOR_Q1,4,560
+ARMOR,Plate Armor (Masterpiece),T4_PLATE_ARMOR_Q4,4,700
+ARMOR,Plate Armor (Outstanding),T4_PLATE_ARMOR_Q2,4,840
+ARMOR,Cloth Armor,T5_CLOTH_ARMOR,5,440
+ARMOR,Cloth Armor (Excellent),T5_CLOTH_ARMOR_Q3,5,660
+ARMOR,Cloth Armor (Good),T5_CLOTH_ARMOR_Q1,5,880
+ARMOR,Cloth Armor (Masterpiece),T5_CLOTH_ARMOR_Q4,5,1100
+ARMOR,Cloth Armor (Outstanding),T5_CLOTH_ARMOR_Q2,5,1320
+ARMOR,Leather Armor,T5_LEATHER_ARMOR,5,440
+ARMOR,Leather Armor (Excellent),T5_LEATHER_ARMOR_Q3,5,660
+ARMOR,Leather Armor (Good),T5_LEATHER_ARMOR_Q1,5,880
+ARMOR,Leather Armor (Masterpiece),T5_LEATHER_ARMOR_Q4,5,1100
+ARMOR,Leather Armor (Outstanding),T5_LEATHER_ARMOR_Q2,5,1320
+ARMOR,Plate Armor,T5_PLATE_ARMOR,5,440
+ARMOR,Plate Armor (Excellent),T5_PLATE_ARMOR_Q3,5,660
+ARMOR,Plate Armor (Good),T5_PLATE_ARMOR_Q1,5,880
+ARMOR,Plate Armor (Masterpiece),T5_PLATE_ARMOR_Q4,5,1100
+ARMOR,Plate Armor (Outstanding),T5_PLATE_ARMOR_Q2,5,1320
+ARMOR,Cloth Armor,T6_CLOTH_ARMOR,6,640
+ARMOR,Cloth Armor (Excellent),T6_CLOTH_ARMOR_Q3,6,960
+ARMOR,Cloth Armor (Good),T6_CLOTH_ARMOR_Q1,6,1280
+ARMOR,Cloth Armor (Masterpiece),T6_CLOTH_ARMOR_Q4,6,1600
+ARMOR,Cloth Armor (Outstanding),T6_CLOTH_ARMOR_Q2,6,1920
+ARMOR,Leather Armor,T6_LEATHER_ARMOR,6,640
+ARMOR,Leather Armor (Excellent),T6_LEATHER_ARMOR_Q3,6,960
+ARMOR,Leather Armor (Good),T6_LEATHER_ARMOR_Q1,6,1280
+ARMOR,Leather Armor (Masterpiece),T6_LEATHER_ARMOR_Q4,6,1600
+ARMOR,Leather Armor (Outstanding),T6_LEATHER_ARMOR_Q2,6,1920
+ARMOR,Plate Armor,T6_PLATE_ARMOR,6,640
+ARMOR,Plate Armor (Excellent),T6_PLATE_ARMOR_Q3,6,960
+ARMOR,Plate Armor (Good),T6_PLATE_ARMOR_Q1,6,1280
+ARMOR,Plate Armor (Masterpiece),T6_PLATE_ARMOR_Q4,6,1600
+ARMOR,Plate Armor (Outstanding),T6_PLATE_ARMOR_Q2,6,1920
+ARMOR,Cloth Armor,T7_CLOTH_ARMOR,7,880
+ARMOR,Cloth Armor (Excellent),T7_CLOTH_ARMOR_Q3,7,1320
+ARMOR,Cloth Armor (Good),T7_CLOTH_ARMOR_Q1,7,1760
+ARMOR,Cloth Armor (Masterpiece),T7_CLOTH_ARMOR_Q4,7,2200
+ARMOR,Cloth Armor (Outstanding),T7_CLOTH_ARMOR_Q2,7,2640
+ARMOR,Leather Armor,T7_LEATHER_ARMOR,7,880
+ARMOR,Leather Armor (Excellent),T7_LEATHER_ARMOR_Q3,7,1320
+ARMOR,Leather Armor (Good),T7_LEATHER_ARMOR_Q1,7,1760
+ARMOR,Leather Armor (Masterpiece),T7_LEATHER_ARMOR_Q4,7,2200
+ARMOR,Leather Armor (Outstanding),T7_LEATHER_ARMOR_Q2,7,2640
+ARMOR,Plate Armor,T7_PLATE_ARMOR,7,880
+ARMOR,Plate Armor (Excellent),T7_PLATE_ARMOR_Q3,7,1320
+ARMOR,Plate Armor (Good),T7_PLATE_ARMOR_Q1,7,1760
+ARMOR,Plate Armor (Masterpiece),T7_PLATE_ARMOR_Q4,7,2200
+ARMOR,Plate Armor (Outstanding),T7_PLATE_ARMOR_Q2,7,2640
+ARMOR,Cloth Armor,T8_CLOTH_ARMOR,8,1160
+ARMOR,Cloth Armor (Excellent),T8_CLOTH_ARMOR_Q3,8,1740
+ARMOR,Cloth Armor (Good),T8_CLOTH_ARMOR_Q1,8,2320
+ARMOR,Cloth Armor (Masterpiece),T8_CLOTH_ARMOR_Q4,8,2900
+ARMOR,Cloth Armor (Outstanding),T8_CLOTH_ARMOR_Q2,8,3480
+ARMOR,Leather Armor,T8_LEATHER_ARMOR,8,1160
+ARMOR,Leather Armor (Excellent),T8_LEATHER_ARMOR_Q3,8,1740
+ARMOR,Leather Armor (Good),T8_LEATHER_ARMOR_Q1,8,2320
+ARMOR,Leather Armor (Masterpiece),T8_LEATHER_ARMOR_Q4,8,2900
+ARMOR,Leather Armor (Outstanding),T8_LEATHER_ARMOR_Q2,8,3480
+ARMOR,Plate Armor,T8_PLATE_ARMOR,8,1160
+ARMOR,Plate Armor (Excellent),T8_PLATE_ARMOR_Q3,8,1740
+ARMOR,Plate Armor (Good),T8_PLATE_ARMOR_Q1,8,2320
+ARMOR,Plate Armor (Masterpiece),T8_PLATE_ARMOR_Q4,8,2900
+ARMOR,Plate Armor (Outstanding),T8_PLATE_ARMOR_Q2,8,3480
+ARMOR,Cloth Armor,T9_CLOTH_ARMOR,9,1480
+ARMOR,Cloth Armor (Excellent),T9_CLOTH_ARMOR_Q3,9,2220
+ARMOR,Cloth Armor (Good),T9_CLOTH_ARMOR_Q1,9,2960
+ARMOR,Cloth Armor (Masterpiece),T9_CLOTH_ARMOR_Q4,9,3700
+ARMOR,Cloth Armor (Outstanding),T9_CLOTH_ARMOR_Q2,9,4440
+ARMOR,Leather Armor,T9_LEATHER_ARMOR,9,1480
+ARMOR,Leather Armor (Excellent),T9_LEATHER_ARMOR_Q3,9,2220
+ARMOR,Leather Armor (Good),T9_LEATHER_ARMOR_Q1,9,2960
+ARMOR,Leather Armor (Masterpiece),T9_LEATHER_ARMOR_Q4,9,3700
+ARMOR,Leather Armor (Outstanding),T9_LEATHER_ARMOR_Q2,9,4440
+ARMOR,Plate Armor,T9_PLATE_ARMOR,9,1480
+ARMOR,Plate Armor (Excellent),T9_PLATE_ARMOR_Q3,9,2220
+ARMOR,Plate Armor (Good),T9_PLATE_ARMOR_Q1,9,2960
+ARMOR,Plate Armor (Masterpiece),T9_PLATE_ARMOR_Q4,9,3700
+ARMOR,Plate Armor (Outstanding),T9_PLATE_ARMOR_Q2,9,4440
+ARMOR,Cloth Armor,T10_CLOTH_ARMOR,10,1840
+ARMOR,Cloth Armor (Excellent),T10_CLOTH_ARMOR_Q3,10,2760
+ARMOR,Cloth Armor (Good),T10_CLOTH_ARMOR_Q1,10,3680
+ARMOR,Cloth Armor (Masterpiece),T10_CLOTH_ARMOR_Q4,10,4600
+ARMOR,Cloth Armor (Outstanding),T10_CLOTH_ARMOR_Q2,10,5520
+ARMOR,Leather Armor,T10_LEATHER_ARMOR,10,1840
+ARMOR,Leather Armor (Excellent),T10_LEATHER_ARMOR_Q3,10,2760
+ARMOR,Leather Armor (Good),T10_LEATHER_ARMOR_Q1,10,3680
+ARMOR,Leather Armor (Masterpiece),T10_LEATHER_ARMOR_Q4,10,4600
+ARMOR,Leather Armor (Outstanding),T10_LEATHER_ARMOR_Q2,10,5520
+ARMOR,Plate Armor,T10_PLATE_ARMOR,10,1840
+ARMOR,Plate Armor (Excellent),T10_PLATE_ARMOR_Q3,10,2760
+ARMOR,Plate Armor (Good),T10_PLATE_ARMOR_Q1,10,3680
+ARMOR,Plate Armor (Masterpiece),T10_PLATE_ARMOR_Q4,10,4600
+ARMOR,Plate Armor (Outstanding),T10_PLATE_ARMOR_Q2,10,5520
+BOOTS,Cloth Boots,T1_CLOTH_BOOTS,1,40
+BOOTS,Cloth Boots (Excellent),T1_CLOTH_BOOTS_Q3,1,60
+BOOTS,Cloth Boots (Good),T1_CLOTH_BOOTS_Q1,1,80
+BOOTS,Cloth Boots (Masterpiece),T1_CLOTH_BOOTS_Q4,1,100
+BOOTS,Cloth Boots (Outstanding),T1_CLOTH_BOOTS_Q2,1,120
+BOOTS,Leather Boots,T1_LEATHER_BOOTS,1,40
+BOOTS,Leather Boots (Excellent),T1_LEATHER_BOOTS_Q3,1,60
+BOOTS,Leather Boots (Good),T1_LEATHER_BOOTS_Q1,1,80
+BOOTS,Leather Boots (Masterpiece),T1_LEATHER_BOOTS_Q4,1,100
+BOOTS,Leather Boots (Outstanding),T1_LEATHER_BOOTS_Q2,1,120
+BOOTS,Plate Boots,T1_PLATE_BOOTS,1,40
+BOOTS,Plate Boots (Excellent),T1_PLATE_BOOTS_Q3,1,60
+BOOTS,Plate Boots (Good),T1_PLATE_BOOTS_Q1,1,80
+BOOTS,Plate Boots (Masterpiece),T1_PLATE_BOOTS_Q4,1,100
+BOOTS,Plate Boots (Outstanding),T1_PLATE_BOOTS_Q2,1,120
+BOOTS,Cloth Boots,T2_CLOTH_BOOTS,2,80
+BOOTS,Cloth Boots (Excellent),T2_CLOTH_BOOTS_Q3,2,120
+BOOTS,Cloth Boots (Good),T2_CLOTH_BOOTS_Q1,2,160
+BOOTS,Cloth Boots (Masterpiece),T2_CLOTH_BOOTS_Q4,2,200
+BOOTS,Cloth Boots (Outstanding),T2_CLOTH_BOOTS_Q2,2,240
+BOOTS,Leather Boots,T2_LEATHER_BOOTS,2,80
+BOOTS,Leather Boots (Excellent),T2_LEATHER_BOOTS_Q3,2,120
+BOOTS,Leather Boots (Good),T2_LEATHER_BOOTS_Q1,2,160
+BOOTS,Leather Boots (Masterpiece),T2_LEATHER_BOOTS_Q4,2,200
+BOOTS,Leather Boots (Outstanding),T2_LEATHER_BOOTS_Q2,2,240
+BOOTS,Plate Boots,T2_PLATE_BOOTS,2,80
+BOOTS,Plate Boots (Excellent),T2_PLATE_BOOTS_Q3,2,120
+BOOTS,Plate Boots (Good),T2_PLATE_BOOTS_Q1,2,160
+BOOTS,Plate Boots (Masterpiece),T2_PLATE_BOOTS_Q4,2,200
+BOOTS,Plate Boots (Outstanding),T2_PLATE_BOOTS_Q2,2,240
+BOOTS,Cloth Boots,T3_CLOTH_BOOTS,3,160
+BOOTS,Cloth Boots (Excellent),T3_CLOTH_BOOTS_Q3,3,240
+BOOTS,Cloth Boots (Good),T3_CLOTH_BOOTS_Q1,3,320
+BOOTS,Cloth Boots (Masterpiece),T3_CLOTH_BOOTS_Q4,3,400
+BOOTS,Cloth Boots (Outstanding),T3_CLOTH_BOOTS_Q2,3,480
+BOOTS,Leather Boots,T3_LEATHER_BOOTS,3,160
+BOOTS,Leather Boots (Excellent),T3_LEATHER_BOOTS_Q3,3,240
+BOOTS,Leather Boots (Good),T3_LEATHER_BOOTS_Q1,3,320
+BOOTS,Leather Boots (Masterpiece),T3_LEATHER_BOOTS_Q4,3,400
+BOOTS,Leather Boots (Outstanding),T3_LEATHER_BOOTS_Q2,3,480
+BOOTS,Plate Boots,T3_PLATE_BOOTS,3,160
+BOOTS,Plate Boots (Excellent),T3_PLATE_BOOTS_Q3,3,240
+BOOTS,Plate Boots (Good),T3_PLATE_BOOTS_Q1,3,320
+BOOTS,Plate Boots (Masterpiece),T3_PLATE_BOOTS_Q4,3,400
+BOOTS,Plate Boots (Outstanding),T3_PLATE_BOOTS_Q2,3,480
+BOOTS,Cloth Boots,T4_CLOTH_BOOTS,4,280
+BOOTS,Cloth Boots (Excellent),T4_CLOTH_BOOTS_Q3,4,420
+BOOTS,Cloth Boots (Good),T4_CLOTH_BOOTS_Q1,4,560
+BOOTS,Cloth Boots (Masterpiece),T4_CLOTH_BOOTS_Q4,4,700
+BOOTS,Cloth Boots (Outstanding),T4_CLOTH_BOOTS_Q2,4,840
+BOOTS,Leather Boots,T4_LEATHER_BOOTS,4,280
+BOOTS,Leather Boots (Excellent),T4_LEATHER_BOOTS_Q3,4,420
+BOOTS,Leather Boots (Good),T4_LEATHER_BOOTS_Q1,4,560
+BOOTS,Leather Boots (Masterpiece),T4_LEATHER_BOOTS_Q4,4,700
+BOOTS,Leather Boots (Outstanding),T4_LEATHER_BOOTS_Q2,4,840
+BOOTS,Plate Boots,T4_PLATE_BOOTS,4,280
+BOOTS,Plate Boots (Excellent),T4_PLATE_BOOTS_Q3,4,420
+BOOTS,Plate Boots (Good),T4_PLATE_BOOTS_Q1,4,560
+BOOTS,Plate Boots (Masterpiece),T4_PLATE_BOOTS_Q4,4,700
+BOOTS,Plate Boots (Outstanding),T4_PLATE_BOOTS_Q2,4,840
+BOOTS,Cloth Boots,T5_CLOTH_BOOTS,5,440
+BOOTS,Cloth Boots (Excellent),T5_CLOTH_BOOTS_Q3,5,660
+BOOTS,Cloth Boots (Good),T5_CLOTH_BOOTS_Q1,5,880
+BOOTS,Cloth Boots (Masterpiece),T5_CLOTH_BOOTS_Q4,5,1100
+BOOTS,Cloth Boots (Outstanding),T5_CLOTH_BOOTS_Q2,5,1320
+BOOTS,Leather Boots,T5_LEATHER_BOOTS,5,440
+BOOTS,Leather Boots (Excellent),T5_LEATHER_BOOTS_Q3,5,660
+BOOTS,Leather Boots (Good),T5_LEATHER_BOOTS_Q1,5,880
+BOOTS,Leather Boots (Masterpiece),T5_LEATHER_BOOTS_Q4,5,1100
+BOOTS,Leather Boots (Outstanding),T5_LEATHER_BOOTS_Q2,5,1320
+BOOTS,Plate Boots,T5_PLATE_BOOTS,5,440
+BOOTS,Plate Boots (Excellent),T5_PLATE_BOOTS_Q3,5,660
+BOOTS,Plate Boots (Good),T5_PLATE_BOOTS_Q1,5,880
+BOOTS,Plate Boots (Masterpiece),T5_PLATE_BOOTS_Q4,5,1100
+BOOTS,Plate Boots (Outstanding),T5_PLATE_BOOTS_Q2,5,1320
+BOOTS,Cloth Boots,T6_CLOTH_BOOTS,6,640
+BOOTS,Cloth Boots (Excellent),T6_CLOTH_BOOTS_Q3,6,960
+BOOTS,Cloth Boots (Good),T6_CLOTH_BOOTS_Q1,6,1280
+BOOTS,Cloth Boots (Masterpiece),T6_CLOTH_BOOTS_Q4,6,1600
+BOOTS,Cloth Boots (Outstanding),T6_CLOTH_BOOTS_Q2,6,1920
+BOOTS,Leather Boots,T6_LEATHER_BOOTS,6,640
+BOOTS,Leather Boots (Excellent),T6_LEATHER_BOOTS_Q3,6,960
+BOOTS,Leather Boots (Good),T6_LEATHER_BOOTS_Q1,6,1280
+BOOTS,Leather Boots (Masterpiece),T6_LEATHER_BOOTS_Q4,6,1600
+BOOTS,Leather Boots (Outstanding),T6_LEATHER_BOOTS_Q2,6,1920
+BOOTS,Plate Boots,T6_PLATE_BOOTS,6,640
+BOOTS,Plate Boots (Excellent),T6_PLATE_BOOTS_Q3,6,960
+BOOTS,Plate Boots (Good),T6_PLATE_BOOTS_Q1,6,1280
+BOOTS,Plate Boots (Masterpiece),T6_PLATE_BOOTS_Q4,6,1600
+BOOTS,Plate Boots (Outstanding),T6_PLATE_BOOTS_Q2,6,1920
+BOOTS,Cloth Boots,T7_CLOTH_BOOTS,7,880
+BOOTS,Cloth Boots (Excellent),T7_CLOTH_BOOTS_Q3,7,1320
+BOOTS,Cloth Boots (Good),T7_CLOTH_BOOTS_Q1,7,1760
+BOOTS,Cloth Boots (Masterpiece),T7_CLOTH_BOOTS_Q4,7,2200
+BOOTS,Cloth Boots (Outstanding),T7_CLOTH_BOOTS_Q2,7,2640
+BOOTS,Leather Boots,T7_LEATHER_BOOTS,7,880
+BOOTS,Leather Boots (Excellent),T7_LEATHER_BOOTS_Q3,7,1320
+BOOTS,Leather Boots (Good),T7_LEATHER_BOOTS_Q1,7,1760
+BOOTS,Leather Boots (Masterpiece),T7_LEATHER_BOOTS_Q4,7,2200
+BOOTS,Leather Boots (Outstanding),T7_LEATHER_BOOTS_Q2,7,2640
+BOOTS,Plate Boots,T7_PLATE_BOOTS,7,880
+BOOTS,Plate Boots (Excellent),T7_PLATE_BOOTS_Q3,7,1320
+BOOTS,Plate Boots (Good),T7_PLATE_BOOTS_Q1,7,1760
+BOOTS,Plate Boots (Masterpiece),T7_PLATE_BOOTS_Q4,7,2200
+BOOTS,Plate Boots (Outstanding),T7_PLATE_BOOTS_Q2,7,2640
+BOOTS,Cloth Boots,T8_CLOTH_BOOTS,8,1160
+BOOTS,Cloth Boots (Excellent),T8_CLOTH_BOOTS_Q3,8,1740
+BOOTS,Cloth Boots (Good),T8_CLOTH_BOOTS_Q1,8,2320
+BOOTS,Cloth Boots (Masterpiece),T8_CLOTH_BOOTS_Q4,8,2900
+BOOTS,Cloth Boots (Outstanding),T8_CLOTH_BOOTS_Q2,8,3480
+BOOTS,Leather Boots,T8_LEATHER_BOOTS,8,1160
+BOOTS,Leather Boots (Excellent),T8_LEATHER_BOOTS_Q3,8,1740
+BOOTS,Leather Boots (Good),T8_LEATHER_BOOTS_Q1,8,2320
+BOOTS,Leather Boots (Masterpiece),T8_LEATHER_BOOTS_Q4,8,2900
+BOOTS,Leather Boots (Outstanding),T8_LEATHER_BOOTS_Q2,8,3480
+BOOTS,Plate Boots,T8_PLATE_BOOTS,8,1160
+BOOTS,Plate Boots (Excellent),T8_PLATE_BOOTS_Q3,8,1740
+BOOTS,Plate Boots (Good),T8_PLATE_BOOTS_Q1,8,2320
+BOOTS,Plate Boots (Masterpiece),T8_PLATE_BOOTS_Q4,8,2900
+BOOTS,Plate Boots (Outstanding),T8_PLATE_BOOTS_Q2,8,3480
+BOOTS,Cloth Boots,T9_CLOTH_BOOTS,9,1480
+BOOTS,Cloth Boots (Excellent),T9_CLOTH_BOOTS_Q3,9,2220
+BOOTS,Cloth Boots (Good),T9_CLOTH_BOOTS_Q1,9,2960
+BOOTS,Cloth Boots (Masterpiece),T9_CLOTH_BOOTS_Q4,9,3700
+BOOTS,Cloth Boots (Outstanding),T9_CLOTH_BOOTS_Q2,9,4440
+BOOTS,Leather Boots,T9_LEATHER_BOOTS,9,1480
+BOOTS,Leather Boots (Excellent),T9_LEATHER_BOOTS_Q3,9,2220
+BOOTS,Leather Boots (Good),T9_LEATHER_BOOTS_Q1,9,2960
+BOOTS,Leather Boots (Masterpiece),T9_LEATHER_BOOTS_Q4,9,3700
+BOOTS,Leather Boots (Outstanding),T9_LEATHER_BOOTS_Q2,9,4440
+BOOTS,Plate Boots,T9_PLATE_BOOTS,9,1480
+BOOTS,Plate Boots (Excellent),T9_PLATE_BOOTS_Q3,9,2220
+BOOTS,Plate Boots (Good),T9_PLATE_BOOTS_Q1,9,2960
+BOOTS,Plate Boots (Masterpiece),T9_PLATE_BOOTS_Q4,9,3700
+BOOTS,Plate Boots (Outstanding),T9_PLATE_BOOTS_Q2,9,4440
+BOOTS,Cloth Boots,T10_CLOTH_BOOTS,10,1840
+BOOTS,Cloth Boots (Excellent),T10_CLOTH_BOOTS_Q3,10,2760
+BOOTS,Cloth Boots (Good),T10_CLOTH_BOOTS_Q1,10,3680
+BOOTS,Cloth Boots (Masterpiece),T10_CLOTH_BOOTS_Q4,10,4600
+BOOTS,Cloth Boots (Outstanding),T10_CLOTH_BOOTS_Q2,10,5520
+BOOTS,Leather Boots,T10_LEATHER_BOOTS,10,1840
+BOOTS,Leather Boots (Excellent),T10_LEATHER_BOOTS_Q3,10,2760
+BOOTS,Leather Boots (Good),T10_LEATHER_BOOTS_Q1,10,3680
+BOOTS,Leather Boots (Masterpiece),T10_LEATHER_BOOTS_Q4,10,4600
+BOOTS,Leather Boots (Outstanding),T10_LEATHER_BOOTS_Q2,10,5520
+BOOTS,Plate Boots,T10_PLATE_BOOTS,10,1840
+BOOTS,Plate Boots (Excellent),T10_PLATE_BOOTS_Q3,10,2760
+BOOTS,Plate Boots (Good),T10_PLATE_BOOTS_Q1,10,3680
+BOOTS,Plate Boots (Masterpiece),T10_PLATE_BOOTS_Q4,10,4600
+BOOTS,Plate Boots (Outstanding),T10_PLATE_BOOTS_Q2,10,5520
+CAPE,Leather Cape,T1_LEATHER_CAPE,1,40
+CAPE,Leather Cape (Excellent),T1_LEATHER_CAPE_Q3,1,60
+CAPE,Leather Cape (Good),T1_LEATHER_CAPE_Q1,1,80
+CAPE,Leather Cape (Masterpiece),T1_LEATHER_CAPE_Q4,1,100
+CAPE,Leather Cape (Outstanding),T1_LEATHER_CAPE_Q2,1,120
+CAPE,Mage Cape,T1_MAGE_CAPE,1,40
+CAPE,Mage Cape (Excellent),T1_MAGE_CAPE_Q3,1,60
+CAPE,Mage Cape (Good),T1_MAGE_CAPE_Q1,1,80
+CAPE,Mage Cape (Masterpiece),T1_MAGE_CAPE_Q4,1,100
+CAPE,Mage Cape (Outstanding),T1_MAGE_CAPE_Q2,1,120
+CAPE,Plate Cape,T1_PLATE_CAPE,1,40
+CAPE,Plate Cape (Excellent),T1_PLATE_CAPE_Q3,1,60
+CAPE,Plate Cape (Good),T1_PLATE_CAPE_Q1,1,80
+CAPE,Plate Cape (Masterpiece),T1_PLATE_CAPE_Q4,1,100
+CAPE,Plate Cape (Outstanding),T1_PLATE_CAPE_Q2,1,120
+CAPE,Leather Cape,T2_LEATHER_CAPE,2,80
+CAPE,Leather Cape (Excellent),T2_LEATHER_CAPE_Q3,2,120
+CAPE,Leather Cape (Good),T2_LEATHER_CAPE_Q1,2,160
+CAPE,Leather Cape (Masterpiece),T2_LEATHER_CAPE_Q4,2,200
+CAPE,Leather Cape (Outstanding),T2_LEATHER_CAPE_Q2,2,240
+CAPE,Mage Cape,T2_MAGE_CAPE,2,80
+CAPE,Mage Cape (Excellent),T2_MAGE_CAPE_Q3,2,120
+CAPE,Mage Cape (Good),T2_MAGE_CAPE_Q1,2,160
+CAPE,Mage Cape (Masterpiece),T2_MAGE_CAPE_Q4,2,200
+CAPE,Mage Cape (Outstanding),T2_MAGE_CAPE_Q2,2,240
+CAPE,Plate Cape,T2_PLATE_CAPE,2,80
+CAPE,Plate Cape (Excellent),T2_PLATE_CAPE_Q3,2,120
+CAPE,Plate Cape (Good),T2_PLATE_CAPE_Q1,2,160
+CAPE,Plate Cape (Masterpiece),T2_PLATE_CAPE_Q4,2,200
+CAPE,Plate Cape (Outstanding),T2_PLATE_CAPE_Q2,2,240
+CAPE,Leather Cape,T3_LEATHER_CAPE,3,160
+CAPE,Leather Cape (Excellent),T3_LEATHER_CAPE_Q3,3,240
+CAPE,Leather Cape (Good),T3_LEATHER_CAPE_Q1,3,320
+CAPE,Leather Cape (Masterpiece),T3_LEATHER_CAPE_Q4,3,400
+CAPE,Leather Cape (Outstanding),T3_LEATHER_CAPE_Q2,3,480
+CAPE,Mage Cape,T3_MAGE_CAPE,3,160
+CAPE,Mage Cape (Excellent),T3_MAGE_CAPE_Q3,3,240
+CAPE,Mage Cape (Good),T3_MAGE_CAPE_Q1,3,320
+CAPE,Mage Cape (Masterpiece),T3_MAGE_CAPE_Q4,3,400
+CAPE,Mage Cape (Outstanding),T3_MAGE_CAPE_Q2,3,480
+CAPE,Plate Cape,T3_PLATE_CAPE,3,160
+CAPE,Plate Cape (Excellent),T3_PLATE_CAPE_Q3,3,240
+CAPE,Plate Cape (Good),T3_PLATE_CAPE_Q1,3,320
+CAPE,Plate Cape (Masterpiece),T3_PLATE_CAPE_Q4,3,400
+CAPE,Plate Cape (Outstanding),T3_PLATE_CAPE_Q2,3,480
+CAPE,Leather Cape,T4_LEATHER_CAPE,4,280
+CAPE,Leather Cape (Excellent),T4_LEATHER_CAPE_Q3,4,420
+CAPE,Leather Cape (Good),T4_LEATHER_CAPE_Q1,4,560
+CAPE,Leather Cape (Masterpiece),T4_LEATHER_CAPE_Q4,4,700
+CAPE,Leather Cape (Outstanding),T4_LEATHER_CAPE_Q2,4,840
+CAPE,Mage Cape,T4_MAGE_CAPE,4,280
+CAPE,Mage Cape (Excellent),T4_MAGE_CAPE_Q3,4,420
+CAPE,Mage Cape (Good),T4_MAGE_CAPE_Q1,4,560
+CAPE,Mage Cape (Masterpiece),T4_MAGE_CAPE_Q4,4,700
+CAPE,Mage Cape (Outstanding),T4_MAGE_CAPE_Q2,4,840
+CAPE,Plate Cape,T4_PLATE_CAPE,4,280
+CAPE,Plate Cape (Excellent),T4_PLATE_CAPE_Q3,4,420
+CAPE,Plate Cape (Good),T4_PLATE_CAPE_Q1,4,560
+CAPE,Plate Cape (Masterpiece),T4_PLATE_CAPE_Q4,4,700
+CAPE,Plate Cape (Outstanding),T4_PLATE_CAPE_Q2,4,840
+CAPE,Leather Cape,T5_LEATHER_CAPE,5,440
+CAPE,Leather Cape (Excellent),T5_LEATHER_CAPE_Q3,5,660
+CAPE,Leather Cape (Good),T5_LEATHER_CAPE_Q1,5,880
+CAPE,Leather Cape (Masterpiece),T5_LEATHER_CAPE_Q4,5,1100
+CAPE,Leather Cape (Outstanding),T5_LEATHER_CAPE_Q2,5,1320
+CAPE,Mage Cape,T5_MAGE_CAPE,5,440
+CAPE,Mage Cape (Excellent),T5_MAGE_CAPE_Q3,5,660
+CAPE,Mage Cape (Good),T5_MAGE_CAPE_Q1,5,880
+CAPE,Mage Cape (Masterpiece),T5_MAGE_CAPE_Q4,5,1100
+CAPE,Mage Cape (Outstanding),T5_MAGE_CAPE_Q2,5,1320
+CAPE,Plate Cape,T5_PLATE_CAPE,5,440
+CAPE,Plate Cape (Excellent),T5_PLATE_CAPE_Q3,5,660
+CAPE,Plate Cape (Good),T5_PLATE_CAPE_Q1,5,880
+CAPE,Plate Cape (Masterpiece),T5_PLATE_CAPE_Q4,5,1100
+CAPE,Plate Cape (Outstanding),T5_PLATE_CAPE_Q2,5,1320
+CAPE,Leather Cape,T6_LEATHER_CAPE,6,640
+CAPE,Leather Cape (Excellent),T6_LEATHER_CAPE_Q3,6,960
+CAPE,Leather Cape (Good),T6_LEATHER_CAPE_Q1,6,1280
+CAPE,Leather Cape (Masterpiece),T6_LEATHER_CAPE_Q4,6,1600
+CAPE,Leather Cape (Outstanding),T6_LEATHER_CAPE_Q2,6,1920
+CAPE,Mage Cape,T6_MAGE_CAPE,6,640
+CAPE,Mage Cape (Excellent),T6_MAGE_CAPE_Q3,6,960
+CAPE,Mage Cape (Good),T6_MAGE_CAPE_Q1,6,1280
+CAPE,Mage Cape (Masterpiece),T6_MAGE_CAPE_Q4,6,1600
+CAPE,Mage Cape (Outstanding),T6_MAGE_CAPE_Q2,6,1920
+CAPE,Plate Cape,T6_PLATE_CAPE,6,640
+CAPE,Plate Cape (Excellent),T6_PLATE_CAPE_Q3,6,960
+CAPE,Plate Cape (Good),T6_PLATE_CAPE_Q1,6,1280
+CAPE,Plate Cape (Masterpiece),T6_PLATE_CAPE_Q4,6,1600
+CAPE,Plate Cape (Outstanding),T6_PLATE_CAPE_Q2,6,1920
+CAPE,Leather Cape,T7_LEATHER_CAPE,7,880
+CAPE,Leather Cape (Excellent),T7_LEATHER_CAPE_Q3,7,1320
+CAPE,Leather Cape (Good),T7_LEATHER_CAPE_Q1,7,1760
+CAPE,Leather Cape (Masterpiece),T7_LEATHER_CAPE_Q4,7,2200
+CAPE,Leather Cape (Outstanding),T7_LEATHER_CAPE_Q2,7,2640
+CAPE,Mage Cape,T7_MAGE_CAPE,7,880
+CAPE,Mage Cape (Excellent),T7_MAGE_CAPE_Q3,7,1320
+CAPE,Mage Cape (Good),T7_MAGE_CAPE_Q1,7,1760
+CAPE,Mage Cape (Masterpiece),T7_MAGE_CAPE_Q4,7,2200
+CAPE,Mage Cape (Outstanding),T7_MAGE_CAPE_Q2,7,2640
+CAPE,Plate Cape,T7_PLATE_CAPE,7,880
+CAPE,Plate Cape (Excellent),T7_PLATE_CAPE_Q3,7,1320
+CAPE,Plate Cape (Good),T7_PLATE_CAPE_Q1,7,1760
+CAPE,Plate Cape (Masterpiece),T7_PLATE_CAPE_Q4,7,2200
+CAPE,Plate Cape (Outstanding),T7_PLATE_CAPE_Q2,7,2640
+CAPE,Leather Cape,T8_LEATHER_CAPE,8,1160
+CAPE,Leather Cape (Excellent),T8_LEATHER_CAPE_Q3,8,1740
+CAPE,Leather Cape (Good),T8_LEATHER_CAPE_Q1,8,2320
+CAPE,Leather Cape (Masterpiece),T8_LEATHER_CAPE_Q4,8,2900
+CAPE,Leather Cape (Outstanding),T8_LEATHER_CAPE_Q2,8,3480
+CAPE,Mage Cape,T8_MAGE_CAPE,8,1160
+CAPE,Mage Cape (Excellent),T8_MAGE_CAPE_Q3,8,1740
+CAPE,Mage Cape (Good),T8_MAGE_CAPE_Q1,8,2320
+CAPE,Mage Cape (Masterpiece),T8_MAGE_CAPE_Q4,8,2900
+CAPE,Mage Cape (Outstanding),T8_MAGE_CAPE_Q2,8,3480
+CAPE,Plate Cape,T8_PLATE_CAPE,8,1160
+CAPE,Plate Cape (Excellent),T8_PLATE_CAPE_Q3,8,1740
+CAPE,Plate Cape (Good),T8_PLATE_CAPE_Q1,8,2320
+CAPE,Plate Cape (Masterpiece),T8_PLATE_CAPE_Q4,8,2900
+CAPE,Plate Cape (Outstanding),T8_PLATE_CAPE_Q2,8,3480
+CAPE,Leather Cape,T9_LEATHER_CAPE,9,1480
+CAPE,Leather Cape (Excellent),T9_LEATHER_CAPE_Q3,9,2220
+CAPE,Leather Cape (Good),T9_LEATHER_CAPE_Q1,9,2960
+CAPE,Leather Cape (Masterpiece),T9_LEATHER_CAPE_Q4,9,3700
+CAPE,Leather Cape (Outstanding),T9_LEATHER_CAPE_Q2,9,4440
+CAPE,Mage Cape,T9_MAGE_CAPE,9,1480
+CAPE,Mage Cape (Excellent),T9_MAGE_CAPE_Q3,9,2220
+CAPE,Mage Cape (Good),T9_MAGE_CAPE_Q1,9,2960
+CAPE,Mage Cape (Masterpiece),T9_MAGE_CAPE_Q4,9,3700
+CAPE,Mage Cape (Outstanding),T9_MAGE_CAPE_Q2,9,4440
+CAPE,Plate Cape,T9_PLATE_CAPE,9,1480
+CAPE,Plate Cape (Excellent),T9_PLATE_CAPE_Q3,9,2220
+CAPE,Plate Cape (Good),T9_PLATE_CAPE_Q1,9,2960
+CAPE,Plate Cape (Masterpiece),T9_PLATE_CAPE_Q4,9,3700
+CAPE,Plate Cape (Outstanding),T9_PLATE_CAPE_Q2,9,4440
+CAPE,Leather Cape,T10_LEATHER_CAPE,10,1840
+CAPE,Leather Cape (Excellent),T10_LEATHER_CAPE_Q3,10,2760
+CAPE,Leather Cape (Good),T10_LEATHER_CAPE_Q1,10,3680
+CAPE,Leather Cape (Masterpiece),T10_LEATHER_CAPE_Q4,10,4600
+CAPE,Leather Cape (Outstanding),T10_LEATHER_CAPE_Q2,10,5520
+CAPE,Mage Cape,T10_MAGE_CAPE,10,1840
+CAPE,Mage Cape (Excellent),T10_MAGE_CAPE_Q3,10,2760
+CAPE,Mage Cape (Good),T10_MAGE_CAPE_Q1,10,3680
+CAPE,Mage Cape (Masterpiece),T10_MAGE_CAPE_Q4,10,4600
+CAPE,Mage Cape (Outstanding),T10_MAGE_CAPE_Q2,10,5520
+CAPE,Plate Cape,T10_PLATE_CAPE,10,1840
+CAPE,Plate Cape (Excellent),T10_PLATE_CAPE_Q3,10,2760
+CAPE,Plate Cape (Good),T10_PLATE_CAPE_Q1,10,3680
+CAPE,Plate Cape (Masterpiece),T10_PLATE_CAPE_Q4,10,4600
+CAPE,Plate Cape (Outstanding),T10_PLATE_CAPE_Q2,10,5520
+CRAFTING_MATERIAL,Battle Rune Shard,T1_BATTLE_RUNE_SHARD,1,202
+CRAFTING_MATERIAL,Boss Crest,T1_CREST,1,88
+CRAFTING_MATERIAL,Boss Crest,T2_CREST,2,176
+CRAFTING_MATERIAL,Boss Crest,T3_CREST,3,330
+CRAFTING_MATERIAL,Boss Crest,T4_CREST,4,550
+CRAFTING_MATERIAL,Boss Crest,T5_CREST,5,836
+CRAFTING_MATERIAL,Boss Crest,T6_CREST,6,1188
+CRAFTING_MATERIAL,Boss Crest,T7_CREST,7,1606
+CRAFTING_MATERIAL,Boss Crest,T8_CREST,8,2090
+CRAFTING_MATERIAL,Boss Crest,T9_CREST,9,2640
+CRAFTING_MATERIAL,Boss Crest,T10_CREST,10,3256
+FOOD,Food,T1_FOOD,1,2
+FOOD,Food,T1_FOOD,1,2
+FOOD,Food,T2_FOOD,2,4
+FOOD,Food,T2_FOOD,2,4
+FOOD,Food,T3_FOOD,3,8
+FOOD,Food,T3_FOOD,3,8
+FOOD,Food,T4_FOOD,4,14
+FOOD,Food,T4_FOOD,4,14
+FOOD,Food,T5_FOOD,5,22
+FOOD,Food,T5_FOOD,5,22
+FOOD,Food,T6_FOOD,6,32
+FOOD,Food,T6_FOOD,6,32
+FOOD,Food,T7_FOOD,7,44
+FOOD,Food,T7_FOOD,7,44
+FOOD,Food,T8_FOOD,8,58
+FOOD,Food,T8_FOOD,8,58
+FOOD,Food,T9_FOOD,9,74
+FOOD,Food,T9_FOOD,9,74
+FOOD,Food,T10_FOOD,10,92
+FOOD,Food,T10_FOOD,10,92
+GLOVES,Cloth Gloves,T1_CLOTH_GLOVES,1,40
+GLOVES,Cloth Gloves (Excellent),T1_CLOTH_GLOVES_Q3,1,60
+GLOVES,Cloth Gloves (Good),T1_CLOTH_GLOVES_Q1,1,80
+GLOVES,Cloth Gloves (Masterpiece),T1_CLOTH_GLOVES_Q4,1,100
+GLOVES,Cloth Gloves (Outstanding),T1_CLOTH_GLOVES_Q2,1,120
+GLOVES,Leather Gloves,T1_LEATHER_GLOVES,1,40
+GLOVES,Leather Gloves (Excellent),T1_LEATHER_GLOVES_Q3,1,60
+GLOVES,Leather Gloves (Good),T1_LEATHER_GLOVES_Q1,1,80
+GLOVES,Leather Gloves (Masterpiece),T1_LEATHER_GLOVES_Q4,1,100
+GLOVES,Leather Gloves (Outstanding),T1_LEATHER_GLOVES_Q2,1,120
+GLOVES,Plate Gloves,T1_PLATE_GLOVES,1,40
+GLOVES,Plate Gloves (Excellent),T1_PLATE_GLOVES_Q3,1,60
+GLOVES,Plate Gloves (Good),T1_PLATE_GLOVES_Q1,1,80
+GLOVES,Plate Gloves (Masterpiece),T1_PLATE_GLOVES_Q4,1,100
+GLOVES,Plate Gloves (Outstanding),T1_PLATE_GLOVES_Q2,1,120
+GLOVES,Cloth Gloves,T2_CLOTH_GLOVES,2,80
+GLOVES,Cloth Gloves (Excellent),T2_CLOTH_GLOVES_Q3,2,120
+GLOVES,Cloth Gloves (Good),T2_CLOTH_GLOVES_Q1,2,160
+GLOVES,Cloth Gloves (Masterpiece),T2_CLOTH_GLOVES_Q4,2,200
+GLOVES,Cloth Gloves (Outstanding),T2_CLOTH_GLOVES_Q2,2,240
+GLOVES,Leather Gloves,T2_LEATHER_GLOVES,2,80
+GLOVES,Leather Gloves (Excellent),T2_LEATHER_GLOVES_Q3,2,120
+GLOVES,Leather Gloves (Good),T2_LEATHER_GLOVES_Q1,2,160
+GLOVES,Leather Gloves (Masterpiece),T2_LEATHER_GLOVES_Q4,2,200
+GLOVES,Leather Gloves (Outstanding),T2_LEATHER_GLOVES_Q2,2,240
+GLOVES,Plate Gloves,T2_PLATE_GLOVES,2,80
+GLOVES,Plate Gloves (Excellent),T2_PLATE_GLOVES_Q3,2,120
+GLOVES,Plate Gloves (Good),T2_PLATE_GLOVES_Q1,2,160
+GLOVES,Plate Gloves (Masterpiece),T2_PLATE_GLOVES_Q4,2,200
+GLOVES,Plate Gloves (Outstanding),T2_PLATE_GLOVES_Q2,2,240
+GLOVES,Cloth Gloves,T3_CLOTH_GLOVES,3,160
+GLOVES,Cloth Gloves (Excellent),T3_CLOTH_GLOVES_Q3,3,240
+GLOVES,Cloth Gloves (Good),T3_CLOTH_GLOVES_Q1,3,320
+GLOVES,Cloth Gloves (Masterpiece),T3_CLOTH_GLOVES_Q4,3,400
+GLOVES,Cloth Gloves (Outstanding),T3_CLOTH_GLOVES_Q2,3,480
+GLOVES,Leather Gloves,T3_LEATHER_GLOVES,3,160
+GLOVES,Leather Gloves (Excellent),T3_LEATHER_GLOVES_Q3,3,240
+GLOVES,Leather Gloves (Good),T3_LEATHER_GLOVES_Q1,3,320
+GLOVES,Leather Gloves (Masterpiece),T3_LEATHER_GLOVES_Q4,3,400
+GLOVES,Leather Gloves (Outstanding),T3_LEATHER_GLOVES_Q2,3,480
+GLOVES,Plate Gloves,T3_PLATE_GLOVES,3,160
+GLOVES,Plate Gloves (Excellent),T3_PLATE_GLOVES_Q3,3,240
+GLOVES,Plate Gloves (Good),T3_PLATE_GLOVES_Q1,3,320
+GLOVES,Plate Gloves (Masterpiece),T3_PLATE_GLOVES_Q4,3,400
+GLOVES,Plate Gloves (Outstanding),T3_PLATE_GLOVES_Q2,3,480
+GLOVES,Cloth Gloves,T4_CLOTH_GLOVES,4,280
+GLOVES,Cloth Gloves (Excellent),T4_CLOTH_GLOVES_Q3,4,420
+GLOVES,Cloth Gloves (Good),T4_CLOTH_GLOVES_Q1,4,560
+GLOVES,Cloth Gloves (Masterpiece),T4_CLOTH_GLOVES_Q4,4,700
+GLOVES,Cloth Gloves (Outstanding),T4_CLOTH_GLOVES_Q2,4,840
+GLOVES,Leather Gloves,T4_LEATHER_GLOVES,4,280
+GLOVES,Leather Gloves (Excellent),T4_LEATHER_GLOVES_Q3,4,420
+GLOVES,Leather Gloves (Good),T4_LEATHER_GLOVES_Q1,4,560
+GLOVES,Leather Gloves (Masterpiece),T4_LEATHER_GLOVES_Q4,4,700
+GLOVES,Leather Gloves (Outstanding),T4_LEATHER_GLOVES_Q2,4,840
+GLOVES,Plate Gloves,T4_PLATE_GLOVES,4,280
+GLOVES,Plate Gloves (Excellent),T4_PLATE_GLOVES_Q3,4,420
+GLOVES,Plate Gloves (Good),T4_PLATE_GLOVES_Q1,4,560
+GLOVES,Plate Gloves (Masterpiece),T4_PLATE_GLOVES_Q4,4,700
+GLOVES,Plate Gloves (Outstanding),T4_PLATE_GLOVES_Q2,4,840
+GLOVES,Cloth Gloves,T5_CLOTH_GLOVES,5,440
+GLOVES,Cloth Gloves (Excellent),T5_CLOTH_GLOVES_Q3,5,660
+GLOVES,Cloth Gloves (Good),T5_CLOTH_GLOVES_Q1,5,880
+GLOVES,Cloth Gloves (Masterpiece),T5_CLOTH_GLOVES_Q4,5,1100
+GLOVES,Cloth Gloves (Outstanding),T5_CLOTH_GLOVES_Q2,5,1320
+GLOVES,Leather Gloves,T5_LEATHER_GLOVES,5,440
+GLOVES,Leather Gloves (Excellent),T5_LEATHER_GLOVES_Q3,5,660
+GLOVES,Leather Gloves (Good),T5_LEATHER_GLOVES_Q1,5,880
+GLOVES,Leather Gloves (Masterpiece),T5_LEATHER_GLOVES_Q4,5,1100
+GLOVES,Leather Gloves (Outstanding),T5_LEATHER_GLOVES_Q2,5,1320
+GLOVES,Plate Gloves,T5_PLATE_GLOVES,5,440
+GLOVES,Plate Gloves (Excellent),T5_PLATE_GLOVES_Q3,5,660
+GLOVES,Plate Gloves (Good),T5_PLATE_GLOVES_Q1,5,880
+GLOVES,Plate Gloves (Masterpiece),T5_PLATE_GLOVES_Q4,5,1100
+GLOVES,Plate Gloves (Outstanding),T5_PLATE_GLOVES_Q2,5,1320
+GLOVES,Cloth Gloves,T6_CLOTH_GLOVES,6,640
+GLOVES,Cloth Gloves (Excellent),T6_CLOTH_GLOVES_Q3,6,960
+GLOVES,Cloth Gloves (Good),T6_CLOTH_GLOVES_Q1,6,1280
+GLOVES,Cloth Gloves (Masterpiece),T6_CLOTH_GLOVES_Q4,6,1600
+GLOVES,Cloth Gloves (Outstanding),T6_CLOTH_GLOVES_Q2,6,1920
+GLOVES,Leather Gloves,T6_LEATHER_GLOVES,6,640
+GLOVES,Leather Gloves (Excellent),T6_LEATHER_GLOVES_Q3,6,960
+GLOVES,Leather Gloves (Good),T6_LEATHER_GLOVES_Q1,6,1280
+GLOVES,Leather Gloves (Masterpiece),T6_LEATHER_GLOVES_Q4,6,1600
+GLOVES,Leather Gloves (Outstanding),T6_LEATHER_GLOVES_Q2,6,1920
+GLOVES,Plate Gloves,T6_PLATE_GLOVES,6,640
+GLOVES,Plate Gloves (Excellent),T6_PLATE_GLOVES_Q3,6,960
+GLOVES,Plate Gloves (Good),T6_PLATE_GLOVES_Q1,6,1280
+GLOVES,Plate Gloves (Masterpiece),T6_PLATE_GLOVES_Q4,6,1600
+GLOVES,Plate Gloves (Outstanding),T6_PLATE_GLOVES_Q2,6,1920
+GLOVES,Cloth Gloves,T7_CLOTH_GLOVES,7,880
+GLOVES,Cloth Gloves (Excellent),T7_CLOTH_GLOVES_Q3,7,1320
+GLOVES,Cloth Gloves (Good),T7_CLOTH_GLOVES_Q1,7,1760
+GLOVES,Cloth Gloves (Masterpiece),T7_CLOTH_GLOVES_Q4,7,2200
+GLOVES,Cloth Gloves (Outstanding),T7_CLOTH_GLOVES_Q2,7,2640
+GLOVES,Leather Gloves,T7_LEATHER_GLOVES,7,880
+GLOVES,Leather Gloves (Excellent),T7_LEATHER_GLOVES_Q3,7,1320
+GLOVES,Leather Gloves (Good),T7_LEATHER_GLOVES_Q1,7,1760
+GLOVES,Leather Gloves (Masterpiece),T7_LEATHER_GLOVES_Q4,7,2200
+GLOVES,Leather Gloves (Outstanding),T7_LEATHER_GLOVES_Q2,7,2640
+GLOVES,Plate Gloves,T7_PLATE_GLOVES,7,880
+GLOVES,Plate Gloves (Excellent),T7_PLATE_GLOVES_Q3,7,1320
+GLOVES,Plate Gloves (Good),T7_PLATE_GLOVES_Q1,7,1760
+GLOVES,Plate Gloves (Masterpiece),T7_PLATE_GLOVES_Q4,7,2200
+GLOVES,Plate Gloves (Outstanding),T7_PLATE_GLOVES_Q2,7,2640
+GLOVES,Cloth Gloves,T8_CLOTH_GLOVES,8,1160
+GLOVES,Cloth Gloves (Excellent),T8_CLOTH_GLOVES_Q3,8,1740
+GLOVES,Cloth Gloves (Good),T8_CLOTH_GLOVES_Q1,8,2320
+GLOVES,Cloth Gloves (Masterpiece),T8_CLOTH_GLOVES_Q4,8,2900
+GLOVES,Cloth Gloves (Outstanding),T8_CLOTH_GLOVES_Q2,8,3480
+GLOVES,Leather Gloves,T8_LEATHER_GLOVES,8,1160
+GLOVES,Leather Gloves (Excellent),T8_LEATHER_GLOVES_Q3,8,1740
+GLOVES,Leather Gloves (Good),T8_LEATHER_GLOVES_Q1,8,2320
+GLOVES,Leather Gloves (Masterpiece),T8_LEATHER_GLOVES_Q4,8,2900
+GLOVES,Leather Gloves (Outstanding),T8_LEATHER_GLOVES_Q2,8,3480
+GLOVES,Plate Gloves,T8_PLATE_GLOVES,8,1160
+GLOVES,Plate Gloves (Excellent),T8_PLATE_GLOVES_Q3,8,1740
+GLOVES,Plate Gloves (Good),T8_PLATE_GLOVES_Q1,8,2320
+GLOVES,Plate Gloves (Masterpiece),T8_PLATE_GLOVES_Q4,8,2900
+GLOVES,Plate Gloves (Outstanding),T8_PLATE_GLOVES_Q2,8,3480
+GLOVES,Cloth Gloves,T9_CLOTH_GLOVES,9,1480
+GLOVES,Cloth Gloves (Excellent),T9_CLOTH_GLOVES_Q3,9,2220
+GLOVES,Cloth Gloves (Good),T9_CLOTH_GLOVES_Q1,9,2960
+GLOVES,Cloth Gloves (Masterpiece),T9_CLOTH_GLOVES_Q4,9,3700
+GLOVES,Cloth Gloves (Outstanding),T9_CLOTH_GLOVES_Q2,9,4440
+GLOVES,Leather Gloves,T9_LEATHER_GLOVES,9,1480
+GLOVES,Leather Gloves (Excellent),T9_LEATHER_GLOVES_Q3,9,2220
+GLOVES,Leather Gloves (Good),T9_LEATHER_GLOVES_Q1,9,2960
+GLOVES,Leather Gloves (Masterpiece),T9_LEATHER_GLOVES_Q4,9,3700
+GLOVES,Leather Gloves (Outstanding),T9_LEATHER_GLOVES_Q2,9,4440
+GLOVES,Plate Gloves,T9_PLATE_GLOVES,9,1480
+GLOVES,Plate Gloves (Excellent),T9_PLATE_GLOVES_Q3,9,2220
+GLOVES,Plate Gloves (Good),T9_PLATE_GLOVES_Q1,9,2960
+GLOVES,Plate Gloves (Masterpiece),T9_PLATE_GLOVES_Q4,9,3700
+GLOVES,Plate Gloves (Outstanding),T9_PLATE_GLOVES_Q2,9,4440
+GLOVES,Cloth Gloves,T10_CLOTH_GLOVES,10,1840
+GLOVES,Cloth Gloves (Excellent),T10_CLOTH_GLOVES_Q3,10,2760
+GLOVES,Cloth Gloves (Good),T10_CLOTH_GLOVES_Q1,10,3680
+GLOVES,Cloth Gloves (Masterpiece),T10_CLOTH_GLOVES_Q4,10,4600
+GLOVES,Cloth Gloves (Outstanding),T10_CLOTH_GLOVES_Q2,10,5520
+GLOVES,Leather Gloves,T10_LEATHER_GLOVES,10,1840
+GLOVES,Leather Gloves (Excellent),T10_LEATHER_GLOVES_Q3,10,2760
+GLOVES,Leather Gloves (Good),T10_LEATHER_GLOVES_Q1,10,3680
+GLOVES,Leather Gloves (Masterpiece),T10_LEATHER_GLOVES_Q4,10,4600
+GLOVES,Leather Gloves (Outstanding),T10_LEATHER_GLOVES_Q2,10,5520
+GLOVES,Plate Gloves,T10_PLATE_GLOVES,10,1840
+GLOVES,Plate Gloves (Excellent),T10_PLATE_GLOVES_Q3,10,2760
+GLOVES,Plate Gloves (Good),T10_PLATE_GLOVES_Q1,10,3680
+GLOVES,Plate Gloves (Masterpiece),T10_PLATE_GLOVES_Q4,10,4600
+GLOVES,Plate Gloves (Outstanding),T10_PLATE_GLOVES_Q2,10,5520
+HELMET,Cloth Helmet,T1_CLOTH_HELMET,1,40
+HELMET,Cloth Helmet (Excellent),T1_CLOTH_HELMET_Q3,1,60
+HELMET,Cloth Helmet (Good),T1_CLOTH_HELMET_Q1,1,80
+HELMET,Cloth Helmet (Masterpiece),T1_CLOTH_HELMET_Q4,1,100
+HELMET,Cloth Helmet (Outstanding),T1_CLOTH_HELMET_Q2,1,120
+HELMET,Leather Helmet,T1_LEATHER_HELMET,1,40
+HELMET,Leather Helmet (Excellent),T1_LEATHER_HELMET_Q3,1,60
+HELMET,Leather Helmet (Good),T1_LEATHER_HELMET_Q1,1,80
+HELMET,Leather Helmet (Masterpiece),T1_LEATHER_HELMET_Q4,1,100
+HELMET,Leather Helmet (Outstanding),T1_LEATHER_HELMET_Q2,1,120
+HELMET,Plate Helmet,T1_PLATE_HELMET,1,40
+HELMET,Plate Helmet (Excellent),T1_PLATE_HELMET_Q3,1,60
+HELMET,Plate Helmet (Good),T1_PLATE_HELMET_Q1,1,80
+HELMET,Plate Helmet (Masterpiece),T1_PLATE_HELMET_Q4,1,100
+HELMET,Plate Helmet (Outstanding),T1_PLATE_HELMET_Q2,1,120
+HELMET,Cloth Helmet,T2_CLOTH_HELMET,2,80
+HELMET,Cloth Helmet (Excellent),T2_CLOTH_HELMET_Q3,2,120
+HELMET,Cloth Helmet (Good),T2_CLOTH_HELMET_Q1,2,160
+HELMET,Cloth Helmet (Masterpiece),T2_CLOTH_HELMET_Q4,2,200
+HELMET,Cloth Helmet (Outstanding),T2_CLOTH_HELMET_Q2,2,240
+HELMET,Leather Helmet,T2_LEATHER_HELMET,2,80
+HELMET,Leather Helmet (Excellent),T2_LEATHER_HELMET_Q3,2,120
+HELMET,Leather Helmet (Good),T2_LEATHER_HELMET_Q1,2,160
+HELMET,Leather Helmet (Masterpiece),T2_LEATHER_HELMET_Q4,2,200
+HELMET,Leather Helmet (Outstanding),T2_LEATHER_HELMET_Q2,2,240
+HELMET,Plate Helmet,T2_PLATE_HELMET,2,80
+HELMET,Plate Helmet (Excellent),T2_PLATE_HELMET_Q3,2,120
+HELMET,Plate Helmet (Good),T2_PLATE_HELMET_Q1,2,160
+HELMET,Plate Helmet (Masterpiece),T2_PLATE_HELMET_Q4,2,200
+HELMET,Plate Helmet (Outstanding),T2_PLATE_HELMET_Q2,2,240
+HELMET,Cloth Helmet,T3_CLOTH_HELMET,3,160
+HELMET,Cloth Helmet (Excellent),T3_CLOTH_HELMET_Q3,3,240
+HELMET,Cloth Helmet (Good),T3_CLOTH_HELMET_Q1,3,320
+HELMET,Cloth Helmet (Masterpiece),T3_CLOTH_HELMET_Q4,3,400
+HELMET,Cloth Helmet (Outstanding),T3_CLOTH_HELMET_Q2,3,480
+HELMET,Leather Helmet,T3_LEATHER_HELMET,3,160
+HELMET,Leather Helmet (Excellent),T3_LEATHER_HELMET_Q3,3,240
+HELMET,Leather Helmet (Good),T3_LEATHER_HELMET_Q1,3,320
+HELMET,Leather Helmet (Masterpiece),T3_LEATHER_HELMET_Q4,3,400
+HELMET,Leather Helmet (Outstanding),T3_LEATHER_HELMET_Q2,3,480
+HELMET,Plate Helmet,T3_PLATE_HELMET,3,160
+HELMET,Plate Helmet (Excellent),T3_PLATE_HELMET_Q3,3,240
+HELMET,Plate Helmet (Good),T3_PLATE_HELMET_Q1,3,320
+HELMET,Plate Helmet (Masterpiece),T3_PLATE_HELMET_Q4,3,400
+HELMET,Plate Helmet (Outstanding),T3_PLATE_HELMET_Q2,3,480
+HELMET,Cloth Helmet,T4_CLOTH_HELMET,4,280
+HELMET,Cloth Helmet (Excellent),T4_CLOTH_HELMET_Q3,4,420
+HELMET,Cloth Helmet (Good),T4_CLOTH_HELMET_Q1,4,560
+HELMET,Cloth Helmet (Masterpiece),T4_CLOTH_HELMET_Q4,4,700
+HELMET,Cloth Helmet (Outstanding),T4_CLOTH_HELMET_Q2,4,840
+HELMET,Leather Helmet,T4_LEATHER_HELMET,4,280
+HELMET,Leather Helmet (Excellent),T4_LEATHER_HELMET_Q3,4,420
+HELMET,Leather Helmet (Good),T4_LEATHER_HELMET_Q1,4,560
+HELMET,Leather Helmet (Masterpiece),T4_LEATHER_HELMET_Q4,4,700
+HELMET,Leather Helmet (Outstanding),T4_LEATHER_HELMET_Q2,4,840
+HELMET,Plate Helmet,T4_PLATE_HELMET,4,280
+HELMET,Plate Helmet (Excellent),T4_PLATE_HELMET_Q3,4,420
+HELMET,Plate Helmet (Good),T4_PLATE_HELMET_Q1,4,560
+HELMET,Plate Helmet (Masterpiece),T4_PLATE_HELMET_Q4,4,700
+HELMET,Plate Helmet (Outstanding),T4_PLATE_HELMET_Q2,4,840
+HELMET,Cloth Helmet,T5_CLOTH_HELMET,5,440
+HELMET,Cloth Helmet (Excellent),T5_CLOTH_HELMET_Q3,5,660
+HELMET,Cloth Helmet (Good),T5_CLOTH_HELMET_Q1,5,880
+HELMET,Cloth Helmet (Masterpiece),T5_CLOTH_HELMET_Q4,5,1100
+HELMET,Cloth Helmet (Outstanding),T5_CLOTH_HELMET_Q2,5,1320
+HELMET,Leather Helmet,T5_LEATHER_HELMET,5,440
+HELMET,Leather Helmet (Excellent),T5_LEATHER_HELMET_Q3,5,660
+HELMET,Leather Helmet (Good),T5_LEATHER_HELMET_Q1,5,880
+HELMET,Leather Helmet (Masterpiece),T5_LEATHER_HELMET_Q4,5,1100
+HELMET,Leather Helmet (Outstanding),T5_LEATHER_HELMET_Q2,5,1320
+HELMET,Plate Helmet,T5_PLATE_HELMET,5,440
+HELMET,Plate Helmet (Excellent),T5_PLATE_HELMET_Q3,5,660
+HELMET,Plate Helmet (Good),T5_PLATE_HELMET_Q1,5,880
+HELMET,Plate Helmet (Masterpiece),T5_PLATE_HELMET_Q4,5,1100
+HELMET,Plate Helmet (Outstanding),T5_PLATE_HELMET_Q2,5,1320
+HELMET,Cloth Helmet,T6_CLOTH_HELMET,6,640
+HELMET,Cloth Helmet (Excellent),T6_CLOTH_HELMET_Q3,6,960
+HELMET,Cloth Helmet (Good),T6_CLOTH_HELMET_Q1,6,1280
+HELMET,Cloth Helmet (Masterpiece),T6_CLOTH_HELMET_Q4,6,1600
+HELMET,Cloth Helmet (Outstanding),T6_CLOTH_HELMET_Q2,6,1920
+HELMET,Leather Helmet,T6_LEATHER_HELMET,6,640
+HELMET,Leather Helmet (Excellent),T6_LEATHER_HELMET_Q3,6,960
+HELMET,Leather Helmet (Good),T6_LEATHER_HELMET_Q1,6,1280
+HELMET,Leather Helmet (Masterpiece),T6_LEATHER_HELMET_Q4,6,1600
+HELMET,Leather Helmet (Outstanding),T6_LEATHER_HELMET_Q2,6,1920
+HELMET,Plate Helmet,T6_PLATE_HELMET,6,640
+HELMET,Plate Helmet (Excellent),T6_PLATE_HELMET_Q3,6,960
+HELMET,Plate Helmet (Good),T6_PLATE_HELMET_Q1,6,1280
+HELMET,Plate Helmet (Masterpiece),T6_PLATE_HELMET_Q4,6,1600
+HELMET,Plate Helmet (Outstanding),T6_PLATE_HELMET_Q2,6,1920
+HELMET,Cloth Helmet,T7_CLOTH_HELMET,7,880
+HELMET,Cloth Helmet (Excellent),T7_CLOTH_HELMET_Q3,7,1320
+HELMET,Cloth Helmet (Good),T7_CLOTH_HELMET_Q1,7,1760
+HELMET,Cloth Helmet (Masterpiece),T7_CLOTH_HELMET_Q4,7,2200
+HELMET,Cloth Helmet (Outstanding),T7_CLOTH_HELMET_Q2,7,2640
+HELMET,Leather Helmet,T7_LEATHER_HELMET,7,880
+HELMET,Leather Helmet (Excellent),T7_LEATHER_HELMET_Q3,7,1320
+HELMET,Leather Helmet (Good),T7_LEATHER_HELMET_Q1,7,1760
+HELMET,Leather Helmet (Masterpiece),T7_LEATHER_HELMET_Q4,7,2200
+HELMET,Leather Helmet (Outstanding),T7_LEATHER_HELMET_Q2,7,2640
+HELMET,Plate Helmet,T7_PLATE_HELMET,7,880
+HELMET,Plate Helmet (Excellent),T7_PLATE_HELMET_Q3,7,1320
+HELMET,Plate Helmet (Good),T7_PLATE_HELMET_Q1,7,1760
+HELMET,Plate Helmet (Masterpiece),T7_PLATE_HELMET_Q4,7,2200
+HELMET,Plate Helmet (Outstanding),T7_PLATE_HELMET_Q2,7,2640
+HELMET,Cloth Helmet,T8_CLOTH_HELMET,8,1160
+HELMET,Cloth Helmet (Excellent),T8_CLOTH_HELMET_Q3,8,1740
+HELMET,Cloth Helmet (Good),T8_CLOTH_HELMET_Q1,8,2320
+HELMET,Cloth Helmet (Masterpiece),T8_CLOTH_HELMET_Q4,8,2900
+HELMET,Cloth Helmet (Outstanding),T8_CLOTH_HELMET_Q2,8,3480
+HELMET,Leather Helmet,T8_LEATHER_HELMET,8,1160
+HELMET,Leather Helmet (Excellent),T8_LEATHER_HELMET_Q3,8,1740
+HELMET,Leather Helmet (Good),T8_LEATHER_HELMET_Q1,8,2320
+HELMET,Leather Helmet (Masterpiece),T8_LEATHER_HELMET_Q4,8,2900
+HELMET,Leather Helmet (Outstanding),T8_LEATHER_HELMET_Q2,8,3480
+HELMET,Plate Helmet,T8_PLATE_HELMET,8,1160
+HELMET,Plate Helmet (Excellent),T8_PLATE_HELMET_Q3,8,1740
+HELMET,Plate Helmet (Good),T8_PLATE_HELMET_Q1,8,2320
+HELMET,Plate Helmet (Masterpiece),T8_PLATE_HELMET_Q4,8,2900
+HELMET,Plate Helmet (Outstanding),T8_PLATE_HELMET_Q2,8,3480
+HELMET,Cloth Helmet,T9_CLOTH_HELMET,9,1480
+HELMET,Cloth Helmet (Excellent),T9_CLOTH_HELMET_Q3,9,2220
+HELMET,Cloth Helmet (Good),T9_CLOTH_HELMET_Q1,9,2960
+HELMET,Cloth Helmet (Masterpiece),T9_CLOTH_HELMET_Q4,9,3700
+HELMET,Cloth Helmet (Outstanding),T9_CLOTH_HELMET_Q2,9,4440
+HELMET,Leather Helmet,T9_LEATHER_HELMET,9,1480
+HELMET,Leather Helmet (Excellent),T9_LEATHER_HELMET_Q3,9,2220
+HELMET,Leather Helmet (Good),T9_LEATHER_HELMET_Q1,9,2960
+HELMET,Leather Helmet (Masterpiece),T9_LEATHER_HELMET_Q4,9,3700
+HELMET,Leather Helmet (Outstanding),T9_LEATHER_HELMET_Q2,9,4440
+HELMET,Plate Helmet,T9_PLATE_HELMET,9,1480
+HELMET,Plate Helmet (Excellent),T9_PLATE_HELMET_Q3,9,2220
+HELMET,Plate Helmet (Good),T9_PLATE_HELMET_Q1,9,2960
+HELMET,Plate Helmet (Masterpiece),T9_PLATE_HELMET_Q4,9,3700
+HELMET,Plate Helmet (Outstanding),T9_PLATE_HELMET_Q2,9,4440
+HELMET,Cloth Helmet,T10_CLOTH_HELMET,10,1840
+HELMET,Cloth Helmet (Excellent),T10_CLOTH_HELMET_Q3,10,2760
+HELMET,Cloth Helmet (Good),T10_CLOTH_HELMET_Q1,10,3680
+HELMET,Cloth Helmet (Masterpiece),T10_CLOTH_HELMET_Q4,10,4600
+HELMET,Cloth Helmet (Outstanding),T10_CLOTH_HELMET_Q2,10,5520
+HELMET,Leather Helmet,T10_LEATHER_HELMET,10,1840
+HELMET,Leather Helmet (Excellent),T10_LEATHER_HELMET_Q3,10,2760
+HELMET,Leather Helmet (Good),T10_LEATHER_HELMET_Q1,10,3680
+HELMET,Leather Helmet (Masterpiece),T10_LEATHER_HELMET_Q4,10,4600
+HELMET,Leather Helmet (Outstanding),T10_LEATHER_HELMET_Q2,10,5520
+HELMET,Plate Helmet,T10_PLATE_HELMET,10,1840
+HELMET,Plate Helmet (Excellent),T10_PLATE_HELMET_Q3,10,2760
+HELMET,Plate Helmet (Good),T10_PLATE_HELMET_Q1,10,3680
+HELMET,Plate Helmet (Masterpiece),T10_PLATE_HELMET_Q4,10,4600
+HELMET,Plate Helmet (Outstanding),T10_PLATE_HELMET_Q2,10,5520
+MAP,Dungeon Map,T1_DUNGEON_MAP,1,2
+MAP,Dungeon Map,T2_DUNGEON_MAP,2,4
+MAP,Dungeon Map,T3_DUNGEON_MAP,3,8
+MAP,Dungeon Map,T4_DUNGEON_MAP,4,14
+MAP,Dungeon Map,T5_DUNGEON_MAP,5,22
+MAP,Dungeon Map,T6_DUNGEON_MAP,6,32
+MAP,Dungeon Map,T7_DUNGEON_MAP,7,44
+MAP,Dungeon Map,T8_DUNGEON_MAP,8,58
+MAP,Dungeon Map,T9_DUNGEON_MAP,9,74
+MAP,Dungeon Map,T10_DUNGEON_MAP,10,92
+OFF_HAND,Sheath,T1_SHEATH,1,40
+OFF_HAND,Sheath (Excellent),T1_SHEATH_Q3,1,60
+OFF_HAND,Sheath (Good),T1_SHEATH_Q1,1,80
+OFF_HAND,Sheath (Masterpiece),T1_SHEATH_Q4,1,100
+OFF_HAND,Sheath (Outstanding),T1_SHEATH_Q2,1,120
+OFF_HAND,Tome,T1_TOME,1,40
+OFF_HAND,Tome (Excellent),T1_TOME_Q3,1,60
+OFF_HAND,Tome (Good),T1_TOME_Q1,1,80
+OFF_HAND,Tome (Masterpiece),T1_TOME_Q4,1,100
+OFF_HAND,Tome (Outstanding),T1_TOME_Q2,1,120
+OFF_HAND,Torch,T1_TORCH,1,40
+OFF_HAND,Torch (Excellent),T1_TORCH_Q3,1,60
+OFF_HAND,Torch (Good),T1_TORCH_Q1,1,80
+OFF_HAND,Torch (Masterpiece),T1_TORCH_Q4,1,100
+OFF_HAND,Torch (Outstanding),T1_TORCH_Q2,1,120
+OFF_HAND,Sheath,T2_SHEATH,2,80
+OFF_HAND,Sheath (Excellent),T2_SHEATH_Q3,2,120
+OFF_HAND,Sheath (Good),T2_SHEATH_Q1,2,160
+OFF_HAND,Sheath (Masterpiece),T2_SHEATH_Q4,2,200
+OFF_HAND,Sheath (Outstanding),T2_SHEATH_Q2,2,240
+OFF_HAND,Tome,T2_TOME,2,80
+OFF_HAND,Tome (Excellent),T2_TOME_Q3,2,120
+OFF_HAND,Tome (Good),T2_TOME_Q1,2,160
+OFF_HAND,Tome (Masterpiece),T2_TOME_Q4,2,200
+OFF_HAND,Tome (Outstanding),T2_TOME_Q2,2,240
+OFF_HAND,Torch,T2_TORCH,2,80
+OFF_HAND,Torch (Excellent),T2_TORCH_Q3,2,120
+OFF_HAND,Torch (Good),T2_TORCH_Q1,2,160
+OFF_HAND,Torch (Masterpiece),T2_TORCH_Q4,2,200
+OFF_HAND,Torch (Outstanding),T2_TORCH_Q2,2,240
+OFF_HAND,Sheath,T3_SHEATH,3,160
+OFF_HAND,Sheath (Excellent),T3_SHEATH_Q3,3,240
+OFF_HAND,Sheath (Good),T3_SHEATH_Q1,3,320
+OFF_HAND,Sheath (Masterpiece),T3_SHEATH_Q4,3,400
+OFF_HAND,Sheath (Outstanding),T3_SHEATH_Q2,3,480
+OFF_HAND,Tome,T3_TOME,3,160
+OFF_HAND,Tome (Excellent),T3_TOME_Q3,3,240
+OFF_HAND,Tome (Good),T3_TOME_Q1,3,320
+OFF_HAND,Tome (Masterpiece),T3_TOME_Q4,3,400
+OFF_HAND,Tome (Outstanding),T3_TOME_Q2,3,480
+OFF_HAND,Torch,T3_TORCH,3,160
+OFF_HAND,Torch (Excellent),T3_TORCH_Q3,3,240
+OFF_HAND,Torch (Good),T3_TORCH_Q1,3,320
+OFF_HAND,Torch (Masterpiece),T3_TORCH_Q4,3,400
+OFF_HAND,Torch (Outstanding),T3_TORCH_Q2,3,480
+OFF_HAND,Sheath,T4_SHEATH,4,280
+OFF_HAND,Sheath (Excellent),T4_SHEATH_Q3,4,420
+OFF_HAND,Sheath (Good),T4_SHEATH_Q1,4,560
+OFF_HAND,Sheath (Masterpiece),T4_SHEATH_Q4,4,700
+OFF_HAND,Sheath (Outstanding),T4_SHEATH_Q2,4,840
+OFF_HAND,Tome,T4_TOME,4,280
+OFF_HAND,Tome (Excellent),T4_TOME_Q3,4,420
+OFF_HAND,Tome (Good),T4_TOME_Q1,4,560
+OFF_HAND,Tome (Masterpiece),T4_TOME_Q4,4,700
+OFF_HAND,Tome (Outstanding),T4_TOME_Q2,4,840
+OFF_HAND,Torch,T4_TORCH,4,280
+OFF_HAND,Torch (Excellent),T4_TORCH_Q3,4,420
+OFF_HAND,Torch (Good),T4_TORCH_Q1,4,560
+OFF_HAND,Torch (Masterpiece),T4_TORCH_Q4,4,700
+OFF_HAND,Torch (Outstanding),T4_TORCH_Q2,4,840
+OFF_HAND,Sheath,T5_SHEATH,5,440
+OFF_HAND,Sheath (Excellent),T5_SHEATH_Q3,5,660
+OFF_HAND,Sheath (Good),T5_SHEATH_Q1,5,880
+OFF_HAND,Sheath (Masterpiece),T5_SHEATH_Q4,5,1100
+OFF_HAND,Sheath (Outstanding),T5_SHEATH_Q2,5,1320
+OFF_HAND,Tome,T5_TOME,5,440
+OFF_HAND,Tome (Excellent),T5_TOME_Q3,5,660
+OFF_HAND,Tome (Good),T5_TOME_Q1,5,880
+OFF_HAND,Tome (Masterpiece),T5_TOME_Q4,5,1100
+OFF_HAND,Tome (Outstanding),T5_TOME_Q2,5,1320
+OFF_HAND,Torch,T5_TORCH,5,440
+OFF_HAND,Torch (Excellent),T5_TORCH_Q3,5,660
+OFF_HAND,Torch (Good),T5_TORCH_Q1,5,880
+OFF_HAND,Torch (Masterpiece),T5_TORCH_Q4,5,1100
+OFF_HAND,Torch (Outstanding),T5_TORCH_Q2,5,1320
+OFF_HAND,Sheath,T6_SHEATH,6,640
+OFF_HAND,Sheath (Excellent),T6_SHEATH_Q3,6,960
+OFF_HAND,Sheath (Good),T6_SHEATH_Q1,6,1280
+OFF_HAND,Sheath (Masterpiece),T6_SHEATH_Q4,6,1600
+OFF_HAND,Sheath (Outstanding),T6_SHEATH_Q2,6,1920
+OFF_HAND,Tome,T6_TOME,6,640
+OFF_HAND,Tome (Excellent),T6_TOME_Q3,6,960
+OFF_HAND,Tome (Good),T6_TOME_Q1,6,1280
+OFF_HAND,Tome (Masterpiece),T6_TOME_Q4,6,1600
+OFF_HAND,Tome (Outstanding),T6_TOME_Q2,6,1920
+OFF_HAND,Torch,T6_TORCH,6,640
+OFF_HAND,Torch (Excellent),T6_TORCH_Q3,6,960
+OFF_HAND,Torch (Good),T6_TORCH_Q1,6,1280
+OFF_HAND,Torch (Masterpiece),T6_TORCH_Q4,6,1600
+OFF_HAND,Torch (Outstanding),T6_TORCH_Q2,6,1920
+OFF_HAND,Sheath,T7_SHEATH,7,880
+OFF_HAND,Sheath (Excellent),T7_SHEATH_Q3,7,1320
+OFF_HAND,Sheath (Good),T7_SHEATH_Q1,7,1760
+OFF_HAND,Sheath (Masterpiece),T7_SHEATH_Q4,7,2200
+OFF_HAND,Sheath (Outstanding),T7_SHEATH_Q2,7,2640
+OFF_HAND,Tome,T7_TOME,7,880
+OFF_HAND,Tome (Excellent),T7_TOME_Q3,7,1320
+OFF_HAND,Tome (Good),T7_TOME_Q1,7,1760
+OFF_HAND,Tome (Masterpiece),T7_TOME_Q4,7,2200
+OFF_HAND,Tome (Outstanding),T7_TOME_Q2,7,2640
+OFF_HAND,Torch,T7_TORCH,7,880
+OFF_HAND,Torch (Excellent),T7_TORCH_Q3,7,1320
+OFF_HAND,Torch (Good),T7_TORCH_Q1,7,1760
+OFF_HAND,Torch (Masterpiece),T7_TORCH_Q4,7,2200
+OFF_HAND,Torch (Outstanding),T7_TORCH_Q2,7,2640
+OFF_HAND,Sheath,T8_SHEATH,8,1160
+OFF_HAND,Sheath (Excellent),T8_SHEATH_Q3,8,1740
+OFF_HAND,Sheath (Good),T8_SHEATH_Q1,8,2320
+OFF_HAND,Sheath (Masterpiece),T8_SHEATH_Q4,8,2900
+OFF_HAND,Sheath (Outstanding),T8_SHEATH_Q2,8,3480
+OFF_HAND,Tome,T8_TOME,8,1160
+OFF_HAND,Tome (Excellent),T8_TOME_Q3,8,1740
+OFF_HAND,Tome (Good),T8_TOME_Q1,8,2320
+OFF_HAND,Tome (Masterpiece),T8_TOME_Q4,8,2900
+OFF_HAND,Tome (Outstanding),T8_TOME_Q2,8,3480
+OFF_HAND,Torch,T8_TORCH,8,1160
+OFF_HAND,Torch (Excellent),T8_TORCH_Q3,8,1740
+OFF_HAND,Torch (Good),T8_TORCH_Q1,8,2320
+OFF_HAND,Torch (Masterpiece),T8_TORCH_Q4,8,2900
+OFF_HAND,Torch (Outstanding),T8_TORCH_Q2,8,3480
+OFF_HAND,Sheath,T9_SHEATH,9,1480
+OFF_HAND,Sheath (Excellent),T9_SHEATH_Q3,9,2220
+OFF_HAND,Sheath (Good),T9_SHEATH_Q1,9,2960
+OFF_HAND,Sheath (Masterpiece),T9_SHEATH_Q4,9,3700
+OFF_HAND,Sheath (Outstanding),T9_SHEATH_Q2,9,4440
+OFF_HAND,Tome,T9_TOME,9,1480
+OFF_HAND,Tome (Excellent),T9_TOME_Q3,9,2220
+OFF_HAND,Tome (Good),T9_TOME_Q1,9,2960
+OFF_HAND,Tome (Masterpiece),T9_TOME_Q4,9,3700
+OFF_HAND,Tome (Outstanding),T9_TOME_Q2,9,4440
+OFF_HAND,Torch,T9_TORCH,9,1480
+OFF_HAND,Torch (Excellent),T9_TORCH_Q3,9,2220
+OFF_HAND,Torch (Good),T9_TORCH_Q1,9,2960
+OFF_HAND,Torch (Masterpiece),T9_TORCH_Q4,9,3700
+OFF_HAND,Torch (Outstanding),T9_TORCH_Q2,9,4440
+OFF_HAND,Sheath,T10_SHEATH,10,1840
+OFF_HAND,Sheath (Excellent),T10_SHEATH_Q3,10,2760
+OFF_HAND,Sheath (Good),T10_SHEATH_Q1,10,3680
+OFF_HAND,Sheath (Masterpiece),T10_SHEATH_Q4,10,4600
+OFF_HAND,Sheath (Outstanding),T10_SHEATH_Q2,10,5520
+OFF_HAND,Tome,T10_TOME,10,1840
+OFF_HAND,Tome (Excellent),T10_TOME_Q3,10,2760
+OFF_HAND,Tome (Good),T10_TOME_Q1,10,3680
+OFF_HAND,Tome (Masterpiece),T10_TOME_Q4,10,4600
+OFF_HAND,Tome (Outstanding),T10_TOME_Q2,10,5520
+OFF_HAND,Torch,T10_TORCH,10,1840
+OFF_HAND,Torch (Excellent),T10_TORCH_Q3,10,2760
+OFF_HAND,Torch (Good),T10_TORCH_Q1,10,3680
+OFF_HAND,Torch (Masterpiece),T10_TORCH_Q4,10,4600
+OFF_HAND,Torch (Outstanding),T10_TORCH_Q2,10,5520
+POTION,Crafting Potion,T1_POTION_CRAFT,1,10
+POTION,Crafting Potion,T1_POTION_CRAFT,1,10
+POTION,Critical Potion,T1_POTION_CRIT,1,10
+POTION,Critical Potion,T1_POTION_CRIT,1,10
+POTION,Damage Potion,T1_POTION_DAMAGE,1,10
+POTION,Damage Potion,T1_POTION_DAMAGE,1,10
+POTION,Gathering Potion,T1_POTION_GATHER,1,10
+POTION,Gathering Potion,T1_POTION_GATHER,1,10
+POTION,Knowledge Potion,T1_POTION_XP,1,10
+POTION,Knowledge Potion,T1_POTION_XP,1,10
+POTION,Luck Potion,T1_POTION_LUCK,1,10
+POTION,Luck Potion,T1_POTION_LUCK,1,10
+POTION,Quality Potion,T1_POTION_QUALITY,1,10
+POTION,Quality Potion,T1_POTION_QUALITY,1,10
+POTION,Refining Potion,T1_POTION_REFINE,1,10
+POTION,Refining Potion,T1_POTION_REFINE,1,10
+POTION,Silver Potion,T1_POTION_SILVER,1,10
+POTION,Silver Potion,T1_POTION_SILVER,1,10
+POTION,Crafting Potion,T2_POTION_CRAFT,2,20
+POTION,Crafting Potion,T2_POTION_CRAFT,2,20
+POTION,Critical Potion,T2_POTION_CRIT,2,20
+POTION,Critical Potion,T2_POTION_CRIT,2,20
+POTION,Damage Potion,T2_POTION_DAMAGE,2,20
+POTION,Damage Potion,T2_POTION_DAMAGE,2,20
+POTION,Gathering Potion,T2_POTION_GATHER,2,20
+POTION,Gathering Potion,T2_POTION_GATHER,2,20
+POTION,Knowledge Potion,T2_POTION_XP,2,20
+POTION,Knowledge Potion,T2_POTION_XP,2,20
+POTION,Luck Potion,T2_POTION_LUCK,2,20
+POTION,Luck Potion,T2_POTION_LUCK,2,20
+POTION,Quality Potion,T2_POTION_QUALITY,2,20
+POTION,Quality Potion,T2_POTION_QUALITY,2,20
+POTION,Refining Potion,T2_POTION_REFINE,2,20
+POTION,Refining Potion,T2_POTION_REFINE,2,20
+POTION,Silver Potion,T2_POTION_SILVER,2,20
+POTION,Silver Potion,T2_POTION_SILVER,2,20
+POTION,Crafting Potion,T3_POTION_CRAFT,3,40
+POTION,Crafting Potion,T3_POTION_CRAFT,3,40
+POTION,Critical Potion,T3_POTION_CRIT,3,40
+POTION,Critical Potion,T3_POTION_CRIT,3,40
+POTION,Damage Potion,T3_POTION_DAMAGE,3,40
+POTION,Damage Potion,T3_POTION_DAMAGE,3,40
+POTION,Gathering Potion,T3_POTION_GATHER,3,40
+POTION,Gathering Potion,T3_POTION_GATHER,3,40
+POTION,Knowledge Potion,T3_POTION_XP,3,40
+POTION,Knowledge Potion,T3_POTION_XP,3,40
+POTION,Luck Potion,T3_POTION_LUCK,3,40
+POTION,Luck Potion,T3_POTION_LUCK,3,40
+POTION,Quality Potion,T3_POTION_QUALITY,3,40
+POTION,Quality Potion,T3_POTION_QUALITY,3,40
+POTION,Refining Potion,T3_POTION_REFINE,3,40
+POTION,Refining Potion,T3_POTION_REFINE,3,40
+POTION,Silver Potion,T3_POTION_SILVER,3,40
+POTION,Silver Potion,T3_POTION_SILVER,3,40
+POTION,Crafting Potion,T4_POTION_CRAFT,4,70
+POTION,Crafting Potion,T4_POTION_CRAFT,4,70
+POTION,Critical Potion,T4_POTION_CRIT,4,70
+POTION,Critical Potion,T4_POTION_CRIT,4,70
+POTION,Damage Potion,T4_POTION_DAMAGE,4,70
+POTION,Damage Potion,T4_POTION_DAMAGE,4,70
+POTION,Gathering Potion,T4_POTION_GATHER,4,70
+POTION,Gathering Potion,T4_POTION_GATHER,4,70
+POTION,Knowledge Potion,T4_POTION_XP,4,70
+POTION,Knowledge Potion,T4_POTION_XP,4,70
+POTION,Luck Potion,T4_POTION_LUCK,4,70
+POTION,Luck Potion,T4_POTION_LUCK,4,70
+POTION,Quality Potion,T4_POTION_QUALITY,4,70
+POTION,Quality Potion,T4_POTION_QUALITY,4,70
+POTION,Refining Potion,T4_POTION_REFINE,4,70
+POTION,Refining Potion,T4_POTION_REFINE,4,70
+POTION,Silver Potion,T4_POTION_SILVER,4,70
+POTION,Silver Potion,T4_POTION_SILVER,4,70
+POTION,Crafting Potion,T5_POTION_CRAFT,5,110
+POTION,Crafting Potion,T5_POTION_CRAFT,5,110
+POTION,Critical Potion,T5_POTION_CRIT,5,110
+POTION,Critical Potion,T5_POTION_CRIT,5,110
+POTION,Damage Potion,T5_POTION_DAMAGE,5,110
+POTION,Damage Potion,T5_POTION_DAMAGE,5,110
+POTION,Gathering Potion,T5_POTION_GATHER,5,110
+POTION,Gathering Potion,T5_POTION_GATHER,5,110
+POTION,Knowledge Potion,T5_POTION_XP,5,110
+POTION,Knowledge Potion,T5_POTION_XP,5,110
+POTION,Luck Potion,T5_POTION_LUCK,5,110
+POTION,Luck Potion,T5_POTION_LUCK,5,110
+POTION,Quality Potion,T5_POTION_QUALITY,5,110
+POTION,Quality Potion,T5_POTION_QUALITY,5,110
+POTION,Refining Potion,T5_POTION_REFINE,5,110
+POTION,Refining Potion,T5_POTION_REFINE,5,110
+POTION,Silver Potion,T5_POTION_SILVER,5,110
+POTION,Silver Potion,T5_POTION_SILVER,5,110
+POTION,Crafting Potion,T6_POTION_CRAFT,6,160
+POTION,Crafting Potion,T6_POTION_CRAFT,6,160
+POTION,Critical Potion,T6_POTION_CRIT,6,160
+POTION,Critical Potion,T6_POTION_CRIT,6,160
+POTION,Damage Potion,T6_POTION_DAMAGE,6,160
+POTION,Damage Potion,T6_POTION_DAMAGE,6,160
+POTION,Gathering Potion,T6_POTION_GATHER,6,160
+POTION,Gathering Potion,T6_POTION_GATHER,6,160
+POTION,Knowledge Potion,T6_POTION_XP,6,160
+POTION,Knowledge Potion,T6_POTION_XP,6,160
+POTION,Luck Potion,T6_POTION_LUCK,6,160
+POTION,Luck Potion,T6_POTION_LUCK,6,160
+POTION,Quality Potion,T6_POTION_QUALITY,6,160
+POTION,Quality Potion,T6_POTION_QUALITY,6,160
+POTION,Refining Potion,T6_POTION_REFINE,6,160
+POTION,Refining Potion,T6_POTION_REFINE,6,160
+POTION,Silver Potion,T6_POTION_SILVER,6,160
+POTION,Silver Potion,T6_POTION_SILVER,6,160
+POTION,Crafting Potion,T7_POTION_CRAFT,7,220
+POTION,Crafting Potion,T7_POTION_CRAFT,7,220
+POTION,Critical Potion,T7_POTION_CRIT,7,220
+POTION,Critical Potion,T7_POTION_CRIT,7,220
+POTION,Damage Potion,T7_POTION_DAMAGE,7,220
+POTION,Damage Potion,T7_POTION_DAMAGE,7,220
+POTION,Gathering Potion,T7_POTION_GATHER,7,220
+POTION,Gathering Potion,T7_POTION_GATHER,7,220
+POTION,Knowledge Potion,T7_POTION_XP,7,220
+POTION,Knowledge Potion,T7_POTION_XP,7,220
+POTION,Luck Potion,T7_POTION_LUCK,7,220
+POTION,Luck Potion,T7_POTION_LUCK,7,220
+POTION,Quality Potion,T7_POTION_QUALITY,7,220
+POTION,Quality Potion,T7_POTION_QUALITY,7,220
+POTION,Refining Potion,T7_POTION_REFINE,7,220
+POTION,Refining Potion,T7_POTION_REFINE,7,220
+POTION,Silver Potion,T7_POTION_SILVER,7,220
+POTION,Silver Potion,T7_POTION_SILVER,7,220
+POTION,Crafting Potion,T8_POTION_CRAFT,8,290
+POTION,Crafting Potion,T8_POTION_CRAFT,8,290
+POTION,Critical Potion,T8_POTION_CRIT,8,290
+POTION,Critical Potion,T8_POTION_CRIT,8,290
+POTION,Damage Potion,T8_POTION_DAMAGE,8,290
+POTION,Damage Potion,T8_POTION_DAMAGE,8,290
+POTION,Gathering Potion,T8_POTION_GATHER,8,290
+POTION,Gathering Potion,T8_POTION_GATHER,8,290
+POTION,Knowledge Potion,T8_POTION_XP,8,290
+POTION,Knowledge Potion,T8_POTION_XP,8,290
+POTION,Luck Potion,T8_POTION_LUCK,8,290
+POTION,Luck Potion,T8_POTION_LUCK,8,290
+POTION,Quality Potion,T8_POTION_QUALITY,8,290
+POTION,Quality Potion,T8_POTION_QUALITY,8,290
+POTION,Refining Potion,T8_POTION_REFINE,8,290
+POTION,Refining Potion,T8_POTION_REFINE,8,290
+POTION,Silver Potion,T8_POTION_SILVER,8,290
+POTION,Silver Potion,T8_POTION_SILVER,8,290
+POTION,Crafting Potion,T9_POTION_CRAFT,9,370
+POTION,Crafting Potion,T9_POTION_CRAFT,9,370
+POTION,Critical Potion,T9_POTION_CRIT,9,370
+POTION,Critical Potion,T9_POTION_CRIT,9,370
+POTION,Damage Potion,T9_POTION_DAMAGE,9,370
+POTION,Damage Potion,T9_POTION_DAMAGE,9,370
+POTION,Gathering Potion,T9_POTION_GATHER,9,370
+POTION,Gathering Potion,T9_POTION_GATHER,9,370
+POTION,Knowledge Potion,T9_POTION_XP,9,370
+POTION,Knowledge Potion,T9_POTION_XP,9,370
+POTION,Luck Potion,T9_POTION_LUCK,9,370
+POTION,Luck Potion,T9_POTION_LUCK,9,370
+POTION,Quality Potion,T9_POTION_QUALITY,9,370
+POTION,Quality Potion,T9_POTION_QUALITY,9,370
+POTION,Refining Potion,T9_POTION_REFINE,9,370
+POTION,Refining Potion,T9_POTION_REFINE,9,370
+POTION,Silver Potion,T9_POTION_SILVER,9,370
+POTION,Silver Potion,T9_POTION_SILVER,9,370
+POTION,Crafting Potion,T10_POTION_CRAFT,10,475
+POTION,Crafting Potion,T10_POTION_CRAFT,10,475
+POTION,Critical Potion,T10_POTION_CRIT,10,475
+POTION,Critical Potion,T10_POTION_CRIT,10,475
+POTION,Damage Potion,T10_POTION_DAMAGE,10,475
+POTION,Damage Potion,T10_POTION_DAMAGE,10,475
+POTION,Gathering Potion,T10_POTION_GATHER,10,475
+POTION,Gathering Potion,T10_POTION_GATHER,10,475
+POTION,Knowledge Potion,T10_POTION_XP,10,475
+POTION,Knowledge Potion,T10_POTION_XP,10,475
+POTION,Luck Potion,T10_POTION_LUCK,10,475
+POTION,Luck Potion,T10_POTION_LUCK,10,475
+POTION,Quality Potion,T10_POTION_QUALITY,10,475
+POTION,Quality Potion,T10_POTION_QUALITY,10,475
+POTION,Refining Potion,T10_POTION_REFINE,10,475
+POTION,Refining Potion,T10_POTION_REFINE,10,475
+POTION,Silver Potion,T10_POTION_SILVER,10,475
+POTION,Silver Potion,T10_POTION_SILVER,10,475
+RAW,Fiber,T1_FIBER,1,1
+RAW,Fish,T1_FISH,1,1
+RAW,Herb,T1_HERB,1,1
+RAW,Hide,T1_HIDE,1,1
+RAW,Ore,T1_ORE,1,1
+RAW,Wood,T1_WOOD,1,1
+RAW,Fiber,T2_FIBER,2,2
+RAW,Fish,T2_FISH,2,2
+RAW,Herb,T2_HERB,2,2
+RAW,Hide,T2_HIDE,2,2
+RAW,Ore,T2_ORE,2,2
+RAW,Wood,T2_WOOD,2,2
+RAW,Fiber,T3_FIBER,3,4
+RAW,Fish,T3_FISH,3,4
+RAW,Herb,T3_HERB,3,4
+RAW,Hide,T3_HIDE,3,4
+RAW,Ore,T3_ORE,3,4
+RAW,Wood,T3_WOOD,3,4
+RAW,Fiber,T4_FIBER,4,7
+RAW,Fish,T4_FISH,4,7
+RAW,Herb,T4_HERB,4,7
+RAW,Hide,T4_HIDE,4,7
+RAW,Ore,T4_ORE,4,7
+RAW,Wood,T4_WOOD,4,7
+RAW,Fiber,T5_FIBER,5,11
+RAW,Fish,T5_FISH,5,11
+RAW,Herb,T5_HERB,5,11
+RAW,Hide,T5_HIDE,5,11
+RAW,Ore,T5_ORE,5,11
+RAW,Wood,T5_WOOD,5,11
+RAW,Fiber,T6_FIBER,6,16
+RAW,Fish,T6_FISH,6,16
+RAW,Herb,T6_HERB,6,16
+RAW,Hide,T6_HIDE,6,16
+RAW,Ore,T6_ORE,6,16
+RAW,Wood,T6_WOOD,6,16
+RAW,Fiber,T7_FIBER,7,22
+RAW,Fish,T7_FISH,7,22
+RAW,Herb,T7_HERB,7,22
+RAW,Hide,T7_HIDE,7,22
+RAW,Ore,T7_ORE,7,22
+RAW,Wood,T7_WOOD,7,22
+RAW,Fiber,T8_FIBER,8,29
+RAW,Fish,T8_FISH,8,29
+RAW,Herb,T8_HERB,8,29
+RAW,Hide,T8_HIDE,8,29
+RAW,Ore,T8_ORE,8,29
+RAW,Wood,T8_WOOD,8,29
+RAW,Fiber,T9_FIBER,9,37
+RAW,Fish,T9_FISH,9,37
+RAW,Herb,T9_HERB,9,37
+RAW,Hide,T9_HIDE,9,37
+RAW,Ore,T9_ORE,9,37
+RAW,Wood,T9_WOOD,9,37
+RAW,Fiber,T10_FIBER,10,46
+RAW,Fish,T10_FISH,10,46
+RAW,Herb,T10_HERB,10,46
+RAW,Hide,T10_HIDE,10,46
+RAW,Ore,T10_ORE,10,46
+RAW,Wood,T10_WOOD,10,46
+REFINED,Bar,T1_BAR,1,2
+REFINED,Cloth,T1_CLOTH,1,2
+REFINED,Extract,T1_EXTRACT,1,2
+REFINED,Leather,T1_LEATHER,1,2
+REFINED,Plank,T1_PLANK,1,2
+REFINED,Bar,T2_BAR,2,4
+REFINED,Cloth,T2_CLOTH,2,4
+REFINED,Extract,T2_EXTRACT,2,4
+REFINED,Leather,T2_LEATHER,2,4
+REFINED,Plank,T2_PLANK,2,4
+REFINED,Bar,T3_BAR,3,8
+REFINED,Cloth,T3_CLOTH,3,8
+REFINED,Extract,T3_EXTRACT,3,8
+REFINED,Leather,T3_LEATHER,3,8
+REFINED,Plank,T3_PLANK,3,8
+REFINED,Bar,T4_BAR,4,14
+REFINED,Cloth,T4_CLOTH,4,14
+REFINED,Extract,T4_EXTRACT,4,14
+REFINED,Leather,T4_LEATHER,4,14
+REFINED,Plank,T4_PLANK,4,14
+REFINED,Bar,T5_BAR,5,22
+REFINED,Cloth,T5_CLOTH,5,22
+REFINED,Extract,T5_EXTRACT,5,22
+REFINED,Leather,T5_LEATHER,5,22
+REFINED,Plank,T5_PLANK,5,22
+REFINED,Bar,T6_BAR,6,32
+REFINED,Cloth,T6_CLOTH,6,32
+REFINED,Extract,T6_EXTRACT,6,32
+REFINED,Leather,T6_LEATHER,6,32
+REFINED,Plank,T6_PLANK,6,32
+REFINED,Bar,T7_BAR,7,44
+REFINED,Cloth,T7_CLOTH,7,44
+REFINED,Extract,T7_EXTRACT,7,44
+REFINED,Leather,T7_LEATHER,7,44
+REFINED,Plank,T7_PLANK,7,44
+REFINED,Bar,T8_BAR,8,58
+REFINED,Cloth,T8_CLOTH,8,58
+REFINED,Extract,T8_EXTRACT,8,58
+REFINED,Leather,T8_LEATHER,8,58
+REFINED,Plank,T8_PLANK,8,58
+REFINED,Bar,T9_BAR,9,74
+REFINED,Cloth,T9_CLOTH,9,74
+REFINED,Extract,T9_EXTRACT,9,74
+REFINED,Leather,T9_LEATHER,9,74
+REFINED,Plank,T9_PLANK,9,74
+REFINED,Bar,T10_BAR,10,92
+REFINED,Cloth,T10_CLOTH,10,92
+REFINED,Extract,T10_EXTRACT,10,92
+REFINED,Leather,T10_LEATHER,10,92
+REFINED,Plank,T10_PLANK,10,92
+RESOURCE,Rune Shard,T1_RUNE_SHARD,1,1
+RESOURCE,Rune Shard,T1_RUNE_SHARD,1,1
+RESOURCE,T1 Runic Shard,T1_SHARD,1,1
+RESOURCE,T2 Runic Shard,T2_SHARD,2,2
+RESOURCE,T3 Runic Shard,T3_SHARD,3,4
+RESOURCE,T4 Runic Shard,T4_SHARD,4,7
+RESOURCE,T5 Runic Shard,T5_SHARD,5,11
+RESOURCE,T6 Runic Shard,T6_SHARD,6,16
+RESOURCE,T7 Runic Shard,T7_SHARD,7,22
+RESOURCE,T8 Runic Shard,T8_SHARD,8,29
+RESOURCE,T9 Runic Shard,T9_SHARD,9,37
+RESOURCE,T10 Runic Shard,T10_SHARD,10,46
+RUNE,T1 Alchemy Rune of Duplication,T1_RUNE_ALCHEMY_DUPLIC_1STAR,1,88
+RUNE,T1 Alchemy Rune of Duplication,T1_RUNE_ALCHEMY_DUPLIC_2STAR,1,150
+RUNE,T1 Alchemy Rune of Duplication,T1_RUNE_ALCHEMY_DUPLIC_3STAR,1,282
+RUNE,T1 Alchemy Rune of Efficiency,T1_RUNE_ALCHEMY_EFF_1STAR,1,88
+RUNE,T1 Alchemy Rune of Efficiency,T1_RUNE_ALCHEMY_EFF_2STAR,1,150
+RUNE,T1 Alchemy Rune of Efficiency,T1_RUNE_ALCHEMY_EFF_3STAR,1,282
+RUNE,T1 Alchemy Rune of XP,T1_RUNE_ALCHEMY_XP_1STAR,1,88
+RUNE,T1 Alchemy Rune of XP,T1_RUNE_ALCHEMY_XP_2STAR,1,150
+RUNE,T1 Alchemy Rune of XP,T1_RUNE_ALCHEMY_XP_3STAR,1,282
+RUNE,T1 Cloth Rune of Duplication,T1_RUNE_CLOTH_DUPLIC_1STAR,1,88
+RUNE,T1 Cloth Rune of Duplication,T1_RUNE_CLOTH_DUPLIC_2STAR,1,150
+RUNE,T1 Cloth Rune of Duplication,T1_RUNE_CLOTH_DUPLIC_3STAR,1,282
+RUNE,T1 Cloth Rune of Efficiency,T1_RUNE_CLOTH_EFF_1STAR,1,88
+RUNE,T1 Cloth Rune of Efficiency,T1_RUNE_CLOTH_EFF_2STAR,1,150
+RUNE,T1 Cloth Rune of Efficiency,T1_RUNE_CLOTH_EFF_3STAR,1,282
+RUNE,T1 Cloth Rune of XP,T1_RUNE_CLOTH_XP_1STAR,1,88
+RUNE,T1 Cloth Rune of XP,T1_RUNE_CLOTH_XP_2STAR,1,150
+RUNE,T1 Cloth Rune of XP,T1_RUNE_CLOTH_XP_3STAR,1,282
+RUNE,T1 Combat Rune of Attack,T1_RUNE_ATTACK_ATTACK_1STAR,1,88
+RUNE,T1 Combat Rune of Attack,T1_RUNE_ATTACK_ATTACK_2STAR,1,150
+RUNE,T1 Combat Rune of Attack,T1_RUNE_ATTACK_ATTACK_3STAR,1,282
+RUNE,T1 Combat Rune of Attack Speed,T1_RUNE_ATTACK_ATTACK_SPEED_1STAR,1,88
+RUNE,T1 Combat Rune of Attack Speed,T1_RUNE_ATTACK_ATTACK_SPEED_2STAR,1,150
+RUNE,T1 Combat Rune of Attack Speed,T1_RUNE_ATTACK_ATTACK_SPEED_3STAR,1,282
+RUNE,T1 Combat Rune of Burst,T1_RUNE_ATTACK_BURST_1STAR,1,88
+RUNE,T1 Combat Rune of Burst,T1_RUNE_ATTACK_BURST_2STAR,1,150
+RUNE,T1 Combat Rune of Burst,T1_RUNE_ATTACK_BURST_3STAR,1,282
+RUNE,T1 Combat Rune of Food Saving,T1_RUNE_ATTACK_SAVE_FOOD_1STAR,1,88
+RUNE,T1 Combat Rune of Food Saving,T1_RUNE_ATTACK_SAVE_FOOD_2STAR,1,150
+RUNE,T1 Combat Rune of Food Saving,T1_RUNE_ATTACK_SAVE_FOOD_3STAR,1,282
+RUNE,T1 Cooking Rune of Duplication,T1_RUNE_COOKING_DUPLIC_1STAR,1,88
+RUNE,T1 Cooking Rune of Duplication,T1_RUNE_COOKING_DUPLIC_2STAR,1,150
+RUNE,T1 Cooking Rune of Duplication,T1_RUNE_COOKING_DUPLIC_3STAR,1,282
+RUNE,T1 Cooking Rune of Efficiency,T1_RUNE_COOKING_EFF_1STAR,1,88
+RUNE,T1 Cooking Rune of Efficiency,T1_RUNE_COOKING_EFF_2STAR,1,150
+RUNE,T1 Cooking Rune of Efficiency,T1_RUNE_COOKING_EFF_3STAR,1,282
+RUNE,T1 Cooking Rune of XP,T1_RUNE_COOKING_XP_1STAR,1,88
+RUNE,T1 Cooking Rune of XP,T1_RUNE_COOKING_XP_2STAR,1,150
+RUNE,T1 Cooking Rune of XP,T1_RUNE_COOKING_XP_3STAR,1,282
+RUNE,T1 Extract Rune of Duplication,T1_RUNE_EXTRACT_DUPLIC_1STAR,1,88
+RUNE,T1 Extract Rune of Duplication,T1_RUNE_EXTRACT_DUPLIC_2STAR,1,150
+RUNE,T1 Extract Rune of Duplication,T1_RUNE_EXTRACT_DUPLIC_3STAR,1,282
+RUNE,T1 Extract Rune of Efficiency,T1_RUNE_EXTRACT_EFF_1STAR,1,88
+RUNE,T1 Extract Rune of Efficiency,T1_RUNE_EXTRACT_EFF_2STAR,1,150
+RUNE,T1 Extract Rune of Efficiency,T1_RUNE_EXTRACT_EFF_3STAR,1,282
+RUNE,T1 Extract Rune of XP,T1_RUNE_EXTRACT_XP_1STAR,1,88
+RUNE,T1 Extract Rune of XP,T1_RUNE_EXTRACT_XP_2STAR,1,150
+RUNE,T1 Extract Rune of XP,T1_RUNE_EXTRACT_XP_3STAR,1,282
+RUNE,T1 Fiber Rune of Auto-Refine,T1_RUNE_FIBER_AUTO_1STAR,1,88
+RUNE,T1 Fiber Rune of Auto-Refine,T1_RUNE_FIBER_AUTO_2STAR,1,150
+RUNE,T1 Fiber Rune of Auto-Refine,T1_RUNE_FIBER_AUTO_3STAR,1,282
+RUNE,T1 Fiber Rune of Duplication,T1_RUNE_FIBER_DUPLIC_1STAR,1,88
+RUNE,T1 Fiber Rune of Duplication,T1_RUNE_FIBER_DUPLIC_2STAR,1,150
+RUNE,T1 Fiber Rune of Duplication,T1_RUNE_FIBER_DUPLIC_3STAR,1,282
+RUNE,T1 Fiber Rune of XP,T1_RUNE_FIBER_XP_1STAR,1,88
+RUNE,T1 Fiber Rune of XP,T1_RUNE_FIBER_XP_2STAR,1,150
+RUNE,T1 Fiber Rune of XP,T1_RUNE_FIBER_XP_3STAR,1,282
+RUNE,T1 Fishing Rune of Auto-Cooking,T1_RUNE_FISH_AUTO_1STAR,1,88
+RUNE,T1 Fishing Rune of Auto-Cooking,T1_RUNE_FISH_AUTO_2STAR,1,150
+RUNE,T1 Fishing Rune of Auto-Cooking,T1_RUNE_FISH_AUTO_3STAR,1,282
+RUNE,T1 Fishing Rune of Duplication,T1_RUNE_FISH_DUPLIC_1STAR,1,88
+RUNE,T1 Fishing Rune of Duplication,T1_RUNE_FISH_DUPLIC_2STAR,1,150
+RUNE,T1 Fishing Rune of Duplication,T1_RUNE_FISH_DUPLIC_3STAR,1,282
+RUNE,T1 Fishing Rune of XP,T1_RUNE_FISH_XP_1STAR,1,88
+RUNE,T1 Fishing Rune of XP,T1_RUNE_FISH_XP_2STAR,1,150
+RUNE,T1 Fishing Rune of XP,T1_RUNE_FISH_XP_3STAR,1,282
+RUNE,T1 Herbalism Rune of Auto-Refine,T1_RUNE_HERB_AUTO_1STAR,1,88
+RUNE,T1 Herbalism Rune of Auto-Refine,T1_RUNE_HERB_AUTO_2STAR,1,150
+RUNE,T1 Herbalism Rune of Auto-Refine,T1_RUNE_HERB_AUTO_3STAR,1,282
+RUNE,T1 Herbalism Rune of Duplication,T1_RUNE_HERB_DUPLIC_1STAR,1,88
+RUNE,T1 Herbalism Rune of Duplication,T1_RUNE_HERB_DUPLIC_2STAR,1,150
+RUNE,T1 Herbalism Rune of Duplication,T1_RUNE_HERB_DUPLIC_3STAR,1,282
+RUNE,T1 Herbalism Rune of XP,T1_RUNE_HERB_XP_1STAR,1,88
+RUNE,T1 Herbalism Rune of XP,T1_RUNE_HERB_XP_2STAR,1,150
+RUNE,T1 Herbalism Rune of XP,T1_RUNE_HERB_XP_3STAR,1,282
+RUNE,T1 Hunter Rune of Duplication,T1_RUNE_HUNTER_DUPLIC_1STAR,1,88
+RUNE,T1 Hunter Rune of Duplication,T1_RUNE_HUNTER_DUPLIC_2STAR,1,150
+RUNE,T1 Hunter Rune of Duplication,T1_RUNE_HUNTER_DUPLIC_3STAR,1,282
+RUNE,T1 Hunter Rune of Efficiency,T1_RUNE_HUNTER_EFF_1STAR,1,88
+RUNE,T1 Hunter Rune of Efficiency,T1_RUNE_HUNTER_EFF_2STAR,1,150
+RUNE,T1 Hunter Rune of Efficiency,T1_RUNE_HUNTER_EFF_3STAR,1,282
+RUNE,T1 Hunter Rune of XP,T1_RUNE_HUNTER_XP_1STAR,1,88
+RUNE,T1 Hunter Rune of XP,T1_RUNE_HUNTER_XP_2STAR,1,150
+RUNE,T1 Hunter Rune of XP,T1_RUNE_HUNTER_XP_3STAR,1,282
+RUNE,T1 Leather Rune of Duplication,T1_RUNE_LEATHER_DUPLIC_1STAR,1,88
+RUNE,T1 Leather Rune of Duplication,T1_RUNE_LEATHER_DUPLIC_2STAR,1,150
+RUNE,T1 Leather Rune of Duplication,T1_RUNE_LEATHER_DUPLIC_3STAR,1,282
+RUNE,T1 Leather Rune of Efficiency,T1_RUNE_LEATHER_EFF_1STAR,1,88
+RUNE,T1 Leather Rune of Efficiency,T1_RUNE_LEATHER_EFF_2STAR,1,150
+RUNE,T1 Leather Rune of Efficiency,T1_RUNE_LEATHER_EFF_3STAR,1,282
+RUNE,T1 Leather Rune of XP,T1_RUNE_LEATHER_XP_1STAR,1,88
+RUNE,T1 Leather Rune of XP,T1_RUNE_LEATHER_XP_2STAR,1,150
+RUNE,T1 Leather Rune of XP,T1_RUNE_LEATHER_XP_3STAR,1,282
+RUNE,T1 Mage Rune of Duplication,T1_RUNE_MAGE_DUPLIC_1STAR,1,88
+RUNE,T1 Mage Rune of Duplication,T1_RUNE_MAGE_DUPLIC_2STAR,1,150
+RUNE,T1 Mage Rune of Duplication,T1_RUNE_MAGE_DUPLIC_3STAR,1,282
+RUNE,T1 Mage Rune of Efficiency,T1_RUNE_MAGE_EFF_1STAR,1,88
+RUNE,T1 Mage Rune of Efficiency,T1_RUNE_MAGE_EFF_2STAR,1,150
+RUNE,T1 Mage Rune of Efficiency,T1_RUNE_MAGE_EFF_3STAR,1,282
+RUNE,T1 Mage Rune of XP,T1_RUNE_MAGE_XP_1STAR,1,88
+RUNE,T1 Mage Rune of XP,T1_RUNE_MAGE_XP_2STAR,1,150
+RUNE,T1 Mage Rune of XP,T1_RUNE_MAGE_XP_3STAR,1,282
+RUNE,T1 Metal Rune of Duplication,T1_RUNE_METAL_DUPLIC_1STAR,1,88
+RUNE,T1 Metal Rune of Duplication,T1_RUNE_METAL_DUPLIC_2STAR,1,150
+RUNE,T1 Metal Rune of Duplication,T1_RUNE_METAL_DUPLIC_3STAR,1,282
+RUNE,T1 Metal Rune of Efficiency,T1_RUNE_METAL_EFF_1STAR,1,88
+RUNE,T1 Metal Rune of Efficiency,T1_RUNE_METAL_EFF_2STAR,1,150
+RUNE,T1 Metal Rune of Efficiency,T1_RUNE_METAL_EFF_3STAR,1,282
+RUNE,T1 Metal Rune of XP,T1_RUNE_METAL_XP_1STAR,1,88
+RUNE,T1 Metal Rune of XP,T1_RUNE_METAL_XP_2STAR,1,150
+RUNE,T1 Metal Rune of XP,T1_RUNE_METAL_XP_3STAR,1,282
+RUNE,T1 Mining Rune of Auto-Refine,T1_RUNE_ORE_AUTO_1STAR,1,88
+RUNE,T1 Mining Rune of Auto-Refine,T1_RUNE_ORE_AUTO_2STAR,1,150
+RUNE,T1 Mining Rune of Auto-Refine,T1_RUNE_ORE_AUTO_3STAR,1,282
+RUNE,T1 Mining Rune of Duplication,T1_RUNE_ORE_DUPLIC_1STAR,1,88
+RUNE,T1 Mining Rune of Duplication,T1_RUNE_ORE_DUPLIC_2STAR,1,150
+RUNE,T1 Mining Rune of Duplication,T1_RUNE_ORE_DUPLIC_3STAR,1,282
+RUNE,T1 Mining Rune of XP,T1_RUNE_ORE_XP_1STAR,1,88
+RUNE,T1 Mining Rune of XP,T1_RUNE_ORE_XP_2STAR,1,150
+RUNE,T1 Mining Rune of XP,T1_RUNE_ORE_XP_3STAR,1,282
+RUNE,T1 Plank Rune of Duplication,T1_RUNE_PLANK_DUPLIC_1STAR,1,88
+RUNE,T1 Plank Rune of Duplication,T1_RUNE_PLANK_DUPLIC_2STAR,1,150
+RUNE,T1 Plank Rune of Duplication,T1_RUNE_PLANK_DUPLIC_3STAR,1,282
+RUNE,T1 Plank Rune of Efficiency,T1_RUNE_PLANK_EFF_1STAR,1,88
+RUNE,T1 Plank Rune of Efficiency,T1_RUNE_PLANK_EFF_2STAR,1,150
+RUNE,T1 Plank Rune of Efficiency,T1_RUNE_PLANK_EFF_3STAR,1,282
+RUNE,T1 Plank Rune of XP,T1_RUNE_PLANK_XP_1STAR,1,88
+RUNE,T1 Plank Rune of XP,T1_RUNE_PLANK_XP_2STAR,1,150
+RUNE,T1 Plank Rune of XP,T1_RUNE_PLANK_XP_3STAR,1,282
+RUNE,T1 Skinning Rune of Auto-Refine,T1_RUNE_HIDE_AUTO_1STAR,1,88
+RUNE,T1 Skinning Rune of Auto-Refine,T1_RUNE_HIDE_AUTO_2STAR,1,150
+RUNE,T1 Skinning Rune of Auto-Refine,T1_RUNE_HIDE_AUTO_3STAR,1,282
+RUNE,T1 Skinning Rune of Duplication,T1_RUNE_HIDE_DUPLIC_1STAR,1,88
+RUNE,T1 Skinning Rune of Duplication,T1_RUNE_HIDE_DUPLIC_2STAR,1,150
+RUNE,T1 Skinning Rune of Duplication,T1_RUNE_HIDE_DUPLIC_3STAR,1,282
+RUNE,T1 Skinning Rune of XP,T1_RUNE_HIDE_XP_1STAR,1,88
+RUNE,T1 Skinning Rune of XP,T1_RUNE_HIDE_XP_2STAR,1,150
+RUNE,T1 Skinning Rune of XP,T1_RUNE_HIDE_XP_3STAR,1,282
+RUNE,T1 Tools Rune of Duplication,T1_RUNE_TOOLS_DUPLIC_1STAR,1,88
+RUNE,T1 Tools Rune of Duplication,T1_RUNE_TOOLS_DUPLIC_2STAR,1,150
+RUNE,T1 Tools Rune of Duplication,T1_RUNE_TOOLS_DUPLIC_3STAR,1,282
+RUNE,T1 Tools Rune of Efficiency,T1_RUNE_TOOLS_EFF_1STAR,1,88
+RUNE,T1 Tools Rune of Efficiency,T1_RUNE_TOOLS_EFF_2STAR,1,150
+RUNE,T1 Tools Rune of Efficiency,T1_RUNE_TOOLS_EFF_3STAR,1,282
+RUNE,T1 Tools Rune of XP,T1_RUNE_TOOLS_XP_1STAR,1,88
+RUNE,T1 Tools Rune of XP,T1_RUNE_TOOLS_XP_2STAR,1,150
+RUNE,T1 Tools Rune of XP,T1_RUNE_TOOLS_XP_3STAR,1,282
+RUNE,T1 Warrior Rune of Duplication,T1_RUNE_WARRIOR_DUPLIC_1STAR,1,88
+RUNE,T1 Warrior Rune of Duplication,T1_RUNE_WARRIOR_DUPLIC_2STAR,1,150
+RUNE,T1 Warrior Rune of Duplication,T1_RUNE_WARRIOR_DUPLIC_3STAR,1,282
+RUNE,T1 Warrior Rune of Efficiency,T1_RUNE_WARRIOR_EFF_1STAR,1,88
+RUNE,T1 Warrior Rune of Efficiency,T1_RUNE_WARRIOR_EFF_2STAR,1,150
+RUNE,T1 Warrior Rune of Efficiency,T1_RUNE_WARRIOR_EFF_3STAR,1,282
+RUNE,T1 Warrior Rune of XP,T1_RUNE_WARRIOR_XP_1STAR,1,88
+RUNE,T1 Warrior Rune of XP,T1_RUNE_WARRIOR_XP_2STAR,1,150
+RUNE,T1 Warrior Rune of XP,T1_RUNE_WARRIOR_XP_3STAR,1,282
+RUNE,T1 Woodcutting Rune of Auto-Refine,T1_RUNE_WOOD_AUTO_1STAR,1,88
+RUNE,T1 Woodcutting Rune of Auto-Refine,T1_RUNE_WOOD_AUTO_2STAR,1,150
+RUNE,T1 Woodcutting Rune of Auto-Refine,T1_RUNE_WOOD_AUTO_3STAR,1,282
+RUNE,T1 Woodcutting Rune of Duplication,T1_RUNE_WOOD_DUPLIC_1STAR,1,88
+RUNE,T1 Woodcutting Rune of Duplication,T1_RUNE_WOOD_DUPLIC_2STAR,1,150
+RUNE,T1 Woodcutting Rune of Duplication,T1_RUNE_WOOD_DUPLIC_3STAR,1,282
+RUNE,T1 Woodcutting Rune of XP,T1_RUNE_WOOD_XP_1STAR,1,88
+RUNE,T1 Woodcutting Rune of XP,T1_RUNE_WOOD_XP_2STAR,1,150
+RUNE,T1 Woodcutting Rune of XP,T1_RUNE_WOOD_XP_3STAR,1,282
+RUNE,T2 Alchemy Rune of Duplication,T2_RUNE_ALCHEMY_DUPLIC_1STAR,2,176
+RUNE,T2 Alchemy Rune of Duplication,T2_RUNE_ALCHEMY_DUPLIC_2STAR,2,299
+RUNE,T2 Alchemy Rune of Duplication,T2_RUNE_ALCHEMY_DUPLIC_3STAR,2,563
+RUNE,T2 Alchemy Rune of Efficiency,T2_RUNE_ALCHEMY_EFF_1STAR,2,176
+RUNE,T2 Alchemy Rune of Efficiency,T2_RUNE_ALCHEMY_EFF_2STAR,2,299
+RUNE,T2 Alchemy Rune of Efficiency,T2_RUNE_ALCHEMY_EFF_3STAR,2,563
+RUNE,T2 Alchemy Rune of XP,T2_RUNE_ALCHEMY_XP_1STAR,2,176
+RUNE,T2 Alchemy Rune of XP,T2_RUNE_ALCHEMY_XP_2STAR,2,299
+RUNE,T2 Alchemy Rune of XP,T2_RUNE_ALCHEMY_XP_3STAR,2,563
+RUNE,T2 Cloth Rune of Duplication,T2_RUNE_CLOTH_DUPLIC_1STAR,2,176
+RUNE,T2 Cloth Rune of Duplication,T2_RUNE_CLOTH_DUPLIC_2STAR,2,299
+RUNE,T2 Cloth Rune of Duplication,T2_RUNE_CLOTH_DUPLIC_3STAR,2,563
+RUNE,T2 Cloth Rune of Efficiency,T2_RUNE_CLOTH_EFF_1STAR,2,176
+RUNE,T2 Cloth Rune of Efficiency,T2_RUNE_CLOTH_EFF_2STAR,2,299
+RUNE,T2 Cloth Rune of Efficiency,T2_RUNE_CLOTH_EFF_3STAR,2,563
+RUNE,T2 Cloth Rune of XP,T2_RUNE_CLOTH_XP_1STAR,2,176
+RUNE,T2 Cloth Rune of XP,T2_RUNE_CLOTH_XP_2STAR,2,299
+RUNE,T2 Cloth Rune of XP,T2_RUNE_CLOTH_XP_3STAR,2,563
+RUNE,T2 Combat Rune of Attack,T2_RUNE_ATTACK_ATTACK_1STAR,2,176
+RUNE,T2 Combat Rune of Attack,T2_RUNE_ATTACK_ATTACK_2STAR,2,299
+RUNE,T2 Combat Rune of Attack,T2_RUNE_ATTACK_ATTACK_3STAR,2,563
+RUNE,T2 Combat Rune of Attack Speed,T2_RUNE_ATTACK_ATTACK_SPEED_1STAR,2,176
+RUNE,T2 Combat Rune of Attack Speed,T2_RUNE_ATTACK_ATTACK_SPEED_2STAR,2,299
+RUNE,T2 Combat Rune of Attack Speed,T2_RUNE_ATTACK_ATTACK_SPEED_3STAR,2,563
+RUNE,T2 Combat Rune of Burst,T2_RUNE_ATTACK_BURST_1STAR,2,176
+RUNE,T2 Combat Rune of Burst,T2_RUNE_ATTACK_BURST_2STAR,2,299
+RUNE,T2 Combat Rune of Burst,T2_RUNE_ATTACK_BURST_3STAR,2,563
+RUNE,T2 Combat Rune of Food Saving,T2_RUNE_ATTACK_SAVE_FOOD_1STAR,2,176
+RUNE,T2 Combat Rune of Food Saving,T2_RUNE_ATTACK_SAVE_FOOD_2STAR,2,299
+RUNE,T2 Combat Rune of Food Saving,T2_RUNE_ATTACK_SAVE_FOOD_3STAR,2,563
+RUNE,T2 Cooking Rune of Duplication,T2_RUNE_COOKING_DUPLIC_1STAR,2,176
+RUNE,T2 Cooking Rune of Duplication,T2_RUNE_COOKING_DUPLIC_2STAR,2,299
+RUNE,T2 Cooking Rune of Duplication,T2_RUNE_COOKING_DUPLIC_3STAR,2,563
+RUNE,T2 Cooking Rune of Efficiency,T2_RUNE_COOKING_EFF_1STAR,2,176
+RUNE,T2 Cooking Rune of Efficiency,T2_RUNE_COOKING_EFF_2STAR,2,299
+RUNE,T2 Cooking Rune of Efficiency,T2_RUNE_COOKING_EFF_3STAR,2,563
+RUNE,T2 Cooking Rune of XP,T2_RUNE_COOKING_XP_1STAR,2,176
+RUNE,T2 Cooking Rune of XP,T2_RUNE_COOKING_XP_2STAR,2,299
+RUNE,T2 Cooking Rune of XP,T2_RUNE_COOKING_XP_3STAR,2,563
+RUNE,T2 Extract Rune of Duplication,T2_RUNE_EXTRACT_DUPLIC_1STAR,2,176
+RUNE,T2 Extract Rune of Duplication,T2_RUNE_EXTRACT_DUPLIC_2STAR,2,299
+RUNE,T2 Extract Rune of Duplication,T2_RUNE_EXTRACT_DUPLIC_3STAR,2,563
+RUNE,T2 Extract Rune of Efficiency,T2_RUNE_EXTRACT_EFF_1STAR,2,176
+RUNE,T2 Extract Rune of Efficiency,T2_RUNE_EXTRACT_EFF_2STAR,2,299
+RUNE,T2 Extract Rune of Efficiency,T2_RUNE_EXTRACT_EFF_3STAR,2,563
+RUNE,T2 Extract Rune of XP,T2_RUNE_EXTRACT_XP_1STAR,2,176
+RUNE,T2 Extract Rune of XP,T2_RUNE_EXTRACT_XP_2STAR,2,299
+RUNE,T2 Extract Rune of XP,T2_RUNE_EXTRACT_XP_3STAR,2,563
+RUNE,T2 Fiber Rune of Auto-Refine,T2_RUNE_FIBER_AUTO_1STAR,2,176
+RUNE,T2 Fiber Rune of Auto-Refine,T2_RUNE_FIBER_AUTO_2STAR,2,299
+RUNE,T2 Fiber Rune of Auto-Refine,T2_RUNE_FIBER_AUTO_3STAR,2,563
+RUNE,T2 Fiber Rune of Duplication,T2_RUNE_FIBER_DUPLIC_1STAR,2,176
+RUNE,T2 Fiber Rune of Duplication,T2_RUNE_FIBER_DUPLIC_2STAR,2,299
+RUNE,T2 Fiber Rune of Duplication,T2_RUNE_FIBER_DUPLIC_3STAR,2,563
+RUNE,T2 Fiber Rune of XP,T2_RUNE_FIBER_XP_1STAR,2,176
+RUNE,T2 Fiber Rune of XP,T2_RUNE_FIBER_XP_2STAR,2,299
+RUNE,T2 Fiber Rune of XP,T2_RUNE_FIBER_XP_3STAR,2,563
+RUNE,T2 Fishing Rune of Auto-Cooking,T2_RUNE_FISH_AUTO_1STAR,2,176
+RUNE,T2 Fishing Rune of Auto-Cooking,T2_RUNE_FISH_AUTO_2STAR,2,299
+RUNE,T2 Fishing Rune of Auto-Cooking,T2_RUNE_FISH_AUTO_3STAR,2,563
+RUNE,T2 Fishing Rune of Duplication,T2_RUNE_FISH_DUPLIC_1STAR,2,176
+RUNE,T2 Fishing Rune of Duplication,T2_RUNE_FISH_DUPLIC_2STAR,2,299
+RUNE,T2 Fishing Rune of Duplication,T2_RUNE_FISH_DUPLIC_3STAR,2,563
+RUNE,T2 Fishing Rune of XP,T2_RUNE_FISH_XP_1STAR,2,176
+RUNE,T2 Fishing Rune of XP,T2_RUNE_FISH_XP_2STAR,2,299
+RUNE,T2 Fishing Rune of XP,T2_RUNE_FISH_XP_3STAR,2,563
+RUNE,T2 Herbalism Rune of Auto-Refine,T2_RUNE_HERB_AUTO_1STAR,2,176
+RUNE,T2 Herbalism Rune of Auto-Refine,T2_RUNE_HERB_AUTO_2STAR,2,299
+RUNE,T2 Herbalism Rune of Auto-Refine,T2_RUNE_HERB_AUTO_3STAR,2,563
+RUNE,T2 Herbalism Rune of Duplication,T2_RUNE_HERB_DUPLIC_1STAR,2,176
+RUNE,T2 Herbalism Rune of Duplication,T2_RUNE_HERB_DUPLIC_2STAR,2,299
+RUNE,T2 Herbalism Rune of Duplication,T2_RUNE_HERB_DUPLIC_3STAR,2,563
+RUNE,T2 Herbalism Rune of XP,T2_RUNE_HERB_XP_1STAR,2,176
+RUNE,T2 Herbalism Rune of XP,T2_RUNE_HERB_XP_2STAR,2,299
+RUNE,T2 Herbalism Rune of XP,T2_RUNE_HERB_XP_3STAR,2,563
+RUNE,T2 Hunter Rune of Duplication,T2_RUNE_HUNTER_DUPLIC_1STAR,2,176
+RUNE,T2 Hunter Rune of Duplication,T2_RUNE_HUNTER_DUPLIC_2STAR,2,299
+RUNE,T2 Hunter Rune of Duplication,T2_RUNE_HUNTER_DUPLIC_3STAR,2,563
+RUNE,T2 Hunter Rune of Efficiency,T2_RUNE_HUNTER_EFF_1STAR,2,176
+RUNE,T2 Hunter Rune of Efficiency,T2_RUNE_HUNTER_EFF_2STAR,2,299
+RUNE,T2 Hunter Rune of Efficiency,T2_RUNE_HUNTER_EFF_3STAR,2,563
+RUNE,T2 Hunter Rune of XP,T2_RUNE_HUNTER_XP_1STAR,2,176
+RUNE,T2 Hunter Rune of XP,T2_RUNE_HUNTER_XP_2STAR,2,299
+RUNE,T2 Hunter Rune of XP,T2_RUNE_HUNTER_XP_3STAR,2,563
+RUNE,T2 Leather Rune of Duplication,T2_RUNE_LEATHER_DUPLIC_1STAR,2,176
+RUNE,T2 Leather Rune of Duplication,T2_RUNE_LEATHER_DUPLIC_2STAR,2,299
+RUNE,T2 Leather Rune of Duplication,T2_RUNE_LEATHER_DUPLIC_3STAR,2,563
+RUNE,T2 Leather Rune of Efficiency,T2_RUNE_LEATHER_EFF_1STAR,2,176
+RUNE,T2 Leather Rune of Efficiency,T2_RUNE_LEATHER_EFF_2STAR,2,299
+RUNE,T2 Leather Rune of Efficiency,T2_RUNE_LEATHER_EFF_3STAR,2,563
+RUNE,T2 Leather Rune of XP,T2_RUNE_LEATHER_XP_1STAR,2,176
+RUNE,T2 Leather Rune of XP,T2_RUNE_LEATHER_XP_2STAR,2,299
+RUNE,T2 Leather Rune of XP,T2_RUNE_LEATHER_XP_3STAR,2,563
+RUNE,T2 Mage Rune of Duplication,T2_RUNE_MAGE_DUPLIC_1STAR,2,176
+RUNE,T2 Mage Rune of Duplication,T2_RUNE_MAGE_DUPLIC_2STAR,2,299
+RUNE,T2 Mage Rune of Duplication,T2_RUNE_MAGE_DUPLIC_3STAR,2,563
+RUNE,T2 Mage Rune of Efficiency,T2_RUNE_MAGE_EFF_1STAR,2,176
+RUNE,T2 Mage Rune of Efficiency,T2_RUNE_MAGE_EFF_2STAR,2,299
+RUNE,T2 Mage Rune of Efficiency,T2_RUNE_MAGE_EFF_3STAR,2,563
+RUNE,T2 Mage Rune of XP,T2_RUNE_MAGE_XP_1STAR,2,176
+RUNE,T2 Mage Rune of XP,T2_RUNE_MAGE_XP_2STAR,2,299
+RUNE,T2 Mage Rune of XP,T2_RUNE_MAGE_XP_3STAR,2,563
+RUNE,T2 Metal Rune of Duplication,T2_RUNE_METAL_DUPLIC_1STAR,2,176
+RUNE,T2 Metal Rune of Duplication,T2_RUNE_METAL_DUPLIC_2STAR,2,299
+RUNE,T2 Metal Rune of Duplication,T2_RUNE_METAL_DUPLIC_3STAR,2,563
+RUNE,T2 Metal Rune of Efficiency,T2_RUNE_METAL_EFF_1STAR,2,176
+RUNE,T2 Metal Rune of Efficiency,T2_RUNE_METAL_EFF_2STAR,2,299
+RUNE,T2 Metal Rune of Efficiency,T2_RUNE_METAL_EFF_3STAR,2,563
+RUNE,T2 Metal Rune of XP,T2_RUNE_METAL_XP_1STAR,2,176
+RUNE,T2 Metal Rune of XP,T2_RUNE_METAL_XP_2STAR,2,299
+RUNE,T2 Metal Rune of XP,T2_RUNE_METAL_XP_3STAR,2,563
+RUNE,T2 Mining Rune of Auto-Refine,T2_RUNE_ORE_AUTO_1STAR,2,176
+RUNE,T2 Mining Rune of Auto-Refine,T2_RUNE_ORE_AUTO_2STAR,2,299
+RUNE,T2 Mining Rune of Auto-Refine,T2_RUNE_ORE_AUTO_3STAR,2,563
+RUNE,T2 Mining Rune of Duplication,T2_RUNE_ORE_DUPLIC_1STAR,2,176
+RUNE,T2 Mining Rune of Duplication,T2_RUNE_ORE_DUPLIC_2STAR,2,299
+RUNE,T2 Mining Rune of Duplication,T2_RUNE_ORE_DUPLIC_3STAR,2,563
+RUNE,T2 Mining Rune of XP,T2_RUNE_ORE_XP_1STAR,2,176
+RUNE,T2 Mining Rune of XP,T2_RUNE_ORE_XP_2STAR,2,299
+RUNE,T2 Mining Rune of XP,T2_RUNE_ORE_XP_3STAR,2,563
+RUNE,T2 Plank Rune of Duplication,T2_RUNE_PLANK_DUPLIC_1STAR,2,176
+RUNE,T2 Plank Rune of Duplication,T2_RUNE_PLANK_DUPLIC_2STAR,2,299
+RUNE,T2 Plank Rune of Duplication,T2_RUNE_PLANK_DUPLIC_3STAR,2,563
+RUNE,T2 Plank Rune of Efficiency,T2_RUNE_PLANK_EFF_1STAR,2,176
+RUNE,T2 Plank Rune of Efficiency,T2_RUNE_PLANK_EFF_2STAR,2,299
+RUNE,T2 Plank Rune of Efficiency,T2_RUNE_PLANK_EFF_3STAR,2,563
+RUNE,T2 Plank Rune of XP,T2_RUNE_PLANK_XP_1STAR,2,176
+RUNE,T2 Plank Rune of XP,T2_RUNE_PLANK_XP_2STAR,2,299
+RUNE,T2 Plank Rune of XP,T2_RUNE_PLANK_XP_3STAR,2,563
+RUNE,T2 Skinning Rune of Auto-Refine,T2_RUNE_HIDE_AUTO_1STAR,2,176
+RUNE,T2 Skinning Rune of Auto-Refine,T2_RUNE_HIDE_AUTO_2STAR,2,299
+RUNE,T2 Skinning Rune of Auto-Refine,T2_RUNE_HIDE_AUTO_3STAR,2,563
+RUNE,T2 Skinning Rune of Duplication,T2_RUNE_HIDE_DUPLIC_1STAR,2,176
+RUNE,T2 Skinning Rune of Duplication,T2_RUNE_HIDE_DUPLIC_2STAR,2,299
+RUNE,T2 Skinning Rune of Duplication,T2_RUNE_HIDE_DUPLIC_3STAR,2,563
+RUNE,T2 Skinning Rune of XP,T2_RUNE_HIDE_XP_1STAR,2,176
+RUNE,T2 Skinning Rune of XP,T2_RUNE_HIDE_XP_2STAR,2,299
+RUNE,T2 Skinning Rune of XP,T2_RUNE_HIDE_XP_3STAR,2,563
+RUNE,T2 Tools Rune of Duplication,T2_RUNE_TOOLS_DUPLIC_1STAR,2,176
+RUNE,T2 Tools Rune of Duplication,T2_RUNE_TOOLS_DUPLIC_2STAR,2,299
+RUNE,T2 Tools Rune of Duplication,T2_RUNE_TOOLS_DUPLIC_3STAR,2,563
+RUNE,T2 Tools Rune of Efficiency,T2_RUNE_TOOLS_EFF_1STAR,2,176
+RUNE,T2 Tools Rune of Efficiency,T2_RUNE_TOOLS_EFF_2STAR,2,299
+RUNE,T2 Tools Rune of Efficiency,T2_RUNE_TOOLS_EFF_3STAR,2,563
+RUNE,T2 Tools Rune of XP,T2_RUNE_TOOLS_XP_1STAR,2,176
+RUNE,T2 Tools Rune of XP,T2_RUNE_TOOLS_XP_2STAR,2,299
+RUNE,T2 Tools Rune of XP,T2_RUNE_TOOLS_XP_3STAR,2,563
+RUNE,T2 Warrior Rune of Duplication,T2_RUNE_WARRIOR_DUPLIC_1STAR,2,176
+RUNE,T2 Warrior Rune of Duplication,T2_RUNE_WARRIOR_DUPLIC_2STAR,2,299
+RUNE,T2 Warrior Rune of Duplication,T2_RUNE_WARRIOR_DUPLIC_3STAR,2,563
+RUNE,T2 Warrior Rune of Efficiency,T2_RUNE_WARRIOR_EFF_1STAR,2,176
+RUNE,T2 Warrior Rune of Efficiency,T2_RUNE_WARRIOR_EFF_2STAR,2,299
+RUNE,T2 Warrior Rune of Efficiency,T2_RUNE_WARRIOR_EFF_3STAR,2,563
+RUNE,T2 Warrior Rune of XP,T2_RUNE_WARRIOR_XP_1STAR,2,176
+RUNE,T2 Warrior Rune of XP,T2_RUNE_WARRIOR_XP_2STAR,2,299
+RUNE,T2 Warrior Rune of XP,T2_RUNE_WARRIOR_XP_3STAR,2,563
+RUNE,T2 Woodcutting Rune of Auto-Refine,T2_RUNE_WOOD_AUTO_1STAR,2,176
+RUNE,T2 Woodcutting Rune of Auto-Refine,T2_RUNE_WOOD_AUTO_2STAR,2,299
+RUNE,T2 Woodcutting Rune of Auto-Refine,T2_RUNE_WOOD_AUTO_3STAR,2,563
+RUNE,T2 Woodcutting Rune of Duplication,T2_RUNE_WOOD_DUPLIC_1STAR,2,176
+RUNE,T2 Woodcutting Rune of Duplication,T2_RUNE_WOOD_DUPLIC_2STAR,2,299
+RUNE,T2 Woodcutting Rune of Duplication,T2_RUNE_WOOD_DUPLIC_3STAR,2,563
+RUNE,T2 Woodcutting Rune of XP,T2_RUNE_WOOD_XP_1STAR,2,176
+RUNE,T2 Woodcutting Rune of XP,T2_RUNE_WOOD_XP_2STAR,2,299
+RUNE,T2 Woodcutting Rune of XP,T2_RUNE_WOOD_XP_3STAR,2,563
+RUNE,T3 Alchemy Rune of Duplication,T3_RUNE_ALCHEMY_DUPLIC_1STAR,3,330
+RUNE,T3 Alchemy Rune of Duplication,T3_RUNE_ALCHEMY_DUPLIC_2STAR,3,561
+RUNE,T3 Alchemy Rune of Duplication,T3_RUNE_ALCHEMY_DUPLIC_3STAR,3,1056
+RUNE,T3 Alchemy Rune of Efficiency,T3_RUNE_ALCHEMY_EFF_1STAR,3,330
+RUNE,T3 Alchemy Rune of Efficiency,T3_RUNE_ALCHEMY_EFF_2STAR,3,561
+RUNE,T3 Alchemy Rune of Efficiency,T3_RUNE_ALCHEMY_EFF_3STAR,3,1056
+RUNE,T3 Alchemy Rune of XP,T3_RUNE_ALCHEMY_XP_1STAR,3,330
+RUNE,T3 Alchemy Rune of XP,T3_RUNE_ALCHEMY_XP_2STAR,3,561
+RUNE,T3 Alchemy Rune of XP,T3_RUNE_ALCHEMY_XP_3STAR,3,1056
+RUNE,T3 Cloth Rune of Duplication,T3_RUNE_CLOTH_DUPLIC_1STAR,3,330
+RUNE,T3 Cloth Rune of Duplication,T3_RUNE_CLOTH_DUPLIC_2STAR,3,561
+RUNE,T3 Cloth Rune of Duplication,T3_RUNE_CLOTH_DUPLIC_3STAR,3,1056
+RUNE,T3 Cloth Rune of Efficiency,T3_RUNE_CLOTH_EFF_1STAR,3,330
+RUNE,T3 Cloth Rune of Efficiency,T3_RUNE_CLOTH_EFF_2STAR,3,561
+RUNE,T3 Cloth Rune of Efficiency,T3_RUNE_CLOTH_EFF_3STAR,3,1056
+RUNE,T3 Cloth Rune of XP,T3_RUNE_CLOTH_XP_1STAR,3,330
+RUNE,T3 Cloth Rune of XP,T3_RUNE_CLOTH_XP_2STAR,3,561
+RUNE,T3 Cloth Rune of XP,T3_RUNE_CLOTH_XP_3STAR,3,1056
+RUNE,T3 Combat Rune of Attack,T3_RUNE_ATTACK_ATTACK_1STAR,3,330
+RUNE,T3 Combat Rune of Attack,T3_RUNE_ATTACK_ATTACK_2STAR,3,561
+RUNE,T3 Combat Rune of Attack,T3_RUNE_ATTACK_ATTACK_3STAR,3,1056
+RUNE,T3 Combat Rune of Attack Speed,T3_RUNE_ATTACK_ATTACK_SPEED_1STAR,3,330
+RUNE,T3 Combat Rune of Attack Speed,T3_RUNE_ATTACK_ATTACK_SPEED_2STAR,3,561
+RUNE,T3 Combat Rune of Attack Speed,T3_RUNE_ATTACK_ATTACK_SPEED_3STAR,3,1056
+RUNE,T3 Combat Rune of Burst,T3_RUNE_ATTACK_BURST_1STAR,3,330
+RUNE,T3 Combat Rune of Burst,T3_RUNE_ATTACK_BURST_2STAR,3,561
+RUNE,T3 Combat Rune of Burst,T3_RUNE_ATTACK_BURST_3STAR,3,1056
+RUNE,T3 Combat Rune of Food Saving,T3_RUNE_ATTACK_SAVE_FOOD_1STAR,3,330
+RUNE,T3 Combat Rune of Food Saving,T3_RUNE_ATTACK_SAVE_FOOD_2STAR,3,561
+RUNE,T3 Combat Rune of Food Saving,T3_RUNE_ATTACK_SAVE_FOOD_3STAR,3,1056
+RUNE,T3 Cooking Rune of Duplication,T3_RUNE_COOKING_DUPLIC_1STAR,3,330
+RUNE,T3 Cooking Rune of Duplication,T3_RUNE_COOKING_DUPLIC_2STAR,3,561
+RUNE,T3 Cooking Rune of Duplication,T3_RUNE_COOKING_DUPLIC_3STAR,3,1056
+RUNE,T3 Cooking Rune of Efficiency,T3_RUNE_COOKING_EFF_1STAR,3,330
+RUNE,T3 Cooking Rune of Efficiency,T3_RUNE_COOKING_EFF_2STAR,3,561
+RUNE,T3 Cooking Rune of Efficiency,T3_RUNE_COOKING_EFF_3STAR,3,1056
+RUNE,T3 Cooking Rune of XP,T3_RUNE_COOKING_XP_1STAR,3,330
+RUNE,T3 Cooking Rune of XP,T3_RUNE_COOKING_XP_2STAR,3,561
+RUNE,T3 Cooking Rune of XP,T3_RUNE_COOKING_XP_3STAR,3,1056
+RUNE,T3 Extract Rune of Duplication,T3_RUNE_EXTRACT_DUPLIC_1STAR,3,330
+RUNE,T3 Extract Rune of Duplication,T3_RUNE_EXTRACT_DUPLIC_2STAR,3,561
+RUNE,T3 Extract Rune of Duplication,T3_RUNE_EXTRACT_DUPLIC_3STAR,3,1056
+RUNE,T3 Extract Rune of Efficiency,T3_RUNE_EXTRACT_EFF_1STAR,3,330
+RUNE,T3 Extract Rune of Efficiency,T3_RUNE_EXTRACT_EFF_2STAR,3,561
+RUNE,T3 Extract Rune of Efficiency,T3_RUNE_EXTRACT_EFF_3STAR,3,1056
+RUNE,T3 Extract Rune of XP,T3_RUNE_EXTRACT_XP_1STAR,3,330
+RUNE,T3 Extract Rune of XP,T3_RUNE_EXTRACT_XP_2STAR,3,561
+RUNE,T3 Extract Rune of XP,T3_RUNE_EXTRACT_XP_3STAR,3,1056
+RUNE,T3 Fiber Rune of Auto-Refine,T3_RUNE_FIBER_AUTO_1STAR,3,330
+RUNE,T3 Fiber Rune of Auto-Refine,T3_RUNE_FIBER_AUTO_2STAR,3,561
+RUNE,T3 Fiber Rune of Auto-Refine,T3_RUNE_FIBER_AUTO_3STAR,3,1056
+RUNE,T3 Fiber Rune of Duplication,T3_RUNE_FIBER_DUPLIC_1STAR,3,330
+RUNE,T3 Fiber Rune of Duplication,T3_RUNE_FIBER_DUPLIC_2STAR,3,561
+RUNE,T3 Fiber Rune of Duplication,T3_RUNE_FIBER_DUPLIC_3STAR,3,1056
+RUNE,T3 Fiber Rune of XP,T3_RUNE_FIBER_XP_1STAR,3,330
+RUNE,T3 Fiber Rune of XP,T3_RUNE_FIBER_XP_2STAR,3,561
+RUNE,T3 Fiber Rune of XP,T3_RUNE_FIBER_XP_3STAR,3,1056
+RUNE,T3 Fishing Rune of Auto-Cooking,T3_RUNE_FISH_AUTO_1STAR,3,330
+RUNE,T3 Fishing Rune of Auto-Cooking,T3_RUNE_FISH_AUTO_2STAR,3,561
+RUNE,T3 Fishing Rune of Auto-Cooking,T3_RUNE_FISH_AUTO_3STAR,3,1056
+RUNE,T3 Fishing Rune of Duplication,T3_RUNE_FISH_DUPLIC_1STAR,3,330
+RUNE,T3 Fishing Rune of Duplication,T3_RUNE_FISH_DUPLIC_2STAR,3,561
+RUNE,T3 Fishing Rune of Duplication,T3_RUNE_FISH_DUPLIC_3STAR,3,1056
+RUNE,T3 Fishing Rune of XP,T3_RUNE_FISH_XP_1STAR,3,330
+RUNE,T3 Fishing Rune of XP,T3_RUNE_FISH_XP_2STAR,3,561
+RUNE,T3 Fishing Rune of XP,T3_RUNE_FISH_XP_3STAR,3,1056
+RUNE,T3 Herbalism Rune of Auto-Refine,T3_RUNE_HERB_AUTO_1STAR,3,330
+RUNE,T3 Herbalism Rune of Auto-Refine,T3_RUNE_HERB_AUTO_2STAR,3,561
+RUNE,T3 Herbalism Rune of Auto-Refine,T3_RUNE_HERB_AUTO_3STAR,3,1056
+RUNE,T3 Herbalism Rune of Duplication,T3_RUNE_HERB_DUPLIC_1STAR,3,330
+RUNE,T3 Herbalism Rune of Duplication,T3_RUNE_HERB_DUPLIC_2STAR,3,561
+RUNE,T3 Herbalism Rune of Duplication,T3_RUNE_HERB_DUPLIC_3STAR,3,1056
+RUNE,T3 Herbalism Rune of XP,T3_RUNE_HERB_XP_1STAR,3,330
+RUNE,T3 Herbalism Rune of XP,T3_RUNE_HERB_XP_2STAR,3,561
+RUNE,T3 Herbalism Rune of XP,T3_RUNE_HERB_XP_3STAR,3,1056
+RUNE,T3 Hunter Rune of Duplication,T3_RUNE_HUNTER_DUPLIC_1STAR,3,330
+RUNE,T3 Hunter Rune of Duplication,T3_RUNE_HUNTER_DUPLIC_2STAR,3,561
+RUNE,T3 Hunter Rune of Duplication,T3_RUNE_HUNTER_DUPLIC_3STAR,3,1056
+RUNE,T3 Hunter Rune of Efficiency,T3_RUNE_HUNTER_EFF_1STAR,3,330
+RUNE,T3 Hunter Rune of Efficiency,T3_RUNE_HUNTER_EFF_2STAR,3,561
+RUNE,T3 Hunter Rune of Efficiency,T3_RUNE_HUNTER_EFF_3STAR,3,1056
+RUNE,T3 Hunter Rune of XP,T3_RUNE_HUNTER_XP_1STAR,3,330
+RUNE,T3 Hunter Rune of XP,T3_RUNE_HUNTER_XP_2STAR,3,561
+RUNE,T3 Hunter Rune of XP,T3_RUNE_HUNTER_XP_3STAR,3,1056
+RUNE,T3 Leather Rune of Duplication,T3_RUNE_LEATHER_DUPLIC_1STAR,3,330
+RUNE,T3 Leather Rune of Duplication,T3_RUNE_LEATHER_DUPLIC_2STAR,3,561
+RUNE,T3 Leather Rune of Duplication,T3_RUNE_LEATHER_DUPLIC_3STAR,3,1056
+RUNE,T3 Leather Rune of Efficiency,T3_RUNE_LEATHER_EFF_1STAR,3,330
+RUNE,T3 Leather Rune of Efficiency,T3_RUNE_LEATHER_EFF_2STAR,3,561
+RUNE,T3 Leather Rune of Efficiency,T3_RUNE_LEATHER_EFF_3STAR,3,1056
+RUNE,T3 Leather Rune of XP,T3_RUNE_LEATHER_XP_1STAR,3,330
+RUNE,T3 Leather Rune of XP,T3_RUNE_LEATHER_XP_2STAR,3,561
+RUNE,T3 Leather Rune of XP,T3_RUNE_LEATHER_XP_3STAR,3,1056
+RUNE,T3 Mage Rune of Duplication,T3_RUNE_MAGE_DUPLIC_1STAR,3,330
+RUNE,T3 Mage Rune of Duplication,T3_RUNE_MAGE_DUPLIC_2STAR,3,561
+RUNE,T3 Mage Rune of Duplication,T3_RUNE_MAGE_DUPLIC_3STAR,3,1056
+RUNE,T3 Mage Rune of Efficiency,T3_RUNE_MAGE_EFF_1STAR,3,330
+RUNE,T3 Mage Rune of Efficiency,T3_RUNE_MAGE_EFF_2STAR,3,561
+RUNE,T3 Mage Rune of Efficiency,T3_RUNE_MAGE_EFF_3STAR,3,1056
+RUNE,T3 Mage Rune of XP,T3_RUNE_MAGE_XP_1STAR,3,330
+RUNE,T3 Mage Rune of XP,T3_RUNE_MAGE_XP_2STAR,3,561
+RUNE,T3 Mage Rune of XP,T3_RUNE_MAGE_XP_3STAR,3,1056
+RUNE,T3 Metal Rune of Duplication,T3_RUNE_METAL_DUPLIC_1STAR,3,330
+RUNE,T3 Metal Rune of Duplication,T3_RUNE_METAL_DUPLIC_2STAR,3,561
+RUNE,T3 Metal Rune of Duplication,T3_RUNE_METAL_DUPLIC_3STAR,3,1056
+RUNE,T3 Metal Rune of Efficiency,T3_RUNE_METAL_EFF_1STAR,3,330
+RUNE,T3 Metal Rune of Efficiency,T3_RUNE_METAL_EFF_2STAR,3,561
+RUNE,T3 Metal Rune of Efficiency,T3_RUNE_METAL_EFF_3STAR,3,1056
+RUNE,T3 Metal Rune of XP,T3_RUNE_METAL_XP_1STAR,3,330
+RUNE,T3 Metal Rune of XP,T3_RUNE_METAL_XP_2STAR,3,561
+RUNE,T3 Metal Rune of XP,T3_RUNE_METAL_XP_3STAR,3,1056
+RUNE,T3 Mining Rune of Auto-Refine,T3_RUNE_ORE_AUTO_1STAR,3,330
+RUNE,T3 Mining Rune of Auto-Refine,T3_RUNE_ORE_AUTO_2STAR,3,561
+RUNE,T3 Mining Rune of Auto-Refine,T3_RUNE_ORE_AUTO_3STAR,3,1056
+RUNE,T3 Mining Rune of Duplication,T3_RUNE_ORE_DUPLIC_1STAR,3,330
+RUNE,T3 Mining Rune of Duplication,T3_RUNE_ORE_DUPLIC_2STAR,3,561
+RUNE,T3 Mining Rune of Duplication,T3_RUNE_ORE_DUPLIC_3STAR,3,1056
+RUNE,T3 Mining Rune of XP,T3_RUNE_ORE_XP_1STAR,3,330
+RUNE,T3 Mining Rune of XP,T3_RUNE_ORE_XP_2STAR,3,561
+RUNE,T3 Mining Rune of XP,T3_RUNE_ORE_XP_3STAR,3,1056
+RUNE,T3 Plank Rune of Duplication,T3_RUNE_PLANK_DUPLIC_1STAR,3,330
+RUNE,T3 Plank Rune of Duplication,T3_RUNE_PLANK_DUPLIC_2STAR,3,561
+RUNE,T3 Plank Rune of Duplication,T3_RUNE_PLANK_DUPLIC_3STAR,3,1056
+RUNE,T3 Plank Rune of Efficiency,T3_RUNE_PLANK_EFF_1STAR,3,330
+RUNE,T3 Plank Rune of Efficiency,T3_RUNE_PLANK_EFF_2STAR,3,561
+RUNE,T3 Plank Rune of Efficiency,T3_RUNE_PLANK_EFF_3STAR,3,1056
+RUNE,T3 Plank Rune of XP,T3_RUNE_PLANK_XP_1STAR,3,330
+RUNE,T3 Plank Rune of XP,T3_RUNE_PLANK_XP_2STAR,3,561
+RUNE,T3 Plank Rune of XP,T3_RUNE_PLANK_XP_3STAR,3,1056
+RUNE,T3 Skinning Rune of Auto-Refine,T3_RUNE_HIDE_AUTO_1STAR,3,330
+RUNE,T3 Skinning Rune of Auto-Refine,T3_RUNE_HIDE_AUTO_2STAR,3,561
+RUNE,T3 Skinning Rune of Auto-Refine,T3_RUNE_HIDE_AUTO_3STAR,3,1056
+RUNE,T3 Skinning Rune of Duplication,T3_RUNE_HIDE_DUPLIC_1STAR,3,330
+RUNE,T3 Skinning Rune of Duplication,T3_RUNE_HIDE_DUPLIC_2STAR,3,561
+RUNE,T3 Skinning Rune of Duplication,T3_RUNE_HIDE_DUPLIC_3STAR,3,1056
+RUNE,T3 Skinning Rune of XP,T3_RUNE_HIDE_XP_1STAR,3,330
+RUNE,T3 Skinning Rune of XP,T3_RUNE_HIDE_XP_2STAR,3,561
+RUNE,T3 Skinning Rune of XP,T3_RUNE_HIDE_XP_3STAR,3,1056
+RUNE,T3 Tools Rune of Duplication,T3_RUNE_TOOLS_DUPLIC_1STAR,3,330
+RUNE,T3 Tools Rune of Duplication,T3_RUNE_TOOLS_DUPLIC_2STAR,3,561
+RUNE,T3 Tools Rune of Duplication,T3_RUNE_TOOLS_DUPLIC_3STAR,3,1056
+RUNE,T3 Tools Rune of Efficiency,T3_RUNE_TOOLS_EFF_1STAR,3,330
+RUNE,T3 Tools Rune of Efficiency,T3_RUNE_TOOLS_EFF_2STAR,3,561
+RUNE,T3 Tools Rune of Efficiency,T3_RUNE_TOOLS_EFF_3STAR,3,1056
+RUNE,T3 Tools Rune of XP,T3_RUNE_TOOLS_XP_1STAR,3,330
+RUNE,T3 Tools Rune of XP,T3_RUNE_TOOLS_XP_2STAR,3,561
+RUNE,T3 Tools Rune of XP,T3_RUNE_TOOLS_XP_3STAR,3,1056
+RUNE,T3 Warrior Rune of Duplication,T3_RUNE_WARRIOR_DUPLIC_1STAR,3,330
+RUNE,T3 Warrior Rune of Duplication,T3_RUNE_WARRIOR_DUPLIC_2STAR,3,561
+RUNE,T3 Warrior Rune of Duplication,T3_RUNE_WARRIOR_DUPLIC_3STAR,3,1056
+RUNE,T3 Warrior Rune of Efficiency,T3_RUNE_WARRIOR_EFF_1STAR,3,330
+RUNE,T3 Warrior Rune of Efficiency,T3_RUNE_WARRIOR_EFF_2STAR,3,561
+RUNE,T3 Warrior Rune of Efficiency,T3_RUNE_WARRIOR_EFF_3STAR,3,1056
+RUNE,T3 Warrior Rune of XP,T3_RUNE_WARRIOR_XP_1STAR,3,330
+RUNE,T3 Warrior Rune of XP,T3_RUNE_WARRIOR_XP_2STAR,3,561
+RUNE,T3 Warrior Rune of XP,T3_RUNE_WARRIOR_XP_3STAR,3,1056
+RUNE,T3 Woodcutting Rune of Auto-Refine,T3_RUNE_WOOD_AUTO_1STAR,3,330
+RUNE,T3 Woodcutting Rune of Auto-Refine,T3_RUNE_WOOD_AUTO_2STAR,3,561
+RUNE,T3 Woodcutting Rune of Auto-Refine,T3_RUNE_WOOD_AUTO_3STAR,3,1056
+RUNE,T3 Woodcutting Rune of Duplication,T3_RUNE_WOOD_DUPLIC_1STAR,3,330
+RUNE,T3 Woodcutting Rune of Duplication,T3_RUNE_WOOD_DUPLIC_2STAR,3,561
+RUNE,T3 Woodcutting Rune of Duplication,T3_RUNE_WOOD_DUPLIC_3STAR,3,1056
+RUNE,T3 Woodcutting Rune of XP,T3_RUNE_WOOD_XP_1STAR,3,330
+RUNE,T3 Woodcutting Rune of XP,T3_RUNE_WOOD_XP_2STAR,3,561
+RUNE,T3 Woodcutting Rune of XP,T3_RUNE_WOOD_XP_3STAR,3,1056
+RUNE,T4 Alchemy Rune of Duplication,T4_RUNE_ALCHEMY_DUPLIC_1STAR,4,550
+RUNE,T4 Alchemy Rune of Duplication,T4_RUNE_ALCHEMY_DUPLIC_2STAR,4,935
+RUNE,T4 Alchemy Rune of Duplication,T4_RUNE_ALCHEMY_DUPLIC_3STAR,4,1760
+RUNE,T4 Alchemy Rune of Efficiency,T4_RUNE_ALCHEMY_EFF_1STAR,4,550
+RUNE,T4 Alchemy Rune of Efficiency,T4_RUNE_ALCHEMY_EFF_2STAR,4,935
+RUNE,T4 Alchemy Rune of Efficiency,T4_RUNE_ALCHEMY_EFF_3STAR,4,1760
+RUNE,T4 Alchemy Rune of XP,T4_RUNE_ALCHEMY_XP_1STAR,4,550
+RUNE,T4 Alchemy Rune of XP,T4_RUNE_ALCHEMY_XP_2STAR,4,935
+RUNE,T4 Alchemy Rune of XP,T4_RUNE_ALCHEMY_XP_3STAR,4,1760
+RUNE,T4 Cloth Rune of Duplication,T4_RUNE_CLOTH_DUPLIC_1STAR,4,550
+RUNE,T4 Cloth Rune of Duplication,T4_RUNE_CLOTH_DUPLIC_2STAR,4,935
+RUNE,T4 Cloth Rune of Duplication,T4_RUNE_CLOTH_DUPLIC_3STAR,4,1760
+RUNE,T4 Cloth Rune of Efficiency,T4_RUNE_CLOTH_EFF_1STAR,4,550
+RUNE,T4 Cloth Rune of Efficiency,T4_RUNE_CLOTH_EFF_2STAR,4,935
+RUNE,T4 Cloth Rune of Efficiency,T4_RUNE_CLOTH_EFF_3STAR,4,1760
+RUNE,T4 Cloth Rune of XP,T4_RUNE_CLOTH_XP_1STAR,4,550
+RUNE,T4 Cloth Rune of XP,T4_RUNE_CLOTH_XP_2STAR,4,935
+RUNE,T4 Cloth Rune of XP,T4_RUNE_CLOTH_XP_3STAR,4,1760
+RUNE,T4 Combat Rune of Attack,T4_RUNE_ATTACK_ATTACK_1STAR,4,550
+RUNE,T4 Combat Rune of Attack,T4_RUNE_ATTACK_ATTACK_2STAR,4,935
+RUNE,T4 Combat Rune of Attack,T4_RUNE_ATTACK_ATTACK_3STAR,4,1760
+RUNE,T4 Combat Rune of Attack Speed,T4_RUNE_ATTACK_ATTACK_SPEED_1STAR,4,550
+RUNE,T4 Combat Rune of Attack Speed,T4_RUNE_ATTACK_ATTACK_SPEED_2STAR,4,935
+RUNE,T4 Combat Rune of Attack Speed,T4_RUNE_ATTACK_ATTACK_SPEED_3STAR,4,1760
+RUNE,T4 Combat Rune of Burst,T4_RUNE_ATTACK_BURST_1STAR,4,550
+RUNE,T4 Combat Rune of Burst,T4_RUNE_ATTACK_BURST_2STAR,4,935
+RUNE,T4 Combat Rune of Burst,T4_RUNE_ATTACK_BURST_3STAR,4,1760
+RUNE,T4 Combat Rune of Food Saving,T4_RUNE_ATTACK_SAVE_FOOD_1STAR,4,550
+RUNE,T4 Combat Rune of Food Saving,T4_RUNE_ATTACK_SAVE_FOOD_2STAR,4,935
+RUNE,T4 Combat Rune of Food Saving,T4_RUNE_ATTACK_SAVE_FOOD_3STAR,4,1760
+RUNE,T4 Cooking Rune of Duplication,T4_RUNE_COOKING_DUPLIC_1STAR,4,550
+RUNE,T4 Cooking Rune of Duplication,T4_RUNE_COOKING_DUPLIC_2STAR,4,935
+RUNE,T4 Cooking Rune of Duplication,T4_RUNE_COOKING_DUPLIC_3STAR,4,1760
+RUNE,T4 Cooking Rune of Efficiency,T4_RUNE_COOKING_EFF_1STAR,4,550
+RUNE,T4 Cooking Rune of Efficiency,T4_RUNE_COOKING_EFF_2STAR,4,935
+RUNE,T4 Cooking Rune of Efficiency,T4_RUNE_COOKING_EFF_3STAR,4,1760
+RUNE,T4 Cooking Rune of XP,T4_RUNE_COOKING_XP_1STAR,4,550
+RUNE,T4 Cooking Rune of XP,T4_RUNE_COOKING_XP_2STAR,4,935
+RUNE,T4 Cooking Rune of XP,T4_RUNE_COOKING_XP_3STAR,4,1760
+RUNE,T4 Extract Rune of Duplication,T4_RUNE_EXTRACT_DUPLIC_1STAR,4,550
+RUNE,T4 Extract Rune of Duplication,T4_RUNE_EXTRACT_DUPLIC_2STAR,4,935
+RUNE,T4 Extract Rune of Duplication,T4_RUNE_EXTRACT_DUPLIC_3STAR,4,1760
+RUNE,T4 Extract Rune of Efficiency,T4_RUNE_EXTRACT_EFF_1STAR,4,550
+RUNE,T4 Extract Rune of Efficiency,T4_RUNE_EXTRACT_EFF_2STAR,4,935
+RUNE,T4 Extract Rune of Efficiency,T4_RUNE_EXTRACT_EFF_3STAR,4,1760
+RUNE,T4 Extract Rune of XP,T4_RUNE_EXTRACT_XP_1STAR,4,550
+RUNE,T4 Extract Rune of XP,T4_RUNE_EXTRACT_XP_2STAR,4,935
+RUNE,T4 Extract Rune of XP,T4_RUNE_EXTRACT_XP_3STAR,4,1760
+RUNE,T4 Fiber Rune of Auto-Refine,T4_RUNE_FIBER_AUTO_1STAR,4,550
+RUNE,T4 Fiber Rune of Auto-Refine,T4_RUNE_FIBER_AUTO_2STAR,4,935
+RUNE,T4 Fiber Rune of Auto-Refine,T4_RUNE_FIBER_AUTO_3STAR,4,1760
+RUNE,T4 Fiber Rune of Duplication,T4_RUNE_FIBER_DUPLIC_1STAR,4,550
+RUNE,T4 Fiber Rune of Duplication,T4_RUNE_FIBER_DUPLIC_2STAR,4,935
+RUNE,T4 Fiber Rune of Duplication,T4_RUNE_FIBER_DUPLIC_3STAR,4,1760
+RUNE,T4 Fiber Rune of XP,T4_RUNE_FIBER_XP_1STAR,4,550
+RUNE,T4 Fiber Rune of XP,T4_RUNE_FIBER_XP_2STAR,4,935
+RUNE,T4 Fiber Rune of XP,T4_RUNE_FIBER_XP_3STAR,4,1760
+RUNE,T4 Fishing Rune of Auto-Cooking,T4_RUNE_FISH_AUTO_1STAR,4,550
+RUNE,T4 Fishing Rune of Auto-Cooking,T4_RUNE_FISH_AUTO_2STAR,4,935
+RUNE,T4 Fishing Rune of Auto-Cooking,T4_RUNE_FISH_AUTO_3STAR,4,1760
+RUNE,T4 Fishing Rune of Duplication,T4_RUNE_FISH_DUPLIC_1STAR,4,550
+RUNE,T4 Fishing Rune of Duplication,T4_RUNE_FISH_DUPLIC_2STAR,4,935
+RUNE,T4 Fishing Rune of Duplication,T4_RUNE_FISH_DUPLIC_3STAR,4,1760
+RUNE,T4 Fishing Rune of XP,T4_RUNE_FISH_XP_1STAR,4,550
+RUNE,T4 Fishing Rune of XP,T4_RUNE_FISH_XP_2STAR,4,935
+RUNE,T4 Fishing Rune of XP,T4_RUNE_FISH_XP_3STAR,4,1760
+RUNE,T4 Herbalism Rune of Auto-Refine,T4_RUNE_HERB_AUTO_1STAR,4,550
+RUNE,T4 Herbalism Rune of Auto-Refine,T4_RUNE_HERB_AUTO_2STAR,4,935
+RUNE,T4 Herbalism Rune of Auto-Refine,T4_RUNE_HERB_AUTO_3STAR,4,1760
+RUNE,T4 Herbalism Rune of Duplication,T4_RUNE_HERB_DUPLIC_1STAR,4,550
+RUNE,T4 Herbalism Rune of Duplication,T4_RUNE_HERB_DUPLIC_2STAR,4,935
+RUNE,T4 Herbalism Rune of Duplication,T4_RUNE_HERB_DUPLIC_3STAR,4,1760
+RUNE,T4 Herbalism Rune of XP,T4_RUNE_HERB_XP_1STAR,4,550
+RUNE,T4 Herbalism Rune of XP,T4_RUNE_HERB_XP_2STAR,4,935
+RUNE,T4 Herbalism Rune of XP,T4_RUNE_HERB_XP_3STAR,4,1760
+RUNE,T4 Hunter Rune of Duplication,T4_RUNE_HUNTER_DUPLIC_1STAR,4,550
+RUNE,T4 Hunter Rune of Duplication,T4_RUNE_HUNTER_DUPLIC_2STAR,4,935
+RUNE,T4 Hunter Rune of Duplication,T4_RUNE_HUNTER_DUPLIC_3STAR,4,1760
+RUNE,T4 Hunter Rune of Efficiency,T4_RUNE_HUNTER_EFF_1STAR,4,550
+RUNE,T4 Hunter Rune of Efficiency,T4_RUNE_HUNTER_EFF_2STAR,4,935
+RUNE,T4 Hunter Rune of Efficiency,T4_RUNE_HUNTER_EFF_3STAR,4,1760
+RUNE,T4 Hunter Rune of XP,T4_RUNE_HUNTER_XP_1STAR,4,550
+RUNE,T4 Hunter Rune of XP,T4_RUNE_HUNTER_XP_2STAR,4,935
+RUNE,T4 Hunter Rune of XP,T4_RUNE_HUNTER_XP_3STAR,4,1760
+RUNE,T4 Leather Rune of Duplication,T4_RUNE_LEATHER_DUPLIC_1STAR,4,550
+RUNE,T4 Leather Rune of Duplication,T4_RUNE_LEATHER_DUPLIC_2STAR,4,935
+RUNE,T4 Leather Rune of Duplication,T4_RUNE_LEATHER_DUPLIC_3STAR,4,1760
+RUNE,T4 Leather Rune of Efficiency,T4_RUNE_LEATHER_EFF_1STAR,4,550
+RUNE,T4 Leather Rune of Efficiency,T4_RUNE_LEATHER_EFF_2STAR,4,935
+RUNE,T4 Leather Rune of Efficiency,T4_RUNE_LEATHER_EFF_3STAR,4,1760
+RUNE,T4 Leather Rune of XP,T4_RUNE_LEATHER_XP_1STAR,4,550
+RUNE,T4 Leather Rune of XP,T4_RUNE_LEATHER_XP_2STAR,4,935
+RUNE,T4 Leather Rune of XP,T4_RUNE_LEATHER_XP_3STAR,4,1760
+RUNE,T4 Mage Rune of Duplication,T4_RUNE_MAGE_DUPLIC_1STAR,4,550
+RUNE,T4 Mage Rune of Duplication,T4_RUNE_MAGE_DUPLIC_2STAR,4,935
+RUNE,T4 Mage Rune of Duplication,T4_RUNE_MAGE_DUPLIC_3STAR,4,1760
+RUNE,T4 Mage Rune of Efficiency,T4_RUNE_MAGE_EFF_1STAR,4,550
+RUNE,T4 Mage Rune of Efficiency,T4_RUNE_MAGE_EFF_2STAR,4,935
+RUNE,T4 Mage Rune of Efficiency,T4_RUNE_MAGE_EFF_3STAR,4,1760
+RUNE,T4 Mage Rune of XP,T4_RUNE_MAGE_XP_1STAR,4,550
+RUNE,T4 Mage Rune of XP,T4_RUNE_MAGE_XP_2STAR,4,935
+RUNE,T4 Mage Rune of XP,T4_RUNE_MAGE_XP_3STAR,4,1760
+RUNE,T4 Metal Rune of Duplication,T4_RUNE_METAL_DUPLIC_1STAR,4,550
+RUNE,T4 Metal Rune of Duplication,T4_RUNE_METAL_DUPLIC_2STAR,4,935
+RUNE,T4 Metal Rune of Duplication,T4_RUNE_METAL_DUPLIC_3STAR,4,1760
+RUNE,T4 Metal Rune of Efficiency,T4_RUNE_METAL_EFF_1STAR,4,550
+RUNE,T4 Metal Rune of Efficiency,T4_RUNE_METAL_EFF_2STAR,4,935
+RUNE,T4 Metal Rune of Efficiency,T4_RUNE_METAL_EFF_3STAR,4,1760
+RUNE,T4 Metal Rune of XP,T4_RUNE_METAL_XP_1STAR,4,550
+RUNE,T4 Metal Rune of XP,T4_RUNE_METAL_XP_2STAR,4,935
+RUNE,T4 Metal Rune of XP,T4_RUNE_METAL_XP_3STAR,4,1760
+RUNE,T4 Mining Rune of Auto-Refine,T4_RUNE_ORE_AUTO_1STAR,4,550
+RUNE,T4 Mining Rune of Auto-Refine,T4_RUNE_ORE_AUTO_2STAR,4,935
+RUNE,T4 Mining Rune of Auto-Refine,T4_RUNE_ORE_AUTO_3STAR,4,1760
+RUNE,T4 Mining Rune of Duplication,T4_RUNE_ORE_DUPLIC_1STAR,4,550
+RUNE,T4 Mining Rune of Duplication,T4_RUNE_ORE_DUPLIC_2STAR,4,935
+RUNE,T4 Mining Rune of Duplication,T4_RUNE_ORE_DUPLIC_3STAR,4,1760
+RUNE,T4 Mining Rune of XP,T4_RUNE_ORE_XP_1STAR,4,550
+RUNE,T4 Mining Rune of XP,T4_RUNE_ORE_XP_2STAR,4,935
+RUNE,T4 Mining Rune of XP,T4_RUNE_ORE_XP_3STAR,4,1760
+RUNE,T4 Plank Rune of Duplication,T4_RUNE_PLANK_DUPLIC_1STAR,4,550
+RUNE,T4 Plank Rune of Duplication,T4_RUNE_PLANK_DUPLIC_2STAR,4,935
+RUNE,T4 Plank Rune of Duplication,T4_RUNE_PLANK_DUPLIC_3STAR,4,1760
+RUNE,T4 Plank Rune of Efficiency,T4_RUNE_PLANK_EFF_1STAR,4,550
+RUNE,T4 Plank Rune of Efficiency,T4_RUNE_PLANK_EFF_2STAR,4,935
+RUNE,T4 Plank Rune of Efficiency,T4_RUNE_PLANK_EFF_3STAR,4,1760
+RUNE,T4 Plank Rune of XP,T4_RUNE_PLANK_XP_1STAR,4,550
+RUNE,T4 Plank Rune of XP,T4_RUNE_PLANK_XP_2STAR,4,935
+RUNE,T4 Plank Rune of XP,T4_RUNE_PLANK_XP_3STAR,4,1760
+RUNE,T4 Skinning Rune of Auto-Refine,T4_RUNE_HIDE_AUTO_1STAR,4,550
+RUNE,T4 Skinning Rune of Auto-Refine,T4_RUNE_HIDE_AUTO_2STAR,4,935
+RUNE,T4 Skinning Rune of Auto-Refine,T4_RUNE_HIDE_AUTO_3STAR,4,1760
+RUNE,T4 Skinning Rune of Duplication,T4_RUNE_HIDE_DUPLIC_1STAR,4,550
+RUNE,T4 Skinning Rune of Duplication,T4_RUNE_HIDE_DUPLIC_2STAR,4,935
+RUNE,T4 Skinning Rune of Duplication,T4_RUNE_HIDE_DUPLIC_3STAR,4,1760
+RUNE,T4 Skinning Rune of XP,T4_RUNE_HIDE_XP_1STAR,4,550
+RUNE,T4 Skinning Rune of XP,T4_RUNE_HIDE_XP_2STAR,4,935
+RUNE,T4 Skinning Rune of XP,T4_RUNE_HIDE_XP_3STAR,4,1760
+RUNE,T4 Tools Rune of Duplication,T4_RUNE_TOOLS_DUPLIC_1STAR,4,550
+RUNE,T4 Tools Rune of Duplication,T4_RUNE_TOOLS_DUPLIC_2STAR,4,935
+RUNE,T4 Tools Rune of Duplication,T4_RUNE_TOOLS_DUPLIC_3STAR,4,1760
+RUNE,T4 Tools Rune of Efficiency,T4_RUNE_TOOLS_EFF_1STAR,4,550
+RUNE,T4 Tools Rune of Efficiency,T4_RUNE_TOOLS_EFF_2STAR,4,935
+RUNE,T4 Tools Rune of Efficiency,T4_RUNE_TOOLS_EFF_3STAR,4,1760
+RUNE,T4 Tools Rune of XP,T4_RUNE_TOOLS_XP_1STAR,4,550
+RUNE,T4 Tools Rune of XP,T4_RUNE_TOOLS_XP_2STAR,4,935
+RUNE,T4 Tools Rune of XP,T4_RUNE_TOOLS_XP_3STAR,4,1760
+RUNE,T4 Warrior Rune of Duplication,T4_RUNE_WARRIOR_DUPLIC_1STAR,4,550
+RUNE,T4 Warrior Rune of Duplication,T4_RUNE_WARRIOR_DUPLIC_2STAR,4,935
+RUNE,T4 Warrior Rune of Duplication,T4_RUNE_WARRIOR_DUPLIC_3STAR,4,1760
+RUNE,T4 Warrior Rune of Efficiency,T4_RUNE_WARRIOR_EFF_1STAR,4,550
+RUNE,T4 Warrior Rune of Efficiency,T4_RUNE_WARRIOR_EFF_2STAR,4,935
+RUNE,T4 Warrior Rune of Efficiency,T4_RUNE_WARRIOR_EFF_3STAR,4,1760
+RUNE,T4 Warrior Rune of XP,T4_RUNE_WARRIOR_XP_1STAR,4,550
+RUNE,T4 Warrior Rune of XP,T4_RUNE_WARRIOR_XP_2STAR,4,935
+RUNE,T4 Warrior Rune of XP,T4_RUNE_WARRIOR_XP_3STAR,4,1760
+RUNE,T4 Woodcutting Rune of Auto-Refine,T4_RUNE_WOOD_AUTO_1STAR,4,550
+RUNE,T4 Woodcutting Rune of Auto-Refine,T4_RUNE_WOOD_AUTO_2STAR,4,935
+RUNE,T4 Woodcutting Rune of Auto-Refine,T4_RUNE_WOOD_AUTO_3STAR,4,1760
+RUNE,T4 Woodcutting Rune of Duplication,T4_RUNE_WOOD_DUPLIC_1STAR,4,550
+RUNE,T4 Woodcutting Rune of Duplication,T4_RUNE_WOOD_DUPLIC_2STAR,4,935
+RUNE,T4 Woodcutting Rune of Duplication,T4_RUNE_WOOD_DUPLIC_3STAR,4,1760
+RUNE,T4 Woodcutting Rune of XP,T4_RUNE_WOOD_XP_1STAR,4,550
+RUNE,T4 Woodcutting Rune of XP,T4_RUNE_WOOD_XP_2STAR,4,935
+RUNE,T4 Woodcutting Rune of XP,T4_RUNE_WOOD_XP_3STAR,4,1760
+RUNE,T5 Alchemy Rune of Duplication,T5_RUNE_ALCHEMY_DUPLIC_1STAR,5,836
+RUNE,T5 Alchemy Rune of Duplication,T5_RUNE_ALCHEMY_DUPLIC_2STAR,5,1421
+RUNE,T5 Alchemy Rune of Duplication,T5_RUNE_ALCHEMY_DUPLIC_3STAR,5,2675
+RUNE,T5 Alchemy Rune of Efficiency,T5_RUNE_ALCHEMY_EFF_1STAR,5,836
+RUNE,T5 Alchemy Rune of Efficiency,T5_RUNE_ALCHEMY_EFF_2STAR,5,1421
+RUNE,T5 Alchemy Rune of Efficiency,T5_RUNE_ALCHEMY_EFF_3STAR,5,2675
+RUNE,T5 Alchemy Rune of XP,T5_RUNE_ALCHEMY_XP_1STAR,5,836
+RUNE,T5 Alchemy Rune of XP,T5_RUNE_ALCHEMY_XP_2STAR,5,1421
+RUNE,T5 Alchemy Rune of XP,T5_RUNE_ALCHEMY_XP_3STAR,5,2675
+RUNE,T5 Cloth Rune of Duplication,T5_RUNE_CLOTH_DUPLIC_1STAR,5,836
+RUNE,T5 Cloth Rune of Duplication,T5_RUNE_CLOTH_DUPLIC_2STAR,5,1421
+RUNE,T5 Cloth Rune of Duplication,T5_RUNE_CLOTH_DUPLIC_3STAR,5,2675
+RUNE,T5 Cloth Rune of Efficiency,T5_RUNE_CLOTH_EFF_1STAR,5,836
+RUNE,T5 Cloth Rune of Efficiency,T5_RUNE_CLOTH_EFF_2STAR,5,1421
+RUNE,T5 Cloth Rune of Efficiency,T5_RUNE_CLOTH_EFF_3STAR,5,2675
+RUNE,T5 Cloth Rune of XP,T5_RUNE_CLOTH_XP_1STAR,5,836
+RUNE,T5 Cloth Rune of XP,T5_RUNE_CLOTH_XP_2STAR,5,1421
+RUNE,T5 Cloth Rune of XP,T5_RUNE_CLOTH_XP_3STAR,5,2675
+RUNE,T5 Combat Rune of Attack,T5_RUNE_ATTACK_ATTACK_1STAR,5,836
+RUNE,T5 Combat Rune of Attack,T5_RUNE_ATTACK_ATTACK_2STAR,5,1421
+RUNE,T5 Combat Rune of Attack,T5_RUNE_ATTACK_ATTACK_3STAR,5,2675
+RUNE,T5 Combat Rune of Attack Speed,T5_RUNE_ATTACK_ATTACK_SPEED_1STAR,5,836
+RUNE,T5 Combat Rune of Attack Speed,T5_RUNE_ATTACK_ATTACK_SPEED_2STAR,5,1421
+RUNE,T5 Combat Rune of Attack Speed,T5_RUNE_ATTACK_ATTACK_SPEED_3STAR,5,2675
+RUNE,T5 Combat Rune of Burst,T5_RUNE_ATTACK_BURST_1STAR,5,836
+RUNE,T5 Combat Rune of Burst,T5_RUNE_ATTACK_BURST_2STAR,5,1421
+RUNE,T5 Combat Rune of Burst,T5_RUNE_ATTACK_BURST_3STAR,5,2675
+RUNE,T5 Combat Rune of Food Saving,T5_RUNE_ATTACK_SAVE_FOOD_1STAR,5,836
+RUNE,T5 Combat Rune of Food Saving,T5_RUNE_ATTACK_SAVE_FOOD_2STAR,5,1421
+RUNE,T5 Combat Rune of Food Saving,T5_RUNE_ATTACK_SAVE_FOOD_3STAR,5,2675
+RUNE,T5 Cooking Rune of Duplication,T5_RUNE_COOKING_DUPLIC_1STAR,5,836
+RUNE,T5 Cooking Rune of Duplication,T5_RUNE_COOKING_DUPLIC_2STAR,5,1421
+RUNE,T5 Cooking Rune of Duplication,T5_RUNE_COOKING_DUPLIC_3STAR,5,2675
+RUNE,T5 Cooking Rune of Efficiency,T5_RUNE_COOKING_EFF_1STAR,5,836
+RUNE,T5 Cooking Rune of Efficiency,T5_RUNE_COOKING_EFF_2STAR,5,1421
+RUNE,T5 Cooking Rune of Efficiency,T5_RUNE_COOKING_EFF_3STAR,5,2675
+RUNE,T5 Cooking Rune of XP,T5_RUNE_COOKING_XP_1STAR,5,836
+RUNE,T5 Cooking Rune of XP,T5_RUNE_COOKING_XP_2STAR,5,1421
+RUNE,T5 Cooking Rune of XP,T5_RUNE_COOKING_XP_3STAR,5,2675
+RUNE,T5 Extract Rune of Duplication,T5_RUNE_EXTRACT_DUPLIC_1STAR,5,836
+RUNE,T5 Extract Rune of Duplication,T5_RUNE_EXTRACT_DUPLIC_2STAR,5,1421
+RUNE,T5 Extract Rune of Duplication,T5_RUNE_EXTRACT_DUPLIC_3STAR,5,2675
+RUNE,T5 Extract Rune of Efficiency,T5_RUNE_EXTRACT_EFF_1STAR,5,836
+RUNE,T5 Extract Rune of Efficiency,T5_RUNE_EXTRACT_EFF_2STAR,5,1421
+RUNE,T5 Extract Rune of Efficiency,T5_RUNE_EXTRACT_EFF_3STAR,5,2675
+RUNE,T5 Extract Rune of XP,T5_RUNE_EXTRACT_XP_1STAR,5,836
+RUNE,T5 Extract Rune of XP,T5_RUNE_EXTRACT_XP_2STAR,5,1421
+RUNE,T5 Extract Rune of XP,T5_RUNE_EXTRACT_XP_3STAR,5,2675
+RUNE,T5 Fiber Rune of Auto-Refine,T5_RUNE_FIBER_AUTO_1STAR,5,836
+RUNE,T5 Fiber Rune of Auto-Refine,T5_RUNE_FIBER_AUTO_2STAR,5,1421
+RUNE,T5 Fiber Rune of Auto-Refine,T5_RUNE_FIBER_AUTO_3STAR,5,2675
+RUNE,T5 Fiber Rune of Duplication,T5_RUNE_FIBER_DUPLIC_1STAR,5,836
+RUNE,T5 Fiber Rune of Duplication,T5_RUNE_FIBER_DUPLIC_2STAR,5,1421
+RUNE,T5 Fiber Rune of Duplication,T5_RUNE_FIBER_DUPLIC_3STAR,5,2675
+RUNE,T5 Fiber Rune of XP,T5_RUNE_FIBER_XP_1STAR,5,836
+RUNE,T5 Fiber Rune of XP,T5_RUNE_FIBER_XP_2STAR,5,1421
+RUNE,T5 Fiber Rune of XP,T5_RUNE_FIBER_XP_3STAR,5,2675
+RUNE,T5 Fishing Rune of Auto-Cooking,T5_RUNE_FISH_AUTO_1STAR,5,836
+RUNE,T5 Fishing Rune of Auto-Cooking,T5_RUNE_FISH_AUTO_2STAR,5,1421
+RUNE,T5 Fishing Rune of Auto-Cooking,T5_RUNE_FISH_AUTO_3STAR,5,2675
+RUNE,T5 Fishing Rune of Duplication,T5_RUNE_FISH_DUPLIC_1STAR,5,836
+RUNE,T5 Fishing Rune of Duplication,T5_RUNE_FISH_DUPLIC_2STAR,5,1421
+RUNE,T5 Fishing Rune of Duplication,T5_RUNE_FISH_DUPLIC_3STAR,5,2675
+RUNE,T5 Fishing Rune of XP,T5_RUNE_FISH_XP_1STAR,5,836
+RUNE,T5 Fishing Rune of XP,T5_RUNE_FISH_XP_2STAR,5,1421
+RUNE,T5 Fishing Rune of XP,T5_RUNE_FISH_XP_3STAR,5,2675
+RUNE,T5 Herbalism Rune of Auto-Refine,T5_RUNE_HERB_AUTO_1STAR,5,836
+RUNE,T5 Herbalism Rune of Auto-Refine,T5_RUNE_HERB_AUTO_2STAR,5,1421
+RUNE,T5 Herbalism Rune of Auto-Refine,T5_RUNE_HERB_AUTO_3STAR,5,2675
+RUNE,T5 Herbalism Rune of Duplication,T5_RUNE_HERB_DUPLIC_1STAR,5,836
+RUNE,T5 Herbalism Rune of Duplication,T5_RUNE_HERB_DUPLIC_2STAR,5,1421
+RUNE,T5 Herbalism Rune of Duplication,T5_RUNE_HERB_DUPLIC_3STAR,5,2675
+RUNE,T5 Herbalism Rune of XP,T5_RUNE_HERB_XP_1STAR,5,836
+RUNE,T5 Herbalism Rune of XP,T5_RUNE_HERB_XP_2STAR,5,1421
+RUNE,T5 Herbalism Rune of XP,T5_RUNE_HERB_XP_3STAR,5,2675
+RUNE,T5 Hunter Rune of Duplication,T5_RUNE_HUNTER_DUPLIC_1STAR,5,836
+RUNE,T5 Hunter Rune of Duplication,T5_RUNE_HUNTER_DUPLIC_2STAR,5,1421
+RUNE,T5 Hunter Rune of Duplication,T5_RUNE_HUNTER_DUPLIC_3STAR,5,2675
+RUNE,T5 Hunter Rune of Efficiency,T5_RUNE_HUNTER_EFF_1STAR,5,836
+RUNE,T5 Hunter Rune of Efficiency,T5_RUNE_HUNTER_EFF_2STAR,5,1421
+RUNE,T5 Hunter Rune of Efficiency,T5_RUNE_HUNTER_EFF_3STAR,5,2675
+RUNE,T5 Hunter Rune of XP,T5_RUNE_HUNTER_XP_1STAR,5,836
+RUNE,T5 Hunter Rune of XP,T5_RUNE_HUNTER_XP_2STAR,5,1421
+RUNE,T5 Hunter Rune of XP,T5_RUNE_HUNTER_XP_3STAR,5,2675
+RUNE,T5 Leather Rune of Duplication,T5_RUNE_LEATHER_DUPLIC_1STAR,5,836
+RUNE,T5 Leather Rune of Duplication,T5_RUNE_LEATHER_DUPLIC_2STAR,5,1421
+RUNE,T5 Leather Rune of Duplication,T5_RUNE_LEATHER_DUPLIC_3STAR,5,2675
+RUNE,T5 Leather Rune of Efficiency,T5_RUNE_LEATHER_EFF_1STAR,5,836
+RUNE,T5 Leather Rune of Efficiency,T5_RUNE_LEATHER_EFF_2STAR,5,1421
+RUNE,T5 Leather Rune of Efficiency,T5_RUNE_LEATHER_EFF_3STAR,5,2675
+RUNE,T5 Leather Rune of XP,T5_RUNE_LEATHER_XP_1STAR,5,836
+RUNE,T5 Leather Rune of XP,T5_RUNE_LEATHER_XP_2STAR,5,1421
+RUNE,T5 Leather Rune of XP,T5_RUNE_LEATHER_XP_3STAR,5,2675
+RUNE,T5 Mage Rune of Duplication,T5_RUNE_MAGE_DUPLIC_1STAR,5,836
+RUNE,T5 Mage Rune of Duplication,T5_RUNE_MAGE_DUPLIC_2STAR,5,1421
+RUNE,T5 Mage Rune of Duplication,T5_RUNE_MAGE_DUPLIC_3STAR,5,2675
+RUNE,T5 Mage Rune of Efficiency,T5_RUNE_MAGE_EFF_1STAR,5,836
+RUNE,T5 Mage Rune of Efficiency,T5_RUNE_MAGE_EFF_2STAR,5,1421
+RUNE,T5 Mage Rune of Efficiency,T5_RUNE_MAGE_EFF_3STAR,5,2675
+RUNE,T5 Mage Rune of XP,T5_RUNE_MAGE_XP_1STAR,5,836
+RUNE,T5 Mage Rune of XP,T5_RUNE_MAGE_XP_2STAR,5,1421
+RUNE,T5 Mage Rune of XP,T5_RUNE_MAGE_XP_3STAR,5,2675
+RUNE,T5 Metal Rune of Duplication,T5_RUNE_METAL_DUPLIC_1STAR,5,836
+RUNE,T5 Metal Rune of Duplication,T5_RUNE_METAL_DUPLIC_2STAR,5,1421
+RUNE,T5 Metal Rune of Duplication,T5_RUNE_METAL_DUPLIC_3STAR,5,2675
+RUNE,T5 Metal Rune of Efficiency,T5_RUNE_METAL_EFF_1STAR,5,836
+RUNE,T5 Metal Rune of Efficiency,T5_RUNE_METAL_EFF_2STAR,5,1421
+RUNE,T5 Metal Rune of Efficiency,T5_RUNE_METAL_EFF_3STAR,5,2675
+RUNE,T5 Metal Rune of XP,T5_RUNE_METAL_XP_1STAR,5,836
+RUNE,T5 Metal Rune of XP,T5_RUNE_METAL_XP_2STAR,5,1421
+RUNE,T5 Metal Rune of XP,T5_RUNE_METAL_XP_3STAR,5,2675
+RUNE,T5 Mining Rune of Auto-Refine,T5_RUNE_ORE_AUTO_1STAR,5,836
+RUNE,T5 Mining Rune of Auto-Refine,T5_RUNE_ORE_AUTO_2STAR,5,1421
+RUNE,T5 Mining Rune of Auto-Refine,T5_RUNE_ORE_AUTO_3STAR,5,2675
+RUNE,T5 Mining Rune of Duplication,T5_RUNE_ORE_DUPLIC_1STAR,5,836
+RUNE,T5 Mining Rune of Duplication,T5_RUNE_ORE_DUPLIC_2STAR,5,1421
+RUNE,T5 Mining Rune of Duplication,T5_RUNE_ORE_DUPLIC_3STAR,5,2675
+RUNE,T5 Mining Rune of XP,T5_RUNE_ORE_XP_1STAR,5,836
+RUNE,T5 Mining Rune of XP,T5_RUNE_ORE_XP_2STAR,5,1421
+RUNE,T5 Mining Rune of XP,T5_RUNE_ORE_XP_3STAR,5,2675
+RUNE,T5 Plank Rune of Duplication,T5_RUNE_PLANK_DUPLIC_1STAR,5,836
+RUNE,T5 Plank Rune of Duplication,T5_RUNE_PLANK_DUPLIC_2STAR,5,1421
+RUNE,T5 Plank Rune of Duplication,T5_RUNE_PLANK_DUPLIC_3STAR,5,2675
+RUNE,T5 Plank Rune of Efficiency,T5_RUNE_PLANK_EFF_1STAR,5,836
+RUNE,T5 Plank Rune of Efficiency,T5_RUNE_PLANK_EFF_2STAR,5,1421
+RUNE,T5 Plank Rune of Efficiency,T5_RUNE_PLANK_EFF_3STAR,5,2675
+RUNE,T5 Plank Rune of XP,T5_RUNE_PLANK_XP_1STAR,5,836
+RUNE,T5 Plank Rune of XP,T5_RUNE_PLANK_XP_2STAR,5,1421
+RUNE,T5 Plank Rune of XP,T5_RUNE_PLANK_XP_3STAR,5,2675
+RUNE,T5 Skinning Rune of Auto-Refine,T5_RUNE_HIDE_AUTO_1STAR,5,836
+RUNE,T5 Skinning Rune of Auto-Refine,T5_RUNE_HIDE_AUTO_2STAR,5,1421
+RUNE,T5 Skinning Rune of Auto-Refine,T5_RUNE_HIDE_AUTO_3STAR,5,2675
+RUNE,T5 Skinning Rune of Duplication,T5_RUNE_HIDE_DUPLIC_1STAR,5,836
+RUNE,T5 Skinning Rune of Duplication,T5_RUNE_HIDE_DUPLIC_2STAR,5,1421
+RUNE,T5 Skinning Rune of Duplication,T5_RUNE_HIDE_DUPLIC_3STAR,5,2675
+RUNE,T5 Skinning Rune of XP,T5_RUNE_HIDE_XP_1STAR,5,836
+RUNE,T5 Skinning Rune of XP,T5_RUNE_HIDE_XP_2STAR,5,1421
+RUNE,T5 Skinning Rune of XP,T5_RUNE_HIDE_XP_3STAR,5,2675
+RUNE,T5 Tools Rune of Duplication,T5_RUNE_TOOLS_DUPLIC_1STAR,5,836
+RUNE,T5 Tools Rune of Duplication,T5_RUNE_TOOLS_DUPLIC_2STAR,5,1421
+RUNE,T5 Tools Rune of Duplication,T5_RUNE_TOOLS_DUPLIC_3STAR,5,2675
+RUNE,T5 Tools Rune of Efficiency,T5_RUNE_TOOLS_EFF_1STAR,5,836
+RUNE,T5 Tools Rune of Efficiency,T5_RUNE_TOOLS_EFF_2STAR,5,1421
+RUNE,T5 Tools Rune of Efficiency,T5_RUNE_TOOLS_EFF_3STAR,5,2675
+RUNE,T5 Tools Rune of XP,T5_RUNE_TOOLS_XP_1STAR,5,836
+RUNE,T5 Tools Rune of XP,T5_RUNE_TOOLS_XP_2STAR,5,1421
+RUNE,T5 Tools Rune of XP,T5_RUNE_TOOLS_XP_3STAR,5,2675
+RUNE,T5 Warrior Rune of Duplication,T5_RUNE_WARRIOR_DUPLIC_1STAR,5,836
+RUNE,T5 Warrior Rune of Duplication,T5_RUNE_WARRIOR_DUPLIC_2STAR,5,1421
+RUNE,T5 Warrior Rune of Duplication,T5_RUNE_WARRIOR_DUPLIC_3STAR,5,2675
+RUNE,T5 Warrior Rune of Efficiency,T5_RUNE_WARRIOR_EFF_1STAR,5,836
+RUNE,T5 Warrior Rune of Efficiency,T5_RUNE_WARRIOR_EFF_2STAR,5,1421
+RUNE,T5 Warrior Rune of Efficiency,T5_RUNE_WARRIOR_EFF_3STAR,5,2675
+RUNE,T5 Warrior Rune of XP,T5_RUNE_WARRIOR_XP_1STAR,5,836
+RUNE,T5 Warrior Rune of XP,T5_RUNE_WARRIOR_XP_2STAR,5,1421
+RUNE,T5 Warrior Rune of XP,T5_RUNE_WARRIOR_XP_3STAR,5,2675
+RUNE,T5 Woodcutting Rune of Auto-Refine,T5_RUNE_WOOD_AUTO_1STAR,5,836
+RUNE,T5 Woodcutting Rune of Auto-Refine,T5_RUNE_WOOD_AUTO_2STAR,5,1421
+RUNE,T5 Woodcutting Rune of Auto-Refine,T5_RUNE_WOOD_AUTO_3STAR,5,2675
+RUNE,T5 Woodcutting Rune of Duplication,T5_RUNE_WOOD_DUPLIC_1STAR,5,836
+RUNE,T5 Woodcutting Rune of Duplication,T5_RUNE_WOOD_DUPLIC_2STAR,5,1421
+RUNE,T5 Woodcutting Rune of Duplication,T5_RUNE_WOOD_DUPLIC_3STAR,5,2675
+RUNE,T5 Woodcutting Rune of XP,T5_RUNE_WOOD_XP_1STAR,5,836
+RUNE,T5 Woodcutting Rune of XP,T5_RUNE_WOOD_XP_2STAR,5,1421
+RUNE,T5 Woodcutting Rune of XP,T5_RUNE_WOOD_XP_3STAR,5,2675
+RUNE,T6 Alchemy Rune of Duplication,T6_RUNE_ALCHEMY_DUPLIC_1STAR,6,1188
+RUNE,T6 Alchemy Rune of Duplication,T6_RUNE_ALCHEMY_DUPLIC_2STAR,6,2020
+RUNE,T6 Alchemy Rune of Duplication,T6_RUNE_ALCHEMY_DUPLIC_3STAR,6,3802
+RUNE,T6 Alchemy Rune of Efficiency,T6_RUNE_ALCHEMY_EFF_1STAR,6,1188
+RUNE,T6 Alchemy Rune of Efficiency,T6_RUNE_ALCHEMY_EFF_2STAR,6,2020
+RUNE,T6 Alchemy Rune of Efficiency,T6_RUNE_ALCHEMY_EFF_3STAR,6,3802
+RUNE,T6 Alchemy Rune of XP,T6_RUNE_ALCHEMY_XP_1STAR,6,1188
+RUNE,T6 Alchemy Rune of XP,T6_RUNE_ALCHEMY_XP_2STAR,6,2020
+RUNE,T6 Alchemy Rune of XP,T6_RUNE_ALCHEMY_XP_3STAR,6,3802
+RUNE,T6 Cloth Rune of Duplication,T6_RUNE_CLOTH_DUPLIC_1STAR,6,1188
+RUNE,T6 Cloth Rune of Duplication,T6_RUNE_CLOTH_DUPLIC_2STAR,6,2020
+RUNE,T6 Cloth Rune of Duplication,T6_RUNE_CLOTH_DUPLIC_3STAR,6,3802
+RUNE,T6 Cloth Rune of Efficiency,T6_RUNE_CLOTH_EFF_1STAR,6,1188
+RUNE,T6 Cloth Rune of Efficiency,T6_RUNE_CLOTH_EFF_2STAR,6,2020
+RUNE,T6 Cloth Rune of Efficiency,T6_RUNE_CLOTH_EFF_3STAR,6,3802
+RUNE,T6 Cloth Rune of XP,T6_RUNE_CLOTH_XP_1STAR,6,1188
+RUNE,T6 Cloth Rune of XP,T6_RUNE_CLOTH_XP_2STAR,6,2020
+RUNE,T6 Cloth Rune of XP,T6_RUNE_CLOTH_XP_3STAR,6,3802
+RUNE,T6 Combat Rune of Attack,T6_RUNE_ATTACK_ATTACK_1STAR,6,1188
+RUNE,T6 Combat Rune of Attack,T6_RUNE_ATTACK_ATTACK_2STAR,6,2020
+RUNE,T6 Combat Rune of Attack,T6_RUNE_ATTACK_ATTACK_3STAR,6,3802
+RUNE,T6 Combat Rune of Attack Speed,T6_RUNE_ATTACK_ATTACK_SPEED_1STAR,6,1188
+RUNE,T6 Combat Rune of Attack Speed,T6_RUNE_ATTACK_ATTACK_SPEED_2STAR,6,2020
+RUNE,T6 Combat Rune of Attack Speed,T6_RUNE_ATTACK_ATTACK_SPEED_3STAR,6,3802
+RUNE,T6 Combat Rune of Burst,T6_RUNE_ATTACK_BURST_1STAR,6,1188
+RUNE,T6 Combat Rune of Burst,T6_RUNE_ATTACK_BURST_2STAR,6,2020
+RUNE,T6 Combat Rune of Burst,T6_RUNE_ATTACK_BURST_3STAR,6,3802
+RUNE,T6 Combat Rune of Food Saving,T6_RUNE_ATTACK_SAVE_FOOD_1STAR,6,1188
+RUNE,T6 Combat Rune of Food Saving,T6_RUNE_ATTACK_SAVE_FOOD_2STAR,6,2020
+RUNE,T6 Combat Rune of Food Saving,T6_RUNE_ATTACK_SAVE_FOOD_3STAR,6,3802
+RUNE,T6 Cooking Rune of Duplication,T6_RUNE_COOKING_DUPLIC_1STAR,6,1188
+RUNE,T6 Cooking Rune of Duplication,T6_RUNE_COOKING_DUPLIC_2STAR,6,2020
+RUNE,T6 Cooking Rune of Duplication,T6_RUNE_COOKING_DUPLIC_3STAR,6,3802
+RUNE,T6 Cooking Rune of Efficiency,T6_RUNE_COOKING_EFF_1STAR,6,1188
+RUNE,T6 Cooking Rune of Efficiency,T6_RUNE_COOKING_EFF_2STAR,6,2020
+RUNE,T6 Cooking Rune of Efficiency,T6_RUNE_COOKING_EFF_3STAR,6,3802
+RUNE,T6 Cooking Rune of XP,T6_RUNE_COOKING_XP_1STAR,6,1188
+RUNE,T6 Cooking Rune of XP,T6_RUNE_COOKING_XP_2STAR,6,2020
+RUNE,T6 Cooking Rune of XP,T6_RUNE_COOKING_XP_3STAR,6,3802
+RUNE,T6 Extract Rune of Duplication,T6_RUNE_EXTRACT_DUPLIC_1STAR,6,1188
+RUNE,T6 Extract Rune of Duplication,T6_RUNE_EXTRACT_DUPLIC_2STAR,6,2020
+RUNE,T6 Extract Rune of Duplication,T6_RUNE_EXTRACT_DUPLIC_3STAR,6,3802
+RUNE,T6 Extract Rune of Efficiency,T6_RUNE_EXTRACT_EFF_1STAR,6,1188
+RUNE,T6 Extract Rune of Efficiency,T6_RUNE_EXTRACT_EFF_2STAR,6,2020
+RUNE,T6 Extract Rune of Efficiency,T6_RUNE_EXTRACT_EFF_3STAR,6,3802
+RUNE,T6 Extract Rune of XP,T6_RUNE_EXTRACT_XP_1STAR,6,1188
+RUNE,T6 Extract Rune of XP,T6_RUNE_EXTRACT_XP_2STAR,6,2020
+RUNE,T6 Extract Rune of XP,T6_RUNE_EXTRACT_XP_3STAR,6,3802
+RUNE,T6 Fiber Rune of Auto-Refine,T6_RUNE_FIBER_AUTO_1STAR,6,1188
+RUNE,T6 Fiber Rune of Auto-Refine,T6_RUNE_FIBER_AUTO_2STAR,6,2020
+RUNE,T6 Fiber Rune of Auto-Refine,T6_RUNE_FIBER_AUTO_3STAR,6,3802
+RUNE,T6 Fiber Rune of Duplication,T6_RUNE_FIBER_DUPLIC_1STAR,6,1188
+RUNE,T6 Fiber Rune of Duplication,T6_RUNE_FIBER_DUPLIC_2STAR,6,2020
+RUNE,T6 Fiber Rune of Duplication,T6_RUNE_FIBER_DUPLIC_3STAR,6,3802
+RUNE,T6 Fiber Rune of XP,T6_RUNE_FIBER_XP_1STAR,6,1188
+RUNE,T6 Fiber Rune of XP,T6_RUNE_FIBER_XP_2STAR,6,2020
+RUNE,T6 Fiber Rune of XP,T6_RUNE_FIBER_XP_3STAR,6,3802
+RUNE,T6 Fishing Rune of Auto-Cooking,T6_RUNE_FISH_AUTO_1STAR,6,1188
+RUNE,T6 Fishing Rune of Auto-Cooking,T6_RUNE_FISH_AUTO_2STAR,6,2020
+RUNE,T6 Fishing Rune of Auto-Cooking,T6_RUNE_FISH_AUTO_3STAR,6,3802
+RUNE,T6 Fishing Rune of Duplication,T6_RUNE_FISH_DUPLIC_1STAR,6,1188
+RUNE,T6 Fishing Rune of Duplication,T6_RUNE_FISH_DUPLIC_2STAR,6,2020
+RUNE,T6 Fishing Rune of Duplication,T6_RUNE_FISH_DUPLIC_3STAR,6,3802
+RUNE,T6 Fishing Rune of XP,T6_RUNE_FISH_XP_1STAR,6,1188
+RUNE,T6 Fishing Rune of XP,T6_RUNE_FISH_XP_2STAR,6,2020
+RUNE,T6 Fishing Rune of XP,T6_RUNE_FISH_XP_3STAR,6,3802
+RUNE,T6 Herbalism Rune of Auto-Refine,T6_RUNE_HERB_AUTO_1STAR,6,1188
+RUNE,T6 Herbalism Rune of Auto-Refine,T6_RUNE_HERB_AUTO_2STAR,6,2020
+RUNE,T6 Herbalism Rune of Auto-Refine,T6_RUNE_HERB_AUTO_3STAR,6,3802
+RUNE,T6 Herbalism Rune of Duplication,T6_RUNE_HERB_DUPLIC_1STAR,6,1188
+RUNE,T6 Herbalism Rune of Duplication,T6_RUNE_HERB_DUPLIC_2STAR,6,2020
+RUNE,T6 Herbalism Rune of Duplication,T6_RUNE_HERB_DUPLIC_3STAR,6,3802
+RUNE,T6 Herbalism Rune of XP,T6_RUNE_HERB_XP_1STAR,6,1188
+RUNE,T6 Herbalism Rune of XP,T6_RUNE_HERB_XP_2STAR,6,2020
+RUNE,T6 Herbalism Rune of XP,T6_RUNE_HERB_XP_3STAR,6,3802
+RUNE,T6 Hunter Rune of Duplication,T6_RUNE_HUNTER_DUPLIC_1STAR,6,1188
+RUNE,T6 Hunter Rune of Duplication,T6_RUNE_HUNTER_DUPLIC_2STAR,6,2020
+RUNE,T6 Hunter Rune of Duplication,T6_RUNE_HUNTER_DUPLIC_3STAR,6,3802
+RUNE,T6 Hunter Rune of Efficiency,T6_RUNE_HUNTER_EFF_1STAR,6,1188
+RUNE,T6 Hunter Rune of Efficiency,T6_RUNE_HUNTER_EFF_2STAR,6,2020
+RUNE,T6 Hunter Rune of Efficiency,T6_RUNE_HUNTER_EFF_3STAR,6,3802
+RUNE,T6 Hunter Rune of XP,T6_RUNE_HUNTER_XP_1STAR,6,1188
+RUNE,T6 Hunter Rune of XP,T6_RUNE_HUNTER_XP_2STAR,6,2020
+RUNE,T6 Hunter Rune of XP,T6_RUNE_HUNTER_XP_3STAR,6,3802
+RUNE,T6 Leather Rune of Duplication,T6_RUNE_LEATHER_DUPLIC_1STAR,6,1188
+RUNE,T6 Leather Rune of Duplication,T6_RUNE_LEATHER_DUPLIC_2STAR,6,2020
+RUNE,T6 Leather Rune of Duplication,T6_RUNE_LEATHER_DUPLIC_3STAR,6,3802
+RUNE,T6 Leather Rune of Efficiency,T6_RUNE_LEATHER_EFF_1STAR,6,1188
+RUNE,T6 Leather Rune of Efficiency,T6_RUNE_LEATHER_EFF_2STAR,6,2020
+RUNE,T6 Leather Rune of Efficiency,T6_RUNE_LEATHER_EFF_3STAR,6,3802
+RUNE,T6 Leather Rune of XP,T6_RUNE_LEATHER_XP_1STAR,6,1188
+RUNE,T6 Leather Rune of XP,T6_RUNE_LEATHER_XP_2STAR,6,2020
+RUNE,T6 Leather Rune of XP,T6_RUNE_LEATHER_XP_3STAR,6,3802
+RUNE,T6 Mage Rune of Duplication,T6_RUNE_MAGE_DUPLIC_1STAR,6,1188
+RUNE,T6 Mage Rune of Duplication,T6_RUNE_MAGE_DUPLIC_2STAR,6,2020
+RUNE,T6 Mage Rune of Duplication,T6_RUNE_MAGE_DUPLIC_3STAR,6,3802
+RUNE,T6 Mage Rune of Efficiency,T6_RUNE_MAGE_EFF_1STAR,6,1188
+RUNE,T6 Mage Rune of Efficiency,T6_RUNE_MAGE_EFF_2STAR,6,2020
+RUNE,T6 Mage Rune of Efficiency,T6_RUNE_MAGE_EFF_3STAR,6,3802
+RUNE,T6 Mage Rune of XP,T6_RUNE_MAGE_XP_1STAR,6,1188
+RUNE,T6 Mage Rune of XP,T6_RUNE_MAGE_XP_2STAR,6,2020
+RUNE,T6 Mage Rune of XP,T6_RUNE_MAGE_XP_3STAR,6,3802
+RUNE,T6 Metal Rune of Duplication,T6_RUNE_METAL_DUPLIC_1STAR,6,1188
+RUNE,T6 Metal Rune of Duplication,T6_RUNE_METAL_DUPLIC_2STAR,6,2020
+RUNE,T6 Metal Rune of Duplication,T6_RUNE_METAL_DUPLIC_3STAR,6,3802
+RUNE,T6 Metal Rune of Efficiency,T6_RUNE_METAL_EFF_1STAR,6,1188
+RUNE,T6 Metal Rune of Efficiency,T6_RUNE_METAL_EFF_2STAR,6,2020
+RUNE,T6 Metal Rune of Efficiency,T6_RUNE_METAL_EFF_3STAR,6,3802
+RUNE,T6 Metal Rune of XP,T6_RUNE_METAL_XP_1STAR,6,1188
+RUNE,T6 Metal Rune of XP,T6_RUNE_METAL_XP_2STAR,6,2020
+RUNE,T6 Metal Rune of XP,T6_RUNE_METAL_XP_3STAR,6,3802
+RUNE,T6 Mining Rune of Auto-Refine,T6_RUNE_ORE_AUTO_1STAR,6,1188
+RUNE,T6 Mining Rune of Auto-Refine,T6_RUNE_ORE_AUTO_2STAR,6,2020
+RUNE,T6 Mining Rune of Auto-Refine,T6_RUNE_ORE_AUTO_3STAR,6,3802
+RUNE,T6 Mining Rune of Duplication,T6_RUNE_ORE_DUPLIC_1STAR,6,1188
+RUNE,T6 Mining Rune of Duplication,T6_RUNE_ORE_DUPLIC_2STAR,6,2020
+RUNE,T6 Mining Rune of Duplication,T6_RUNE_ORE_DUPLIC_3STAR,6,3802
+RUNE,T6 Mining Rune of XP,T6_RUNE_ORE_XP_1STAR,6,1188
+RUNE,T6 Mining Rune of XP,T6_RUNE_ORE_XP_2STAR,6,2020
+RUNE,T6 Mining Rune of XP,T6_RUNE_ORE_XP_3STAR,6,3802
+RUNE,T6 Plank Rune of Duplication,T6_RUNE_PLANK_DUPLIC_1STAR,6,1188
+RUNE,T6 Plank Rune of Duplication,T6_RUNE_PLANK_DUPLIC_2STAR,6,2020
+RUNE,T6 Plank Rune of Duplication,T6_RUNE_PLANK_DUPLIC_3STAR,6,3802
+RUNE,T6 Plank Rune of Efficiency,T6_RUNE_PLANK_EFF_1STAR,6,1188
+RUNE,T6 Plank Rune of Efficiency,T6_RUNE_PLANK_EFF_2STAR,6,2020
+RUNE,T6 Plank Rune of Efficiency,T6_RUNE_PLANK_EFF_3STAR,6,3802
+RUNE,T6 Plank Rune of XP,T6_RUNE_PLANK_XP_1STAR,6,1188
+RUNE,T6 Plank Rune of XP,T6_RUNE_PLANK_XP_2STAR,6,2020
+RUNE,T6 Plank Rune of XP,T6_RUNE_PLANK_XP_3STAR,6,3802
+RUNE,T6 Skinning Rune of Auto-Refine,T6_RUNE_HIDE_AUTO_1STAR,6,1188
+RUNE,T6 Skinning Rune of Auto-Refine,T6_RUNE_HIDE_AUTO_2STAR,6,2020
+RUNE,T6 Skinning Rune of Auto-Refine,T6_RUNE_HIDE_AUTO_3STAR,6,3802
+RUNE,T6 Skinning Rune of Duplication,T6_RUNE_HIDE_DUPLIC_1STAR,6,1188
+RUNE,T6 Skinning Rune of Duplication,T6_RUNE_HIDE_DUPLIC_2STAR,6,2020
+RUNE,T6 Skinning Rune of Duplication,T6_RUNE_HIDE_DUPLIC_3STAR,6,3802
+RUNE,T6 Skinning Rune of XP,T6_RUNE_HIDE_XP_1STAR,6,1188
+RUNE,T6 Skinning Rune of XP,T6_RUNE_HIDE_XP_2STAR,6,2020
+RUNE,T6 Skinning Rune of XP,T6_RUNE_HIDE_XP_3STAR,6,3802
+RUNE,T6 Tools Rune of Duplication,T6_RUNE_TOOLS_DUPLIC_1STAR,6,1188
+RUNE,T6 Tools Rune of Duplication,T6_RUNE_TOOLS_DUPLIC_2STAR,6,2020
+RUNE,T6 Tools Rune of Duplication,T6_RUNE_TOOLS_DUPLIC_3STAR,6,3802
+RUNE,T6 Tools Rune of Efficiency,T6_RUNE_TOOLS_EFF_1STAR,6,1188
+RUNE,T6 Tools Rune of Efficiency,T6_RUNE_TOOLS_EFF_2STAR,6,2020
+RUNE,T6 Tools Rune of Efficiency,T6_RUNE_TOOLS_EFF_3STAR,6,3802
+RUNE,T6 Tools Rune of XP,T6_RUNE_TOOLS_XP_1STAR,6,1188
+RUNE,T6 Tools Rune of XP,T6_RUNE_TOOLS_XP_2STAR,6,2020
+RUNE,T6 Tools Rune of XP,T6_RUNE_TOOLS_XP_3STAR,6,3802
+RUNE,T6 Warrior Rune of Duplication,T6_RUNE_WARRIOR_DUPLIC_1STAR,6,1188
+RUNE,T6 Warrior Rune of Duplication,T6_RUNE_WARRIOR_DUPLIC_2STAR,6,2020
+RUNE,T6 Warrior Rune of Duplication,T6_RUNE_WARRIOR_DUPLIC_3STAR,6,3802
+RUNE,T6 Warrior Rune of Efficiency,T6_RUNE_WARRIOR_EFF_1STAR,6,1188
+RUNE,T6 Warrior Rune of Efficiency,T6_RUNE_WARRIOR_EFF_2STAR,6,2020
+RUNE,T6 Warrior Rune of Efficiency,T6_RUNE_WARRIOR_EFF_3STAR,6,3802
+RUNE,T6 Warrior Rune of XP,T6_RUNE_WARRIOR_XP_1STAR,6,1188
+RUNE,T6 Warrior Rune of XP,T6_RUNE_WARRIOR_XP_2STAR,6,2020
+RUNE,T6 Warrior Rune of XP,T6_RUNE_WARRIOR_XP_3STAR,6,3802
+RUNE,T6 Woodcutting Rune of Auto-Refine,T6_RUNE_WOOD_AUTO_1STAR,6,1188
+RUNE,T6 Woodcutting Rune of Auto-Refine,T6_RUNE_WOOD_AUTO_2STAR,6,2020
+RUNE,T6 Woodcutting Rune of Auto-Refine,T6_RUNE_WOOD_AUTO_3STAR,6,3802
+RUNE,T6 Woodcutting Rune of Duplication,T6_RUNE_WOOD_DUPLIC_1STAR,6,1188
+RUNE,T6 Woodcutting Rune of Duplication,T6_RUNE_WOOD_DUPLIC_2STAR,6,2020
+RUNE,T6 Woodcutting Rune of Duplication,T6_RUNE_WOOD_DUPLIC_3STAR,6,3802
+RUNE,T6 Woodcutting Rune of XP,T6_RUNE_WOOD_XP_1STAR,6,1188
+RUNE,T6 Woodcutting Rune of XP,T6_RUNE_WOOD_XP_2STAR,6,2020
+RUNE,T6 Woodcutting Rune of XP,T6_RUNE_WOOD_XP_3STAR,6,3802
+RUNE,T7 Alchemy Rune of Duplication,T7_RUNE_ALCHEMY_DUPLIC_1STAR,7,1606
+RUNE,T7 Alchemy Rune of Duplication,T7_RUNE_ALCHEMY_DUPLIC_2STAR,7,2730
+RUNE,T7 Alchemy Rune of Duplication,T7_RUNE_ALCHEMY_DUPLIC_3STAR,7,5139
+RUNE,T7 Alchemy Rune of Efficiency,T7_RUNE_ALCHEMY_EFF_1STAR,7,1606
+RUNE,T7 Alchemy Rune of Efficiency,T7_RUNE_ALCHEMY_EFF_2STAR,7,2730
+RUNE,T7 Alchemy Rune of Efficiency,T7_RUNE_ALCHEMY_EFF_3STAR,7,5139
+RUNE,T7 Alchemy Rune of XP,T7_RUNE_ALCHEMY_XP_1STAR,7,1606
+RUNE,T7 Alchemy Rune of XP,T7_RUNE_ALCHEMY_XP_2STAR,7,2730
+RUNE,T7 Alchemy Rune of XP,T7_RUNE_ALCHEMY_XP_3STAR,7,5139
+RUNE,T7 Cloth Rune of Duplication,T7_RUNE_CLOTH_DUPLIC_1STAR,7,1606
+RUNE,T7 Cloth Rune of Duplication,T7_RUNE_CLOTH_DUPLIC_2STAR,7,2730
+RUNE,T7 Cloth Rune of Duplication,T7_RUNE_CLOTH_DUPLIC_3STAR,7,5139
+RUNE,T7 Cloth Rune of Efficiency,T7_RUNE_CLOTH_EFF_1STAR,7,1606
+RUNE,T7 Cloth Rune of Efficiency,T7_RUNE_CLOTH_EFF_2STAR,7,2730
+RUNE,T7 Cloth Rune of Efficiency,T7_RUNE_CLOTH_EFF_3STAR,7,5139
+RUNE,T7 Cloth Rune of XP,T7_RUNE_CLOTH_XP_1STAR,7,1606
+RUNE,T7 Cloth Rune of XP,T7_RUNE_CLOTH_XP_2STAR,7,2730
+RUNE,T7 Cloth Rune of XP,T7_RUNE_CLOTH_XP_3STAR,7,5139
+RUNE,T7 Combat Rune of Attack,T7_RUNE_ATTACK_ATTACK_1STAR,7,1606
+RUNE,T7 Combat Rune of Attack,T7_RUNE_ATTACK_ATTACK_2STAR,7,2730
+RUNE,T7 Combat Rune of Attack,T7_RUNE_ATTACK_ATTACK_3STAR,7,5139
+RUNE,T7 Combat Rune of Attack Speed,T7_RUNE_ATTACK_ATTACK_SPEED_1STAR,7,1606
+RUNE,T7 Combat Rune of Attack Speed,T7_RUNE_ATTACK_ATTACK_SPEED_2STAR,7,2730
+RUNE,T7 Combat Rune of Attack Speed,T7_RUNE_ATTACK_ATTACK_SPEED_3STAR,7,5139
+RUNE,T7 Combat Rune of Burst,T7_RUNE_ATTACK_BURST_1STAR,7,1606
+RUNE,T7 Combat Rune of Burst,T7_RUNE_ATTACK_BURST_2STAR,7,2730
+RUNE,T7 Combat Rune of Burst,T7_RUNE_ATTACK_BURST_3STAR,7,5139
+RUNE,T7 Combat Rune of Food Saving,T7_RUNE_ATTACK_SAVE_FOOD_1STAR,7,1606
+RUNE,T7 Combat Rune of Food Saving,T7_RUNE_ATTACK_SAVE_FOOD_2STAR,7,2730
+RUNE,T7 Combat Rune of Food Saving,T7_RUNE_ATTACK_SAVE_FOOD_3STAR,7,5139
+RUNE,T7 Cooking Rune of Duplication,T7_RUNE_COOKING_DUPLIC_1STAR,7,1606
+RUNE,T7 Cooking Rune of Duplication,T7_RUNE_COOKING_DUPLIC_2STAR,7,2730
+RUNE,T7 Cooking Rune of Duplication,T7_RUNE_COOKING_DUPLIC_3STAR,7,5139
+RUNE,T7 Cooking Rune of Efficiency,T7_RUNE_COOKING_EFF_1STAR,7,1606
+RUNE,T7 Cooking Rune of Efficiency,T7_RUNE_COOKING_EFF_2STAR,7,2730
+RUNE,T7 Cooking Rune of Efficiency,T7_RUNE_COOKING_EFF_3STAR,7,5139
+RUNE,T7 Cooking Rune of XP,T7_RUNE_COOKING_XP_1STAR,7,1606
+RUNE,T7 Cooking Rune of XP,T7_RUNE_COOKING_XP_2STAR,7,2730
+RUNE,T7 Cooking Rune of XP,T7_RUNE_COOKING_XP_3STAR,7,5139
+RUNE,T7 Extract Rune of Duplication,T7_RUNE_EXTRACT_DUPLIC_1STAR,7,1606
+RUNE,T7 Extract Rune of Duplication,T7_RUNE_EXTRACT_DUPLIC_2STAR,7,2730
+RUNE,T7 Extract Rune of Duplication,T7_RUNE_EXTRACT_DUPLIC_3STAR,7,5139
+RUNE,T7 Extract Rune of Efficiency,T7_RUNE_EXTRACT_EFF_1STAR,7,1606
+RUNE,T7 Extract Rune of Efficiency,T7_RUNE_EXTRACT_EFF_2STAR,7,2730
+RUNE,T7 Extract Rune of Efficiency,T7_RUNE_EXTRACT_EFF_3STAR,7,5139
+RUNE,T7 Extract Rune of XP,T7_RUNE_EXTRACT_XP_1STAR,7,1606
+RUNE,T7 Extract Rune of XP,T7_RUNE_EXTRACT_XP_2STAR,7,2730
+RUNE,T7 Extract Rune of XP,T7_RUNE_EXTRACT_XP_3STAR,7,5139
+RUNE,T7 Fiber Rune of Auto-Refine,T7_RUNE_FIBER_AUTO_1STAR,7,1606
+RUNE,T7 Fiber Rune of Auto-Refine,T7_RUNE_FIBER_AUTO_2STAR,7,2730
+RUNE,T7 Fiber Rune of Auto-Refine,T7_RUNE_FIBER_AUTO_3STAR,7,5139
+RUNE,T7 Fiber Rune of Duplication,T7_RUNE_FIBER_DUPLIC_1STAR,7,1606
+RUNE,T7 Fiber Rune of Duplication,T7_RUNE_FIBER_DUPLIC_2STAR,7,2730
+RUNE,T7 Fiber Rune of Duplication,T7_RUNE_FIBER_DUPLIC_3STAR,7,5139
+RUNE,T7 Fiber Rune of XP,T7_RUNE_FIBER_XP_1STAR,7,1606
+RUNE,T7 Fiber Rune of XP,T7_RUNE_FIBER_XP_2STAR,7,2730
+RUNE,T7 Fiber Rune of XP,T7_RUNE_FIBER_XP_3STAR,7,5139
+RUNE,T7 Fishing Rune of Auto-Cooking,T7_RUNE_FISH_AUTO_1STAR,7,1606
+RUNE,T7 Fishing Rune of Auto-Cooking,T7_RUNE_FISH_AUTO_2STAR,7,2730
+RUNE,T7 Fishing Rune of Auto-Cooking,T7_RUNE_FISH_AUTO_3STAR,7,5139
+RUNE,T7 Fishing Rune of Duplication,T7_RUNE_FISH_DUPLIC_1STAR,7,1606
+RUNE,T7 Fishing Rune of Duplication,T7_RUNE_FISH_DUPLIC_2STAR,7,2730
+RUNE,T7 Fishing Rune of Duplication,T7_RUNE_FISH_DUPLIC_3STAR,7,5139
+RUNE,T7 Fishing Rune of XP,T7_RUNE_FISH_XP_1STAR,7,1606
+RUNE,T7 Fishing Rune of XP,T7_RUNE_FISH_XP_2STAR,7,2730
+RUNE,T7 Fishing Rune of XP,T7_RUNE_FISH_XP_3STAR,7,5139
+RUNE,T7 Herbalism Rune of Auto-Refine,T7_RUNE_HERB_AUTO_1STAR,7,1606
+RUNE,T7 Herbalism Rune of Auto-Refine,T7_RUNE_HERB_AUTO_2STAR,7,2730
+RUNE,T7 Herbalism Rune of Auto-Refine,T7_RUNE_HERB_AUTO_3STAR,7,5139
+RUNE,T7 Herbalism Rune of Duplication,T7_RUNE_HERB_DUPLIC_1STAR,7,1606
+RUNE,T7 Herbalism Rune of Duplication,T7_RUNE_HERB_DUPLIC_2STAR,7,2730
+RUNE,T7 Herbalism Rune of Duplication,T7_RUNE_HERB_DUPLIC_3STAR,7,5139
+RUNE,T7 Herbalism Rune of XP,T7_RUNE_HERB_XP_1STAR,7,1606
+RUNE,T7 Herbalism Rune of XP,T7_RUNE_HERB_XP_2STAR,7,2730
+RUNE,T7 Herbalism Rune of XP,T7_RUNE_HERB_XP_3STAR,7,5139
+RUNE,T7 Hunter Rune of Duplication,T7_RUNE_HUNTER_DUPLIC_1STAR,7,1606
+RUNE,T7 Hunter Rune of Duplication,T7_RUNE_HUNTER_DUPLIC_2STAR,7,2730
+RUNE,T7 Hunter Rune of Duplication,T7_RUNE_HUNTER_DUPLIC_3STAR,7,5139
+RUNE,T7 Hunter Rune of Efficiency,T7_RUNE_HUNTER_EFF_1STAR,7,1606
+RUNE,T7 Hunter Rune of Efficiency,T7_RUNE_HUNTER_EFF_2STAR,7,2730
+RUNE,T7 Hunter Rune of Efficiency,T7_RUNE_HUNTER_EFF_3STAR,7,5139
+RUNE,T7 Hunter Rune of XP,T7_RUNE_HUNTER_XP_1STAR,7,1606
+RUNE,T7 Hunter Rune of XP,T7_RUNE_HUNTER_XP_2STAR,7,2730
+RUNE,T7 Hunter Rune of XP,T7_RUNE_HUNTER_XP_3STAR,7,5139
+RUNE,T7 Leather Rune of Duplication,T7_RUNE_LEATHER_DUPLIC_1STAR,7,1606
+RUNE,T7 Leather Rune of Duplication,T7_RUNE_LEATHER_DUPLIC_2STAR,7,2730
+RUNE,T7 Leather Rune of Duplication,T7_RUNE_LEATHER_DUPLIC_3STAR,7,5139
+RUNE,T7 Leather Rune of Efficiency,T7_RUNE_LEATHER_EFF_1STAR,7,1606
+RUNE,T7 Leather Rune of Efficiency,T7_RUNE_LEATHER_EFF_2STAR,7,2730
+RUNE,T7 Leather Rune of Efficiency,T7_RUNE_LEATHER_EFF_3STAR,7,5139
+RUNE,T7 Leather Rune of XP,T7_RUNE_LEATHER_XP_1STAR,7,1606
+RUNE,T7 Leather Rune of XP,T7_RUNE_LEATHER_XP_2STAR,7,2730
+RUNE,T7 Leather Rune of XP,T7_RUNE_LEATHER_XP_3STAR,7,5139
+RUNE,T7 Mage Rune of Duplication,T7_RUNE_MAGE_DUPLIC_1STAR,7,1606
+RUNE,T7 Mage Rune of Duplication,T7_RUNE_MAGE_DUPLIC_2STAR,7,2730
+RUNE,T7 Mage Rune of Duplication,T7_RUNE_MAGE_DUPLIC_3STAR,7,5139
+RUNE,T7 Mage Rune of Efficiency,T7_RUNE_MAGE_EFF_1STAR,7,1606
+RUNE,T7 Mage Rune of Efficiency,T7_RUNE_MAGE_EFF_2STAR,7,2730
+RUNE,T7 Mage Rune of Efficiency,T7_RUNE_MAGE_EFF_3STAR,7,5139
+RUNE,T7 Mage Rune of XP,T7_RUNE_MAGE_XP_1STAR,7,1606
+RUNE,T7 Mage Rune of XP,T7_RUNE_MAGE_XP_2STAR,7,2730
+RUNE,T7 Mage Rune of XP,T7_RUNE_MAGE_XP_3STAR,7,5139
+RUNE,T7 Metal Rune of Duplication,T7_RUNE_METAL_DUPLIC_1STAR,7,1606
+RUNE,T7 Metal Rune of Duplication,T7_RUNE_METAL_DUPLIC_2STAR,7,2730
+RUNE,T7 Metal Rune of Duplication,T7_RUNE_METAL_DUPLIC_3STAR,7,5139
+RUNE,T7 Metal Rune of Efficiency,T7_RUNE_METAL_EFF_1STAR,7,1606
+RUNE,T7 Metal Rune of Efficiency,T7_RUNE_METAL_EFF_2STAR,7,2730
+RUNE,T7 Metal Rune of Efficiency,T7_RUNE_METAL_EFF_3STAR,7,5139
+RUNE,T7 Metal Rune of XP,T7_RUNE_METAL_XP_1STAR,7,1606
+RUNE,T7 Metal Rune of XP,T7_RUNE_METAL_XP_2STAR,7,2730
+RUNE,T7 Metal Rune of XP,T7_RUNE_METAL_XP_3STAR,7,5139
+RUNE,T7 Mining Rune of Auto-Refine,T7_RUNE_ORE_AUTO_1STAR,7,1606
+RUNE,T7 Mining Rune of Auto-Refine,T7_RUNE_ORE_AUTO_2STAR,7,2730
+RUNE,T7 Mining Rune of Auto-Refine,T7_RUNE_ORE_AUTO_3STAR,7,5139
+RUNE,T7 Mining Rune of Duplication,T7_RUNE_ORE_DUPLIC_1STAR,7,1606
+RUNE,T7 Mining Rune of Duplication,T7_RUNE_ORE_DUPLIC_2STAR,7,2730
+RUNE,T7 Mining Rune of Duplication,T7_RUNE_ORE_DUPLIC_3STAR,7,5139
+RUNE,T7 Mining Rune of XP,T7_RUNE_ORE_XP_1STAR,7,1606
+RUNE,T7 Mining Rune of XP,T7_RUNE_ORE_XP_2STAR,7,2730
+RUNE,T7 Mining Rune of XP,T7_RUNE_ORE_XP_3STAR,7,5139
+RUNE,T7 Plank Rune of Duplication,T7_RUNE_PLANK_DUPLIC_1STAR,7,1606
+RUNE,T7 Plank Rune of Duplication,T7_RUNE_PLANK_DUPLIC_2STAR,7,2730
+RUNE,T7 Plank Rune of Duplication,T7_RUNE_PLANK_DUPLIC_3STAR,7,5139
+RUNE,T7 Plank Rune of Efficiency,T7_RUNE_PLANK_EFF_1STAR,7,1606
+RUNE,T7 Plank Rune of Efficiency,T7_RUNE_PLANK_EFF_2STAR,7,2730
+RUNE,T7 Plank Rune of Efficiency,T7_RUNE_PLANK_EFF_3STAR,7,5139
+RUNE,T7 Plank Rune of XP,T7_RUNE_PLANK_XP_1STAR,7,1606
+RUNE,T7 Plank Rune of XP,T7_RUNE_PLANK_XP_2STAR,7,2730
+RUNE,T7 Plank Rune of XP,T7_RUNE_PLANK_XP_3STAR,7,5139
+RUNE,T7 Skinning Rune of Auto-Refine,T7_RUNE_HIDE_AUTO_1STAR,7,1606
+RUNE,T7 Skinning Rune of Auto-Refine,T7_RUNE_HIDE_AUTO_2STAR,7,2730
+RUNE,T7 Skinning Rune of Auto-Refine,T7_RUNE_HIDE_AUTO_3STAR,7,5139
+RUNE,T7 Skinning Rune of Duplication,T7_RUNE_HIDE_DUPLIC_1STAR,7,1606
+RUNE,T7 Skinning Rune of Duplication,T7_RUNE_HIDE_DUPLIC_2STAR,7,2730
+RUNE,T7 Skinning Rune of Duplication,T7_RUNE_HIDE_DUPLIC_3STAR,7,5139
+RUNE,T7 Skinning Rune of XP,T7_RUNE_HIDE_XP_1STAR,7,1606
+RUNE,T7 Skinning Rune of XP,T7_RUNE_HIDE_XP_2STAR,7,2730
+RUNE,T7 Skinning Rune of XP,T7_RUNE_HIDE_XP_3STAR,7,5139
+RUNE,T7 Tools Rune of Duplication,T7_RUNE_TOOLS_DUPLIC_1STAR,7,1606
+RUNE,T7 Tools Rune of Duplication,T7_RUNE_TOOLS_DUPLIC_2STAR,7,2730
+RUNE,T7 Tools Rune of Duplication,T7_RUNE_TOOLS_DUPLIC_3STAR,7,5139
+RUNE,T7 Tools Rune of Efficiency,T7_RUNE_TOOLS_EFF_1STAR,7,1606
+RUNE,T7 Tools Rune of Efficiency,T7_RUNE_TOOLS_EFF_2STAR,7,2730
+RUNE,T7 Tools Rune of Efficiency,T7_RUNE_TOOLS_EFF_3STAR,7,5139
+RUNE,T7 Tools Rune of XP,T7_RUNE_TOOLS_XP_1STAR,7,1606
+RUNE,T7 Tools Rune of XP,T7_RUNE_TOOLS_XP_2STAR,7,2730
+RUNE,T7 Tools Rune of XP,T7_RUNE_TOOLS_XP_3STAR,7,5139
+RUNE,T7 Warrior Rune of Duplication,T7_RUNE_WARRIOR_DUPLIC_1STAR,7,1606
+RUNE,T7 Warrior Rune of Duplication,T7_RUNE_WARRIOR_DUPLIC_2STAR,7,2730
+RUNE,T7 Warrior Rune of Duplication,T7_RUNE_WARRIOR_DUPLIC_3STAR,7,5139
+RUNE,T7 Warrior Rune of Efficiency,T7_RUNE_WARRIOR_EFF_1STAR,7,1606
+RUNE,T7 Warrior Rune of Efficiency,T7_RUNE_WARRIOR_EFF_2STAR,7,2730
+RUNE,T7 Warrior Rune of Efficiency,T7_RUNE_WARRIOR_EFF_3STAR,7,5139
+RUNE,T7 Warrior Rune of XP,T7_RUNE_WARRIOR_XP_1STAR,7,1606
+RUNE,T7 Warrior Rune of XP,T7_RUNE_WARRIOR_XP_2STAR,7,2730
+RUNE,T7 Warrior Rune of XP,T7_RUNE_WARRIOR_XP_3STAR,7,5139
+RUNE,T7 Woodcutting Rune of Auto-Refine,T7_RUNE_WOOD_AUTO_1STAR,7,1606
+RUNE,T7 Woodcutting Rune of Auto-Refine,T7_RUNE_WOOD_AUTO_2STAR,7,2730
+RUNE,T7 Woodcutting Rune of Auto-Refine,T7_RUNE_WOOD_AUTO_3STAR,7,5139
+RUNE,T7 Woodcutting Rune of Duplication,T7_RUNE_WOOD_DUPLIC_1STAR,7,1606
+RUNE,T7 Woodcutting Rune of Duplication,T7_RUNE_WOOD_DUPLIC_2STAR,7,2730
+RUNE,T7 Woodcutting Rune of Duplication,T7_RUNE_WOOD_DUPLIC_3STAR,7,5139
+RUNE,T7 Woodcutting Rune of XP,T7_RUNE_WOOD_XP_1STAR,7,1606
+RUNE,T7 Woodcutting Rune of XP,T7_RUNE_WOOD_XP_2STAR,7,2730
+RUNE,T7 Woodcutting Rune of XP,T7_RUNE_WOOD_XP_3STAR,7,5139
+RUNE,T8 Alchemy Rune of Duplication,T8_RUNE_ALCHEMY_DUPLIC_1STAR,8,2090
+RUNE,T8 Alchemy Rune of Duplication,T8_RUNE_ALCHEMY_DUPLIC_2STAR,8,3553
+RUNE,T8 Alchemy Rune of Duplication,T8_RUNE_ALCHEMY_DUPLIC_3STAR,8,6688
+RUNE,T8 Alchemy Rune of Efficiency,T8_RUNE_ALCHEMY_EFF_1STAR,8,2090
+RUNE,T8 Alchemy Rune of Efficiency,T8_RUNE_ALCHEMY_EFF_2STAR,8,3553
+RUNE,T8 Alchemy Rune of Efficiency,T8_RUNE_ALCHEMY_EFF_3STAR,8,6688
+RUNE,T8 Alchemy Rune of XP,T8_RUNE_ALCHEMY_XP_1STAR,8,2090
+RUNE,T8 Alchemy Rune of XP,T8_RUNE_ALCHEMY_XP_2STAR,8,3553
+RUNE,T8 Alchemy Rune of XP,T8_RUNE_ALCHEMY_XP_3STAR,8,6688
+RUNE,T8 Cloth Rune of Duplication,T8_RUNE_CLOTH_DUPLIC_1STAR,8,2090
+RUNE,T8 Cloth Rune of Duplication,T8_RUNE_CLOTH_DUPLIC_2STAR,8,3553
+RUNE,T8 Cloth Rune of Duplication,T8_RUNE_CLOTH_DUPLIC_3STAR,8,6688
+RUNE,T8 Cloth Rune of Efficiency,T8_RUNE_CLOTH_EFF_1STAR,8,2090
+RUNE,T8 Cloth Rune of Efficiency,T8_RUNE_CLOTH_EFF_2STAR,8,3553
+RUNE,T8 Cloth Rune of Efficiency,T8_RUNE_CLOTH_EFF_3STAR,8,6688
+RUNE,T8 Cloth Rune of XP,T8_RUNE_CLOTH_XP_1STAR,8,2090
+RUNE,T8 Cloth Rune of XP,T8_RUNE_CLOTH_XP_2STAR,8,3553
+RUNE,T8 Cloth Rune of XP,T8_RUNE_CLOTH_XP_3STAR,8,6688
+RUNE,T8 Combat Rune of Attack,T8_RUNE_ATTACK_ATTACK_1STAR,8,2090
+RUNE,T8 Combat Rune of Attack,T8_RUNE_ATTACK_ATTACK_2STAR,8,3553
+RUNE,T8 Combat Rune of Attack,T8_RUNE_ATTACK_ATTACK_3STAR,8,6688
+RUNE,T8 Combat Rune of Attack Speed,T8_RUNE_ATTACK_ATTACK_SPEED_1STAR,8,2090
+RUNE,T8 Combat Rune of Attack Speed,T8_RUNE_ATTACK_ATTACK_SPEED_2STAR,8,3553
+RUNE,T8 Combat Rune of Attack Speed,T8_RUNE_ATTACK_ATTACK_SPEED_3STAR,8,6688
+RUNE,T8 Combat Rune of Burst,T8_RUNE_ATTACK_BURST_1STAR,8,2090
+RUNE,T8 Combat Rune of Burst,T8_RUNE_ATTACK_BURST_2STAR,8,3553
+RUNE,T8 Combat Rune of Burst,T8_RUNE_ATTACK_BURST_3STAR,8,6688
+RUNE,T8 Combat Rune of Food Saving,T8_RUNE_ATTACK_SAVE_FOOD_1STAR,8,2090
+RUNE,T8 Combat Rune of Food Saving,T8_RUNE_ATTACK_SAVE_FOOD_2STAR,8,3553
+RUNE,T8 Combat Rune of Food Saving,T8_RUNE_ATTACK_SAVE_FOOD_3STAR,8,6688
+RUNE,T8 Cooking Rune of Duplication,T8_RUNE_COOKING_DUPLIC_1STAR,8,2090
+RUNE,T8 Cooking Rune of Duplication,T8_RUNE_COOKING_DUPLIC_2STAR,8,3553
+RUNE,T8 Cooking Rune of Duplication,T8_RUNE_COOKING_DUPLIC_3STAR,8,6688
+RUNE,T8 Cooking Rune of Efficiency,T8_RUNE_COOKING_EFF_1STAR,8,2090
+RUNE,T8 Cooking Rune of Efficiency,T8_RUNE_COOKING_EFF_2STAR,8,3553
+RUNE,T8 Cooking Rune of Efficiency,T8_RUNE_COOKING_EFF_3STAR,8,6688
+RUNE,T8 Cooking Rune of XP,T8_RUNE_COOKING_XP_1STAR,8,2090
+RUNE,T8 Cooking Rune of XP,T8_RUNE_COOKING_XP_2STAR,8,3553
+RUNE,T8 Cooking Rune of XP,T8_RUNE_COOKING_XP_3STAR,8,6688
+RUNE,T8 Extract Rune of Duplication,T8_RUNE_EXTRACT_DUPLIC_1STAR,8,2090
+RUNE,T8 Extract Rune of Duplication,T8_RUNE_EXTRACT_DUPLIC_2STAR,8,3553
+RUNE,T8 Extract Rune of Duplication,T8_RUNE_EXTRACT_DUPLIC_3STAR,8,6688
+RUNE,T8 Extract Rune of Efficiency,T8_RUNE_EXTRACT_EFF_1STAR,8,2090
+RUNE,T8 Extract Rune of Efficiency,T8_RUNE_EXTRACT_EFF_2STAR,8,3553
+RUNE,T8 Extract Rune of Efficiency,T8_RUNE_EXTRACT_EFF_3STAR,8,6688
+RUNE,T8 Extract Rune of XP,T8_RUNE_EXTRACT_XP_1STAR,8,2090
+RUNE,T8 Extract Rune of XP,T8_RUNE_EXTRACT_XP_2STAR,8,3553
+RUNE,T8 Extract Rune of XP,T8_RUNE_EXTRACT_XP_3STAR,8,6688
+RUNE,T8 Fiber Rune of Auto-Refine,T8_RUNE_FIBER_AUTO_1STAR,8,2090
+RUNE,T8 Fiber Rune of Auto-Refine,T8_RUNE_FIBER_AUTO_2STAR,8,3553
+RUNE,T8 Fiber Rune of Auto-Refine,T8_RUNE_FIBER_AUTO_3STAR,8,6688
+RUNE,T8 Fiber Rune of Duplication,T8_RUNE_FIBER_DUPLIC_1STAR,8,2090
+RUNE,T8 Fiber Rune of Duplication,T8_RUNE_FIBER_DUPLIC_2STAR,8,3553
+RUNE,T8 Fiber Rune of Duplication,T8_RUNE_FIBER_DUPLIC_3STAR,8,6688
+RUNE,T8 Fiber Rune of XP,T8_RUNE_FIBER_XP_1STAR,8,2090
+RUNE,T8 Fiber Rune of XP,T8_RUNE_FIBER_XP_2STAR,8,3553
+RUNE,T8 Fiber Rune of XP,T8_RUNE_FIBER_XP_3STAR,8,6688
+RUNE,T8 Fishing Rune of Auto-Cooking,T8_RUNE_FISH_AUTO_1STAR,8,2090
+RUNE,T8 Fishing Rune of Auto-Cooking,T8_RUNE_FISH_AUTO_2STAR,8,3553
+RUNE,T8 Fishing Rune of Auto-Cooking,T8_RUNE_FISH_AUTO_3STAR,8,6688
+RUNE,T8 Fishing Rune of Duplication,T8_RUNE_FISH_DUPLIC_1STAR,8,2090
+RUNE,T8 Fishing Rune of Duplication,T8_RUNE_FISH_DUPLIC_2STAR,8,3553
+RUNE,T8 Fishing Rune of Duplication,T8_RUNE_FISH_DUPLIC_3STAR,8,6688
+RUNE,T8 Fishing Rune of XP,T8_RUNE_FISH_XP_1STAR,8,2090
+RUNE,T8 Fishing Rune of XP,T8_RUNE_FISH_XP_2STAR,8,3553
+RUNE,T8 Fishing Rune of XP,T8_RUNE_FISH_XP_3STAR,8,6688
+RUNE,T8 Herbalism Rune of Auto-Refine,T8_RUNE_HERB_AUTO_1STAR,8,2090
+RUNE,T8 Herbalism Rune of Auto-Refine,T8_RUNE_HERB_AUTO_2STAR,8,3553
+RUNE,T8 Herbalism Rune of Auto-Refine,T8_RUNE_HERB_AUTO_3STAR,8,6688
+RUNE,T8 Herbalism Rune of Duplication,T8_RUNE_HERB_DUPLIC_1STAR,8,2090
+RUNE,T8 Herbalism Rune of Duplication,T8_RUNE_HERB_DUPLIC_2STAR,8,3553
+RUNE,T8 Herbalism Rune of Duplication,T8_RUNE_HERB_DUPLIC_3STAR,8,6688
+RUNE,T8 Herbalism Rune of XP,T8_RUNE_HERB_XP_1STAR,8,2090
+RUNE,T8 Herbalism Rune of XP,T8_RUNE_HERB_XP_2STAR,8,3553
+RUNE,T8 Herbalism Rune of XP,T8_RUNE_HERB_XP_3STAR,8,6688
+RUNE,T8 Hunter Rune of Duplication,T8_RUNE_HUNTER_DUPLIC_1STAR,8,2090
+RUNE,T8 Hunter Rune of Duplication,T8_RUNE_HUNTER_DUPLIC_2STAR,8,3553
+RUNE,T8 Hunter Rune of Duplication,T8_RUNE_HUNTER_DUPLIC_3STAR,8,6688
+RUNE,T8 Hunter Rune of Efficiency,T8_RUNE_HUNTER_EFF_1STAR,8,2090
+RUNE,T8 Hunter Rune of Efficiency,T8_RUNE_HUNTER_EFF_2STAR,8,3553
+RUNE,T8 Hunter Rune of Efficiency,T8_RUNE_HUNTER_EFF_3STAR,8,6688
+RUNE,T8 Hunter Rune of XP,T8_RUNE_HUNTER_XP_1STAR,8,2090
+RUNE,T8 Hunter Rune of XP,T8_RUNE_HUNTER_XP_2STAR,8,3553
+RUNE,T8 Hunter Rune of XP,T8_RUNE_HUNTER_XP_3STAR,8,6688
+RUNE,T8 Leather Rune of Duplication,T8_RUNE_LEATHER_DUPLIC_1STAR,8,2090
+RUNE,T8 Leather Rune of Duplication,T8_RUNE_LEATHER_DUPLIC_2STAR,8,3553
+RUNE,T8 Leather Rune of Duplication,T8_RUNE_LEATHER_DUPLIC_3STAR,8,6688
+RUNE,T8 Leather Rune of Efficiency,T8_RUNE_LEATHER_EFF_1STAR,8,2090
+RUNE,T8 Leather Rune of Efficiency,T8_RUNE_LEATHER_EFF_2STAR,8,3553
+RUNE,T8 Leather Rune of Efficiency,T8_RUNE_LEATHER_EFF_3STAR,8,6688
+RUNE,T8 Leather Rune of XP,T8_RUNE_LEATHER_XP_1STAR,8,2090
+RUNE,T8 Leather Rune of XP,T8_RUNE_LEATHER_XP_2STAR,8,3553
+RUNE,T8 Leather Rune of XP,T8_RUNE_LEATHER_XP_3STAR,8,6688
+RUNE,T8 Mage Rune of Duplication,T8_RUNE_MAGE_DUPLIC_1STAR,8,2090
+RUNE,T8 Mage Rune of Duplication,T8_RUNE_MAGE_DUPLIC_2STAR,8,3553
+RUNE,T8 Mage Rune of Duplication,T8_RUNE_MAGE_DUPLIC_3STAR,8,6688
+RUNE,T8 Mage Rune of Efficiency,T8_RUNE_MAGE_EFF_1STAR,8,2090
+RUNE,T8 Mage Rune of Efficiency,T8_RUNE_MAGE_EFF_2STAR,8,3553
+RUNE,T8 Mage Rune of Efficiency,T8_RUNE_MAGE_EFF_3STAR,8,6688
+RUNE,T8 Mage Rune of XP,T8_RUNE_MAGE_XP_1STAR,8,2090
+RUNE,T8 Mage Rune of XP,T8_RUNE_MAGE_XP_2STAR,8,3553
+RUNE,T8 Mage Rune of XP,T8_RUNE_MAGE_XP_3STAR,8,6688
+RUNE,T8 Metal Rune of Duplication,T8_RUNE_METAL_DUPLIC_1STAR,8,2090
+RUNE,T8 Metal Rune of Duplication,T8_RUNE_METAL_DUPLIC_2STAR,8,3553
+RUNE,T8 Metal Rune of Duplication,T8_RUNE_METAL_DUPLIC_3STAR,8,6688
+RUNE,T8 Metal Rune of Efficiency,T8_RUNE_METAL_EFF_1STAR,8,2090
+RUNE,T8 Metal Rune of Efficiency,T8_RUNE_METAL_EFF_2STAR,8,3553
+RUNE,T8 Metal Rune of Efficiency,T8_RUNE_METAL_EFF_3STAR,8,6688
+RUNE,T8 Metal Rune of XP,T8_RUNE_METAL_XP_1STAR,8,2090
+RUNE,T8 Metal Rune of XP,T8_RUNE_METAL_XP_2STAR,8,3553
+RUNE,T8 Metal Rune of XP,T8_RUNE_METAL_XP_3STAR,8,6688
+RUNE,T8 Mining Rune of Auto-Refine,T8_RUNE_ORE_AUTO_1STAR,8,2090
+RUNE,T8 Mining Rune of Auto-Refine,T8_RUNE_ORE_AUTO_2STAR,8,3553
+RUNE,T8 Mining Rune of Auto-Refine,T8_RUNE_ORE_AUTO_3STAR,8,6688
+RUNE,T8 Mining Rune of Duplication,T8_RUNE_ORE_DUPLIC_1STAR,8,2090
+RUNE,T8 Mining Rune of Duplication,T8_RUNE_ORE_DUPLIC_2STAR,8,3553
+RUNE,T8 Mining Rune of Duplication,T8_RUNE_ORE_DUPLIC_3STAR,8,6688
+RUNE,T8 Mining Rune of XP,T8_RUNE_ORE_XP_1STAR,8,2090
+RUNE,T8 Mining Rune of XP,T8_RUNE_ORE_XP_2STAR,8,3553
+RUNE,T8 Mining Rune of XP,T8_RUNE_ORE_XP_3STAR,8,6688
+RUNE,T8 Plank Rune of Duplication,T8_RUNE_PLANK_DUPLIC_1STAR,8,2090
+RUNE,T8 Plank Rune of Duplication,T8_RUNE_PLANK_DUPLIC_2STAR,8,3553
+RUNE,T8 Plank Rune of Duplication,T8_RUNE_PLANK_DUPLIC_3STAR,8,6688
+RUNE,T8 Plank Rune of Efficiency,T8_RUNE_PLANK_EFF_1STAR,8,2090
+RUNE,T8 Plank Rune of Efficiency,T8_RUNE_PLANK_EFF_2STAR,8,3553
+RUNE,T8 Plank Rune of Efficiency,T8_RUNE_PLANK_EFF_3STAR,8,6688
+RUNE,T8 Plank Rune of XP,T8_RUNE_PLANK_XP_1STAR,8,2090
+RUNE,T8 Plank Rune of XP,T8_RUNE_PLANK_XP_2STAR,8,3553
+RUNE,T8 Plank Rune of XP,T8_RUNE_PLANK_XP_3STAR,8,6688
+RUNE,T8 Skinning Rune of Auto-Refine,T8_RUNE_HIDE_AUTO_1STAR,8,2090
+RUNE,T8 Skinning Rune of Auto-Refine,T8_RUNE_HIDE_AUTO_2STAR,8,3553
+RUNE,T8 Skinning Rune of Auto-Refine,T8_RUNE_HIDE_AUTO_3STAR,8,6688
+RUNE,T8 Skinning Rune of Duplication,T8_RUNE_HIDE_DUPLIC_1STAR,8,2090
+RUNE,T8 Skinning Rune of Duplication,T8_RUNE_HIDE_DUPLIC_2STAR,8,3553
+RUNE,T8 Skinning Rune of Duplication,T8_RUNE_HIDE_DUPLIC_3STAR,8,6688
+RUNE,T8 Skinning Rune of XP,T8_RUNE_HIDE_XP_1STAR,8,2090
+RUNE,T8 Skinning Rune of XP,T8_RUNE_HIDE_XP_2STAR,8,3553
+RUNE,T8 Skinning Rune of XP,T8_RUNE_HIDE_XP_3STAR,8,6688
+RUNE,T8 Tools Rune of Duplication,T8_RUNE_TOOLS_DUPLIC_1STAR,8,2090
+RUNE,T8 Tools Rune of Duplication,T8_RUNE_TOOLS_DUPLIC_2STAR,8,3553
+RUNE,T8 Tools Rune of Duplication,T8_RUNE_TOOLS_DUPLIC_3STAR,8,6688
+RUNE,T8 Tools Rune of Efficiency,T8_RUNE_TOOLS_EFF_1STAR,8,2090
+RUNE,T8 Tools Rune of Efficiency,T8_RUNE_TOOLS_EFF_2STAR,8,3553
+RUNE,T8 Tools Rune of Efficiency,T8_RUNE_TOOLS_EFF_3STAR,8,6688
+RUNE,T8 Tools Rune of XP,T8_RUNE_TOOLS_XP_1STAR,8,2090
+RUNE,T8 Tools Rune of XP,T8_RUNE_TOOLS_XP_2STAR,8,3553
+RUNE,T8 Tools Rune of XP,T8_RUNE_TOOLS_XP_3STAR,8,6688
+RUNE,T8 Warrior Rune of Duplication,T8_RUNE_WARRIOR_DUPLIC_1STAR,8,2090
+RUNE,T8 Warrior Rune of Duplication,T8_RUNE_WARRIOR_DUPLIC_2STAR,8,3553
+RUNE,T8 Warrior Rune of Duplication,T8_RUNE_WARRIOR_DUPLIC_3STAR,8,6688
+RUNE,T8 Warrior Rune of Efficiency,T8_RUNE_WARRIOR_EFF_1STAR,8,2090
+RUNE,T8 Warrior Rune of Efficiency,T8_RUNE_WARRIOR_EFF_2STAR,8,3553
+RUNE,T8 Warrior Rune of Efficiency,T8_RUNE_WARRIOR_EFF_3STAR,8,6688
+RUNE,T8 Warrior Rune of XP,T8_RUNE_WARRIOR_XP_1STAR,8,2090
+RUNE,T8 Warrior Rune of XP,T8_RUNE_WARRIOR_XP_2STAR,8,3553
+RUNE,T8 Warrior Rune of XP,T8_RUNE_WARRIOR_XP_3STAR,8,6688
+RUNE,T8 Woodcutting Rune of Auto-Refine,T8_RUNE_WOOD_AUTO_1STAR,8,2090
+RUNE,T8 Woodcutting Rune of Auto-Refine,T8_RUNE_WOOD_AUTO_2STAR,8,3553
+RUNE,T8 Woodcutting Rune of Auto-Refine,T8_RUNE_WOOD_AUTO_3STAR,8,6688
+RUNE,T8 Woodcutting Rune of Duplication,T8_RUNE_WOOD_DUPLIC_1STAR,8,2090
+RUNE,T8 Woodcutting Rune of Duplication,T8_RUNE_WOOD_DUPLIC_2STAR,8,3553
+RUNE,T8 Woodcutting Rune of Duplication,T8_RUNE_WOOD_DUPLIC_3STAR,8,6688
+RUNE,T8 Woodcutting Rune of XP,T8_RUNE_WOOD_XP_1STAR,8,2090
+RUNE,T8 Woodcutting Rune of XP,T8_RUNE_WOOD_XP_2STAR,8,3553
+RUNE,T8 Woodcutting Rune of XP,T8_RUNE_WOOD_XP_3STAR,8,6688
+RUNE,T9 Alchemy Rune of Duplication,T9_RUNE_ALCHEMY_DUPLIC_1STAR,9,2640
+RUNE,T9 Alchemy Rune of Duplication,T9_RUNE_ALCHEMY_DUPLIC_2STAR,9,4488
+RUNE,T9 Alchemy Rune of Duplication,T9_RUNE_ALCHEMY_DUPLIC_3STAR,9,8448
+RUNE,T9 Alchemy Rune of Efficiency,T9_RUNE_ALCHEMY_EFF_1STAR,9,2640
+RUNE,T9 Alchemy Rune of Efficiency,T9_RUNE_ALCHEMY_EFF_2STAR,9,4488
+RUNE,T9 Alchemy Rune of Efficiency,T9_RUNE_ALCHEMY_EFF_3STAR,9,8448
+RUNE,T9 Alchemy Rune of XP,T9_RUNE_ALCHEMY_XP_1STAR,9,2640
+RUNE,T9 Alchemy Rune of XP,T9_RUNE_ALCHEMY_XP_2STAR,9,4488
+RUNE,T9 Alchemy Rune of XP,T9_RUNE_ALCHEMY_XP_3STAR,9,8448
+RUNE,T9 Cloth Rune of Duplication,T9_RUNE_CLOTH_DUPLIC_1STAR,9,2640
+RUNE,T9 Cloth Rune of Duplication,T9_RUNE_CLOTH_DUPLIC_2STAR,9,4488
+RUNE,T9 Cloth Rune of Duplication,T9_RUNE_CLOTH_DUPLIC_3STAR,9,8448
+RUNE,T9 Cloth Rune of Efficiency,T9_RUNE_CLOTH_EFF_1STAR,9,2640
+RUNE,T9 Cloth Rune of Efficiency,T9_RUNE_CLOTH_EFF_2STAR,9,4488
+RUNE,T9 Cloth Rune of Efficiency,T9_RUNE_CLOTH_EFF_3STAR,9,8448
+RUNE,T9 Cloth Rune of XP,T9_RUNE_CLOTH_XP_1STAR,9,2640
+RUNE,T9 Cloth Rune of XP,T9_RUNE_CLOTH_XP_2STAR,9,4488
+RUNE,T9 Cloth Rune of XP,T9_RUNE_CLOTH_XP_3STAR,9,8448
+RUNE,T9 Combat Rune of Attack,T9_RUNE_ATTACK_ATTACK_1STAR,9,2640
+RUNE,T9 Combat Rune of Attack,T9_RUNE_ATTACK_ATTACK_2STAR,9,4488
+RUNE,T9 Combat Rune of Attack,T9_RUNE_ATTACK_ATTACK_3STAR,9,8448
+RUNE,T9 Combat Rune of Attack Speed,T9_RUNE_ATTACK_ATTACK_SPEED_1STAR,9,2640
+RUNE,T9 Combat Rune of Attack Speed,T9_RUNE_ATTACK_ATTACK_SPEED_2STAR,9,4488
+RUNE,T9 Combat Rune of Attack Speed,T9_RUNE_ATTACK_ATTACK_SPEED_3STAR,9,8448
+RUNE,T9 Combat Rune of Burst,T9_RUNE_ATTACK_BURST_1STAR,9,2640
+RUNE,T9 Combat Rune of Burst,T9_RUNE_ATTACK_BURST_2STAR,9,4488
+RUNE,T9 Combat Rune of Burst,T9_RUNE_ATTACK_BURST_3STAR,9,8448
+RUNE,T9 Combat Rune of Food Saving,T9_RUNE_ATTACK_SAVE_FOOD_1STAR,9,2640
+RUNE,T9 Combat Rune of Food Saving,T9_RUNE_ATTACK_SAVE_FOOD_2STAR,9,4488
+RUNE,T9 Combat Rune of Food Saving,T9_RUNE_ATTACK_SAVE_FOOD_3STAR,9,8448
+RUNE,T9 Cooking Rune of Duplication,T9_RUNE_COOKING_DUPLIC_1STAR,9,2640
+RUNE,T9 Cooking Rune of Duplication,T9_RUNE_COOKING_DUPLIC_2STAR,9,4488
+RUNE,T9 Cooking Rune of Duplication,T9_RUNE_COOKING_DUPLIC_3STAR,9,8448
+RUNE,T9 Cooking Rune of Efficiency,T9_RUNE_COOKING_EFF_1STAR,9,2640
+RUNE,T9 Cooking Rune of Efficiency,T9_RUNE_COOKING_EFF_2STAR,9,4488
+RUNE,T9 Cooking Rune of Efficiency,T9_RUNE_COOKING_EFF_3STAR,9,8448
+RUNE,T9 Cooking Rune of XP,T9_RUNE_COOKING_XP_1STAR,9,2640
+RUNE,T9 Cooking Rune of XP,T9_RUNE_COOKING_XP_2STAR,9,4488
+RUNE,T9 Cooking Rune of XP,T9_RUNE_COOKING_XP_3STAR,9,8448
+RUNE,T9 Extract Rune of Duplication,T9_RUNE_EXTRACT_DUPLIC_1STAR,9,2640
+RUNE,T9 Extract Rune of Duplication,T9_RUNE_EXTRACT_DUPLIC_2STAR,9,4488
+RUNE,T9 Extract Rune of Duplication,T9_RUNE_EXTRACT_DUPLIC_3STAR,9,8448
+RUNE,T9 Extract Rune of Efficiency,T9_RUNE_EXTRACT_EFF_1STAR,9,2640
+RUNE,T9 Extract Rune of Efficiency,T9_RUNE_EXTRACT_EFF_2STAR,9,4488
+RUNE,T9 Extract Rune of Efficiency,T9_RUNE_EXTRACT_EFF_3STAR,9,8448
+RUNE,T9 Extract Rune of XP,T9_RUNE_EXTRACT_XP_1STAR,9,2640
+RUNE,T9 Extract Rune of XP,T9_RUNE_EXTRACT_XP_2STAR,9,4488
+RUNE,T9 Extract Rune of XP,T9_RUNE_EXTRACT_XP_3STAR,9,8448
+RUNE,T9 Fiber Rune of Auto-Refine,T9_RUNE_FIBER_AUTO_1STAR,9,2640
+RUNE,T9 Fiber Rune of Auto-Refine,T9_RUNE_FIBER_AUTO_2STAR,9,4488
+RUNE,T9 Fiber Rune of Auto-Refine,T9_RUNE_FIBER_AUTO_3STAR,9,8448
+RUNE,T9 Fiber Rune of Duplication,T9_RUNE_FIBER_DUPLIC_1STAR,9,2640
+RUNE,T9 Fiber Rune of Duplication,T9_RUNE_FIBER_DUPLIC_2STAR,9,4488
+RUNE,T9 Fiber Rune of Duplication,T9_RUNE_FIBER_DUPLIC_3STAR,9,8448
+RUNE,T9 Fiber Rune of XP,T9_RUNE_FIBER_XP_1STAR,9,2640
+RUNE,T9 Fiber Rune of XP,T9_RUNE_FIBER_XP_2STAR,9,4488
+RUNE,T9 Fiber Rune of XP,T9_RUNE_FIBER_XP_3STAR,9,8448
+RUNE,T9 Fishing Rune of Auto-Cooking,T9_RUNE_FISH_AUTO_1STAR,9,2640
+RUNE,T9 Fishing Rune of Auto-Cooking,T9_RUNE_FISH_AUTO_2STAR,9,4488
+RUNE,T9 Fishing Rune of Auto-Cooking,T9_RUNE_FISH_AUTO_3STAR,9,8448
+RUNE,T9 Fishing Rune of Duplication,T9_RUNE_FISH_DUPLIC_1STAR,9,2640
+RUNE,T9 Fishing Rune of Duplication,T9_RUNE_FISH_DUPLIC_2STAR,9,4488
+RUNE,T9 Fishing Rune of Duplication,T9_RUNE_FISH_DUPLIC_3STAR,9,8448
+RUNE,T9 Fishing Rune of XP,T9_RUNE_FISH_XP_1STAR,9,2640
+RUNE,T9 Fishing Rune of XP,T9_RUNE_FISH_XP_2STAR,9,4488
+RUNE,T9 Fishing Rune of XP,T9_RUNE_FISH_XP_3STAR,9,8448
+RUNE,T9 Herbalism Rune of Auto-Refine,T9_RUNE_HERB_AUTO_1STAR,9,2640
+RUNE,T9 Herbalism Rune of Auto-Refine,T9_RUNE_HERB_AUTO_2STAR,9,4488
+RUNE,T9 Herbalism Rune of Auto-Refine,T9_RUNE_HERB_AUTO_3STAR,9,8448
+RUNE,T9 Herbalism Rune of Duplication,T9_RUNE_HERB_DUPLIC_1STAR,9,2640
+RUNE,T9 Herbalism Rune of Duplication,T9_RUNE_HERB_DUPLIC_2STAR,9,4488
+RUNE,T9 Herbalism Rune of Duplication,T9_RUNE_HERB_DUPLIC_3STAR,9,8448
+RUNE,T9 Herbalism Rune of XP,T9_RUNE_HERB_XP_1STAR,9,2640
+RUNE,T9 Herbalism Rune of XP,T9_RUNE_HERB_XP_2STAR,9,4488
+RUNE,T9 Herbalism Rune of XP,T9_RUNE_HERB_XP_3STAR,9,8448
+RUNE,T9 Hunter Rune of Duplication,T9_RUNE_HUNTER_DUPLIC_1STAR,9,2640
+RUNE,T9 Hunter Rune of Duplication,T9_RUNE_HUNTER_DUPLIC_2STAR,9,4488
+RUNE,T9 Hunter Rune of Duplication,T9_RUNE_HUNTER_DUPLIC_3STAR,9,8448
+RUNE,T9 Hunter Rune of Efficiency,T9_RUNE_HUNTER_EFF_1STAR,9,2640
+RUNE,T9 Hunter Rune of Efficiency,T9_RUNE_HUNTER_EFF_2STAR,9,4488
+RUNE,T9 Hunter Rune of Efficiency,T9_RUNE_HUNTER_EFF_3STAR,9,8448
+RUNE,T9 Hunter Rune of XP,T9_RUNE_HUNTER_XP_1STAR,9,2640
+RUNE,T9 Hunter Rune of XP,T9_RUNE_HUNTER_XP_2STAR,9,4488
+RUNE,T9 Hunter Rune of XP,T9_RUNE_HUNTER_XP_3STAR,9,8448
+RUNE,T9 Leather Rune of Duplication,T9_RUNE_LEATHER_DUPLIC_1STAR,9,2640
+RUNE,T9 Leather Rune of Duplication,T9_RUNE_LEATHER_DUPLIC_2STAR,9,4488
+RUNE,T9 Leather Rune of Duplication,T9_RUNE_LEATHER_DUPLIC_3STAR,9,8448
+RUNE,T9 Leather Rune of Efficiency,T9_RUNE_LEATHER_EFF_1STAR,9,2640
+RUNE,T9 Leather Rune of Efficiency,T9_RUNE_LEATHER_EFF_2STAR,9,4488
+RUNE,T9 Leather Rune of Efficiency,T9_RUNE_LEATHER_EFF_3STAR,9,8448
+RUNE,T9 Leather Rune of XP,T9_RUNE_LEATHER_XP_1STAR,9,2640
+RUNE,T9 Leather Rune of XP,T9_RUNE_LEATHER_XP_2STAR,9,4488
+RUNE,T9 Leather Rune of XP,T9_RUNE_LEATHER_XP_3STAR,9,8448
+RUNE,T9 Mage Rune of Duplication,T9_RUNE_MAGE_DUPLIC_1STAR,9,2640
+RUNE,T9 Mage Rune of Duplication,T9_RUNE_MAGE_DUPLIC_2STAR,9,4488
+RUNE,T9 Mage Rune of Duplication,T9_RUNE_MAGE_DUPLIC_3STAR,9,8448
+RUNE,T9 Mage Rune of Efficiency,T9_RUNE_MAGE_EFF_1STAR,9,2640
+RUNE,T9 Mage Rune of Efficiency,T9_RUNE_MAGE_EFF_2STAR,9,4488
+RUNE,T9 Mage Rune of Efficiency,T9_RUNE_MAGE_EFF_3STAR,9,8448
+RUNE,T9 Mage Rune of XP,T9_RUNE_MAGE_XP_1STAR,9,2640
+RUNE,T9 Mage Rune of XP,T9_RUNE_MAGE_XP_2STAR,9,4488
+RUNE,T9 Mage Rune of XP,T9_RUNE_MAGE_XP_3STAR,9,8448
+RUNE,T9 Metal Rune of Duplication,T9_RUNE_METAL_DUPLIC_1STAR,9,2640
+RUNE,T9 Metal Rune of Duplication,T9_RUNE_METAL_DUPLIC_2STAR,9,4488
+RUNE,T9 Metal Rune of Duplication,T9_RUNE_METAL_DUPLIC_3STAR,9,8448
+RUNE,T9 Metal Rune of Efficiency,T9_RUNE_METAL_EFF_1STAR,9,2640
+RUNE,T9 Metal Rune of Efficiency,T9_RUNE_METAL_EFF_2STAR,9,4488
+RUNE,T9 Metal Rune of Efficiency,T9_RUNE_METAL_EFF_3STAR,9,8448
+RUNE,T9 Metal Rune of XP,T9_RUNE_METAL_XP_1STAR,9,2640
+RUNE,T9 Metal Rune of XP,T9_RUNE_METAL_XP_2STAR,9,4488
+RUNE,T9 Metal Rune of XP,T9_RUNE_METAL_XP_3STAR,9,8448
+RUNE,T9 Mining Rune of Auto-Refine,T9_RUNE_ORE_AUTO_1STAR,9,2640
+RUNE,T9 Mining Rune of Auto-Refine,T9_RUNE_ORE_AUTO_2STAR,9,4488
+RUNE,T9 Mining Rune of Auto-Refine,T9_RUNE_ORE_AUTO_3STAR,9,8448
+RUNE,T9 Mining Rune of Duplication,T9_RUNE_ORE_DUPLIC_1STAR,9,2640
+RUNE,T9 Mining Rune of Duplication,T9_RUNE_ORE_DUPLIC_2STAR,9,4488
+RUNE,T9 Mining Rune of Duplication,T9_RUNE_ORE_DUPLIC_3STAR,9,8448
+RUNE,T9 Mining Rune of XP,T9_RUNE_ORE_XP_1STAR,9,2640
+RUNE,T9 Mining Rune of XP,T9_RUNE_ORE_XP_2STAR,9,4488
+RUNE,T9 Mining Rune of XP,T9_RUNE_ORE_XP_3STAR,9,8448
+RUNE,T9 Plank Rune of Duplication,T9_RUNE_PLANK_DUPLIC_1STAR,9,2640
+RUNE,T9 Plank Rune of Duplication,T9_RUNE_PLANK_DUPLIC_2STAR,9,4488
+RUNE,T9 Plank Rune of Duplication,T9_RUNE_PLANK_DUPLIC_3STAR,9,8448
+RUNE,T9 Plank Rune of Efficiency,T9_RUNE_PLANK_EFF_1STAR,9,2640
+RUNE,T9 Plank Rune of Efficiency,T9_RUNE_PLANK_EFF_2STAR,9,4488
+RUNE,T9 Plank Rune of Efficiency,T9_RUNE_PLANK_EFF_3STAR,9,8448
+RUNE,T9 Plank Rune of XP,T9_RUNE_PLANK_XP_1STAR,9,2640
+RUNE,T9 Plank Rune of XP,T9_RUNE_PLANK_XP_2STAR,9,4488
+RUNE,T9 Plank Rune of XP,T9_RUNE_PLANK_XP_3STAR,9,8448
+RUNE,T9 Skinning Rune of Auto-Refine,T9_RUNE_HIDE_AUTO_1STAR,9,2640
+RUNE,T9 Skinning Rune of Auto-Refine,T9_RUNE_HIDE_AUTO_2STAR,9,4488
+RUNE,T9 Skinning Rune of Auto-Refine,T9_RUNE_HIDE_AUTO_3STAR,9,8448
+RUNE,T9 Skinning Rune of Duplication,T9_RUNE_HIDE_DUPLIC_1STAR,9,2640
+RUNE,T9 Skinning Rune of Duplication,T9_RUNE_HIDE_DUPLIC_2STAR,9,4488
+RUNE,T9 Skinning Rune of Duplication,T9_RUNE_HIDE_DUPLIC_3STAR,9,8448
+RUNE,T9 Skinning Rune of XP,T9_RUNE_HIDE_XP_1STAR,9,2640
+RUNE,T9 Skinning Rune of XP,T9_RUNE_HIDE_XP_2STAR,9,4488
+RUNE,T9 Skinning Rune of XP,T9_RUNE_HIDE_XP_3STAR,9,8448
+RUNE,T9 Tools Rune of Duplication,T9_RUNE_TOOLS_DUPLIC_1STAR,9,2640
+RUNE,T9 Tools Rune of Duplication,T9_RUNE_TOOLS_DUPLIC_2STAR,9,4488
+RUNE,T9 Tools Rune of Duplication,T9_RUNE_TOOLS_DUPLIC_3STAR,9,8448
+RUNE,T9 Tools Rune of Efficiency,T9_RUNE_TOOLS_EFF_1STAR,9,2640
+RUNE,T9 Tools Rune of Efficiency,T9_RUNE_TOOLS_EFF_2STAR,9,4488
+RUNE,T9 Tools Rune of Efficiency,T9_RUNE_TOOLS_EFF_3STAR,9,8448
+RUNE,T9 Tools Rune of XP,T9_RUNE_TOOLS_XP_1STAR,9,2640
+RUNE,T9 Tools Rune of XP,T9_RUNE_TOOLS_XP_2STAR,9,4488
+RUNE,T9 Tools Rune of XP,T9_RUNE_TOOLS_XP_3STAR,9,8448
+RUNE,T9 Warrior Rune of Duplication,T9_RUNE_WARRIOR_DUPLIC_1STAR,9,2640
+RUNE,T9 Warrior Rune of Duplication,T9_RUNE_WARRIOR_DUPLIC_2STAR,9,4488
+RUNE,T9 Warrior Rune of Duplication,T9_RUNE_WARRIOR_DUPLIC_3STAR,9,8448
+RUNE,T9 Warrior Rune of Efficiency,T9_RUNE_WARRIOR_EFF_1STAR,9,2640
+RUNE,T9 Warrior Rune of Efficiency,T9_RUNE_WARRIOR_EFF_2STAR,9,4488
+RUNE,T9 Warrior Rune of Efficiency,T9_RUNE_WARRIOR_EFF_3STAR,9,8448
+RUNE,T9 Warrior Rune of XP,T9_RUNE_WARRIOR_XP_1STAR,9,2640
+RUNE,T9 Warrior Rune of XP,T9_RUNE_WARRIOR_XP_2STAR,9,4488
+RUNE,T9 Warrior Rune of XP,T9_RUNE_WARRIOR_XP_3STAR,9,8448
+RUNE,T9 Woodcutting Rune of Auto-Refine,T9_RUNE_WOOD_AUTO_1STAR,9,2640
+RUNE,T9 Woodcutting Rune of Auto-Refine,T9_RUNE_WOOD_AUTO_2STAR,9,4488
+RUNE,T9 Woodcutting Rune of Auto-Refine,T9_RUNE_WOOD_AUTO_3STAR,9,8448
+RUNE,T9 Woodcutting Rune of Duplication,T9_RUNE_WOOD_DUPLIC_1STAR,9,2640
+RUNE,T9 Woodcutting Rune of Duplication,T9_RUNE_WOOD_DUPLIC_2STAR,9,4488
+RUNE,T9 Woodcutting Rune of Duplication,T9_RUNE_WOOD_DUPLIC_3STAR,9,8448
+RUNE,T9 Woodcutting Rune of XP,T9_RUNE_WOOD_XP_1STAR,9,2640
+RUNE,T9 Woodcutting Rune of XP,T9_RUNE_WOOD_XP_2STAR,9,4488
+RUNE,T9 Woodcutting Rune of XP,T9_RUNE_WOOD_XP_3STAR,9,8448
+RUNE,T10 Alchemy Rune of Duplication,T10_RUNE_ALCHEMY_DUPLIC_1STAR,10,3256
+RUNE,T10 Alchemy Rune of Duplication,T10_RUNE_ALCHEMY_DUPLIC_2STAR,10,5535
+RUNE,T10 Alchemy Rune of Duplication,T10_RUNE_ALCHEMY_DUPLIC_3STAR,10,10419
+RUNE,T10 Alchemy Rune of Efficiency,T10_RUNE_ALCHEMY_EFF_1STAR,10,3256
+RUNE,T10 Alchemy Rune of Efficiency,T10_RUNE_ALCHEMY_EFF_2STAR,10,5535
+RUNE,T10 Alchemy Rune of Efficiency,T10_RUNE_ALCHEMY_EFF_3STAR,10,10419
+RUNE,T10 Alchemy Rune of XP,T10_RUNE_ALCHEMY_XP_1STAR,10,3256
+RUNE,T10 Alchemy Rune of XP,T10_RUNE_ALCHEMY_XP_2STAR,10,5535
+RUNE,T10 Alchemy Rune of XP,T10_RUNE_ALCHEMY_XP_3STAR,10,10419
+RUNE,T10 Cloth Rune of Duplication,T10_RUNE_CLOTH_DUPLIC_1STAR,10,3256
+RUNE,T10 Cloth Rune of Duplication,T10_RUNE_CLOTH_DUPLIC_2STAR,10,5535
+RUNE,T10 Cloth Rune of Duplication,T10_RUNE_CLOTH_DUPLIC_3STAR,10,10419
+RUNE,T10 Cloth Rune of Efficiency,T10_RUNE_CLOTH_EFF_1STAR,10,3256
+RUNE,T10 Cloth Rune of Efficiency,T10_RUNE_CLOTH_EFF_2STAR,10,5535
+RUNE,T10 Cloth Rune of Efficiency,T10_RUNE_CLOTH_EFF_3STAR,10,10419
+RUNE,T10 Cloth Rune of XP,T10_RUNE_CLOTH_XP_1STAR,10,3256
+RUNE,T10 Cloth Rune of XP,T10_RUNE_CLOTH_XP_2STAR,10,5535
+RUNE,T10 Cloth Rune of XP,T10_RUNE_CLOTH_XP_3STAR,10,10419
+RUNE,T10 Combat Rune of Attack,T10_RUNE_ATTACK_ATTACK_1STAR,10,3256
+RUNE,T10 Combat Rune of Attack,T10_RUNE_ATTACK_ATTACK_2STAR,10,5535
+RUNE,T10 Combat Rune of Attack,T10_RUNE_ATTACK_ATTACK_3STAR,10,10419
+RUNE,T10 Combat Rune of Attack Speed,T10_RUNE_ATTACK_ATTACK_SPEED_1STAR,10,3256
+RUNE,T10 Combat Rune of Attack Speed,T10_RUNE_ATTACK_ATTACK_SPEED_2STAR,10,5535
+RUNE,T10 Combat Rune of Attack Speed,T10_RUNE_ATTACK_ATTACK_SPEED_3STAR,10,10419
+RUNE,T10 Combat Rune of Burst,T10_RUNE_ATTACK_BURST_1STAR,10,3256
+RUNE,T10 Combat Rune of Burst,T10_RUNE_ATTACK_BURST_2STAR,10,5535
+RUNE,T10 Combat Rune of Burst,T10_RUNE_ATTACK_BURST_3STAR,10,10419
+RUNE,T10 Combat Rune of Food Saving,T10_RUNE_ATTACK_SAVE_FOOD_1STAR,10,3256
+RUNE,T10 Combat Rune of Food Saving,T10_RUNE_ATTACK_SAVE_FOOD_2STAR,10,5535
+RUNE,T10 Combat Rune of Food Saving,T10_RUNE_ATTACK_SAVE_FOOD_3STAR,10,10419
+RUNE,T10 Cooking Rune of Duplication,T10_RUNE_COOKING_DUPLIC_1STAR,10,3256
+RUNE,T10 Cooking Rune of Duplication,T10_RUNE_COOKING_DUPLIC_2STAR,10,5535
+RUNE,T10 Cooking Rune of Duplication,T10_RUNE_COOKING_DUPLIC_3STAR,10,10419
+RUNE,T10 Cooking Rune of Efficiency,T10_RUNE_COOKING_EFF_1STAR,10,3256
+RUNE,T10 Cooking Rune of Efficiency,T10_RUNE_COOKING_EFF_2STAR,10,5535
+RUNE,T10 Cooking Rune of Efficiency,T10_RUNE_COOKING_EFF_3STAR,10,10419
+RUNE,T10 Cooking Rune of XP,T10_RUNE_COOKING_XP_1STAR,10,3256
+RUNE,T10 Cooking Rune of XP,T10_RUNE_COOKING_XP_2STAR,10,5535
+RUNE,T10 Cooking Rune of XP,T10_RUNE_COOKING_XP_3STAR,10,10419
+RUNE,T10 Extract Rune of Duplication,T10_RUNE_EXTRACT_DUPLIC_1STAR,10,3256
+RUNE,T10 Extract Rune of Duplication,T10_RUNE_EXTRACT_DUPLIC_2STAR,10,5535
+RUNE,T10 Extract Rune of Duplication,T10_RUNE_EXTRACT_DUPLIC_3STAR,10,10419
+RUNE,T10 Extract Rune of Efficiency,T10_RUNE_EXTRACT_EFF_1STAR,10,3256
+RUNE,T10 Extract Rune of Efficiency,T10_RUNE_EXTRACT_EFF_2STAR,10,5535
+RUNE,T10 Extract Rune of Efficiency,T10_RUNE_EXTRACT_EFF_3STAR,10,10419
+RUNE,T10 Extract Rune of XP,T10_RUNE_EXTRACT_XP_1STAR,10,3256
+RUNE,T10 Extract Rune of XP,T10_RUNE_EXTRACT_XP_2STAR,10,5535
+RUNE,T10 Extract Rune of XP,T10_RUNE_EXTRACT_XP_3STAR,10,10419
+RUNE,T10 Fiber Rune of Auto-Refine,T10_RUNE_FIBER_AUTO_1STAR,10,3256
+RUNE,T10 Fiber Rune of Auto-Refine,T10_RUNE_FIBER_AUTO_2STAR,10,5535
+RUNE,T10 Fiber Rune of Auto-Refine,T10_RUNE_FIBER_AUTO_3STAR,10,10419
+RUNE,T10 Fiber Rune of Duplication,T10_RUNE_FIBER_DUPLIC_1STAR,10,3256
+RUNE,T10 Fiber Rune of Duplication,T10_RUNE_FIBER_DUPLIC_2STAR,10,5535
+RUNE,T10 Fiber Rune of Duplication,T10_RUNE_FIBER_DUPLIC_3STAR,10,10419
+RUNE,T10 Fiber Rune of XP,T10_RUNE_FIBER_XP_1STAR,10,3256
+RUNE,T10 Fiber Rune of XP,T10_RUNE_FIBER_XP_2STAR,10,5535
+RUNE,T10 Fiber Rune of XP,T10_RUNE_FIBER_XP_3STAR,10,10419
+RUNE,T10 Fishing Rune of Auto-Cooking,T10_RUNE_FISH_AUTO_1STAR,10,3256
+RUNE,T10 Fishing Rune of Auto-Cooking,T10_RUNE_FISH_AUTO_2STAR,10,5535
+RUNE,T10 Fishing Rune of Auto-Cooking,T10_RUNE_FISH_AUTO_3STAR,10,10419
+RUNE,T10 Fishing Rune of Duplication,T10_RUNE_FISH_DUPLIC_1STAR,10,3256
+RUNE,T10 Fishing Rune of Duplication,T10_RUNE_FISH_DUPLIC_2STAR,10,5535
+RUNE,T10 Fishing Rune of Duplication,T10_RUNE_FISH_DUPLIC_3STAR,10,10419
+RUNE,T10 Fishing Rune of XP,T10_RUNE_FISH_XP_1STAR,10,3256
+RUNE,T10 Fishing Rune of XP,T10_RUNE_FISH_XP_2STAR,10,5535
+RUNE,T10 Fishing Rune of XP,T10_RUNE_FISH_XP_3STAR,10,10419
+RUNE,T10 Herbalism Rune of Auto-Refine,T10_RUNE_HERB_AUTO_1STAR,10,3256
+RUNE,T10 Herbalism Rune of Auto-Refine,T10_RUNE_HERB_AUTO_2STAR,10,5535
+RUNE,T10 Herbalism Rune of Auto-Refine,T10_RUNE_HERB_AUTO_3STAR,10,10419
+RUNE,T10 Herbalism Rune of Duplication,T10_RUNE_HERB_DUPLIC_1STAR,10,3256
+RUNE,T10 Herbalism Rune of Duplication,T10_RUNE_HERB_DUPLIC_2STAR,10,5535
+RUNE,T10 Herbalism Rune of Duplication,T10_RUNE_HERB_DUPLIC_3STAR,10,10419
+RUNE,T10 Herbalism Rune of XP,T10_RUNE_HERB_XP_1STAR,10,3256
+RUNE,T10 Herbalism Rune of XP,T10_RUNE_HERB_XP_2STAR,10,5535
+RUNE,T10 Herbalism Rune of XP,T10_RUNE_HERB_XP_3STAR,10,10419
+RUNE,T10 Hunter Rune of Duplication,T10_RUNE_HUNTER_DUPLIC_1STAR,10,3256
+RUNE,T10 Hunter Rune of Duplication,T10_RUNE_HUNTER_DUPLIC_2STAR,10,5535
+RUNE,T10 Hunter Rune of Duplication,T10_RUNE_HUNTER_DUPLIC_3STAR,10,10419
+RUNE,T10 Hunter Rune of Efficiency,T10_RUNE_HUNTER_EFF_1STAR,10,3256
+RUNE,T10 Hunter Rune of Efficiency,T10_RUNE_HUNTER_EFF_2STAR,10,5535
+RUNE,T10 Hunter Rune of Efficiency,T10_RUNE_HUNTER_EFF_3STAR,10,10419
+RUNE,T10 Hunter Rune of XP,T10_RUNE_HUNTER_XP_1STAR,10,3256
+RUNE,T10 Hunter Rune of XP,T10_RUNE_HUNTER_XP_2STAR,10,5535
+RUNE,T10 Hunter Rune of XP,T10_RUNE_HUNTER_XP_3STAR,10,10419
+RUNE,T10 Leather Rune of Duplication,T10_RUNE_LEATHER_DUPLIC_1STAR,10,3256
+RUNE,T10 Leather Rune of Duplication,T10_RUNE_LEATHER_DUPLIC_2STAR,10,5535
+RUNE,T10 Leather Rune of Duplication,T10_RUNE_LEATHER_DUPLIC_3STAR,10,10419
+RUNE,T10 Leather Rune of Efficiency,T10_RUNE_LEATHER_EFF_1STAR,10,3256
+RUNE,T10 Leather Rune of Efficiency,T10_RUNE_LEATHER_EFF_2STAR,10,5535
+RUNE,T10 Leather Rune of Efficiency,T10_RUNE_LEATHER_EFF_3STAR,10,10419
+RUNE,T10 Leather Rune of XP,T10_RUNE_LEATHER_XP_1STAR,10,3256
+RUNE,T10 Leather Rune of XP,T10_RUNE_LEATHER_XP_2STAR,10,5535
+RUNE,T10 Leather Rune of XP,T10_RUNE_LEATHER_XP_3STAR,10,10419
+RUNE,T10 Mage Rune of Duplication,T10_RUNE_MAGE_DUPLIC_1STAR,10,3256
+RUNE,T10 Mage Rune of Duplication,T10_RUNE_MAGE_DUPLIC_2STAR,10,5535
+RUNE,T10 Mage Rune of Duplication,T10_RUNE_MAGE_DUPLIC_3STAR,10,10419
+RUNE,T10 Mage Rune of Efficiency,T10_RUNE_MAGE_EFF_1STAR,10,3256
+RUNE,T10 Mage Rune of Efficiency,T10_RUNE_MAGE_EFF_2STAR,10,5535
+RUNE,T10 Mage Rune of Efficiency,T10_RUNE_MAGE_EFF_3STAR,10,10419
+RUNE,T10 Mage Rune of XP,T10_RUNE_MAGE_XP_1STAR,10,3256
+RUNE,T10 Mage Rune of XP,T10_RUNE_MAGE_XP_2STAR,10,5535
+RUNE,T10 Mage Rune of XP,T10_RUNE_MAGE_XP_3STAR,10,10419
+RUNE,T10 Metal Rune of Duplication,T10_RUNE_METAL_DUPLIC_1STAR,10,3256
+RUNE,T10 Metal Rune of Duplication,T10_RUNE_METAL_DUPLIC_2STAR,10,5535
+RUNE,T10 Metal Rune of Duplication,T10_RUNE_METAL_DUPLIC_3STAR,10,10419
+RUNE,T10 Metal Rune of Efficiency,T10_RUNE_METAL_EFF_1STAR,10,3256
+RUNE,T10 Metal Rune of Efficiency,T10_RUNE_METAL_EFF_2STAR,10,5535
+RUNE,T10 Metal Rune of Efficiency,T10_RUNE_METAL_EFF_3STAR,10,10419
+RUNE,T10 Metal Rune of XP,T10_RUNE_METAL_XP_1STAR,10,3256
+RUNE,T10 Metal Rune of XP,T10_RUNE_METAL_XP_2STAR,10,5535
+RUNE,T10 Metal Rune of XP,T10_RUNE_METAL_XP_3STAR,10,10419
+RUNE,T10 Mining Rune of Auto-Refine,T10_RUNE_ORE_AUTO_1STAR,10,3256
+RUNE,T10 Mining Rune of Auto-Refine,T10_RUNE_ORE_AUTO_2STAR,10,5535
+RUNE,T10 Mining Rune of Auto-Refine,T10_RUNE_ORE_AUTO_3STAR,10,10419
+RUNE,T10 Mining Rune of Duplication,T10_RUNE_ORE_DUPLIC_1STAR,10,3256
+RUNE,T10 Mining Rune of Duplication,T10_RUNE_ORE_DUPLIC_2STAR,10,5535
+RUNE,T10 Mining Rune of Duplication,T10_RUNE_ORE_DUPLIC_3STAR,10,10419
+RUNE,T10 Mining Rune of XP,T10_RUNE_ORE_XP_1STAR,10,3256
+RUNE,T10 Mining Rune of XP,T10_RUNE_ORE_XP_2STAR,10,5535
+RUNE,T10 Mining Rune of XP,T10_RUNE_ORE_XP_3STAR,10,10419
+RUNE,T10 Plank Rune of Duplication,T10_RUNE_PLANK_DUPLIC_1STAR,10,3256
+RUNE,T10 Plank Rune of Duplication,T10_RUNE_PLANK_DUPLIC_2STAR,10,5535
+RUNE,T10 Plank Rune of Duplication,T10_RUNE_PLANK_DUPLIC_3STAR,10,10419
+RUNE,T10 Plank Rune of Efficiency,T10_RUNE_PLANK_EFF_1STAR,10,3256
+RUNE,T10 Plank Rune of Efficiency,T10_RUNE_PLANK_EFF_2STAR,10,5535
+RUNE,T10 Plank Rune of Efficiency,T10_RUNE_PLANK_EFF_3STAR,10,10419
+RUNE,T10 Plank Rune of XP,T10_RUNE_PLANK_XP_1STAR,10,3256
+RUNE,T10 Plank Rune of XP,T10_RUNE_PLANK_XP_2STAR,10,5535
+RUNE,T10 Plank Rune of XP,T10_RUNE_PLANK_XP_3STAR,10,10419
+RUNE,T10 Skinning Rune of Auto-Refine,T10_RUNE_HIDE_AUTO_1STAR,10,3256
+RUNE,T10 Skinning Rune of Auto-Refine,T10_RUNE_HIDE_AUTO_2STAR,10,5535
+RUNE,T10 Skinning Rune of Auto-Refine,T10_RUNE_HIDE_AUTO_3STAR,10,10419
+RUNE,T10 Skinning Rune of Duplication,T10_RUNE_HIDE_DUPLIC_1STAR,10,3256
+RUNE,T10 Skinning Rune of Duplication,T10_RUNE_HIDE_DUPLIC_2STAR,10,5535
+RUNE,T10 Skinning Rune of Duplication,T10_RUNE_HIDE_DUPLIC_3STAR,10,10419
+RUNE,T10 Skinning Rune of XP,T10_RUNE_HIDE_XP_1STAR,10,3256
+RUNE,T10 Skinning Rune of XP,T10_RUNE_HIDE_XP_2STAR,10,5535
+RUNE,T10 Skinning Rune of XP,T10_RUNE_HIDE_XP_3STAR,10,10419
+RUNE,T10 Tools Rune of Duplication,T10_RUNE_TOOLS_DUPLIC_1STAR,10,3256
+RUNE,T10 Tools Rune of Duplication,T10_RUNE_TOOLS_DUPLIC_2STAR,10,5535
+RUNE,T10 Tools Rune of Duplication,T10_RUNE_TOOLS_DUPLIC_3STAR,10,10419
+RUNE,T10 Tools Rune of Efficiency,T10_RUNE_TOOLS_EFF_1STAR,10,3256
+RUNE,T10 Tools Rune of Efficiency,T10_RUNE_TOOLS_EFF_2STAR,10,5535
+RUNE,T10 Tools Rune of Efficiency,T10_RUNE_TOOLS_EFF_3STAR,10,10419
+RUNE,T10 Tools Rune of XP,T10_RUNE_TOOLS_XP_1STAR,10,3256
+RUNE,T10 Tools Rune of XP,T10_RUNE_TOOLS_XP_2STAR,10,5535
+RUNE,T10 Tools Rune of XP,T10_RUNE_TOOLS_XP_3STAR,10,10419
+RUNE,T10 Warrior Rune of Duplication,T10_RUNE_WARRIOR_DUPLIC_1STAR,10,3256
+RUNE,T10 Warrior Rune of Duplication,T10_RUNE_WARRIOR_DUPLIC_2STAR,10,5535
+RUNE,T10 Warrior Rune of Duplication,T10_RUNE_WARRIOR_DUPLIC_3STAR,10,10419
+RUNE,T10 Warrior Rune of Efficiency,T10_RUNE_WARRIOR_EFF_1STAR,10,3256
+RUNE,T10 Warrior Rune of Efficiency,T10_RUNE_WARRIOR_EFF_2STAR,10,5535
+RUNE,T10 Warrior Rune of Efficiency,T10_RUNE_WARRIOR_EFF_3STAR,10,10419
+RUNE,T10 Warrior Rune of XP,T10_RUNE_WARRIOR_XP_1STAR,10,3256
+RUNE,T10 Warrior Rune of XP,T10_RUNE_WARRIOR_XP_2STAR,10,5535
+RUNE,T10 Warrior Rune of XP,T10_RUNE_WARRIOR_XP_3STAR,10,10419
+RUNE,T10 Woodcutting Rune of Auto-Refine,T10_RUNE_WOOD_AUTO_1STAR,10,3256
+RUNE,T10 Woodcutting Rune of Auto-Refine,T10_RUNE_WOOD_AUTO_2STAR,10,5535
+RUNE,T10 Woodcutting Rune of Auto-Refine,T10_RUNE_WOOD_AUTO_3STAR,10,10419
+RUNE,T10 Woodcutting Rune of Duplication,T10_RUNE_WOOD_DUPLIC_1STAR,10,3256
+RUNE,T10 Woodcutting Rune of Duplication,T10_RUNE_WOOD_DUPLIC_2STAR,10,5535
+RUNE,T10 Woodcutting Rune of Duplication,T10_RUNE_WOOD_DUPLIC_3STAR,10,10419
+RUNE,T10 Woodcutting Rune of XP,T10_RUNE_WOOD_XP_1STAR,10,3256
+RUNE,T10 Woodcutting Rune of XP,T10_RUNE_WOOD_XP_2STAR,10,5535
+RUNE,T10 Woodcutting Rune of XP,T10_RUNE_WOOD_XP_3STAR,10,10419
+TOOL_AXE,Axe,T1_AXE,1,40
+TOOL_AXE,Axe (Excellent),T1_AXE_Q3,1,60
+TOOL_AXE,Axe (Good),T1_AXE_Q1,1,80
+TOOL_AXE,Axe (Masterpiece),T1_AXE_Q4,1,100
+TOOL_AXE,Axe (Outstanding),T1_AXE_Q2,1,120
+TOOL_AXE,Axe,T2_AXE,2,80
+TOOL_AXE,Axe (Excellent),T2_AXE_Q3,2,120
+TOOL_AXE,Axe (Good),T2_AXE_Q1,2,160
+TOOL_AXE,Axe (Masterpiece),T2_AXE_Q4,2,200
+TOOL_AXE,Axe (Outstanding),T2_AXE_Q2,2,240
+TOOL_AXE,Axe,T3_AXE,3,160
+TOOL_AXE,Axe (Excellent),T3_AXE_Q3,3,240
+TOOL_AXE,Axe (Good),T3_AXE_Q1,3,320
+TOOL_AXE,Axe (Masterpiece),T3_AXE_Q4,3,400
+TOOL_AXE,Axe (Outstanding),T3_AXE_Q2,3,480
+TOOL_AXE,Axe,T4_AXE,4,280
+TOOL_AXE,Axe (Excellent),T4_AXE_Q3,4,420
+TOOL_AXE,Axe (Good),T4_AXE_Q1,4,560
+TOOL_AXE,Axe (Masterpiece),T4_AXE_Q4,4,700
+TOOL_AXE,Axe (Outstanding),T4_AXE_Q2,4,840
+TOOL_AXE,Axe,T5_AXE,5,440
+TOOL_AXE,Axe (Excellent),T5_AXE_Q3,5,660
+TOOL_AXE,Axe (Good),T5_AXE_Q1,5,880
+TOOL_AXE,Axe (Masterpiece),T5_AXE_Q4,5,1100
+TOOL_AXE,Axe (Outstanding),T5_AXE_Q2,5,1320
+TOOL_AXE,Axe,T6_AXE,6,640
+TOOL_AXE,Axe (Excellent),T6_AXE_Q3,6,960
+TOOL_AXE,Axe (Good),T6_AXE_Q1,6,1280
+TOOL_AXE,Axe (Masterpiece),T6_AXE_Q4,6,1600
+TOOL_AXE,Axe (Outstanding),T6_AXE_Q2,6,1920
+TOOL_AXE,Axe,T7_AXE,7,880
+TOOL_AXE,Axe (Excellent),T7_AXE_Q3,7,1320
+TOOL_AXE,Axe (Good),T7_AXE_Q1,7,1760
+TOOL_AXE,Axe (Masterpiece),T7_AXE_Q4,7,2200
+TOOL_AXE,Axe (Outstanding),T7_AXE_Q2,7,2640
+TOOL_AXE,Axe,T8_AXE,8,1160
+TOOL_AXE,Axe (Excellent),T8_AXE_Q3,8,1740
+TOOL_AXE,Axe (Good),T8_AXE_Q1,8,2320
+TOOL_AXE,Axe (Masterpiece),T8_AXE_Q4,8,2900
+TOOL_AXE,Axe (Outstanding),T8_AXE_Q2,8,3480
+TOOL_AXE,Axe,T9_AXE,9,1480
+TOOL_AXE,Axe (Excellent),T9_AXE_Q3,9,2220
+TOOL_AXE,Axe (Good),T9_AXE_Q1,9,2960
+TOOL_AXE,Axe (Masterpiece),T9_AXE_Q4,9,3700
+TOOL_AXE,Axe (Outstanding),T9_AXE_Q2,9,4440
+TOOL_AXE,Axe,T10_AXE,10,1840
+TOOL_AXE,Axe (Excellent),T10_AXE_Q3,10,2760
+TOOL_AXE,Axe (Good),T10_AXE_Q1,10,3680
+TOOL_AXE,Axe (Masterpiece),T10_AXE_Q4,10,4600
+TOOL_AXE,Axe (Outstanding),T10_AXE_Q2,10,5520
+TOOL_KNIFE,Skinning Knife,T1_SKINNING_KNIFE,1,40
+TOOL_KNIFE,Skinning Knife (Excellent),T1_SKINNING_KNIFE_Q3,1,60
+TOOL_KNIFE,Skinning Knife (Good),T1_SKINNING_KNIFE_Q1,1,80
+TOOL_KNIFE,Skinning Knife (Masterpiece),T1_SKINNING_KNIFE_Q4,1,100
+TOOL_KNIFE,Skinning Knife (Outstanding),T1_SKINNING_KNIFE_Q2,1,120
+TOOL_KNIFE,Skinning Knife,T2_SKINNING_KNIFE,2,80
+TOOL_KNIFE,Skinning Knife (Excellent),T2_SKINNING_KNIFE_Q3,2,120
+TOOL_KNIFE,Skinning Knife (Good),T2_SKINNING_KNIFE_Q1,2,160
+TOOL_KNIFE,Skinning Knife (Masterpiece),T2_SKINNING_KNIFE_Q4,2,200
+TOOL_KNIFE,Skinning Knife (Outstanding),T2_SKINNING_KNIFE_Q2,2,240
+TOOL_KNIFE,Skinning Knife,T3_SKINNING_KNIFE,3,160
+TOOL_KNIFE,Skinning Knife (Excellent),T3_SKINNING_KNIFE_Q3,3,240
+TOOL_KNIFE,Skinning Knife (Good),T3_SKINNING_KNIFE_Q1,3,320
+TOOL_KNIFE,Skinning Knife (Masterpiece),T3_SKINNING_KNIFE_Q4,3,400
+TOOL_KNIFE,Skinning Knife (Outstanding),T3_SKINNING_KNIFE_Q2,3,480
+TOOL_KNIFE,Skinning Knife,T4_SKINNING_KNIFE,4,280
+TOOL_KNIFE,Skinning Knife (Excellent),T4_SKINNING_KNIFE_Q3,4,420
+TOOL_KNIFE,Skinning Knife (Good),T4_SKINNING_KNIFE_Q1,4,560
+TOOL_KNIFE,Skinning Knife (Masterpiece),T4_SKINNING_KNIFE_Q4,4,700
+TOOL_KNIFE,Skinning Knife (Outstanding),T4_SKINNING_KNIFE_Q2,4,840
+TOOL_KNIFE,Skinning Knife,T5_SKINNING_KNIFE,5,440
+TOOL_KNIFE,Skinning Knife (Excellent),T5_SKINNING_KNIFE_Q3,5,660
+TOOL_KNIFE,Skinning Knife (Good),T5_SKINNING_KNIFE_Q1,5,880
+TOOL_KNIFE,Skinning Knife (Masterpiece),T5_SKINNING_KNIFE_Q4,5,1100
+TOOL_KNIFE,Skinning Knife (Outstanding),T5_SKINNING_KNIFE_Q2,5,1320
+TOOL_KNIFE,Skinning Knife,T6_SKINNING_KNIFE,6,640
+TOOL_KNIFE,Skinning Knife (Excellent),T6_SKINNING_KNIFE_Q3,6,960
+TOOL_KNIFE,Skinning Knife (Good),T6_SKINNING_KNIFE_Q1,6,1280
+TOOL_KNIFE,Skinning Knife (Masterpiece),T6_SKINNING_KNIFE_Q4,6,1600
+TOOL_KNIFE,Skinning Knife (Outstanding),T6_SKINNING_KNIFE_Q2,6,1920
+TOOL_KNIFE,Skinning Knife,T7_SKINNING_KNIFE,7,880
+TOOL_KNIFE,Skinning Knife (Excellent),T7_SKINNING_KNIFE_Q3,7,1320
+TOOL_KNIFE,Skinning Knife (Good),T7_SKINNING_KNIFE_Q1,7,1760
+TOOL_KNIFE,Skinning Knife (Masterpiece),T7_SKINNING_KNIFE_Q4,7,2200
+TOOL_KNIFE,Skinning Knife (Outstanding),T7_SKINNING_KNIFE_Q2,7,2640
+TOOL_KNIFE,Skinning Knife,T8_SKINNING_KNIFE,8,1160
+TOOL_KNIFE,Skinning Knife (Excellent),T8_SKINNING_KNIFE_Q3,8,1740
+TOOL_KNIFE,Skinning Knife (Good),T8_SKINNING_KNIFE_Q1,8,2320
+TOOL_KNIFE,Skinning Knife (Masterpiece),T8_SKINNING_KNIFE_Q4,8,2900
+TOOL_KNIFE,Skinning Knife (Outstanding),T8_SKINNING_KNIFE_Q2,8,3480
+TOOL_KNIFE,Skinning Knife,T9_SKINNING_KNIFE,9,1480
+TOOL_KNIFE,Skinning Knife (Excellent),T9_SKINNING_KNIFE_Q3,9,2220
+TOOL_KNIFE,Skinning Knife (Good),T9_SKINNING_KNIFE_Q1,9,2960
+TOOL_KNIFE,Skinning Knife (Masterpiece),T9_SKINNING_KNIFE_Q4,9,3700
+TOOL_KNIFE,Skinning Knife (Outstanding),T9_SKINNING_KNIFE_Q2,9,4440
+TOOL_KNIFE,Skinning Knife,T10_SKINNING_KNIFE,10,1840
+TOOL_KNIFE,Skinning Knife (Excellent),T10_SKINNING_KNIFE_Q3,10,2760
+TOOL_KNIFE,Skinning Knife (Good),T10_SKINNING_KNIFE_Q1,10,3680
+TOOL_KNIFE,Skinning Knife (Masterpiece),T10_SKINNING_KNIFE_Q4,10,4600
+TOOL_KNIFE,Skinning Knife (Outstanding),T10_SKINNING_KNIFE_Q2,10,5520
+TOOL_PICKAXE,Pickaxe,T1_PICKAXE,1,40
+TOOL_PICKAXE,Pickaxe (Excellent),T1_PICKAXE_Q3,1,60
+TOOL_PICKAXE,Pickaxe (Good),T1_PICKAXE_Q1,1,80
+TOOL_PICKAXE,Pickaxe (Masterpiece),T1_PICKAXE_Q4,1,100
+TOOL_PICKAXE,Pickaxe (Outstanding),T1_PICKAXE_Q2,1,120
+TOOL_PICKAXE,Pickaxe,T2_PICKAXE,2,80
+TOOL_PICKAXE,Pickaxe (Excellent),T2_PICKAXE_Q3,2,120
+TOOL_PICKAXE,Pickaxe (Good),T2_PICKAXE_Q1,2,160
+TOOL_PICKAXE,Pickaxe (Masterpiece),T2_PICKAXE_Q4,2,200
+TOOL_PICKAXE,Pickaxe (Outstanding),T2_PICKAXE_Q2,2,240
+TOOL_PICKAXE,Pickaxe,T3_PICKAXE,3,160
+TOOL_PICKAXE,Pickaxe (Excellent),T3_PICKAXE_Q3,3,240
+TOOL_PICKAXE,Pickaxe (Good),T3_PICKAXE_Q1,3,320
+TOOL_PICKAXE,Pickaxe (Masterpiece),T3_PICKAXE_Q4,3,400
+TOOL_PICKAXE,Pickaxe (Outstanding),T3_PICKAXE_Q2,3,480
+TOOL_PICKAXE,Pickaxe,T4_PICKAXE,4,280
+TOOL_PICKAXE,Pickaxe (Excellent),T4_PICKAXE_Q3,4,420
+TOOL_PICKAXE,Pickaxe (Good),T4_PICKAXE_Q1,4,560
+TOOL_PICKAXE,Pickaxe (Masterpiece),T4_PICKAXE_Q4,4,700
+TOOL_PICKAXE,Pickaxe (Outstanding),T4_PICKAXE_Q2,4,840
+TOOL_PICKAXE,Pickaxe,T5_PICKAXE,5,440
+TOOL_PICKAXE,Pickaxe (Excellent),T5_PICKAXE_Q3,5,660
+TOOL_PICKAXE,Pickaxe (Good),T5_PICKAXE_Q1,5,880
+TOOL_PICKAXE,Pickaxe (Masterpiece),T5_PICKAXE_Q4,5,1100
+TOOL_PICKAXE,Pickaxe (Outstanding),T5_PICKAXE_Q2,5,1320
+TOOL_PICKAXE,Pickaxe,T6_PICKAXE,6,640
+TOOL_PICKAXE,Pickaxe (Excellent),T6_PICKAXE_Q3,6,960
+TOOL_PICKAXE,Pickaxe (Good),T6_PICKAXE_Q1,6,1280
+TOOL_PICKAXE,Pickaxe (Masterpiece),T6_PICKAXE_Q4,6,1600
+TOOL_PICKAXE,Pickaxe (Outstanding),T6_PICKAXE_Q2,6,1920
+TOOL_PICKAXE,Pickaxe,T7_PICKAXE,7,880
+TOOL_PICKAXE,Pickaxe (Excellent),T7_PICKAXE_Q3,7,1320
+TOOL_PICKAXE,Pickaxe (Good),T7_PICKAXE_Q1,7,1760
+TOOL_PICKAXE,Pickaxe (Masterpiece),T7_PICKAXE_Q4,7,2200
+TOOL_PICKAXE,Pickaxe (Outstanding),T7_PICKAXE_Q2,7,2640
+TOOL_PICKAXE,Pickaxe,T8_PICKAXE,8,1160
+TOOL_PICKAXE,Pickaxe (Excellent),T8_PICKAXE_Q3,8,1740
+TOOL_PICKAXE,Pickaxe (Good),T8_PICKAXE_Q1,8,2320
+TOOL_PICKAXE,Pickaxe (Masterpiece),T8_PICKAXE_Q4,8,2900
+TOOL_PICKAXE,Pickaxe (Outstanding),T8_PICKAXE_Q2,8,3480
+TOOL_PICKAXE,Pickaxe,T9_PICKAXE,9,1480
+TOOL_PICKAXE,Pickaxe (Excellent),T9_PICKAXE_Q3,9,2220
+TOOL_PICKAXE,Pickaxe (Good),T9_PICKAXE_Q1,9,2960
+TOOL_PICKAXE,Pickaxe (Masterpiece),T9_PICKAXE_Q4,9,3700
+TOOL_PICKAXE,Pickaxe (Outstanding),T9_PICKAXE_Q2,9,4440
+TOOL_PICKAXE,Pickaxe,T10_PICKAXE,10,1840
+TOOL_PICKAXE,Pickaxe (Excellent),T10_PICKAXE_Q3,10,2760
+TOOL_PICKAXE,Pickaxe (Good),T10_PICKAXE_Q1,10,3680
+TOOL_PICKAXE,Pickaxe (Masterpiece),T10_PICKAXE_Q4,10,4600
+TOOL_PICKAXE,Pickaxe (Outstanding),T10_PICKAXE_Q2,10,5520
+TOOL_POUCH,Pouch,T1_POUCH,1,40
+TOOL_POUCH,Pouch (Excellent),T1_POUCH_Q3,1,60
+TOOL_POUCH,Pouch (Good),T1_POUCH_Q1,1,80
+TOOL_POUCH,Pouch (Masterpiece),T1_POUCH_Q4,1,100
+TOOL_POUCH,Pouch (Outstanding),T1_POUCH_Q2,1,120
+TOOL_POUCH,Pouch,T2_POUCH,2,80
+TOOL_POUCH,Pouch (Excellent),T2_POUCH_Q3,2,120
+TOOL_POUCH,Pouch (Good),T2_POUCH_Q1,2,160
+TOOL_POUCH,Pouch (Masterpiece),T2_POUCH_Q4,2,200
+TOOL_POUCH,Pouch (Outstanding),T2_POUCH_Q2,2,240
+TOOL_POUCH,Pouch,T3_POUCH,3,160
+TOOL_POUCH,Pouch (Excellent),T3_POUCH_Q3,3,240
+TOOL_POUCH,Pouch (Good),T3_POUCH_Q1,3,320
+TOOL_POUCH,Pouch (Masterpiece),T3_POUCH_Q4,3,400
+TOOL_POUCH,Pouch (Outstanding),T3_POUCH_Q2,3,480
+TOOL_POUCH,Pouch,T4_POUCH,4,280
+TOOL_POUCH,Pouch (Excellent),T4_POUCH_Q3,4,420
+TOOL_POUCH,Pouch (Good),T4_POUCH_Q1,4,560
+TOOL_POUCH,Pouch (Masterpiece),T4_POUCH_Q4,4,700
+TOOL_POUCH,Pouch (Outstanding),T4_POUCH_Q2,4,840
+TOOL_POUCH,Pouch,T5_POUCH,5,440
+TOOL_POUCH,Pouch (Excellent),T5_POUCH_Q3,5,660
+TOOL_POUCH,Pouch (Good),T5_POUCH_Q1,5,880
+TOOL_POUCH,Pouch (Masterpiece),T5_POUCH_Q4,5,1100
+TOOL_POUCH,Pouch (Outstanding),T5_POUCH_Q2,5,1320
+TOOL_POUCH,Pouch,T6_POUCH,6,640
+TOOL_POUCH,Pouch (Excellent),T6_POUCH_Q3,6,960
+TOOL_POUCH,Pouch (Good),T6_POUCH_Q1,6,1280
+TOOL_POUCH,Pouch (Masterpiece),T6_POUCH_Q4,6,1600
+TOOL_POUCH,Pouch (Outstanding),T6_POUCH_Q2,6,1920
+TOOL_POUCH,Pouch,T7_POUCH,7,880
+TOOL_POUCH,Pouch (Excellent),T7_POUCH_Q3,7,1320
+TOOL_POUCH,Pouch (Good),T7_POUCH_Q1,7,1760
+TOOL_POUCH,Pouch (Masterpiece),T7_POUCH_Q4,7,2200
+TOOL_POUCH,Pouch (Outstanding),T7_POUCH_Q2,7,2640
+TOOL_POUCH,Pouch,T8_POUCH,8,1160
+TOOL_POUCH,Pouch (Excellent),T8_POUCH_Q3,8,1740
+TOOL_POUCH,Pouch (Good),T8_POUCH_Q1,8,2320
+TOOL_POUCH,Pouch (Masterpiece),T8_POUCH_Q4,8,2900
+TOOL_POUCH,Pouch (Outstanding),T8_POUCH_Q2,8,3480
+TOOL_POUCH,Pouch,T9_POUCH,9,1480
+TOOL_POUCH,Pouch (Excellent),T9_POUCH_Q3,9,2220
+TOOL_POUCH,Pouch (Good),T9_POUCH_Q1,9,2960
+TOOL_POUCH,Pouch (Masterpiece),T9_POUCH_Q4,9,3700
+TOOL_POUCH,Pouch (Outstanding),T9_POUCH_Q2,9,4440
+TOOL_POUCH,Pouch,T10_POUCH,10,1840
+TOOL_POUCH,Pouch (Excellent),T10_POUCH_Q3,10,2760
+TOOL_POUCH,Pouch (Good),T10_POUCH_Q1,10,3680
+TOOL_POUCH,Pouch (Masterpiece),T10_POUCH_Q4,10,4600
+TOOL_POUCH,Pouch (Outstanding),T10_POUCH_Q2,10,5520
+TOOL_ROD,Fishing Rod,T1_FISHING_ROD,1,40
+TOOL_ROD,Fishing Rod (Excellent),T1_FISHING_ROD_Q3,1,60
+TOOL_ROD,Fishing Rod (Good),T1_FISHING_ROD_Q1,1,80
+TOOL_ROD,Fishing Rod (Masterpiece),T1_FISHING_ROD_Q4,1,100
+TOOL_ROD,Fishing Rod (Outstanding),T1_FISHING_ROD_Q2,1,120
+TOOL_ROD,Fishing Rod,T2_FISHING_ROD,2,80
+TOOL_ROD,Fishing Rod (Excellent),T2_FISHING_ROD_Q3,2,120
+TOOL_ROD,Fishing Rod (Good),T2_FISHING_ROD_Q1,2,160
+TOOL_ROD,Fishing Rod (Masterpiece),T2_FISHING_ROD_Q4,2,200
+TOOL_ROD,Fishing Rod (Outstanding),T2_FISHING_ROD_Q2,2,240
+TOOL_ROD,Fishing Rod,T3_FISHING_ROD,3,160
+TOOL_ROD,Fishing Rod (Excellent),T3_FISHING_ROD_Q3,3,240
+TOOL_ROD,Fishing Rod (Good),T3_FISHING_ROD_Q1,3,320
+TOOL_ROD,Fishing Rod (Masterpiece),T3_FISHING_ROD_Q4,3,400
+TOOL_ROD,Fishing Rod (Outstanding),T3_FISHING_ROD_Q2,3,480
+TOOL_ROD,Fishing Rod,T4_FISHING_ROD,4,280
+TOOL_ROD,Fishing Rod (Excellent),T4_FISHING_ROD_Q3,4,420
+TOOL_ROD,Fishing Rod (Good),T4_FISHING_ROD_Q1,4,560
+TOOL_ROD,Fishing Rod (Masterpiece),T4_FISHING_ROD_Q4,4,700
+TOOL_ROD,Fishing Rod (Outstanding),T4_FISHING_ROD_Q2,4,840
+TOOL_ROD,Fishing Rod,T5_FISHING_ROD,5,440
+TOOL_ROD,Fishing Rod (Excellent),T5_FISHING_ROD_Q3,5,660
+TOOL_ROD,Fishing Rod (Good),T5_FISHING_ROD_Q1,5,880
+TOOL_ROD,Fishing Rod (Masterpiece),T5_FISHING_ROD_Q4,5,1100
+TOOL_ROD,Fishing Rod (Outstanding),T5_FISHING_ROD_Q2,5,1320
+TOOL_ROD,Fishing Rod,T6_FISHING_ROD,6,640
+TOOL_ROD,Fishing Rod (Excellent),T6_FISHING_ROD_Q3,6,960
+TOOL_ROD,Fishing Rod (Good),T6_FISHING_ROD_Q1,6,1280
+TOOL_ROD,Fishing Rod (Masterpiece),T6_FISHING_ROD_Q4,6,1600
+TOOL_ROD,Fishing Rod (Outstanding),T6_FISHING_ROD_Q2,6,1920
+TOOL_ROD,Fishing Rod,T7_FISHING_ROD,7,880
+TOOL_ROD,Fishing Rod (Excellent),T7_FISHING_ROD_Q3,7,1320
+TOOL_ROD,Fishing Rod (Good),T7_FISHING_ROD_Q1,7,1760
+TOOL_ROD,Fishing Rod (Masterpiece),T7_FISHING_ROD_Q4,7,2200
+TOOL_ROD,Fishing Rod (Outstanding),T7_FISHING_ROD_Q2,7,2640
+TOOL_ROD,Fishing Rod,T8_FISHING_ROD,8,1160
+TOOL_ROD,Fishing Rod (Excellent),T8_FISHING_ROD_Q3,8,1740
+TOOL_ROD,Fishing Rod (Good),T8_FISHING_ROD_Q1,8,2320
+TOOL_ROD,Fishing Rod (Masterpiece),T8_FISHING_ROD_Q4,8,2900
+TOOL_ROD,Fishing Rod (Outstanding),T8_FISHING_ROD_Q2,8,3480
+TOOL_ROD,Fishing Rod,T9_FISHING_ROD,9,1480
+TOOL_ROD,Fishing Rod (Excellent),T9_FISHING_ROD_Q3,9,2220
+TOOL_ROD,Fishing Rod (Good),T9_FISHING_ROD_Q1,9,2960
+TOOL_ROD,Fishing Rod (Masterpiece),T9_FISHING_ROD_Q4,9,3700
+TOOL_ROD,Fishing Rod (Outstanding),T9_FISHING_ROD_Q2,9,4440
+TOOL_ROD,Fishing Rod,T10_FISHING_ROD,10,1840
+TOOL_ROD,Fishing Rod (Excellent),T10_FISHING_ROD_Q3,10,2760
+TOOL_ROD,Fishing Rod (Good),T10_FISHING_ROD_Q1,10,3680
+TOOL_ROD,Fishing Rod (Masterpiece),T10_FISHING_ROD_Q4,10,4600
+TOOL_ROD,Fishing Rod (Outstanding),T10_FISHING_ROD_Q2,10,5520
+TOOL_SICKLE,Sickle,T1_SICKLE,1,40
+TOOL_SICKLE,Sickle (Excellent),T1_SICKLE_Q3,1,60
+TOOL_SICKLE,Sickle (Good),T1_SICKLE_Q1,1,80
+TOOL_SICKLE,Sickle (Masterpiece),T1_SICKLE_Q4,1,100
+TOOL_SICKLE,Sickle (Outstanding),T1_SICKLE_Q2,1,120
+TOOL_SICKLE,Sickle,T2_SICKLE,2,80
+TOOL_SICKLE,Sickle (Excellent),T2_SICKLE_Q3,2,120
+TOOL_SICKLE,Sickle (Good),T2_SICKLE_Q1,2,160
+TOOL_SICKLE,Sickle (Masterpiece),T2_SICKLE_Q4,2,200
+TOOL_SICKLE,Sickle (Outstanding),T2_SICKLE_Q2,2,240
+TOOL_SICKLE,Sickle,T3_SICKLE,3,160
+TOOL_SICKLE,Sickle (Excellent),T3_SICKLE_Q3,3,240
+TOOL_SICKLE,Sickle (Good),T3_SICKLE_Q1,3,320
+TOOL_SICKLE,Sickle (Masterpiece),T3_SICKLE_Q4,3,400
+TOOL_SICKLE,Sickle (Outstanding),T3_SICKLE_Q2,3,480
+TOOL_SICKLE,Sickle,T4_SICKLE,4,280
+TOOL_SICKLE,Sickle (Excellent),T4_SICKLE_Q3,4,420
+TOOL_SICKLE,Sickle (Good),T4_SICKLE_Q1,4,560
+TOOL_SICKLE,Sickle (Masterpiece),T4_SICKLE_Q4,4,700
+TOOL_SICKLE,Sickle (Outstanding),T4_SICKLE_Q2,4,840
+TOOL_SICKLE,Sickle,T5_SICKLE,5,440
+TOOL_SICKLE,Sickle (Excellent),T5_SICKLE_Q3,5,660
+TOOL_SICKLE,Sickle (Good),T5_SICKLE_Q1,5,880
+TOOL_SICKLE,Sickle (Masterpiece),T5_SICKLE_Q4,5,1100
+TOOL_SICKLE,Sickle (Outstanding),T5_SICKLE_Q2,5,1320
+TOOL_SICKLE,Sickle,T6_SICKLE,6,640
+TOOL_SICKLE,Sickle (Excellent),T6_SICKLE_Q3,6,960
+TOOL_SICKLE,Sickle (Good),T6_SICKLE_Q1,6,1280
+TOOL_SICKLE,Sickle (Masterpiece),T6_SICKLE_Q4,6,1600
+TOOL_SICKLE,Sickle (Outstanding),T6_SICKLE_Q2,6,1920
+TOOL_SICKLE,Sickle,T7_SICKLE,7,880
+TOOL_SICKLE,Sickle (Excellent),T7_SICKLE_Q3,7,1320
+TOOL_SICKLE,Sickle (Good),T7_SICKLE_Q1,7,1760
+TOOL_SICKLE,Sickle (Masterpiece),T7_SICKLE_Q4,7,2200
+TOOL_SICKLE,Sickle (Outstanding),T7_SICKLE_Q2,7,2640
+TOOL_SICKLE,Sickle,T8_SICKLE,8,1160
+TOOL_SICKLE,Sickle (Excellent),T8_SICKLE_Q3,8,1740
+TOOL_SICKLE,Sickle (Good),T8_SICKLE_Q1,8,2320
+TOOL_SICKLE,Sickle (Masterpiece),T8_SICKLE_Q4,8,2900
+TOOL_SICKLE,Sickle (Outstanding),T8_SICKLE_Q2,8,3480
+TOOL_SICKLE,Sickle,T9_SICKLE,9,1480
+TOOL_SICKLE,Sickle (Excellent),T9_SICKLE_Q3,9,2220
+TOOL_SICKLE,Sickle (Good),T9_SICKLE_Q1,9,2960
+TOOL_SICKLE,Sickle (Masterpiece),T9_SICKLE_Q4,9,3700
+TOOL_SICKLE,Sickle (Outstanding),T9_SICKLE_Q2,9,4440
+TOOL_SICKLE,Sickle,T10_SICKLE,10,1840
+TOOL_SICKLE,Sickle (Excellent),T10_SICKLE_Q3,10,2760
+TOOL_SICKLE,Sickle (Good),T10_SICKLE_Q1,10,3680
+TOOL_SICKLE,Sickle (Masterpiece),T10_SICKLE_Q4,10,4600
+TOOL_SICKLE,Sickle (Outstanding),T10_SICKLE_Q2,10,5520
+WEAPON,Bow,T1_BOW,1,40
+WEAPON,Bow (Excellent),T1_BOW_Q3,1,60
+WEAPON,Bow (Good),T1_BOW_Q1,1,80
+WEAPON,Bow (Masterpiece),T1_BOW_Q4,1,100
+WEAPON,Bow (Outstanding),T1_BOW_Q2,1,120
+WEAPON,Fire Staff,T1_FIRE_STAFF,1,40
+WEAPON,Fire Staff (Excellent),T1_FIRE_STAFF_Q3,1,60
+WEAPON,Fire Staff (Good),T1_FIRE_STAFF_Q1,1,80
+WEAPON,Fire Staff (Masterpiece),T1_FIRE_STAFF_Q4,1,100
+WEAPON,Fire Staff (Outstanding),T1_FIRE_STAFF_Q2,1,120
+WEAPON,Sword,T1_SWORD,1,40
+WEAPON,Sword (Excellent),T1_SWORD_Q3,1,60
+WEAPON,Sword (Good),T1_SWORD_Q1,1,80
+WEAPON,Sword (Masterpiece),T1_SWORD_Q4,1,100
+WEAPON,Sword (Outstanding),T1_SWORD_Q2,1,120
+WEAPON,Bow,T2_BOW,2,80
+WEAPON,Bow (Excellent),T2_BOW_Q3,2,120
+WEAPON,Bow (Good),T2_BOW_Q1,2,160
+WEAPON,Bow (Masterpiece),T2_BOW_Q4,2,200
+WEAPON,Bow (Outstanding),T2_BOW_Q2,2,240
+WEAPON,Fire Staff,T2_FIRE_STAFF,2,80
+WEAPON,Fire Staff (Excellent),T2_FIRE_STAFF_Q3,2,120
+WEAPON,Fire Staff (Good),T2_FIRE_STAFF_Q1,2,160
+WEAPON,Fire Staff (Masterpiece),T2_FIRE_STAFF_Q4,2,200
+WEAPON,Fire Staff (Outstanding),T2_FIRE_STAFF_Q2,2,240
+WEAPON,Sword,T2_SWORD,2,80
+WEAPON,Sword (Excellent),T2_SWORD_Q3,2,120
+WEAPON,Sword (Good),T2_SWORD_Q1,2,160
+WEAPON,Sword (Masterpiece),T2_SWORD_Q4,2,200
+WEAPON,Sword (Outstanding),T2_SWORD_Q2,2,240
+WEAPON,Bow,T3_BOW,3,160
+WEAPON,Bow (Excellent),T3_BOW_Q3,3,240
+WEAPON,Bow (Good),T3_BOW_Q1,3,320
+WEAPON,Bow (Masterpiece),T3_BOW_Q4,3,400
+WEAPON,Bow (Outstanding),T3_BOW_Q2,3,480
+WEAPON,Fire Staff,T3_FIRE_STAFF,3,160
+WEAPON,Fire Staff (Excellent),T3_FIRE_STAFF_Q3,3,240
+WEAPON,Fire Staff (Good),T3_FIRE_STAFF_Q1,3,320
+WEAPON,Fire Staff (Masterpiece),T3_FIRE_STAFF_Q4,3,400
+WEAPON,Fire Staff (Outstanding),T3_FIRE_STAFF_Q2,3,480
+WEAPON,Sword,T3_SWORD,3,160
+WEAPON,Sword (Excellent),T3_SWORD_Q3,3,240
+WEAPON,Sword (Good),T3_SWORD_Q1,3,320
+WEAPON,Sword (Masterpiece),T3_SWORD_Q4,3,400
+WEAPON,Sword (Outstanding),T3_SWORD_Q2,3,480
+WEAPON,Bow,T4_BOW,4,280
+WEAPON,Bow (Excellent),T4_BOW_Q3,4,420
+WEAPON,Bow (Good),T4_BOW_Q1,4,560
+WEAPON,Bow (Masterpiece),T4_BOW_Q4,4,700
+WEAPON,Bow (Outstanding),T4_BOW_Q2,4,840
+WEAPON,Fire Staff,T4_FIRE_STAFF,4,280
+WEAPON,Fire Staff (Excellent),T4_FIRE_STAFF_Q3,4,420
+WEAPON,Fire Staff (Good),T4_FIRE_STAFF_Q1,4,560
+WEAPON,Fire Staff (Masterpiece),T4_FIRE_STAFF_Q4,4,700
+WEAPON,Fire Staff (Outstanding),T4_FIRE_STAFF_Q2,4,840
+WEAPON,Sword,T4_SWORD,4,280
+WEAPON,Sword (Excellent),T4_SWORD_Q3,4,420
+WEAPON,Sword (Good),T4_SWORD_Q1,4,560
+WEAPON,Sword (Masterpiece),T4_SWORD_Q4,4,700
+WEAPON,Sword (Outstanding),T4_SWORD_Q2,4,840
+WEAPON,Bow,T5_BOW,5,440
+WEAPON,Bow (Excellent),T5_BOW_Q3,5,660
+WEAPON,Bow (Good),T5_BOW_Q1,5,880
+WEAPON,Bow (Masterpiece),T5_BOW_Q4,5,1100
+WEAPON,Bow (Outstanding),T5_BOW_Q2,5,1320
+WEAPON,Fire Staff,T5_FIRE_STAFF,5,440
+WEAPON,Fire Staff (Excellent),T5_FIRE_STAFF_Q3,5,660
+WEAPON,Fire Staff (Good),T5_FIRE_STAFF_Q1,5,880
+WEAPON,Fire Staff (Masterpiece),T5_FIRE_STAFF_Q4,5,1100
+WEAPON,Fire Staff (Outstanding),T5_FIRE_STAFF_Q2,5,1320
+WEAPON,Sword,T5_SWORD,5,440
+WEAPON,Sword (Excellent),T5_SWORD_Q3,5,660
+WEAPON,Sword (Good),T5_SWORD_Q1,5,880
+WEAPON,Sword (Masterpiece),T5_SWORD_Q4,5,1100
+WEAPON,Sword (Outstanding),T5_SWORD_Q2,5,1320
+WEAPON,Bow,T6_BOW,6,640
+WEAPON,Bow (Excellent),T6_BOW_Q3,6,960
+WEAPON,Bow (Good),T6_BOW_Q1,6,1280
+WEAPON,Bow (Masterpiece),T6_BOW_Q4,6,1600
+WEAPON,Bow (Outstanding),T6_BOW_Q2,6,1920
+WEAPON,Fire Staff,T6_FIRE_STAFF,6,640
+WEAPON,Fire Staff (Excellent),T6_FIRE_STAFF_Q3,6,960
+WEAPON,Fire Staff (Good),T6_FIRE_STAFF_Q1,6,1280
+WEAPON,Fire Staff (Masterpiece),T6_FIRE_STAFF_Q4,6,1600
+WEAPON,Fire Staff (Outstanding),T6_FIRE_STAFF_Q2,6,1920
+WEAPON,Sword,T6_SWORD,6,640
+WEAPON,Sword (Excellent),T6_SWORD_Q3,6,960
+WEAPON,Sword (Good),T6_SWORD_Q1,6,1280
+WEAPON,Sword (Masterpiece),T6_SWORD_Q4,6,1600
+WEAPON,Sword (Outstanding),T6_SWORD_Q2,6,1920
+WEAPON,Bow,T7_BOW,7,880
+WEAPON,Bow (Excellent),T7_BOW_Q3,7,1320
+WEAPON,Bow (Good),T7_BOW_Q1,7,1760
+WEAPON,Bow (Masterpiece),T7_BOW_Q4,7,2200
+WEAPON,Bow (Outstanding),T7_BOW_Q2,7,2640
+WEAPON,Fire Staff,T7_FIRE_STAFF,7,880
+WEAPON,Fire Staff (Excellent),T7_FIRE_STAFF_Q3,7,1320
+WEAPON,Fire Staff (Good),T7_FIRE_STAFF_Q1,7,1760
+WEAPON,Fire Staff (Masterpiece),T7_FIRE_STAFF_Q4,7,2200
+WEAPON,Fire Staff (Outstanding),T7_FIRE_STAFF_Q2,7,2640
+WEAPON,Sword,T7_SWORD,7,880
+WEAPON,Sword (Excellent),T7_SWORD_Q3,7,1320
+WEAPON,Sword (Good),T7_SWORD_Q1,7,1760
+WEAPON,Sword (Masterpiece),T7_SWORD_Q4,7,2200
+WEAPON,Sword (Outstanding),T7_SWORD_Q2,7,2640
+WEAPON,Bow,T8_BOW,8,1160
+WEAPON,Bow (Excellent),T8_BOW_Q3,8,1740
+WEAPON,Bow (Good),T8_BOW_Q1,8,2320
+WEAPON,Bow (Masterpiece),T8_BOW_Q4,8,2900
+WEAPON,Bow (Outstanding),T8_BOW_Q2,8,3480
+WEAPON,Fire Staff,T8_FIRE_STAFF,8,1160
+WEAPON,Fire Staff (Excellent),T8_FIRE_STAFF_Q3,8,1740
+WEAPON,Fire Staff (Good),T8_FIRE_STAFF_Q1,8,2320
+WEAPON,Fire Staff (Masterpiece),T8_FIRE_STAFF_Q4,8,2900
+WEAPON,Fire Staff (Outstanding),T8_FIRE_STAFF_Q2,8,3480
+WEAPON,Sword,T8_SWORD,8,1160
+WEAPON,Sword (Excellent),T8_SWORD_Q3,8,1740
+WEAPON,Sword (Good),T8_SWORD_Q1,8,2320
+WEAPON,Sword (Masterpiece),T8_SWORD_Q4,8,2900
+WEAPON,Sword (Outstanding),T8_SWORD_Q2,8,3480
+WEAPON,Bow,T9_BOW,9,1480
+WEAPON,Bow (Excellent),T9_BOW_Q3,9,2220
+WEAPON,Bow (Good),T9_BOW_Q1,9,2960
+WEAPON,Bow (Masterpiece),T9_BOW_Q4,9,3700
+WEAPON,Bow (Outstanding),T9_BOW_Q2,9,4440
+WEAPON,Fire Staff,T9_FIRE_STAFF,9,1480
+WEAPON,Fire Staff (Excellent),T9_FIRE_STAFF_Q3,9,2220
+WEAPON,Fire Staff (Good),T9_FIRE_STAFF_Q1,9,2960
+WEAPON,Fire Staff (Masterpiece),T9_FIRE_STAFF_Q4,9,3700
+WEAPON,Fire Staff (Outstanding),T9_FIRE_STAFF_Q2,9,4440
+WEAPON,Sword,T9_SWORD,9,1480
+WEAPON,Sword (Excellent),T9_SWORD_Q3,9,2220
+WEAPON,Sword (Good),T9_SWORD_Q1,9,2960
+WEAPON,Sword (Masterpiece),T9_SWORD_Q4,9,3700
+WEAPON,Sword (Outstanding),T9_SWORD_Q2,9,4440
+WEAPON,Bow,T10_BOW,10,1840
+WEAPON,Bow (Excellent),T10_BOW_Q3,10,2760
+WEAPON,Bow (Good),T10_BOW_Q1,10,3680
+WEAPON,Bow (Masterpiece),T10_BOW_Q4,10,4600
+WEAPON,Bow (Outstanding),T10_BOW_Q2,10,5520
+WEAPON,Fire Staff,T10_FIRE_STAFF,10,1840
+WEAPON,Fire Staff (Excellent),T10_FIRE_STAFF_Q3,10,2760
+WEAPON,Fire Staff (Good),T10_FIRE_STAFF_Q1,10,3680
+WEAPON,Fire Staff (Masterpiece),T10_FIRE_STAFF_Q4,10,4600
+WEAPON,Fire Staff (Outstanding),T10_FIRE_STAFF_Q2,10,5520
+WEAPON,Sword,T10_SWORD,10,1840
+WEAPON,Sword (Excellent),T10_SWORD_Q3,10,2760
+WEAPON,Sword (Good),T10_SWORD_Q1,10,3680
+WEAPON,Sword (Masterpiece),T10_SWORD_Q4,10,4600
+WEAPON,Sword (Outstanding),T10_SWORD_Q2,10,5520

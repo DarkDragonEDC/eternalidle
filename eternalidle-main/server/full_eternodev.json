@@ -1,0 +1,1281 @@
+[
+  {
+    "id": "95323ca3-85c9-4b5e-b4af-08aafa64c6ff",
+    "user_id": "214b276f-45c1-45cd-a4c1-3519a78f9f72",
+    "name": "EternoDev",
+    "state": {
+      "claims": [],
+      "cosmetics": {
+        "frame": "golden",
+        "title": "Elite Member"
+      },
+      "daily_spin": {
+        "total_spins": 9,
+        "last_spin_date": "2026-02-07T05:31:11.602Z"
+      },
+      "notifications": [
+        {
+          "id": 1771617552071.2893,
+          "read": false,
+          "type": "SYSTEM",
+          "message": "📜 Combat Summary\n⌛ 1m 28s\n💀 12 Kills\n✨ +756 COMBAT\n💰 +6.666 Silver",
+          "timestamp": 1771617552071
+        },
+        {
+          "id": 1771617445454.1733,
+          "read": false,
+          "type": "SYSTEM",
+          "message": "📜 Combat Summary\n⌛ 1m 16s\n💀 10 Kills\n✨ +630 COMBAT\n💰 +5.274 Silver\n📦 Loot:\n • 1x T4 DUNGEON MAP",
+          "timestamp": 1771617445454
+        },
+        {
+          "id": 1771617339454.4167,
+          "read": false,
+          "type": "SYSTEM",
+          "message": "📜 Combat Summary\n⌛ 12s\n💀 1 Kills\n✨ +63 COMBAT\n💰 +620 Silver",
+          "timestamp": 1771617339454
+        },
+        {
+          "id": 1771617322378.0623,
+          "read": false,
+          "type": "SYSTEM",
+          "message": "📜 Combat Summary\n⌛ 5s",
+          "timestamp": 1771617322378
+        },
+        {
+          "id": 1771617283981.9717,
+          "read": false,
+          "type": "SYSTEM",
+          "message": "📜 Offline Progress Summary\n⌛ 13m 33s",
+          "timestamp": 1771617283981
+        },
+        {
+          "id": 1771616470957.8127,
+          "read": false,
+          "type": "SYSTEM",
+          "message": "📜 Combat Summary\n⌛ 7s\n💀 3 Kills\n✨ +189 COMBAT\n💰 +1.655 Silver",
+          "timestamp": 1771616470957
+        },
+        {
+          "id": 1771616451668.6064,
+          "read": false,
+          "type": "SYSTEM",
+          "message": "📜 Combat Summary\n⌛ 4m 48s\n💀 133 Kills\n✨ +8379 COMBAT\n💰 +69.346 Silver\n📦 Loot:\n • 1x T4 DUNGEON MAP",
+          "timestamp": 1771616451668
+        },
+        {
+          "id": 1771616149718.4285,
+          "read": false,
+          "type": "SYSTEM",
+          "message": "📜 Combat Summary\n⌛ 6s\n💀 2 Kills\n✨ +126 COMBAT\n💰 +1.238 Silver",
+          "timestamp": 1771616149718
+        },
+        {
+          "id": 1771616028309.3318,
+          "read": false,
+          "type": "SYSTEM",
+          "message": "📜 Combat Summary\n⌛ 5s\n💀 2 Kills\n✨ +126 COMBAT\n💰 +962 Silver",
+          "timestamp": 1771616028309
+        },
+        {
+          "id": 1771616014754.1113,
+          "read": false,
+          "type": "SYSTEM",
+          "message": "📜 Offline Progress Summary\n⌛ 1m 5s",
+          "timestamp": 1771616014754
+        }
+      ],
+      "selectedTitle": "<Game Dev>",
+      "crownPurchases": {
+        "NAME_CHANGE_TOKEN": 4,
+        "ETERNAL_MEMBERSHIP": 5,
+        "INVENTORY_SLOT_TICKET": 14
+      },
+      "crownTransactions": [
+        {
+          "cost": 500,
+          "type": "PURCHASE",
+          "itemId": "NAME_CHANGE_TOKEN",
+          "timestamp": 1769989036889,
+          "balanceAfter": 3475
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770005014510,
+          "balanceAfter": 3450
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770005015550,
+          "balanceAfter": 3425
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770005016391,
+          "balanceAfter": 3400
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770005017275,
+          "balanceAfter": 3375
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770005018039,
+          "balanceAfter": 3350
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770005018799,
+          "balanceAfter": 3325
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770005019571,
+          "balanceAfter": 3300
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770005020278,
+          "balanceAfter": 3275
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770005021089,
+          "balanceAfter": 3250
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770005022170,
+          "balanceAfter": 3225
+        },
+        {
+          "cost": 25,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1770380252988,
+          "balanceAfter": 3200
+        },
+        {
+          "type": "ADD",
+          "amount": 10,
+          "source": "ADMIN_CMD",
+          "timestamp": 1770429065573,
+          "balanceAfter": 3210
+        },
+        {
+          "type": "ADD",
+          "amount": 25,
+          "source": "DAILY_SPIN",
+          "timestamp": 1770433730930,
+          "balanceAfter": 3235
+        },
+        {
+          "type": "ADD",
+          "amount": 25,
+          "source": "DAILY_SPIN",
+          "timestamp": 1770437825517,
+          "balanceAfter": 3260
+        },
+        {
+          "type": "ADD",
+          "amount": 25,
+          "source": "DAILY_SPIN",
+          "timestamp": 1770442271602,
+          "balanceAfter": 3285
+        },
+        {
+          "type": "ADD",
+          "amount": 25,
+          "source": "DAILY_SPIN",
+          "timestamp": 1770520700143,
+          "balanceAfter": 3310
+        },
+        {
+          "cost": 50,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1771286154730,
+          "balanceAfter": 9949
+        },
+        {
+          "cost": 50,
+          "type": "PURCHASE",
+          "itemId": "INVENTORY_SLOT_TICKET",
+          "timestamp": 1771287531429,
+          "balanceAfter": 9899
+        },
+        {
+          "cost": 500,
+          "type": "PURCHASE",
+          "itemId": "NAME_CHANGE_TOKEN",
+          "timestamp": 1771358014934,
+          "balanceAfter": 9399
+        }
+      ],
+      "pendingNameChange": false
+    },
+    "skills": {
+      "RUNE": {
+        "xp": 0,
+        "level": 100
+      },
+      "COMBAT": {
+        "xp": 404923373,
+        "level": 100
+      },
+      "ALCHEMY": {
+        "xp": 89614,
+        "level": 100
+      },
+      "COOKING": {
+        "xp": 0,
+        "level": 100
+      },
+      "FISHING": {
+        "xp": 0,
+        "level": 100
+      },
+      "HERBALISM": {
+        "xp": 0,
+        "level": 100
+      },
+      "ORE_MINER": {
+        "xp": 15072,
+        "level": 100
+      },
+      "LUMBERJACK": {
+        "xp": 49616,
+        "level": 100
+      },
+      "BOW_MASTERY": {
+        "xp": 0,
+        "level": 100
+      },
+      "DISTILLATION": {
+        "xp": 0,
+        "level": 100
+      },
+      "MAGE_CRAFTER": {
+        "xp": 0,
+        "level": 100
+      },
+      "TOOL_CRAFTER": {
+        "xp": 4048,
+        "level": 100
+      },
+      "CLOTH_REFINER": {
+        "xp": 0,
+        "level": 100
+      },
+      "DUNGEONEERING": {
+        "xp": 161731,
+        "level": 100
+      },
+      "PLANK_REFINER": {
+        "xp": 0,
+        "level": 100
+      },
+      "SWORD_MASTERY": {
+        "xp": 0,
+        "level": 100
+      },
+      "ANIMAL_SKINNER": {
+        "xp": 0,
+        "level": 100
+      },
+      "HUNTER_CRAFTER": {
+        "xp": 946237,
+        "level": 100
+      },
+      "FIBER_HARVESTER": {
+        "xp": 0,
+        "level": 100
+      },
+      "LEATHER_REFINER": {
+        "xp": 0,
+        "level": 100
+      },
+      "WARRIOR_CRAFTER": {
+        "xp": 0,
+        "level": 100
+      },
+      "MAGE_PROFICIENCY": {
+        "xp": 0,
+        "level": 39
+      },
+      "METAL_BAR_REFINER": {
+        "xp": 0,
+        "level": 100
+      },
+      "FIRE_STAFF_MASTERY": {
+        "xp": 0,
+        "level": 100
+      },
+      "HUNTER_PROFICIENCY": {
+        "xp": 62515,
+        "level": 39
+      },
+      "WARRIOR_PROFICIENCY": {
+        "xp": 19668,
+        "level": 79
+      }
+    },
+    "equipment": {
+      "cape": {
+        "id": "T4_PLATE_CAPE_Q4",
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "food": {
+        "id": "T4_food",
+        "stars": 0,
+        "amount": 9978496,
+        "quality": 0
+      },
+      "boots": {
+        "id": "T4_PLATE_BOOTS_Q4",
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "chest": {
+        "id": "T4_PLATE_ARMOR_Q4",
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "gloves": {
+        "id": "T4_PLATE_GLOVES_Q4",
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "helmet": {
+        "id": "T4_PLATE_HELMET_Q4",
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "offHand": {
+        "id": "T4_SHEATH_Q4",
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "mainHand": {
+        "id": "T4_sword_Q4",
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "tool_axe": {
+        "id": "T10_AXE_Q4::Eugene Lionheart",
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "rune_ORE_XP": {
+        "id": "T3_RUNE_ORE_XP_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_FISH_XP": {
+        "id": "T3_RUNE_FISH_XP_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_HERB_XP": {
+        "id": "T3_RUNE_HERB_XP_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_HIDE_XP": {
+        "id": "T3_RUNE_HIDE_XP_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_MAGE_XP": {
+        "id": "T2_RUNE_MAGE_XP_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_WOOD_XP": {
+        "id": "T3_RUNE_WOOD_XP_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "tool_pickaxe": {
+        "id": "T3_PICKAXE_Q3::<EternoDev>",
+        "stars": 0,
+        "amount": 1,
+        "quality": 3
+      },
+      "rune_CLOTH_XP": {
+        "id": "T2_RUNE_CLOTH_XP_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_FIBER_XP": {
+        "id": "T3_RUNE_FIBER_XP_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_MAGE_EFF": {
+        "id": "T2_RUNE_MAGE_EFF_1STAR",
+        "stars": 1,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_METAL_XP": {
+        "id": "T2_RUNE_METAL_XP_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_ORE_COPY": {
+        "id": "T3_RUNE_ORE_COPY_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_PLANK_XP": {
+        "id": "T2_RUNE_PLANK_XP_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_TOOLS_XP": {
+        "id": "T2_RUNE_TOOLS_XP_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_CLOTH_EFF": {
+        "id": "T2_RUNE_CLOTH_EFF_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_FISH_COPY": {
+        "id": "T3_RUNE_FISH_COPY_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_HERB_COPY": {
+        "id": "T3_RUNE_HERB_COPY_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_HIDE_COPY": {
+        "id": "T3_RUNE_HIDE_COPY_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_HUNTER_XP": {
+        "id": "T2_RUNE_HUNTER_XP_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_MAGE_COPY": {
+        "id": "T2_RUNE_MAGE_COPY_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_METAL_EFF": {
+        "id": "T2_RUNE_METAL_EFF_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_ORE_SPEED": {
+        "id": "T3_RUNE_ORE_SPEED_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_PLANK_EFF": {
+        "id": "T2_RUNE_PLANK_EFF_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_TOOLS_EFF": {
+        "id": "T2_RUNE_TOOLS_EFF_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_WOOD_COPY": {
+        "id": "T3_RUNE_WOOD_COPY_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_ALCHEMY_XP": {
+        "id": "T2_RUNE_ALCHEMY_XP_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_CLOTH_COPY": {
+        "id": "T2_RUNE_CLOTH_COPY_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_COOKING_XP": {
+        "id": "T2_RUNE_COOKING_XP_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_EXTRACT_XP": {
+        "id": "T2_RUNE_EXTRACT_XP_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_FIBER_COPY": {
+        "id": "T3_RUNE_FIBER_COPY_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_FISH_SPEED": {
+        "id": "T3_RUNE_FISH_SPEED_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_HERB_SPEED": {
+        "id": "T3_RUNE_HERB_SPEED_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_HIDE_SPEED": {
+        "id": "T3_RUNE_HIDE_SPEED_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_HUNTER_EFF": {
+        "id": "T2_RUNE_HUNTER_EFF_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_LEATHER_XP": {
+        "id": "T2_RUNE_LEATHER_XP_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_METAL_COPY": {
+        "id": "T2_RUNE_METAL_COPY_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_PLANK_COPY": {
+        "id": "T2_RUNE_PLANK_COPY_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_TOOLS_COPY": {
+        "id": "T2_RUNE_TOOLS_COPY_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_WARRIOR_XP": {
+        "id": "T2_RUNE_WARRIOR_XP_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_WOOD_SPEED": {
+        "id": "T3_RUNE_WOOD_SPEED_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_ALCHEMY_EFF": {
+        "id": "T2_RUNE_ALCHEMY_EFF_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_COOKING_EFF": {
+        "id": "T2_RUNE_COOKING_EFF_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_EXTRACT_EFF": {
+        "id": "T2_RUNE_EXTRACT_EFF_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_FIBER_SPEED": {
+        "id": "T3_RUNE_FIBER_SPEED_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_HUNTER_COPY": {
+        "id": "T2_RUNE_HUNTER_COPY_1STAR",
+        "stars": 1,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_LEATHER_EFF": {
+        "id": "T2_RUNE_LEATHER_EFF_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_WARRIOR_EFF": {
+        "id": "T2_RUNE_WARRIOR_EFF_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_ALCHEMY_COPY": {
+        "id": "T2_RUNE_ALCHEMY_COPY_1STAR",
+        "stars": 1,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_ATTACK_BURST": {
+        "id": "T4_RUNE_ATTACK_BURST_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_COOKING_COPY": {
+        "id": "T2_RUNE_COOKING_COPY_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_EXTRACT_COPY": {
+        "id": "T3_RUNE_EXTRACT_COPY_1STAR",
+        "stars": 1,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_LEATHER_COPY": {
+        "id": "T3_RUNE_LEATHER_COPY_1STAR",
+        "stars": 1,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_WARRIOR_COPY": {
+        "id": "T2_RUNE_WARRIOR_COPY_2STAR",
+        "stars": 2,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_ATTACK_ATTACK": {
+        "id": "T4_RUNE_ATTACK_ATTACK_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      },
+      "rune_ATTACK_ATTACK_SPEED": {
+        "id": "T4_RUNE_ATTACK_ATTACK_SPEED_3STAR",
+        "stars": 3,
+        "amount": 1,
+        "quality": 0
+      }
+    },
+    "created_at": "2026-01-29T12:53:02.770704+00:00",
+    "updated_at": "2026-02-20T16:32:50.913911+00:00",
+    "inventory": {
+      "T1_ORE": 3560,
+      "T2_BAR": {
+        "stars": 0,
+        "amount": 490,
+        "quality": 0
+      },
+      "T2_ORE": {
+        "stars": 0,
+        "amount": 1710,
+        "quality": 0
+      },
+      "T3_BAR": 7,
+      "T3_ORE": 12840,
+      "T4_BAR": 112,
+      "T4_ORE": 1936,
+      "T8_ORE": 1713,
+      "T1_FISH": 2450,
+      "T1_HIDE": 4098,
+      "T1_WOOD": {
+        "stars": 0,
+        "amount": 3254,
+        "quality": 0
+      },
+      "T2_FISH": 6401,
+      "T2_HERB": 2254,
+      "T2_HIDE": {
+        "stars": 0,
+        "amount": 3175,
+        "quality": 0
+      },
+      "T2_WOOD": 5383,
+      "T3_FISH": 1299,
+      "T3_HERB": 1541,
+      "T3_HIDE": {
+        "stars": 0,
+        "amount": 2138,
+        "quality": 0
+      },
+      "T3_WOOD": 2013,
+      "T4_FISH": 6518,
+      "T4_HIDE": 2653,
+      "T4_WOOD": 515,
+      "T5_FISH": 39,
+      "T5_FOOD": 300,
+      "T10_HIDE": {
+        "stars": 0,
+        "amount": 164,
+        "quality": 0
+      },
+      "T10_WOOD": 901,
+      "T1_CLOTH": 7,
+      "T1_CREST": 34,
+      "T1_PLANK": {
+        "stars": 0,
+        "amount": 7,
+        "quality": 0
+      },
+      "T2_CLOTH": 1089,
+      "T2_FIBER": 1291,
+      "T2_PLANK": 350,
+      "T3_CLOTH": 65,
+      "T3_FIBER": 876,
+      "T3_PLANK": 125,
+      "T4_CLOTH": 384,
+      "T4_FIBER": 2601,
+      "T4_PLANK": 53,
+      "T5_PLANK": 997919,
+      "T8_CREST": 14,
+      "T10_CREST": 998851,
+      "T10_PLANK": {
+        "stars": 0,
+        "amount": 255,
+        "quality": 0
+      },
+      "T2_BOW_Q2": 1,
+      "MEMBERSHIP": 2,
+      "T1_EXTRACT": 2181,
+      "T1_LEATHER": 243,
+      "T2_EXTRACT": {
+        "stars": 0,
+        "amount": 106,
+        "quality": 0
+      },
+      "T2_LEATHER": 80,
+      "T3_LEATHER": 284,
+      "T4_LEATHER": 500,
+      "T4_TOME_Q3": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 3
+      },
+      "t10_bow_q4": 1,
+      "T10_EXTRACT": 999174,
+      "T10_TOME_Q4": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "T10_TORCH_Q4": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "T3_POTION_XP": 4,
+      "T10_POTION_XP": {
+        "amount": 95
+      },
+      "T1_CHEST_GOOD": 4,
+      "T1_RUNE_SHARD": 9508,
+      "T8_CHEST_GOOD": 3,
+      "T10_CHEST_GOOD": 27,
+      "T1_DUNGEON_MAP": {
+        "amount": 1133,
+        "quality": 0
+      },
+      "T3_DUNGEON_MAP": 10,
+      "T4_DUNGEON_MAP": 159,
+      "T5_DUNGEON_MAP": 194,
+      "T6_DUNGEON_MAP": 37,
+      "T7_DUNGEON_MAP": 35,
+      "T8_DUNGEON_MAP": 355,
+      "T10_DUNGEON_MAP": 522,
+      "T1_CHEST_NORMAL": 10,
+      "T1_FOOD::Kvothe": 963,
+      "T3_MAGE_CAPE_Q3": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 3
+      },
+      "T3_MAGE_CAPE_Q4": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "T8_CHEST_NORMAL": 4,
+      "T10_CHEST_NORMAL": 55,
+      "T10_MAGE_CAPE_Q4": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "T2_FIRE_STAFF_Q4": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 0
+      },
+      "T3_POTION_SILVER": 12,
+      "NAME_CHANGE_TOKEN": 1,
+      "T10_POTION_GATHER": {
+        "amount": 47
+      },
+      "T1_PLATE_ARMOR_Q4": 1,
+      "T2_PLATE_ARMOR_Q4": 1,
+      "T3_PLATE_ARMOR_Q4": 1,
+      "T3_POTION_QUALITY": 1,
+      "T4_CLOTH_ARMOR_Q2": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 2
+      },
+      "T4_PLATE_ARMOR_Q4": 1,
+      "T5_PLATE_ARMOR_Q4": 1,
+      "T6_PLATE_ARMOR_Q4": 1,
+      "T7_PLATE_ARMOR_Q4": 1,
+      "T8_PLATE_ARMOR_Q4": 1,
+      "T9_PLATE_ARMOR_Q4": 1,
+      "T10_CLOTH_ARMOR_Q4": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "T10_CLOTH_BOOTS_Q4": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "T10_PLATE_ARMOR_Q4": 1,
+      "T10_POTION_QUALITY": {
+        "amount": 31
+      },
+      "T3_CLOTH_GLOVES_Q3": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 3
+      },
+      "T3_SWORD_Q4::Benni": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "T10_CHEST_EXCELLENT": 5,
+      "T10_CLOTH_GLOVES_Q4": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "T10_CLOTH_HELMET_Q4": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "T10_LEATHER_CAPE_Q4": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "T3_LEATHER_BOOTS_Q3": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 3
+      },
+      "T10_LEATHER_ARMOR_Q4": {
+        "stars": 0,
+        "amount": 2,
+        "quality": 4
+      },
+      "T10_LEATHER_BOOTS_Q4": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "T1_BATTLE_RUNE_SHARD": 79996931341,
+      "T1_CHEST_MASTERPIECE": 2,
+      "T1_CHEST_OUTSTANDING": 2,
+      "T1_RUNE_ORE_XP_3STAR": 1,
+      "T2_RUNE_ORE_XP_1STAR": 1,
+      "T2_RUNE_ORE_XP_2STAR": 1,
+      "T3_RUNE_ORE_XP_3STAR": 1,
+      "T4_LEATHER_HELMET_Q3": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 3
+      },
+      "T5_CHEST_MASTERPIECE": 1,
+      "T8_CHEST_MASTERPIECE": 4,
+      "T8_CHEST_OUTSTANDING": 1,
+      "INVENTORY_SLOT_TICKET": 2,
+      "T10_CHEST_MASTERPIECE": 2,
+      "T10_CHEST_OUTSTANDING": 19,
+      "T10_LEATHER_GLOVES_Q4": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "T10_LEATHER_HELMET_Q4": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 4
+      },
+      "T1_RUNE_FISH_XP_2STAR": 1,
+      "T1_RUNE_HERB_XP_3STAR": 1,
+      "T1_RUNE_HIDE_XP_1STAR": 1,
+      "T1_RUNE_HIDE_XP_2STAR": 1,
+      "T1_RUNE_HIDE_XP_3STAR": 1,
+      "T1_RUNE_MAGE_XP_2STAR": 1,
+      "T1_RUNE_MAGE_XP_3STAR": 1,
+      "T2_RUNE_FISH_XP_1STAR": 1,
+      "T2_RUNE_HERB_XP_1STAR": 1,
+      "T2_RUNE_HERB_XP_2STAR": 1,
+      "T2_RUNE_HERB_XP_3STAR": 1,
+      "T2_RUNE_HIDE_XP_1STAR": 1,
+      "T2_RUNE_HIDE_XP_2STAR": 1,
+      "T2_RUNE_MAGE_XP_1STAR": 1,
+      "T2_RUNE_WOOD_XP_1STAR": 1,
+      "T3_RUNE_FISH_XP_3STAR": 1,
+      "T3_RUNE_HERB_XP_3STAR": 1,
+      "T3_RUNE_HIDE_XP_3STAR": 1,
+      "T3_RUNE_WOOD_XP_1STAR": 1,
+      "T3_RUNE_WOOD_XP_2STAR": 1,
+      "T1_CLOTH_GLOVES::Korea": {
+        "stars": 0,
+        "amount": 2,
+        "quality": 0
+      },
+      "T1_RUNE_CLOTH_XP_3STAR": 1,
+      "T1_RUNE_FIBER_XP_1STAR": 1,
+      "T1_RUNE_FIBER_XP_2STAR": 1,
+      "T1_RUNE_FIBER_XP_3STAR": 1,
+      "T1_RUNE_MAGE_EFF_3STAR": 1,
+      "T1_RUNE_ORE_COPY_3STAR": 1,
+      "T1_RUNE_PLANK_XP_1STAR": 1,
+      "T1_RUNE_PLANK_XP_2STAR": 1,
+      "T1_RUNE_PLANK_XP_3STAR": 1,
+      "T2_RUNE_FIBER_XP_2STAR": 1,
+      "T2_RUNE_FIBER_XP_3STAR": 1,
+      "T2_RUNE_METAL_XP_1STAR": 1,
+      "T2_RUNE_ORE_COPY_1STAR": 1,
+      "T2_RUNE_PLANK_XP_1STAR": 1,
+      "T3_RUNE_FIBER_XP_2STAR": 1,
+      "T3_RUNE_ORE_COPY_1STAR": 1,
+      "T1_RUNE_FISH_COPY_1STAR": 1,
+      "T1_RUNE_FISH_COPY_3STAR": 1,
+      "T1_RUNE_HERB_COPY_2STAR": 1,
+      "T1_RUNE_HERB_COPY_3STAR": 1,
+      "T1_RUNE_HIDE_COPY_2STAR": 1,
+      "T1_RUNE_HUNTER_XP_1STAR": 1,
+      "T1_RUNE_METAL_EFF_2STAR": 1,
+      "T1_RUNE_METAL_EFF_3STAR": 1,
+      "T1_RUNE_ORE_SPEED_2STAR": 1,
+      "T1_RUNE_ORE_SPEED_3STAR": 1,
+      "T1_RUNE_PLANK_EFF_2STAR": 1,
+      "T1_RUNE_PLANK_EFF_3STAR": 1,
+      "T1_RUNE_TOOLS_EFF_1STAR": 1,
+      "T1_RUNE_TOOLS_EFF_2STAR": 1,
+      "T1_RUNE_WOOD_COPY_2STAR": 1,
+      "T1_RUNE_WOOD_COPY_3STAR": 1,
+      "T2_RUNE_FISH_COPY_2STAR": 1,
+      "T2_RUNE_HERB_COPY_2STAR": 1,
+      "T2_RUNE_HIDE_COPY_3STAR": 1,
+      "T2_RUNE_HUNTER_XP_1STAR": 1,
+      "T2_RUNE_METAL_EFF_1STAR": 1,
+      "T2_RUNE_ORE_SPEED_3STAR": 1,
+      "T2_RUNE_PLANK_EFF_1STAR": 1,
+      "T2_RUNE_PLANK_EFF_2STAR": 1,
+      "T2_RUNE_WOOD_COPY_2STAR": 1,
+      "T2_RUNE_WOOD_COPY_3STAR": 1,
+      "T3_PICKAXE::<EternoDev>": {
+        "stars": 0,
+        "amount": 12,
+        "quality": 0
+      },
+      "T3_RUNE_FISH_COPY_1STAR": 1,
+      "T3_RUNE_HERB_COPY_3STAR": 1,
+      "T3_RUNE_HIDE_COPY_2STAR": 1,
+      "T3_RUNE_ORE_SPEED_2STAR": 1,
+      "T3_RUNE_WOOD_COPY_2STAR": {
+        "stars": 2,
+        "amount": 1,
+        "rarity": "RARE",
+        "quality": 0
+      },
+      "T1_RUNE_ALCHEMY_XP_2STAR": 1,
+      "T1_RUNE_CLOTH_COPY_1STAR": 1,
+      "T1_RUNE_CLOTH_COPY_2STAR": 1,
+      "T1_RUNE_EXTRACT_XP_2STAR": 1,
+      "T1_RUNE_EXTRACT_XP_3STAR": 1,
+      "T1_RUNE_FIBER_COPY_1STAR": 1,
+      "T1_RUNE_FIBER_COPY_2STAR": 1,
+      "T1_RUNE_FIBER_COPY_3STAR": 1,
+      "T1_RUNE_FISH_SPEED_1STAR": 1,
+      "T1_RUNE_FISH_SPEED_2STAR": 1,
+      "T1_RUNE_HIDE_SPEED_1STAR": 1,
+      "T1_RUNE_HIDE_SPEED_3STAR": 1,
+      "T1_RUNE_LEATHER_XP_1STAR": 1,
+      "T1_RUNE_LEATHER_XP_2STAR": 1,
+      "T1_RUNE_PLANK_COPY_1STAR": 1,
+      "T1_RUNE_TOOLS_COPY_1STAR": 1,
+      "T1_RUNE_TOOLS_COPY_2STAR": 1,
+      "T1_RUNE_TOOLS_COPY_3STAR": 1,
+      "T1_RUNE_WOOD_SPEED_1STAR": 1,
+      "T2_RUNE_ALCHEMY_XP_1STAR": 1,
+      "T2_RUNE_COOKING_XP_1STAR": 1,
+      "T2_RUNE_FIBER_COPY_3STAR": 1,
+      "T2_RUNE_FISH_SPEED_1STAR": 1,
+      "T2_RUNE_FISH_SPEED_3STAR": 1,
+      "T2_RUNE_HERB_SPEED_1STAR": 1,
+      "T2_RUNE_HERB_SPEED_3STAR": 1,
+      "T2_RUNE_HIDE_SPEED_1STAR": 1,
+      "T2_RUNE_HIDE_SPEED_2STAR": 1,
+      "T2_RUNE_HUNTER_EFF_1STAR": 1,
+      "T2_RUNE_LEATHER_XP_1STAR": 1,
+      "T2_RUNE_METAL_COPY_1STAR": 1,
+      "T2_RUNE_METAL_COPY_2STAR": 1,
+      "T2_RUNE_TOOLS_COPY_1STAR": 1,
+      "T2_RUNE_WOOD_SPEED_1STAR": 1,
+      "T2_RUNE_WOOD_SPEED_3STAR": 1,
+      "T3_RUNE_FIBER_COPY_2STAR": 1,
+      "T3_RUNE_FISH_SPEED_2STAR": 1,
+      "T3_RUNE_HERB_SPEED_3STAR": 1,
+      "T3_RUNE_HIDE_SPEED_2STAR": 1,
+      "T3_RUNE_WOOD_SPEED_2STAR": 1,
+      "T1_CLOTH_GLOVES_Q1::Korea": {
+        "stars": 0,
+        "amount": 2,
+        "quality": 0
+      },
+      "T1_FOOD::Eugene Lionheart": {
+        "stars": 0,
+        "amount": 1819,
+        "quality": 0
+      },
+      "T1_RUNE_ALCHEMY_EFF_2STAR": 1,
+      "T1_RUNE_COOKING_EFF_1STAR": 1,
+      "T1_RUNE_COOKING_EFF_2STAR": 1,
+      "T1_RUNE_EXTRACT_EFF_1STAR": 1,
+      "T1_RUNE_FIBER_SPEED_1STAR": 1,
+      "T1_RUNE_FIBER_SPEED_3STAR": 1,
+      "T1_RUNE_HUNTER_COPY_1STAR": 1,
+      "T1_RUNE_HUNTER_COPY_3STAR": 1,
+      "T1_RUNE_LEATHER_EFF_1STAR": 1,
+      "T1_RUNE_LEATHER_EFF_2STAR": 1,
+      "T1_RUNE_WARRIOR_EFF_1STAR": 1,
+      "T1_RUNE_WARRIOR_EFF_2STAR": 1,
+      "T2_FOOD::Eugene Lionheart": 13,
+      "T2_RUNE_ALCHEMY_EFF_1STAR": 1,
+      "T2_RUNE_COOKING_EFF_1STAR": 1,
+      "T2_RUNE_EXTRACT_EFF_1STAR": 1,
+      "T2_RUNE_LEATHER_EFF_2STAR": 1,
+      "T3_RUNE_FIBER_SPEED_3STAR": 1,
+      "T1_RUNE_ALCHEMY_COPY_2STAR": 1,
+      "T1_RUNE_ALCHEMY_COPY_3STAR": 1,
+      "T1_RUNE_ATTACK_BURST_1STAR": 1,
+      "T1_RUNE_ATTACK_BURST_2STAR": 1,
+      "T1_RUNE_ATTACK_BURST_3STAR": 1,
+      "T1_RUNE_COOKING_COPY_1STAR": 1,
+      "T1_RUNE_COOKING_COPY_2STAR": 1,
+      "T1_RUNE_EXTRACT_COPY_1STAR": 1,
+      "T1_RUNE_EXTRACT_COPY_3STAR": 1,
+      "T1_RUNE_LEATHER_COPY_3STAR": 1,
+      "T1_RUNE_WARRIOR_COPY_2STAR": 1,
+      "T1_RUNE_WARRIOR_COPY_3STAR": 1,
+      "T2_RUNE_ATTACK_BURST_2STAR": 1,
+      "T2_RUNE_ATTACK_BURST_3STAR": 1,
+      "T2_RUNE_COOKING_COPY_1STAR": 1,
+      "T2_RUNE_EXTRACT_COPY_3STAR": 1,
+      "T2_RUNE_LEATHER_COPY_1STAR": 1,
+      "T2_RUNE_LEATHER_COPY_3STAR": 1,
+      "T3_PICKAXE_Q1::<EternoDev>": {
+        "stars": 0,
+        "amount": 4,
+        "quality": 0
+      },
+      "T3_PICKAXE_Q2::<EternoDev>": {
+        "stars": 0,
+        "amount": 3,
+        "quality": 0
+      },
+      "T3_PICKAXE_Q3::<EternoDev>": {
+        "stars": 0,
+        "amount": 3,
+        "quality": 0
+      },
+      "T3_RUNE_ATTACK_BURST_1STAR": 1,
+      "T3_RUNE_ATTACK_BURST_2STAR": 1,
+      "T4_RUNE_ATTACK_BURST_1STAR": 1,
+      "T4_RUNE_ATTACK_BURST_2STAR": 1,
+      "T5_RUNE_ATTACK_BURST_3STAR": 1,
+      "T6_RUNE_ATTACK_BURST_1STAR": 1,
+      "T7_RUNE_ATTACK_BURST_1STAR": 1,
+      "T7_RUNE_ATTACK_BURST_2STAR": 1,
+      "T1_RUNE_ATTACK_ATTACK_1STAR": 1,
+      "T1_RUNE_ATTACK_ATTACK_2STAR": 1,
+      "T2_RUNE_ATTACK_ATTACK_3STAR": 1,
+      "T3_RUNE_ATTACK_ATTACK_1STAR": 1,
+      "T3_RUNE_ATTACK_ATTACK_2STAR": 1,
+      "T4_RUNE_ATTACK_ATTACK_3STAR": 1,
+      "T5_RUNE_ATTACK_ATTACK_3STAR": 1,
+      "T6_RUNE_ATTACK_ATTACK_1STAR": 1,
+      "T7_RUNE_ATTACK_ATTACK_1STAR": 1,
+      "T7_RUNE_ATTACK_ATTACK_2STAR": 1,
+      "T1_RUNE_ATTACK_SAVE_FOOD_1STAR": 1,
+      "T1_RUNE_ATTACK_SAVE_FOOD_3STAR": 1,
+      "T2_RUNE_ATTACK_SAVE_FOOD_1STAR": 1,
+      "T2_RUNE_ATTACK_SAVE_FOOD_3STAR": 1,
+      "T3_RUNE_ATTACK_SAVE_FOOD_1STAR": 1,
+      "T5_RUNE_ATTACK_SAVE_FOOD_3STAR": 1,
+      "T6_RUNE_ATTACK_SAVE_FOOD_1STAR": 1,
+      "T7_RUNE_ATTACK_SAVE_FOOD_1STAR": 1,
+      "T7_RUNE_ATTACK_SAVE_FOOD_2STAR": 1,
+      "T7_WORLDBOSS_CHEST_MASTERPIECE": 9998498,
+      "T8_WORLDBOSS_CHEST_MASTERPIECE": 9998498,
+      "T9_WORLDBOSS_CHEST_MASTERPIECE": 9998498,
+      "T10_RUNE_ATTACK_SAVE_FOOD_3STAR": 1,
+      "T10_WORLDBOSS_CHEST_MASTERPIECE": 9998498,
+      "T1_RUNE_ATTACK_ATTACK_SPEED_2STAR": 1,
+      "T1_RUNE_ATTACK_ATTACK_SPEED_3STAR": 1,
+      "T3_CLOTH_GLOVES::Eugene Lionheart": {
+        "stars": 0,
+        "amount": 6,
+        "quality": 0
+      },
+      "T3_RUNE_ATTACK_ATTACK_SPEED_1STAR": 1,
+      "T4_RUNE_ATTACK_ATTACK_SPEED_2STAR": 1,
+      "T4_RUNE_ATTACK_ATTACK_SPEED_3STAR": 1,
+      "T5_RUNE_ATTACK_ATTACK_SPEED_2STAR": 1,
+      "T6_RUNE_ATTACK_ATTACK_SPEED_1STAR": 1,
+      "T6_RUNE_ATTACK_ATTACK_SPEED_2STAR": 1,
+      "T7_RUNE_ATTACK_ATTACK_SPEED_1STAR": 1,
+      "T10_RUNE_ATTACK_ATTACK_SPEED_1STAR": 1,
+      "T10_RUNE_ATTACK_ATTACK_SPEED_2STAR": 1,
+      "T10_RUNE_ATTACK_ATTACK_SPEED_3STAR": 256,
+      "T3_CLOTH_GLOVES_Q1::Eugene Lionheart": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 0
+      },
+      "T3_CLOTH_GLOVES_Q2::Eugene Lionheart": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 0
+      },
+      "T3_CLOTH_GLOVES_Q3::Eugene Lionheart": {
+        "stars": 0,
+        "amount": 1,
+        "quality": 0
+      }
+    },
+    "info": {
+      "orbs": 0,
+      "stats": {
+        "totalKills": 105490,
+        "dungeonsCleared": 127
+      },
+      "health": 2976,
+      "silver": 9696379535,
+      "membership": {
+        "active": true,
+        "expiresAt": 4409507598316,
+        "startedAt": 1770851598316
+      },
+      "active_buffs": {
+        "DROP": {
+          "tier": 3,
+          "value": 0.04,
+          "expiresAt": 1771053382078
+        },
+        "QUALITY": {
+          "tier": 10,
+          "value": 0.4,
+          "expiresAt": 1771429757106
+        },
+        "GLOBAL_XP": {
+          "tier": 10,
+          "value": 0.2,
+          "expiresAt": 1771429784896
+        },
+        "MEMBERSHIP_BOOST": {
+          "source": "MEMBERSHIP",
+          "xpBonus": 0.1,
+          "expiresAt": 4409507598316,
+          "speedBonus": 0
+        }
+      },
+      "inventorySlots": 30,
+      "unlockedTitles": [
+        "<Game Dev>",
+        "Pre-Alpha Player"
+      ],
+      "extraInventorySlots": 999
+    },
+    "combat": null,
+    "dungeon": null,
+    "current_activity": null,
+    "activity_started_at": null,
+    "last_saved": "2026-02-20T19:59:11.055+00:00",
+    "dungeon_state": null,
+    "is_admin": true
+  }
+]

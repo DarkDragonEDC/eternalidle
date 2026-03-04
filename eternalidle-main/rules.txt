@@ -1,0 +1,22 @@
+# Eternal Idle - Regras e Conduta (Pre-Alpha)
+
+## 1. Regras de Gameplay (Ética Idle)
+1. **Automação e Software de Terceiros**: É estritamente proibido o uso de bots, scripts, autoclickers ou qualquer software externo para automatizar ações. O progresso deve ser orgânico ou através dos sistemas nativos de idle/offline do jogo.
+2. **Exploração de Bugs**: Caso encontre uma falha ou bug que conceda vantagem injusta, você deve reportar à administração. O uso deliberado de bugs para ganho pessoal resultará em punições ou reset de progresso.
+3. **Multi-Contas**: Para garantir uma economia justa no Marketplace, cada jogador é limitado a apenas uma conta ativa. O uso de contas secundárias para transferir recursos ou manipular o mercado é proibido.
+4. **Manipulação de Mercado**: Criar ofertas falsas ou realizar ações coordenadas para manipular preços e prejudicar outros jogadores não é permitido.
+
+## 2. Regras de Conduta e Moralidade
+1. **Respeito Mútuo**: Temos tolerância zero para discurso de ódio, assédio ou qualquer forma de discriminação (raça, gênero, religião, orientação sexual, etc.).
+2. **Política de Nomes**: Nomes de personagens não devem ser ofensivos, obscenos ou se passar por membros da equipe de desenvolvimento. Nomes irregulares serão alterados sem aviso prévio.
+3. **Spam e Publicidade**: O chat e os espaços comunitários não devem ser usados para spam ou propaganda de serviços/produtos externos.
+4. **Toxicidade**: Comportamentos que visam apenas estragar a experiência de outros jogadores ou criar um ambiente hostil resultarão em moderação imediata.
+
+## 3. Penalidades
+Infrações a estas regras podem resultar em:
+- Advertências formais.
+- Suspensão temporária da conta.
+- Banimento permanente e exclusão de todos os dados de jogo.
+
+---
+*Regras atualizadas em 06/02/2026 - Versão 1.0 (Pre-Alpha)*

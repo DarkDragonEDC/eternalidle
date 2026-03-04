@@ -1,0 +1,68 @@
+# Eternal Idle - Official Wiki (Pre-Alpha)
+
+Bem-vindo ao guia definitivo do Eternal Idle. Este documento contém informações precisas extraídas diretamente dos sistemas internos do jogo.
+
+---
+
+## 1. Atributos do Personagem
+Seu personagem possui três atributos principais que escalam o dano em conjunto, mas oferecem utilidades distintas.
+
+- **STR (Strength)**: Aumenta seu HP Máximo em **+10 por ponto**
+- **AGI (Agility)**: Aumenta sua velocidade de ataque (**reduz o intervalo entre golpes**). Personagens com alta AGI atacam com muito mais frequência.
+- **INT (Intelligence)**: Aumenta seu ganho passivo de **XP e Prata em +0.5% por ponto**. Ideal para acelerar a progressão global.
+- **IP (Item Power)**: Representa o poder total do seu equipamento. O IP base é `Tier * 100`, acrescido de bônus por qualidade.
+
+---
+
+## 2. Itens, Tiers e Qualidades
+O jogo possui uma progressão de **T1 até T10**.
+
+### Qualidades de Equipamento (Crafting/Upgrade):
+1. **Normal** (Branco) - +0 IP
+2. **Good** (Verde) - +20 IP
+3. **Outstanding** (Azul) - +50 IP
+4. **Excellent** (Roxo) - +100 IP
+5. **Masterpiece** (Laranja) - +200 IP
+
+### Baús de Masmorra (Categorias):
+- **Common, Uncommon, Rare, Epic, Legendary**.
+- Baús contêm **Cristas de Chefe** (Boss Crests) e **Fragmentos de Runa** (Rune Shards).
+
+---
+
+## 3. Profissões e Habilidades
+Cada atividade possui sua própria linha de nível e bônus de eficiência.
+
+### Coleta (Gathering):
+- **Lumberjack**: Coleta de Madeira para Arcos e Ferramentas.
+- **Ore Miner**: Extração de Minérios para Armas e Armaduras de Placa.
+- **Animal Skinner**: Coleta de Couros de monstros derrotados.
+- **Fiber Harvester**: Coleta de Fibras para Tecidos e Equipamentos Mágicos.
+- **Herbalism**: Colheita de Ervas para Alquimia.
+- **Fishing**: Pesca de peixes para a culinária.
+
+### Refino e Produção:
+- **Refining**: Transformação de brutos em Planks, Metal Bars, Leather e Cloth.
+- **Distillation**: Processo alquímico para criar Extratos de Ervas.
+- **Crafting**: Criação de equipamentos nas estações (Warrior, Hunter, Mage, Toolmaker).
+- **Alchemy**: Produção de Poções que buffam XP, Ganho de Prata ou Chance de Qualidade.
+- **Cooking**: Preparo de alimentos para regeneração automática de HP.
+
+---
+
+## 4. Combate e Masmorras
+- **Combate**: Derrotar monstros aumenta seu nível de Combate, permitindo enfrentar criaturas mais poderosas e entrar em masmorras de Tiers elevados.
+- **Dungeons (T1 a T10)**: Requerem Mapas. Consistem em 5 ondas de monstros terminando em um Boss. Garantem bônus de XP massivos e Baús de Tesouro.
+- **Offline Progress**: Ao fechar o jogo, seu personagem continua lutando ou coletando, desde que tenha recursos iniciais (como comida ou fôlego).
+
+---
+
+## 5. Sistemas Avançados
+- **Rune Forge**: Use Fragmentos de Runa para criar Runas que dão bônus de XP, Duplicação de Itens (Copy) ou Auto-Refino (Auto-Refine).
+- **Membership (VIP)**: Concede **+20 Slots de Inventário**, **+10% XP**, **+10% Prata** e **+10% de Eficiência** global.
+- **Moedas**:
+- **Silver (Prata)**: Moeda padrão para mercado e taxas.
+- **Orbs (Orbes)**: Moeda premium para Member, expansões de inventário e itens especiais.
+
+---
+*Wiki técnica revisada em 06/02/2026 - Versão Pre-Alpha*

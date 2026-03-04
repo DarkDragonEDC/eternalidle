@@ -1,0 +1,38 @@
+# Patch Notes - Eternal Idle
+
+## Configuração Inicial (06/02/2026)
+- Configurado idioma de comunicação para Português (PT-BR).
+- Definido padrão de idioma do código do jogo para Inglês.
+- Inicializado o acompanhamento de patch notes.
+- Iniciados servidores de desenvolvimento local para o cliente e o servidor.
+
+## Correção do Sistema de Ranking
+- Corrigido o Sistema de Ranking: Aumentado o limite de busca inicial de 100 para 1000 jogadores para garantir que todos os jogadores ativos sejam incluídos no Hall da Fama.
+- Melhorada a Robu- Sistema de Ranking Robusto: Adicionado fallback para tipos de ranking indefinidos para evitar erros de ordenação.
+
+## Correção de Sobrevivência (Comida)
+- Consumo de Comida Offline: Corrigido o erro onde personagens em Masmorras Offline não consumiam comida, levando a mortes indesejadas.
+- Sobrevivência contra Burst: Agora o personagem tenta consumir comida entre rounds de ataque (mesmo dentro de uma mesma tick de servidor), aumentando drasticamente a chance de sobrevivência contra monstros rápidos ou em situações de lag.
+- **Cura de Pânico**: Ajustada a lógica de consumo para permitir desperdício de cura se o HP estiver abaixo de 40%. O personagem não vai mais morrer segurando comida só porque a cura da comida era "grande demais" para o HP faltante.
+
+## Interface e UX
+- **Formatação de Prata**: Restaurada a funcionalidade de alternar entre o valor completo e abreviado (K, M, B) ao clicar no saldo de prata. O menu de Orbs/Shop continua acessível através do ícone de seta.
+- Sistema: Renomeado "Eternal Membership" para apenas "Membership" para maior clareza sobre a duração do item.
+- Sistema: Adicionada migração automática de itens "Eternal Membership" antigos para o novo formato.
+- Loja: Aumentado o custo de "Inventory Slot expansion" de 25 para 50 Orbs.
+
+## Ajustes de Atributos e Poder (Item Power)
+- **Correção da Atualização de IP**: Corrigido um problema onde o Item Power não atualizava em tempo real ao equipar/desequipar Capacetes ou Botas devido a nomes de slots incorretos no frontend.
+- **Lógica de Gear Score**: O cálculo do Item Power foi alterado para ser a média de todos os **7 slots de combate**. Agora, slots vazios contam como 0, fazendo com que o poder total do personagem caia conforme o esperado ao remover equipamentos.
+- **Resolução Dinâmica**: O frontend agora resolve os atributos dos itens diretamente da definição compartilhada, garantindo que bônus de qualidade e mudanças de balanceamento reflitam instantaneamente no IP médio.
+- **Otimização de UI**: Redesenhado o modal de informações do item para ser mais compacto. Tier, Tipo e IP agora usam um sistema de badges horizontais, e a grade de atributos foi otimizada para ocupar menos espaço vertical sem perder informações.
+
+## Metadados de Fabricação (Crafting)
+- **Rastreamento de Criador**: Agora, todos os itens fabricados via Crafting, Alchemy e Cooking registram o nome do personagem que os criou (`Crafted By`) e o momento da criação (`Crafted At`).
+- **Visualização de Detalhes**: Adicionada uma nova seção no modal de informações do item para exibir esses dados de fabricação de forma clara.
+
+## Estabilidade do Inventário e Mercado
+- **Correção de Crash Visual**: Resolvido o erro "Objects are not valid as a React child" que ocorria ao tentar renderizar quantidades de itens que continham metadados (como itens craftados).
+- **Compatibilidade Global**: Atualizados os painéis de Inventário, Atividades, Mercado e Runas para suportarem o novo formato de armazenamento de itens com segurança.
+- **Persistência no Mercado**: O sistema de Mercado agora preserva os metadados dos itens durante todo o ciclo: Listagem -> Compra/Cancelamento -> Resgate (Claims) -> Inventário. Corrigido um bug onde metadados de fabricação eram perdidos durante a transação entre personagens.
+- **Sanitização de Dados**: Implementada uma proteção no servidor para garantir que a quantidade de itens e informações estáticas não corrompam os metadados específicos da instância do item (como quem o craftou).
