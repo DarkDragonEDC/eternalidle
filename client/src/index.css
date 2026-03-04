@@ -1,0 +1,503 @@
+:root {
+  /* Common variables (Tier Colors) */
+  --t1: #a0a0a0;
+  --t2: #4ade80;
+  --t3: #60a5fa;
+  --t4: #a855f7;
+  --t5: #fbbf24;
+  --t6: #f87171;
+  --t7: #f0f0f0;
+  --t8: #d4af37;
+}
+
+.theme-dark {
+  --bg-dark: #0d1117;
+  --panel-bg: rgba(22, 27, 34, 0.82);
+  --accent: #90d5ff;
+  --accent-soft: rgba(144, 213, 255, 0.15);
+  --text-main: #f0f0f0;
+  --text-dim: #d9dce2;
+  --border: rgba(240, 240, 240, 0.08);
+  --border-active: rgba(144, 213, 255, 0.3);
+  --glass-bg: rgba(13, 17, 23, 0.7);
+  --glass-border: rgba(240, 240, 240, 0.05);
+  --glass-blur: blur(12px);
+  --scrollbar-track: rgba(0, 0, 0, 0.3);
+  --slot-bg: rgba(0, 0, 0, 0.7);
+  --panel-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --badge-bg: rgba(255, 255, 255, 0.05);
+  --avatar-overlay: rgba(0, 0, 0, 0.5);
+  --bg-image: url('/backgrounds/dark.webp');
+}
+
+.theme-light {
+  --bg-image: url('/backgrounds/light.webp');
+  --bg-dark: #c8d2dB;
+  /* Softer grayish blue */
+  --panel-bg: rgba(225, 230, 235, 0.95);
+  /* Grayish off-white */
+  --accent: #2c5282;
+  /* Muted blue */
+  --accent-soft: rgba(44, 82, 130, 0.15);
+  --text-main: #2d3748;
+  /* Dark gray, easier on the eyes than pure black */
+  --text-dim: #4a5568;
+  /* Medium gray */
+  --border: rgba(44, 82, 130, 0.2);
+  --border-active: #2c5282;
+  --glass-bg: rgba(240, 242, 245, 0.85);
+  /* Slightly darker, more opaque glass */
+  --glass-border: rgba(44, 82, 130, 0.15);
+  --glass-blur: blur(12px);
+  --scrollbar-track: rgba(0, 0, 0, 0.1);
+  --slot-bg: rgba(0, 0, 0, 0.15);
+  /* Increased contrast for light slots */
+  --panel-shadow: 0 8px 32px rgba(44, 82, 130, 0.1);
+  --badge-bg: rgba(0, 0, 0, 0.1);
+  --avatar-overlay: rgba(0, 0, 0, 0.35);
+  --contrast: #2c5282;
+  --highlight: #3182ce;
+}
+
+.theme-ember {
+  --bg-dark: #080604;
+  --panel-bg: rgba(12, 10, 7, 0.95);
+  --accent: #d8bc7c;
+  --accent-soft: rgba(216, 188, 124, 0.20);
+  --text-main: #f2ecdf;
+  --text-dim: #a69c8e;
+  --border: rgba(216, 188, 124, 0.28);
+  --border-active: rgba(216, 188, 124, 0.45);
+  --glass-bg: rgba(12, 10, 7, 0.85);
+  --glass-border: rgba(216, 188, 124, 0.15);
+  --glass-blur: blur(16px);
+  --scrollbar-track: #080604;
+  --slot-bg: rgba(0, 0, 0, 0.7);
+  --panel-shadow: 0 22px 60px rgba(0, 0, 0, 0.55);
+  --ember: #c88a63;
+  --gold-light: #f0d9a4;
+  --bg-image: url('/backgrounds/ember.webp');
+}
+
+.theme-cyber {
+  --bg-dark: #05080f;
+  --panel-bg: rgba(10, 17, 32, 0.92);
+  --accent: #00f2ff;
+  --accent-soft: rgba(0, 242, 255, 0.12);
+  --text-main: #e0faff;
+  --text-dim: #7a8d9f;
+  --border: rgba(0, 242, 255, 0.2);
+  --border-active: rgba(0, 242, 255, 0.45);
+  --glass-bg: rgba(5, 8, 15, 0.75);
+  --glass-border: rgba(0, 242, 255, 0.15);
+  --glass-blur: blur(20px);
+  --scrollbar-track: #05080f;
+  --slot-bg: rgba(0, 0, 0, 0.7);
+  --panel-shadow: 0 10px 40px rgba(0, 242, 255, 0.08);
+  --bg-image: url('/backgrounds/cyber.webp');
+}
+
+.theme-rose {
+  --bg-dark: #120b12;
+  --panel-bg: rgba(26, 16, 26, 0.93);
+  --accent: #ff85a1;
+  --accent-soft: rgba(255, 133, 161, 0.18);
+  --text-main: #fff0f3;
+  --text-dim: #a696a6;
+  --border: rgba(255, 133, 161, 0.25);
+  --border-active: rgba(255, 133, 161, 0.5);
+  --glass-bg: rgba(18, 11, 18, 0.85);
+  --glass-border: rgba(255, 133, 161, 0.15);
+  --glass-blur: blur(14px);
+  --scrollbar-track: #120b12;
+  --slot-bg: rgba(0, 0, 0, 0.7);
+  --panel-shadow: 0 15px 45px rgba(255, 133, 161, 0.12);
+  --bg-image: url('/backgrounds/rose.webp');
+}
+
+.theme-nature {
+  --bg-dark: #0a0f0a;
+  --panel-bg: rgba(15, 20, 15, 0.94);
+  --accent: #86efac;
+  --accent-soft: rgba(134, 239, 172, 0.15);
+  --text-main: #f0fdf4;
+  --text-dim: #8ba38b;
+  --border: rgba(134, 239, 172, 0.2);
+  --border-active: rgba(134, 239, 172, 0.45);
+  --glass-bg: rgba(10, 15, 10, 0.8);
+  --glass-border: rgba(134, 239, 172, 0.1);
+  --glass-blur: blur(12px);
+  --scrollbar-track: #0a0f0a;
+  --slot-bg: rgba(0, 0, 0, 0.7);
+  --panel-shadow: 0 10px 35px rgba(134, 239, 172, 0.08);
+  --bg-image: url('/backgrounds/nature.webp');
+}
+
+.theme-arcane {
+  --bg-dark: #0f0a1a;
+  --panel-bg: rgba(20, 15, 30, 0.92);
+  --accent: #d8b4fe;
+  --accent-soft: rgba(216, 180, 254, 0.15);
+  --text-main: #faf5ff;
+  --text-dim: #a78bfa;
+  --border: rgba(216, 180, 254, 0.25);
+  --border-active: rgba(216, 180, 254, 0.5);
+  --glass-bg: rgba(15, 10, 25, 0.75);
+  --glass-border: rgba(216, 180, 254, 0.15);
+  --glass-blur: blur(18px);
+  --scrollbar-track: #0f0a1a;
+  --slot-bg: rgba(0, 0, 0, 0.7);
+  --panel-shadow: 0 12px 40px rgba(216, 180, 254, 0.1);
+  --bg-image: url('/backgrounds/arcane.webp');
+}
+
+.theme-ice {
+  --bg-dark: #0a1118;
+  --panel-bg: rgba(15, 22, 32, 0.95);
+  --accent: #93c5fd;
+  --accent-soft: rgba(147, 197, 253, 0.15);
+  --text-main: #f0f9ff;
+  --text-dim: #7dd3fc;
+  --border: rgba(147, 197, 253, 0.2);
+  --border-active: rgba(147, 197, 253, 0.45);
+  --glass-bg: rgba(10, 17, 24, 0.8);
+  --glass-border: rgba(147, 197, 253, 0.1);
+  --glass-blur: blur(10px);
+  --scrollbar-track: #0a1118;
+  --slot-bg: rgba(0, 0, 0, 0.7);
+  --panel-shadow: 0 8px 30px rgba(147, 197, 253, 0.08);
+  --bg-image: url('/backgrounds/ice.webp');
+}
+
+.theme-crimson {
+  --bg-dark: #0f0505;
+  --panel-bg: rgba(20, 10, 10, 0.95);
+  --accent: #f87171;
+  --accent-soft: rgba(248, 113, 113, 0.15);
+  --text-main: #fef2f2;
+  --text-dim: #fca5a5;
+  --border: rgba(248, 113, 113, 0.25);
+  --border-active: rgba(248, 113, 113, 0.5);
+  --glass-bg: rgba(15, 5, 5, 0.85);
+  --glass-border: rgba(248, 113, 113, 0.15);
+  --glass-blur: blur(14px);
+  --scrollbar-track: #0f0505;
+  --slot-bg: rgba(0, 0, 0, 0.7);
+  --panel-shadow: 0 15px 50px rgba(248, 113, 113, 0.12);
+  --bg-image: url('/backgrounds/crimson.webp');
+}
+
+.theme-medieval {
+  --bg-dark: #12100d;
+  --panel-bg: rgba(22, 18, 14, 0.94);
+  --accent: #c9a84c;
+  --accent-soft: rgba(201, 168, 76, 0.15);
+  --text-main: #ede4d3;
+  --text-dim: #9c8e78;
+  --border: rgba(201, 168, 76, 0.22);
+  --border-active: rgba(201, 168, 76, 0.45);
+  --glass-bg: rgba(18, 16, 13, 0.85);
+  --glass-border: rgba(201, 168, 76, 0.12);
+  --glass-blur: blur(14px);
+  --scrollbar-track: #12100d;
+  --slot-bg: rgba(0, 0, 0, 0.7);
+  --panel-shadow: 0 12px 40px rgba(201, 168, 76, 0.08);
+  --bg-image: url('/backgrounds/medieval.webp');
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-dark);
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: var(--text-main);
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100vh;
+  width: 100vw;
+  line-height: 1.5;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Glassmorphism Utility */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--panel-shadow);
+}
+
+/* Custom Scrollbar - Sophisticated Hub Style */
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--scrollbar-track);
+}
+
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  opacity: 0.6;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+  opacity: 1;
+}
+
+/* Typography Utilities */
+.text-gold {
+  color: var(--accent);
+}
+
+.text-dim {
+  color: var(--text-dim);
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-black {
+  font-weight: 900;
+}
+
+.scroll-container {
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Floating Combat Text Animations REMOVED */
+
+/* Notification Center Responsive */
+.notification-panel {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  width: 320px;
+  background: var(--panel-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--panel-shadow);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .notification-panel {
+    position: fixed;
+    top: 70px;
+    left: 10px;
+    right: 10px;
+    width: calc(100% - 20px);
+    max-width: none;
+    z-index: 1001;
+  }
+}
+
+/* Global Select & Option Styles */
+select {
+  background-color: var(--panel-bg);
+  color: var(--text-main);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  /* Uniform arrow styling is handled by components with Lucide icons */
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+select:hover {
+  border-color: var(--border-active);
+}
+
+option {
+  background-color: #1a1d23;
+  /* Solid dark background for consistency */
+  color: var(--text-main);
+  padding: 8px;
+}
+
+body.theme-light option {
+  background-color: #ffffff;
+  color: #001f3f;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Remove default spin buttons from number inputs */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  /* Firefox */
+}
+/* Ranking UI - AAA Quality */
+.ranking-row {
+  display: flex;
+  align-items: center;
+  padding: 14px 18px;
+  background: var(--slot-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.ranking-row:hover {
+  background: var(--glass-bg);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2), 0 0 15px var(--accent-soft);
+}
+
+.ranking-row.me {
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.02) 100%);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.ranking-row.top-3 {
+  background: linear-gradient(90deg, rgba(212, 175, 55, 0.05) 0%, transparent 100%);
+  border-color: rgba(212, 175, 55, 0.15);
+}
+
+.ranking-position {
+  width: 42px;
+  text-align: center;
+  font-weight: 900;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ranking-name {
+  font-weight: 400;
+  color: var(--text-main);
+  font-size: 0.95rem;
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+  transition: color 0.2s ease;
+}
+
+.ranking-name:hover {
+  text-decoration: underline;
+}
+
+.ranking-name.me {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.chest-label {
+  font-size: 0.7rem;
+  color: var(--accent);
+  opacity: 0.85;
+  font-weight: 500;
+  margin-top: 2px;
+  cursor: pointer;
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.chest-label:hover {
+  opacity: 1;
+  text-decoration: underline dotted;
+}
+
+.ranking-damage-container {
+  text-align: right;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.ranking-damage-value {
+  font-weight: 800;
+  color: var(--accent);
+  font-size: 1rem;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  letter-spacing: -0.5px;
+}
+
+.ranking-damage-label {
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: -2px;
+}
+
+.medal-glow {
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.4));
+}

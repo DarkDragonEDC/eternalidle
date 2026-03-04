@@ -1,0 +1,133 @@
+/**
+ * Shared survival time calculation logic for Eternal Idle.
+ * Accounts for:
+ * - Player and Mob Mitigation (0.75 cap)
+ * - Food Healing and Cooldown (5s)
+ * - Mob Respawn (1s delay)
+ * - Idle Limit (8h normal / 12h premium)
+ */
+
+export const calculateSurvivalTime = (playerStats, mobData, foodItem, foodAmountInput, currentHp, isPremium = false, profLevel = 1) => {
+    if (!mobData) return { seconds: Infinity, text: "∞", color: "#4caf50" };
+
+    const foodAmount = typeof foodAmountInput === 'object' ? (foodAmountInput.amount || 0) : (Number(foodAmountInput) || 0);
+
+    const maxHp = playerStats.maxHP || playerStats.hp || 100;
+    const defense = playerStats.defense || 0;
+
+    const mobBaseDmg = mobData.damage || 1;
+    const mobAtkSpeed = 1000; // Server constant
+
+    // Mitigation (Defense)
+    const playerMitigation = Math.min(0.75, defense / 10000);
+
+    // Damage reduction (Level difference) - PLAYER PENALTY
+    const mobLevel = mobData.level || 1;
+    const levelDiff = Math.max(0, profLevel - mobLevel);
+    const damagePenalty = Math.min(0.9, levelDiff * 0.045); // 4.5% per level, max 90%
+
+    // Mob damage is now normal (no longer reduced by player level)
+    const dmgToPlayer = Math.max(1, Math.floor(mobBaseDmg * (1 - playerMitigation)));
+
+    // Healing
+    let unitHeal = 0;
+    if (foodItem) {
+        if (foodItem.healPercent) {
+            unitHeal = Math.floor(maxHp * (foodItem.healPercent / 100));
+        } else {
+            unitHeal = foodItem.heal || 0;
+        }
+    }
+    if (unitHeal < 1) unitHeal = 0;
+
+    const mobMaxHp = mobData.health || 100;
+
+    // Player Attack Phase
+    const playerAtkSpeed = Math.max(200, playerStats.attackSpeed || 1000);
+    const playerAtkPower = playerStats.damage || 1;
+    const mobDef = mobData.defense || 0;
+    const mobMitigation = Math.min(0.75, mobDef / 10000);
+
+    // Average Hit including Burst
+    const burstChance = playerStats.burstChance || 0;
+    const burstMult = playerStats.burstDmg || 1.5;
+    const baseMitigatedHit = Math.max(1, Math.floor(playerAtkPower * (1 - mobMitigation)));
+    let avgPlayerHit = baseMitigatedHit * (1 + (burstChance / 100) * (burstMult - 1));
+
+    // --- LEVEL-BASED DAMAGE DEBUFF ---
+    if (damagePenalty > 0) {
+        avgPlayerHit = Math.max(1, avgPlayerHit * (1 - damagePenalty));
+    }
+
+    // Time to Kill (TTK)
+    const hitsToKill = Math.ceil(mobMaxHp / avgPlayerHit);
+    const timeToKill = hitsToKill * playerAtkSpeed;
+
+    // Mob Attacks during TTK
+    // Mob first attack is at t=1000ms. Subsequent attacks every 1000ms.
+    const mobAttacksPerKill = Math.floor(timeToKill / 1000);
+    const totalDmgPerKill = mobAttacksPerKill * dmgToPlayer;
+    const totalCycleTime = timeToKill + 1000; // TTK + 1s Respawn
+
+    // Rates
+    const dmgRate = totalDmgPerKill / (totalCycleTime / 1000);
+    const healPerSec = unitHeal / 5; // 5s food cooldown
+
+    const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
+
+    // SCENARIO A: No damage (Unlimited survival)
+    if (dmgRate <= 0) return { seconds: Infinity, text: "Unlimited", color: "#4caf50" };
+
+    let totalSeconds = 0;
+
+    // The "Golden Formula":
+    // 1. If we die even while eating as fast as possible (dmg > healPerSec)
+    // 2. Otherwise, we only die when our total HP pool (HP + Food) is exhausted by the damage rate.
+
+    const netDmgRate = dmgRate - healPerSec;
+    let color = "#ffcc00"; // Default: Yellow (Food running out)
+
+    if (netDmgRate > 0) {
+        const timeToDieWhileHealing = currentHp / netDmgRate;
+        const maxHealingTime = foodAmount * 5;
+
+        if (timeToDieWhileHealing < maxHealingTime) {
+            // Bottlenecked by 5s cooldown - we die with food left in the bag
+            totalSeconds = timeToDieWhileHealing;
+            color = "#ff4444"; // Red: Damage > Healing speed
+        } else {
+            // Food runs out first, then we die at full dmgRate
+            totalSeconds = (currentHp + foodAmount * unitHeal) / dmgRate;
+            color = "#ffcc00"; // Yellow: Food depletion
+        }
+    } else {
+        // Healing >= Damage. We never die while we have food.
+        totalSeconds = (currentHp + foodAmount * unitHeal) / dmgRate;
+        color = "#ffcc00"; // Yellow: Food depletion
+    }
+
+    return formatSurvival(totalSeconds, color);
+};
+
+const formatSurvival = (totalSeconds, overrideColor = null) => {
+    const days = Math.floor(totalSeconds / 86400);
+    const hrs = Math.floor((totalSeconds % 86400) / 3600);
+    const mins = Math.floor((totalSeconds % 3600) / 60);
+    const secs = Math.floor(totalSeconds % 60);
+
+    let text = "";
+    let color = overrideColor || "#ff9800";
+
+    if (days > 0) {
+        text = `${days}d ${hrs}h`;
+    } else if (hrs > 0) {
+        text = `${hrs}h ${mins}m`;
+    } else if (mins > 0) {
+        text = `${mins}m ${secs}s`;
+    } else {
+        text = `${secs}s`;
+        if (!overrideColor) color = "#ff4444";
+    }
+
+    return { seconds: totalSeconds, text, color };
+};
