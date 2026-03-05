@@ -1411,7 +1411,10 @@ const GuildPanel = ({ gameState, socket, isMobile, onInspect }) => {
                                                                         <CountryFlag code={g.country_code} name={COUNTRIES.find(c => c.code === g.country_code)?.name} size="0.6rem" />
                                                                     </div>
                                                                 )}
-                                                                <DashboardIcon size={20} color={g.icon_color || '#fff'} />
+                                                                {(() => {
+                                                                    const ResultIcon = ICONS[g.icon] || Shield;
+                                                                    return <ResultIcon size={20} color={g.icon_color || '#fff'} />;
+                                                                })()}
                                                             </div>
                                                             <div>
                                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
