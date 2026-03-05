@@ -6,7 +6,7 @@ import {
     Shield, Zap, Apple, Box, Clock, Check, AlertTriangle, X, Star, Hammer, Lock, History, TrendingUp, TrendingDown,
     Gavel
 } from 'lucide-react';
-import { resolveItem, getTierColor, formatItemId, getRequiredProficiencyGroup } from '@shared/items';
+import { resolveItem, getTierColor, formatItemId, getRequiredProficiencyGroup, calculateItemSellPrice } from '@shared/items';
 
 const QUALITIES = {
     0: { name: 'Normal', color: '#9ca3af' },
@@ -2742,6 +2742,9 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                 <div
                                                     key={`suggest-${item.id}`}
                                                     onClick={() => {
+                                                        const tempItem = { ...item };
+                                                        const minP = calculateItemSellPrice(tempItem, item.id) || 1;
+
                                                         setCreateBuyOrderModal(prev => ({
                                                             ...prev,
                                                             itemId: item.id,
@@ -2749,7 +2752,9 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                             canHaveQuality: item.canHaveQuality,
                                                             canHaveStars: item.canHaveStars,
                                                             quality: 0,
-                                                            stars: 1
+                                                            stars: 1,
+                                                            pricePerUnit: minP,
+                                                            minPrice: minP
                                                         }));
                                                         setItemSuggestions([]);
                                                         setLowestSellPrice(null);
@@ -2789,11 +2794,14 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                     <button
                                                         key={`opt-q-${q}`}
                                                         onClick={() => {
-                                                            setCreateBuyOrderModal(prev => ({ ...prev, quality: q }));
-                                                            setLowestSellPrice(null);
-                                                            setLoadingPrice(true);
                                                             const baseId = createBuyOrderModal.itemId.split('_Q')[0].split('_')[0];
                                                             const finalId = q > 0 ? `${baseId}_Q${q}` : baseId;
+                                                            const tempItem = resolveItem(baseId, q);
+                                                            const minP = tempItem ? calculateItemSellPrice(tempItem, finalId) || 1 : 1;
+
+                                                            setCreateBuyOrderModal(prev => ({ ...prev, quality: q, minPrice: minP, pricePerUnit: (prev.pricePerUnit < minP) ? minP : prev.pricePerUnit }));
+                                                            setLowestSellPrice(null);
+                                                            setLoadingPrice(true);
                                                             socket.emit('get_item_market_price', { itemId: finalId });
                                                         }}
                                                         style={{
@@ -2812,11 +2820,15 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                     <button
                                                         key={`opt-s-${s}`}
                                                         onClick={() => {
-                                                            setCreateBuyOrderModal(prev => ({ ...prev, stars: s }));
-                                                            setLowestSellPrice(null);
-                                                            setLoadingPrice(true);
                                                             const baseId = createBuyOrderModal.itemId.split('_')[0];
                                                             const finalId = `${baseId}_${s}STAR`;
+                                                            const tempItem = resolveItem(baseId, 0);
+                                                            if (tempItem) tempItem.stars = s;
+                                                            const minP = tempItem ? calculateItemSellPrice(tempItem, finalId) || 1 : 1;
+
+                                                            setCreateBuyOrderModal(prev => ({ ...prev, stars: s, minPrice: minP, pricePerUnit: (prev.pricePerUnit < minP) ? minP : prev.pricePerUnit }));
+                                                            setLowestSellPrice(null);
+                                                            setLoadingPrice(true);
                                                             socket.emit('get_item_market_price', { itemId: finalId });
                                                         }}
                                                         style={{
@@ -2890,6 +2902,16 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                 <span><b>Instant Buy!</b> Match found in current listings.</span>
                                             </div>
                                         )}
+                                        {createBuyOrderModal.minPrice && parseInt(createBuyOrderModal.pricePerUnit || 0) < createBuyOrderModal.minPrice && (
+                                            <div style={{
+                                                marginTop: '8px', padding: '8px 12px', background: 'rgba(255, 68, 68, 0.1)',
+                                                borderRadius: '6px', border: '1px solid rgba(255, 68, 68, 0.3)',
+                                                fontSize: '0.75rem', color: '#ff4444', display: 'flex', alignItems: 'center', gap: '8px'
+                                            }}>
+                                                <AlertTriangle size={14} />
+                                                <span>Minimum price allowed is {formatNumber(createBuyOrderModal.minPrice)}</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
@@ -2907,6 +2929,9 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                 <button
                                     onClick={() => {
                                         if (!createBuyOrderModal.itemId) return setNotification({ type: 'error', message: 'Please enter an Item ID.' });
+                                        if (createBuyOrderModal.minPrice && parseInt(createBuyOrderModal.pricePerUnit || 0) < createBuyOrderModal.minPrice) {
+                                            return setNotification({ type: 'error', message: `Price must be at least ${createBuyOrderModal.minPrice}.` });
+                                        }
 
                                         // Finalize Item ID with Quality or Stars
                                         let finalId = createBuyOrderModal.itemId;
@@ -2924,9 +2949,13 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                         });
                                         setCreateBuyOrderModal(null);
                                     }}
+                                    disabled={createBuyOrderModal.minPrice && parseInt(createBuyOrderModal.pricePerUnit || 0) < createBuyOrderModal.minPrice}
                                     style={{
                                         width: '100%', padding: '15px', borderRadius: '10px', background: 'var(--accent)', color: '#000',
-                                        border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '1.1rem', marginTop: '10px'
+                                        border: 'none',
+                                        cursor: (createBuyOrderModal.minPrice && parseInt(createBuyOrderModal.pricePerUnit || 0) < createBuyOrderModal.minPrice) ? 'not-allowed' : 'pointer',
+                                        opacity: (createBuyOrderModal.minPrice && parseInt(createBuyOrderModal.pricePerUnit || 0) < createBuyOrderModal.minPrice) ? 0.5 : 1,
+                                        fontWeight: 'bold', fontSize: '1.1rem', marginTop: '10px'
                                     }}
                                 >
                                     POST BUY ORDER

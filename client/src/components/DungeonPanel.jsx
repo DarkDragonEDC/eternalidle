@@ -63,13 +63,12 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
 
         let totalDungeonTime = 0;
 
-        // Wave 1-4: Trash Mobs with Scaling (1.0x, 1.1x, 1.2x, 1.3x)
+        // Wave 1-4: Trash Mobs based on server configs (No scaling)
         trashMobIds.forEach((mobId, index) => {
             const mob = MONSTERS[tier]?.find(m => m.id === mobId);
             if (mob) {
-                const scaling = 1 + (index * 0.1);
-                const mobDef = (mob.defense || 0) * scaling;
-                const mobHealth = mob.health * scaling;
+                const mobDef = mob.defense || 0;
+                const mobHealth = mob.health;
                 const mobMitigation = mobDef / 10000;
                 const mitigatedDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
                 const killTime = Math.ceil(mobHealth / mitigatedDmg) * attackSpeed;
@@ -77,11 +76,10 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
             }
         });
 
-        // Wave 5: Boss with 1.5x Scaling
+        // Wave 5: Boss (No scaling)
         if (boss) {
-            const scaling = 1.5;
-            const bossDef = (boss.defense || 0) * scaling;
-            const bossHealth = boss.health * scaling;
+            const bossDef = boss.defense || 0;
+            const bossHealth = boss.health;
             const bossMitigation = bossDef / 10000;
             const mitigatedBossDmg = Math.max(1, Math.floor(playerDmg * (1 - bossMitigation)));
             const bossKillTime = Math.ceil(bossHealth / mitigatedBossDmg) * attackSpeed;
@@ -137,7 +135,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
         let totalFoodConsumedPerRun = 0;
         let survived = true;
 
-        const simulateMob = (mobId) => {
+        const simulateMob = (mobId, isFirstRun) => {
             if (!survived) return;
             const mob = MONSTERS[tier]?.find(m => m.id === mobId);
             if (!mob) return;
@@ -158,24 +156,33 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
             let nextPAtk = 0;
             let nextMAtk = 500; // Server first mob hit is at +500ms
 
+            // Simulate the exact tick-based loop of the server
             while (mHealth > 0 && currentHpSnapshot > 0 && timeElapsed < 300000) {
-                const nextTick = Math.min(nextPAtk, nextMAtk);
-                timeElapsed = nextTick;
-
+                // If player kills mob before mob hits them, mob won't hit
                 if (nextPAtk <= nextMAtk) {
+                    timeElapsed = nextPAtk;
                     mHealth -= finalPlayerDmg;
                     nextPAtk += playerAtkSpeed;
-                } else {
+                }
+
+                // Check if mob is dead BEFORE it gets to swing
+                if (mHealth <= 0) break;
+
+                // Mob gets to hit
+                if (nextMAtk <= nextPAtk && nextMAtk > timeElapsed) {
+                    timeElapsed = nextMAtk;
                     currentHpSnapshot -= finalMobDmg;
-                    totalDamagePerRun += finalMobDmg;
+                    if (isFirstRun) totalDamagePerRun += finalMobDmg;
                     nextMAtk += mobAtkSpeed;
 
                     // Reactive healing during fight
-                    if (currentHpSnapshot < maxHp && foodRemaining > 0 && (timeElapsed - lastFoodAt >= 5000)) {
+                    const missingHp = maxHp - currentHpSnapshot;
+                    const shouldEat = missingHp >= (healPerUse * 0.5) || currentHpSnapshot < (maxHp * 0.3);
+                    if (shouldEat && foodRemaining > 0 && (timeElapsed - lastFoodAt >= 5000)) {
                         const heal = Math.min(healPerUse, maxHp - currentHpSnapshot);
                         currentHpSnapshot += heal;
                         foodRemaining--;
-                        totalFoodConsumedPerRun++;
+                        if (isFirstRun) totalFoodConsumedPerRun++;
                         lastFoodAt = timeElapsed;
                     }
                 }
@@ -186,34 +193,45 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                 }
             }
 
-            // Passive healing during WALKING (60s total wave time)
+            // Passive healing during WALKING (60s total wave time min, wait time calculated dynamically)
             if (survived) {
                 const walkingTime = Math.max(0, 60000 - timeElapsed);
                 let walkingHeals = Math.floor(walkingTime / 5000);
                 while (walkingHeals > 0 && currentHpSnapshot < maxHp && foodRemaining > 0) {
+                    const missingHp = maxHp - currentHpSnapshot;
+                    const shouldEat = missingHp >= (healPerUse * 0.5) || currentHpSnapshot < (maxHp * 0.3);
+                    if (!shouldEat) break;
+
                     const heal = Math.min(healPerUse, maxHp - currentHpSnapshot);
                     currentHpSnapshot += heal;
                     foodRemaining--;
-                    totalFoodConsumedPerRun++;
+                    if (isFirstRun) totalFoodConsumedPerRun++;
                     walkingHeals--;
                     lastFoodAt += 5000; // Update lastFoodAt to avoid instant heal on next mob
                 }
             }
         };
 
-        // Run simulation for 1 run
-        trashMobIds.forEach(id => simulateMob(id));
-        if (boss) simulateMob(boss.id);
+        let safeRuns = 0;
+        for (let r = 0; r < count; r++) {
+            lastFoodAt = 0; // cooldown resets between runs
+            const isFirstRun = (r === 0);
 
-        // Estimate runs before death (total HP pool / damage per run)
+            trashMobIds.forEach(id => simulateMob(id, isFirstRun));
+            if (boss) simulateMob(boss.id, isFirstRun);
+
+            if (!survived) {
+                break;
+            }
+            safeRuns++;
+        }
+
         const totalEffectiveHp = maxHp + ((food?.amount || 0) * healPerUse);
-        const runsBeforeDeath = totalDamagePerRun > 0 ? Math.floor(totalEffectiveHp / totalDamagePerRun) : Infinity;
-
-        const survives = survived && runsBeforeDeath >= count;
+        const survives = safeRuns >= count;
 
         return {
             survives,
-            runsBeforeDeath: runsBeforeDeath === Infinity ? '∞' : formatNumber(runsBeforeDeath),
+            diesAtRun: safeRuns >= count ? '∞' : formatNumber(safeRuns + 1),
             totalDamagePerRun,
             totalFoodConsumedPerRun,
             totalEffectiveHp
@@ -280,9 +298,8 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
 
             if (!mob) return MIN_WAVE_DURATION;
 
-            const scaling = isBoss ? 1.5 : (1 + waveIndex * 0.1);
-            const mobDef = (mob.defense || 0) * scaling;
-            const mobHealth = currentHp !== null ? currentHp : Math.floor(mob.health * scaling);
+            const mobDef = mob.defense || 0;
+            const mobHealth = currentHp !== null ? currentHp : mob.health;
 
             const mobMitigation = mobDef / 10000;
             const mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
@@ -419,7 +436,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
 
                                     <div style={{ padding: '12px', background: survival.survives ? 'rgba(76, 175, 80, 0.08)' : 'rgba(255, 68, 68, 0.08)', borderRadius: '12px', border: `1px solid ${survival.survives ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255, 68, 68, 0.3)'}`, width: '100%', textAlign: 'center' }}>
                                         <div style={{ fontSize: '0.65rem', color: survival.survives ? '#4caf50' : '#ff4444', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}><Heart size={12} />Survival Prediction</div>
-                                        <div style={{ fontSize: '1rem', color: survival.survives ? '#4caf50' : '#ff4444', fontWeight: '900' }}>{survival.survives ? `✓ SURVIVES ALL ${repeatCount} RUNS` : `✗ DIES AT RUN ${survival.runsBeforeDeath}`}</div>
+                                        <div style={{ fontSize: '1rem', color: survival.survives ? '#4caf50' : '#ff4444', fontWeight: '900' }}>{survival.survives ? `✓ SURVIVES ALL ${repeatCount} RUNS` : `✗ DIES AT RUN ${survival.diesAtRun}`}</div>
                                         <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', marginTop: '6px', display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                             <span>HP: {formatNumber(Math.floor(survival.totalEffectiveHp))}</span>
                                             <span>|</span>
@@ -1104,17 +1121,15 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                                             {/* Wave Sequence (Minion 1-4) */}
                                             {dungeon.trashMobs?.map((mobId, idx) => {
                                                 const mob = MONSTERS[tier]?.find(m => m.id === mobId);
-                                                const scaling = 1 + (idx * 0.1);
-                                                const powerStr = (scaling * 100).toFixed(0);
                                                 return (
-                                                    <div key={`${mobId}-${idx}`} title={`${mob?.name} (Lvl ${tier * 10}, ${powerStr}%)`} style={{ width: '40px', height: '40px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--slot-bg)', border: `1px solid var(--border)`, flexShrink: 0, position: 'relative' }}>
+                                                    <div key={`${mobId}-${idx}`} title={`${mob?.name} (Lvl ${tier * 10})`} style={{ width: '40px', height: '40px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--slot-bg)', border: `1px solid var(--border)`, flexShrink: 0, position: 'relative' }}>
                                                         <Skull size={20} color={idx === 3 ? '#ff6666' : '#ff4444'} />
                                                         <div style={{ position: 'absolute', bottom: '1px', right: '3px', fontSize: '0.45rem', fontWeight: '900', color: 'var(--text-dim)' }}>{idx + 1}</div>
                                                     </div>
                                                 )
                                             })}
                                             {/* Boss (Final Wave) */}
-                                            <div title={`BOSS: ${bossMob?.name} (150% POWER)`} style={{ width: '40px', height: '40px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,68,68,0.15)', border: '1px solid rgba(255,68,68,0.5)', flexShrink: 0, position: 'relative' }}>
+                                            <div title={`BOSS: ${bossMob?.name}`} style={{ width: '40px', height: '40px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,68,68,0.15)', border: '1px solid rgba(255,68,68,0.5)', flexShrink: 0, position: 'relative' }}>
                                                 <Skull size={24} color="#ff0000" />
                                                 <div style={{ position: 'absolute', bottom: '1px', right: '3px', fontSize: '0.45rem', fontWeight: '900', color: '#ff0000' }}>5</div>
                                             </div>

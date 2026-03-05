@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { formatNumber, formatSilver } from '@utils/format';
 import { Package, X, Star, Zap } from 'lucide-react';
-import { resolveItem, getTierColor, formatItemId } from '@shared/items';
+import { resolveItem, getTierColor, formatItemId, calculateItemSellPrice } from '@shared/items';
 
 const MarketListingModal = ({ listingItem, onClose, socket }) => {
     const [amount, setAmount] = useState('1');
@@ -13,7 +13,9 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
     useEffect(() => {
         if (listingItem) {
             setAmount('1');
-            setUnitPrice('');
+            const itemData = resolveItem(listingItem.itemId);
+            const minP = itemData ? (calculateItemSellPrice(itemData, listingItem.itemId) || 1) : 1;
+            setUnitPrice(minP.toString());
             setCurrentMarketPrice(null);
             setHighestBuyOrder(null);
 
@@ -50,12 +52,14 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
         return typeof raw === 'object' ? (raw.amount || 0) : (Number(raw) || 0);
     })();
 
+    const minPrice = itemData ? (calculateItemSellPrice(itemData, listingItem.itemId) || 1) : 1;
+
     const handleConfirm = () => {
         const parsedAmount = parseInt(amount);
         const parsedPrice = parseFloat(unitPrice.toString().replace(',', '.'));
 
         if (isNaN(parsedAmount) || parsedAmount <= 0) return;
-        if (isNaN(parsedPrice) || parsedPrice <= 0) return;
+        if (isNaN(parsedPrice) || parsedPrice < minPrice) return;
 
         const total = Math.floor(parsedAmount * parsedPrice);
 
@@ -276,13 +280,15 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                                 const val = e.target.value.replace(/\D/g, '');
                                 setUnitPrice(val);
                             }}
-                            placeholder="0"
+                            placeholder={minPrice.toString()}
                             style={{
                                 width: '100%',
                                 background: 'var(--slot-bg)',
-                                border: parsedPrice > 0 && highestBuyOrder && parsedPrice <= highestBuyOrder
-                                    ? '1px solid rgba(68, 255, 68, 0.5)'
-                                    : '1px solid var(--border)',
+                                border: (parsedPrice > 0 && parsedPrice < minPrice)
+                                    ? '1px solid rgba(255, 68, 68, 0.5)'
+                                    : (parsedPrice > 0 && highestBuyOrder && parsedPrice <= highestBuyOrder)
+                                        ? '1px solid rgba(68, 255, 68, 0.5)'
+                                        : '1px solid var(--border)',
                                 borderRadius: '8px',
                                 padding: '10px',
                                 color: 'rgb(255, 255, 255)',
@@ -292,7 +298,19 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                                 transition: '0.2s'
                             }}
                         />
-                        {parsedPrice > 0 && highestBuyOrder && parsedPrice <= highestBuyOrder && (
+                        {parsedPrice > 0 && parsedPrice < minPrice && (
+                            <div style={{
+                                marginTop: '5px',
+                                fontSize: '0.7rem',
+                                color: 'rgb(255, 68, 68)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                            }}>
+                                Minimum price allowed is {formatNumber(minPrice)}
+                            </div>
+                        )}
+                        {parsedPrice > 0 && highestBuyOrder && parsedPrice <= highestBuyOrder && parsedPrice >= minPrice && (
                             <div style={{
                                 marginTop: '5px',
                                 fontSize: '0.7rem',
@@ -331,6 +349,7 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                 {/* Confirm Button */}
                 <button
                     onClick={handleConfirm}
+                    disabled={parsedPrice < minPrice || parsedAmount <= 0}
                     style={{
                         width: '100%',
                         padding: '15px',
@@ -339,7 +358,8 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                         background: 'var(--accent)',
                         color: 'var(--panel-bg)',
                         fontWeight: 'bold',
-                        cursor: 'pointer',
+                        cursor: (parsedPrice < minPrice || parsedAmount <= 0) ? 'not-allowed' : 'pointer',
+                        opacity: (parsedPrice < minPrice || parsedAmount <= 0) ? 0.5 : 1,
                         marginTop: '10px',
                         fontSize: '1rem'
                     }}

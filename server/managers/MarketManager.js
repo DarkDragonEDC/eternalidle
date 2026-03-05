@@ -121,10 +121,17 @@ export class MarketManager {
         const itemData = this.gameManager.inventoryManager.resolveItem(itemId, quality);
         if (!itemData) throw new Error("Invalid item");
 
+        // Enforce minimum price per unit
+        const sellPricePerUnit = Math.floor(parsedPrice / parsedAmount);
+        // Note: For listings, the itemId passed is already the fully qualified ID from inventory (e.g. T1_SWORD_Q2, MYSTIC_RABBIT_MEAT)
+        const minPrice = calculateItemSellPrice(itemData, itemId) || 1;
+        if (sellPricePerUnit < minPrice) {
+            throw new Error(`Price per unit cannot be below the item's base value (${minPrice.toLocaleString()} Silver).`);
+        }
+
         // --- NEW: AUTO-MATCHING (Sell -> Buy) ---
         let remainingAmount = parsedAmount;
         let totalSold = 0;
-        const sellPricePerUnit = Math.floor(parsedPrice / parsedAmount);
 
         try {
             // Build the item ID variants that buy orders might use
@@ -595,6 +602,12 @@ export class MarketManager {
         if (!itemData) throw new Error("Invalid item");
         if (stars !== undefined) itemData.stars = stars;
         if (quality !== undefined) itemData.quality = quality;
+
+        // Enforce minimum price (cannot be below item's quick sell value)
+        const minPrice = calculateItemSellPrice(itemData, baseItemId) || 1;
+        if (parsedPrice < minPrice) {
+            throw new Error(`Price per unit cannot be below the item's base value (${minPrice.toLocaleString()} Silver).`);
+        }
 
         // Deduct silver (Escrow)
         char.state.silver -= totalCost;
