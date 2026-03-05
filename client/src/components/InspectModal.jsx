@@ -559,11 +559,11 @@ const InspectModal = React.memo(({ data, theme: propTheme, onClose, onItemClick 
                                     <EquipmentSlot slot="helmet" icon={<User size={18} />} label="HEAD" item={equipment.helmet} delay={0.1} onItemClick={onItemClick} />
                                     <EquipmentSlot slot="food" icon={<Apple size={18} />} label="FOOD" item={equipment.food} delay={0.15} onItemClick={onItemClick} />
 
-                                    <EquipmentSlot slot="gloves" icon={<Shield size={18} />} label="HANDS" item={equipment.gloves} delay={0.2} onItemClick={onItemClick} />
+                                    <EquipmentSlot slot="mainHand" icon={<Sword size={18} />} label="WEAPON" item={equipment.mainHand} delay={0.2} onItemClick={onItemClick} />
                                     <EquipmentSlot slot="chest" icon={<Shield size={18} />} label="CHEST" item={equipment.chest} delay={0.25} onItemClick={onItemClick} />
                                     <EquipmentSlot slot="offHand" icon={<Target size={18} />} label="OFF-HAND" item={equipment.offHand} delay={0.3} onItemClick={onItemClick} />
 
-                                    <EquipmentSlot slot="mainHand" icon={<Sword size={18} />} label="WEAPON" item={equipment.mainHand} delay={0.35} onItemClick={onItemClick} />
+                                    <EquipmentSlot slot="gloves" icon={<Shield size={18} />} label="HANDS" item={equipment.gloves} delay={0.35} onItemClick={onItemClick} />
                                     <EquipmentSlot slot="boots" icon={<Target size={18} />} label="FEET" item={equipment.boots} delay={0.4} onItemClick={onItemClick} />
 
                                     <div style={{

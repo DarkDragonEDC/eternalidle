@@ -465,6 +465,7 @@ function App() {
   // Trade State
   const [activeTrade, setActiveTrade] = useState(null);
   const [tradeInvites, setTradeInvites] = useState([]);
+  const pendingTradeOpenRef = React.useRef(false);
   const [showSocialModal, setShowSocialModal] = useState(false);
   const [inspectData, setInspectData] = useState(null);
   const [banModalData, setBanModalData] = useState(null);
@@ -487,7 +488,9 @@ function App() {
 
   const handleTradeInvite = useCallback((receiverName) => {
     if (socket) {
+      pendingTradeOpenRef.current = true;
       socket.emit('trade_create', { receiverName });
+      setShowSocialModal(false);
     }
   }, [socket]);
 
@@ -998,7 +1001,10 @@ function App() {
       } else {
         setActiveTrade(prev => {
           if (prev?.id === trade.id) return trade;
-          if (!prev && trade.sender_id === characterId) return trade;
+          if (!prev && pendingTradeOpenRef.current) {
+            pendingTradeOpenRef.current = false;
+            return trade;
+          }
           return prev;
         });
       }
@@ -2939,6 +2945,7 @@ function App() {
               isOpen={showOrbShop}
               onClose={() => setShowOrbShop(false)}
               socket={socket}
+              gameState={displayedGameState}
               serverTimeOffset={clockOffset.current}
               isPreviewActive={isPreviewActive}
               onPreviewActionBlocked={onPreviewActionBlocked}

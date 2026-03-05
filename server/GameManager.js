@@ -1555,8 +1555,17 @@ export class GameManager {
                     combatXp += result.details.xpGained || 0;
                     silverGained += result.details.silverGained || 0;
                     if (result.details.lootGained) {
-                        result.details.lootGained.forEach(itemId => {
-                            itemsGained[itemId] = (itemsGained[itemId] || 0) + 1;
+                        result.details.lootGained.forEach(lootEntry => {
+                            // CombatManager returns loot as "Nx ITEM_ID" strings (e.g. "1x T1_WOOD")
+                            const match = lootEntry.match(/^(\d+)x\s+(.+)$/);
+                            if (match) {
+                                const qty = parseInt(match[1]) || 1;
+                                const actualId = match[2];
+                                itemsGained[actualId] = (itemsGained[actualId] || 0) + qty;
+                            } else {
+                                // Fallback: treat the whole string as an item ID
+                                itemsGained[lootEntry] = (itemsGained[lootEntry] || 0) + 1;
+                            }
                         });
                     }
 

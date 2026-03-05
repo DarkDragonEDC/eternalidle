@@ -8,6 +8,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
     const [localOffer, setLocalOffer] = useState({ items: [], silver: 0 });
     const [isAccepting, setIsAccepting] = useState(false);
     const [filterText, setFilterText] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('ALL');
     const [quantityModal, setQuantityModal] = useState({ isOpen: false, item: null, itemId: null, max: 0 });
     const [quantityInput, setQuantityInput] = useState('1');
     const [silverInput, setSilverInput] = useState('');
@@ -343,12 +344,92 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                         <Search size={12} style={{ position: 'absolute', left: '6px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
                                     </div>
                                 </div>
+
+                                {/* Category Filters */}
+                                <div style={{
+                                    display: 'flex',
+                                    gap: '6px',
+                                    marginBottom: isMobile ? '8px' : '12px',
+                                    overflowX: 'auto',
+                                    paddingBottom: '4px'
+                                }} className="custom-scrollbar">
+                                    {[
+                                        { id: 'ALL', label: 'All' },
+                                        { id: 'MAT', label: 'Materials' },
+                                        { id: 'CRAFT', label: 'Craft' },
+                                        { id: 'CONS', label: 'Consumable' },
+                                        { id: 'RUNE', label: 'Runes' }
+                                    ].map(cat => (
+                                        <button
+                                            key={cat.id}
+                                            onClick={() => setSelectedCategory(cat.id)}
+                                            style={{
+                                                padding: '4px 10px',
+                                                borderRadius: '6px',
+                                                border: '1px solid var(--border)',
+                                                background: selectedCategory === cat.id ? 'var(--accent)' : 'var(--slot-bg)',
+                                                color: selectedCategory === cat.id ? '#000' : 'var(--text-dim)',
+                                                fontSize: '0.65rem',
+                                                fontWeight: 'bold',
+                                                cursor: 'pointer',
+                                                whiteSpace: 'nowrap',
+                                                transition: '0.2s'
+                                            }}
+                                        >
+                                            {cat.label}
+                                        </button>
+                                    ))}
+                                </div>
+
                                 <div style={{ flex: 1, overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gridAutoRows: 'min-content', gap: isMobile ? '5px' : '8px', paddingRight: '5px' }}>
                                     {Object.entries(inventory || {})
                                         .filter(([id, entry]) => {
-                                            if (!filterText) return true;
                                             const item = resolveItem(id);
-                                            return item && item.name.toLowerCase().includes(filterText.toLowerCase());
+                                            if (!item) return false;
+
+                                            // Category Filter
+                                            if (selectedCategory !== 'ALL') {
+                                                const type = item.type;
+                                                const name = (item.name || '').toUpperCase();
+                                                const isRuneRelated = type === 'RUNE' || id.includes('RUNE') || name.includes('RUNE');
+
+                                                switch (selectedCategory) {
+                                                    case 'MAT':
+                                                        if (isRuneRelated) return false;
+                                                        if (!['RAW', 'REFINED', 'CRAFTING_MATERIAL', 'RESOURCE'].includes(type)) return false;
+                                                        break;
+                                                    case 'CRAFT':
+                                                        if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFFHAND', 'SHIELD', 'PICKAXE', 'AXE', 'SICKLE', 'SKINNING_KNIFE', 'FISHING_ROD'].includes(type)) return false;
+                                                        break;
+                                                    case 'CONS':
+                                                        if (!['CONSUMABLE', 'FOOD', 'POTION', 'CHEST'].includes(type) && !id.includes('CHEST')) return false;
+                                                        break;
+                                                    case 'RUNE':
+                                                        if (!isRuneRelated) return false;
+                                                        break;
+                                                }
+                                            }
+
+                                            // Search Filter
+                                            if (!filterText.trim()) return true;
+
+                                            const words = filterText.trim().toLowerCase().split(/\s+/);
+                                            const itemName = (item.name || '').toLowerCase();
+                                            const itemId = (item.id || id).toLowerCase();
+
+                                            return words.every(word => {
+                                                if (word.includes(':')) {
+                                                    const [key, value] = word.split(':');
+                                                    if (!value) return true;
+                                                    if (key === 't' || key === 'tier') return item.tier === parseInt(value);
+                                                    if (key === 'c' || key === 'cat' || key === 'type') return item.type?.toLowerCase().includes(value);
+                                                    if (key === 'r' || key === 'rarity') return item.rarity?.toLowerCase().includes(value);
+                                                    if (key === 'q' || key === 'quality') return (item.quality || 0) === parseInt(value);
+                                                    if (key === 'id') return itemId.includes(value);
+                                                    return true;
+                                                }
+                                                return itemName.includes(word) || itemId.includes(word) || `t${item.tier}` === word;
+                                            });
                                         })
                                         .map(([id, entry]) => {
                                             const item = resolveItem(id);
@@ -393,7 +474,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                                         )}
 
                                                         {/* Icon */}
-                                                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                                                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', minHeight: 0, overflow: 'hidden' }}>
                                                             {item.icon ? (
                                                                 typeof item.icon === 'string' ? <img src={item.icon} alt={item.name} style={{ width: item.scale || '70%', height: item.scale || '70%', objectFit: 'contain' }} /> : <item.icon size={20} color={item.rarityColor || "var(--text-dim)"} />
                                                             ) : <Package size={20} color="var(--text-dim)" />}
@@ -403,7 +484,21 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                                         <div style={{ position: 'absolute', bottom: '2px', right: '4px', fontSize: '0.55rem', fontWeight: 'bold', color: '#fff', textShadow: '0 0 3px #000', zIndex: 10 }}>{amount}</div>
 
                                                         {/* Item Name */}
-                                                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textAlign: 'center', width: '100%', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', fontWeight: '600', lineHeight: '1.2' }}>{item.name}</div>
+                                                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textAlign: 'center', width: '100%', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', fontWeight: '600', lineHeight: '1.2', flexShrink: 0 }}>
+                                                            {(() => {
+                                                                const rawName = item.name || (() => {
+                                                                    // Generate readable name from raw ID
+                                                                    let cleanId = id.replace(/_Q\d+$/, '').replace(/_\d+STAR$/, '');
+                                                                    return formatItemId(cleanId);
+                                                                })();
+
+                                                                // Prepend tier if it's not already in the name
+                                                                if (item.tier && !rawName.startsWith(`T${item.tier}`)) {
+                                                                    return `T${item.tier} ${rawName}`;
+                                                                }
+                                                                return rawName;
+                                                            })()}
+                                                        </div>
                                                     </div>
                                                 )
                                             })();

@@ -172,7 +172,7 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                                     </div>
                                     <div style={{ textAlign: 'left', flex: 1, overflow: 'hidden' }}>
                                         <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                            {item.qty}x <span style={{ color: resolvedItem?.rarityColor || tierColor }}>{resolvedItem ? (resolvedItem.tier ? `T${resolvedItem.tier} ${resolvedItem.name}` : resolvedItem.name) : formatItemId(item.id)}</span>
+                                            {item.qty}x <span style={{ color: resolvedItem?.rarityColor || tierColor }}>{resolvedItem ? ((resolvedItem.tier && !item.id.includes('RUNE_SHARD')) ? `T${resolvedItem.tier} ${resolvedItem.name}` : resolvedItem.name) : formatItemId(item.id)}</span>
                                             {item.id.includes('::') && (
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'var(--accent)', opacity: 0.8, fontSize: '0.6rem', border: '1px solid var(--accent)', padding: '1px 4px', borderRadius: '4px' }}>
                                                     <Hammer size={10} />

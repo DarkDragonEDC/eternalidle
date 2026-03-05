@@ -370,7 +370,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
 
         const now = gameState?._clientTime || Date.now();
         const potionDmgBonus = (active_buffs?.DAMAGE?.expiresAt > now) ? (active_buffs.DAMAGE.value || 0) : 0;
-        const potionCritChance = (active_buffs?.CRIT?.expiresAt > now) ? (active_buffs.CRIT.value || 0) : 0;
+        const potionCritChance = (active_buffs?.CRIT?.expiresAt > now) ? (active_buffs.CRIT.value || 0) * 100 : 0;
 
         return {
             hp: health !== undefined ? health : (100 + activeHP + gearHP),
@@ -1419,11 +1419,11 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                                         <EquipmentSlot slot="helmet" icon={<User size={20} />} label="HEAD" item={equipment.helmet} onClick={() => setSelectedSlot('helmet')} onShowInfo={onShowInfo} isLocked={!hasWeapon} weaponClass={currentWeaponClass} />
                                         <EquipmentSlot slot="food" icon={<Apple size={20} />} label="FOOD" item={equipment.food} onClick={() => setSelectedSlot('food')} onShowInfo={onShowInfo} />
 
-                                        <EquipmentSlot slot="gloves" icon={<Shield size={20} />} label="HANDS" item={equipment.gloves} onClick={() => setSelectedSlot('gloves')} onShowInfo={onShowInfo} isLocked={!hasWeapon} weaponClass={currentWeaponClass} />
+                                        <EquipmentSlot slot="mainHand" icon={<Sword size={20} />} label="WEAPON" item={equipment.mainHand} onClick={() => setSelectedSlot('mainHand')} onShowInfo={onShowInfo} weaponClass={currentWeaponClass} />
                                         <EquipmentSlot slot="chest" icon={<Shield size={20} />} label="CHEST" item={equipment.chest} onClick={() => setSelectedSlot('chest')} onShowInfo={onShowInfo} isLocked={!hasWeapon} weaponClass={currentWeaponClass} />
                                         <EquipmentSlot slot="offHand" icon={<Target size={20} />} label="OFF-HAND" item={equipment.offHand} onClick={() => setSelectedSlot('offHand')} onShowInfo={onShowInfo} isLocked={!hasWeapon} weaponClass={currentWeaponClass} />
 
-                                        <EquipmentSlot slot="mainHand" icon={<Sword size={20} />} label="WEAPON" item={equipment.mainHand} onClick={() => setSelectedSlot('mainHand')} onShowInfo={onShowInfo} weaponClass={currentWeaponClass} />
+                                        <EquipmentSlot slot="gloves" icon={<Shield size={20} />} label="HANDS" item={equipment.gloves} onClick={() => setSelectedSlot('gloves')} onShowInfo={onShowInfo} isLocked={!hasWeapon} weaponClass={currentWeaponClass} />
                                         <EquipmentSlot slot="boots" icon={<Target size={20} />} label="FEET" item={equipment.boots} onClick={() => setSelectedSlot('boots')} onShowInfo={onShowInfo} isLocked={!hasWeapon} weaponClass={currentWeaponClass} />
                                         <div style={{
                                             width: '64px',

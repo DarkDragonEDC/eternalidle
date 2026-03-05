@@ -1682,6 +1682,21 @@ for (const t of TIERS) {
             };
         }
     });
+
+    // --- RUNE ICON OVERRIDES ---
+    for (const t of TIERS) {
+        for (let s = 1; s <= 3; s++) {
+            const woodDuplicId = `T${t}_RUNE_WOOD_DUPLIC_${s}STAR`;
+            if (ITEMS.SPECIAL.RUNE[woodDuplicId]) {
+                ITEMS.SPECIAL.RUNE[woodDuplicId].icon = `/RUNAS/T${t}_WOOD_DUPLICATION.webp`;
+            }
+
+            const woodAutoId = `T${t}_RUNE_WOOD_AUTO_${s}STAR`;
+            if (ITEMS.SPECIAL.RUNE[woodAutoId]) {
+                ITEMS.SPECIAL.RUNE[woodAutoId].icon = `/RUNAS/T${t}_WOOD_AUTO.webp`;
+            }
+        }
+    }
 }
 
 
@@ -1764,9 +1779,16 @@ indexItems(ITEMS);
 // Format item ID for display (replace underscores with spaces and capitalize)
 export const formatItemId = (itemId) => {
     if (!itemId) return '';
-    return itemId
+    let formatted = itemId
         .replace(/_/g, ' ')
         .toLowerCase()
         .replace(/\b\w/g, char => char.toUpperCase());
+
+    // Remove "T1 ", "T2 " etc from Rune Shards since only one tier exists
+    if (formatted.includes('Rune Shard')) {
+        formatted = formatted.replace(/T\d+\s+/i, '');
+    }
+
+    return formatted;
 };
 

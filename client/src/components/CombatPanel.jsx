@@ -526,6 +526,38 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
                         </div>
 
                         <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', letterSpacing: '1px' }}>SURVIVAL</div>
+                            {(() => {
+                                const activeMob = (MONSTERS[combat.tier] || []).find(m => m.id === combat.mobId);
+                                const foodItem = gameState?.state?.equipment?.food;
+                                const foodAmount = typeof foodItem?.amount === 'object' ? (foodItem.amount.amount || 0) : (Number(foodItem?.amount) || 0);
+
+                                const weaponId = (gameState?.state?.equipment?.mainHand?.id || '').toUpperCase();
+                                let profSkillKey = null;
+                                if (weaponId.includes('SWORD')) profSkillKey = 'WARRIOR_PROFICIENCY';
+                                else if (weaponId.includes('BOW')) profSkillKey = 'HUNTER_PROFICIENCY';
+                                else if (weaponId.includes('STAFF')) profSkillKey = 'MAGE_PROFICIENCY';
+                                const profLevel = profSkillKey ? (gameState?.state?.skills?.[profSkillKey]?.level || 1) : 1;
+
+                                const survival = calculateSurvivalTime(
+                                    stats,
+                                    activeMob,
+                                    foodItem ? resolveItem(foodItem.id) : null,
+                                    foodAmount,
+                                    combat.playerHealth || 1,
+                                    gameState?.state?.isPremium || gameState?.state?.membership?.active,
+                                    profLevel
+                                );
+
+                                return (
+                                    <div style={{ fontSize: '1rem', fontWeight: 'bold', fontFamily: 'monospace', color: survival.color }}>
+                                        {survival.text}
+                                    </div>
+                                );
+                            })()}
+                        </div>
+
+                        <div style={{ textAlign: 'right' }}>
                             <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', letterSpacing: '1px' }}>DURATION</div>
                             <div style={{ fontSize: '1rem', fontWeight: 'bold', fontFamily: 'monospace', color: 'var(--text-main)' }}>
                                 {`${Math.floor(duration / 3600).toString().padStart(2, '0')}:${Math.floor((duration % 3600) / 60).toString().padStart(2, '0')}:${(duration % 60).toString().padStart(2, '0')}`}
@@ -1222,17 +1254,46 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
                                             })}
                                         </div>
 
-                                        {/* TTK Badge */}
                                         <div style={{
-                                            padding: '4px 10px',
-                                            background: 'rgba(0,0,0,0.2)',
-                                            borderRadius: '8px',
-                                            border: '1px solid rgba(255,255,255,0.03)',
-                                            textAlign: 'right'
+                                            display: 'flex',
+                                            gap: '8px',
+                                            alignItems: 'end',
+                                            justifyContent: 'flex-end'
                                         }}>
-                                            <div style={{ fontSize: '0.5rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>TTK (Est.)</div>
-                                            <div style={{ fontSize: '0.85rem', fontWeight: '900', color: 'var(--accent)', fontFamily: 'monospace' }}>
-                                                {cycleTime.toFixed(1)}s
+                                            {/* Survival Badge */}
+                                            <div style={{
+                                                padding: '4px 10px',
+                                                background: 'rgba(0,0,0,0.2)',
+                                                borderRadius: '8px',
+                                                border: '1px solid rgba(255,255,255,0.03)',
+                                                textAlign: 'right'
+                                            }}>
+                                                <div style={{ fontSize: '0.5rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Survival (Est.)</div>
+                                                <div style={{
+                                                    fontSize: '0.85rem', fontWeight: '900', color: (() => {
+                                                        const s = calculateSurvivalTime(stats, mob, foodItem ? resolveItem(foodItem.id) : null, foodAmount, playerHp, isPremium, profLevel);
+                                                        return s.color;
+                                                    })(), fontFamily: 'monospace'
+                                                }}>
+                                                    {(() => {
+                                                        const s = calculateSurvivalTime(stats, mob, foodItem ? resolveItem(foodItem.id) : null, foodAmount, playerHp, isPremium, profLevel);
+                                                        return s.text;
+                                                    })()}
+                                                </div>
+                                            </div>
+
+                                            {/* TTK Badge */}
+                                            <div style={{
+                                                padding: '4px 10px',
+                                                background: 'rgba(0,0,0,0.2)',
+                                                borderRadius: '8px',
+                                                border: '1px solid rgba(255,255,255,0.03)',
+                                                textAlign: 'right'
+                                            }}>
+                                                <div style={{ fontSize: '0.5rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>TTK (Est.)</div>
+                                                <div style={{ fontSize: '0.85rem', fontWeight: '900', color: 'var(--accent)', fontFamily: 'monospace' }}>
+                                                    {cycleTime.toFixed(1)}s
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

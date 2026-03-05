@@ -258,9 +258,11 @@ const DailySpinModal = ({ isOpen, onClose, socket, isPreviewActive, onPreviewAct
                     }}>
                         <h2 style={{
                             color: '#ffd700',
-                            fontSize: 'clamp(1.5rem, 6vw, 2rem)', // Responsive font
+                            fontSize: 'clamp(1.2rem, 5vw, 1.8rem)', // Slightly smaller for better fit
                             marginBottom: '10px',
-                            wordBreak: 'break-word' // Safety wrap
+                            whiteSpace: 'nowrap', // Prevent wrapping
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
                         }}>CONGRATULATIONS!</h2>
                         <div style={{ fontSize: '4rem', margin: '20px 0' }}>🎁</div>
                         <p style={{ color: '#fff', fontSize: '1.2rem', marginBottom: '30px' }}>

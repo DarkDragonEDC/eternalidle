@@ -79,7 +79,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
         return { reqId, reqQty, userQty, displayName: resolveItem(reqId) ? `T${resolveItem(reqId).tier} ${resolveItem(reqId).name}` : formatItemId(reqId) };
     });
 
-    const maxQuantity = Math.min(timeLimitMax, Object.keys(reqs).length > 0 ? maxByMaterials : timeLimitMax);
+    const maxQuantity = Math.max(0, Math.floor(Math.min(timeLimitMax, Object.keys(reqs).length > 0 ? maxByMaterials : timeLimitMax)));
     const currentQty = Math.max(1, Math.min(Number(quantity) || 1, maxQuantity));
     const totalDuration = finalTime * currentQty;
     const totalXP = formatNumber(xpPerAction * currentQty);

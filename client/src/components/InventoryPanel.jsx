@@ -9,7 +9,10 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
     const [selectedItemForModal, setSelectedItemForModal] = useState(null);
     const [sellModal, setSellModal] = useState(null);
     const [filter, setFilter] = useState('ALL');
-    const [sortBy, setSortBy] = useState('NAME'); // NAME, QUALITY, QUANTITY, TYPE, VALUE, DATE
+    const [sortBy, setSortBy] = useState(() => {
+        const auto = settings?.autoSortInventory;
+        return (auto && auto !== 'off') ? auto.toUpperCase() : 'NAME';
+    });
     const [sortDir, setSortDir] = useState('asc');
     const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -171,24 +174,6 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
 
     // Sorting Logic
     const sortedItems = [...filteredItems].sort((a, b) => {
-        if (settings?.autoSortInventory && settings.autoSortInventory !== 'off') {
-            const mode = settings.autoSortInventory;
-            if (mode === 'name') return a.name.localeCompare(b.name);
-            if (mode === 'tier') return (b.tier || 0) - (a.tier || 0);
-            if (mode === 'type') {
-                if (a.type !== b.type) return a.type.localeCompare(b.type);
-                return (b.tier || 0) - (a.tier || 0);
-            }
-            if (mode === 'value') return calculateItemSellPrice(b, b.id) - calculateItemSellPrice(a, a.id);
-            if (mode === 'quality') return (b.quality || 0) - (a.quality || 0);
-            if (mode === 'quantity') return b.qty - a.qty;
-            if (mode === 'date') {
-                const indexA = Object.keys(gameState?.state?.inventory || {}).indexOf(a.id);
-                const indexB = Object.keys(gameState?.state?.inventory || {}).indexOf(b.id);
-                return indexA - indexB;
-            }
-        }
-
         let comparison = 0;
         switch (sortBy) {
             case 'NAME':
@@ -201,7 +186,7 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                 comparison = a.qty - b.qty;
                 break;
             case 'TYPE':
-                comparison = a.type.localeCompare(b.type);
+                comparison = (a.type || '').localeCompare(b.type || '');
                 break;
             case 'VALUE':
                 const valA = calculateItemSellPrice(a, a.id);
@@ -209,9 +194,9 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                 comparison = valA - valB;
                 break;
             case 'DATE':
-                // Using index in the original inventory as a proxy for acquisition date if not stored
-                const indexA = Object.keys(gameState?.state?.inventory || {}).indexOf(a.id);
-                const indexB = Object.keys(gameState?.state?.inventory || {}).indexOf(b.id);
+                // Using index in the original inventory/bank as a proxy for acquisition date
+                const indexA = Object.keys(rawItems || {}).indexOf(a.id);
+                const indexB = Object.keys(rawItems || {}).indexOf(b.id);
                 comparison = indexA - indexB;
                 break;
             case 'TIER':

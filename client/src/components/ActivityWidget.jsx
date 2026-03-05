@@ -30,12 +30,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
     // Derived stats
     const initialQty = activity?.initial_quantity || activity?.actions_remaining || 1;
     const remainingQty = activity?.actions_remaining || 0;
-
-    // Defensive: If initial_quantity is 0 or missing but we have progress in syncedElapsed,
-    // don't let initialQty be smaller than what's already done.
-    const effectiveInitialQty = Math.max(initialQty, remainingQty + Math.floor(syncedElapsed / (activity?.time_per_action || 3)));
-
-    const doneQty = Math.max(0, effectiveInitialQty - remainingQty);
+    const doneQty = Math.max(0, initialQty - remainingQty);
     const timePerAction = activity?.time_per_action || 3;
 
     // Cálculo de Stats (Replicado do ProfilePanel para consistência)
@@ -169,7 +164,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
     const isRefining = activity?.type === 'REFINING';
     const isCrafting = activity?.type === 'CRAFTING';
 
-    const totalDuration = effectiveInitialQty * timePerAction;
+    const totalDuration = initialQty * timePerAction;
     const totalProgress = Math.min(100, (syncedElapsed / totalDuration) * 100);
     const remainingSeconds = Math.max(0, totalDuration - syncedElapsed);
 
@@ -353,11 +348,11 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                         />
                         <div style={{
                             position: 'fixed',
-                            bottom: isMobile ? '160px' : '110px',
+                            bottom: isMobile ? '146px' : '96px',
                             right: isMobile ? '20px' : '30px',
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '15px',
+                            gap: '0px',
                             zIndex: 1001,
                             alignItems: 'flex-end', // Alinha à direita
                             transition: '0.2s',
@@ -443,7 +438,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                                     return formatItemId(activity.item_id) || 'Unknown Item';
                                                 })()}
                                             </span>
-                                            <span style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '0.8rem' }}>{doneQty} <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)' }}>/ {effectiveInitialQty}</span></span>
+                                            <span style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '0.8rem' }}>{doneQty} <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)' }}>/ {initialQty}</span></span>
                                         </div>
 
                                         <div style={{ height: '8px', background: 'var(--accent-soft)', borderRadius: '4px', overflow: 'hidden', position: 'relative', marginBottom: '8px' }}>
@@ -705,29 +700,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                                 })()}
                                             </div>
                                         </div>
-                                        {(() => {
-                                            const tier = combat.tier || 1;
-                                            const activeMob = (MONSTERS[tier] || []).find(m => m.id === combat.mobId);
-                                            const weaponId = (gameState?.state?.equipment?.mainHand?.id || '').toUpperCase();
-                                            let profSkillKey = null;
-                                            if (weaponId.includes('SWORD')) profSkillKey = 'WARRIOR_PROFICIENCY';
-                                            else if (weaponId.includes('BOW')) profSkillKey = 'HUNTER_PROFICIENCY';
-                                            else if (weaponId.includes('STAFF')) profSkillKey = 'MAGE_PROFICIENCY';
-                                            const profLevel = profSkillKey ? (gameState?.state?.skills?.[profSkillKey]?.level || 1) : 1;
-                                            const mobLevel = activeMob?.level || 1;
-                                            const penalty = Math.min(90, Math.max(0, profLevel - mobLevel) * 4.5);
 
-                                            if (penalty <= 0) return null;
-
-                                            return (
-                                                <div style={{ flex: 1 }}>
-                                                    <div style={{ fontSize: '0.5rem', color: '#ff4444', fontWeight: 'bold', letterSpacing: '0.5px' }}>DEBUFF</div>
-                                                    <div style={{ fontFamily: 'monospace', fontSize: '0.8rem', fontWeight: '900', color: '#ff6666' }}>
-                                                        -{penalty.toFixed(1)}%
-                                                    </div>
-                                                </div>
-                                            );
-                                        })()}
                                         <div style={{ flex: 1, textAlign: 'right' }}>
                                             <div style={{ fontSize: '0.5rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '0.5px' }}>DURATION</div>
                                             <div style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--text-main)', fontWeight: '900' }}>
@@ -1091,47 +1064,49 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                     </button>
                                 </motion.div>
                             )}
+                            {/* --- CAIXA INFORMATIVA MULTITAREFA --- */}
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                style={{
+                                    position: 'fixed',
+                                    bottom: isMobile ? '80px' : '30px',
+                                    right: isMobile ? '86px' : '96px',
+                                    width: '214px',
+                                    background: 'var(--panel-bg)',
+                                    backdropFilter: 'blur(20px)',
+                                    border: '1px solid var(--border-active)',
+                                    borderRadius: '12px',
+                                    padding: '6px 10px',
+                                    height: '64px',
+                                    color: 'var(--text-main)',
+                                    fontSize: '0.7rem',
+                                    zIndex: 1001,
+                                    boxShadow: 'rgba(0, 0, 0, 0.7) 0px 10px 40px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}
+                            >
+                                <div style={{
+                                    width: '22px',
+                                    height: '22px',
+                                    minWidth: '22px',
+                                    borderRadius: '6px',
+                                    background: 'var(--accent-soft)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'var(--accent)',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.65rem'
+                                }}>i</div>
+                                <div style={{ lineHeight: '1.3', flex: '1 1 0%' }}>
+                                    You can perform a <b>gathering</b> and a <b>combat</b> action at the same time.
+                                </div>
+                            </motion.div>
                         </div>
-
-                        {/* --- CAIXA INFORMATIVA MULTITAREFA (Posicionamento Fixo Exato) --- */}
-                        <motion.div
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 20 }}
-                            style={{
-                                position: 'fixed',
-                                bottom: isMobile ? '80px' : '30px',
-                                right: isMobile ? '95px' : '105px',
-                                width: '205px',
-                                background: 'var(--panel-bg)',
-                                backdropFilter: 'blur(20px)',
-                                border: '1px solid var(--border-active)',
-                                borderRadius: '12px',
-                                padding: '12px',
-                                color: 'var(--text-main)',
-                                fontSize: '0.75rem',
-                                zIndex: 1001,
-                                boxShadow: 'rgba(0, 0, 0, 0.7) 0px 10px 40px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '10px'
-                            }}
-                        >
-                            <div style={{
-                                width: '24px',
-                                height: '24px',
-                                borderRadius: '6px',
-                                background: 'var(--accent-soft)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'var(--accent)',
-                                fontWeight: 'bold'
-                            }}>i</div>
-                            <div style={{ lineHeight: '1.4', flex: '1 1 0%' }}>
-                                You can perform a <b>gathering</b> and a <b>combat</b> action at the same time.
-                            </div>
-                        </motion.div>
 
                     </>
                 )

@@ -21,12 +21,7 @@ export const calculateSurvivalTime = (playerStats, mobData, foodItem, foodAmount
     // Mitigation (Defense)
     const playerMitigation = Math.min(0.75, defense / 10000);
 
-    // Damage reduction (Level difference) - PLAYER PENALTY
-    const mobLevel = mobData.level || 1;
-    const levelDiff = Math.max(0, profLevel - mobLevel);
-    const damagePenalty = Math.min(0.9, levelDiff * 0.045); // 4.5% per level, max 90%
-
-    // Mob damage is now normal (no longer reduced by player level)
+    // Damage per hit to player (only defense mitigation, farm cap removed)
     const dmgToPlayer = Math.max(1, Math.floor(mobBaseDmg * (1 - playerMitigation)));
 
     // Healing
@@ -54,10 +49,6 @@ export const calculateSurvivalTime = (playerStats, mobData, foodItem, foodAmount
     const baseMitigatedHit = Math.max(1, Math.floor(playerAtkPower * (1 - mobMitigation)));
     let avgPlayerHit = baseMitigatedHit * (1 + (burstChance / 100) * (burstMult - 1));
 
-    // --- LEVEL-BASED DAMAGE DEBUFF ---
-    if (damagePenalty > 0) {
-        avgPlayerHit = Math.max(1, avgPlayerHit * (1 - damagePenalty));
-    }
 
     // Time to Kill (TTK)
     const hitsToKill = Math.ceil(mobMaxHp / avgPlayerHit);
@@ -74,9 +65,10 @@ export const calculateSurvivalTime = (playerStats, mobData, foodItem, foodAmount
     const healPerSec = unitHeal / 5; // 5s food cooldown
 
     const idleLimitSeconds = (isPremium ? 12 : 8) * 3600;
+    const limitText = isPremium ? "12h+" : "8h+";
 
     // SCENARIO A: No damage (Unlimited survival)
-    if (dmgRate <= 0) return { seconds: Infinity, text: "Unlimited", color: "#4caf50" };
+    if (dmgRate <= 0) return { seconds: Infinity, text: limitText, color: "#4caf50" };
 
     let totalSeconds = 0;
 
@@ -104,6 +96,10 @@ export const calculateSurvivalTime = (playerStats, mobData, foodItem, foodAmount
         // Healing >= Damage. We never die while we have food.
         totalSeconds = (currentHp + foodAmount * unitHeal) / dmgRate;
         color = "#ffcc00"; // Yellow: Food depletion
+    }
+
+    if (totalSeconds >= idleLimitSeconds) {
+        return { seconds: totalSeconds, text: limitText, color: "#4caf50" };
     }
 
     return formatSurvival(totalSeconds, color);

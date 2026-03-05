@@ -227,7 +227,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                                         <span style={{ fontSize: '0.7rem', fontWeight: '900', color: '#4ade80' }}>100%</span>
                                                     </div>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                        <span style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-main)' }}>50x T1 Rune Shards</span>
+                                                        <span style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-main)' }}>50x Rune Shards</span>
                                                         <span style={{ fontSize: '0.7rem', fontWeight: '900', color: '#4ade80' }}>100%</span>
                                                     </div>
                                                 </>
@@ -235,7 +235,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                         }
 
                                         const isWorldBoss = item.id.includes('WORLDBOSS');
-                                        const shardName = isWorldBoss ? 'Battle Rune Shard' : `Rune Shard (T${item.tier})`;
+                                        const shardName = isWorldBoss ? 'Battle Rune Shard' : 'Rune Shard';
                                         if (isWorldBoss) {
                                             const qty = WORLDBOSS_DROP_TABLE[item.id] || 0;
                                             return (
