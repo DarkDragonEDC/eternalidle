@@ -38,6 +38,7 @@ import DailySpinModal from './components/DailySpinModal';
 import SocialPanel from './components/SocialPanel';
 import TradePanel from './components/TradePanel';
 import SettingsModal from './components/SettingsModal';
+import GuildPanel from './components/GuildPanel';
 import AnnouncementModal, { shouldShowAnnouncement } from './components/AnnouncementModal';
 import {
   Zap, Package, User, Trophy, Coins,
@@ -341,7 +342,7 @@ function App() {
     const validTabs = [
       'inventory', 'profile', 'combat', 'gathering', 'refining', 'crafting',
       'town_overview', 'skills_overview', 'combat_overview', 'market',
-      'dungeon', 'merging', 'rest_camp', 'world_boss', 'taxometer', 'ranking', 'guild'
+      'dungeon', 'merging', 'rest_camp', 'world_boss', 'taxometer', 'ranking', 'guild', 'guild_develop'
     ];
     if (validTabs.includes(path)) return path;
     return localStorage.getItem('activeTab') || 'inventory';
@@ -920,7 +921,7 @@ function App() {
 
     newSocket.on('server_version', ({ version }) => {
       // client version is 1.0.0
-      const CLIENT_VERSION = '1.2.0'; // Mantenha sincronizado com server/package.json
+      const CLIENT_VERSION = '1.3.0'; // Mantenha sincronizado com server/package.json
       if (version && version !== CLIENT_VERSION) {
         console.warn(`[VERSION] Mismatch! Server: ${version}, Client: ${CLIENT_VERSION}`);
 
@@ -2120,6 +2121,14 @@ function App() {
               </div>
             </div>
           </div>
+        );
+      case 'guild_develop':
+        return (
+          <GuildPanel
+            gameState={displayedGameState}
+            socket={socket}
+            isMobile={isMobile}
+          />
         );
       default:
         return <div style={{ padding: 20, textAlign: 'center', color: '#555' }}>Select a category</div>;

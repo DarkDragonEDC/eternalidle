@@ -398,6 +398,8 @@ export const CombatOverview = ({ onNavigate, gameState }) => {
 
     return (
         <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <HubButton label="Rest Camp" icon={<Heart />} color="#f43f5e" onClick={() => onNavigate('rest_camp')} />
+
             <HubButton
                 id="combat-adventure-btn"
                 label={adventureLabel}
@@ -407,8 +409,6 @@ export const CombatOverview = ({ onNavigate, gameState }) => {
                 level={combatLevel}
                 progress={combatProgress}
             />
-
-            <HubButton label="Rest Camp" icon={<Heart />} color="#f43f5e" onClick={() => onNavigate('rest_camp')} />
 
             <HubButton
                 label="Dungeons"

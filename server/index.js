@@ -589,6 +589,23 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('create_guild', async (data) => {
+        try {
+            if (!socket.data.characterId || socket.data.characterId === 'undefined') return;
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                const result = await gameManager.guildManager.createGuild(char, data);
+
+                socket.emit('guild_created', result);
+                // Force a status update to sync guild data to client
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            });
+        } catch (err) {
+            console.error('[GUILD] Error in create_guild socket:', err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
     socket.on('claim_reward', async () => {
         try {
             if (!socket.data.characterId || socket.data.characterId === 'undefined') return;

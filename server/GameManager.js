@@ -13,6 +13,7 @@ import { DailyRewardManager } from './managers/DailyRewardManager.js';
 import { TradeManager } from './managers/TradeManager.js';
 import { WorldBossManager } from './managers/WorldBossManager.js';
 import { SocialManager } from './managers/SocialManager.js';
+import { GuildManager } from './managers/GuildManager.js';
 import { pruneState, hydrateState } from './utils/statePruner.js';
 
 // Removed local ITEM_LOOKUP generation in favor of shared source of truth
@@ -32,6 +33,7 @@ export class GameManager {
         this.tradeManager = new TradeManager(this);
         this.worldBossManager = new WorldBossManager(this);
         this.socialManager = new SocialManager(this);
+        this.guildManager = new GuildManager(this);
         this.userLocks = new Map(); // userId -> Promise (current task)
         this.cache = new Map(); // charId -> character object
         this.dirty = new Set(); // set of charIds that need persisting
@@ -1870,6 +1872,7 @@ export class GameManager {
             dungeon_state: char.state.dungeon,
             globalStats: this.globalStats,
             serverTime: Date.now(),
+            guild: await this.guildManager.getCharacterGuild(characterId || char.id),
             banWarning: (ban && ban.level === 1 && !ban.ack) ? ban.reason : null
         };
 
@@ -2359,6 +2362,7 @@ export class GameManager {
                     user_id: char.user_id,
                     name: char.name,
                     state: char.state,
+                    guild: await this.guildManager.getCharacterGuild(char.id),
                     calculatedStats: this.inventoryManager.calculateStats(char),
                     current_activity: char.current_activity,
                     activity_started_at: char.activity_started_at,

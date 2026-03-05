@@ -1,5 +1,20 @@
 # Patch Notes - Eternal Idle
 
+## v1.3.0
+
+### 🛡️ Novo Sistema de Guildas
+- **Fundação**: Agora você pode criar sua própria guilda! Escolha um nome (3-15 chars), uma tag (2-4 chars), ícone e cor.
+- **Custos**: Fundação custa 500k de Prata ou 100 Orbes.
+- **Dashboard AAA**: Uma interface premium totalmente nova para gerenciar sua guilda, com efeitos de vidro (glassmorphism), glows dinâmicos e progresso de nível.
+- **Lista de Membros**: Acompanhe quem está online em tempo real com indicadores pulsantes e cargos destacados (Líder, Oficial, Membro).
+- **Limite Inicial**: Guildas começam com um limite de 10 membros.
+
+### ⛺ Melhorias de UX
+- **Rest Camp**: O botão do Acampamento de Descanso foi movido para cima da Aventura no Hub de Combate mobile, facilitando o acesso rápido para cura.
+
+---
+
+
 ## v1.2.2
 
 ### 🔄 Interface & Trade
