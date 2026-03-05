@@ -163,7 +163,8 @@ export class GuildManager {
                 characters (
                     id,
                     name,
-                    state
+                    state,
+                    skills
                 )
             `)
             .eq('guild_id', guild.id);
@@ -176,7 +177,8 @@ export class GuildManager {
                 const isOnline = this.gameManager.cache.has(charId);
                 // Use cached (live) state for online members, DB state for offline
                 const cachedChar = isOnline ? this.gameManager.cache.get(charId) : null;
-                const state = cachedChar?.state || m.characters.state;
+                const dbChar = m.characters;
+                const state = cachedChar?.state || { ...dbChar.state, skills: dbChar.skills };
                 return {
                     id: charId,
                     name: m.characters.name,
@@ -332,7 +334,8 @@ export class GuildManager {
                 characters (
                     id,
                     name,
-                    state
+                    state,
+                    skills
                 )
             `)
             .eq('guild_id', member.guild_id)
@@ -346,7 +349,8 @@ export class GuildManager {
             const charId = r.characters.id;
             const isOnline = this.gameManager.cache.has(charId);
             const cachedChar = isOnline ? this.gameManager.cache.get(charId) : null;
-            const state = cachedChar?.state || r.characters.state;
+            const dbChar = r.characters;
+            const state = cachedChar?.state || { ...dbChar.state, skills: dbChar.skills };
 
             return {
                 id: r.id,
