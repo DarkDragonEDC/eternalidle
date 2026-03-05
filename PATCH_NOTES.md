@@ -1,5 +1,25 @@
 # Patch Notes - Eternal Idle
 
+## v1.3.2
+
+### 🎁 Dungeon Chests & Loots
+- **Drop de Crests**: Aumentada significativamente a chance de obter "Crest" ao abrir baús de Dungeon. As novas chances são escalonadas por raridade:
+    - **Normal**: 2%
+    - **Good**: 4%
+    - **Outstanding**: 8%
+    - **Excellent**: 13%
+    - **Masterpiece**: 20%
+
+### ⚒️ Crafting de Equipamentos & Ferramentas
+- **Raridade Escalonada**: Implementado o sistema de chances de qualidade baseada no Tier do item para Weapons, Armor e Tools.
+    - Quanto maior o Tier, mais difícil é obter qualidades superiores (Good, Outstanding, Excellent, Masterpiece).
+    - As chances base são multiplicadas pelo seu bônus de "Quality Chance" de equipamentos e consumíveis.
+    - **Tier 1**: Normal (44.4%), Good (30%), Outstanding (14.4%), Excellent (9.8%), Masterpiece (1.4%).
+    - **Tier 10**: Normal (75%), Good (20%), Outstanding (4.5%), Excellent (0.45%), Masterpiece (0.05%).
+    - A tabela completa de Tiers 1-10 foi revisada e validada conforme as especificações.
+
+
+
 ## v1.3.1
 
 ### ⚖️ Rebalanceamento de Dungeons

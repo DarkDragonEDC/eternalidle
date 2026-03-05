@@ -1,4 +1,4 @@
-import { ITEMS, getSkillForItem, getLevelRequirement, ITEM_LOOKUP, QUALITIES, resolveItem } from '../../shared/items.js';
+import { ITEMS, getSkillForItem, getLevelRequirement, ITEM_LOOKUP, QUALITIES, resolveItem, BASE_QUALITY_CHANCES } from '../../shared/items.js';
 
 // === STARTUP DIAGNOSTIC ===
 const potionKeys = Object.keys(ITEM_LOOKUP).filter(k => k.includes('POTION'));
@@ -339,18 +339,7 @@ export class ActivityManager {
             const qualityBonus = stats.globals?.qualityChance || 0;
 
             const rand = Math.random() * 100; // 0 to 100
-            const BASE_QUALITY_CHANCES = {
-                1: { q4: 1.40, q3: 9.80, q2: 14.40, q1: 30.00 },
-                2: { q4: 1.25, q3: 8.76, q2: 13.30, q1: 28.89 },
-                3: { q4: 1.10, q3: 7.72, q2: 12.20, q1: 27.78 },
-                4: { q4: 0.95, q3: 6.68, q2: 11.10, q1: 26.67 },
-                5: { q4: 0.80, q3: 5.64, q2: 10.00, q1: 25.56 },
-                6: { q4: 0.65, q3: 4.61, q2: 8.90, q1: 24.44 },
-                7: { q4: 0.50, q3: 3.57, q2: 7.80, q1: 23.33 },
-                8: { q4: 0.35, q3: 2.53, q2: 6.70, q1: 22.22 },
-                9: { q4: 0.20, q3: 1.49, q2: 5.60, q1: 21.11 },
-                10: { q4: 0.05, q3: 0.45, q2: 4.50, q1: 20.00 }
-            };
+
 
             const tierStats = BASE_QUALITY_CHANCES[item.tier] || BASE_QUALITY_CHANCES[1];
             const mult = 1 + (qualityBonus / 100);

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { formatNumber, formatSilver } from '@utils/format';
 import { X, Clock, Zap, Target, Star, ChevronRight, Package, Box, Sword, Shield, Heart, Lock, TrendingUp, Timer } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { resolveItem, formatItemId, QUALITIES, getSkillForItem, getLevelRequirement } from '@shared/items';
+import { resolveItem, formatItemId, QUALITIES, getSkillForItem, getLevelRequirement, BASE_QUALITY_CHANCES } from '@shared/items';
 
 const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavigate, onSearchInMarket, isMobile }) => {
     const [quantity, setQuantity] = useState(1);
@@ -235,10 +235,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                                             {Object.values(QUALITIES).map((q, idx) => {
                                                 const qualityBonus = stats.globals?.qualityChance || 0;
                                                 const mult = 1 + (qualityBonus / 100);
-                                                const BASE_CHANCES = {
-                                                    1: { q4: 1.40, q3: 9.80, q2: 14.40, q1: 30.00 }, 10: { q4: 0.05, q3: 0.45, q2: 4.50, q1: 20.00 }
-                                                };
-                                                const chances = BASE_CHANCES[tier] || BASE_CHANCES[1];
+                                                const chances = BASE_QUALITY_CHANCES[tier] || BASE_QUALITY_CHANCES[1];
                                                 let c = 0;
                                                 if (q.id === 4) c = chances.q4 * mult;
                                                 else if (q.id === 3) c = chances.q3 * mult;

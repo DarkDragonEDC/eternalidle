@@ -119,7 +119,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
         const playerDmg = stats.damage || 1;
 
         const maxHp = stats.maxHP || stats.hp || 100;
-        let currentHpSnapshot = gameState?.state?.health || maxHp;
+        let currentHpSnapshot = (typeof gameState?.state?.health === 'number') ? gameState.state.health : maxHp;
         const food = gameState?.state?.equipment?.food;
 
         const freshFood = food ? resolveItem(food.id) : null;
@@ -133,7 +133,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
 
         let totalDamagePerRun = 0;
         let totalFoodConsumedPerRun = 0;
-        let survived = true;
+        let survived = currentHpSnapshot > 0;
 
         const simulateMob = (mobId, isFirstRun) => {
             if (!survived) return;
