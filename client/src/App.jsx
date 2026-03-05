@@ -49,6 +49,7 @@ import { calculateNextLevelXP, XP_TABLE } from '@shared/skills';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOptimisticState } from './hooks/useOptimisticState';
 import ResponsiveText from './components/ResponsiveText';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 
 
@@ -249,6 +250,8 @@ function App() {
   const clockOffset = useRef(0);
   const lastThemeChangeRef = useRef(0);
   const displayedGameState = useOptimisticState(gameState);
+  const navigate = useNavigate();
+  const location = useLocation();
   const [error, setError] = useState('');
   const [initialAuthView, setInitialAuthView] = useState('LOGIN');
   const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
@@ -333,8 +336,31 @@ function App() {
   // characterSelected is no longer needed, we use selectedCharacter (charId) as the source of truth
 
   // Navigation State
-  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('activeTab') || 'inventory');
-  const prevTabRef = React.useRef(localStorage.getItem('activeTab') || 'inventory');
+  const [activeTab, setActiveTabState] = useState(() => {
+    const path = window.location.pathname.substring(1);
+    const validTabs = [
+      'inventory', 'profile', 'combat', 'gathering', 'refining', 'crafting',
+      'town_overview', 'skills_overview', 'combat_overview', 'market',
+      'dungeon', 'merging', 'rest_camp', 'world_boss', 'taxometer', 'ranking', 'guild'
+    ];
+    if (validTabs.includes(path)) return path;
+    return localStorage.getItem('activeTab') || 'inventory';
+  });
+
+  const setActiveTab = (newTab) => {
+    setActiveTabState(newTab);
+    navigate('/' + newTab);
+  };
+
+  // Sync tab with URL on manual path changes (e.g. browser back/forward)
+  useEffect(() => {
+    const path = location.pathname.substring(1);
+    if (path && path !== activeTab) {
+      setActiveTabState(path);
+    }
+  }, [location.pathname]);
+
+  const prevTabRef = React.useRef(activeTab);
   const [activeCategory, setActiveCategory] = useState(() => localStorage.getItem('activeCategory') || 'WOOD');
 
   // Helper for safe inventory access
@@ -2066,6 +2092,32 @@ function App() {
                 isPreviewActive={isPreviewActive}
                 onPreviewActionBlocked={onPreviewActionBlocked}
               />
+            </div>
+          </div>
+        );
+      case 'guild':
+        return (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <SkillProgressHeader tab="guild" category="GUILDS" />
+            <div className="glass-panel" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '16px', background: 'var(--panel-bg)', margin: '10px' }}>
+              <div style={{ textAlign: 'center', opacity: 0.8 }}>
+                <div style={{ position: 'relative', marginBottom: '30px', display: 'flex', justifyContent: 'center' }}>
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.4, 0.2] }}
+                    transition={{ repeat: Infinity, duration: 4 }}
+                    style={{ position: 'absolute', width: '120px', height: '120px', background: 'var(--accent)', filter: 'blur(40px)', borderRadius: '50%', zIndex: 1 }}
+                  />
+                  <Shield size={80} color="var(--accent)" style={{ position: 'relative', zIndex: 2, filter: 'drop-shadow(0 0 15px var(--accent-soft))' }} />
+                </div>
+                <h2 style={{ color: 'var(--text-main)', fontSize: '2rem', fontWeight: '900', letterSpacing: '4px', textTransform: 'uppercase', margin: '0 0 15px' }}>GUILD SYSTEM</h2>
+                <p style={{ color: 'var(--accent)', fontSize: '1rem', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '8px' }}>UNDER DEVELOPMENT</p>
+                <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', maxWidth: '300px', margin: '0 auto', lineHeight: '1.5' }}>Prepare your banners and gather your allies. The age of guilds is coming soon to Eternal Idle.</p>
+                <div style={{ marginTop: '30px', display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent)', opacity: 0.3 }} />
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent)', opacity: 0.6 }} />
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent)', opacity: 0.3 }} />
+                </div>
+              </div>
             </div>
           </div>
         );

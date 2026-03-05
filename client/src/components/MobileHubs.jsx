@@ -333,6 +333,12 @@ export const TownOverview = ({ onNavigate, gameState, canSpin, onOpenDailySpin, 
                 showBadge={hasActiveTrade && !isAnonymous}
                 customStyle={isAnonymous ? { opacity: 0.7 } : {}}
             />
+            <HubButton
+                label="Guild"
+                icon={<Shield />}
+                color="#4ade80"
+                onClick={() => onNavigate('guild')}
+            />
             <HubButton label="Ranking" icon={<Trophy />} color="#a78bfa" onClick={() => onNavigate('ranking')} />
             <HubButton label="Taxometer" icon={<Coins />} color="var(--accent)" onClick={() => onNavigate('taxometer')} />
         </div>

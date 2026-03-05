@@ -344,10 +344,11 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
                         </motion.button>
                     ))}
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
                     {[
                         { id: 'trade', label: 'SOCIAL', icon: <Users size={18} />, restricted: isAnonymous, isTrade: true },
-                        { id: 'rest_camp', label: 'CAMP', icon: <Flame size={18} />, color: '#ff9329' }
+                        { id: 'rest_camp', label: 'CAMP', icon: <Flame size={18} />, color: '#ff9329' },
+                        { id: 'guild', label: 'GUILD', icon: <Shield size={18} />, color: '#4ade80' }
                     ].map(item => (
                         <motion.button
                             key={item.id}
