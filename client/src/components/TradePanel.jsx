@@ -399,10 +399,10 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                                         if (!['RAW', 'REFINED', 'CRAFTING_MATERIAL', 'RESOURCE'].includes(type)) return false;
                                                         break;
                                                     case 'CRAFT':
-                                                        if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFFHAND', 'SHIELD', 'PICKAXE', 'AXE', 'SICKLE', 'SKINNING_KNIFE', 'FISHING_ROD'].includes(type)) return false;
+                                                        if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFF_HAND', 'SHIELD'].includes(type) && !type.startsWith('TOOL')) return false;
                                                         break;
                                                     case 'CONS':
-                                                        if (!['CONSUMABLE', 'FOOD', 'POTION', 'CHEST'].includes(type) && !id.includes('CHEST')) return false;
+                                                        if (!['CONSUMABLE', 'FOOD', 'POTION', 'CHEST', 'MAP'].includes(type) && !id.includes('CHEST')) return false;
                                                         break;
                                                     case 'RUNE':
                                                         if (!isRuneRelated) return false;
