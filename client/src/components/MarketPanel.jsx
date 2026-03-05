@@ -371,7 +371,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                 const type = itemInfo.type || '';
                 const cat = itemInfo.category || '';
                 if (buyOrdersSelectedCategory === 'EQUIPMENT') {
-                    if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'OFF_HAND', 'GLOVES', 'CAPE', 'TOOL'].includes(type)) return false;
+                    if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'OFF_HAND', 'GLOVES', 'CAPE'].includes(type) && !type?.startsWith('TOOL')) return false;
                 } else if (buyOrdersSelectedCategory === 'RESOURCE') {
                     if (type !== 'RAW' && type !== 'RESOURCE' && cat !== 'RESOURCE') return false;
                     const isRefined = itemId.includes('_bar') || itemId.includes('_plank') || itemId.includes('_leather') || itemId.includes('_cloth') || itemId.includes('_extract');
@@ -872,7 +872,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
         // 4. Category Filter
         if (selectedCategory !== 'ALL') {
             if (selectedCategory === 'EQUIPMENT') {
-                if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'OFF_HAND', 'GLOVES', 'CAPE', 'TOOL'].includes(l.item_data?.type)) return false;
+                if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'OFF_HAND', 'GLOVES', 'CAPE'].includes(l.item_data?.type) && !l.item_data?.type?.startsWith('TOOL')) return false;
             } else if (selectedCategory === 'RESOURCE') {
                 // Show only raw materials/resources, excluding refined ones
                 if (l.item_data?.type === 'RAW') return true;
@@ -1628,7 +1628,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                             if (sellSelectedCategory !== 'ALL') {
                                                 const type = item.data.type;
                                                 if (sellSelectedCategory === 'EQUIPMENT') {
-                                                    if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'OFF_HAND', 'GLOVES', 'CAPE', 'TOOL'].includes(type)) return false;
+                                                    if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'OFF_HAND', 'GLOVES', 'CAPE'].includes(type) && !type?.startsWith('TOOL')) return false;
                                                 } else if (sellSelectedCategory === 'RESOURCE') {
                                                     if (type !== 'RAW' && type !== 'RESOURCE') return false;
                                                     // Exclude refined items from basic resources if they are tagged as refined

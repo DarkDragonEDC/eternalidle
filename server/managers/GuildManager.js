@@ -4,7 +4,7 @@ export class GuildManager {
         this.supabase = gameManager.supabase;
     }
 
-    async createGuild(char, { name, tag, summary, icon, iconColor, bgColor, paymentMethod }) {
+    async createGuild(char, { name, tag, summary, icon, iconColor, bgColor, paymentMethod, countryCode }) {
         if (!char) throw new Error("Character not found");
 
         // 1. Basic Validation
@@ -54,7 +54,8 @@ export class GuildManager {
                 icon: icon || "Shield",
                 icon_color: iconColor || "#FFD700",
                 bg_color: bgColor || "#1a1a1a",
-                leader_id: char.id
+                leader_id: char.id,
+                country_code: countryCode || null
             })
             .select()
             .single();
@@ -138,6 +139,34 @@ export class GuildManager {
                 level: this._calculateCharLevel(m.characters.state)
             }))
         };
+    }
+
+    async searchGuilds(query, countryCode = null) {
+        const cleanQuery = (query || "").trim();
+
+        let queryBuilder = this.supabase.from('guilds').select('*');
+
+        if (countryCode) {
+            queryBuilder = queryBuilder.eq('country_code', countryCode);
+        }
+
+        // If query is too short, return empty or some featured guilds
+        // For now, let's just search if 2+ chars
+        if (cleanQuery.length < 2) {
+            // Return top 10 guilds
+            const { data, error } = await queryBuilder
+                .limit(10);
+
+            if (error) throw error;
+            return data || [];
+        }
+
+        const { data, error } = await queryBuilder
+            .or(`name.ilike.%${cleanQuery}%,tag.ilike.%${cleanQuery}%`)
+            .limit(20);
+
+        if (error) throw error;
+        return data || [];
     }
 
     _calculateCharLevel(state) {

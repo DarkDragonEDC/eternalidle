@@ -1,12 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Users, Sword, Swords, Trophy, Settings, Plus, Info, Check, X, Coins, Sparkles, Tag, User, Zap } from 'lucide-react';
 import { formatSilver } from '@utils/format';
+import { COUNTRIES } from '../../../shared/countries';
 
 const formatNumber = (num) => {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
     if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
     return num.toString();
+};
+
+const CountryFlag = ({ code, name, size = '1.2rem', style = {} }) => {
+    if (!code) return <span style={{ fontSize: size, ...style }}>🌐</span>;
+    return (
+        <img
+            src={`https://flagcdn.com/w40/${code.toLowerCase()}.png`}
+            alt={name || code}
+            title={name || code}
+            style={{
+                height: isNaN(size) ? size : `${size}px`,
+                width: 'auto',
+                borderRadius: '2px',
+                display: 'inline-block',
+                verticalAlign: 'middle',
+                ...style
+            }}
+        />
+    );
 };
 
 const GuildDashboard = ({ guild, socket, isMobile }) => {
@@ -314,8 +334,61 @@ const GuildPanel = ({ gameState, socket, isMobile }) => {
     const [guildSummary, setGuildSummary] = useState('');
     const [activeTab, setActiveTab] = useState('search'); // 'search' or 'create'
     const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState('silver');
 
-    const [paymentMethod, setPaymentMethod] = useState('silver'); // 'silver' or 'orb'
+    // Country selection states
+    const [selectedCountry, setSelectedCountry] = useState(null);
+    const [countrySearch, setCountrySearch] = useState('');
+    const [showCountryPicker, setShowCountryPicker] = useState(false);
+
+    const filteredCountries = COUNTRIES.filter(c =>
+        c.name.toLowerCase().includes(countrySearch.toLowerCase())
+    );
+
+    // Initial search
+    useEffect(() => {
+        if (activeTab === 'search') {
+            socket?.emit('search_guilds', { query: searchQuery, countryCode: selectedCountry?.code || null });
+            setIsSearching(true);
+        }
+    }, [activeTab, socket, selectedCountry]);
+
+    // Search debouncing
+    useEffect(() => {
+        if (activeTab !== 'search') return;
+
+        const timer = setTimeout(() => {
+            socket?.emit('search_guilds', { query: searchQuery, countryCode: selectedCountry?.code || null });
+            setIsSearching(true);
+        }, 800);
+
+        return () => clearTimeout(timer);
+    }, [searchQuery, socket, activeTab, selectedCountry]);
+
+    // Socket listeners
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on('guild_search_results', (results) => {
+            setSearchResults(results || []);
+            setIsSearching(false);
+        });
+
+        socket.on('guild_created', (result) => {
+            if (result.success) {
+                setStatusMessage({ type: 'success', text: 'Guild created successfully!' });
+                setActiveTab('search');
+            }
+        });
+
+        return () => {
+            socket.off('guild_search_results');
+            socket.off('guild_created');
+        };
+    }, [socket]);
+
     const userSilver = gameState?.state?.silver || 0;
     const userOrbs = gameState?.state?.orbs || 0;
     const SILVER_COST = 500000;
@@ -326,7 +399,7 @@ const GuildPanel = ({ gameState, socket, isMobile }) => {
     const ICONS = {
         Shield: Shield,
         Sword: Sword,
-        Sword2: Swords, // Crossed swords
+        Sword2: Swords,
         Trophy: Trophy,
         Sparkles: Sparkles,
         Users: Users,
@@ -354,7 +427,6 @@ const GuildPanel = ({ gameState, socket, isMobile }) => {
         setIsSubmitting(true);
         setStatusMessage({ type: 'info', text: 'Sending request to the ancients...' });
 
-        // Submit to socket
         if (socket) {
             socket.emit('create_guild', {
                 name: guildName,
@@ -363,14 +435,12 @@ const GuildPanel = ({ gameState, socket, isMobile }) => {
                 iconColor: iconColor,
                 bgColor: bgColor,
                 summary: guildSummary,
-                paymentMethod: paymentMethod
+                paymentMethod: paymentMethod,
+                countryCode: selectedCountry?.code || null
             });
         }
 
-        // For dev purposes, reset after a bit
-        setTimeout(() => {
-            setIsSubmitting(false);
-        }, 2000);
+        setTimeout(() => setIsSubmitting(false), 2000);
     };
 
     const PreviewIcon = ICONS[selectedIcon] || Shield;
@@ -459,32 +529,248 @@ const GuildPanel = ({ gameState, socket, isMobile }) => {
                                             gap: '15px'
                                         }}
                                     >
-                                        <div style={{ position: 'relative' }}>
-                                            <input
-                                                type="text"
-                                                placeholder="Search for guilds by name or tag..."
-                                                value={searchQuery}
-                                                onChange={(e) => setSearchQuery(e.target.value)}
-                                                style={{
-                                                    width: '100%',
-                                                    padding: '12px 15px 12px 40px',
-                                                    background: '#1a1a1a',
-                                                    border: '1px solid var(--border)',
-                                                    borderRadius: '12px',
-                                                    color: '#fff',
-                                                    fontSize: '0.9rem',
-                                                    outline: 'none'
-                                                }}
-                                            />
-                                            <Users size={18} color="var(--text-dim)" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)' }} />
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <div style={{ position: 'relative', flex: 1 }}>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search for guilds by name or tag..."
+                                                    value={searchQuery}
+                                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '12px 15px 12px 40px',
+                                                        background: '#1a1a1a',
+                                                        border: '1px solid var(--border)',
+                                                        borderRadius: '12px',
+                                                        color: '#fff',
+                                                        fontSize: '0.9rem',
+                                                        outline: 'none'
+                                                    }}
+                                                />
+                                                <Users size={18} color="var(--text-dim)" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)' }} />
+                                            </div>
+
+                                            {/* Country Filter in Search */}
+                                            <div style={{ position: 'relative', width: '80px' }}>
+                                                <button
+                                                    onClick={() => setShowCountryPicker(!showCountryPicker)}
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        background: '#1a1a1a',
+                                                        border: '1px solid var(--border)',
+                                                        borderRadius: '12px',
+                                                        cursor: 'pointer',
+                                                        fontSize: '1.4rem',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center'
+                                                    }}
+                                                    title={selectedCountry?.name || "Filter by Country"}
+                                                >
+                                                    <CountryFlag code={selectedCountry?.code} name={selectedCountry?.name} size="1.4rem" />
+                                                </button>
+
+                                                <AnimatePresence>
+                                                    {showCountryPicker && (
+                                                        <>
+                                                            {/* Backdrop */}
+                                                            <motion.div
+                                                                initial={{ opacity: 0 }}
+                                                                animate={{ opacity: 1 }}
+                                                                exit={{ opacity: 0 }}
+                                                                onClick={() => setShowCountryPicker(false)}
+                                                                style={{
+                                                                    position: 'fixed',
+                                                                    top: 0,
+                                                                    left: 0,
+                                                                    right: 0,
+                                                                    bottom: 0,
+                                                                    background: 'rgba(0,0,0,0.8)',
+                                                                    backdropFilter: 'blur(5px)',
+                                                                    zIndex: 10000
+                                                                }}
+                                                            />
+                                                            {/* Modal */}
+                                                            <motion.div
+                                                                initial={{ opacity: 0, scale: 0.9, x: '-50%', y: '-40%' }}
+                                                                animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
+                                                                exit={{ opacity: 0, scale: 0.9, x: '-50%', y: '-40%' }}
+                                                                style={{
+                                                                    position: 'fixed',
+                                                                    top: '50%',
+                                                                    left: '50%',
+                                                                    width: 'min(350px, 90vw)',
+                                                                    background: '#111',
+                                                                    border: '2px solid var(--accent)',
+                                                                    borderRadius: '24px',
+                                                                    padding: '24px',
+                                                                    zIndex: 10001,
+                                                                    boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
+                                                                    display: 'flex',
+                                                                    flexDirection: 'column',
+                                                                    gap: '15px'
+                                                                }}
+                                                            >
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                    <div style={{ fontSize: '0.9rem', fontWeight: '900', color: 'var(--accent)', letterSpacing: '1px' }}>SELECT REGION</div>
+                                                                    <button onClick={() => setShowCountryPicker(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}><X size={20} /></button>
+                                                                </div>
+
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Search country..."
+                                                                    value={countrySearch}
+                                                                    onChange={(e) => setCountrySearch(e.target.value)}
+                                                                    style={{
+                                                                        width: '100%',
+                                                                        padding: '12px 16px',
+                                                                        background: '#0a0a0a',
+                                                                        border: '1px solid var(--border)',
+                                                                        borderRadius: '12px',
+                                                                        color: '#fff',
+                                                                        fontSize: '0.9rem',
+                                                                        outline: 'none',
+                                                                        borderColor: 'rgba(255,255,255,0.1)'
+                                                                    }}
+                                                                    autoFocus
+                                                                />
+                                                                <div style={{ maxHeight: '300px', overflowY: 'auto', overflowX: 'hidden', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', padding: '5px' }}>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setSelectedCountry(null);
+                                                                            setShowCountryPicker(false);
+                                                                        }}
+                                                                        style={{
+                                                                            aspectRatio: '1',
+                                                                            background: !selectedCountry ? 'rgba(255,215,0,0.1)' : 'rgba(255,255,255,0.03)',
+                                                                            border: `1px solid ${!selectedCountry ? 'var(--accent)' : 'rgba(255,255,255,0.05)'}`,
+                                                                            borderRadius: '12px',
+                                                                            fontSize: '1.5rem',
+                                                                            cursor: 'pointer',
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            justifyContent: 'center',
+                                                                            transition: '0.2s'
+                                                                        }}
+                                                                        title="All Countries"
+                                                                    >
+                                                                        🌐
+                                                                    </button>
+                                                                    {filteredCountries.map(c => (
+                                                                        <button
+                                                                            key={c.code}
+                                                                            onClick={() => {
+                                                                                setSelectedCountry(c);
+                                                                                setShowCountryPicker(false);
+                                                                            }}
+                                                                            style={{
+                                                                                aspectRatio: '1',
+                                                                                background: selectedCountry?.code === c.code ? 'rgba(255,215,0,0.1)' : 'rgba(255,255,255,0.03)',
+                                                                                border: `1px solid ${selectedCountry?.code === c.code ? 'var(--accent)' : 'rgba(255,255,255,0.05)'}`,
+                                                                                borderRadius: '12px',
+                                                                                cursor: 'pointer',
+                                                                                display: 'flex',
+                                                                                alignItems: 'center',
+                                                                                justifyContent: 'center',
+                                                                                transition: '0.2s'
+                                                                            }}
+                                                                            title={c.name}
+                                                                        >
+                                                                            <CountryFlag code={c.code} name={c.name} size="1.8rem" />
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
+                                                            </motion.div>
+                                                        </>
+                                                    )}
+                                                </AnimatePresence>
+                                            </div>
                                         </div>
 
-                                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '15px', opacity: 0.5 }}>
-                                            <Shield size={48} color="var(--border)" />
-                                            <div style={{ textAlign: 'center' }}>
-                                                <div style={{ fontWeight: 'bold', color: 'var(--text-dim)' }}>No guilds found</div>
-                                                <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Try searching for a different name or tag</div>
-                                            </div>
+                                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto' }}>
+                                            {isSearching ? (
+                                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <div className="spinner-small" style={{ width: '30px', height: '30px' }} />
+                                                </div>
+                                            ) : searchResults.length > 0 ? (
+                                                searchResults.map((g, idx) => (
+                                                    <motion.div
+                                                        key={g.id}
+                                                        initial={{ opacity: 0, x: -10 }}
+                                                        animate={{ opacity: 1, x: 0 }}
+                                                        transition={{ delay: idx * 0.05 }}
+                                                        style={{
+                                                            background: 'rgba(255,255,255,0.03)',
+                                                            border: '1px solid rgba(255,255,255,0.05)',
+                                                            borderRadius: '16px',
+                                                            padding: '12px 15px',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'space-between'
+                                                        }}
+                                                    >
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                                            <div style={{
+                                                                width: '40px',
+                                                                height: '40px',
+                                                                background: g.bg_color || '#1a1a1a',
+                                                                borderRadius: '10px',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                border: '1px solid rgba(255,255,255,0.1)'
+                                                            }}>
+                                                                <Shield size={20} color={g.icon_color || '#fff'} />
+                                                            </div>
+                                                            <div>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                    <div style={{ fontWeight: 'bold', color: '#fff' }}>{g.name}</div>
+                                                                    {g.country_code && (
+                                                                        <CountryFlag code={g.country_code} name={COUNTRIES.find(c => c.code === g.country_code)?.name} size="1rem" />
+                                                                    )}
+                                                                    <span style={{ color: 'var(--accent)', fontSize: '0.7rem', fontWeight: 'bold' }}>[{g.tag}]</span>
+                                                                </div>
+                                                                <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>
+                                                                    LVL {g.level || 1} • {g.summary || 'Stronger Together'}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                                            <motion.button
+                                                                whileHover={{ scale: 1.05 }}
+                                                                whileTap={{ scale: 0.95 }}
+                                                                onClick={() => {
+                                                                    // Placeholder for Join Logic
+                                                                    socket?.emit('apply_to_guild', { guildId: g.id });
+                                                                    setStatusMessage({ type: 'info', text: 'Application sent to the Guild Leader!' });
+                                                                }}
+                                                                style={{
+                                                                    padding: '6px 16px',
+                                                                    background: 'var(--accent)',
+                                                                    border: 'none',
+                                                                    borderRadius: '8px',
+                                                                    color: '#000',
+                                                                    fontSize: '0.7rem',
+                                                                    fontWeight: '900',
+                                                                    cursor: 'pointer'
+                                                                }}
+                                                            >
+                                                                JOIN
+                                                            </motion.button>
+                                                            <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>{g.member_count || 1}/{g.member_limit || 10}</span>
+                                                        </div>
+                                                    </motion.div>
+                                                ))
+                                            ) : (
+                                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '15px', opacity: 0.5 }}>
+                                                    <Shield size={48} color="var(--border)" />
+                                                    <div style={{ textAlign: 'center' }}>
+                                                        <div style={{ fontWeight: 'bold', color: 'var(--text-dim)' }}>No guilds found</div>
+                                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Try searching for a different name or tag</div>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </motion.div>
                                 ) : (
@@ -518,54 +804,64 @@ const GuildPanel = ({ gameState, socket, isMobile }) => {
                                                 borderRadius: '4px',
                                                 whiteSpace: 'nowrap',
                                                 zIndex: 1
-                                            }}>BANNER PREVIEW</div>
-                                            <div style={{
-                                                padding: isMobile ? '8px' : '12px',
-                                                background: 'linear-gradient(180deg, #111 0%, #080808 100%)',
-                                                border: '1px solid var(--border)',
-                                                borderRadius: '14px',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center'
-                                            }}>
-                                                <motion.div
-                                                    key={guildName + guildTag + selectedIcon + iconColor + bgColor}
-                                                    initial={{ opacity: 0.9, scale: 0.98 }}
-                                                    animate={{ opacity: 1, scale: 1 }}
-                                                    style={{
-                                                        display: 'inline-flex',
-                                                        padding: isMobile ? '8px 16px' : '11px 24px',
-                                                        background: 'linear-gradient(135deg, rgba(255,215,0,0.08) 0%, rgba(255,215,0,0.02) 100%)',
-                                                        border: '1px solid rgba(255,215,0,0.15)',
-                                                        borderRadius: '12px',
-                                                        alignItems: 'center',
-                                                        gap: isMobile ? '10px' : '15px',
-                                                        boxShadow: `0 5px 20px ${bgColor}11`
-                                                    }}
-                                                >
+                                            }}>HOW OTHERS WILL SEE YOUR GUILD</div>
+                                            <motion.div
+                                                key={guildName + guildTag + selectedIcon + iconColor + bgColor + (selectedCountry?.code || '') + guildSummary}
+                                                initial={{ opacity: 0.9, scale: 0.98 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                style={{
+                                                    background: 'rgba(255,255,255,0.03)',
+                                                    border: '1px solid rgba(255,255,255,0.05)',
+                                                    borderRadius: '16px',
+                                                    padding: '12px 15px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'space-between'
+                                                }}
+                                            >
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                                                     <div style={{
-                                                        width: isMobile ? '36px' : '44px',
-                                                        height: isMobile ? '36px' : '44px',
+                                                        width: '40px',
+                                                        height: '40px',
                                                         background: bgColor,
-                                                        borderRadius: '8px',
+                                                        borderRadius: '10px',
                                                         display: 'flex',
                                                         alignItems: 'center',
                                                         justifyContent: 'center',
-                                                        boxShadow: `0 0 15px ${bgColor}33`,
-                                                        transition: '0.3s'
+                                                        border: '1px solid rgba(255,255,255,0.1)'
                                                     }}>
-                                                        <PreviewIcon size={isMobile ? 20 : 24} color={iconColor} />
+                                                        <PreviewIcon size={20} color={iconColor} />
                                                     </div>
-                                                    <div style={{ textAlign: 'left' }}>
-                                                        <div style={{ fontSize: isMobile ? '1rem' : '1.2rem', fontWeight: '900', color: '#fff', textTransform: 'uppercase', letterSpacing: '1px' }}>{guildName || 'New Guild'}</div>
-                                                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                                                            <span style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: isMobile ? '0.75rem' : '0.85rem' }}>[{guildTag || 'TAG'}]</span>
-                                                            <div style={{ width: '3px', height: '3px', borderRadius: '50%', background: 'var(--text-dim)', opacity: 0.3 }} />
-                                                            <span style={{ color: 'var(--text-dim)', fontSize: isMobile ? '0.65rem' : '0.75rem' }}>1/10 Members</span>
+                                                    <div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                            <div style={{ fontWeight: 'bold', color: '#fff' }}>{guildName || 'New Guild'}</div>
+                                                            {selectedCountry && (
+                                                                <CountryFlag code={selectedCountry.code} name={selectedCountry.name} size="1rem" />
+                                                            )}
+                                                            <span style={{ color: 'var(--accent)', fontSize: '0.7rem', fontWeight: 'bold' }}>[{guildTag || 'TAG'}]</span>
+                                                        </div>
+                                                        <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>
+                                                            LVL 1 {guildSummary ? `\u2022 ${guildSummary}` : '\u2022 Stronger Together'}
                                                         </div>
                                                     </div>
-                                                </motion.div>
-                                            </div>
+                                                </div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                                    <div
+                                                        style={{
+                                                            padding: '6px 16px',
+                                                            background: 'var(--accent)',
+                                                            borderRadius: '8px',
+                                                            color: '#000',
+                                                            fontSize: '0.7rem',
+                                                            fontWeight: '900',
+                                                            opacity: 0.4
+                                                        }}
+                                                    >
+                                                        JOIN
+                                                    </div>
+                                                    <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>1/10</span>
+                                                </div>
+                                            </motion.div>
                                         </div>
 
                                         {/* Main Interaction Grid */}
@@ -615,37 +911,187 @@ const GuildPanel = ({ gameState, socket, isMobile }) => {
                                                     />
                                                 </div>
 
-                                                {/* Guild Tag */}
-                                                <div>
-                                                    <label style={{ fontSize: '0.55rem', color: 'var(--text-dim)', marginLeft: '4px', display: 'block', marginBottom: '2px', fontWeight: 'bold' }}>GUILD TAG - {guildTag.length}/4</label>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="TAG"
-                                                        maxLength={4}
-                                                        value={guildTag}
-                                                        onChange={(e) => setGuildTag(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
-                                                        style={{
-                                                            width: '100%',
-                                                            padding: '8px 12px',
-                                                            background: '#1a1a1a',
-                                                            border: '1px solid var(--border)',
-                                                            borderRadius: '8px',
-                                                            color: 'var(--accent)',
-                                                            fontSize: '0.85rem',
-                                                            fontWeight: '900',
-                                                            letterSpacing: '2px',
-                                                            outline: 'none',
-                                                            transition: '0.2s'
-                                                        }}
-                                                        onFocus={(e) => {
-                                                            e.target.style.borderColor = 'var(--accent)';
-                                                            e.target.style.boxShadow = '0 0 10px rgba(212, 175, 55, 0.1)';
-                                                        }}
-                                                        onBlur={(e) => {
-                                                            e.target.style.borderColor = 'var(--border)';
-                                                            e.target.style.boxShadow = 'none';
-                                                        }}
-                                                    />
+                                                {/* Guild Tag & Country */}
+                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                    <div style={{ flex: 1 }}>
+                                                        <label style={{ fontSize: '0.55rem', color: 'var(--text-dim)', marginLeft: '4px', display: 'block', marginBottom: '2px', fontWeight: 'bold' }}>GUILD TAG - {guildTag.length}/4</label>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="TAG"
+                                                            maxLength={4}
+                                                            value={guildTag}
+                                                            onChange={(e) => setGuildTag(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+                                                            style={{
+                                                                width: '100%',
+                                                                padding: '8px 12px',
+                                                                background: '#1a1a1a',
+                                                                border: '1px solid var(--border)',
+                                                                borderRadius: '8px',
+                                                                color: 'var(--accent)',
+                                                                fontSize: '0.85rem',
+                                                                fontWeight: '900',
+                                                                letterSpacing: '2px',
+                                                                outline: 'none',
+                                                                transition: '0.2s'
+                                                            }}
+                                                            onFocus={(e) => {
+                                                                e.target.style.borderColor = 'var(--accent)';
+                                                                e.target.style.boxShadow = '0 0 10px rgba(212, 175, 55, 0.1)';
+                                                            }}
+                                                            onBlur={(e) => {
+                                                                e.target.style.borderColor = 'var(--border)';
+                                                                e.target.style.boxShadow = 'none';
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div style={{ flex: 1, position: 'relative' }}>
+                                                        <label style={{ fontSize: '0.55rem', color: 'var(--text-dim)', marginLeft: '4px', display: 'block', marginBottom: '2px', fontWeight: 'bold' }}>COUNTRY</label>
+                                                        <button
+                                                            onClick={() => setShowCountryPicker(!showCountryPicker)}
+                                                            style={{
+                                                                width: '100%',
+                                                                padding: '8px 12px',
+                                                                background: '#1a1a1a',
+                                                                border: '1px solid var(--border)',
+                                                                borderRadius: '8px',
+                                                                color: '#fff',
+                                                                fontSize: '0.8rem',
+                                                                textAlign: 'left',
+                                                                cursor: 'pointer',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '8px',
+                                                                height: '37px'
+                                                            }}
+                                                            onFocus={(e) => {
+                                                                e.target.style.borderColor = 'var(--accent)';
+                                                                e.target.style.boxShadow = '0 0 10px rgba(212, 175, 55, 0.1)';
+                                                            }}
+                                                            onBlur={(e) => {
+                                                                e.target.style.borderColor = 'var(--border)';
+                                                                e.target.style.boxShadow = 'none';
+                                                            }}
+                                                        >
+                                                            <CountryFlag code={selectedCountry?.code} name={selectedCountry?.name} size="1.2rem" />
+                                                            <span style={{ color: selectedCountry ? '#fff' : 'var(--text-dim)', fontSize: '0.7rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                                {selectedCountry ? selectedCountry.name : 'All Regions'}
+                                                            </span>
+                                                        </button>
+
+                                                        <AnimatePresence>
+                                                            {showCountryPicker && (
+                                                                <>
+                                                                    {/* Backdrop */}
+                                                                    <motion.div
+                                                                        initial={{ opacity: 0 }}
+                                                                        animate={{ opacity: 1 }}
+                                                                        exit={{ opacity: 0 }}
+                                                                        onClick={() => setShowCountryPicker(false)}
+                                                                        style={{
+                                                                            position: 'fixed',
+                                                                            top: 0,
+                                                                            left: 0,
+                                                                            right: 0,
+                                                                            bottom: 0,
+                                                                            background: 'rgba(0,0,0,0.8)',
+                                                                            backdropFilter: 'blur(5px)',
+                                                                            zIndex: 10000
+                                                                        }}
+                                                                    />
+                                                                    {/* Modal */}
+                                                                    <motion.div
+                                                                        initial={{ opacity: 0, scale: 0.9, x: '-50%', y: '-40%' }}
+                                                                        animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
+                                                                        exit={{ opacity: 0, scale: 0.9, x: '-50%', y: '-40%' }}
+                                                                        style={{
+                                                                            position: 'fixed',
+                                                                            top: '50%',
+                                                                            left: '50%',
+                                                                            width: 'min(350px, 90vw)',
+                                                                            background: '#111',
+                                                                            border: '2px solid var(--accent)',
+                                                                            borderRadius: '24px',
+                                                                            padding: '24px',
+                                                                            zIndex: 10001,
+                                                                            boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
+                                                                            display: 'flex',
+                                                                            flexDirection: 'column',
+                                                                            gap: '15px'
+                                                                        }}
+                                                                    >
+                                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                            <div style={{ fontSize: '0.9rem', fontWeight: '900', color: 'var(--accent)', letterSpacing: '1px' }}>CHOOSE ORIGIN</div>
+                                                                            <button onClick={() => setShowCountryPicker(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}><X size={20} /></button>
+                                                                        </div>
+
+                                                                        <input
+                                                                            type="text"
+                                                                            placeholder="Filter country..."
+                                                                            value={countrySearch}
+                                                                            onChange={(e) => setCountrySearch(e.target.value)}
+                                                                            style={{
+                                                                                width: '100%',
+                                                                                padding: '12px 16px',
+                                                                                background: '#0a0a0a',
+                                                                                border: '1px solid var(--border)',
+                                                                                borderRadius: '12px',
+                                                                                color: '#fff',
+                                                                                fontSize: '0.9rem',
+                                                                                outline: 'none',
+                                                                                borderColor: 'rgba(255,255,255,0.1)'
+                                                                            }}
+                                                                            autoFocus
+                                                                        />
+                                                                        <div style={{ maxHeight: '300px', overflowY: 'auto', overflowX: 'hidden', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', padding: '5px' }}>
+                                                                            <button
+                                                                                onClick={() => {
+                                                                                    setSelectedCountry(null);
+                                                                                    setShowCountryPicker(false);
+                                                                                }}
+                                                                                style={{
+                                                                                    aspectRatio: '1',
+                                                                                    background: !selectedCountry ? 'rgba(255,215,0,0.1)' : 'rgba(255,255,255,0.03)',
+                                                                                    border: `1px solid ${!selectedCountry ? 'var(--accent)' : 'rgba(255,255,255,0.05)'}`,
+                                                                                    borderRadius: '12px',
+                                                                                    fontSize: '1.5rem',
+                                                                                    cursor: 'pointer',
+                                                                                    display: 'flex',
+                                                                                    alignItems: 'center',
+                                                                                    justifyContent: 'center',
+                                                                                    transition: '0.2s'
+                                                                                }}
+                                                                            >
+                                                                                🌐
+                                                                            </button>
+                                                                            {filteredCountries.map(c => (
+                                                                                <button
+                                                                                    key={c.code}
+                                                                                    onClick={() => {
+                                                                                        setSelectedCountry(c);
+                                                                                        setShowCountryPicker(false);
+                                                                                    }}
+                                                                                    style={{
+                                                                                        aspectRatio: '1',
+                                                                                        background: selectedCountry?.code === c.code ? 'rgba(255,215,0,0.1)' : 'rgba(255,255,255,0.03)',
+                                                                                        border: `1px solid ${selectedCountry?.code === c.code ? 'var(--accent)' : 'rgba(255,255,255,0.05)'}`,
+                                                                                        borderRadius: '12px',
+                                                                                        cursor: 'pointer',
+                                                                                        display: 'flex',
+                                                                                        alignItems: 'center',
+                                                                                        justifyContent: 'center',
+                                                                                        transition: '0.2s'
+                                                                                    }}
+                                                                                    title={c.name}
+                                                                                >
+                                                                                    <CountryFlag code={c.code} name={c.name} size="1.8rem" />
+                                                                                </button>
+                                                                            ))}
+                                                                        </div>
+                                                                    </motion.div>
+                                                                </>
+                                                            )}
+                                                        </AnimatePresence>
+                                                    </div>
                                                 </div>
 
                                                 {/* Guild Summary */}

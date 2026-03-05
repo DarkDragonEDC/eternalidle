@@ -1,5 +1,21 @@
 # Patch Notes - Eternal Idle
 
+## v1.3.3
+
+### 🛡️ Guildas - Seleção de País
+- **Bandeiras Visuais**: Substituída a exibição de siglas de países por bandeiras reais (imagens), garantindo renderização correta em todos os sistemas operacionais.
+- **Seletor Centralizado**: O seletor de país agora abre como um modal centralizado na tela com fundo desfocado, em vez de um dropdown simples.
+- **Layout em 3 Colunas**: O grid de países foi ajustado para 3 colunas com ícones dimensionados para evitar scroll horizontal.
+
+### 🏰 Preview da Guilda
+- **Preview Fiel**: O preview de criação de guilda agora é idêntico ao card exibido nos resultados de busca — incluindo ícone, nome, bandeira, tag, nível, resumo e botão JOIN.
+- **Contador de Membros**: Adicionada a contagem de membros (ex: "1/10") ao lado do botão JOIN, tanto no preview quanto nos resultados de busca.
+
+### 🛒 Mercado
+- **Filtro de Equipamentos**: Corrigido um bug onde ferramentas (Picareta, Machado, Faca, Foice, Vara de Pesca) não apareciam ao filtrar por "Equipment" no Marketplace. O filtro agora reconhece todos os subtipos de ferramentas.
+
+---
+
 ## v1.3.2
 
 ### 🎁 Dungeon Chests & Loots

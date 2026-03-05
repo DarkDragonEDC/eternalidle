@@ -606,6 +606,16 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('search_guilds', async ({ query, countryCode }) => {
+        try {
+            const results = await gameManager.guildManager.searchGuilds(query, countryCode);
+            socket.emit('guild_search_results', results);
+        } catch (err) {
+            console.error('[GUILD] Error in search_guilds socket:', err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
     socket.on('claim_reward', async () => {
         try {
             if (!socket.data.characterId || socket.data.characterId === 'undefined') return;
