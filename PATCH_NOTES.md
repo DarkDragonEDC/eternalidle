@@ -17,3 +17,4 @@
 ### 🛠️ Correções Gerais
 - **Daily Spin**: Corrigida a quebra de linha na mensagem de vitória para telas menores.
 - **Ordenação**: Correção na persistência da ordenação do inventário quando o "Auto-Sort" está ativo.
+- **Drops de Dungeon**: Corrigido um erro onde monstros de tier alto (ex: T4, T7) dropavam mapas T1. Agora todos os monstros dropam mapas referentes ao seu próprio tier com a chance de 3%.
