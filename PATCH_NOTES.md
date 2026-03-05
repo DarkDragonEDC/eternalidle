@@ -1,5 +1,12 @@
 # Patch Notes - Eternal Idle
 
+## v1.3.1
+
+### ⚖️ Rebalanceamento de Dungeons
+- **Cálculo de Sobrevivência**: O painel de Dungeon agora exibe previsões de sobrevivência baseadas na lógica real do servidor, incluindo o intervalo de 5 segundos entre o uso de comidas.
+- **Dano de Monstros**: Rebalanceamento completo de todos os 50 monstros exclusivos de Dungeon. O dano agora é escalonado para que um jogador com set "Outstanding" do tier correspondente consuma cerca de 10 comidas por run.
+- **Precisão da UI**: Removidos multiplicadores de dano desatualizados da interface, garantindo que o "DMG/RUN" exibido seja o que realmente acontece no combate.
+
 ## v1.3.0
 
 ### 🛡️ Novo Sistema de Guildas

@@ -921,7 +921,7 @@ function App() {
 
     newSocket.on('server_version', ({ version }) => {
       // client version is 1.0.0
-      const CLIENT_VERSION = '1.3.0'; // Mantenha sincronizado com server/package.json
+      const CLIENT_VERSION = '1.3.1'; // Mantenha sincronizado com server/package.json
       if (version && version !== CLIENT_VERSION) {
         console.warn(`[VERSION] Mismatch! Server: ${version}, Client: ${CLIENT_VERSION}`);
 

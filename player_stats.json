@@ -1,0 +1,62 @@
+{
+  "1": {
+    "maxHP": 345,
+    "damage": 252,
+    "defense": 150,
+    "attackSpeed": 1930
+  },
+  "2": {
+    "maxHP": 596,
+    "damage": 492,
+    "defense": 300,
+    "attackSpeed": 1863
+  },
+  "3": {
+    "maxHP": 846,
+    "damage": 733,
+    "defense": 450,
+    "attackSpeed": 1797
+  },
+  "4": {
+    "maxHP": 1097,
+    "damage": 973,
+    "defense": 600,
+    "attackSpeed": 1730
+  },
+  "5": {
+    "maxHP": 1347,
+    "damage": 1213,
+    "defense": 750,
+    "attackSpeed": 1663
+  },
+  "6": {
+    "maxHP": 1598,
+    "damage": 1455,
+    "defense": 900,
+    "attackSpeed": 1595
+  },
+  "7": {
+    "maxHP": 1848,
+    "damage": 1695,
+    "defense": 1050,
+    "attackSpeed": 1528
+  },
+  "8": {
+    "maxHP": 2099,
+    "damage": 1935,
+    "defense": 1200,
+    "attackSpeed": 1461
+  },
+  "9": {
+    "maxHP": 2349,
+    "damage": 2176,
+    "defense": 1350,
+    "attackSpeed": 1394
+  },
+  "10": {
+    "maxHP": 2600,
+    "damage": 2416,
+    "defense": 1500,
+    "attackSpeed": 1328
+  }
+}

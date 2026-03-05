@@ -117,68 +117,105 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
         const stats = gameState.calculatedStats;
         const playerDefense = stats.defense || 0;
         const playerMitigation = Math.min(0.75, playerDefense / 10000);
-        const attackSpeed = stats.attackSpeed || 1000;
+        const playerAtkSpeed = Math.max(200, stats.attackSpeed || 1000);
         const playerDmg = stats.damage || 1;
 
-        // Player HP + Food healing
-        const baseHp = gameState?.state?.health || stats.hp || 100;
+        const maxHp = stats.maxHP || stats.hp || 100;
+        let currentHpSnapshot = gameState?.state?.health || maxHp;
         const food = gameState?.state?.equipment?.food;
 
-        // RESOLVE FRESH ITEM DATA: Ensure we have the latest heal/healPercent
         const freshFood = food ? resolveItem(food.id) : null;
-        const healPerUse = (freshFood && (freshFood.heal || (freshFood.healPercent && Math.floor(baseHp * freshFood.healPercent / 100)))) || 0;
-        const foodTotalHeal = (food && food.amount > 0) ? (food.amount * healPerUse) : 0;
-        const totalEffectiveHp = baseHp + foodTotalHeal;
+        const healPerUse = (freshFood && (freshFood.heal || (freshFood.healPercent && Math.floor(maxHp * freshFood.healPercent / 100)))) || 0;
+        let foodRemaining = (food && typeof food.amount === 'number') ? food.amount : 0;
+        let lastFoodAt = 0;
 
         const trashMobIds = dungeon.trashMobs || [];
-        const boss = MONSTERS[tier]?.find(m => m.id === dungeon.bossId);
+        const bossId = dungeon.bossId;
+        const boss = MONSTERS[tier]?.find(m => m.id === bossId);
 
-        // Calculate total damage taken per run
         let totalDamagePerRun = 0;
+        let totalFoodConsumedPerRun = 0;
+        let survived = true;
 
-        // Trash mobs damage
-        trashMobIds.forEach((mobId, index) => {
+        const simulateMob = (mobId) => {
+            if (!survived) return;
             const mob = MONSTERS[tier]?.find(m => m.id === mobId);
-            if (mob) {
-                const scaling = 1 + (index * 0.1);
-                const mobDamage = Math.floor((mob.damage || 0) * scaling);
-                const mobDef = (mob.defense || 0) * scaling;
-                const mobHealth = mob.health * scaling;
+            if (!mob) return;
 
-                // Calculate how many rounds to kill this mob
-                const mobMitigation = mobDef / 10000;
-                const mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
-                const roundsToKill = Math.ceil(mobHealth / mitigatedPlayerDmg);
+            // NO SCALING in server anymore
+            const mobDmg = mob.damage || 0;
+            const mobDef = mob.defense || 0;
+            const mobHealth = mob.health || 100;
 
-                // Mob attacks once per player attack (same speed assumption)
-                const mitigatedMobDmg = Math.max(1, Math.floor(mobDamage * (1 - playerMitigation)));
-                totalDamagePerRun += mitigatedMobDmg * roundsToKill;
+            const mobMitigation = mobDef / (mobDef + 36000);
+            const finalPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
+            const finalMobDmg = Math.max(1, Math.floor(mobDmg * (1 - playerMitigation)));
+
+            let mHealth = mobHealth;
+            let timeElapsed = 0;
+            const mobAtkSpeed = 1000;
+
+            let nextPAtk = 0;
+            let nextMAtk = 500; // Server first mob hit is at +500ms
+
+            while (mHealth > 0 && currentHpSnapshot > 0 && timeElapsed < 300000) {
+                const nextTick = Math.min(nextPAtk, nextMAtk);
+                timeElapsed = nextTick;
+
+                if (nextPAtk <= nextMAtk) {
+                    mHealth -= finalPlayerDmg;
+                    nextPAtk += playerAtkSpeed;
+                } else {
+                    currentHpSnapshot -= finalMobDmg;
+                    totalDamagePerRun += finalMobDmg;
+                    nextMAtk += mobAtkSpeed;
+
+                    // Reactive healing during fight
+                    if (currentHpSnapshot < maxHp && foodRemaining > 0 && (timeElapsed - lastFoodAt >= 5000)) {
+                        const heal = Math.min(healPerUse, maxHp - currentHpSnapshot);
+                        currentHpSnapshot += heal;
+                        foodRemaining--;
+                        totalFoodConsumedPerRun++;
+                        lastFoodAt = timeElapsed;
+                    }
+                }
+
+                if (currentHpSnapshot <= 0) {
+                    survived = false;
+                    break;
+                }
             }
-        });
 
-        // Boss damage
-        if (boss) {
-            const scaling = 1.5;
-            const bossDamage = Math.floor((boss.damage || 0) * scaling);
-            const bossDef = (boss.defense || 0) * scaling;
-            const bossHealth = boss.health * scaling;
+            // Passive healing during WALKING (60s total wave time)
+            if (survived) {
+                const walkingTime = Math.max(0, 60000 - timeElapsed);
+                let walkingHeals = Math.floor(walkingTime / 5000);
+                while (walkingHeals > 0 && currentHpSnapshot < maxHp && foodRemaining > 0) {
+                    const heal = Math.min(healPerUse, maxHp - currentHpSnapshot);
+                    currentHpSnapshot += heal;
+                    foodRemaining--;
+                    totalFoodConsumedPerRun++;
+                    walkingHeals--;
+                    lastFoodAt += 5000; // Update lastFoodAt to avoid instant heal on next mob
+                }
+            }
+        };
 
-            const bossMitigation = bossDef / 10000;
-            const mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - bossMitigation)));
-            const roundsToKill = Math.ceil(bossHealth / mitigatedPlayerDmg);
+        // Run simulation for 1 run
+        trashMobIds.forEach(id => simulateMob(id));
+        if (boss) simulateMob(boss.id);
 
-            const mitigatedBossDmg = Math.max(1, Math.floor(bossDamage * (1 - playerMitigation)));
-            totalDamagePerRun += mitigatedBossDmg * roundsToKill;
-        }
-
-        // How many runs before death?
+        // Estimate runs before death (total HP pool / damage per run)
+        const totalEffectiveHp = maxHp + ((food?.amount || 0) * healPerUse);
         const runsBeforeDeath = totalDamagePerRun > 0 ? Math.floor(totalEffectiveHp / totalDamagePerRun) : Infinity;
-        const survives = runsBeforeDeath >= count;
+
+        const survives = survived && runsBeforeDeath >= count;
 
         return {
             survives,
             runsBeforeDeath: runsBeforeDeath === Infinity ? '∞' : formatNumber(runsBeforeDeath),
             totalDamagePerRun,
+            totalFoodConsumedPerRun,
             totalEffectiveHp
         };
     };
