@@ -2128,6 +2128,7 @@ function App() {
             gameState={displayedGameState}
             socket={socket}
             isMobile={isMobile}
+            onInspect={handleInspectPlayer}
           />
         );
       default:

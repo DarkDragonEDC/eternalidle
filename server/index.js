@@ -606,12 +606,86 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('update_guild_customization', async (data) => {
+        try {
+            if (!socket.data.characterId || socket.data.characterId === 'undefined') return;
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                const result = await gameManager.guildManager.updateCustomization(char, data);
+
+                socket.emit('guild_customization_updated', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            });
+        } catch (err) {
+            console.error('[GUILD] Error in update_guild_customization socket:', err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
     socket.on('search_guilds', async ({ query, countryCode }) => {
         try {
             const results = await gameManager.guildManager.searchGuilds(query, countryCode);
             socket.emit('guild_search_results', results);
         } catch (err) {
             console.error('[GUILD] Error in search_guilds socket:', err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('leave_guild', async () => {
+        try {
+            if (!socket.data.characterId || socket.data.characterId === 'undefined') return;
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                const result = await gameManager.guildManager.leaveGuild(char);
+                socket.emit('guild_left', result);
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            });
+        } catch (err) {
+            console.error('[GUILD] Error in leave_guild socket:', err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('apply_to_guild', async ({ guildId }) => {
+        try {
+            if (!socket.data.characterId || socket.data.characterId === 'undefined') return;
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                const result = await gameManager.guildManager.applyToGuild(char, guildId);
+                socket.emit('guild_application_sent', result);
+            });
+        } catch (err) {
+            console.error('[GUILD] Error in apply_to_guild socket:', err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('get_guild_requests', async () => {
+        try {
+            if (!socket.data.characterId || socket.data.characterId === 'undefined') return;
+            const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+            const requests = await gameManager.guildManager.getGuildRequests(char);
+            socket.emit('guild_requests_data', requests);
+        } catch (err) {
+            console.error('[GUILD] Error in get_guild_requests socket:', err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('handle_guild_request', async ({ requestId, action }) => {
+        try {
+            if (!socket.data.characterId || socket.data.characterId === 'undefined') return;
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                const result = await gameManager.guildManager.handleGuildRequest(char, requestId, action);
+                socket.emit('guild_request_handled', result);
+
+                // If accepted, force a status update for the leader to see the new member count
+                socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            });
+        } catch (err) {
+            console.error('[GUILD] Error in handle_guild_request socket:', err);
             socket.emit('error', { message: err.message });
         }
     });
