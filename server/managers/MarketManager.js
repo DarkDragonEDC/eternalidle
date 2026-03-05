@@ -778,18 +778,72 @@ export class MarketManager {
         const remaining = order.amount - order.filled;
         if (qtyNum > remaining) throw new Error(`Only ${remaining} units requested in this order`);
 
+        // --- FIX: Parse quality/stars suffixes from the order's item_id ---
+        // Buy orders encode quality/stars in item_id (e.g., T2_TOOL_FISHING_Q4, RUNE_XP_WOOD_2STAR)
+        // but inventory stores gear by base ID with quality/stars as metadata.
+        let lookupId = order.item_id;
+        let requiredQuality, requiredStars;
+
+        const qualityMatch = lookupId.match(/^(.+?)_Q(\d)$/);
+        if (qualityMatch) {
+            lookupId = qualityMatch[1];
+            requiredQuality = parseInt(qualityMatch[2]);
+        }
+
+        const starMatch = lookupId.match(/^(.+?)_(\d)STAR$/);
+        if (starMatch) {
+            lookupId = starMatch[1];
+            requiredStars = parseInt(starMatch[2]);
+        }
+
+        // Also try using quality/stars from order.item_data as fallback
+        if (requiredQuality === undefined && order.item_data?.quality !== undefined) {
+            requiredQuality = order.item_data.quality;
+        }
+        if (requiredStars === undefined && order.item_data?.stars !== undefined) {
+            requiredStars = order.item_data.stars;
+        }
+
+        console.log(`[FILL_ORDER] order.item_id=${order.item_id}, lookupId=${lookupId}, requiredQuality=${requiredQuality}, requiredStars=${requiredStars}`);
+
         const inventory = seller.state.inventory;
-        const entry = inventory[order.item_id];
+
+        // Try exact match first (order.item_id), then fallback to parsed base ID
+        let invKey = null;
+        if (inventory[order.item_id]) {
+            invKey = order.item_id;
+        } else if (inventory[lookupId]) {
+            invKey = lookupId;
+        }
+
+        if (!invKey) throw new Error("Insufficient items in inventory");
+
+        const entry = inventory[invKey];
         const currentQty = typeof entry === 'object' ? (entry?.amount || 0) : (Number(entry) || 0);
 
-        if (!entry || currentQty < qtyNum) throw new Error("Insufficient items in inventory");
+        if (currentQty < qtyNum) throw new Error("Insufficient items in inventory");
 
-        if (typeof inventory[order.item_id] === 'object' && inventory[order.item_id] !== null) {
-            inventory[order.item_id].amount -= qtyNum;
-            if (inventory[order.item_id].amount <= 0) delete inventory[order.item_id];
+        // Validate quality/stars match if the order requires a specific quality
+        if (requiredQuality !== undefined && typeof entry === 'object') {
+            const entryQuality = entry.quality !== undefined ? entry.quality : 0;
+            if (entryQuality !== requiredQuality) {
+                throw new Error(`Item quality mismatch. Order requires quality ${requiredQuality}, but your item has quality ${entryQuality}.`);
+            }
+        }
+        if (requiredStars !== undefined && typeof entry === 'object') {
+            const entryStars = entry.stars !== undefined ? entry.stars : 0;
+            if (entryStars !== requiredStars) {
+                throw new Error(`Item stars mismatch. Order requires ${requiredStars} stars, but your item has ${entryStars}.`);
+            }
+        }
+
+        // Deduct from inventory using the resolved key
+        if (typeof inventory[invKey] === 'object' && inventory[invKey] !== null) {
+            inventory[invKey].amount -= qtyNum;
+            if (inventory[invKey].amount <= 0) delete inventory[invKey];
         } else {
-            inventory[order.item_id] -= qtyNum;
-            if (inventory[order.item_id] <= 0) delete inventory[order.item_id];
+            inventory[invKey] -= qtyNum;
+            if (inventory[invKey] <= 0) delete inventory[invKey];
         }
 
         const totalPrice = qtyNum * order.price_per_unit;
@@ -799,7 +853,7 @@ export class MarketManager {
         this.addClaim(seller, {
             type: 'SOLD_ITEM',
             silver: profit,
-            itemId: order.item_id,
+            itemId: lookupId,
             amount: qtyNum,
             timestamp: Date.now(),
             orderType: 'BUY_ORDER'
@@ -812,9 +866,9 @@ export class MarketManager {
         if (buyer) {
             this.addClaim(buyer, {
                 type: 'BOUGHT_ITEM',
-                itemId: order.item_id,
+                itemId: lookupId,
                 amount: qtyNum,
-                metadata: {},
+                metadata: { quality: requiredQuality, stars: requiredStars },
                 timestamp: Date.now(),
                 cost: totalPrice,
                 orderType: 'BUY_ORDER'
@@ -840,7 +894,7 @@ export class MarketManager {
             await this.gameManager.supabase
                 .from('market_history')
                 .insert([{
-                    item_id: order.item_id,
+                    item_id: lookupId,
                     item_data: order.item_data,
                     seller_id: sellerId,
                     buyer_id: order.buyer_id,

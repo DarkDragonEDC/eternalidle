@@ -3005,9 +3005,19 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                     <span>Max needed: {fillOrderModal.amount - fillOrderModal.filled}</span>
                                     <span
                                         onClick={() => {
-                                            const inventoryQty = typeof gameState.state.inventory[fillOrderModal.item_id] === 'object'
-                                                ? (gameState.state.inventory[fillOrderModal.item_id]?.amount || 0)
-                                                : (Number(gameState.state.inventory[fillOrderModal.item_id]) || 0);
+                                            // Parse base item ID (strip _Q# and _#STAR suffixes)
+                                            let baseId = fillOrderModal.item_id;
+                                            const qMatch = baseId.match(/^(.+?)_Q(\d)$/);
+                                            if (qMatch) baseId = qMatch[1];
+                                            const sMatch = baseId.match(/^(.+?)_(\d)STAR$/);
+                                            if (sMatch) baseId = sMatch[1];
+
+                                            // Try exact match first, then base ID
+                                            const inv = gameState.state.inventory;
+                                            const entry = inv[fillOrderModal.item_id] || inv[baseId];
+                                            const inventoryQty = typeof entry === 'object'
+                                                ? (entry?.amount || 0)
+                                                : (Number(entry) || 0);
                                             setFillQuantity(Math.min(fillOrderModal.amount - fillOrderModal.filled, inventoryQty));
                                         }}
                                         style={{ color: 'var(--accent)', cursor: 'pointer' }}

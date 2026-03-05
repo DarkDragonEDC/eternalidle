@@ -4,7 +4,7 @@ export const MONSTERS = {
             "id": "RABBIT",
             "name": "Rabbit",
             "health": 2500,
-            "damage": 6,
+            "damage": 1,
             "defense": 0,
             "xp": 5,
             "loot": {
@@ -26,7 +26,7 @@ export const MONSTERS = {
             "id": "GOBLIN_SCOUT",
             "name": "Goblin Scout",
             "health": 2500,
-            "damage": 6,
+            "damage": 1,
             "defense": 0,
             "xp": 5,
             "loot": {
@@ -46,7 +46,7 @@ export const MONSTERS = {
             "id": "WILD_HOG",
             "name": "Wild Hog",
             "health": 2500,
-            "damage": 6,
+            "damage": 1,
             "defense": 0,
             "xp": 5,
             "loot": {
@@ -66,7 +66,7 @@ export const MONSTERS = {
             "id": "FOX",
             "name": "Fox",
             "health": 2500,
-            "damage": 6,
+            "damage": 1,
             "defense": 0,
             "xp": 5,
             "loot": {
@@ -86,7 +86,7 @@ export const MONSTERS = {
             "id": "SNAKE",
             "name": "Snake",
             "health": 2500,
-            "damage": 6,
+            "damage": 1,
             "defense": 0,
             "xp": 5,
             "loot": {
@@ -126,7 +126,7 @@ export const MONSTERS = {
             "id": "GIANT_SPIDER_T1",
             "name": "Forest Spider",
             "health": 2500,
-            "damage": 8,
+            "damage": 3,
             "defense": 166,
             "xp": 0,
             "loot": {
@@ -164,7 +164,7 @@ export const MONSTERS = {
             "id": "DG_RABBIT",
             "name": "Dungeon Rabbit",
             "health": 2500,
-            "damage": 10,
+            "damage": 4,
             "defense": 297,
             "xp": 12,
             "loot": {
@@ -185,7 +185,7 @@ export const MONSTERS = {
             "id": "BOSS_GOBLIN_SCOUT",
             "name": "Goblin Scout King",
             "health": 2500,
-            "damage": 12,
+            "damage": 5,
             "defense": 362,
             "xp": 12,
             "loot": {
@@ -206,7 +206,7 @@ export const MONSTERS = {
             "id": "WOLF",
             "name": "Wolf",
             "health": 5989,
-            "damage": 22,
+            "damage": 6,
             "defense": 0,
             "xp": 8,
             "loot": {
@@ -226,7 +226,7 @@ export const MONSTERS = {
             "id": "DIRE_RAT",
             "name": "Dire Rat",
             "health": 5989,
-            "damage": 22,
+            "damage": 6,
             "defense": 0,
             "xp": 8,
             "loot": {
@@ -246,7 +246,7 @@ export const MONSTERS = {
             "id": "STAG",
             "name": "Stag",
             "health": 5989,
-            "damage": 22,
+            "damage": 6,
             "defense": 0,
             "xp": 8,
             "loot": {
@@ -266,7 +266,7 @@ export const MONSTERS = {
             "id": "MOUNTAIN_GOAT",
             "name": "Mountain Goat",
             "health": 5989,
-            "damage": 22,
+            "damage": 6,
             "defense": 0,
             "xp": 8,
             "loot": {
@@ -286,7 +286,7 @@ export const MONSTERS = {
             "id": "BANDIT_THUG",
             "name": "Bandit Thug",
             "health": 5989,
-            "damage": 22,
+            "damage": 6,
             "defense": 0,
             "xp": 8,
             "loot": {
@@ -345,7 +345,7 @@ export const MONSTERS = {
             "id": "WOLF_ALPHA",
             "name": "Alpha Wolf",
             "health": 6255,
-            "damage": 21,
+            "damage": 36,
             "defense": 559,
             "xp": 90,
             "loot": {
@@ -364,7 +364,7 @@ export const MONSTERS = {
             "id": "DG_WOLF",
             "name": "Dungeon Wolf",
             "health": 6999,
-            "damage": 24,
+            "damage": 39,
             "defense": 624,
             "xp": 15,
             "loot": {
@@ -383,7 +383,7 @@ export const MONSTERS = {
             "id": "BOSS_DIRE_RAT",
             "name": "Dire Rat King",
             "health": 7772,
-            "damage": 30,
+            "damage": 45,
             "defense": 690,
             "xp": 16,
             "loot": {
@@ -404,7 +404,7 @@ export const MONSTERS = {
             "id": "BEAR",
             "name": "Bear",
             "health": 10607,
-            "damage": 50,
+            "damage": 9,
             "defense": 0,
             "xp": 14,
             "loot": {
@@ -424,7 +424,7 @@ export const MONSTERS = {
             "id": "MOUNTAIN_GOBLIN",
             "name": "Mountain Goblin",
             "health": 10607,
-            "damage": 50,
+            "damage": 9,
             "defense": 0,
             "xp": 14,
             "loot": {
@@ -444,7 +444,7 @@ export const MONSTERS = {
             "id": "HIGHLAND_COW",
             "name": "Highland Cow",
             "health": 10607,
-            "damage": 50,
+            "damage": 9,
             "defense": 0,
             "xp": 14,
             "loot": {
@@ -464,7 +464,7 @@ export const MONSTERS = {
             "id": "HARPY",
             "name": "Harpy",
             "health": 10607,
-            "damage": 50,
+            "damage": 9,
             "defense": 0,
             "xp": 14,
             "loot": {
@@ -484,7 +484,7 @@ export const MONSTERS = {
             "id": "ROGUE_KNIGHT",
             "name": "Rogue Knight",
             "health": 10607,
-            "damage": 50,
+            "damage": 9,
             "defense": 0,
             "xp": 14,
             "loot": {
@@ -543,7 +543,7 @@ export const MONSTERS = {
             "id": "BEAR_ANCIENT",
             "name": "Ancient Bear",
             "health": 10282,
-            "damage": 31,
+            "damage": 84,
             "defense": 886,
             "xp": 120,
             "loot": {
@@ -562,7 +562,7 @@ export const MONSTERS = {
             "id": "DG_BEAR",
             "name": "Dungeon Bear",
             "health": 11242,
-            "damage": 34,
+            "damage": 87,
             "defense": 952,
             "xp": 19,
             "loot": {
@@ -581,7 +581,7 @@ export const MONSTERS = {
             "id": "BOSS_MOUNTAIN_GOBLIN",
             "name": "Mountain Goblin King",
             "health": 12196,
-            "damage": 40,
+            "damage": 93,
             "defense": 1017,
             "xp": 20,
             "loot": {
@@ -602,7 +602,7 @@ export const MONSTERS = {
             "id": "DIRE_WOLF",
             "name": "Dire Wolf",
             "health": 14371,
-            "damage": 88,
+            "damage": 12,
             "defense": 0,
             "xp": 20,
             "loot": {
@@ -622,7 +622,7 @@ export const MONSTERS = {
             "id": "GHOST_KNIGHT",
             "name": "Ghost Knight",
             "health": 14371,
-            "damage": 88,
+            "damage": 12,
             "defense": 0,
             "xp": 20,
             "loot": {
@@ -642,7 +642,7 @@ export const MONSTERS = {
             "id": "SNOW_LEOPARD",
             "name": "Snow Leopard",
             "health": 14371,
-            "damage": 88,
+            "damage": 12,
             "defense": 0,
             "xp": 20,
             "loot": {
@@ -662,7 +662,7 @@ export const MONSTERS = {
             "id": "GIANT_EAGLE",
             "name": "Giant Eagle",
             "health": 14371,
-            "damage": 88,
+            "damage": 12,
             "defense": 0,
             "xp": 20,
             "loot": {
@@ -682,7 +682,7 @@ export const MONSTERS = {
             "id": "ASH_GHOUL",
             "name": "Ash Ghoul",
             "health": 14371,
-            "damage": 88,
+            "damage": 12,
             "defense": 0,
             "xp": 20,
             "loot": {
@@ -760,7 +760,7 @@ export const MONSTERS = {
             "id": "DG_DIRE_WOLF",
             "name": "Dungeon Dire Wolf",
             "health": 16577,
-            "damage": 60,
+            "damage": 159,
             "defense": 1279,
             "xp": 24,
             "loot": {
@@ -779,7 +779,7 @@ export const MONSTERS = {
             "id": "BOSS_GHOST_KNIGHT",
             "name": "Ghost Knight Lord",
             "health": 17793,
-            "damage": 75,
+            "damage": 165,
             "defense": 1345,
             "xp": 25,
             "loot": {
@@ -800,7 +800,7 @@ export const MONSTERS = {
             "id": "OGRE",
             "name": "Ogre",
             "health": 20877,
-            "damage": 140,
+            "damage": 15,
             "defense": 0,
             "xp": 28,
             "loot": {
@@ -820,7 +820,7 @@ export const MONSTERS = {
             "id": "WAR_OGRE",
             "name": "War Ogre",
             "health": 20877,
-            "damage": 140,
+            "damage": 15,
             "defense": 0,
             "xp": 28,
             "loot": {
@@ -840,7 +840,7 @@ export const MONSTERS = {
             "id": "SWAMP_TROC",
             "name": "Swamp Troc",
             "health": 20877,
-            "damage": 140,
+            "damage": 15,
             "defense": 0,
             "xp": 28,
             "loot": {
@@ -860,7 +860,7 @@ export const MONSTERS = {
             "id": "CRIMSON_BAT",
             "name": "Crimson Bat",
             "health": 20877,
-            "damage": 140,
+            "damage": 15,
             "defense": 0,
             "xp": 28,
             "loot": {
@@ -880,7 +880,7 @@ export const MONSTERS = {
             "id": "CORRUPTED_PALADIN",
             "name": "Corrupted Paladin",
             "health": 20877,
-            "damage": 140,
+            "damage": 15,
             "defense": 0,
             "xp": 28,
             "loot": {
@@ -900,7 +900,7 @@ export const MONSTERS = {
             "id": "LICH",
             "name": "Ancient Lich",
             "health": 19072,
-            "damage": 80,
+            "damage": 219,
             "defense": 1410,
             "xp": 0,
             "loot": {
@@ -958,7 +958,7 @@ export const MONSTERS = {
             "id": "DG_OGRE",
             "name": "Dungeon Ogre",
             "health": 23495,
-            "damage": 110,
+            "damage": 252,
             "defense": 1607,
             "xp": 31,
             "loot": {
@@ -977,7 +977,7 @@ export const MONSTERS = {
             "id": "BOSS_WAR_OGRE",
             "name": "War Ogre King",
             "health": 25095,
-            "damage": 135,
+            "damage": 261,
             "defense": 1672,
             "xp": 32,
             "loot": {
@@ -998,7 +998,7 @@ export const MONSTERS = {
             "id": "TROLL",
             "name": "Mountain Troll",
             "health": 28886,
-            "damage": 206,
+            "damage": 18,
             "defense": 0,
             "xp": 35,
             "loot": {
@@ -1018,7 +1018,7 @@ export const MONSTERS = {
             "id": "ARMORED_TROLL",
             "name": "Armored Troll",
             "health": 28886,
-            "damage": 206,
+            "damage": 18,
             "defense": 0,
             "xp": 35,
             "loot": {
@@ -1038,7 +1038,7 @@ export const MONSTERS = {
             "id": "TUNDRA_BEAR",
             "name": "Tundra Bear",
             "health": 28886,
-            "damage": 206,
+            "damage": 18,
             "defense": 0,
             "xp": 35,
             "loot": {
@@ -1058,7 +1058,7 @@ export const MONSTERS = {
             "id": "SKY_STALKER",
             "name": "Sky Stalker",
             "health": 28886,
-            "damage": 206,
+            "damage": 18,
             "defense": 0,
             "xp": 35,
             "loot": {
@@ -1078,7 +1078,7 @@ export const MONSTERS = {
             "id": "EXECUTIONER",
             "name": "Executioner",
             "health": 28886,
-            "damage": 206,
+            "damage": 18,
             "defense": 0,
             "xp": 35,
             "loot": {
@@ -1137,7 +1137,7 @@ export const MONSTERS = {
             "id": "TROLL_ELDER",
             "name": "Elder Troll",
             "health": 30670,
-            "damage": 170,
+            "damage": 357,
             "defense": 1869,
             "xp": 240,
             "loot": {
@@ -1156,7 +1156,7 @@ export const MONSTERS = {
             "id": "DG_TROLL",
             "name": "Dungeon Troll",
             "health": 32659,
-            "damage": 185,
+            "damage": 369,
             "defense": 1934,
             "xp": 39,
             "loot": {
@@ -1175,7 +1175,7 @@ export const MONSTERS = {
             "id": "BOSS_ARMORED_TROLL",
             "name": "Armored Troll King",
             "health": 35040,
-            "damage": 220,
+            "damage": 384,
             "defense": 2000,
             "xp": 41,
             "loot": {
@@ -1196,7 +1196,7 @@ export const MONSTERS = {
             "id": "DRAGON_WHELP",
             "name": "Dragon Whelp",
             "health": 41852,
-            "damage": 308,
+            "damage": 21,
             "defense": 0,
             "xp": 50,
             "loot": {
@@ -1216,7 +1216,7 @@ export const MONSTERS = {
             "id": "FIRE_DRAKE",
             "name": "Fire Drake",
             "health": 41852,
-            "damage": 308,
+            "damage": 21,
             "defense": 0,
             "xp": 50,
             "loot": {
@@ -1236,7 +1236,7 @@ export const MONSTERS = {
             "id": "LAVA_HOUND",
             "name": "Lava Hound",
             "health": 41852,
-            "damage": 308,
+            "damage": 21,
             "defense": 0,
             "xp": 50,
             "loot": {
@@ -1256,7 +1256,7 @@ export const MONSTERS = {
             "id": "STORM_WRAITH",
             "name": "Storm Wraith",
             "health": 41852,
-            "damage": 308,
+            "damage": 21,
             "defense": 0,
             "xp": 50,
             "loot": {
@@ -1276,7 +1276,7 @@ export const MONSTERS = {
             "id": "RUNE_GUARDIAN",
             "name": "Rune Guardian",
             "health": 41852,
-            "damage": 308,
+            "damage": 21,
             "defense": 0,
             "xp": 50,
             "loot": {
@@ -1354,7 +1354,7 @@ export const MONSTERS = {
             "id": "DG_DRAGON_WHELP",
             "name": "Dungeon Dragon Whelp",
             "health": 45803,
-            "damage": 250,
+            "damage": 519,
             "defense": 144,
             "xp": 50,
             "loot": {
@@ -1373,7 +1373,7 @@ export const MONSTERS = {
             "id": "BOSS_FIRE_DRAKE",
             "name": "Fire Drake Monarch",
             "health": 49220,
-            "damage": 300,
+            "damage": 537,
             "defense": 155,
             "xp": 52,
             "loot": {
@@ -1394,7 +1394,7 @@ export const MONSTERS = {
             "id": "ANCIENT_GOLEM",
             "name": "Ancient Golem",
             "health": 57431,
-            "damage": 409,
+            "damage": 24,
             "defense": 0,
             "xp": 65,
             "loot": {
@@ -1414,7 +1414,7 @@ export const MONSTERS = {
             "id": "OBSIDIAN_GOLEM",
             "name": "Obsidian Golem",
             "health": 57431,
-            "damage": 409,
+            "damage": 24,
             "defense": 0,
             "xp": 65,
             "loot": {
@@ -1434,7 +1434,7 @@ export const MONSTERS = {
             "id": "GLACIER_GIANT",
             "name": "Glacier Giant",
             "health": 57431,
-            "damage": 409,
+            "damage": 24,
             "defense": 0,
             "xp": 65,
             "loot": {
@@ -1454,7 +1454,7 @@ export const MONSTERS = {
             "id": "VOID_STALKER",
             "name": "Void Stalker",
             "health": 57431,
-            "damage": 409,
+            "damage": 24,
             "defense": 0,
             "xp": 65,
             "loot": {
@@ -1474,7 +1474,7 @@ export const MONSTERS = {
             "id": "ABYSSAL_KNIGHT",
             "name": "Abyssal Knight",
             "health": 57431,
-            "damage": 409,
+            "damage": 24,
             "defense": 0,
             "xp": 65,
             "loot": {
@@ -1494,7 +1494,7 @@ export const MONSTERS = {
             "id": "DEMON",
             "name": "Lesser Demon",
             "health": 52691,
-            "damage": 240,
+            "damage": 633,
             "defense": 486,
             "xp": 0,
             "loot": {
@@ -1533,7 +1533,7 @@ export const MONSTERS = {
             "id": "GOLEM_PRIMORDIAL",
             "name": "Primordial Golem",
             "health": 61051,
-            "damage": 290,
+            "damage": 675,
             "defense": 566,
             "xp": 326,
             "loot": {
@@ -1552,7 +1552,7 @@ export const MONSTERS = {
             "id": "DG_ANCIENT_GOLEM",
             "name": "Dungeon Ancient Golem",
             "health": 65621,
-            "damage": 315,
+            "damage": 699,
             "defense": 209,
             "xp": 63,
             "loot": {
@@ -1571,7 +1571,7 @@ export const MONSTERS = {
             "id": "BOSS_OBSIDIAN_GOLEM",
             "name": "Obsidian Golem Lord",
             "health": 70659,
-            "damage": 380,
+            "damage": 720,
             "defense": 225,
             "xp": 67,
             "loot": {
@@ -1592,7 +1592,7 @@ export const MONSTERS = {
             "id": "ELDER_DRAGON",
             "name": "Elder Dragon",
             "health": 85848,
-            "damage": 537,
+            "damage": 27,
             "defense": 0,
             "xp": 105,
             "loot": {
@@ -1612,7 +1612,7 @@ export const MONSTERS = {
             "id": "VOID_DRAGON",
             "name": "Void Dragon",
             "health": 85848,
-            "damage": 537,
+            "damage": 27,
             "defense": 0,
             "xp": 105,
             "loot": {
@@ -1632,7 +1632,7 @@ export const MONSTERS = {
             "id": "NEBULA_SERPENT",
             "name": "Nebula Serpent",
             "health": 85848,
-            "damage": 537,
+            "damage": 27,
             "defense": 0,
             "xp": 105,
             "loot": {
@@ -1652,7 +1652,7 @@ export const MONSTERS = {
             "id": "STAR_DEVOURER",
             "name": "Star Devourer",
             "health": 85848,
-            "damage": 537,
+            "damage": 27,
             "defense": 0,
             "xp": 105,
             "loot": {
@@ -1672,7 +1672,7 @@ export const MONSTERS = {
             "id": "COSMIC_HORROR",
             "name": "Cosmic Horror",
             "health": 85848,
-            "damage": 537,
+            "damage": 27,
             "defense": 0,
             "xp": 105,
             "loot": {
@@ -1750,7 +1750,7 @@ export const MONSTERS = {
             "id": "DG_ELDER_DRAGON",
             "name": "Dungeon Elder Dragon",
             "health": 99183,
-            "damage": 390,
+            "damage": 915,
             "defense": 305,
             "xp": 81,
             "loot": {
@@ -1769,7 +1769,7 @@ export const MONSTERS = {
             "id": "BOSS_VOID_DRAGON",
             "name": "Void Dragon Overlord",
             "health": 108440,
-            "damage": 470,
+            "damage": 942,
             "defense": 329,
             "xp": 85,
             "loot": {
@@ -1790,7 +1790,7 @@ export const MONSTERS = {
             "id": "ANCIENT_DRAGON",
             "name": "Ancient Dragon",
             "health": 142647,
-            "damage": 650,
+            "damage": 30,
             "defense": 0,
             "xp": 170,
             "loot": {
@@ -1810,7 +1810,7 @@ export const MONSTERS = {
             "id": "VOID_DRAGON_LORD",
             "name": "Void Dragon Lord",
             "health": 142647,
-            "damage": 650,
+            "damage": 30,
             "defense": 0,
             "xp": 170,
             "loot": {
@@ -1830,7 +1830,7 @@ export const MONSTERS = {
             "id": "GALAXY_EATER",
             "name": "Galaxy Eater",
             "health": 142647,
-            "damage": 650,
+            "damage": 30,
             "defense": 0,
             "xp": 170,
             "loot": {
@@ -1850,7 +1850,7 @@ export const MONSTERS = {
             "id": "VOID_REAPER",
             "name": "Void Reaper",
             "health": 142647,
-            "damage": 650,
+            "damage": 30,
             "defense": 0,
             "xp": 170,
             "loot": {
@@ -1870,7 +1870,7 @@ export const MONSTERS = {
             "id": "ETERNAL_WATCHER",
             "name": "Eternal Watcher",
             "health": 142647,
-            "damage": 650,
+            "damage": 30,
             "defense": 0,
             "xp": 125,
             "loot": {
@@ -1948,7 +1948,7 @@ export const MONSTERS = {
             "id": "DG_ANCIENT_DRAGON",
             "name": "Dungeon Ancient Dragon",
             "health": 168212,
-            "damage": 500,
+            "damage": 1170,
             "defense": 444,
             "xp": 103,
             "loot": {
