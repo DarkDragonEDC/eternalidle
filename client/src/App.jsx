@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-console.log("[App.jsx] Initializing App component...");
+
 import { io } from 'socket.io-client';
 import { supabase } from './supabase';
 import Auth from './components/Auth';
@@ -372,7 +372,7 @@ function App() {
     return 0;
   };
   const [activeTier, setActiveTier] = useState(() => parseInt(localStorage.getItem('activeTier')) || 1);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [modalItem, setModalItem] = useState(null);
   const [infoItem, setInfoItem] = useState(null);
@@ -620,7 +620,7 @@ function App() {
 
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.innerWidth < 1024;
+      const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
       if (!mobile) setSidebarOpen(false);
     };
@@ -921,7 +921,7 @@ function App() {
 
     newSocket.on('server_version', ({ version }) => {
       // client version is 1.0.0
-      const CLIENT_VERSION = '1.3.2'; // Mantenha sincronizado com server/package.json
+      const CLIENT_VERSION = '1.3.3'; // Mantenha sincronizado com server/package.json
       if (version && version !== CLIENT_VERSION) {
         console.warn(`[VERSION] Mismatch! Server: ${version}, Client: ${CLIENT_VERSION}`);
 

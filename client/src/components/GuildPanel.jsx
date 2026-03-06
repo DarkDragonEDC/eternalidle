@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Users, Sword, Swords, Trophy, Settings, Plus, Info, Check, X, Coins, Sparkles, Tag, User, Zap, LogOut, Edit2, Save } from 'lucide-react';
+import { Shield, Users, Sword, Swords, Trophy, Settings, Plus, Info, Check, X, Coins, Sparkles, Tag, User, Zap, LogOut, Edit2, Save, Menu, Home, Building2, ChevronDown, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
 import { formatSilver } from '@utils/format';
 import { COUNTRIES } from '../../../shared/countries';
 
@@ -29,14 +30,23 @@ const CountryFlag = ({ code, name, size = '1.2rem', style = {} }) => {
     );
 };
 
+const GUILD_PERMISSIONS = [
+    { id: 'edit_appearance', label: 'Edit Appearance', desc: 'Can change icon and colors' },
+    { id: 'manage_roles', label: 'Manage Roles', desc: 'Can edit rank names and permissions' },
+    { id: 'kick_members', label: 'Kick Members', desc: 'Can remove players from the guild' },
+    { id: 'manage_requests', label: 'Manage Requests', desc: 'Can accept/reject applications' },
+    { id: 'change_member_roles', label: 'Manage Ranks', desc: 'Can promote/demote members' }
+];
+
 const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
     if (!guild) return null;
 
     const members = guild.members || [];
     const [confirmLeave, setConfirmLeave] = useState(false);
-    const [activeTab, setActiveTab] = useState('MEMBERS'); // MEMBERS | REQUESTS
-    const [requests, setRequests] = useState([]);
+    const [activeTab, setActiveTab] = useState('MEMBERS'); // HOME | MEMBERS | REQUESTS | SETTINGS | BUILDING
+    const [showNavDropdown, setShowNavDropdown] = useState(false);
     const [isLoadingRequests, setIsLoadingRequests] = useState(false);
+    const [requests, setRequests] = useState([]);
 
     // Edit Customization States
     const [showEditCustomization, setShowEditCustomization] = useState(false);
@@ -47,6 +57,28 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
     const [editCountry, setEditCountry] = useState(guild.country_code ? COUNTRIES.find(c => c.code === guild.country_code) : null);
     const [showEditCountryPicker, setShowEditCountryPicker] = useState(false);
     const [editCountrySearch, setEditCountrySearch] = useState('');
+    const [showInfoModal, setShowInfoModal] = useState(false);
+    const [showRolesModal, setShowRolesModal] = useState(false);
+    const [customRoles, setCustomRoles] = useState([]);
+    const [showCreateRoleModal, setShowCreateRoleModal] = useState(false);
+    const [newRoleName, setNewRoleName] = useState('');
+    const [newRoleColor, setNewRoleColor] = useState('#ffd700');
+    const [roleDropdownId, setRoleDropdownId] = useState(null);
+    const [showEditRoleModal, setShowEditRoleModal] = useState(false);
+    const [editingRoleId, setEditingRoleId] = useState(null);
+    const [editRoleName, setEditRoleName] = useState('');
+    const [editRoleColor, setEditRoleColor] = useState('');
+    const [editRolePerms, setEditRolePerms] = useState([]);
+
+    // Guild Settings States
+    const [settingsMinLevel, setSettingsMinLevel] = useState(guild.min_level || 1);
+    const [settingsJoinMode, setSettingsJoinMode] = useState(guild.join_mode || 'APPLY');
+    const [settingsPending, setSettingsPending] = useState(false);
+
+    // Delete Role Confirmation
+    const [deleteRoleConfirm, setDeleteRoleConfirm] = useState(null); // { id, name }
+    // Kick Member Confirmation
+    const [kickConfirm, setKickConfirm] = useState(null); // { id, name }
 
     useEffect(() => {
         if (!socket) return;
@@ -77,14 +109,36 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
 
     const currentXP = guild.xp || 0;
     const memberLimit = guild.member_limit || 10;
-    const nextLevelXP = (guild.level || 1) * 1000; // Mock formula for visualization
-    const xpProgress = (currentXP / nextLevelXP) * 100;
+    const nextLevelXP = guild.nextLevelXP || (guild.level || 1) * 1000;
+    const xpProgress = Math.min(100, (currentXP / nextLevelXP) * 100);
 
     const ICONS = {
         Shield: Shield, Sword: Sword, Sword2: Swords, Trophy: Trophy,
         Sparkles: Sparkles, Users: Users, Settings: Settings, Coins: Coins
     };
     const DashboardIcon = ICONS[guild.icon] || Shield;
+
+    const getRoleDisplayName = (roleId) => {
+        if (!roleId) return 'Membro';
+        const roles = guild.roles || {};
+        if (roles[roleId]) return roles[roleId].name;
+
+        const mapping = {
+            'LEADER': 'Líder',
+            'OFFICER': 'Vice-líder',
+            'MEMBER': 'Membro'
+        };
+        if (mapping[roleId]) return mapping[roleId];
+        if (roleId.startsWith('CUSTOM_')) return roleId.replace('CUSTOM_', '');
+        return roleId;
+    };
+
+    const playerHasPermission = (permission) => {
+        if (guild.myRole === 'LEADER') return true;
+        const roles = guild.roles || {};
+        const myRoleConfig = roles[guild.myRole];
+        return myRoleConfig?.permissions?.includes(permission);
+    };
 
     return (
         <motion.div
@@ -105,6 +159,34 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
                 border: '1px solid rgba(255,255,255,0.08)',
                 boxShadow: '0 20px 40px rgba(0,0,0,0.4)'
             }}>
+                {/* Guild Info Tooltip */}
+                <div
+                    onClick={() => setShowInfoModal(true)}
+                    style={{
+                        position: 'absolute',
+                        top: '15px',
+                        left: isMobile ? '15px' : 'auto',
+                        right: isMobile ? 'auto' : '15px',
+                        zIndex: 10,
+                        cursor: 'pointer',
+                        color: 'var(--accent)',
+                        opacity: 0.8,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: 'rgba(0,0,0,0.4)',
+                        padding: '8px',
+                        borderRadius: '50%',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        backdropFilter: 'blur(4px)',
+                        transition: '0.2s'
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'scale(1.1)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.opacity = '0.8'; e.currentTarget.style.transform = 'scale(1)'; }}
+                >
+                    <Info size={20} />
+                </div>
+
                 {/* Dark Base */}
                 <div style={{
                     position: 'absolute', inset: 0,
@@ -266,7 +348,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
                         <div style={{ marginTop: '15px', width: '100%' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', marginBottom: '5px', fontWeight: 'bold', letterSpacing: '0.5px' }}>
                                 <span>GUILD PROGRESS</span>
-                                <span>{xpProgress.toFixed(0)}%</span>
+                                <span>{formatSilver(currentXP)} / {formatSilver(nextLevelXP)} - {xpProgress.toFixed(0)}%</span>
                             </div>
                             <div style={{
                                 height: '6px',
@@ -290,28 +372,108 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
                 </div>
             </div>
 
-            {/* Members Section */}
+            {/* Unified Glass Container */}
             <div style={{
                 background: 'rgba(0,0,0,0.2)',
                 borderRadius: '24px',
                 padding: isMobile ? '15px' : '20px',
                 border: '1px solid rgba(255,255,255,0.05)',
-                backdropFilter: 'blur(20px)'
+                backdropFilter: 'blur(20px)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '15px'
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                    <h3 style={{
-                        margin: 0,
-                        fontSize: '0.9rem',
-                        color: '#fff',
-                        fontWeight: '900',
-                        letterSpacing: '1px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px'
-                    }}>
-                        <Users size={16} color="var(--accent)" /> {activeTab}
-                    </h3>
-                    {(guild.myRole === 'LEADER' || guild.myRole === 'OFFICER') && (
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div
+                            onClick={() => setShowNavDropdown(!showNavDropdown)}
+                            style={{
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                background: 'rgba(255,255,255,0.05)',
+                                padding: '6px 12px',
+                                borderRadius: '10px',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                transition: 'all 0.2s ease'
+                            }}
+                        >
+                            <Menu size={16} color="var(--accent)" />
+                            <h3 style={{
+                                margin: 0,
+                                fontSize: '0.8rem',
+                                color: '#fff',
+                                fontWeight: '900',
+                                letterSpacing: '1px',
+                                textTransform: 'uppercase'
+                            }}>
+                                {activeTab === 'MEMBERS' ? 'Home' :
+                                    activeTab === 'SETTINGS' ? 'Settings' :
+                                        activeTab === 'BUILDING' ? 'Building' : activeTab}
+                            </h3>
+                            <ChevronDown size={14} color="rgba(255,255,255,0.5)" style={{ transform: showNavDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                        </div>
+
+                        <AnimatePresence>
+                            {showNavDropdown && (
+                                <>
+                                    <div
+                                        onClick={() => setShowNavDropdown(false)}
+                                        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 999 }}
+                                    />
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        style={{
+                                            position: 'absolute',
+                                            top: '100%',
+                                            left: 0,
+                                            marginTop: '8px',
+                                            background: '#1a1a1a',
+                                            borderRadius: '12px',
+                                            border: '1px solid rgba(255,255,255,0.1)',
+                                            boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                                            zIndex: 1000,
+                                            minWidth: '180px',
+                                            overflow: 'hidden'
+                                        }}
+                                    >
+                                        {[
+                                            { id: 'MEMBERS', label: 'Home', icon: Home },
+                                            { id: 'BUILDING', label: 'Building', icon: Building2 },
+                                            { id: 'SETTINGS', label: 'Settings', icon: Settings, permission: 'manage_roles' }
+                                        ].filter(opt => !opt.permission || playerHasPermission(opt.permission)).map((opt) => (
+                                            <div
+                                                key={opt.id}
+                                                onClick={() => {
+                                                    setActiveTab(opt.id);
+                                                    setShowNavDropdown(false);
+                                                }}
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '12px',
+                                                    padding: '12px 16px',
+                                                    cursor: 'pointer',
+                                                    background: activeTab === opt.id ? 'rgba(212, 175, 55, 0.1)' : 'transparent',
+                                                    color: activeTab === opt.id ? 'var(--accent)' : 'rgba(255,255,255,0.7)',
+                                                    transition: 'all 0.2s ease',
+                                                    borderLeft: activeTab === opt.id ? '3px solid var(--accent)' : '3px solid transparent'
+                                                }}
+                                            >
+                                                <opt.icon size={16} />
+                                                <span style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>{opt.label}</span>
+                                            </div>
+                                        ))}
+                                    </motion.div>
+                                </>
+                            )}
+                        </AnimatePresence>
+                    </div>
+
+                    {playerHasPermission('manage_requests') && (activeTab === 'MEMBERS' || activeTab === 'REQUESTS') && (
                         <div style={{ display: 'flex', gap: '8px' }}>
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
@@ -377,9 +539,184 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
                         </div>
                     )}
                 </div>
-
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {activeTab === 'MEMBERS' ? (
+
+                    {activeTab === 'BUILDING' && (
+                        <div style={{ padding: '20px', textAlign: 'center', color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
+                            <Building2 size={40} style={{ marginBottom: '15px', opacity: 0.2 }} />
+                            <p>Guild Building Area</p>
+                            <p style={{ fontSize: '0.7rem' }}>Expand your territory and unlock exclusive bonuses.</p>
+                            <span style={{ background: 'rgba(212,175,55,0.1)', color: 'var(--accent)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.6rem', marginTop: '10px', display: 'inline-block' }}>COMING SOON</span>
+                        </div>
+                    )}
+
+                    {activeTab === 'SETTINGS' && (
+                        <div style={{ padding: '20px' }}>
+                            <div style={{ marginBottom: '20px' }}>
+                                <h4 style={{ color: '#fff', margin: '0 0 10px 0', fontSize: '0.8rem' }}>Guild Preferences</h4>
+                                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem' }}>Configure who can join and view guild information.</p>
+                            </div>
+                            {playerHasPermission('edit_appearance') || playerHasPermission('manage_roles') ? (
+                                <>
+                                    {playerHasPermission('edit_appearance') && (
+                                        <div
+                                            onClick={() => setShowEditCustomization(true)}
+                                            style={{
+                                                background: 'rgba(255,255,255,0.05)',
+                                                padding: '15px',
+                                                borderRadius: '12px',
+                                                border: '1px solid rgba(255,255,255,0.1)',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '12px'
+                                            }}
+                                        >
+                                            <Edit2 size={16} color="var(--accent)" />
+                                            <div>
+                                                <div style={{ color: '#fff', fontSize: '0.75rem', fontWeight: 'bold' }}>Edit Appearance</div>
+                                                <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem' }}>Guild icon, colors and country</div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {playerHasPermission('manage_roles') && (
+                                        <div
+                                            onClick={() => setShowRolesModal(true)}
+                                            style={{
+                                                background: 'rgba(255,255,255,0.05)',
+                                                padding: '15px',
+                                                borderRadius: '12px',
+                                                border: '1px solid rgba(255,255,255,0.1)',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '12px',
+                                                marginTop: '12px'
+                                            }}
+                                        >
+                                            <Users size={16} color="var(--accent)" />
+                                            <div>
+                                                <div style={{ color: '#fff', fontSize: '0.75rem', fontWeight: 'bold' }}>Manage Roles</div>
+                                                <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem' }}>View and configure guild ranks</div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Join Settings */}
+                                    <div style={{
+                                        background: 'rgba(255,255,255,0.03)',
+                                        padding: '18px',
+                                        borderRadius: '16px',
+                                        border: '1px solid rgba(255,255,255,0.06)',
+                                        marginTop: '16px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '16px'
+                                    }}>
+                                        <div style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--accent)', letterSpacing: '1px' }}>JOIN SETTINGS</div>
+
+                                        {/* Min Level */}
+                                        <div>
+                                            <label style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>Minimum Level</label>
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                max="9999"
+                                                value={settingsMinLevel}
+                                                onChange={(e) => setSettingsMinLevel(Math.max(1, Math.min(9999, parseInt(e.target.value) || 1)))}
+                                                style={{
+                                                    width: '80px',
+                                                    padding: '8px 12px',
+                                                    background: 'rgba(0,0,0,0.3)',
+                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                    borderRadius: '10px',
+                                                    color: '#fff',
+                                                    fontSize: '0.85rem',
+                                                    fontWeight: 'bold',
+                                                    outline: 'none',
+                                                    textAlign: 'center'
+                                                }}
+                                            />
+                                        </div>
+
+                                        {/* Join Mode */}
+                                        <div>
+                                            <label style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>Entry Mode</label>
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                {[{ id: 'APPLY', label: 'Requires Application' }, { id: 'OPEN', label: 'Open to Join' }].map(mode => (
+                                                    <button
+                                                        key={mode.id}
+                                                        onClick={() => setSettingsJoinMode(mode.id)}
+                                                        style={{
+                                                            flex: 1,
+                                                            padding: '10px',
+                                                            background: settingsJoinMode === mode.id ? 'rgba(212, 175, 55, 0.15)' : 'rgba(255,255,255,0.03)',
+                                                            border: settingsJoinMode === mode.id ? '1px solid var(--accent)' : '1px solid rgba(255,255,255,0.08)',
+                                                            borderRadius: '10px',
+                                                            color: settingsJoinMode === mode.id ? 'var(--accent)' : 'rgba(255,255,255,0.5)',
+                                                            fontSize: '0.7rem',
+                                                            fontWeight: 'bold',
+                                                            cursor: 'pointer',
+                                                            transition: 'all 0.2s ease'
+                                                        }}
+                                                    >
+                                                        {mode.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Save Button */}
+                                        <motion.button
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.97 }}
+                                            disabled={settingsPending}
+                                            onClick={() => {
+                                                setSettingsPending(true);
+                                                socket?.emit('update_guild_settings', {
+                                                    minLevel: settingsMinLevel,
+                                                    joinMode: settingsJoinMode
+                                                });
+                                                setTimeout(() => setSettingsPending(false), 2000);
+                                            }}
+                                            style={{
+                                                width: '100%',
+                                                padding: '10px',
+                                                background: 'var(--accent)',
+                                                border: 'none',
+                                                borderRadius: '10px',
+                                                color: '#000',
+                                                fontWeight: '900',
+                                                fontSize: '0.75rem',
+                                                cursor: settingsPending ? 'not-allowed' : 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '8px',
+                                                opacity: settingsPending ? 0.6 : 1
+                                            }}
+                                        >
+                                            {settingsPending ? (
+                                                <div className="spinner-small" style={{ width: '14px', height: '14px', borderTopColor: '#000' }} />
+                                            ) : (
+                                                <>
+                                                    <Save size={14} />
+                                                    SAVE SETTINGS
+                                                </>
+                                            )}
+                                        </motion.button>
+                                    </div>
+                                </>
+                            ) : (
+                                <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: '0.7rem', padding: '20px' }}>
+                                    You don't have permission to manage guild settings.
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'MEMBERS' && (
                         members.map((member, i) => (
                             <motion.div
                                 key={member.id}
@@ -438,21 +775,118 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                    <span style={{
-                                        fontSize: '0.65rem',
-                                        fontWeight: '900',
-                                        color: member.role === 'LEADER' ? 'var(--accent)' : 'rgba(255,255,255,0.4)',
-                                        background: member.role === 'LEADER' ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255,255,255,0.03)',
-                                        padding: '4px 10px',
-                                        borderRadius: '8px',
-                                        letterSpacing: '0.5px',
-                                        border: member.role === 'LEADER' ? '1px solid rgba(212, 175, 55, 0.2)' : '1px solid transparent'
-                                    }}>{member.role}</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', position: 'relative' }}>
+                                    <div
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (playerHasPermission('change_member_roles') && member.role !== 'LEADER' && member.id !== guild.myMemberId) {
+                                                setRoleDropdownId(roleDropdownId === member.id ? null : member.id);
+                                            }
+                                        }}
+                                        style={{
+                                            fontSize: '0.65rem',
+                                            fontWeight: '900',
+                                            color: member.role === 'LEADER' ? 'var(--accent)' : 'rgba(255,255,255,0.4)',
+                                            background: member.role === 'LEADER' ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255,255,255,0.03)',
+                                            padding: '4px 10px',
+                                            borderRadius: '8px',
+                                            letterSpacing: '0.5px',
+                                            border: member.role === 'LEADER' ? '1px solid rgba(212, 175, 55, 0.2)' : '1px solid transparent',
+                                            cursor: guild.myRole === 'LEADER' ? 'pointer' : 'default',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '5px'
+                                        }}
+                                    >
+                                        {getRoleDisplayName(member.role)}
+                                        {playerHasPermission('change_member_roles') && member.role !== 'LEADER' && member.id !== guild.myMemberId && <ChevronDown size={10} />}
+                                    </div>
+
+                                    {playerHasPermission('kick_members') && member.id !== guild.myMemberId && member.role !== 'LEADER' && (
+                                        <motion.button
+                                            whileHover={{ scale: 1.1 }}
+                                            whileTap={{ scale: 0.9 }}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setKickConfirm({ id: member.id, name: member.name });
+                                            }}
+                                            style={{
+                                                background: 'rgba(255, 68, 68, 0.1)',
+                                                border: '1px solid rgba(255, 68, 68, 0.3)',
+                                                borderRadius: '8px',
+                                                padding: '6px',
+                                                color: '#ff4444',
+                                                cursor: 'pointer',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                            }}
+                                            title="Kick Member"
+                                        >
+                                            <X size={14} />
+                                        </motion.button>
+                                    )}
+
+                                    <AnimatePresence>
+                                        {roleDropdownId === member.id && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: '100%',
+                                                    right: 0,
+                                                    marginTop: '5px',
+                                                    background: '#1a1a1a',
+                                                    borderRadius: '10px',
+                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                                                    zIndex: 2000,
+                                                    minWidth: '140px',
+                                                    overflow: 'hidden'
+                                                }}
+                                            >
+                                                {Object.entries({
+                                                    OFFICER: { name: 'Vice-líder', color: '#c0c0c0' },
+                                                    MEMBER: { name: 'Membro', color: '#808080' },
+                                                    ...(guild.roles || {})
+                                                }).filter(([key]) => key !== 'LEADER').map(([key, role]) => {
+                                                    const config = (guild.roles || {})[key] || {};
+                                                    return {
+                                                        id: key,
+                                                        label: config.name || role.name,
+                                                        color: config.color || role.color || '#ffd700',
+                                                        order: config.order !== undefined ? config.order : (key === 'OFFICER' ? -50 : (key === 'MEMBER' ? 0 : 100))
+                                                    };
+                                                }).sort((a, b) => a.order - b.order).map((role) => (
+                                                    <div
+                                                        key={role.id}
+                                                        onClick={() => {
+                                                            socket?.emit('change_member_role', { memberId: member.id, newRole: role.id });
+                                                            setRoleDropdownId(null);
+                                                        }}
+                                                        style={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '10px',
+                                                            padding: '10px 14px',
+                                                            cursor: 'pointer',
+                                                            transition: 'all 0.2s ease',
+                                                            background: member.role === role.id ? 'rgba(255,255,255,0.05)' : 'transparent',
+                                                            borderLeft: member.role === role.id ? `3px solid ${role.color}` : '3px solid transparent'
+                                                        }}
+                                                    >
+                                                        <div style={{ width: '3px', height: '14px', background: role.color, borderRadius: '2px' }} />
+                                                        <span style={{ fontSize: '0.7rem', color: member.role === role.id ? role.color : '#fff', fontWeight: 'bold' }}>{role.label}</span>
+                                                    </div>
+                                                ))}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
                             </motion.div>
                         ))
-                    ) : (
+                    )}
+                    {activeTab === 'REQUESTS' && (
                         isLoadingRequests ? (
                             <div style={{ textAlign: 'center', padding: '20px', color: 'rgba(255,255,255,0.5)' }}>Loading requests...</div>
                         ) : requests.length > 0 ? (
@@ -545,442 +979,1105 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
                         )
                     )}
                 </div>
-            </div>
 
-            {/* Leave Guild Button */}
-            <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setConfirmLeave(true)}
-                style={{
-                    width: '100%',
-                    padding: '12px',
-                    background: 'rgba(255, 68, 68, 0.05)',
-                    border: '1px solid rgba(255, 68, 68, 0.15)',
-                    borderRadius: '12px',
-                    color: 'rgba(255, 68, 68, 0.6)',
-                    fontSize: '0.7rem',
-                    fontWeight: '900',
-                    letterSpacing: '1px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    marginTop: '15px'
-                }}
-            >
-                <LogOut size={14} />
-                {guild.myRole === 'LEADER' && members.length <= 1 ? 'DISBAND GUILD' : 'LEAVE GUILD'}
-            </motion.button>
+                {/* Leave Guild Button - only on Home tab */}
+                {(activeTab === 'MEMBERS' || activeTab === 'REQUESTS') && <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setConfirmLeave(true)}
+                    style={{
+                        width: '100%',
+                        padding: '12px',
+                        background: 'rgba(255, 68, 68, 0.05)',
+                        border: '1px solid rgba(255, 68, 68, 0.15)',
+                        borderRadius: '12px',
+                        color: 'rgba(255, 68, 68, 0.6)',
+                        fontSize: '0.7rem',
+                        fontWeight: '900',
+                        letterSpacing: '1px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        marginTop: '15px'
+                    }}
+                >
+                    <LogOut size={14} />
+                    {guild.myRole === 'LEADER' && members.length <= 1 ? 'DISBAND GUILD' : 'LEAVE GUILD'}
+                </motion.button>}
 
-            {/* Leave Confirmation Modal */}
-            <AnimatePresence>
-                {confirmLeave && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setConfirmLeave(false)}
-                        style={{
-                            position: 'fixed',
-                            top: 0, left: 0, right: 0, bottom: 0,
-                            background: 'rgba(0,0,0,0.8)',
-                            backdropFilter: 'blur(5px)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            zIndex: 9999,
-                            padding: '20px'
-                        }}
-                    >
+                {/* Leave Confirmation Modal */}
+                <AnimatePresence>
+                    {confirmLeave && (
                         <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            onClick={e => e.stopPropagation()}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setConfirmLeave(false)}
                             style={{
-                                background: 'var(--panel-bg, #1a1a2e)',
-                                border: '1px solid rgba(255, 68, 68, 0.3)',
-                                borderRadius: '20px',
-                                padding: '30px',
-                                maxWidth: '350px',
-                                width: '100%',
-                                textAlign: 'center'
-                            }}
-                        >
-                            <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(255,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px' }}>
-                                <LogOut size={24} color="#ff4444" />
-                            </div>
-                            <h3 style={{ color: '#ff4444', fontSize: '1rem', fontWeight: '900', margin: '0 0 10px' }}>
-                                {guild.myRole === 'LEADER' && members.length <= 1 ? 'DISBAND GUILD?' : 'LEAVE GUILD?'}
-                            </h3>
-                            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', margin: '0 0 20px', lineHeight: '1.5' }}>
-                                {guild.myRole === 'LEADER' && members.length <= 1
-                                    ? 'You are the only member. Leaving will permanently disband the guild.'
-                                    : 'Are you sure you want to leave this guild?'
-                                }
-                            </p>
-                            <div style={{ display: 'flex', gap: '10px' }}>
-                                <motion.button
-                                    whileHover={{ scale: 1.03 }}
-                                    whileTap={{ scale: 0.97 }}
-                                    onClick={() => setConfirmLeave(false)}
-                                    style={{
-                                        flex: 1,
-                                        padding: '10px',
-                                        background: 'rgba(255,255,255,0.05)',
-                                        border: '1px solid rgba(255,255,255,0.1)',
-                                        borderRadius: '10px',
-                                        color: 'rgba(255,255,255,0.6)',
-                                        fontSize: '0.75rem',
-                                        fontWeight: 'bold',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    CANCEL
-                                </motion.button>
-                                <motion.button
-                                    whileHover={{ scale: 1.03 }}
-                                    whileTap={{ scale: 0.97 }}
-                                    onClick={() => {
-                                        if (socket) socket.emit('leave_guild');
-                                        setConfirmLeave(false);
-                                    }}
-                                    style={{
-                                        flex: 1,
-                                        padding: '10px',
-                                        background: 'rgba(255, 68, 68, 0.2)',
-                                        border: '1px solid rgba(255, 68, 68, 0.3)',
-                                        borderRadius: '10px',
-                                        color: '#ff4444',
-                                        fontSize: '0.75rem',
-                                        fontWeight: '900',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    CONFIRM
-                                </motion.button>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* Edit Customization Modal */}
-            <AnimatePresence>
-                {showEditCustomization && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        style={{
-                            position: 'fixed',
-                            top: 0, left: 0, right: 0, bottom: 0,
-                            background: 'rgba(0,0,0,0.85)',
-                            backdropFilter: 'blur(8px)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            zIndex: 9999,
-                            padding: '20px'
-                        }}
-                        onClick={() => !editPending && setShowEditCustomization(false)}
-                    >
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            onClick={e => e.stopPropagation()}
-                            style={{
-                                background: '#0a0a0c',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: '24px',
-                                padding: isMobile ? '20px' : '30px',
-                                maxWidth: '450px',
-                                width: '100%',
-                                boxShadow: '0 30px 60px rgba(0,0,0,0.8)',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '20px',
-                                maxHeight: '90vh',
-                                overflowY: 'auto'
-                            }}
-                        >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <div style={{ padding: '8px', background: 'rgba(212, 175, 55, 0.1)', borderRadius: '12px' }}>
-                                        <Settings size={20} color="var(--accent)" />
-                                    </div>
-                                    <h3 style={{ margin: 0, color: '#fff', fontSize: '1.2rem', fontWeight: '900' }}>EDIT GUILD</h3>
-                                </div>
-                                <button
-                                    onClick={() => setShowEditCustomization(false)}
-                                    style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}
-                                >
-                                    <X size={24} />
-                                </button>
-                            </div>
-
-                            {/* Preview */}
-                            <div style={{
-                                background: 'rgba(255,255,255,0.03)',
-                                padding: '15px',
-                                borderRadius: '16px',
-                                border: '1px solid rgba(255,255,255,0.05)',
+                                position: 'fixed',
+                                top: 0, left: 0, right: 0, bottom: 0,
+                                background: 'rgba(0,0,0,0.8)',
+                                backdropFilter: 'blur(5px)',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '15px'
-                            }}>
-                                <div style={{
-                                    width: '50px',
-                                    height: '50px',
-                                    background: editBgColor,
-                                    borderRadius: '12px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    position: 'relative'
-                                }}>
-                                    {editCountry && (
-                                        <div style={{ position: 'absolute', top: '-6px', left: '-6px', background: '#000', padding: '2px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.2)', display: 'flex' }}>
-                                            <CountryFlag code={editCountry.code} name={editCountry.name} size="0.8rem" />
-                                        </div>
-                                    )}
-                                    {React.createElement(ICONS[editIcon] || Shield, { size: 24, color: editIconColor })}
-                                </div>
-                                <div>
-                                    <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '1rem' }}>{guild.name}</div>
-                                    <div style={{ color: 'var(--accent)', fontSize: '0.7rem', fontWeight: 'bold' }}>[{guild.tag}]</div>
-                                </div>
-                            </div>
-
-                            {/* Icon Selection */}
-                            <div>
-                                <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', letterSpacing: '1px', display: 'block', marginBottom: '10px' }}>SELECT ICON</label>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
-                                    {Object.keys(ICONS).map(iconName => (
-                                        <button
-                                            key={iconName}
-                                            onClick={() => setEditIcon(iconName)}
-                                            style={{
-                                                aspectRatio: '1',
-                                                background: editIcon === iconName ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255,255,255,0.03)',
-                                                border: editIcon === iconName ? '2px solid var(--accent)' : '1px solid rgba(255,255,255,0.05)',
-                                                borderRadius: '12px',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                color: editIcon === iconName ? 'var(--accent)' : 'rgba(255,255,255,0.4)',
-                                                transition: '0.2s'
-                                            }}
-                                        >
-                                            {React.createElement(ICONS[iconName], { size: 20 })}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Color Selection */}
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                                <div>
-                                    <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', letterSpacing: '1px', display: 'block', marginBottom: '8px' }}>ICON COLOR</label>
-                                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                                        {['#ffffff', '#ffd700', '#ff4444', '#4caf50', '#2196f3', '#9c27b0'].map(color => (
-                                            <button
-                                                key={color}
-                                                onClick={() => setEditIconColor(color)}
-                                                style={{
-                                                    width: '24px',
-                                                    height: '24px',
-                                                    background: color,
-                                                    borderRadius: '6px',
-                                                    border: editIconColor === color ? '2px solid #fff' : '1px solid rgba(0,0,0,0.2)',
-                                                    cursor: 'pointer',
-                                                    transition: '0.2s'
-                                                }}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
-                                <div>
-                                    <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', letterSpacing: '1px', display: 'block', marginBottom: '8px' }}>BACK COLOR</label>
-                                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                                        {['#1a1a1a', '#2d1a1a', '#1a2d1a', '#1a1a2d', '#2d2d1a', '#2d1a2d'].map(color => (
-                                            <button
-                                                key={color}
-                                                onClick={() => setEditBgColor(color)}
-                                                style={{
-                                                    width: '24px',
-                                                    height: '24px',
-                                                    background: color,
-                                                    borderRadius: '6px',
-                                                    border: editBgColor === color ? '2px solid #fff' : '1px solid rgba(0,0,0,0.2)',
-                                                    cursor: 'pointer',
-                                                    transition: '0.2s'
-                                                }}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Country Selection */}
-                            <div>
-                                <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', letterSpacing: '1px', display: 'block', marginBottom: '8px' }}>REGION</label>
-                                <button
-                                    onClick={() => setShowEditCountryPicker(true)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '12px',
-                                        background: 'rgba(255,255,255,0.03)',
-                                        border: '1px solid rgba(255,255,255,0.1)',
-                                        borderRadius: '12px',
-                                        color: '#fff',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '10px',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    <CountryFlag code={editCountry?.code} name={editCountry?.name} size="1.2rem" />
-                                    <span style={{ fontSize: '0.9rem' }}>{editCountry ? editCountry.name : 'Select Region'}</span>
-                                </button>
-                            </div>
-
-                            <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                disabled={editPending}
-                                onClick={() => {
-                                    setEditPending(true);
-                                    socket?.emit('update_guild_customization', {
-                                        icon: editIcon,
-                                        iconColor: editIconColor,
-                                        bgColor: editBgColor,
-                                        countryCode: editCountry?.code
-                                    });
-                                }}
+                                justifyContent: 'center',
+                                zIndex: 9999,
+                                padding: '20px'
+                            }}
+                        >
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.9, opacity: 0 }}
+                                onClick={e => e.stopPropagation()}
                                 style={{
+                                    background: 'var(--panel-bg, #1a1a2e)',
+                                    border: '1px solid rgba(255, 68, 68, 0.3)',
+                                    borderRadius: '20px',
+                                    padding: '30px',
+                                    maxWidth: '350px',
                                     width: '100%',
-                                    padding: '15px',
-                                    background: 'var(--accent)',
-                                    border: 'none',
-                                    borderRadius: '12px',
-                                    color: '#000',
-                                    fontWeight: '900',
-                                    fontSize: '0.9rem',
-                                    cursor: editPending ? 'not-allowed' : 'pointer',
-                                    marginTop: '10px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '10px'
+                                    textAlign: 'center'
                                 }}
                             >
-                                {editPending ? (
-                                    <div className="spinner-small" style={{ width: '16px', height: '16px', borderTopColor: '#000' }} />
-                                ) : (
-                                    <>
-                                        <Save size={18} />
-                                        SAVE CHANGES
-                                    </>
-                                )}
-                            </motion.button>
-                        </motion.div>
-
-                        {/* Nested Country Picker for Editing */}
-                        <AnimatePresence>
-                            {showEditCountryPicker && (
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    style={{
-                                        position: 'fixed',
-                                        top: 0, left: 0, right: 0, bottom: 0,
-                                        background: 'rgba(0,0,0,0.8)',
-                                        backdropFilter: 'blur(5px)',
-                                        zIndex: 10000,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
-                                    }}
-                                    onClick={() => setShowEditCountryPicker(false)}
-                                >
-                                    <motion.div
-                                        initial={{ scale: 0.9, opacity: 0 }}
-                                        animate={{ scale: 1, opacity: 1 }}
-                                        exit={{ scale: 0.9, opacity: 0 }}
-                                        onClick={e => e.stopPropagation()}
+                                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(255,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px' }}>
+                                    <LogOut size={24} color="#ff4444" />
+                                </div>
+                                <h3 style={{ color: '#ff4444', fontSize: '1rem', fontWeight: '900', margin: '0 0 10px' }}>
+                                    {guild.myRole === 'LEADER' && members.length <= 1 ? 'DISBAND GUILD?' : 'LEAVE GUILD?'}
+                                </h3>
+                                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', margin: '0 0 20px', lineHeight: '1.5' }}>
+                                    {guild.myRole === 'LEADER' && members.length <= 1
+                                        ? 'You are the only member. Leaving will permanently disband the guild.'
+                                        : 'Are you sure you want to leave this guild?'
+                                    }
+                                </p>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <motion.button
+                                        whileHover={{ scale: 1.03 }}
+                                        whileTap={{ scale: 0.97 }}
+                                        onClick={() => setConfirmLeave(false)}
                                         style={{
-                                            width: 'min(350px, 90vw)',
-                                            background: '#111',
-                                            border: '2px solid var(--accent)',
-                                            borderRadius: '24px',
-                                            padding: '24px',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            gap: '15px'
+                                            flex: 1,
+                                            padding: '10px',
+                                            background: 'rgba(255,255,255,0.05)',
+                                            border: '1px solid rgba(255,255,255,0.1)',
+                                            borderRadius: '10px',
+                                            color: 'rgba(255,255,255,0.6)',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer'
                                         }}
                                     >
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <div style={{ fontSize: '0.9rem', fontWeight: '900', color: 'var(--accent)', letterSpacing: '1px' }}>SELECT REGION</div>
-                                            <button onClick={() => setShowEditCountryPicker(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}><X size={20} /></button>
-                                        </div>
+                                        CANCEL
+                                    </motion.button>
+                                    <motion.button
+                                        whileHover={{ scale: 1.03 }}
+                                        whileTap={{ scale: 0.97 }}
+                                        onClick={() => {
+                                            if (socket) socket.emit('leave_guild');
+                                            setConfirmLeave(false);
+                                        }}
+                                        style={{
+                                            flex: 1,
+                                            padding: '10px',
+                                            background: 'rgba(255, 68, 68, 0.2)',
+                                            border: '1px solid rgba(255, 68, 68, 0.3)',
+                                            borderRadius: '10px',
+                                            color: '#ff4444',
+                                            fontSize: '0.75rem',
+                                            fontWeight: '900',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        CONFIRM
+                                    </motion.button>
+                                </div>
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
-                                        <input
-                                            type="text"
-                                            placeholder="Search country..."
-                                            value={editCountrySearch}
-                                            onChange={(e) => setEditCountrySearch(e.target.value)}
-                                            style={{
-                                                width: '100%',
-                                                padding: '12px 16px',
-                                                background: '#0a0a0a',
-                                                border: '1px solid var(--border)',
-                                                borderRadius: '12px',
-                                                color: '#fff',
-                                                fontSize: '0.9rem',
-                                                outline: 'none'
-                                            }}
-                                            autoFocus
-                                        />
-                                        <div style={{ maxHeight: '300px', overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-                                            {COUNTRIES.filter(c => c.name.toLowerCase().includes(editCountrySearch.toLowerCase())).map(c => (
+                {/* Info Modal */}
+                {ReactDOM.createPortal(
+                    <AnimatePresence>
+                        {showInfoModal && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setShowInfoModal(false)}
+                                style={{
+                                    position: 'fixed',
+                                    inset: 0,
+                                    background: 'rgba(0,0,0,0.85)',
+                                    backdropFilter: 'blur(10px)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    zIndex: 1000000, // Absolute front
+                                    padding: '20px',
+                                    paddingTop: '80px'
+                                }}
+                            >
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                                    onClick={e => e.stopPropagation()}
+                                    style={{
+                                        background: '#000', // Solid background matching other modals
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        borderRadius: '24px',
+                                        padding: '30px',
+                                        maxWidth: '400px',
+                                        width: '100%',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '20px',
+                                        boxShadow: '0 30px 60px rgba(0,0,0,0.8)',
+                                        position: 'relative',
+                                        maxHeight: '90vh',
+                                        overflowY: 'auto'
+                                    }}
+                                >
+                                    <button
+                                        onClick={() => setShowInfoModal(false)}
+                                        style={{
+                                            position: 'absolute',
+                                            top: '20px',
+                                            right: '20px',
+                                            background: 'none',
+                                            border: 'none',
+                                            color: 'rgba(255,255,255,0.5)',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        <X size={20} />
+                                    </button>
+
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                        <div style={{
+                                            width: '50px',
+                                            height: '50px',
+                                            borderRadius: '16px',
+                                            background: 'rgba(212, 175, 55, 0.1)',
+                                            border: '1px solid var(--accent)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: 'var(--accent)'
+                                        }}>
+                                            <Info size={28} />
+                                        </div>
+                                        <div>
+                                            <h3 style={{ margin: 0, color: '#fff', fontSize: '1.2rem' }}>About Guild XP</h3>
+                                            <p style={{ margin: 0, color: 'var(--text-dim)', fontSize: '0.8rem' }}>How does your guild grow?</p>
+                                        </div>
+                                    </div>
+
+                                    <div style={{
+                                        background: 'rgba(0,0,0,0.3)',
+                                        borderRadius: '12px',
+                                        padding: '15px',
+                                        border: '1px solid rgba(255,255,255,0.05)',
+                                        fontSize: '0.85rem',
+                                        color: 'rgba(255,255,255,0.8)',
+                                        lineHeight: '1.5'
+                                    }}>
+                                        <p style={{ margin: '0 0 10px 0' }}>
+                                            Whenever any member of the guild performs actions that grant experience, <strong>a 5% bonus</strong> of that XP is copied and granted directly to the Guild!
+                                        </p>
+                                        <ul style={{ paddingLeft: '20px', margin: 0, color: 'var(--accent)', fontWeight: 'bold' }}>
+                                            <li>⚔️ Combat (Killing Mobs)</li>
+                                            <li>🏰 Dungeons</li>
+                                            <li>⛏️ Gathering (Wood, Ore, Fishing, etc.)</li>
+                                            <li>⚒️ Refining & Crafting</li>
+                                        </ul>
+                                        <p style={{ margin: '15px 0 0 0', fontStyle: 'italic', fontSize: '0.8rem', color: 'var(--text-dim)' }}>
+                                            Note: Offline XP gains are automatically credited to the guild when the member logs back in. Guild XP updates occur every 30 minutes in the background.
+                                        </p>
+                                    </div>
+
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => setShowInfoModal(false)}
+                                        style={{
+                                            padding: '12px',
+                                            background: 'var(--accent)',
+                                            color: '#000',
+                                            border: 'none',
+                                            borderRadius: '12px',
+                                            fontWeight: '900',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        GOT IT
+                                    </motion.button>
+                                </motion.div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>,
+                    document.body
+                )}
+
+                {/* Edit Customization Modal */}
+                <AnimatePresence>
+                    {showEditCustomization && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            style={{
+                                position: 'fixed',
+                                top: 0, left: 0, right: 0, bottom: 0,
+                                background: '#000',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                zIndex: 9999,
+                                padding: '20px'
+                            }}
+                            onClick={() => !editPending && setShowEditCustomization(false)}
+                        >
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                                animate={{ scale: 1, opacity: 1, y: 0 }}
+                                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                                onClick={e => e.stopPropagation()}
+                                style={{
+                                    background: '#000',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    borderRadius: '24px',
+                                    padding: isMobile ? '20px' : '30px',
+                                    maxWidth: '450px',
+                                    width: '100%',
+                                    boxShadow: '0 30px 60px rgba(0,0,0,0.8)',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '20px',
+                                    maxHeight: '90vh',
+                                    overflowY: 'auto'
+                                }}
+                            >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <div style={{ padding: '8px', background: 'rgba(212, 175, 55, 0.1)', borderRadius: '12px' }}>
+                                            <Settings size={20} color="var(--accent)" />
+                                        </div>
+                                        <h3 style={{ margin: 0, color: '#fff', fontSize: '1.2rem', fontWeight: '900' }}>EDIT GUILD</h3>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowEditCustomization(false)}
+                                        style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}
+                                    >
+                                        <X size={24} />
+                                    </button>
+                                </div>
+
+                                {/* Preview */}
+                                <div style={{
+                                    background: 'rgba(255,255,255,0.03)',
+                                    padding: '15px',
+                                    borderRadius: '16px',
+                                    border: '1px solid rgba(255,255,255,0.05)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '15px'
+                                }}>
+                                    <div style={{
+                                        width: '50px',
+                                        height: '50px',
+                                        background: editBgColor,
+                                        borderRadius: '12px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        position: 'relative'
+                                    }}>
+                                        {editCountry && (
+                                            <div style={{ position: 'absolute', top: '-6px', left: '-6px', background: '#000', padding: '2px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.2)', display: 'flex' }}>
+                                                <CountryFlag code={editCountry.code} name={editCountry.name} size="0.8rem" />
+                                            </div>
+                                        )}
+                                        {React.createElement(ICONS[editIcon] || Shield, { size: 24, color: editIconColor })}
+                                    </div>
+                                    <div>
+                                        <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '1rem' }}>{guild.name}</div>
+                                        <div style={{ color: 'var(--accent)', fontSize: '0.7rem', fontWeight: 'bold' }}>[{guild.tag}]</div>
+                                    </div>
+                                </div>
+
+                                {/* Icon Selection */}
+                                <div>
+                                    <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', letterSpacing: '1px', display: 'block', marginBottom: '10px' }}>SELECT ICON</label>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: '6px' }}>
+                                        {Object.keys(ICONS).map(iconName => (
+                                            <button
+                                                key={iconName}
+                                                onClick={() => setEditIcon(iconName)}
+                                                style={{
+                                                    aspectRatio: '1',
+                                                    background: editIcon === iconName ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255,255,255,0.03)',
+                                                    border: editIcon === iconName ? '2px solid var(--accent)' : '1px solid rgba(255,255,255,0.05)',
+                                                    borderRadius: '8px',
+                                                    cursor: 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    color: editIcon === iconName ? 'var(--accent)' : 'rgba(255,255,255,0.4)',
+                                                    transition: '0.2s'
+                                                }}
+                                            >
+                                                {React.createElement(ICONS[iconName], { size: 10 })}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Color Selection */}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', letterSpacing: '1px', display: 'block', marginBottom: '8px' }}>ICON COLOR</label>
+                                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                                            {['#ffffff', '#ffd700', '#ff4444', '#4caf50', '#2196f3', '#9c27b0'].map(color => (
                                                 <button
-                                                    key={c.code}
-                                                    onClick={() => {
-                                                        setEditCountry(c);
-                                                        setShowEditCountryPicker(false);
-                                                    }}
+                                                    key={color}
+                                                    onClick={() => setEditIconColor(color)}
                                                     style={{
-                                                        aspectRatio: '1',
-                                                        background: editCountry?.code === c.code ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255,255,255,0.03)',
-                                                        border: editCountry?.code === c.code ? '2px solid var(--accent)' : '1px solid rgba(255,255,255,0.05)',
-                                                        borderRadius: '12px',
+                                                        width: '24px',
+                                                        height: '24px',
+                                                        background: color,
+                                                        borderRadius: '6px',
+                                                        border: editIconColor === color ? '2px solid #fff' : '1px solid rgba(0,0,0,0.2)',
                                                         cursor: 'pointer',
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        gap: '5px'
+                                                        transition: '0.2s'
                                                     }}
-                                                >
-                                                    <CountryFlag code={c.code} name={c.name} size="1.4rem" />
-                                                    <span style={{ fontSize: '0.5rem', color: '#fff', textAlign: 'center' }}>{c.code}</span>
-                                                </button>
+                                                />
                                             ))}
                                         </div>
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', letterSpacing: '1px', display: 'block', marginBottom: '8px' }}>BACK COLOR</label>
+                                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                                            {['#1a1a1a', '#2d1a1a', '#1a2d1a', '#1a1a2d', '#2d2d1a', '#2d1a2d'].map(color => (
+                                                <button
+                                                    key={color}
+                                                    onClick={() => setEditBgColor(color)}
+                                                    style={{
+                                                        width: '24px',
+                                                        height: '24px',
+                                                        background: color,
+                                                        borderRadius: '6px',
+                                                        border: editBgColor === color ? '2px solid #fff' : '1px solid rgba(0,0,0,0.2)',
+                                                        cursor: 'pointer',
+                                                        transition: '0.2s'
+                                                    }}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Country Selection */}
+                                <div>
+                                    <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', letterSpacing: '1px', display: 'block', marginBottom: '8px' }}>REGION</label>
+                                    <button
+                                        onClick={() => setShowEditCountryPicker(true)}
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px',
+                                            background: 'rgba(255,255,255,0.03)',
+                                            border: '1px solid rgba(255,255,255,0.1)',
+                                            borderRadius: '12px',
+                                            color: '#fff',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '10px',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        <CountryFlag code={editCountry?.code} name={editCountry?.name} size="1.2rem" />
+                                        <span style={{ fontSize: '0.9rem' }}>{editCountry ? editCountry.name : 'Select Region'}</span>
+                                    </button>
+                                </div>
+
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    disabled={editPending}
+                                    onClick={() => {
+                                        setEditPending(true);
+                                        socket?.emit('update_guild_customization', {
+                                            icon: editIcon,
+                                            iconColor: editIconColor,
+                                            bgColor: editBgColor,
+                                            countryCode: editCountry?.code
+                                        });
+                                    }}
+                                    style={{
+                                        width: '100%',
+                                        padding: '15px',
+                                        background: 'var(--accent)',
+                                        border: 'none',
+                                        borderRadius: '12px',
+                                        color: '#000',
+                                        fontWeight: '900',
+                                        fontSize: '0.9rem',
+                                        cursor: editPending ? 'not-allowed' : 'pointer',
+                                        marginTop: '10px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '10px'
+                                    }}
+                                >
+                                    {editPending ? (
+                                        <div className="spinner-small" style={{ width: '16px', height: '16px', borderTopColor: '#000' }} />
+                                    ) : (
+                                        <>
+                                            <Save size={18} />
+                                            SAVE CHANGES
+                                        </>
+                                    )}
+                                </motion.button>
+                            </motion.div>
+
+                            {/* Nested Country Picker for Editing */}
+                            <AnimatePresence>
+                                {showEditCountryPicker && (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        style={{
+                                            position: 'fixed',
+                                            top: 0, left: 0, right: 0, bottom: 0,
+                                            background: '#000',
+                                            zIndex: 10000,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}
+                                        onClick={() => setShowEditCountryPicker(false)}
+                                    >
+                                        <motion.div
+                                            initial={{ scale: 0.9, opacity: 0 }}
+                                            animate={{ scale: 1, opacity: 1 }}
+                                            exit={{ scale: 0.9, opacity: 0 }}
+                                            onClick={e => e.stopPropagation()}
+                                            style={{
+                                                width: 'min(350px, 90vw)',
+                                                background: '#000',
+                                                border: '2px solid var(--accent)',
+                                                borderRadius: '24px',
+                                                padding: '24px',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                gap: '15px'
+                                            }}
+                                        >
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div style={{ fontSize: '0.9rem', fontWeight: '900', color: 'var(--accent)', letterSpacing: '1px' }}>SELECT REGION</div>
+                                                <button onClick={() => setShowEditCountryPicker(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}><X size={20} /></button>
+                                            </div>
+
+                                            <input
+                                                type="text"
+                                                placeholder="Search country..."
+                                                value={editCountrySearch}
+                                                onChange={(e) => setEditCountrySearch(e.target.value)}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '12px 16px',
+                                                    background: '#0a0a0a',
+                                                    border: '1px solid var(--border)',
+                                                    borderRadius: '12px',
+                                                    color: '#fff',
+                                                    fontSize: '0.9rem',
+                                                    outline: 'none'
+                                                }}
+                                                autoFocus
+                                            />
+                                            <div style={{ maxHeight: '300px', overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                                                {COUNTRIES.filter(c => c.name.toLowerCase().includes(editCountrySearch.toLowerCase())).map(c => (
+                                                    <button
+                                                        key={c.code}
+                                                        onClick={() => {
+                                                            setEditCountry(c);
+                                                            setShowEditCountryPicker(false);
+                                                        }}
+                                                        style={{
+                                                            aspectRatio: '1',
+                                                            background: editCountry?.code === c.code ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255,255,255,0.03)',
+                                                            border: editCountry?.code === c.code ? '2px solid var(--accent)' : '1px solid rgba(255,255,255,0.05)',
+                                                            borderRadius: '12px',
+                                                            cursor: 'pointer',
+                                                            display: 'flex',
+                                                            flexDirection: 'column',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            gap: '5px'
+                                                        }}
+                                                    >
+                                                        <CountryFlag code={c.code} name={c.name} size="1.4rem" />
+                                                        <span style={{ fontSize: '0.5rem', color: '#fff', textAlign: 'center' }}>{c.code}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </motion.div>
                                     </motion.div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                                )}
+                            </AnimatePresence>
+
+                        </motion.div>
+                    )}
+                    {showRolesModal && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            style={{
+                                position: 'fixed',
+                                top: 0, left: 0, right: 0, bottom: 0,
+                                background: '#000',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                zIndex: 9999,
+                                padding: '20px'
+                            }}
+                            onClick={() => setShowRolesModal(false)}
+                        >
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                                animate={{ scale: 1, opacity: 1, y: 0 }}
+                                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                                onClick={e => e.stopPropagation()}
+                                style={{
+                                    background: '#000',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    borderRadius: '24px',
+                                    padding: isMobile ? '20px' : '30px',
+                                    maxWidth: '500px',
+                                    width: '100%',
+                                    boxShadow: '0 30px 60px rgba(0,0,0,0.8)',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '20px',
+                                    maxHeight: '90vh',
+                                    overflowY: 'auto'
+                                }}
+                            >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                        <div style={{
+                                            padding: '10px',
+                                            background: 'rgba(212, 175, 55, 0.1)',
+                                            borderRadius: '12px',
+                                            border: '1px solid rgba(212, 175, 55, 0.2)'
+                                        }}>
+                                            <Users size={20} color="var(--accent)" />
+                                        </div>
+                                        <div>
+                                            <h3 style={{ color: '#fff', margin: 0, fontSize: '1.2rem', fontWeight: '900', letterSpacing: '0.5px' }}>GUILD ROLES</h3>
+                                            <p style={{ color: 'rgba(255,255,255,0.4)', margin: 0, fontSize: '0.7rem' }}>Configure hierarchy and permissions</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowRolesModal(false)}
+                                        style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer' }}
+                                    >
+                                        <X size={24} />
+                                    </button>
+                                </div>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    {Object.entries({
+                                        LEADER: { name: 'Líder', color: '#d4af37', members: 1, limit: 1 },
+                                        OFFICER: { name: 'Vice-líder', color: '#c0c0c0', members: 0, limit: 3 },
+                                        MEMBER: { name: 'Membro', color: '#808080', members: members.filter(m => m.role === 'MEMBER').length, limit: guild.member_limit || 10 },
+                                        ...(guild.roles || {})
+                                    }).map(([id, baseRole]) => {
+                                        const config = (guild.roles || {})[id] || {};
+                                        return {
+                                            id,
+                                            name: config.name || baseRole.name,
+                                            color: config.color || baseRole.color,
+                                            members: id === 'LEADER' ? 1 : (id === 'OFFICER' ? members.filter(m => m.role === 'OFFICER').length : (id === 'MEMBER' ? members.filter(m => m.role === 'MEMBER').length : members.filter(m => m.role === id).length)),
+                                            limit: baseRole.limit || 10,
+                                            permissions: config.permissions || []
+                                        };
+                                    }).map((role) => {
+                                        const roleConfig = (guild.roles || {})[role.id] || {};
+                                        return {
+                                            ...role,
+                                            order: roleConfig.order !== undefined ? roleConfig.order : (role.id === 'LEADER' ? -100 : (role.id === 'OFFICER' ? -50 : (role.id === 'MEMBER' ? 0 : 100)))
+                                        };
+                                    }).sort((a, b) => a.order - b.order).map((role, index, sortedRoles) => (
+                                        <div key={role.id} style={{
+                                            background: 'rgba(255,255,255,0.03)',
+                                            padding: '15px',
+                                            borderRadius: '16px',
+                                            border: '1px solid rgba(255,255,255,0.05)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                                        }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                                <div style={{
+                                                    width: '4px',
+                                                    height: '24px',
+                                                    borderRadius: '2px',
+                                                    background: role.color
+                                                }} />
+                                                <div>
+                                                    <div style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 'bold' }}>{role.name}</div>
+                                                    <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.65rem' }}>{role.members} / {role.limit} members</div>
+                                                </div>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                {playerHasPermission('manage_roles') && role.id !== 'LEADER' && (
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                        <button
+                                                            disabled={index <= 1} // Index 0 is LEADER, can't move others above it, can't move index 1 up
+                                                            onClick={() => {
+                                                                const newRoles = { ...(guild.roles || {}) };
+                                                                // Ensure all roles have an order first
+                                                                sortedRoles.forEach((r, i) => {
+                                                                    if (!newRoles[r.id] && r.id !== 'LEADER') {
+                                                                        newRoles[r.id] = { name: r.name, color: r.color, permissions: r.permissions || [] };
+                                                                    }
+                                                                    if (newRoles[r.id]) newRoles[r.id].order = i;
+                                                                });
+                                                                // Swap
+                                                                const prevRole = sortedRoles[index - 1];
+                                                                newRoles[role.id].order = index - 1;
+                                                                newRoles[prevRole.id].order = index;
+                                                                socket?.emit('reorder_guild_roles', { roles: newRoles });
+                                                            }}
+                                                            style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: 'rgba(255,255,255,0.5)', padding: '2px', borderRadius: '4px', cursor: index <= 1 ? 'not-allowed' : 'pointer', opacity: index <= 1 ? 0.3 : 1 }}
+                                                        >
+                                                            <ArrowUp size={12} />
+                                                        </button>
+                                                        <button
+                                                            disabled={index === sortedRoles.length - 1}
+                                                            onClick={() => {
+                                                                const newRoles = { ...(guild.roles || {}) };
+                                                                sortedRoles.forEach((r, i) => {
+                                                                    if (!newRoles[r.id] && r.id !== 'LEADER') {
+                                                                        newRoles[r.id] = { name: r.name, color: r.color, permissions: r.permissions || [] };
+                                                                    }
+                                                                    if (newRoles[r.id]) newRoles[r.id].order = i;
+                                                                });
+                                                                // Swap
+                                                                const nextRole = sortedRoles[index + 1];
+                                                                newRoles[role.id].order = index + 1;
+                                                                newRoles[nextRole.id].order = index;
+                                                                socket?.emit('reorder_guild_roles', { roles: newRoles });
+                                                            }}
+                                                            style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: 'rgba(255,255,255,0.5)', padding: '2px', borderRadius: '4px', cursor: index === sortedRoles.length - 1 ? 'not-allowed' : 'pointer', opacity: index === sortedRoles.length - 1 ? 0.3 : 1 }}
+                                                        >
+                                                            <ArrowDown size={12} />
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {playerHasPermission('manage_roles') && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingRoleId(role.id);
+                                                            setEditRoleName(role.name);
+                                                            setEditRoleColor(role.color);
+                                                            setEditRolePerms(role.permissions);
+                                                            setShowEditRoleModal(true);
+                                                        }}
+                                                        style={{
+                                                            background: 'rgba(255,255,255,0.05)',
+                                                            border: 'none',
+                                                            color: 'rgba(255,255,255,0.5)',
+                                                            padding: '6px',
+                                                            borderRadius: '8px', cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        <Settings size={14} />
+                                                    </button>
+                                                )}
+                                                {playerHasPermission('manage_roles') && !['LEADER', 'OFFICER', 'MEMBER'].includes(role.id) && (
+                                                    <button
+                                                        onClick={() => setDeleteRoleConfirm({ id: role.id, name: role.name })}
+                                                        style={{
+                                                            background: 'rgba(255, 68, 68, 0.1)',
+                                                            border: '1px solid rgba(255, 68, 68, 0.2)',
+                                                            color: '#ff4444',
+                                                            padding: '5px',
+                                                            borderRadius: '8px',
+                                                            cursor: 'pointer',
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                        }}
+                                                        title="Delete Role"
+                                                    >
+                                                        <Trash2 size={12} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Delete Role Confirmation Modal */}
+                                {deleteRoleConfirm && ReactDOM.createPortal(
+                                    <AnimatePresence>
+                                        {deleteRoleConfirm && (
+                                            <motion.div
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
+                                                onClick={() => setDeleteRoleConfirm(null)}
+                                                style={{
+                                                    position: 'fixed',
+                                                    top: 0, left: 0, right: 0, bottom: 0,
+                                                    background: 'rgba(0,0,0,0.7)',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    zIndex: 9999
+                                                }}
+                                            >
+                                                <motion.div
+                                                    initial={{ scale: 0.9, opacity: 0 }}
+                                                    animate={{ scale: 1, opacity: 1 }}
+                                                    exit={{ scale: 0.9, opacity: 0 }}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    style={{
+                                                        background: '#1a1a1a',
+                                                        borderRadius: '16px',
+                                                        border: '1px solid rgba(255, 68, 68, 0.2)',
+                                                        padding: '24px',
+                                                        maxWidth: '320px',
+                                                        width: '90%',
+                                                        textAlign: 'center'
+                                                    }}
+                                                >
+                                                    <Trash2 size={32} color="#ff4444" style={{ marginBottom: '12px' }} />
+                                                    <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '8px' }}>Delete "{deleteRoleConfirm.name}"?</div>
+                                                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', marginBottom: '20px' }}>Members with this role will be demoted to Member.</div>
+                                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={() => setDeleteRoleConfirm(null)}
+                                                            style={{
+                                                                flex: 1, padding: '10px',
+                                                                background: 'rgba(255,255,255,0.05)',
+                                                                border: '1px solid rgba(255,255,255,0.1)',
+                                                                borderRadius: '10px',
+                                                                color: 'rgba(255,255,255,0.6)',
+                                                                fontWeight: 'bold', fontSize: '0.75rem', cursor: 'pointer'
+                                                            }}
+                                                        >Cancel</motion.button>
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={() => {
+                                                                socket?.emit('delete_guild_role', { roleId: deleteRoleConfirm.id });
+                                                                setDeleteRoleConfirm(null);
+                                                            }}
+                                                            style={{
+                                                                flex: 1, padding: '10px',
+                                                                background: 'rgba(255, 68, 68, 0.2)',
+                                                                border: '1px solid rgba(255, 68, 68, 0.4)',
+                                                                borderRadius: '10px',
+                                                                color: '#ff4444',
+                                                                fontWeight: '900', fontSize: '0.75rem', cursor: 'pointer'
+                                                            }}
+                                                        >Delete</motion.button>
+                                                    </div>
+                                                </motion.div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>, document.body)}
+
+                                <button
+                                    onClick={() => setShowCreateRoleModal(true)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '15px',
+                                        background: 'rgba(212, 175, 55, 0.1)',
+                                        border: '1px solid rgba(212, 175, 55, 0.2)',
+                                        borderRadius: '12px',
+                                        color: 'var(--accent)',
+                                        fontWeight: 'bold',
+                                        fontSize: '0.8rem',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '10px',
+                                        marginTop: '10px'
+                                    }}
+                                >
+                                    <Plus size={16} />
+                                </button>
+                            </motion.div>
+
+                            <AnimatePresence>
+                                {showCreateRoleModal && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                        style={{
+                                            position: 'fixed',
+                                            inset: isMobile ? '10px' : '40px',
+                                            background: '#0a0a0c',
+                                            borderRadius: '20px',
+                                            border: '2px solid var(--accent)',
+                                            padding: '20px',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '20px',
+                                            zIndex: 10002,
+                                            boxShadow: '0 0 50px rgba(0,0,0,0.9)'
+                                        }}
+                                        onClick={e => e.stopPropagation()}
+                                    >
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <h4 style={{ color: '#fff', margin: 0, fontSize: '1rem' }}>Create Role</h4>
+                                            <button onClick={() => setShowCreateRoleModal(false)} style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={20} /></button>
+                                        </div>
+
+                                        <div>
+                                            <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', display: 'block', marginBottom: '8px' }}>ROLE NAME</label>
+                                            <input
+                                                type="text"
+                                                value={newRoleName}
+                                                onChange={(e) => setNewRoleName(e.target.value)}
+                                                placeholder="Enter role name..."
+                                                style={{
+                                                    width: '100%',
+                                                    background: 'rgba(255,255,255,0.03)',
+                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                    padding: '12px',
+                                                    borderRadius: '8px',
+                                                    color: '#fff',
+                                                    fontSize: '0.8rem'
+                                                }}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', display: 'block', marginBottom: '8px' }}>ROLE COLOR</label>
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                {['#ffd700', '#c0c0c0', '#cd7f32', '#ff4444', '#44aaff', '#44ff44'].map(color => (
+                                                    <div
+                                                        key={color}
+                                                        onClick={() => setNewRoleColor(color)}
+                                                        style={{
+                                                            width: '30px',
+                                                            height: '30px',
+                                                            borderRadius: '50%',
+                                                            background: color,
+                                                            border: newRoleColor === color ? '2px solid #fff' : 'none',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            onClick={() => {
+                                                if (newRoleName.trim()) {
+                                                    const roleId = `ROLE_${Date.now()}`;
+                                                    socket?.emit('update_guild_role', {
+                                                        roleId,
+                                                        name: newRoleName,
+                                                        color: newRoleColor,
+                                                        permissions: []
+                                                    });
+                                                    setNewRoleName('');
+                                                    setShowCreateRoleModal(false);
+                                                }
+                                            }}
+                                            style={{
+                                                width: '100%',
+                                                padding: '12px',
+                                                background: 'var(--accent)',
+                                                border: 'none',
+                                                borderRadius: '8px',
+                                                color: '#000',
+                                                fontWeight: 'bold',
+                                                cursor: 'pointer',
+                                                marginTop: 'auto'
+                                            }}
+                                        >
+                                            CREATE
+                                        </button>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            <AnimatePresence>
+                                {showEditRoleModal && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                        style={{
+                                            position: 'absolute',
+                                            inset: '20px',
+                                            background: '#0a0a0c',
+                                            borderRadius: '20px',
+                                            border: '2px solid var(--accent)',
+                                            padding: '24px',
+                                            display: 'flex', flexDirection: 'column', gap: '20px',
+                                            zIndex: 20,
+                                            overflowY: 'auto'
+                                        }}
+                                        onClick={e => e.stopPropagation()}
+                                    >
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <h4 style={{ color: '#fff', margin: 0, fontSize: '1.2rem', fontWeight: 'bold' }}>Edit Rank: {editingRoleId}</h4>
+                                            <button onClick={() => setShowEditRoleModal(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={24} /></button>
+                                        </div>
+
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', display: 'block', marginBottom: '8px' }}>RANK NAME</label>
+                                                <input
+                                                    type="text"
+                                                    value={editRoleName}
+                                                    onChange={(e) => setEditRoleName(e.target.value)}
+                                                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '12px', borderRadius: '12px', color: '#fff', fontSize: '0.8rem' }}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', display: 'block', marginBottom: '8px' }}>RANK COLOR</label>
+                                                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                                    {['#ffd700', '#c0c0c0', '#cd7f32', '#ff4444', '#44aaff', '#44ff44', '#9c27b0', '#e91e63'].map(color => (
+                                                        <div key={color} onClick={() => setEditRoleColor(color)} style={{ width: '28px', height: '28px', borderRadius: '50%', background: color, border: editRoleColor === color ? '2px solid #fff' : '1px solid rgba(0,0,0,0.5)', cursor: 'pointer', transition: '0.2s' }} />
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', display: 'block', marginBottom: '12px' }}>RANK PERMISSIONS</label>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                    {GUILD_PERMISSIONS.map(perm => (
+                                                        <div key={perm.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                            <div style={{ flex: 1 }}>
+                                                                <div style={{ color: '#fff', fontSize: '0.75rem', fontWeight: 'bold' }}>{perm.label}</div>
+                                                                <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.6rem' }}>{perm.desc}</div>
+                                                            </div>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={editRolePerms.includes(perm.id)}
+                                                                onChange={(e) => {
+                                                                    if (e.target.checked) setEditRolePerms([...editRolePerms, perm.id]);
+                                                                    else setEditRolePerms(editRolePerms.filter(p => p !== perm.id));
+                                                                }}
+                                                                style={{ width: '18px', height: '18px', accentColor: 'var(--accent)', cursor: 'pointer' }}
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            onClick={() => {
+                                                socket?.emit('update_guild_role', {
+                                                    roleId: editingRoleId,
+                                                    name: editRoleName,
+                                                    color: editRoleColor,
+                                                    permissions: editRolePerms
+                                                });
+                                                setShowEditRoleModal(false);
+                                            }}
+                                            style={{ width: '100%', padding: '15px', background: 'var(--accent)', color: '#000', border: 'none', borderRadius: '12px', fontWeight: '900', cursor: 'pointer', marginTop: 'auto', boxShadow: '0 5px 15px rgba(212,175,55,0.2)', fontSize: '0.8rem', letterSpacing: '1px' }}
+                                        >
+                                            SAVE CHANGES
+                                        </button>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+
+            {/* Kick Member Confirmation Modal */}
+            {kickConfirm && ReactDOM.createPortal(
+                <AnimatePresence>
+                    {kickConfirm && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setKickConfirm(null)}
+                            style={{
+                                position: 'fixed',
+                                top: 0, left: 0, right: 0, bottom: 0,
+                                background: 'rgba(0,0,0,0.7)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                zIndex: 9999
+                            }}
+                        >
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.9, opacity: 0 }}
+                                onClick={(e) => e.stopPropagation()}
+                                style={{
+                                    background: '#1a1a1a',
+                                    borderRadius: '16px',
+                                    border: '1px solid rgba(255, 68, 68, 0.2)',
+                                    padding: '24px',
+                                    maxWidth: '320px',
+                                    width: '90%',
+                                    textAlign: 'center'
+                                }}
+                            >
+                                <LogOut size={32} color="#ff4444" style={{ marginBottom: '12px' }} />
+                                <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '8px' }}>Kick "{kickConfirm.name}"?</div>
+                                <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', marginBottom: '20px' }}>This member will be removed from the guild.</div>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => setKickConfirm(null)}
+                                        style={{
+                                            flex: 1, padding: '10px',
+                                            background: 'rgba(255,255,255,0.05)',
+                                            border: '1px solid rgba(255,255,255,0.1)',
+                                            borderRadius: '10px',
+                                            color: 'rgba(255,255,255,0.6)',
+                                            fontWeight: 'bold', fontSize: '0.75rem', cursor: 'pointer'
+                                        }}
+                                    >Cancel</motion.button>
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => {
+                                            socket?.emit('kick_guild_member', { memberId: kickConfirm.id });
+                                            setKickConfirm(null);
+                                        }}
+                                        style={{
+                                            flex: 1, padding: '10px',
+                                            background: 'rgba(255, 68, 68, 0.2)',
+                                            border: '1px solid rgba(255, 68, 68, 0.4)',
+                                            borderRadius: '10px',
+                                            color: '#ff4444',
+                                            fontWeight: '900', fontSize: '0.75rem', cursor: 'pointer'
+                                        }}
+                                    >Kick</motion.button>
+                                </div>
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>, document.body)}
+
         </motion.div >
     );
 };

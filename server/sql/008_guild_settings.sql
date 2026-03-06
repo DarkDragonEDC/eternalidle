@@ -1,0 +1,3 @@
+-- Guild join settings
+ALTER TABLE guilds ADD COLUMN IF NOT EXISTS min_level INT DEFAULT 1;
+ALTER TABLE guilds ADD COLUMN IF NOT EXISTS join_mode TEXT DEFAULT 'APPLY'; -- 'APPLY' or 'OPEN'

@@ -18,6 +18,20 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
         { id: 'SYSTEM', label: 'System' }
     ];
 
+    // Add GUILD tab if the character is in a guild
+    // The character profile stores the guild info in `user.state.guild_id` or similar depending on the props structure
+    // Since we receive `user` and `characterName`, we need to inspect `user` to see if it holds `state.guild_id`.
+    // We'll rely on the parent component potentially passing a `hasGuild` prop, but since we can't easily change all callers,
+    // we'll attempt to derive it from `user` if extended, or default to showing it and letting the server reject it.
+    // However, it's better UX to conditionally show it.
+    // Usually `user` contains the generic user account, we might not have `char.state.guild_id` here.
+    // Let's add the tab universally for now, as checking `user.state` might not work if it's the raw user account. 
+    // Wait, the client usually has a `characterState` in Context or props.
+    // For safety, let's keep it visible. The server rejects non-guild members anyway.
+
+    // Actually, looking at the code, it's safe to just add it to TABS.
+    TABS.splice(3, 0, { id: 'Guild', label: 'Guild' });
+
     useEffect(() => {
         let interval;
         if (cooldown > 0) {

@@ -1,7 +1,17 @@
+import { calculateGuildNextLevelXP } from '../../shared/guilds.js';
+
 export class GuildManager {
     constructor(gameManager) {
         this.gameManager = gameManager;
         this.supabase = gameManager.supabase;
+
+        // Memory buffer for 5% fractional XP gained by members
+        this.pendingGuildXP = {}; // { guild_id: 15.23 }
+
+        // Flush memory to DB every 30 minutes
+        setInterval(() => {
+            this.flushGuildXP().catch(e => console.error("[GUILD_XP] Flush error:", e));
+        }, 30 * 60 * 1000);
     }
 
     async createGuild(char, { name, tag, summary, icon, iconColor, bgColor, paymentMethod, countryCode }) {
@@ -107,8 +117,9 @@ export class GuildManager {
         if (memberError || !member) throw new Error("Character is not in a guild");
 
         // 2. Check permissions
-        if (member.role !== 'LEADER') {
-            throw new Error("Only the Guild Leader can update customization");
+        const hasPerm = await this.hasPermission(char.id, 'edit_appearance');
+        if (!hasPerm) {
+            throw new Error("You don't have permission to update guild customization");
         }
 
         // 3. Update the guild
@@ -171,6 +182,7 @@ export class GuildManager {
 
         return {
             ...guild,
+            myMemberId: characterId,
             myRole: member.role,
             members: members.map(m => {
                 const charId = m.characters.id;
@@ -187,7 +199,8 @@ export class GuildManager {
                     online: isOnline,
                     level: this._calculateCharLevel(state)
                 };
-            })
+            }),
+            nextLevelXP: calculateGuildNextLevelXP(guild.level || 1)
         };
     }
 
@@ -280,11 +293,17 @@ export class GuildManager {
         // Check if guild exists and is not full
         const { data: guild, error: guildErr } = await this.supabase
             .from('guilds')
-            .select('id')
+            .select('id, min_level, join_mode')
             .eq('id', guildId)
             .maybeSingle();
 
         if (guildErr || !guild) throw new Error("Guild not found");
+
+        // Check minimum level
+        const charLevel = this._calculateCharLevel(char.state ? { skills: char.skills, ...char.state } : { skills: char.skills });
+        if (guild.min_level && charLevel < guild.min_level) {
+            throw new Error(`You need to be at least level ${guild.min_level} to join this guild`);
+        }
 
         // Count members (max 10 for now)
         const { count } = await this.supabase
@@ -294,7 +313,27 @@ export class GuildManager {
 
         if (count >= 10) throw new Error("Guild is full");
 
-        // Create request
+        // If OPEN mode, join directly
+        if (guild.join_mode === 'OPEN') {
+            const { error: joinError } = await this.supabase
+                .from('guild_members')
+                .insert({
+                    guild_id: guildId,
+                    character_id: char.id,
+                    role: 'MEMBER'
+                });
+
+            if (joinError) {
+                if (joinError.code === '23505') {
+                    return { success: false, message: "You are already in this guild", type: 'info' };
+                }
+                throw new Error(`Failed to join guild: ${joinError.message}`);
+            }
+
+            return { success: true, joined: true };
+        }
+
+        // APPLY mode: Create request
         const { error } = await this.supabase
             .from('guild_requests')
             .insert({
@@ -321,7 +360,8 @@ export class GuildManager {
             .eq('character_id', char.id)
             .maybeSingle();
 
-        if (!member || (member.role !== 'LEADER' && member.role !== 'OFFICER')) {
+        const hasPerm = await this.hasPermission(char.id, 'manage_requests');
+        if (!hasPerm) {
             throw new Error("No permission to view requests");
         }
 
@@ -373,7 +413,8 @@ export class GuildManager {
             .eq('character_id', char.id)
             .maybeSingle();
 
-        if (!member || (member.role !== 'LEADER' && member.role !== 'OFFICER')) {
+        const hasPerm = await this.hasPermission(char.id, 'manage_requests');
+        if (!hasPerm) {
             throw new Error("No permission to manage requests");
         }
 
@@ -438,10 +479,365 @@ export class GuildManager {
         return { success: true, action: 'ACCEPTED' };
     }
 
+    async changeMemberRole(char, { memberId, newRole }) {
+        if (!char) throw new Error("Character not found");
+
+        const { data: leaderMember, error: leaderErr } = await this.supabase
+            .from('guild_members')
+            .select('guild_id, role')
+            .eq('character_id', char.id)
+            .maybeSingle();
+
+        const hasPerm = await this.hasPermission(char.id, 'change_member_roles');
+        if (!hasPerm) {
+            throw new Error("No permission to change roles");
+        }
+
+        const { data: targetMember, error: targetErr } = await this.supabase
+            .from('guild_members')
+            .select('guild_id, role')
+            .eq('character_id', memberId)
+            .eq('guild_id', leaderMember.guild_id)
+            .maybeSingle();
+
+        if (targetErr || !targetMember) throw new Error("Member not found in your guild");
+        if (targetMember.role === 'LEADER') throw new Error("Cannot change the Leader's role");
+        if (char.id === memberId) throw new Error("Cannot change your own role");
+
+        const { error: updateErr } = await this.supabase
+            .from('guild_members')
+            .update({ role: newRole })
+            .eq('character_id', memberId)
+            .eq('guild_id', leaderMember.guild_id);
+
+        if (updateErr) {
+            console.error("[GUILD] Error updating member role:", updateErr);
+            throw new Error("Failed to update role");
+        }
+
+        return { success: true };
+    }
+
+    async updateGuildRole(char, { roleId, name, color, permissions }) {
+        if (!char) throw new Error("Character not found");
+
+        const { data: member, error: memberError } = await this.supabase
+            .from('guild_members')
+            .select('guild_id, role, guilds(roles)')
+            .eq('character_id', char.id)
+            .maybeSingle();
+
+        if (memberError || !member) throw new Error("Character is not in a guild");
+
+        // Check permission
+        if (member.role !== 'LEADER' && !await this.hasPermission(char.id, 'manage_roles')) {
+            throw new Error("No permission to manage roles");
+        }
+
+        if (roleId === member.role) throw new Error("Cannot edit your own role");
+        if (roleId === 'LEADER') throw new Error("Cannot edit the LEADER role");
+
+        const guildId = member.guild_id;
+        const roles = member.guilds.roles || {};
+
+        if (!roles[roleId]) {
+            // Create new role
+            roles[roleId] = { name, color, permissions: permissions || [], order: Object.keys(roles).length + 10 };
+        } else {
+            // Update existing
+            roles[roleId].name = name || roles[roleId].name;
+            roles[roleId].color = color || roles[roleId].color;
+            roles[roleId].permissions = permissions || roles[roleId].permissions;
+        }
+
+        const { error: updateError } = await this.supabase
+            .from('guilds')
+            .update({ roles })
+            .eq('id', guildId);
+
+        if (updateError) throw new Error("Failed to update guild roles");
+
+        return { success: true, roles };
+    }
+
+    async reorderGuildRoles(char, { roles }) {
+        if (!char) throw new Error("Character not found");
+
+        const { data: member, error: memberError } = await this.supabase
+            .from('guild_members')
+            .select('guild_id, role')
+            .eq('character_id', char.id)
+            .maybeSingle();
+
+        if (memberError || !member) throw new Error("Character is not in a guild");
+
+        // Check permission
+        if (member.role !== 'LEADER' && !await this.hasPermission(char.id, 'manage_roles')) {
+            throw new Error("No permission to manage roles");
+        }
+
+        const guildId = member.guild_id;
+
+        const { error: updateError } = await this.supabase
+            .from('guilds')
+            .update({ roles })
+            .eq('id', guildId);
+
+        if (updateError) throw new Error("Failed to reorder guild roles");
+
+        return { success: true, roles };
+    }
+
+    async deleteGuildRole(char, { roleId }) {
+        if (!char) throw new Error("Character not found");
+        if (['LEADER', 'OFFICER', 'MEMBER'].includes(roleId)) throw new Error("Cannot delete built-in roles");
+
+        const { data: member, error: memberError } = await this.supabase
+            .from('guild_members')
+            .select('guild_id, role, guilds(roles)')
+            .eq('character_id', char.id)
+            .maybeSingle();
+
+        if (memberError || !member) throw new Error("Character is not in a guild");
+
+        if (member.role !== 'LEADER' && !await this.hasPermission(char.id, 'manage_roles')) {
+            throw new Error("No permission to manage roles");
+        }
+
+        const guildId = member.guild_id;
+        const roles = { ...(member.guilds.roles || {}) };
+
+        if (!roles[roleId]) throw new Error("Role not found");
+
+        delete roles[roleId];
+
+        // Demote members with this role to MEMBER
+        await this.supabase
+            .from('guild_members')
+            .update({ role: 'MEMBER' })
+            .eq('guild_id', guildId)
+            .eq('role', roleId);
+
+        const { error: updateError } = await this.supabase
+            .from('guilds')
+            .update({ roles })
+            .eq('id', guildId);
+
+        if (updateError) throw new Error("Failed to delete role");
+
+        return { success: true };
+    }
+
+    async kickMember(char, { memberId }) {
+        if (!char) throw new Error("Character not found");
+
+        const { data: hunter, error: hunterError } = await this.supabase
+            .from('guild_members')
+            .select('guild_id, role')
+            .eq('character_id', char.id)
+            .maybeSingle();
+
+        if (hunterError || !hunter) throw new Error("You are not in a guild");
+
+        // Check permission
+        if (hunter.role !== 'LEADER' && !await this.hasPermission(char.id, 'kick_members')) {
+            throw new Error("No permission to kick members");
+        }
+
+        const { data: target, error: targetError } = await this.supabase
+            .from('guild_members')
+            .select('guild_id, role')
+            .eq('character_id', memberId)
+            .eq('guild_id', hunter.guild_id)
+            .maybeSingle();
+
+        if (targetError || !target) throw new Error("Member not found in your guild");
+        if (target.role === 'LEADER') throw new Error("Cannot kick the Leader");
+        if (char.id === memberId) throw new Error("Cannot kick yourself");
+
+        const { error: delError } = await this.supabase
+            .from('guild_members')
+            .delete()
+            .eq('character_id', memberId);
+
+        if (delError) throw new Error("Failed to kick member");
+
+        // Clear cache for the kicked member
+        const targetCharCache = this.gameManager.cache.get(memberId);
+        if (targetCharCache) {
+            delete targetCharCache.state.guild_id;
+            this.gameManager.markDirty(memberId);
+        }
+
+        return { success: true };
+    }
+
+    async hasPermission(characterId, permission) {
+        if (!characterId) return false;
+
+        const { data: member, error } = await this.supabase
+            .from('guild_members')
+            .select('role, guilds(roles, leader_id)')
+            .eq('character_id', characterId)
+            .maybeSingle();
+
+        if (error || !member) return false;
+
+        // Leader ID check (absolute fallback)
+        if (member.guilds.leader_id === characterId || member.role === 'LEADER') return true;
+
+        const rolesConfig = member.guilds.roles || {};
+        const myRoleConfig = rolesConfig[member.role];
+
+        if (!myRoleConfig || !myRoleConfig.permissions) return false;
+        return myRoleConfig.permissions.includes(permission);
+    }
+
+    async updateGuildSettings(char, { minLevel, joinMode }) {
+        if (!char) throw new Error("Character not found");
+
+        const { data: member, error: memberError } = await this.supabase
+            .from('guild_members')
+            .select('guild_id, role')
+            .eq('character_id', char.id)
+            .maybeSingle();
+
+        if (memberError || !member) throw new Error("Character is not in a guild");
+
+        // Check permission
+        if (member.role !== 'LEADER' && !await this.hasPermission(char.id, 'manage_roles')) {
+            throw new Error("No permission to manage guild settings");
+        }
+
+        const updates = {};
+        if (minLevel !== undefined) {
+            const lvl = parseInt(minLevel);
+            if (isNaN(lvl) || lvl < 1 || lvl > 9999) throw new Error("Invalid minimum level (1-9999)");
+            updates.min_level = lvl;
+        }
+        if (joinMode !== undefined) {
+            if (!['APPLY', 'OPEN'].includes(joinMode)) throw new Error("Invalid join mode");
+            updates.join_mode = joinMode;
+        }
+
+        if (Object.keys(updates).length === 0) throw new Error("No settings to update");
+
+        const { error: updateError } = await this.supabase
+            .from('guilds')
+            .update(updates)
+            .eq('id', member.guild_id);
+
+        if (updateError) throw new Error("Failed to update guild settings");
+
+        return { success: true };
+    }
+
     _calculateCharLevel(state) {
         if (!state || !state.skills) return 1;
         let total = 0;
         Object.values(state.skills).forEach(s => total += (s.level || 1));
         return total;
+    }
+
+    addPendingGuildXP(guildId, amount) {
+        if (!guildId || !amount) return;
+        if (!this.pendingGuildXP[guildId]) {
+            this.pendingGuildXP[guildId] = 0;
+        }
+        this.pendingGuildXP[guildId] += amount;
+    }
+
+    async flushGuildXP() {
+        if (Object.keys(this.pendingGuildXP).length === 0) return;
+
+        console.log(`[GUILD_XP] Flushing XP for ${Object.keys(this.pendingGuildXP).length} guilds...`);
+
+        // Create a copy and clear the buffer quickly to avoid race conditions
+        const xpToProcess = { ...this.pendingGuildXP };
+        this.pendingGuildXP = {};
+
+        for (const [guildId, totalAmount] of Object.entries(xpToProcess)) {
+            // Only flush whole numbers, keep the decimal in memory
+            const wholeXP = Math.floor(totalAmount);
+            const remainder = totalAmount - wholeXP;
+
+            if (remainder > 0) {
+                this.addPendingGuildXP(guildId, remainder);
+            }
+
+            if (wholeXP > 0) {
+                await this.addExactGuildXP(guildId, wholeXP);
+            }
+        }
+    }
+
+    async addExactGuildXP(guildId, amount) {
+        // Fetch current guild state
+        const { data: guild, error } = await this.supabase
+            .from('guilds')
+            .select('level, xp, name, tag')
+            .eq('id', guildId)
+            .single();
+
+        if (error || !guild) return;
+
+        let currentXP = Number(guild.xp) + amount;
+        let currentLevel = Number(guild.level) || 1;
+        let leveledUp = false;
+        let nextLevelXP = calculateGuildNextLevelXP(currentLevel);
+
+        // Calculate Level Ups
+        while (currentXP >= nextLevelXP && currentLevel < 100) {
+            currentXP -= nextLevelXP;
+            currentLevel++;
+            leveledUp = true;
+            nextLevelXP = calculateGuildNextLevelXP(currentLevel);
+        }
+
+        // Save back to DB
+        const { error: updateError } = await this.supabase
+            .from('guilds')
+            .update({
+                level: currentLevel,
+                xp: currentXP
+            })
+            .eq('id', guildId);
+
+        if (updateError) {
+            console.error(`[GUILD_XP] Failed to save XP to guild ${guildId}:`, updateError);
+            // Restore failure to memory safely
+            this.addPendingGuildXP(guildId, amount);
+            return;
+        }
+
+        if (leveledUp) {
+            console.log(`[GUILD_XP] Guild ${guild.name} [${guild.tag}] Leveled Up to ${currentLevel}!`);
+
+            // Broadcast Level Up to Guild Chat
+            // This relies on the new Guild Chat channel we will implement
+            this.gameManager.broadcastToGuild(guildId, 'new_message', {
+                id: Date.now() + Math.random(),
+                channel: 'Guild',
+                sender: 'System',
+                message: `🎉 The Guild has reached Level ${currentLevel}!`,
+                timestamp: Date.now(),
+                isSystem: true
+            });
+
+            // Refresh the cache/client states immediately
+            const members = await this.supabase.from('guild_members').select('character_id').eq('guild_id', guildId);
+            if (members.data) {
+                members.data.forEach(m => {
+                    const charId = m.character_id;
+                    if (this.gameManager.cache.has(charId)) {
+                        this.gameManager.broadcastToCharacter(charId, 'guild_update', {
+                            level: currentLevel,
+                            xp: currentXP,
+                            nextLevelXP: nextLevelXP
+                        });
+                    }
+                });
+            }
+        }
     }
 }

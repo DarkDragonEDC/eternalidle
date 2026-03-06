@@ -690,6 +690,103 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('change_member_role', async ({ memberId, newRole }) => {
+        try {
+            if (!socket.data.characterId || socket.data.characterId === 'undefined') return;
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                const result = await gameManager.guildManager.changeMemberRole(char, { memberId, newRole });
+
+                if (result.success) {
+                    socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+                }
+            });
+        } catch (err) {
+            console.error('[GUILD] Error in change_member_role socket:', err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('update_guild_role', async (data) => {
+        try {
+            if (!socket.data.characterId || socket.data.characterId === 'undefined') return;
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                const result = await gameManager.guildManager.updateGuildRole(char, data);
+                if (result.success) {
+                    socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+                }
+            });
+        } catch (err) {
+            console.error('[GUILD] Error in update_guild_role socket:', err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('reorder_guild_roles', async ({ roles }) => {
+        try {
+            if (!socket.data.characterId || socket.data.characterId === 'undefined') return;
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                const result = await gameManager.guildManager.reorderGuildRoles(char, { roles });
+                if (result.success) {
+                    socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+                }
+            });
+        } catch (err) {
+            console.error('[GUILD] Error in reorder_guild_roles socket:', err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('update_guild_settings', async ({ minLevel, joinMode }) => {
+        try {
+            if (!socket.data.characterId || socket.data.characterId === 'undefined') return;
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                const result = await gameManager.guildManager.updateGuildSettings(char, { minLevel, joinMode });
+                if (result.success) {
+                    socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+                }
+            });
+        } catch (err) {
+            console.error('[GUILD] Error in update_guild_settings socket:', err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('delete_guild_role', async ({ roleId }) => {
+        try {
+            if (!socket.data.characterId || socket.data.characterId === 'undefined') return;
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                const result = await gameManager.guildManager.deleteGuildRole(char, { roleId });
+                if (result.success) {
+                    socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+                }
+            });
+        } catch (err) {
+            console.error('[GUILD] Error in delete_guild_role socket:', err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
+    socket.on('kick_guild_member', async ({ memberId }) => {
+        try {
+            if (!socket.data.characterId || socket.data.characterId === 'undefined') return;
+            await gameManager.executeLocked(socket.user.id, async () => {
+                const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+                const result = await gameManager.guildManager.kickMember(char, { memberId });
+                if (result.success) {
+                    socket.emit('status_update', await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+                }
+            });
+        } catch (err) {
+            console.error('[GUILD] Error in kick_guild_member socket:', err);
+            socket.emit('error', { message: err.message });
+        }
+    });
+
     socket.on('claim_reward', async () => {
         try {
             if (!socket.data.characterId || socket.data.characterId === 'undefined') return;
@@ -2076,13 +2173,37 @@ io.on('connection', (socket) => {
 
             queries.push(systemQuery);
 
+            // Fetch Guild channel messages if the player is in a guild
+            const charId = socket.data.characterId;
+            if (charId) {
+                const char = await gameManager.getCharacter(socket.user.id, charId);
+                if (char && char.state && char.state.guild_id) {
+                    const guildChannelId = `Guild-${char.state.guild_id}`;
+                    const guildQuery = supabase
+                        .from('messages')
+                        .select('*')
+                        .eq('channel', guildChannelId)
+                        .order('created_at', { ascending: false })
+                        .limit(50);
+
+                    queries.push(guildQuery);
+                }
+            }
+
             const results = await Promise.all(queries);
 
             // Collect all data, flattening the results
             let allMessages = [];
             for (const res of results) {
                 if (res.error) console.error('Error fetching chat channel history:', res.error);
-                if (res.data) allMessages = allMessages.concat(res.data);
+                if (res.data) {
+                    // Normalize the Guild channel name for the client so it appears in the "Guild" tab
+                    const normalized = res.data.map(msg => ({
+                        ...msg,
+                        channel: msg.channel?.startsWith('Guild-') ? 'Guild' : msg.channel
+                    }));
+                    allMessages = allMessages.concat(normalized);
+                }
             }
 
             // Sort everything chronologically before sending
@@ -2296,12 +2417,18 @@ io.on('connection', (socket) => {
                 content = content.substring(0, 100);
             }
 
+            // Reject Guild messages if the user is not in a guild
+            if (channel === 'Guild' && !char.state?.guild_id) {
+                socket.emit('error', { message: "You must be in a guild to use the Guild chat." });
+                return;
+            }
+
             // We attempt to insert with channel. If it fails due to missing column, we fallback.
             let insertData = {
                 user_id: socket.user.id,
                 sender_name: char.name,
                 content: content,
-                channel: channel
+                channel: channel === 'Guild' && char.state?.guild_id ? `Guild-${char.state.guild_id}` : channel
             };
 
             const { data, error } = await supabase
@@ -2323,13 +2450,24 @@ io.on('connection', (socket) => {
 
                     // Manually add channel to broadcast data even if not persisted
                     retryData.channel = channel;
-                    io.emit('new_message', retryData);
+
+                    if (channel === 'Guild' && char.state.guild_id) {
+                        gameManager.broadcastToGuild(char.state.guild_id, 'new_message', retryData);
+                    } else {
+                        io.emit('new_message', retryData);
+                    }
                 } else {
                     throw error;
                 }
             } else {
                 // Force include channel in case select() didn't pick it up (schema cache)
-                io.emit('new_message', { ...data, channel: data.channel || channel });
+                const outData = { ...data, channel: data.channel || channel };
+                if (channel === 'Guild' && char.state.guild_id) {
+                    outData.channel = 'Guild'; // Normalize for the client
+                    gameManager.broadcastToGuild(char.state.guild_id, 'new_message', outData);
+                } else {
+                    io.emit('new_message', outData);
+                }
             }
         } catch (err) {
             console.error('Error sending message:', err);

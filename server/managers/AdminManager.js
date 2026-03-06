@@ -21,6 +21,7 @@ export class AdminManager {
                 case 'add_orbs': return await this.cmdAddOrbs(socket, args);
                 case 'add_crowns': return await this.cmdAddOrbs(socket, args); // Alias for backward compatibility during transition
                 case 'xp': return await this.cmdAddXp(socket, args);
+                case 'gxp': return await this.cmdAddGuildXp(socket, args);
                 case 'resetdaily': return await this.cmdResetDaily(socket, args);
                 case 'ban': return await this.cmdBan(socket, args);
                 case 'title': return await this.cmdTitle(socket, args);
@@ -193,6 +194,18 @@ export class AdminManager {
         this.gameManager.addXP(char, skill, amount);
         await this.saveAndNotify(char);
         return { success: true, message: `Added ${amount} XP to ${skill} for ${char.name}.` };
+    }
+
+    async cmdAddGuildXp(socket, args) {
+        let amount = parseInt(args[0]);
+        if (isNaN(amount)) return { success: false, error: "Usage: /gxp [amount]" };
+
+        const char = await this.resolveTarget(socket, 'me');
+        if (!char.state.guild_id) return { success: false, error: "You are not in a guild." };
+
+        // We use addExactGuildXP to bypass the memory batching and force a save
+        await this.gameManager.guildManager.addExactGuildXP(char.state.guild_id, amount);
+        return { success: true, message: `Added ${amount} XP directly to your guild.` };
     }
 
     async cmdResetDaily(socket, args) {

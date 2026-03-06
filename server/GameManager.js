@@ -200,6 +200,24 @@ export class GameManager {
         }
     }
 
+    async broadcastToGuild(guildId, event, data) {
+        if (!this.io || !guildId) return;
+
+        // Find all users in the guild who are online
+        const { data: members } = await this.supabase
+            .from('guild_members')
+            .select('characters ( user_id )')
+            .eq('guild_id', guildId);
+
+        if (members) {
+            members.forEach(m => {
+                if (m.characters && m.characters.user_id) {
+                    this.io.to(`user:${m.characters.user_id}`).emit(event, data);
+                }
+            });
+        }
+    }
+
     async loadGlobalStats() {
         try {
             const { data, error } = await this.supabase
@@ -1187,6 +1205,21 @@ export class GameManager {
                     // Only show the modal if total catchup was significant (based on wall-clock time)
                     // and we haven't already generated one in this session
                     const hasNotableGains = elapsedSeconds > 60;
+
+                    // --- GUILD XP OFFLINE INTEGRATION ---
+                    if (data.state.guild_id && finalReport.totalTime > 0) {
+                        let totalOfflineXp = 0;
+                        for (const xp of Object.values(finalReport.xpGained || {})) {
+                            totalOfflineXp += (Number(xp) || 0);
+                        }
+                        if (totalOfflineXp > 0) {
+                            const guildXpToAdd = totalOfflineXp * 0.05;
+                            if (this.guildManager && this.guildManager.addPendingGuildXP) {
+                                this.guildManager.addPendingGuildXP(data.state.guild_id, guildXpToAdd);
+                                console.log(`[CATCHUP] ${data.name} generated ${guildXpToAdd.toFixed(2)} Guild XP while offline.`);
+                            }
+                        }
+                    }
 
                     if (hasNotableGains && !data._offlineReportSent) {
                         data.offlineReport = finalReport;
@@ -2404,6 +2437,16 @@ export class GameManager {
 
         // FIX: Persist the nextLevelXp to the state so the client knows the target
         skill.nextLevelXp = nextLevelXP;
+
+        // --- GUILD XP INTEGRATION (5%) ---
+        // If char is in a guild, route 5% of the gained XP into the guild manager's memory buffer
+        if (char.state.guild_id && safeAmount > 0) {
+            const guildXpGained = safeAmount * 0.05;
+            // The guild manager will handle adding to memory and flushing every 30m
+            if (this.guildManager && this.guildManager.addPendingGuildXP) {
+                this.guildManager.addPendingGuildXP(char.state.guild_id, guildXpGained);
+            }
+        }
 
         return leveledUp ? { skill: skillKey, level: skill.level } : null;
     }
