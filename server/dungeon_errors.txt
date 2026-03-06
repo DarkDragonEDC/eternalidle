@@ -1,0 +1,11 @@
+[SOCKET] User disconnected: XGSVaKovSgtnEOgpAAAN. Reason: transport error
+[DUNGEON-FOOD] Player=DarkDragon, DungeonTier=4, PlayerIP=337
+[DUNGEON-FOOD] Checking inventory: T10_FOOD x6 -> NOT FOUND
+[DUNGEON-FOOD] Checking inventory: T9_FOOD x6 -> NOT FOUND
+[DUNGEON-FOOD] Checking inventory: T8_FOOD x8 -> NOT FOUND
+[DUNGEON-FOOD] Checking inventory: T7_FOOD x9 -> NOT FOUND
+[DUNGEON-FOOD] Checking inventory: T6_FOOD x11 -> NOT FOUND
+[DUNGEON-FOOD] Checking inventory: T5_FOOD x12 -> NOT FOUND
+[DUNGEON-FOOD] Checking inventory: T4_FOOD x15 -> NOT FOUND
+[DUNGEON-FOOD] Checking inventory: T3_FOOD x20 -> FOUND
+[DUNGEON-FOOD] Consuming: T3_FOOD x20

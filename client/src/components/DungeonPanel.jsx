@@ -139,8 +139,11 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
     const getEstimatedTime = () => {
         if (!dungeonState || !dungeonState.active) return null;
 
-        const duration = 300000; // 5 minutes in ms
-        const elapsedSinceStart = dungeonState.started_at ? (now - new Date(dungeonState.started_at).getTime()) : 0;
+        const startTimestamp = dungeonState.started_at ? new Date(dungeonState.started_at).getTime() : now;
+        const finishTimestamp = dungeonState.finish_at ? new Date(dungeonState.finish_at).getTime() : startTimestamp + 300000;
+        const duration = Math.max(1000, finishTimestamp - startTimestamp);
+
+        const elapsedSinceStart = Math.max(0, now - startTimestamp);
         const currentRunRemaining = Math.max(0, duration - elapsedSinceStart);
 
         const repeats = dungeonState.repeatCount || 0;
@@ -346,11 +349,13 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
     if (dungeonState && dungeonState.active) {
         const dungeonConfig = Object.values(DUNGEONS).find(d => d.id === dungeonState.id) || { name: 'Dungeon' };
 
-        // Calculate overall progress for the current 5-minute run
-        const runDuration = 300000; // 5 min
+        // Calculate overall progress based on exact dynamically assigned timestamps
         const startTimestamp = dungeonState.started_at ? new Date(dungeonState.started_at).getTime() : now;
-        const elapsed = now - startTimestamp;
-        const rawProgress = Math.max(0, Math.min(1, elapsed / runDuration));
+        const finishTimestamp = dungeonState.finish_at ? new Date(dungeonState.finish_at).getTime() : startTimestamp + 300000;
+        const runDuration = finishTimestamp - startTimestamp;
+
+        const elapsed = Math.max(0, now - startTimestamp);
+        const rawProgress = runDuration > 0 ? Math.max(0, Math.min(1, elapsed / runDuration)) : 1;
         const progressPct = (rawProgress * 100).toFixed(1);
 
         return (
@@ -590,7 +595,6 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                                                         background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
                                                         padding: '6px 10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px'
                                                     }}>
-                                                        <img src={`/items/${id}.webp`} style={{ width: '16px', height: '16px', objectFit: 'contain' }} onError={(e) => e.target.style = 'none'} />
                                                         <span style={{ color: '#fff', fontSize: '0.75rem', fontWeight: '700' }}>{qty}x</span>
                                                         <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.7rem' }}>{itemData?.name || id.replace(/_/g, ' ')}</span>
                                                     </div>

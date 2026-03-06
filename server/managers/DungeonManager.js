@@ -29,24 +29,31 @@ export class DungeonManager {
         let foodToConsume = null;
         let requiredAmount = 0;
 
-        for (let foodTier = 10; foodTier >= 1; foodTier--) {
-            const foodId = `T${foodTier}_FOOD`;
-            const cost = getFoodCost(dungeonTier, foodTier, playerIP);
-            if (cost <= 0) continue;
-            if (this.gameManager.inventoryManager.hasItems(char, { [foodId]: cost })) {
-                foodToConsume = foodId;
+        console.log(`[DUNGEON-FOOD] Player=${char.name}, DungeonTier=${dungeonTier}, PlayerIP=${playerIP}`);
+
+        // 1. Check equipped food FIRST (this is what the user sees)
+        const equippedFood = char.state.equipment?.food;
+        if (equippedFood) {
+            const cost = getFoodCost(dungeonTier, equippedFood.tier, playerIP);
+            console.log(`[DUNGEON-FOOD] Equipped food: tier=${equippedFood.tier}, amount=${equippedFood.amount}, cost=${cost}`);
+            if (equippedFood.amount >= cost && cost > 0) {
+                foodToConsume = 'EQUIPPED_FOOD';
                 requiredAmount = cost;
-                break;
             }
         }
 
+        // 2. Fallback: Check inventory food (T10 down to T1)
         if (!foodToConsume) {
-            const equippedFood = char.state.equipment?.food;
-            if (equippedFood) {
-                const cost = getFoodCost(dungeonTier, equippedFood.tier, playerIP);
-                if (equippedFood.amount >= cost) {
-                    foodToConsume = 'EQUIPPED_FOOD';
+            for (let foodTier = 10; foodTier >= 1; foodTier--) {
+                const foodId = `T${foodTier}_FOOD`;
+                const cost = getFoodCost(dungeonTier, foodTier, playerIP);
+                if (cost <= 0) continue;
+                const hasIt = this.gameManager.inventoryManager.hasItems(char, { [foodId]: cost });
+                console.log(`[DUNGEON-FOOD] Checking inventory: ${foodId} x${cost} -> ${hasIt ? 'FOUND' : 'NOT FOUND'}`);
+                if (hasIt) {
+                    foodToConsume = foodId;
                     requiredAmount = cost;
+                    break;
                 }
             }
         }
@@ -55,11 +62,14 @@ export class DungeonManager {
             throw new Error(`Not enough food to enter this tier ${dungeonTier} dungeon`);
         }
 
+        console.log(`[DUNGEON-FOOD] Consuming: ${foodToConsume} x${requiredAmount}`);
+
         // --- CONSUMPTION ---
         char.state.silver = (char.state.silver || 0) - entryCost;
         this.gameManager.inventoryManager.consumeItems(char, { [mapId]: 1 });
         if (foodToConsume === 'EQUIPPED_FOOD') {
             char.state.equipment.food.amount -= requiredAmount;
+            console.log(`[DUNGEON-FOOD] Equipped food after consume: amount=${char.state.equipment.food?.amount}`);
             if (char.state.equipment.food.amount <= 0) delete char.state.equipment.food;
         } else {
             this.gameManager.inventoryManager.consumeItems(char, { [foodToConsume]: requiredAmount });
@@ -138,10 +148,15 @@ export class DungeonManager {
             }
 
             // 2. Exploration Logic (Fixed Time)
+            if (dungeonState.status === 'COMPLETED') {
+                return { dungeonUpdate: { status: 'COMPLETED', message: 'Dungeon run is finished.' } };
+            }
+
             if (now >= dungeonState.finish_at) {
                 return await this.completeDungeon(char, dungeonConfig, now);
             } else {
                 const timeLeft = Math.ceil((dungeonState.finish_at - now) / 1000);
+                console.log(`[DUNGEON-DEBUG] processDungeonTick: char=${char.name}, time_left=${timeLeft}s`);
                 return {
                     dungeonUpdate: {
                         status: 'EXPLORING',
@@ -156,6 +171,7 @@ export class DungeonManager {
     }
 
     async completeDungeon(char, config, virtualNow = null) {
+        console.log(`[DUNGEON-DEBUG] completeDungeon called for ${char.name}, tier: ${config.tier}`);
         const now = virtualNow || Date.now();
         const rewards = config.rewards;
         const loot = [];
@@ -175,6 +191,7 @@ export class DungeonManager {
         else rarity = 'NORMAL';
 
         const chestId = `T${config.tier}_CHEST_${rarity}`;
+        console.log(`[DUNGEON-DEBUG] Adding ${chestId} for ${char.name}`);
         const added = this.gameManager.inventoryManager.addItemToInventory(char, chestId, 1);
 
         if (added) {
@@ -240,6 +257,7 @@ export class DungeonManager {
 
                 // Save immediately after starting a new repeat run
                 await this.gameManager.saveState(char.id, char.state);
+                console.log(`[DUNGEON-DEBUG] Starting repeat run. Current run: ${char.state.dungeon.currentRun}`);
 
                 return {
                     dungeonUpdate: {
@@ -247,7 +265,12 @@ export class DungeonManager {
                         message: `Starting repeat run...`,
                         rewards: { xp: rewards.xp, items: loot },
                         autoRepeat: true,
-                        lootLog: char.state.dungeon.lootLog
+                        lootLog: char.state.dungeon.lootLog,
+                        currentRun: char.state.dungeon.currentRun,
+                        repeatCount: char.state.dungeon.repeatCount,
+                        started_at: char.state.dungeon.started_at,
+                        finish_at: char.state.dungeon.finish_at,
+                        total_duration: duration / 1000
                     },
                     leveledUp
                 };
@@ -275,6 +298,7 @@ export class DungeonManager {
         char.state.dungeon.status = 'COMPLETED';
         // Save immediately after final run
         await this.gameManager.saveState(char.id, char.state);
+        console.log(`[DUNGEON-DEBUG] completeDungeon finished successfully for ${char.name}`);
 
         return {
             dungeonUpdate: {

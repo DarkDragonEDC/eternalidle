@@ -20,7 +20,7 @@ const ToastContainer = ({ socket, settings }) => {
             }
 
             // Hide Dungeon activity toasts
-            if (msg.startsWith('Exploring') || msg.startsWith('Starting repeat run')) {
+            if (msg.startsWith('Exploring') || msg.startsWith('Starting repeat run') || msg.startsWith('Dungeon run is finished')) {
                 return;
             }
 
