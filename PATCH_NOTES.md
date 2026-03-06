@@ -12,8 +12,12 @@
 ### ⚙️ Sistema e Sincronização
 - **Correção de Chat da Guilda**: Implementada sincronização automática de `guild_id` para membros. Isso resolve o erro "You must be in a guild" que ocorria para alguns membros.
 - **Entrada em Guildas**: Jogadores que entram em guildas abertas agora têm seu acesso ao chat liberado instantaneamente.
-- **Compactação de UI**: A interface de Dungeon foi otimizada para ser mais densa e caber melhor em diferentes resoluções de tela.
-- **Chat Sem Duplicatas**: Corrigido erro de chaves duplicadas no Chat, garantindo uma interface estável e sem avisos de console.
+- [Dungeon] Corrigido travamento ao final de runs repetidas (1s left).
+- [Dungeon] Corrigido erro onde o consumo de silver e food não era salvo em runs da fila.
+- [Dungeon] Removido sistema de Waves (Ondas) de todo o simulador e interface.
+- [Dungeon] Interface otimizada e compactada para melhor performance em telas 1080p.
+- [Chat] Corrigida sincronização de Guild ID para usuários que usam o chat pela primeira vez.
+- [Chat] Removido aviso de chaves duplicadas no console e mensagens repetidas.
 - **Versão 1.3.4**: Atualização obrigatória de versão para garantir a sincronia entre cliente e servidor.
 
 ---

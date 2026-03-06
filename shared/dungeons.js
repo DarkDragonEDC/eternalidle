@@ -4,7 +4,6 @@ export const DUNGEONS = {
         name: 'Goblin Cave',
         tier: 1,
         reqItem: 'T1_DUNGEON_MAP',
-        waves: 5,
         bossId: 'WILD_HOG',
         trashMobs: ['RABBIT', 'GOBLIN_SCOUT', 'FOX', 'SNAKE'],
         rewards: {
@@ -20,7 +19,6 @@ export const DUNGEONS = {
         name: 'Wolf Den',
         tier: 2,
         reqItem: 'T2_DUNGEON_MAP',
-        waves: 5,
         bossId: 'WOLF',
         trashMobs: ['DIRE_RAT', 'STAG', 'MOUNTAIN_GOAT', 'BANDIT_THUG'],
         rewards: {
@@ -36,7 +34,6 @@ export const DUNGEONS = {
         name: 'Bear Cave',
         tier: 3,
         reqItem: 'T3_DUNGEON_MAP',
-        waves: 5,
         bossId: 'BEAR',
         trashMobs: ['MOUNTAIN_GOBLIN', 'HIGHLAND_COW', 'HARPY', 'ROGUE_KNIGHT'],
         rewards: {
@@ -52,7 +49,6 @@ export const DUNGEONS = {
         name: 'Undead Crypt',
         tier: 4,
         reqItem: 'T4_DUNGEON_MAP',
-        waves: 5,
         bossId: 'DIRE_WOLF',
         trashMobs: ['GHOST_KNIGHT', 'SNOW_LEOPARD', 'GIANT_EAGLE', 'ASH_GHOUL'],
         rewards: {
@@ -68,7 +64,6 @@ export const DUNGEONS = {
         name: 'Ogre Fortress',
         tier: 5,
         reqItem: 'T5_DUNGEON_MAP',
-        waves: 5,
         bossId: 'OGRE',
         trashMobs: ['SWAMP_HYRA', 'POLAR_BEAR', 'MOUNTAIN_TROLL', 'BANDIT_LEADER'],
         rewards: {
@@ -84,7 +79,6 @@ export const DUNGEONS = {
         name: 'Troll Mountain',
         tier: 6,
         reqItem: 'T6_DUNGEON_MAP',
-        waves: 5,
         bossId: 'TROLL',
         trashMobs: ['BASILISK', 'IRON_GOLEM', 'WYVERN', 'CHIMERA'],
         rewards: {
@@ -100,7 +94,6 @@ export const DUNGEONS = {
         name: 'Dragon Nest',
         tier: 7,
         reqItem: 'T7_DUNGEON_MAP',
-        waves: 5,
         bossId: 'DRAGON',
         trashMobs: ['HYDRA', 'PHOENIX', 'CYCLOPS', 'GIANT'],
         rewards: {
@@ -116,7 +109,6 @@ export const DUNGEONS = {
         name: 'Ancient Ruins',
         tier: 8,
         reqItem: 'T8_DUNGEON_MAP',
-        waves: 5,
         bossId: 'ANCIENT_GOLEM',
         trashMobs: ['UNDEAD_KNIGHT', 'BANSHEE', 'VAMPIRE', 'WEREWOLF'],
         rewards: {
@@ -132,7 +124,6 @@ export const DUNGEONS = {
         name: 'Demon Realm',
         tier: 9,
         reqItem: 'T9_DUNGEON_MAP',
-        waves: 5,
         bossId: 'ELDER_DRAGON',
         trashMobs: ['PIT_FIEND', 'SUCCUBUS', 'HELLHOUND', 'IMP'],
         rewards: {
@@ -148,7 +139,6 @@ export const DUNGEONS = {
         name: 'Void Dimension',
         tier: 10,
         reqItem: 'T10_DUNGEON_MAP',
-        waves: 5,
         bossId: 'ANCIENT_DRAGON',
         trashMobs: ['VOID_WALKER', 'VOID_REAPER', 'VOID_MAGE', 'VOID_CENTURION'],
         rewards: {

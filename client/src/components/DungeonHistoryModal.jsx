@@ -113,7 +113,7 @@ const DungeonHistoryModal = ({ isOpen, onClose, history }) => {
 
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.7rem' }}>
                                             <span style={{ color: run.outcome === 'COMPLETED' ? '#4caf50' : '#ff4444', fontWeight: 'bold' }}>
-                                                {run.outcome} • Wave {run.wave_reached}/{run.max_waves}
+                                                {run.outcome}
                                             </span>
                                         </div>
 

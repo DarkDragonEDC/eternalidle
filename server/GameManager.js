@@ -1660,23 +1660,9 @@ export class GameManager {
         while (remainingSeconds >= 1 && char.state.dungeon && !died) {
             const dungeonState = char.state.dungeon;
 
-            // Optimization: If WALKING, skip as much as possible
-            if (dungeonState.status === 'WALKING' && dungeonState.wave_started_at) {
-                const waveDuration = 60 * 1000;
-                const waveElapsed = virtualNow - new Date(dungeonState.wave_started_at).getTime();
-                const msLeft = waveDuration - waveElapsed;
-                const secondsLeftInWave = Math.ceil(msLeft / 1000);
+            // Optimization: If WALKING/EXPLORING, we could skip time, but processDungeonTick handles the logic now based on duration.
+            // Pure duration based dungeons don't need wave-by-wave skipping anymore.
 
-                if (secondsLeftInWave > 0) {
-                    const skip = Math.min(remainingSeconds, secondsLeftInWave, 10); // Skip up to 10s or wave end
-                    if (skip > 1) {
-                        virtualNow += (skip * 1000);
-                        remainingSeconds -= skip;
-                        // We don't call processDungeonTick here, but we need to let it trigger the next wave if skip hits the end
-                        if (skip < secondsLeftInWave) continue;
-                    }
-                }
-            }
 
             const result = await this.dungeonManager.processDungeonTick(char, virtualNow);
 

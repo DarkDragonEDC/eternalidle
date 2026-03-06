@@ -100,6 +100,7 @@ export class DungeonManager {
             status: 'EXPLORING',
             repeatCount: repeatCount,
             initialRepeats: repeatCount,
+            currentRun: 1, // Initialize run counter
             lootLog: [],
             sessionStats: {
                 totalXp: 0,
@@ -138,7 +139,7 @@ export class DungeonManager {
 
             // 2. Exploration Logic (Fixed Time)
             if (now >= dungeonState.finish_at) {
-                return this.completeDungeon(char, dungeonConfig, now);
+                return await this.completeDungeon(char, dungeonConfig, now);
             } else {
                 const timeLeft = Math.ceil((dungeonState.finish_at - now) / 1000);
                 return {
@@ -232,9 +233,13 @@ export class DungeonManager {
                 const duration = getDungeonDuration(config.tier, playerIP);
 
                 char.state.dungeon.repeatCount--;
+                char.state.dungeon.currentRun = (char.state.dungeon.currentRun || 1) + 1;
                 char.state.dungeon.started_at = now;
                 char.state.dungeon.finish_at = now + duration;
                 char.state.dungeon.status = 'EXPLORING';
+
+                // Save immediately after starting a new repeat run
+                await this.gameManager.saveState(char.id, char.state);
 
                 return {
                     dungeonUpdate: {
@@ -250,6 +255,8 @@ export class DungeonManager {
                 // Not enough resources to start the next run
                 await this.saveDungeonLog(char, config, 'COMPLETED', null, now);
                 char.state.dungeon.status = 'COMPLETED';
+                // Save immediately when queue stops
+                await this.gameManager.saveState(char.id, char.state);
 
                 return {
                     dungeonUpdate: {
@@ -266,6 +273,8 @@ export class DungeonManager {
         // Final Run Completed
         await this.saveDungeonLog(char, config, 'COMPLETED', null, now);
         char.state.dungeon.status = 'COMPLETED';
+        // Save immediately after final run
+        await this.gameManager.saveState(char.id, char.state);
 
         return {
             dungeonUpdate: {
@@ -352,8 +361,6 @@ export class DungeonManager {
                 dungeon_id: dungeon.id || config?.id || 'UNKNOWN',
                 dungeon_name: config?.name || dungeon.name || 'Unknown Dungeon',
                 tier: dungeon.tier || config?.tier || 1,
-                wave_reached: 1, // Simplified
-                max_waves: 1, // Simplified
                 outcome: outcome,
                 duration_seconds: duration,
                 xp_gained: Math.floor(totalXp || 0),

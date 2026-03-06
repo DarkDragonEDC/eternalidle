@@ -522,7 +522,10 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                             <div style={{ color: '#ae00ff', fontWeight: '900', fontSize: '1rem' }}>
                                 {(() => {
                                     let total, current;
-                                    if (dungeonState.initialRepeats !== undefined) {
+                                    if (dungeonState.currentRun !== undefined) {
+                                        current = dungeonState.currentRun;
+                                        total = (dungeonState.initialRepeats || 0) + 1;
+                                    } else if (dungeonState.initialRepeats !== undefined) {
                                         total = dungeonState.initialRepeats + 1;
                                         current = total - dungeonState.repeatCount;
                                     } else {

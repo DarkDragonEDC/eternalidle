@@ -875,17 +875,11 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                                 <div style={{ color: dungeonState.status === 'BOSS_FIGHT' ? '#ff4444' : '#ae00ff', fontSize: '0.65rem', fontWeight: 'bold' }}>{dungeonState.status}</div>
                                             </div>
                                         </div>
-                                        <div style={{ textAlign: 'right', display: 'flex', gap: '15px' }}>
+                                        <div style={{ textAlign: 'right' }}>
                                             <div>
                                                 <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: 'bold' }}>DURATION</div>
                                                 <div style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 'bold' }}>
                                                     {formatTime(dungeonElapsed)}
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: 'bold' }}>WAVE</div>
-                                                <div style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 'bold' }}>
-                                                    {dungeonState.wave}/{dungeonState.maxWaves}
                                                 </div>
                                             </div>
                                         </div>
@@ -910,7 +904,10 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                                 <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>
                                                     {(() => {
                                                         let total, current;
-                                                        if (dungeonState.initialRepeats !== undefined) {
+                                                        if (dungeonState.currentRun !== undefined) {
+                                                            current = dungeonState.currentRun;
+                                                            total = (dungeonState.initialRepeats || 0) + 1;
+                                                        } else if (dungeonState.initialRepeats !== undefined) {
                                                             total = dungeonState.initialRepeats + 1;
                                                             current = total - dungeonState.repeatCount;
                                                         } else {
