@@ -579,7 +579,7 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                                     lineHeight: '1.2',
                                     height: '1.55rem' // Ensure fixed height for 2 lines to keep grid consistent
                                 }}>
-                                    {item.name}
+                                    {item.name?.replace(/_/g, ' ')}
                                 </div>
                             </div>
                         );
@@ -650,7 +650,7 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                             overflowY: 'auto'
                         }} className="custom-scrollbar" onClick={e => e.stopPropagation()}>
                             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                                <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-main)' }}>Sell {sellModal.item.name}</h3>
+                                <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-main)' }}>Sell {sellModal.item.name?.replace(/_/g, ' ')}</h3>
                                 <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '4px' }}>
                                     Unit Price: <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{sellModal.unitPrice} Silver</span>
                                 </div>

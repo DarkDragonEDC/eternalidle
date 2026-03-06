@@ -146,7 +146,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                     <div className="glass-panel" style={{ padding: '10px 12px', borderRadius: '12px', background: 'var(--accent-soft)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', alignItems: 'center' }}>
                             <span style={{ fontSize: '0.6rem', fontWeight: '800', color: 'var(--text-dim)' }}>PLAN QUANTITY</span>
-                            <span style={{ fontSize: '0.6rem', fontWeight: '800', color: tierColor }}>REMAINTING: {formatNumber(maxQuantity)}</span>
+                            <span style={{ fontSize: '0.6rem', fontWeight: '800', color: tierColor }}>REMAINING: {formatNumber(maxQuantity)}</span>
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
                             <input

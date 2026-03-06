@@ -760,7 +760,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                         </div>
 
                                         <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 'bold', textAlign: 'center', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                            {item.name}
+                                            {item.name?.replace(/_/g, ' ')}
                                         </div>
 
                                         <div
@@ -882,7 +882,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                     )}
                                 </div>
                                 <div style={{ height: '15px', fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100px', textAlign: 'center' }}>
-                                    {selectedShard ? selectedShard.name : ''}
+                                    {selectedShard ? selectedShard.name?.replace(/_/g, ' ') : ''}
                                 </div>
                             </div>
 
@@ -967,7 +967,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                     )}
                                 </div>
                                 <div style={{ height: '15px', fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100px', textAlign: 'center' }}>
-                                    {craftResult ? craftResult.name : ''}
+                                    {craftResult ? craftResult.name?.replace(/_/g, ' ') : ''}
                                 </div>
                             </div>
                         </div>
@@ -1167,7 +1167,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                             )}
 
                                             <div style={{ fontSize: '0.65rem', textAlign: 'center', marginTop: '5px', lineHeight: '1.1' }}>
-                                                {item.name.replace(' Rune Shard', '').replace('Rune of ', '')}
+                                                {item.name?.replace(/_/g, ' ').replace(' Rune Shard', '').replace('Rune of ', '')}
                                             </div>
                                             <div style={{ position: 'absolute', top: 2, right: 4, fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--text-dim)' }}>
                                                 {item.qty}

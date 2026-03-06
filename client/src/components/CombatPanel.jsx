@@ -288,7 +288,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
                             newLogs.push({
                                 id: generateLogId(),
                                 type: 'loot',
-                                content: `Item found: ${itemData ? (itemData.tier ? `T${itemData.tier} ${itemData.name}` : itemData.name) : formatItemId(item)}!`,
+                                content: `Item found: ${itemData ? (itemData.tier ? `T${itemData.tier} ${itemData.name?.replace(/_/g, ' ')}` : itemData.name?.replace(/_/g, ' ')) : formatItemId(item)}!`,
                                 color: '#ae00ff',
                                 timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
                             });
@@ -860,7 +860,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
                                             gap: '5px'
                                         }}>
                                             <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{qty}x</span>
-                                            <span style={{ fontSize: '0.7rem', color: '#ae00ff', textTransform: 'capitalize' }}>{itemData ? (itemData.tier ? `T${itemData.tier} ${itemData.name}` : itemData.name) : formatItemId(id)}</span>
+                                            <span style={{ fontSize: '0.7rem', color: '#ae00ff', textTransform: 'capitalize' }}>{itemData ? (itemData.tier ? `T${itemData.tier} ${itemData.name?.replace(/_/g, ' ')}` : itemData.name?.replace(/_/g, ' ')) : formatItemId(id)}</span>
                                         </div>
                                     );
                                 })

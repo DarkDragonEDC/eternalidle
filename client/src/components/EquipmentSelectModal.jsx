@@ -161,7 +161,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onEquipFood
                     flexShrink: 0
                 }}>
                     <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                        Select {slot}
+                        Select {slot?.replace(/_/g, ' ')}
                     </h3>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#aaa', cursor: 'pointer', padding: '5px' }}>
                         <X size={24} />
@@ -272,7 +272,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onEquipFood
                                     </div>
                                     <div>
                                         <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>
-                                            {bestCandidate.name}
+                                            {bestCandidate.name?.replace(/_/g, ' ')}
                                         </div>
                                         <div style={{ fontSize: '0.8rem', color: bestCandidate.rarityColor || 'var(--accent)' }}>
                                             {bestCandidate.type === 'RUNE' ? `Tier ${bestCandidate.tier} • ${bestCandidate.stars} Stars` :
@@ -359,7 +359,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onEquipFood
                                     </div>
                                     <div style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                         <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
-                                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{resolvedCurrent?.name || currentItem.name || currentItem.id}</span>
+                                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{resolvedCurrent?.name?.replace(/_/g, ' ') || currentItem.name?.replace(/_/g, ' ') || currentItem.id.replace(/_/g, ' ')}</span>
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); if (gameState?.state?.tutorialStep && gameState.state.tutorialStep !== 'COMPLETED') return; onShowInfo(currentItem); }}
                                                 style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.5, flexShrink: 0 }}
@@ -530,7 +530,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onEquipFood
                                                 </div>
                                                 <div>
                                                     <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                        {item.name}
+                                                        {item.name?.replace(/_/g, ' ')}
                                                         {isItemRecommended && (
                                                             <span style={{ fontSize: '0.6rem', background: 'var(--accent)', color: '#000', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>BEST</span>
                                                         )}

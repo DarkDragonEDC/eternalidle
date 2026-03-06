@@ -571,7 +571,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                         WebkitBoxOrient: 'vertical',
                         overflow: 'hidden'
                     }}>
-                        {item.name}
+                        {item.name?.replace(/_/g, ' ')}
                     </span>
                 )}
             </div>
@@ -2336,7 +2336,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                             <div style={{ width: '60px', height: '60px', margin: '0 auto 12px', background: 'var(--slot-bg)', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <img src={foodEquipModal.item.icon} alt="" style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
                             </div>
-                            <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '900', color: 'var(--accent)', textTransform: 'uppercase' }}>Equip {foodEquipModal.item.name}</h3>
+                            <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '900', color: 'var(--accent)', textTransform: 'uppercase' }}>Equip {foodEquipModal.item.name?.replace(/_/g, ' ')}</h3>
                         </div>
 
                         <div style={{ marginBottom: '25px' }}>

@@ -3,7 +3,7 @@ import { formatNumber, formatSilver } from '@utils/format';
 import { Skull, Map as MapIcon, Shield, Lock, ChevronRight, AlertTriangle, Star, Coins, History, Heart, Sword, Package, Layers, Clock, Sparkles } from 'lucide-react';
 import { ITEMS, resolveItem } from '@shared/items';
 import { MONSTERS } from '@shared/monsters';
-import { DUNGEONS } from '@shared/dungeons';
+import { DUNGEONS, FOOD_COST_MATRIX, getFoodCost, getDungeonDuration } from '@shared/dungeons';
 import DungeonHistoryModal from './DungeonHistoryModal';
 import ItemInfoModal from './ItemInfoModal';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,6 +19,29 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
     const [selectedLootItem, setSelectedLootItem] = useState(null);
     const prevFoodAmtRef = React.useRef(null);
     const [lastFoodEatClient, setLastFoodEatClient] = useState(0);
+
+    const avgIP = React.useMemo(() => {
+        const equipment = gameState?.state?.equipment || {};
+        const combatSlots = ['helmet', 'chest', 'boots', 'gloves', 'cape', 'mainHand', 'offHand'];
+        let totalIP = 0;
+
+        const hasWeapon = !!equipment.mainHand;
+
+        combatSlots.forEach(slot => {
+            const rawItem = equipment[slot];
+            if (rawItem) {
+                // Return early if no weapon and it's a combat gear slot
+                if (!hasWeapon && slot !== 'mainHand') return;
+
+                // Resolve item to ensure we have the 'ip' field even if it's missing in the cached raw state
+                const item = { ...rawItem, ...resolveItem(rawItem.id || rawItem.item_id) };
+                totalIP += item.ip || 0;
+            }
+        });
+
+        // Always divide by 7 (the number of combat slots) to ensure removing items lowers the score
+        return Math.floor(totalIP / 7);
+    }, [gameState?.state?.equipment]);
 
     React.useEffect(() => {
         if (socket) {
@@ -46,47 +69,8 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
     };
 
     const calculateEstimatedTime = (tier, count) => {
-        const dungeon = Object.values(DUNGEONS).find(d => d.tier === tier);
-        if (!dungeon || !gameState?.calculatedStats) return 0;
-
-        const stats = gameState.calculatedStats;
-        const playerDmg = stats.damage || 1;
-        const attackSpeed = stats.attackSpeed || 1000;
-
-        const mobs = MONSTERS[tier] || [];
-        const boss = mobs.find(m => m.id === dungeon.bossId);
-        const trash = mobs.filter(m => dungeon.trashMobs.includes(m.id));
-
-        if (!boss || trash.length === 0) return 0;
-
-        const trashMobIds = dungeon.trashMobs || [];
-
-        let totalDungeonTime = 0;
-
-        // Wave 1-4: Trash Mobs based on server configs (No scaling)
-        trashMobIds.forEach((mobId, index) => {
-            const mob = MONSTERS[tier]?.find(m => m.id === mobId);
-            if (mob) {
-                const mobDef = mob.defense || 0;
-                const mobHealth = mob.health;
-                const mobMitigation = mobDef / 10000;
-                const mitigatedDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
-                const killTime = Math.ceil(mobHealth / mitigatedDmg) * attackSpeed;
-                totalDungeonTime += Math.max(60000, killTime);
-            }
-        });
-
-        // Wave 5: Boss (No scaling)
-        if (boss) {
-            const bossDef = boss.defense || 0;
-            const bossHealth = boss.health;
-            const bossMitigation = bossDef / 10000;
-            const mitigatedBossDmg = Math.max(1, Math.floor(playerDmg * (1 - bossMitigation)));
-            const bossKillTime = Math.ceil(bossHealth / mitigatedBossDmg) * attackSpeed;
-            totalDungeonTime += Math.max(60000, bossKillTime);
-        }
-
-        return totalDungeonTime * count;
+        const timeForOne = getDungeonDuration(tier, avgIP);
+        return timeForOne * count;
     };
 
     const formatDuration = (ms) => {
@@ -107,135 +91,9 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
         return Math.max(1, Math.floor(maxTime / timeFor1Run));
     };
 
-    // Calculate if player survives the dungeon runs
+    // Simplified survival check (always survives now as it's time-based)
     const calculateSurvival = (tier, count) => {
-        const dungeon = Object.values(DUNGEONS).find(d => d.tier === tier);
-        if (!dungeon || !gameState?.calculatedStats) return { survives: true, runsBeforeDeath: count };
-
-        const stats = gameState.calculatedStats;
-        const playerDefense = stats.defense || 0;
-        const playerMitigation = Math.min(0.75, playerDefense / 10000);
-        const playerAtkSpeed = Math.max(200, stats.attackSpeed || 1000);
-        const playerDmg = stats.damage || 1;
-
-        const maxHp = stats.maxHP || stats.hp || 100;
-        let currentHpSnapshot = (typeof gameState?.state?.health === 'number') ? gameState.state.health : maxHp;
-        const food = gameState?.state?.equipment?.food;
-
-        const freshFood = food ? resolveItem(food.id) : null;
-        const healPerUse = (freshFood && (freshFood.heal || (freshFood.healPercent && Math.floor(maxHp * freshFood.healPercent / 100)))) || 0;
-        let foodRemaining = (food && typeof food.amount === 'number') ? food.amount : 0;
-        let lastFoodAt = 0;
-
-        const trashMobIds = dungeon.trashMobs || [];
-        const bossId = dungeon.bossId;
-        const boss = MONSTERS[tier]?.find(m => m.id === bossId);
-
-        let totalDamagePerRun = 0;
-        let totalFoodConsumedPerRun = 0;
-        let survived = currentHpSnapshot > 0;
-
-        const simulateMob = (mobId, isFirstRun) => {
-            if (!survived) return;
-            const mob = MONSTERS[tier]?.find(m => m.id === mobId);
-            if (!mob) return;
-
-            // NO SCALING in server anymore
-            const mobDmg = mob.damage || 0;
-            const mobDef = mob.defense || 0;
-            const mobHealth = mob.health || 100;
-
-            const mobMitigation = mobDef / (mobDef + 36000);
-            const finalPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
-            const finalMobDmg = Math.max(1, Math.floor(mobDmg * (1 - playerMitigation)));
-
-            let mHealth = mobHealth;
-            let timeElapsed = 0;
-            const mobAtkSpeed = 1000;
-
-            let nextPAtk = 0;
-            let nextMAtk = 500; // Server first mob hit is at +500ms
-
-            // Simulate the exact tick-based loop of the server
-            while (mHealth > 0 && currentHpSnapshot > 0 && timeElapsed < 300000) {
-                // If player kills mob before mob hits them, mob won't hit
-                if (nextPAtk <= nextMAtk) {
-                    timeElapsed = nextPAtk;
-                    mHealth -= finalPlayerDmg;
-                    nextPAtk += playerAtkSpeed;
-                }
-
-                // Check if mob is dead BEFORE it gets to swing
-                if (mHealth <= 0) break;
-
-                // Mob gets to hit
-                if (nextMAtk <= nextPAtk && nextMAtk > timeElapsed) {
-                    timeElapsed = nextMAtk;
-                    currentHpSnapshot -= finalMobDmg;
-                    if (isFirstRun) totalDamagePerRun += finalMobDmg;
-                    nextMAtk += mobAtkSpeed;
-
-                    // Reactive healing during fight
-                    const missingHp = maxHp - currentHpSnapshot;
-                    const shouldEat = missingHp >= (healPerUse * 0.5) || currentHpSnapshot < (maxHp * 0.3);
-                    if (shouldEat && foodRemaining > 0 && (timeElapsed - lastFoodAt >= 5000)) {
-                        const heal = Math.min(healPerUse, maxHp - currentHpSnapshot);
-                        currentHpSnapshot += heal;
-                        foodRemaining--;
-                        if (isFirstRun) totalFoodConsumedPerRun++;
-                        lastFoodAt = timeElapsed;
-                    }
-                }
-
-                if (currentHpSnapshot <= 0) {
-                    survived = false;
-                    break;
-                }
-            }
-
-            // Passive healing during WALKING (60s total wave time min, wait time calculated dynamically)
-            if (survived) {
-                const walkingTime = Math.max(0, 60000 - timeElapsed);
-                let walkingHeals = Math.floor(walkingTime / 5000);
-                while (walkingHeals > 0 && currentHpSnapshot < maxHp && foodRemaining > 0) {
-                    const missingHp = maxHp - currentHpSnapshot;
-                    const shouldEat = missingHp >= (healPerUse * 0.5) || currentHpSnapshot < (maxHp * 0.3);
-                    if (!shouldEat) break;
-
-                    const heal = Math.min(healPerUse, maxHp - currentHpSnapshot);
-                    currentHpSnapshot += heal;
-                    foodRemaining--;
-                    if (isFirstRun) totalFoodConsumedPerRun++;
-                    walkingHeals--;
-                    lastFoodAt += 5000; // Update lastFoodAt to avoid instant heal on next mob
-                }
-            }
-        };
-
-        let safeRuns = 0;
-        for (let r = 0; r < count; r++) {
-            lastFoodAt = 0; // cooldown resets between runs
-            const isFirstRun = (r === 0);
-
-            trashMobIds.forEach(id => simulateMob(id, isFirstRun));
-            if (boss) simulateMob(boss.id, isFirstRun);
-
-            if (!survived) {
-                break;
-            }
-            safeRuns++;
-        }
-
-        const totalEffectiveHp = maxHp + ((food?.amount || 0) * healPerUse);
-        const survives = safeRuns >= count;
-
-        return {
-            survives,
-            diesAtRun: safeRuns >= count ? '∞' : formatNumber(safeRuns + 1),
-            totalDamagePerRun,
-            totalFoodConsumedPerRun,
-            totalEffectiveHp
-        };
+        return { survives: true, runsBeforeDeath: count, totalDamagePerRun: 0, totalEffectiveHp: 100 };
     };
 
     const confirmEnterDungeon = () => {
@@ -279,80 +137,17 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
     }, [gameState?.state?.equipment?.food?.amount]);
 
     const getEstimatedTime = () => {
-        if (!dungeonState || !dungeonState.active || !gameState?.calculatedStats) return null;
+        if (!dungeonState || !dungeonState.active) return null;
 
-        const stats = gameState.calculatedStats;
-        const playerDmg = stats.damage || 1;
-        const playerAtkSpeed = stats.attackSpeed || 1000;
-        const MIN_WAVE_DURATION = 60 * 1000; // 60s walk/prep time total minimum
-
-        const tier = dungeonState.tier;
-        const dungeon = Object.values(DUNGEONS).find(d => d.tier === tier);
-        if (!dungeon) return null;
-
-        // Helper to simulate time for a specific wave
-        const simulateWaveTime = (waveIndex, currentHp = null) => {
-            const isBoss = (waveIndex + 1) === dungeonState.maxWaves;
-            const mobId = isBoss ? dungeon.bossId : (dungeon.trashMobs[waveIndex] || dungeon.trashMobs[dungeon.trashMobs.length - 1]);
-            const mob = MONSTERS[tier]?.find(m => m.id === mobId);
-
-            if (!mob) return MIN_WAVE_DURATION;
-
-            const mobDef = mob.defense || 0;
-            const mobHealth = currentHp !== null ? currentHp : mob.health;
-
-            const mobMitigation = mobDef / 10000;
-            const mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
-            const roundsToKill = Math.ceil(mobHealth / mitigatedPlayerDmg);
-            const fightTime = roundsToKill * playerAtkSpeed;
-
-            // The server ensures at least 60s total for the wave (fight + walking)
-            return Math.max(MIN_WAVE_DURATION, fightTime);
-        };
-
-        // 1. Current Run Remaining
-        let currentRunMs = 0;
-
-        // Time left in CURRENT wave
-        if (dungeonState.status === 'FIGHTING' || dungeonState.status === 'BOSS_FIGHT') {
-            const currentHp = dungeonState.activeMob?.health || 0;
-            const playerAtkSpeed = stats.attackSpeed || 1000;
-
-            // Re-calculate fight time for remaining HP
-            const mobConfig = MONSTERS[tier]?.find(m => m.id === dungeonState.activeMob?.id);
-            const mobDef = dungeonState.activeMob?.defense || (mobConfig?.defense || 0);
-            const mobMitigation = mobDef / 10000;
-            const mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
-            const roundsRemaining = Math.ceil(currentHp / mitigatedPlayerDmg);
-            const fightTimeLeft = roundsRemaining * playerAtkSpeed;
-
-            // Adjust based on how much was already spent in the wave (walking part)
-            const elapsedSinceStart = dungeonState.wave_started_at ? (now - dungeonState.wave_started_at) : 0;
-            // The dungeon expects at least 60s total. If we are still fighting at 61s, 
-            // the time left is simply the fight time left.
-            currentRunMs = fightTimeLeft;
-        } else {
-            // Walking or Waiting - assume standard wave duration remaining
-            const elapsed = dungeonState.wave_started_at ? (now - dungeonState.wave_started_at) : 0;
-            currentRunMs = Math.max(0, MIN_WAVE_DURATION - elapsed);
-        }
-
-        // Add remaining waves in THIS run
-        for (let i = dungeonState.wave; i < dungeonState.maxWaves; i++) {
-            currentRunMs += simulateWaveTime(i);
-        }
-
-        // 2. Future Runs in Queue
-        let fullRunMs = 0;
-        for (let i = 0; i < dungeonState.maxWaves; i++) {
-            fullRunMs += simulateWaveTime(i);
-        }
+        const duration = 300000; // 5 minutes in ms
+        const elapsedSinceStart = dungeonState.started_at ? (now - new Date(dungeonState.started_at).getTime()) : 0;
+        const currentRunRemaining = Math.max(0, duration - elapsedSinceStart);
 
         const repeats = dungeonState.repeatCount || 0;
-        const queueMs = currentRunMs + (repeats * fullRunMs);
+        const queueMs = currentRunRemaining + (repeats * duration);
 
         const formatTime = (ms) => {
-            if (ms <= 0) return "0m 1s"; // Smallest displayable
+            if (ms <= 0) return "0m 1s";
             const h = Math.floor(ms / 3600000);
             const m = Math.floor((ms % 3600000) / 60000);
             const s = Math.floor((ms % 60000) / 1000);
@@ -361,7 +156,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
         };
 
         return {
-            current: formatTime(currentRunMs),
+            current: formatTime(currentRunRemaining),
             queue: formatTime(queueMs)
         };
     };
@@ -399,7 +194,23 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                             const availableMaps = (mapEntry && typeof mapEntry === 'object') ? (mapEntry.amount || 0) : (Number(mapEntry) || 0);
 
                             const maxRunsIn12h = calculateMaxRunsIn12Hours(pendingTier);
-                            const effectiveMax = Math.min(availableMaps, maxRunsIn12h);
+
+                            // Calculate total runs possible by EQUIPPED food only
+                            let totalFoodRuns = 0;
+                            const playerIP = avgIP || 0;
+                            const eqFood = gameState?.state?.equipment?.food;
+
+                            if (eqFood && eqFood.amount > 0) {
+                                const foodTier = eqFood.tier || (eqFood.id ? parseInt(eqFood.id.match(/T(\d+)/)?.[1] || '0') : 0);
+                                const foodQty = (typeof eqFood.amount === 'object' ? eqFood.amount.amount : eqFood.amount) || 0;
+                                const cost = getFoodCost(pendingTier, foodTier, playerIP);
+
+                                if (cost > 0) {
+                                    totalFoodRuns = Math.floor(foodQty / cost);
+                                }
+                            }
+
+                            const effectiveMax = Math.min(availableMaps, maxRunsIn12h, totalFoodRuns || 1);
 
                             const survival = calculateSurvival(pendingTier, repeatCount);
                             const food = gameState?.state?.equipment?.food;
@@ -430,22 +241,13 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                                         <div style={{ fontSize: '0.6rem', color: '#888', marginTop: '4px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
                                             <span>MAPS: {availableMaps}</span>
                                             <span>|</span>
+                                            <span>FOOD: {totalFoodRuns}</span>
+                                            <span>|</span>
                                             <span>MAX 12H: {maxRunsIn12h}</span>
                                         </div>
                                     </div>
 
-                                    <div style={{ padding: '12px', background: survival.survives ? 'rgba(76, 175, 80, 0.08)' : 'rgba(255, 68, 68, 0.08)', borderRadius: '12px', border: `1px solid ${survival.survives ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255, 68, 68, 0.3)'}`, width: '100%', textAlign: 'center' }}>
-                                        <div style={{ fontSize: '0.65rem', color: survival.survives ? '#4caf50' : '#ff4444', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}><Heart size={12} />Survival Prediction</div>
-                                        <div style={{ fontSize: '1rem', color: survival.survives ? '#4caf50' : '#ff4444', fontWeight: '900' }}>{survival.survives ? `✓ SURVIVES ALL ${repeatCount} RUNS` : `✗ DIES AT RUN ${survival.diesAtRun}`}</div>
-                                        <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', marginTop: '6px', display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                            <span>HP: {formatNumber(Math.floor(survival.totalEffectiveHp))}</span>
-                                            <span>|</span>
-                                            <span>DMG/RUN: {formatNumber(survival.totalDamagePerRun)}</span>
-                                            {hasFood && (
-                                                <><span>|</span><span style={{ color: '#ff9800' }}>🍖 {food.amount}x ({freshFood?.heal || (freshFood?.healPercent ? `${freshFood.healPercent}%` : 0)} HP)</span></>
-                                            )}
-                                        </div>
-                                    </div>
+                                    {/* Survival Prediction Removed */}
 
                                     <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
                                         <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: '12px', background: 'var(--slot-bg)', color: 'var(--text-dim)', borderRadius: '12px', border: '1px solid var(--border)', fontWeight: 'bold', cursor: 'pointer' }}>CANCEL</button>
@@ -1000,10 +802,9 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                         const mapQty = (mapEntry && typeof mapEntry === 'object') ? (mapEntry.amount || 0) : (Number(mapEntry) || 0);
                         const hasMap = mapQty > 0;
 
-                        const dungeonLevel = gameState?.state?.skills?.DUNGEONEERING?.level || 1;
-                        const reqLevel = (tier === 1 ? 1 : (tier - 1) * 10);
-                        const levelLocked = dungeonLevel < reqLevel;
-                        const isTotalLocked = levelLocked;
+                        const { skills = {} } = gameState?.state || {};
+                        const playerIP = avgIP || 0;
+                        const reqIP = dungeon.reqIP || 0;
 
                         const estimatedTimeRun = calculateEstimatedTime(tier, 1);
 
@@ -1024,28 +825,23 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                                 animate={{ opacity: 1, y: 0 }}
                                 style={{
                                     position: 'relative',
-                                    padding: '20px',
+                                    padding: isMobile ? '12px' : '20px',
                                     background: 'var(--panel-bg)',
                                     borderRadius: '12px',
-                                    border: `1px solid ${levelLocked ? 'rgba(255, 68, 68, 0.3)' : 'rgba(174, 0, 255, 0.3)'}`,
-                                    opacity: levelLocked ? 0.8 : 1,
+                                    border: `1px solid ${playerIP < reqIP ? 'rgba(255, 68, 68, 0.3)' : 'rgba(174, 0, 255, 0.3)'}`,
                                     transition: 'all 0.3s ease'
                                 }}
                             >
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '10px' : '16px' }}>
                                     {/* Header Info */}
-                                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                                        <div>
+                                    <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
+                                        <div style={{ flex: 1 }}>
                                             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                                                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-main)' }}>{dungeon.name}</h3>
-                                                {levelLocked ? (
-                                                    <span style={{ fontSize: '0.65rem', background: 'rgba(255, 68, 68, 0.2)', color: '#ff6b6b', px: '8px', py: '2px', borderRadius: '4px', fontWeight: 'bold', textTransform: 'uppercase' }}>Requires Level {reqLevel}</span>
-                                                ) : (
-                                                    <span style={{ fontSize: '0.65rem', background: 'rgba(174, 0, 255, 0.2)', color: '#ae00ff', px: '8px', py: '2px', borderRadius: '4px', fontWeight: 'bold', textTransform: 'uppercase' }}>Tier {tier}</span>
-                                                )}
+                                                <h3 style={{ margin: 0, fontSize: isMobile ? '1rem' : '1.2rem', fontWeight: '800', color: 'var(--text-main)' }}>{dungeon.name}</h3>
+                                                <span style={{ fontSize: '0.65rem', background: 'rgba(174, 0, 255, 0.2)', color: '#ae00ff', px: '8px', py: '2px', borderRadius: '4px', fontWeight: 'bold', textTransform: 'uppercase' }}>Tier {tier}</span>
                                             </div>
 
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', color: '#8B8D91', fontSize: '0.8rem' }}>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: isMobile ? '8px' : '16px', color: '#8B8D91', fontSize: isMobile ? '0.7rem' : '0.8rem', marginBottom: '12px' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                     <Sparkles size={14} color="#ffd700" />
                                                     <span>{formatNumber(dungeon.rewards.xp)} XP</span>
@@ -1054,27 +850,103 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                                                     <Clock size={14} color="#8B8D91" />
                                                     <span>{formatDuration(estimatedTimeRun)}</span>
                                                 </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    <Shield size={14} color={playerIP >= reqIP ? '#4caf50' : '#ff4444'} />
+                                                    <span style={{ color: playerIP >= reqIP ? '#4caf50' : '#ff4444', fontWeight: 'bold' }}>IP REQ: {reqIP}</span>
+                                                </div>
+                                            </div>
+
+                                            {/* Item Power Progress Bar (0-1200) */}
+                                            <div style={{ width: '100%', maxWidth: isMobile ? '100%' : '300px', marginBottom: isMobile ? '4px' : '16px' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: '#8B8D91', marginBottom: '20px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                                    <span>0</span>
+                                                    <span>ITEM POWER</span>
+                                                    <span>1200</span>
+                                                </div>
+                                                <div style={{ position: 'relative', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', marginBottom: '50px' }}>
+                                                    {/* Player Progress Fill with fixed multi-color gradient */}
+                                                    {(() => {
+                                                        const percentage = Math.min(100, (playerIP / 1200) * 100);
+                                                        const stopYellow = ((reqIP * 0.7) / 1200) * 100;
+                                                        const stopGreen = (reqIP / 1200) * 100;
+
+                                                        // Fixed gradient that maps to the full 1200 IP width
+                                                        const fullGradient = `linear-gradient(90deg, 
+                                                            hsl(0, 80%, 50%) 0%, 
+                                                            hsl(40, 80%, 50%) ${stopYellow}%, 
+                                                            hsl(60, 80%, 55%) ${stopGreen - 1}%, 
+                                                            hsl(120, 80%, 50%) ${stopGreen}%, 
+                                                            hsl(120, 80%, 20%) 100%)`;
+
+                                                        return (
+                                                            <motion.div
+                                                                initial={{ width: 0 }}
+                                                                animate={{ width: `${percentage}%` }}
+                                                                style={{
+                                                                    height: '100%',
+                                                                    background: fullGradient,
+                                                                    // This ensures the gradient doesn't stretch, but reveals itself
+                                                                    backgroundSize: `${percentage > 0 ? (100 / percentage) * 100 : 100}% 100%`,
+                                                                    boxShadow: `0 0 10px rgba(255, 255, 255, 0.1)`
+                                                                }}
+                                                            />
+                                                        );
+                                                    })()}
+
+                                                    {/* Requirement (CAP) Marker and Label */}
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        left: `${Math.min(100, (reqIP / 1200) * 100)}%`,
+                                                        top: -4,
+                                                        height: '16px',
+                                                        width: '2px',
+                                                        background: '#fff',
+                                                        zIndex: 3,
+                                                        boxShadow: '0 0 6px #fff',
+                                                        transform: 'translateX(-50%)'
+                                                    }}>
+                                                        <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', fontSize: '0.65rem', color: '#fff', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>
+                                                            {reqIP}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Current IP Marker and Label */}
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        left: `${Math.min(100, (playerIP / 1200) * 100)}%`,
+                                                        top: -4,
+                                                        height: '16px',
+                                                        width: '2px',
+                                                        background: playerIP >= reqIP ? '#4caf50' : '#ff4444',
+                                                        zIndex: 4,
+                                                        boxShadow: `0 0 8px ${playerIP >= reqIP ? '#4caf50' : '#ff4444'}`,
+                                                        transform: 'translateX(-50%)'
+                                                    }}>
+                                                        <div style={{ position: 'absolute', top: 20, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', fontSize: '0.7rem', color: playerIP >= reqIP ? '#4caf50' : '#ff4444', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>
+                                                            {playerIP}
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
                                         <button
                                             onClick={() => handleEnterClick(tier)}
-                                            disabled={levelLocked}
                                             style={{
-                                                padding: '8px 20px',
+                                                padding: isMobile ? '10px 16px' : '8px 20px',
                                                 borderRadius: '8px',
-                                                fontSize: '0.85rem',
+                                                fontSize: isMobile ? '0.8rem' : '0.85rem',
                                                 fontWeight: '700',
-                                                minWidth: '110px',
-                                                cursor: levelLocked ? 'not-allowed' : 'pointer',
-                                                background: levelLocked ? 'rgba(255, 255, 255, 0.05)' : 'linear-gradient(135deg, #ae00ff 0%, #7a00cc 100%)',
-                                                color: levelLocked ? '#555' : '#fff',
+                                                width: isMobile ? '100%' : '110px',
+                                                cursor: 'pointer',
+                                                background: 'linear-gradient(135deg, #ae00ff 0%, #7a00cc 100%)',
+                                                color: '#fff',
                                                 border: 'none',
                                                 transition: '0.2s',
-                                                boxShadow: levelLocked ? 'none' : '0 4px 12px rgba(174, 0, 255, 0.3)'
+                                                boxShadow: '0 4px 12px rgba(174, 0, 255, 0.3)'
                                             }}
                                         >
-                                            {levelLocked ? 'LOCKED' : 'ENTER'}
+                                            ENTER
                                         </button>
                                     </div>
 
@@ -1099,6 +971,56 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                                                 </div>
                                             </div>
 
+                                            {/* Food Requirement */}
+                                            {(() => {
+                                                const inv = gameState?.state?.inventory || {};
+                                                const equippedFood = gameState?.state?.equipment?.food;
+
+                                                // Determine which food to show: priority to equipped, then highest tier in inventory
+                                                let bestFoodTier = equippedFood?.tier || null;
+                                                let bestFoodQty = equippedFood?.amount || 0;
+                                                let source = 'EQUIPPED';
+
+                                                if (!bestFoodTier || bestFoodQty < getFoodCost(tier, bestFoodTier, playerIP)) {
+                                                    // Find best in inventory
+                                                    for (let ft = 10; ft >= 1; ft--) {
+                                                        const id = `T${ft}_FOOD`;
+                                                        if (inv[id]) {
+                                                            const qty = typeof inv[id] === 'object' ? inv[id].amount : inv[id];
+                                                            if (qty > 0) {
+                                                                bestFoodTier = ft;
+                                                                bestFoodQty = qty;
+                                                                source = 'INVENTORY';
+                                                                break;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+
+                                                // Fallback to T1 if none found to show requirement
+                                                const displayTier = bestFoodTier || 1;
+                                                const cost = getFoodCost(selectedTier, displayTier, playerIP);
+                                                const hasEnough = bestFoodQty >= cost;
+
+                                                return (
+                                                    <div style={{ position: 'relative', width: '52px', height: '52px', background: 'var(--bg-dark)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)' }}>
+                                                        <div style={{ position: 'absolute', top: '-6px', right: '-6px', background: 'var(--slot-bg)', fontSize: '0.6rem', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border)', color: hasEnough ? '#4caf50' : '#ff4444', fontWeight: 'bold', zIndex: 2 }}>
+                                                            {formatNumber(bestFoodQty)}/{cost}
+                                                        </div>
+                                                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', opacity: bestFoodTier ? 1 : 0.4 }}>
+                                                            <div style={{ padding: '4px', borderRadius: '4px', overflow: 'hidden' }}>
+                                                                <img src={`/items/T${displayTier}_FOOD.webp`} alt="Food" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                                            </div>
+                                                        </div>
+                                                        {source === 'EQUIPPED' && bestFoodTier && (
+                                                            <div style={{ position: 'absolute', bottom: '-4px', left: '50%', transform: 'translateX(-50%)', background: '#4a90e2', color: '#fff', fontSize: '0.5rem', padding: '1px 3px', borderRadius: '2px', fontWeight: 'bold' }}>
+                                                                EQP
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })()}
+
                                             {/* Silver Cost (if any, showing reward silver for now) */}
                                             <div style={{ position: 'relative', width: '52px', height: '52px', background: 'var(--bg-dark)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)' }}>
                                                 <div style={{ position: 'absolute', top: '-6px', right: '-6px', background: 'var(--slot-bg)', fontSize: '0.6rem', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border)', color: 'var(--accent)', fontWeight: 'bold', zIndex: 2 }}>
@@ -1111,30 +1033,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                                         </div>
                                     </div>
 
-                                    {/* Rooms Section */}
-                                    <div>
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                            <h4 style={{ fontSize: '0.75rem', fontWeight: '600', color: '#8B8D91', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Dungeon Rooms</h4>
-                                            <span style={{ fontSize: '0.6rem', color: '#4daafc', cursor: 'pointer' }}>{dungeon.waves} Nodes</span>
-                                        </div>
-                                        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
-                                            {/* Wave Sequence (Minion 1-4) */}
-                                            {dungeon.trashMobs?.map((mobId, idx) => {
-                                                const mob = MONSTERS[tier]?.find(m => m.id === mobId);
-                                                return (
-                                                    <div key={`${mobId}-${idx}`} title={`${mob?.name} (Lvl ${tier * 10})`} style={{ width: '40px', height: '40px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--slot-bg)', border: `1px solid var(--border)`, flexShrink: 0, position: 'relative' }}>
-                                                        <Skull size={20} color={idx === 3 ? '#ff6666' : '#ff4444'} />
-                                                        <div style={{ position: 'absolute', bottom: '1px', right: '3px', fontSize: '0.45rem', fontWeight: '900', color: 'var(--text-dim)' }}>{idx + 1}</div>
-                                                    </div>
-                                                )
-                                            })}
-                                            {/* Boss (Final Wave) */}
-                                            <div title={`BOSS: ${bossMob?.name}`} style={{ width: '40px', height: '40px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,68,68,0.15)', border: '1px solid rgba(255,68,68,0.5)', flexShrink: 0, position: 'relative' }}>
-                                                <Skull size={24} color="#ff0000" />
-                                                <div style={{ position: 'absolute', bottom: '1px', right: '3px', fontSize: '0.45rem', fontWeight: '900', color: '#ff0000' }}>5</div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    {/* Rooms Section Removed */}
 
                                     {/* Loot Section */}
                                     <div>

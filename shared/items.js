@@ -1276,7 +1276,7 @@ export const resolveItem = (itemId, overrideQuality = null) => {
     const finalItem = {
         ...baseItem,
         id: finalId,
-        name: baseItem.name,
+        name: baseItem.name?.replace(/_/g, ' '),
         rarityColor: baseItem.rarityColor || effectiveQuality.color || '#fff',
         quality: effectiveQualityId,
         qualityName: effectiveQuality.name,
