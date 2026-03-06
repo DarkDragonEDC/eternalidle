@@ -267,22 +267,37 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                 marginBottom: '10px'
             }}>
                 {/* Row 1: Categories */}
-                <div style={{ display: 'flex', gap: '8px', overflowX: 'auto' }}>
+                <div style={{
+                    display: 'flex',
+                    gap: isMobile ? '1px' : '8px',
+                    overflowX: isMobile ? 'hidden' : 'auto',
+                    width: '100%'
+                }}>
                     {['ALL', 'EQUIPMENT', 'RESOURCE', 'CONSUMABLE'].map(f => (
                         <button
                             key={f}
                             onClick={() => setFilter(f)}
                             style={{
-                                padding: '6px 12px',
+                                flex: isMobile ? 1 : 'none',
+                                padding: isMobile ? '6px 0' : '6px 12px',
                                 borderRadius: '8px',
                                 background: filter === f ? 'var(--accent-soft)' : 'var(--glass-bg)',
                                 color: filter === f ? 'var(--accent)' : 'var(--text-dim)',
                                 border: filter === f ? '1px solid var(--accent)' : '1px solid var(--border)',
                                 fontWeight: 'bold',
-                                fontSize: '0.75rem',
+                                fontSize: isMobile
+                                    ? (f.length > 8 ? '0.46rem' : '0.6rem')
+                                    : '0.75rem',
+                                letterSpacing: isMobile ? '-0.05em' : 'normal',
                                 cursor: 'pointer',
-                                transition: '0.2s',
-                                whiteSpace: 'nowrap'
+                                transition: '0.1s',
+                                whiteSpace: 'nowrap',
+                                minWidth: 0,
+                                textAlign: 'center',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxSizing: 'border-box'
                             }}
                         >
                             {f}

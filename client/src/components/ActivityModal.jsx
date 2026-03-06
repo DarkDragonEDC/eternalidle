@@ -3,10 +3,11 @@ import { formatNumber, formatSilver } from '@utils/format';
 import { X, Clock, Zap, Target, Star, ChevronRight, Package, Box, Sword, Shield, Heart, Lock, TrendingUp, Timer } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { resolveItem, formatItemId, QUALITIES, getSkillForItem, getLevelRequirement, BASE_QUALITY_CHANCES } from '@shared/items';
+import CraftingOddsModal from './CraftingOddsModal';
 
 const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavigate, onSearchInMarket, isMobile }) => {
     const [quantity, setQuantity] = useState(1);
-    const [showProbabilities, setShowProbabilities] = useState(false);
+    const [isOddsModalOpen, setIsOddsModalOpen] = useState(false);
 
     // Initial item loading
     useEffect(() => {
@@ -220,61 +221,22 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                         </div>
                     )}
 
-                    {/* Probability Section (Crafting only) */}
+                    {/* Probability Button (Crafting only) */}
                     {type === 'CRAFTING' && !['FOOD', 'POTION'].includes(resolvedItem.type) && (
                         <div style={{ marginTop: '4px' }}>
-                            <button onClick={() => setShowProbabilities(!showProbabilities)}
+                            <button onClick={() => setIsOddsModalOpen(true)}
                                 style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'var(--accent-soft)', borderRadius: '12px', border: '1px solid var(--border)', color: 'var(--text-dim)', fontSize: '0.7rem', fontWeight: '800' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Box size={14} /> <span>CRAFTING ODDS & BASE STATS</span></div>
-                                <ChevronRight size={16} style={{ transform: showProbabilities ? 'rotate(90deg)' : 'none', transition: '0.2s' }} />
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Package size={14} /> <span>CRAFTING ODDS & BASE STATS</span></div>
+                                <div style={{ fontSize: '0.6rem', background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '6px', color: 'var(--accent)' }}>VIEW</div>
                             </button>
-                            <AnimatePresence>
-                                {showProbabilities && (
-                                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden' }}>
-                                        <div style={{ marginTop: '8px', padding: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                            {Object.values(QUALITIES).map((q, idx) => {
-                                                const qualityBonus = stats.globals?.qualityChance || 0;
-                                                const mult = 1 + (qualityBonus / 100);
-                                                const chances = BASE_QUALITY_CHANCES[tier] || BASE_QUALITY_CHANCES[1];
-                                                let c = 0;
-                                                if (q.id === 4) c = chances.q4 * mult;
-                                                else if (q.id === 3) c = chances.q3 * mult;
-                                                else if (q.id === 2) c = chances.q2 * mult;
-                                                else if (q.id === 1) c = chances.q1 * mult;
-                                                else c = Math.max(0, 100 - (chances.q4 + chances.q3 + chances.q2 + chances.q1) * mult);
 
-                                                const qItem = resolveItem(resolvedItem.id, q.id);
-                                                const s = qItem?.stats || {};
-
-                                                return (
-                                                    <div key={idx} style={{ background: 'var(--slot-bg)', padding: '10px', borderRadius: '10px', borderLeft: `4px solid ${q.color}`, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem' }}>
-                                                            <span style={{ fontWeight: '900', color: q.color }}>{q.name}</span>
-                                                            <span style={{ fontWeight: '900', color: 'var(--text-main)' }}>{c.toFixed(2)}%</span>
-                                                        </div>
-                                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', opacity: 0.8 }}>
-                                                            {s.damage && <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#f87171' }}><Sword size={10} /> <span style={{ fontSize: '0.6rem', fontWeight: '800' }}>{s.damage} DMG</span></div>}
-                                                            {s.defense && <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#4ade80' }}><Shield size={10} /> <span style={{ fontSize: '0.6rem', fontWeight: '800' }}>{s.defense} DEF</span></div>}
-                                                            {s.hp && <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#ff4d4d' }}><Heart size={10} /> <span style={{ fontSize: '0.6rem', fontWeight: '800' }}>{s.hp} HP</span></div>}
-                                                            {s.attackSpeed && <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'var(--accent)' }}><Zap size={10} /> <span style={{ fontSize: '0.6rem', fontWeight: '800' }}>{(s.attackSpeed / 1000).toFixed(2)}s</span></div>}
-                                                            {s.efficiency && typeof s.efficiency === 'number' && (
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#90d5ff' }}>
-                                                                    <TrendingUp size={10} /> <span style={{ fontSize: '0.6rem', fontWeight: '800' }}>{s.efficiency}% EFF</span>
-                                                                </div>
-                                                            )}
-                                                            {s.efficiency && typeof s.efficiency === 'object' && s.efficiency.GLOBAL && (
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#90d5ff' }}>
-                                                                    <TrendingUp size={10} /> <span style={{ fontSize: '0.6rem', fontWeight: '800' }}>{s.efficiency.GLOBAL}% GLOBAL</span>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                            <CraftingOddsModal
+                                isOpen={isOddsModalOpen}
+                                onClose={() => setIsOddsModalOpen(false)}
+                                item={item}
+                                stats={stats}
+                                tierColor={tierColor}
+                            />
                         </div>
                     )}
 
