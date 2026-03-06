@@ -1,5 +1,19 @@
 # Patch Notes - Eternal Idle
 
+## v1.3.4
+
+### 🛡️ Guildas - Novos Rankings e XP
+- **Ranking de XP Total**: Adicionada uma nova aba no menu de membros que mostra o total de XP que cada jogador contribuiu para a guilda. 
+- **Ranking de XP Diário**: Agora é possível ver a média de contribuição diária de cada membro (XP Total dividido pelos dias na guilda), facilitando a identificação dos jogadores mais ativos.
+- **Ordenação por Data**: Adicionada a opção de ordenar membros pela data de entrada, mostrando quem está há mais tempo na guilda.
+- **Rastreamento Individual**: O XP da guilda agora é rastreado individualmente por jogador, sendo consolidado a cada 30 minutos junto com o XP total da guilda.
+- **Ajuste de Visual**: A cor customizada da guilda agora é aplicada dinamicamente aos botões e elementos de destaque no painel de membros.
+
+### ⚙️ Sistema e Sincronização
+- **Versão 1.3.4**: Atualização obrigatória de versão para garantir a sincronia entre cliente e servidor com as novas colunas de banco de dados.
+
+---
+
 ## v1.3.3
 
 ### 🛡️ Guildas - Seleção de País

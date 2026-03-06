@@ -171,6 +171,7 @@ export class GuildManager {
             .select(`
                 role,
                 joined_at,
+                donated_xp,
                 characters (
                     id,
                     name,
@@ -196,6 +197,7 @@ export class GuildManager {
                     name: m.characters.name,
                     role: m.role,
                     joinedAt: m.joined_at,
+                    donatedXP: m.donated_xp || 0,
                     online: isOnline,
                     level: this._calculateCharLevel(state)
                 };
@@ -739,12 +741,19 @@ export class GuildManager {
         return total;
     }
 
-    addPendingGuildXP(guildId, amount) {
+    addPendingGuildXP(guildId, amount, charId = null) {
         if (!guildId || !amount) return;
         if (!this.pendingGuildXP[guildId]) {
-            this.pendingGuildXP[guildId] = 0;
+            this.pendingGuildXP[guildId] = { total: 0, donors: {} };
         }
-        this.pendingGuildXP[guildId] += amount;
+        this.pendingGuildXP[guildId].total += amount;
+
+        if (charId) {
+            if (!this.pendingGuildXP[guildId].donors[charId]) {
+                this.pendingGuildXP[guildId].donors[charId] = 0;
+            }
+            this.pendingGuildXP[guildId].donors[charId] += amount;
+        }
     }
 
     async flushGuildXP() {
@@ -756,17 +765,51 @@ export class GuildManager {
         const xpToProcess = { ...this.pendingGuildXP };
         this.pendingGuildXP = {};
 
-        for (const [guildId, totalAmount] of Object.entries(xpToProcess)) {
-            // Only flush whole numbers, keep the decimal in memory
+        for (const [guildId, guildData] of Object.entries(xpToProcess)) {
+            const totalAmount = guildData.total;
+            const donors = guildData.donors;
+
+            // Only flush whole numbers for Guild XP, keep the decimal in memory
             const wholeXP = Math.floor(totalAmount);
             const remainder = totalAmount - wholeXP;
 
             if (remainder > 0) {
+                // Return remainder to guild total pool (without specific donor attribution to avoid dust tracking issues)
                 this.addPendingGuildXP(guildId, remainder);
             }
 
             if (wholeXP > 0) {
                 await this.addExactGuildXP(guildId, wholeXP);
+
+                // Process individual donors XP to guild_members table
+                try {
+                    const donorPromises = Object.entries(donors).map(async ([charId, amount]) => {
+                        const wholeDonorXP = Math.floor(amount);
+                        if (wholeDonorXP <= 0) return;
+                        // Execute RPC or manual update. We can use straight update on guild_members matching guild_id and character_id
+                        // Utilizing supabase's increment capability through rpc is preferable, 
+                        // but if no RPC exists, we query and update.
+                        const { data: currentMember } = await this.supabase
+                            .from('guild_members')
+                            .select('donated_xp')
+                            .eq('guild_id', guildId)
+                            .eq('character_id', charId)
+                            .maybeSingle();
+
+                        if (currentMember !== null) {
+                            const newDonatedXP = Number(currentMember.donated_xp || 0) + wholeDonorXP;
+                            await this.supabase
+                                .from('guild_members')
+                                .update({ donated_xp: newDonatedXP })
+                                .eq('guild_id', guildId)
+                                .eq('character_id', charId);
+                        }
+                    });
+
+                    await Promise.all(donorPromises);
+                } catch (e) {
+                    console.error(`[GUILD_XP] Error flushing donor XP for guild ${guildId}:`, e);
+                }
             }
         }
     }

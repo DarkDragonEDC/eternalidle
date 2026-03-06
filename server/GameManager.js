@@ -1215,7 +1215,7 @@ export class GameManager {
                         if (totalOfflineXp > 0) {
                             const guildXpToAdd = totalOfflineXp * 0.05;
                             if (this.guildManager && this.guildManager.addPendingGuildXP) {
-                                this.guildManager.addPendingGuildXP(data.state.guild_id, guildXpToAdd);
+                                this.guildManager.addPendingGuildXP(data.state.guild_id, guildXpToAdd, data.id);
                                 console.log(`[CATCHUP] ${data.name} generated ${guildXpToAdd.toFixed(2)} Guild XP while offline.`);
                             }
                         }
@@ -2444,7 +2444,7 @@ export class GameManager {
             const guildXpGained = safeAmount * 0.05;
             // The guild manager will handle adding to memory and flushing every 30m
             if (this.guildManager && this.guildManager.addPendingGuildXP) {
-                this.guildManager.addPendingGuildXP(char.state.guild_id, guildXpGained);
+                this.guildManager.addPendingGuildXP(char.state.guild_id, guildXpGained, char.id);
             }
         }
 

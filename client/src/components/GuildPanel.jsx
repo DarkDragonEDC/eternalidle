@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Users, Sword, Swords, Trophy, Settings, Plus, Info, Check, X, Coins, Sparkles, Tag, User, Zap, LogOut, Edit2, Save, Menu, Home, Building2, ChevronDown, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
@@ -44,6 +44,8 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
     const members = guild.members || [];
     const [confirmLeave, setConfirmLeave] = useState(false);
     const [activeTab, setActiveTab] = useState('MEMBERS'); // HOME | MEMBERS | REQUESTS | SETTINGS | BUILDING
+    const [membersSortBy, setMembersSortBy] = useState('DEFAULT'); // 'DEFAULT' | 'DATE'
+    const [showMembersDropdown, setShowMembersDropdown] = useState(false);
     const [showNavDropdown, setShowNavDropdown] = useState(false);
     const [isLoadingRequests, setIsLoadingRequests] = useState(false);
     const [requests, setRequests] = useState([]);
@@ -124,9 +126,9 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
         if (roles[roleId]) return roles[roleId].name;
 
         const mapping = {
-            'LEADER': 'Líder',
-            'OFFICER': 'Vice-líder',
-            'MEMBER': 'Membro'
+            'LEADER': 'Leader',
+            'OFFICER': 'Co-Leader',
+            'MEMBER': 'Member'
         };
         if (mapping[roleId]) return mapping[roleId];
         if (roleId.startsWith('CUSTOM_')) return roleId.replace('CUSTOM_', '');
@@ -140,6 +142,36 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
         return myRoleConfig?.permissions?.includes(permission);
     };
 
+    const sortedMembers = useMemo(() => {
+        if (!members || members.length === 0) return [];
+        let sorted = [...members];
+
+        if (membersSortBy === 'DATE') {
+            sorted.sort((a, b) => new Date(a.joinedAt || 0) - new Date(b.joinedAt || 0));
+        } else if (membersSortBy === 'TOTAL_XP') {
+            sorted.sort((a, b) => (b.donatedXP || 0) - (a.donatedXP || 0));
+        } else if (membersSortBy === 'DAILY_XP') {
+            const getDaily = (m) => {
+                if (!m.donatedXP) return 0;
+                let days = Math.floor((new Date() - new Date(m.joinedAt || Date.now())) / (1000 * 60 * 60 * 24));
+                if (days < 1) days = 1; // Prevent division by zero, treat sub-24h as 1 day
+                return m.donatedXP / days;
+            };
+            sorted.sort((a, b) => getDaily(b) - getDaily(a));
+        } else {
+            // Default sorting: LEADER first, then OFFICER, then MEMBER (by level)
+            const roleOrder = { 'LEADER': 0, 'OFFICER': 1, 'MEMBER': 2 };
+            sorted.sort((a, b) => {
+                const roleA = roleOrder[a.role] ?? 99;
+                const roleB = roleOrder[b.role] ?? 99;
+                if (roleA !== roleB) return roleA - roleB;
+                return (b.level || 1) - (a.level || 1);
+            });
+        }
+
+        return sorted;
+    }, [members, membersSortBy]);
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -148,7 +180,8 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: isMobile ? '12px' : '20px',
-                paddingBottom: '20px'
+                paddingBottom: '20px',
+                '--accent': guild?.icon_color || '#d4af37'
             }}
         >
             {/* Premium Guild Header */}
@@ -475,23 +508,90 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
 
                     {playerHasPermission('manage_requests') && (activeTab === 'MEMBERS' || activeTab === 'REQUESTS') && (
                         <div style={{ display: 'flex', gap: '8px' }}>
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => setActiveTab('MEMBERS')}
-                                style={{
-                                    background: activeTab === 'MEMBERS' ? 'rgba(212, 175, 55, 0.2)' : 'rgba(255,255,255,0.05)',
-                                    border: activeTab === 'MEMBERS' ? '1px solid var(--accent)' : '1px solid rgba(255,255,255,0.1)',
-                                    padding: '6px 12px',
-                                    borderRadius: '8px',
-                                    color: activeTab === 'MEMBERS' ? 'var(--accent)' : 'rgba(255,255,255,0.5)',
-                                    fontSize: '0.65rem',
-                                    fontWeight: 'bold',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                MEMBERS
-                            </motion.button>
+                            <div style={{ position: 'relative' }}>
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => {
+                                        if (activeTab !== 'MEMBERS') setActiveTab('MEMBERS');
+                                        else setShowMembersDropdown(!showMembersDropdown);
+                                    }}
+                                    style={{
+                                        background: activeTab === 'MEMBERS' ? 'rgba(212, 175, 55, 0.2)' : 'rgba(255,255,255,0.05)',
+                                        border: activeTab === 'MEMBERS' ? '1px solid var(--accent)' : '1px solid rgba(255,255,255,0.1)',
+                                        padding: '6px 12px',
+                                        borderRadius: '8px',
+                                        color: activeTab === 'MEMBERS' ? 'var(--accent)' : 'rgba(255,255,255,0.5)',
+                                        fontSize: '0.65rem',
+                                        fontWeight: 'bold',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px'
+                                    }}
+                                >
+                                    {membersSortBy === 'DATE' ? 'DATE' : membersSortBy === 'TOTAL_XP' ? 'TOTAL XP' : membersSortBy === 'DAILY_XP' ? 'DAILY XP' : 'MEMBERS'}
+                                    {activeTab === 'MEMBERS' && (
+                                        <ChevronDown size={12} style={{ opacity: 0.7, transform: showMembersDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                                    )}
+                                </motion.button>
+
+                                <AnimatePresence>
+                                    {showMembersDropdown && activeTab === 'MEMBERS' && (
+                                        <>
+                                            <div
+                                                onClick={() => setShowMembersDropdown(false)}
+                                                style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 99 }}
+                                            />
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 5, scale: 0.95 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, y: 5, scale: 0.95 }}
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: '100%',
+                                                    left: 0,
+                                                    marginTop: '4px',
+                                                    background: '#1a1a1a',
+                                                    borderRadius: '8px',
+                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+                                                    zIndex: 100,
+                                                    minWidth: '120px',
+                                                    overflow: 'hidden'
+                                                }}
+                                            >
+                                                {[
+                                                    { id: 'DEFAULT', label: 'Members' },
+                                                    { id: 'DATE', label: 'Date' },
+                                                    { id: 'TOTAL_XP', label: 'Total XP' },
+                                                    { id: 'DAILY_XP', label: 'Daily XP' }
+                                                ].map(opt => (
+                                                    <div
+                                                        key={opt.id}
+                                                        onClick={() => {
+                                                            setMembersSortBy(opt.id);
+                                                            setShowMembersDropdown(false);
+                                                        }}
+                                                        style={{
+                                                            padding: '8px 12px',
+                                                            fontSize: '0.65rem',
+                                                            fontWeight: 'bold',
+                                                            cursor: 'pointer',
+                                                            background: membersSortBy === opt.id ? 'rgba(212, 175, 55, 0.1)' : 'transparent',
+                                                            color: membersSortBy === opt.id ? 'var(--accent)' : 'rgba(255,255,255,0.7)',
+                                                            borderLeft: membersSortBy === opt.id ? '2px solid var(--accent)' : '2px solid transparent',
+                                                            transition: 'all 0.2s'
+                                                        }}
+                                                    >
+                                                        {opt.label}
+                                                    </div>
+                                                ))}
+                                            </motion.div>
+                                        </>
+                                    )}
+                                </AnimatePresence>
+                            </div>
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
@@ -717,7 +817,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
                     )}
 
                     {activeTab === 'MEMBERS' && (
-                        members.map((member, i) => (
+                        sortedMembers.map((member, i) => (
                             <motion.div
                                 key={member.id}
                                 initial={{ opacity: 0, x: -10 }}
@@ -771,7 +871,15 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
                                             onClick={() => onInspect && onInspect(member.name)}
                                             style={{ fontSize: '0.9rem', fontWeight: 'bold', color: member.online ? '#fff' : 'rgba(255,255,255,0.5)', cursor: 'pointer' }}
                                         >{member.name}</div>
-                                        <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>LVL {member.level}</div>
+                                        <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>
+                                            {membersSortBy === 'DATE' && member.joinedAt ?
+                                                `${Math.floor((new Date() - new Date(member.joinedAt)) / (1000 * 60 * 60 * 24))} days ago` :
+                                                membersSortBy === 'TOTAL_XP' ?
+                                                    `Total XP: ${formatNumber(member.donatedXP || 0)}` :
+                                                    membersSortBy === 'DAILY_XP' ?
+                                                        `${formatNumber(Math.floor((member.donatedXP || 0) / Math.max(1, Math.floor((new Date() - new Date(member.joinedAt || Date.now())) / (1000 * 60 * 60 * 24)))))} XP/day` :
+                                                        `LVL ${member.level}`}
+                                        </div>
                                     </div>
                                 </div>
 
@@ -846,8 +954,8 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
                                                 }}
                                             >
                                                 {Object.entries({
-                                                    OFFICER: { name: 'Vice-líder', color: '#c0c0c0' },
-                                                    MEMBER: { name: 'Membro', color: '#808080' },
+                                                    OFFICER: { name: 'Co-Leader', color: '#c0c0c0' },
+                                                    MEMBER: { name: 'Member', color: '#808080' },
                                                     ...(guild.roles || {})
                                                 }).filter(([key]) => key !== 'LEADER').map(([key, role]) => {
                                                     const config = (guild.roles || {})[key] || {};
@@ -1598,9 +1706,9 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                     {Object.entries({
-                                        LEADER: { name: 'Líder', color: '#d4af37', members: 1, limit: 1 },
-                                        OFFICER: { name: 'Vice-líder', color: '#c0c0c0', members: 0, limit: 3 },
-                                        MEMBER: { name: 'Membro', color: '#808080', members: members.filter(m => m.role === 'MEMBER').length, limit: guild.member_limit || 10 },
+                                        LEADER: { name: 'Leader', color: guild.icon_color || '#d4af37', members: 1, limit: 1 },
+                                        OFFICER: { name: 'Co-Leader', color: '#c0c0c0', members: 0, limit: 3 },
+                                        MEMBER: { name: 'Member', color: '#808080', members: members.filter(m => m.role === 'MEMBER').length, limit: guild.member_limit || 10 },
                                         ...(guild.roles || {})
                                     }).map(([id, baseRole]) => {
                                         const config = (guild.roles || {})[id] || {};

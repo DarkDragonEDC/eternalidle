@@ -559,14 +559,20 @@ function App() {
   };
 
   const markAsRead = (id) => {
+    // Optimistic UI update
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
     socket?.emit('mark_notification_read', { notificationId: id });
   };
 
   const clearAllNotifications = () => {
+    // Optimistic UI update
+    setNotifications([]);
     socket?.emit('clear_notifications');
   };
 
   const markAllAsRead = () => {
+    // Optimistic UI update
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     socket?.emit('mark_all_notifications_read');
   };
 
@@ -921,7 +927,7 @@ function App() {
 
     newSocket.on('server_version', ({ version }) => {
       // client version is 1.0.0
-      const CLIENT_VERSION = '1.3.3'; // Mantenha sincronizado com server/package.json
+      const CLIENT_VERSION = '1.3.4'; // Mantenha sincronizado com server/package.json
       if (version && version !== CLIENT_VERSION) {
         console.warn(`[VERSION] Mismatch! Server: ${version}, Client: ${CLIENT_VERSION}`);
 
