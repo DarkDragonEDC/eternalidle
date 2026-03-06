@@ -241,6 +241,10 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                                     <div style={{ padding: '10px', background: 'var(--accent-soft)', borderRadius: '12px', border: '1px solid var(--accent)', width: '100%', textAlign: 'center' }}>
                                         <div style={{ fontSize: '0.65rem', color: 'var(--accent)', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px', marginBottom: '4px' }}>Estimated Time</div>
                                         <div style={{ fontSize: '1.2rem', color: 'var(--text-main)', fontWeight: '900' }}>{formatDuration(calculateEstimatedTime(pendingTier, repeatCount))}</div>
+                                        <div style={{ fontSize: '0.8rem', color: '#ffd700', fontWeight: '900', marginTop: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                                            <Coins size={14} />
+                                            {formatSilver((dungeon?.entrySilver || 0) * (parseInt(repeatCount) || 1))}
+                                        </div>
                                         <div style={{ fontSize: '0.6rem', color: '#888', marginTop: '4px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
                                             <span>MAPS: {availableMaps}</span>
                                             <span>|</span>
@@ -750,6 +754,10 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                                                     <span>{formatNumber(dungeon.rewards.xp)} XP</span>
                                                 </div>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    <Coins size={14} color="#ffd700" />
+                                                    <span>{formatSilver(dungeon.entrySilver)}</span>
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                     <Clock size={14} color="#8B8D91" />
                                                     <span>{formatDuration(estimatedTimeRun)}</span>
                                                 </div>
@@ -769,7 +777,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                                                         const stopYellow = ((reqIP * 0.7) / 1200) * 100;
                                                         const stopGreen = (reqIP / 1200) * 100;
 
-                                                        // Fixed gradient that maps to the full 1200 IP width
+                                                        // Fixed gradient that maps to the full width
                                                         const fullGradient = `linear-gradient(90deg, 
                                                             hsl(0, 80%, 50%) 0%, 
                                                             hsl(40, 80%, 50%) ${stopYellow}%, 
@@ -804,6 +812,9 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                                                         boxShadow: '0 0 6px #fff',
                                                         transform: 'translateX(-50%)'
                                                     }}>
+                                                        <div style={{ position: 'absolute', top: 20, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', fontSize: '0.7rem', color: '#fff', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>
+                                                            {reqIP}
+                                                        </div>
                                                     </div>
 
                                                     {/* Current IP Marker and Label */}
