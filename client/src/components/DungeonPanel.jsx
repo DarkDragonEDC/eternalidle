@@ -344,413 +344,309 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
 
     // If inside a dungeon, show status
     if (dungeonState && dungeonState.active) {
+        const dungeonConfig = Object.values(DUNGEONS).find(d => d.id === dungeonState.id) || { name: 'Dungeon' };
+
+        // Calculate overall progress for the current 5-minute run
+        const runDuration = 300000; // 5 min
+        const startTimestamp = dungeonState.started_at ? new Date(dungeonState.started_at).getTime() : now;
+        const elapsed = now - startTimestamp;
+        const rawProgress = Math.max(0, Math.min(1, elapsed / runDuration));
+        const progressPct = (rawProgress * 100).toFixed(1);
+
         return (
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="glass-panel"
                 style={{
-                    padding: '20px',
                     height: '100%',
                     display: 'flex',
                     flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '12px',
-                    background: 'var(--panel-bg)',
+                    background: 'radial-gradient(circle at center, rgba(30, 10, 50, 0.4) 0%, var(--panel-bg) 100%)',
                     position: 'relative',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
+                    padding: isMobile ? '8px' : '15px'
                 }}
             >
-                {/* Background Glow */}
+                {/* Visual Atmosphere Layer */}
                 <div style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: '200px',
-                    height: '200px',
-                    background: dungeonState.status === 'BOSS_FIGHT' ? 'rgba(255, 0, 0, 0.08)' : 'rgba(174, 0, 255, 0.04)',
-                    filter: 'blur(80px)',
-                    borderRadius: '50%',
-                    pointerEvents: 'none',
-                    zIndex: 0
+                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundImage: 'url("/ui/dungeon_bg_pattern.png")', // Sublte grid or pattern if exists
+                    opacity: 0.05, pointerEvents: 'none'
                 }} />
 
-                <div style={{ display: 'flex', gap: '20px', textAlign: 'center', zIndex: 1, background: 'var(--bg-dark)', padding: '10px 20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                    <div>
-                        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.6rem', fontWeight: '900', letterSpacing: '0.5px', marginBottom: '2px', textTransform: 'uppercase' }}>
-                            Current Run
-                        </div>
-                        <div style={{ color: '#ae00ff', fontSize: '1.1rem', fontWeight: '900', fontFamily: 'monospace' }}>
-                            {estimatedTime?.current || '--'}
-                        </div>
+                {/* Animated Ambient Glow */}
+                <motion.div
+                    animate={{
+                        opacity: [0.3, 0.5, 0.3],
+                        scale: [1, 1.1, 1]
+                    }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                    style={{
+                        position: 'absolute', top: '40%', left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '400px', height: '400px',
+                        background: 'radial-gradient(circle, rgba(174, 0, 255, 0.15) 0%, transparent 70%)',
+                        filter: 'blur(60px)', zIndex: 0, pointerEvents: 'none'
+                    }}
+                />
+
+                {/* Header: Dungeon Name and Tier - Compacted */}
+                <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', marginBottom: '8px' }}>
+                    <div style={{
+                        color: 'var(--accent)',
+                        fontSize: '0.7rem',
+                        fontWeight: '900',
+                        letterSpacing: '2px',
+                        textTransform: 'uppercase',
+                        opacity: 0.8,
+                        marginBottom: '2px'
+                    }}>
+                        {dungeonConfig.name}
                     </div>
-                    <div style={{ width: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
-                    <div>
-                        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.6rem', fontWeight: '900', letterSpacing: '0.5px', marginBottom: '2px', textTransform: 'uppercase' }}>
-                            Total Queue
-                        </div>
-                        <div style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: '900', fontFamily: 'monospace' }}>
-                            {estimatedTime?.queue || '--'}
-                        </div>
-                    </div>
+                    <h2 style={{
+                        margin: 0,
+                        fontSize: '1.3rem',
+                        fontWeight: '900',
+                        color: '#fff',
+                        textShadow: '0 0 15px rgba(174, 0, 255, 0.4)',
+                        letterSpacing: '-0.5px'
+                    }}>
+                        TIER {dungeonState.tier}
+                    </h2>
                 </div>
 
-                {/* Arena / Walking Section */}
+                {/* Progress Hub Section - Compacted */}
                 <div style={{
+                    position: 'relative',
+                    zIndex: 2,
                     display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'space-around',
-                    width: '100%',
-                    maxWidth: '600px',
-                    zIndex: 1,
-                    padding: isMobile ? '10px' : '20px'
+                    marginBottom: '10px'
                 }}>
-                    {/* Player Side - Persistent */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                    <div style={{ position: 'relative', width: isMobile ? '130px' : '160px', height: isMobile ? '130px' : '160px' }}>
+                        {/* Outer Glow Ring */}
                         <div style={{
-                            width: isMobile ? '50px' : '80px', height: isMobile ? '50px' : '80px',
-                            background: 'linear-gradient(135deg, var(--accent) 0%, #003366 100%)',
-                            borderRadius: '50%', border: isMobile ? '2px solid #fff' : '3px solid #fff',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            boxShadow: '0 0 15px var(--accent-soft)',
-                            marginBottom: '8px'
-                        }}>
-                            <Sword size={isMobile ? 24 : 40} color="#000" />
-                        </div>
-                        <div style={{ fontSize: isMobile ? '0.6rem' : '0.8rem', fontWeight: '900', color: 'var(--text-main)' }}>{gameState?.name?.toUpperCase()}</div>
+                            position: 'absolute', top: '-8px', left: '-8px', right: '-8px', bottom: '-8px',
+                            border: '1px solid rgba(174, 0, 255, 0.1)', borderRadius: '50%',
+                            boxShadow: 'inset 0 0 20px rgba(174, 0, 255, 0.05)'
+                        }} />
+
+                        {/* SVG Progress Circle */}
+                        <svg width="100%" height="100%" viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
+                            {/* Track */}
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="4" />
+                            {/* Progress */}
+                            <motion.circle
+                                cx="50" cy="50" r="45" fill="none"
+                                stroke="url(#dungeonGradient)" strokeWidth="4"
+                                strokeDasharray="282.7"
+                                strokeDashoffset={282.7 * (1 - rawProgress)}
+                                strokeLinecap="round"
+                                style={{ transition: 'stroke-dashoffset 0.5s ease-out' }}
+                            />
+                            <defs>
+                                <linearGradient id="dungeonGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stopColor="#ae00ff" />
+                                    <stop offset="100%" stopColor="#7a00cc" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+
+                        {/* Central Text Content */}
                         <div style={{
-                            fontSize: isMobile ? '0.8rem' : '1.1rem',
-                            fontWeight: '900',
-                            color: '#4caf50',
-                            marginTop: '2px',
-                            display: 'flex',
-                            gap: '4px'
+                            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                            textAlign: 'center'
                         }}>
-                            <span>{formatNumber(Math.round(gameState?.state?.health || 0))}</span>
-                            <span>/</span>
-                            <span>{formatNumber(Math.round(gameState?.calculatedStats?.maxHP || gameState?.calculatedStats?.hp || 100))}</span>
-                            <span style={{ fontSize: '0.6rem', alignSelf: 'center', marginLeft: '2px' }}>HP</span>
+                            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.6rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                EXPLORING
+                            </div>
+                            <div style={{ fontSize: '1.6rem', fontWeight: '900', color: '#fff', lineHeight: '1' }}>
+                                {progressPct}%
+                            </div>
+                            <div style={{
+                                marginTop: '4px',
+                                padding: '2px 10px',
+                                background: 'rgba(174, 0, 255, 0.1)',
+                                borderRadius: '20px',
+                                border: '1px solid rgba(174, 0, 255, 0.3)',
+                                color: '#ae00ff',
+                                fontSize: '0.65rem',
+                                fontWeight: '900'
+                            }}>
+                                {estimatedTime?.current || '--'} LEFT
+                            </div>
                         </div>
                     </div>
 
-                    {/* Food and VS Label */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                    {/* Compact Info Bar: Food + Run + Queue */}
+                    <div style={{
+                        marginTop: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        background: 'rgba(255,255,255,0.03)',
+                        padding: '6px 15px',
+                        borderRadius: '100px',
+                        border: '1px solid rgba(255,255,255,0.05)',
+                        backdropFilter: 'blur(10px)'
+                    }}>
+                        {/* Integrated Food Icon */}
                         {gameState?.state?.equipment?.food?.amount > 0 && (() => {
                             const food = gameState.state.equipment.food;
                             const amt = typeof food.amount === 'object' ? (food.amount.amount || 0) : (Number(food.amount) || 0);
                             const tier = food.tier || (food.id ? parseInt(food.id.match(/T(\d+)/)?.[1] || '0') : 0);
-
-                            // Use server-provided lastFoodAt if available, fallback to client-side tracking
                             const serverLastFoodAt = gameState?.state?.lastFoodAt;
                             const effectiveLastEat = serverLastFoodAt ? new Date(serverLastFoodAt).getTime() : lastFoodEatClient;
-
-                            const COOLDOWN_MS = 5000;
-                            const elapsed = now - effectiveLastEat;
-                            const progress = effectiveLastEat === 0 ? 1 : Math.max(0, Math.min(1, elapsed / COOLDOWN_MS));
-                            const isReady = progress >= 1;
-
-                            const size = isMobile ? 42 : 54;
-                            const stroke = 3;
-                            const radius = (size / 2) - stroke;
-                            const circumference = 2 * Math.PI * radius;
-                            const dashOffset = circumference * (1 - progress);
+                            const progress = Math.max(0, Math.min(1, (now - effectiveLastEat) / 5000));
 
                             return (
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                                    <div style={{ position: 'relative', width: size, height: size }}>
-                                        <svg width={size} height={size} style={{ position: 'absolute', top: 0, left: 0, transform: 'rotate(-90deg)' }}>
-                                            <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={stroke} />
-                                            <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={isReady ? '#4caf50' : '#ff6b6b'} strokeWidth={stroke} strokeDasharray={circumference} strokeDashoffset={dashOffset} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 0.2s linear' }} />
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingRight: '12px', borderRight: '1px solid rgba(255,255,255,0.1)' }}>
+                                    <div style={{ position: 'relative', width: '28px', height: '28px' }}>
+                                        <svg width="32" height="32" style={{ transform: 'rotate(-90deg)' }}>
+                                            <circle cx="16" cy="16" r="14" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="2" />
+                                            <circle cx="16" cy="16" r="14" fill="none" stroke={progress >= 1 ? '#4caf50' : '#ff6b6b'} strokeWidth="2" strokeDasharray="88" strokeDashoffset={88 * (1 - progress)} />
                                         </svg>
                                         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <img src={food.icon || `/items/${food.id}.webp`} alt="Food" style={{ width: isMobile ? 24 : 32, height: isMobile ? 24 : 32, objectFit: 'contain', opacity: isReady ? 1 : 0.5 }} />
+                                            <img src={food.icon || `/items/${food.id}.webp`} style={{ width: '18px', opacity: progress >= 1 ? 1 : 0.5 }} />
                                         </div>
                                     </div>
-                                    <div style={{ fontSize: '0.65rem', fontWeight: '900', color: isReady ? '#4caf50' : '#ff6b6b' }}>
-                                        T{tier} × {amt}
-                                    </div>
+                                    <div style={{ fontSize: '0.7rem', fontWeight: '900', color: progress >= 1 ? '#4caf50' : '#ff6b6b' }}>T{tier}×{amt}</div>
                                 </div>
                             );
                         })()}
 
-                        {(dungeonState.status === 'FIGHTING' || dungeonState.status === 'BOSS_FIGHT') ? (
-                            <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-dim)', opacity: 0.2 }}>VS</div>
-                        ) : (
-                            <div style={{ height: '20px' }} />
-                        )}
-                    </div>
-
-                    {/* Right Side - Mob or Walking */}
-                    <div style={{ minWidth: isMobile ? '70px' : '120px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        {(dungeonState.status === 'FIGHTING' || dungeonState.status === 'BOSS_FIGHT') ? (
-                            <motion.div
-                                key="mob"
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0, scale: [1, 1.05, 1] }}
-                                transition={{ scale: { repeat: Infinity, duration: 2 } }}
-                                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-                            >
-                                <div style={{
-                                    width: isMobile ? '50px' : '80px', height: isMobile ? '50px' : '80px',
-                                    background: 'var(--slot-bg)',
-                                    borderRadius: '50%', border: isMobile ? '2px solid #ff4444' : '3px solid #ff4444',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    boxShadow: '0 0 15px rgba(255, 68, 68, 0.3)',
-                                    marginBottom: '8px'
-                                }}>
-                                    {dungeonState.activeMob?.image ? (
-                                        <img src={`/monsters/${dungeonState.activeMob.image}`} alt={dungeonState.activeMob.name} style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
-                                    ) : (
-                                        <Skull size={isMobile ? 24 : 40} color="#ff4444" />
-                                    )}
-                                </div>
-                                <div style={{ fontSize: isMobile ? '0.6rem' : '0.8rem', fontWeight: '900', color: 'var(--text-main)' }}>
-                                    {dungeonState.activeMob?.name?.toUpperCase() || '???'}
-                                </div>
-                                <div style={{ fontSize: isMobile ? '0.8rem' : '1.1rem', fontWeight: '900', color: '#ff4444', marginTop: '2px', display: 'flex', gap: '4px' }}>
-                                    <span>{formatNumber(Math.round(dungeonState.activeMob?.health || 0))}</span>
-                                    <span>/</span>
-                                    <span>{formatNumber(Math.round(dungeonState.activeMob?.maxHealth || 0))}</span>
-                                    <span style={{ fontSize: '0.6rem', alignSelf: 'center', marginLeft: '2px' }}>HP</span>
-                                </div>
-                            </motion.div>
-                        ) : (
-                            <motion.div
-                                key="walking"
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-                            >
-                                <div style={{
-                                    width: isMobile ? '50px' : '80px', height: isMobile ? '50px' : '80px',
-                                    background: 'rgba(174, 0, 255, 0.05)',
-                                    borderRadius: '50%', border: isMobile ? '2px solid #ae00ff' : '3px solid #ae00ff',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    boxShadow: '0 0 15px rgba(174, 0, 255, 0.2)',
-                                    marginBottom: '8px'
-                                }}>
-                                    <motion.div
-                                        animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
-                                        transition={{ repeat: Infinity, duration: 4 }}
-                                        style={{ color: '#ae00ff' }}
-                                    >
-                                        <Skull size={isMobile ? 24 : 40} strokeWidth={1.5} />
-                                    </motion.div>
-                                </div>
-                                <div style={{ fontSize: isMobile ? '0.6rem' : '0.8rem', fontWeight: '900', color: '#ae00ff', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                                    WALKING
-                                </div>
-                                <div style={{ fontSize: isMobile ? '0.8rem' : '1.1rem', fontWeight: '900', color: 'var(--text-dim)', marginTop: '2px' }}>
-                                    {dungeonState.timeLeft || '?'}s
-                                </div>
-                            </motion.div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Status and Wave Info */}
-                <div style={{ textAlign: 'center', zIndex: 1 }}>
-                    <div style={{ color: '#ae00ff', fontSize: '0.9rem', fontWeight: '900', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '1px' }}>
-                        TIER {dungeonState.tier}
-                    </div>
-                    <motion.h2
-                        key={dungeonState.wave}
-                        style={{ color: 'var(--text-main)', fontSize: '1.4rem', fontWeight: '900', margin: 0, letterSpacing: '1px' }}
-                    >
-                        {dungeonState.status === 'BOSS_FIGHT' ? 'THE BOSS' : `WAVE ${dungeonState.wave} / ${dungeonState.maxWaves}`}
-                    </motion.h2>
-                    <div style={{ height: '20px', marginTop: '2px' }}>
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key={dungeonState.status}
-                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                                style={{
-                                    color: dungeonState.status === 'COMPLETED' ? '#4caf50' :
-                                        dungeonState.status === 'FAILED' ? '#ff4444' :
-                                            dungeonState.status === 'BOSS_FIGHT' ? '#ff0000' : 'var(--text-dim)',
-                                    fontSize: '0.85rem',
-                                    fontWeight: 'bold',
-                                    textTransform: 'uppercase'
-                                }}
-                            >
-                                {dungeonState.status === 'PREPARING' && "Preparing..."}
-                                {dungeonState.status === 'FIGHTING' && "In Combat"}
-                                {dungeonState.status === 'WAITING_NEXT_WAVE' && "Next wave incoming..."}
-                                {dungeonState.status === 'BOSS_FIGHT' && "BOSS FIGHT!"}
-                                {dungeonState.status === 'WALKING' && `Walking... (${dungeonState.timeLeft || '?'}s)`}
-                                {dungeonState.status === 'WAITING_EXIT' && `Exit in ${dungeonState.timeLeft || '?'}s`}
-                                {dungeonState.status === 'COMPLETED' && "CLEARED!"}
-                                {dungeonState.status === 'ERROR' && "ERROR"}
-                            </motion.div>
-                        </AnimatePresence>
-                    </div>
-                </div>
-
-                <div style={{
-                    padding: '4px 12px',
-                    background: 'rgba(174, 0, 255, 0.1)',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(174, 0, 255, 0.2)',
-                    color: '#ae00ff',
-                    fontSize: '0.7rem',
-                    fontWeight: '900',
-                    zIndex: 1
-                }}>
-                    {(() => {
-                        let total, current;
-                        if (dungeonState.initialRepeats !== undefined) {
-                            // New logic (Server-driven)
-                            total = dungeonState.initialRepeats + 1;
-                            current = total - dungeonState.repeatCount;
-                        } else {
-                            // Fallback logic for existing active sessions
-                            // inferredTotal = completed (lootLog) + current (1) + remaining (repeatCount)
-                            const completed = (dungeonState.lootLog || []).length;
-                            const remaining = dungeonState.repeatCount || 0;
-                            total = completed + 1 + remaining;
-                            current = completed + 1;
-                        }
-                        return `RUN: ${current} / ${total}`;
-                    })()}
-                </div>
-
-                {dungeonState.stopping && (
-                    <div style={{
-                        padding: '6px 14px',
-                        background: 'rgba(255, 152, 0, 0.15)',
-                        borderRadius: '12px',
-                        border: '1px solid rgba(255, 152, 0, 0.4)',
-                        color: '#ff9800',
-                        fontSize: '0.8rem',
-                        fontWeight: '900',
-                        zIndex: 1,
-                        marginTop: '8px',
-                        animation: 'pulse 1.5s infinite',
-                        letterSpacing: '0.5px',
-                        boxShadow: '0 0 10px rgba(255, 152, 0, 0.2)'
-                    }}>
-                        STOPPING AFTER THIS RUN
-                    </div>
-                )}
-
-                {/* Real-time Loot Summary (Aggregated) */}
-                <div
-                    style={{
-                        width: '100%',
-                        maxWidth: '420px',
-                        background: 'var(--bg-dark)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '16px',
-                        padding: '12px 16px',
-                        zIndex: 1
-                    }}
-                >
-                    <div style={{ color: '#ae00ff', fontWeight: '900', fontSize: '0.6rem', letterSpacing: '1px', marginBottom: '10px', textTransform: 'uppercase', textAlign: 'center', opacity: 0.7 }}>
-                        Session Rewards
-                    </div>
-                    {dungeonState.lootLog && dungeonState.lootLog.length > 0 ? (
-                        (() => {
-                            const totals = dungeonState.lootLog.reduce((acc, log) => {
-                                acc.xp += (log.xp || 0);
-                                (log.items || []).forEach(itemStr => {
-                                    const match = itemStr.match(/^(\d+)x\s+(.+)$/);
-                                    if (match) {
-                                        const qty = parseInt(match[1]);
-                                        const id = match[2];
-                                        acc.items[id] = (acc.items[id] || 0) + qty;
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.55rem', fontWeight: '900', textTransform: 'uppercase' }}>Run</div>
+                            <div style={{ color: '#ae00ff', fontWeight: '900', fontSize: '1rem' }}>
+                                {(() => {
+                                    let total, current;
+                                    if (dungeonState.initialRepeats !== undefined) {
+                                        total = dungeonState.initialRepeats + 1;
+                                        current = total - dungeonState.repeatCount;
                                     } else {
-                                        acc.items[itemStr] = (acc.items[itemStr] || 0) + 1;
+                                        const completed = (dungeonState.lootLog || []).length;
+                                        const remaining = dungeonState.repeatCount || 0;
+                                        current = completed + 1;
+                                        total = completed + 1 + remaining;
                                     }
-                                });
-                                return acc;
-                            }, { xp: 0, items: {} });
+                                    return `${current} / ${total}`;
+                                })()}
+                            </div>
+                        </div>
+                        <div style={{ width: '1px', height: '15px', background: 'rgba(255,255,255,0.1)' }} />
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.55rem', fontWeight: '900', textTransform: 'uppercase' }}>Queue</div>
+                            <div style={{ color: '#fff', fontWeight: '900', fontSize: '1rem' }}>{estimatedTime?.queue || '--'}</div>
+                        </div>
+                    </div>
+                </div>
 
-                            return (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                        <div style={{ background: 'var(--slot-bg)', padding: '8px 20px', borderRadius: '10px', textAlign: 'center', border: '1px solid var(--border)', minWidth: '120px' }}>
-                                            <div style={{ color: 'var(--text-dim)', fontSize: '0.55rem', fontWeight: '900' }}>TOTAL XP Gained</div>
-                                            <div style={{ color: '#4caf50', fontWeight: '900', fontSize: '1.2rem' }}>+{formatNumber(totals.xp)}</div>
+                {/* Session Rewards Log - Compacted */}
+                <div style={{ flex: 1, width: '100%', maxWidth: '600px', alignSelf: 'center', overflow: 'hidden', display: 'flex', flexDirection: 'column', zIndex: 2 }}>
+                    <div style={{ padding: '0 5px 5px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px' }}>SESSION LOG</div>
+                    </div>
+
+                    <div className="scroll-container" style={{
+                        flex: 1, background: 'rgba(0,0,0,0.2)', borderRadius: '15px', padding: '10px',
+                        border: '1px solid rgba(255,255,255,0.05)', overflowY: 'auto'
+                    }}>
+                        {dungeonState.lootLog?.length > 0 ? (
+                            (() => {
+                                const totals = dungeonState.lootLog.reduce((acc, log) => {
+                                    acc.xp += (log.xp || 0);
+                                    (log.items || []).forEach(itemStr => {
+                                        const match = itemStr.match(/^(\d+)x\s+(.+)$/);
+                                        if (match) {
+                                            const qty = parseInt(match[1]);
+                                            const id = match[2];
+                                            acc.items[id] = (acc.items[id] || 0) + qty;
+                                        } else {
+                                            acc.items[itemStr] = (acc.items[itemStr] || 0) + 1;
+                                        }
+                                    });
+                                    return acc;
+                                }, { xp: 0, items: {} });
+
+                                return (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        {/* Total XP Bar - Compacted */}
+                                        <div style={{ background: 'linear-gradient(90deg, rgba(76, 175, 80, 0.1) 0%, transparent 100%)', padding: '6px 12px', borderRadius: '10px', borderLeft: '3px solid #4caf50' }}>
+                                            <div style={{ color: '#4caf50', fontSize: '0.6rem', fontWeight: '900', textTransform: 'uppercase' }}>Total Exp</div>
+                                            <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: '900' }}>+{formatNumber(totals.xp)} XP</div>
                                         </div>
-                                    </div>
 
-                                    {Object.keys(totals.items).length > 0 && (
-                                        <div style={{
-                                            display: 'flex',
-                                            flexWrap: 'wrap',
-                                            gap: '5px',
-                                            justifyContent: 'center',
-                                            maxHeight: '80px',
-                                            overflowY: 'auto',
-                                            padding: '8px',
-                                            background: 'var(--panel-bg)',
-                                            borderRadius: '10px'
-                                        }}>
+                                        {/* Items Grid */}
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                                             {Object.entries(totals.items).map(([id, qty]) => {
                                                 const itemData = resolveItem(id);
                                                 return (
                                                     <div key={id} style={{
-                                                        background: 'rgba(174, 0, 255, 0.1)',
-                                                        color: '#ae00ff',
-                                                        padding: '3px 8px',
-                                                        borderRadius: '6px',
-                                                        fontSize: '0.7rem',
-                                                        border: '1px solid rgba(174, 0, 255, 0.2)',
-                                                        fontWeight: 'bold'
+                                                        background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+                                                        padding: '6px 10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px'
                                                     }}>
-                                                        {qty}x {itemData?.name || id.replace(/_/g, ' ')}
+                                                        <img src={`/items/${id}.webp`} style={{ width: '16px', height: '16px', objectFit: 'contain' }} onError={(e) => e.target.style = 'none'} />
+                                                        <span style={{ color: '#fff', fontSize: '0.75rem', fontWeight: '700' }}>{qty}x</span>
+                                                        <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.7rem' }}>{itemData?.name || id.replace(/_/g, ' ')}</span>
                                                     </div>
                                                 );
                                             })}
                                         </div>
-                                    )}
-                                </div>
-                            );
-                        })()
-                    ) : (
-                        <div style={{ color: '#555', fontStyle: 'italic', textAlign: 'center', fontSize: '0.7rem' }}>
-                            Waiting for rewards...
-                        </div>
-                    )}
+                                    </div>
+                                );
+                            })()
+                        ) : (
+                            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: '0.8rem', fontStyle: 'italic' }}>
+                                Hunting treasures...
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                <button
-                    onClick={() => {
-                        if (dungeonState.status === 'COMPLETED') {
-                            socket.emit('stop_dungeon');
-                        } else {
-                            setShowAbandonModal(true);
-                        }
-                    }}
-                    style={{
-                        padding: '8px 20px',
-                        background: dungeonState.status === 'COMPLETED' ? 'rgba(76, 175, 80, 0.05)' : 'rgba(255, 68, 68, 0.05)',
-                        border: '1px solid',
-                        borderColor: dungeonState.status === 'COMPLETED' ? 'rgba(76, 175, 80, 0.5)' : '#ff4444',
-                        color: dungeonState.status === 'COMPLETED' ? '#4caf50' : '#ff4444',
-                        borderRadius: '10px',
-                        cursor: 'pointer',
-                        fontWeight: '900',
-                        fontSize: '0.75rem',
-                        zIndex: 1,
-                        transition: '0.2s',
-                        opacity: 1,
-                        pointerEvents: 'auto'
-                    }}
-                >
-                    {dungeonState.status === 'COMPLETED' ? 'FINISH' : dungeonState.stopping ? 'STOPPING...' : 'ABANDON'}
-                </button>
+                {/* Footer Controls - Compacted */}
+                <div style={{ zIndex: 3, marginTop: '5px', display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                    {dungeonState.stopping && (
+                        <div style={{
+                            padding: '8px 15px', background: 'rgba(255, 152, 0, 0.1)', borderRadius: '10px',
+                            border: '1px solid rgba(255, 152, 0, 0.3)', color: '#ff9800', fontWeight: '900',
+                            fontSize: '0.7rem', animation: 'pulse 2s infinite'
+                        }}>
+                            STOPPING...
+                        </div>
+                    )}
+
+                    <button
+                        onClick={() => dungeonState.status === 'COMPLETED' ? socket.emit('stop_dungeon') : setShowAbandonModal(true)}
+                        style={{
+                            padding: '8px 20px',
+                            background: dungeonState.status === 'COMPLETED' ? 'linear-gradient(to bottom, #4caf50, #388e3c)' : 'rgba(255, 68, 68, 0.1)',
+                            border: '1px solid',
+                            borderColor: dungeonState.status === 'COMPLETED' ? '#4caf50' : '#ff4444',
+                            color: dungeonState.status === 'COMPLETED' ? '#fff' : '#ff4444',
+                            borderRadius: '12px',
+                            cursor: 'pointer',
+                            fontWeight: '900',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px',
+                            boxShadow: dungeonState.status === 'COMPLETED' ? '0 5px 15px rgba(76, 175, 80, 0.3)' : 'none'
+                        }}
+                    >
+                        {dungeonState.status === 'COMPLETED' ? 'COLLECT' : dungeonState.stopping ? 'STOPPING...' : 'ABANDON'}
+                    </button>
+                </div>
+
                 {modals}
-            </motion.div>
+            </motion.div >
         );
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '10px', gap: '15px', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '6px', gap: '10px', overflow: 'hidden' }}>
             {/* New Hunting Grounds Header */}
-            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', background: 'var(--panel-bg)', borderRadius: '12px' }}>
+            <div style={{ padding: '8px 15px', borderBottom: '1px solid var(--border)', background: 'var(--panel-bg)', borderRadius: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Sword color="#ff4444" size={18} />
@@ -791,7 +687,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                 </div>
             </div>
 
-            <div className="scroll-container" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px', paddingRight: '4px' }}>
+            <div className="scroll-container" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '4px' }}>
 
                 {Object.values(DUNGEONS)
                     .filter(d => d.tier === selectedTier)
@@ -825,7 +721,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                                 animate={{ opacity: 1, y: 0 }}
                                 style={{
                                     position: 'relative',
-                                    padding: isMobile ? '12px' : '20px',
+                                    padding: isMobile ? '10px' : '14px',
                                     background: 'var(--panel-bg)',
                                     borderRadius: '12px',
                                     border: `1px solid ${playerIP < reqIP ? 'rgba(255, 68, 68, 0.3)' : 'rgba(174, 0, 255, 0.3)'}`,
@@ -849,10 +745,6 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                     <Clock size={14} color="#8B8D91" />
                                                     <span>{formatDuration(estimatedTimeRun)}</span>
-                                                </div>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                    <Shield size={14} color={playerIP >= reqIP ? '#4caf50' : '#ff4444'} />
-                                                    <span style={{ color: playerIP >= reqIP ? '#4caf50' : '#ff4444', fontWeight: 'bold' }}>IP REQ: {reqIP}</span>
                                                 </div>
                                             </div>
 
@@ -905,9 +797,6 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                                                         boxShadow: '0 0 6px #fff',
                                                         transform: 'translateX(-50%)'
                                                     }}>
-                                                        <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', fontSize: '0.65rem', color: '#fff', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>
-                                                            {reqIP}
-                                                        </div>
                                                     </div>
 
                                                     {/* Current IP Marker and Label */}

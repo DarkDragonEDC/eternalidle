@@ -10,56 +10,30 @@ export class DungeonManager {
         this.gameManager = gameManager;
     }
 
-    async startDungeon(userId, characterId, dungeonId, repeatCount = 0) {
-        const char = await this.gameManager.getCharacter(userId, characterId);
-        if (char.state.dungeon) throw new Error("Already in a dungeon");
-        if (char.state.combat) throw new Error("Cannot enter dungeon while in combat");
-
-        const dungeon = Object.values(DUNGEONS).find(d => d.id === dungeonId);
-        if (!dungeon) throw new Error("Dungeon not found");
-
-        // ---- Silver cost check ----
+    async checkAndConsumeResources(char, dungeon) {
+        // Silver check
         const entryCost = dungeon.entrySilver || 0;
         if ((char.state.silver || 0) < entryCost) {
             throw new Error(`Not enough silver to enter dungeon (requires ${entryCost})`);
         }
-        // Deduct silver
-        char.state.silver = (char.state.silver || 0) - entryCost;
 
-        const inventory = char.state.inventory || {};
+        // Map check
         const mapId = dungeon.reqItem;
         if (!this.gameManager.inventoryManager.hasItems(char, { [mapId]: 1 })) {
             throw new Error(`Missing required item: ${mapId}`);
         }
 
-        // Level Requirement Check
-        const dungeonLevel = char.state.skills?.DUNGEONEERING?.level || 1;
-        if (dungeonLevel < (dungeon.reqLevel || 1)) {
-            throw new Error(`Dungeoneering level ${dungeon.reqLevel} required to enter this dungeon`);
-        }
-
-        // Consume Map
-        this.gameManager.inventoryManager.consumeItems(char, { [mapId]: 1 });
-
-        // ---- Food cost check ----
+        // Food check
         const playerIP = this.gameManager.inventoryManager.calculateCharacterIP(char);
         const dungeonTier = dungeon.tier;
-        const inv = char.state.inventory || {};
         let foodToConsume = null;
         let requiredAmount = 0;
-
-        // Try to find food that satisfies the cost
-        // We prioritize higher tier food if multiple options satisfy the cost
-        // or just the first one we find that the user has enough of.
-        // User implied: "Priorizar o consumo da comida de maior tier disponível" in implementation plan.
 
         for (let foodTier = 10; foodTier >= 1; foodTier--) {
             const foodId = `T${foodTier}_FOOD`;
             const cost = getFoodCost(dungeonTier, foodTier, playerIP);
             if (cost <= 0) continue;
-
-            const hasEnough = this.gameManager.inventoryManager.hasItems(char, { [foodId]: cost });
-            if (hasEnough) {
+            if (this.gameManager.inventoryManager.hasItems(char, { [foodId]: cost })) {
                 foodToConsume = foodId;
                 requiredAmount = cost;
                 break;
@@ -67,12 +41,9 @@ export class DungeonManager {
         }
 
         if (!foodToConsume) {
-            // Check if player has food equipped that could satisfy the cost?
-            // Usually we consume from inventory first. If not in inventory, check equipped food.
             const equippedFood = char.state.equipment?.food;
             if (equippedFood) {
-                const foodTier = equippedFood.tier;
-                const cost = getFoodCost(dungeonTier, foodTier, playerIP);
+                const cost = getFoodCost(dungeonTier, equippedFood.tier, playerIP);
                 if (equippedFood.amount >= cost) {
                     foodToConsume = 'EQUIPPED_FOOD';
                     requiredAmount = cost;
@@ -84,28 +55,48 @@ export class DungeonManager {
             throw new Error(`Not enough food to enter this tier ${dungeonTier} dungeon`);
         }
 
-        // Consume food
+        // --- CONSUMPTION ---
+        char.state.silver = (char.state.silver || 0) - entryCost;
+        this.gameManager.inventoryManager.consumeItems(char, { [mapId]: 1 });
         if (foodToConsume === 'EQUIPPED_FOOD') {
             char.state.equipment.food.amount -= requiredAmount;
-            if (char.state.equipment.food.amount <= 0) {
-                delete char.state.equipment.food;
-            }
+            if (char.state.equipment.food.amount <= 0) delete char.state.equipment.food;
         } else {
             this.gameManager.inventoryManager.consumeItems(char, { [foodToConsume]: requiredAmount });
         }
 
+        return { playerIP };
+    }
+
+    async startDungeon(userId, characterId, dungeonId, repeatCount = 0) {
+        const char = await this.gameManager.getCharacter(userId, characterId);
+        if (char.state.dungeon) throw new Error("Already in a dungeon");
+        if (char.state.combat) throw new Error("Cannot enter dungeon while in combat");
+
+        const dungeon = Object.values(DUNGEONS).find(d => d.id === dungeonId);
+        if (!dungeon) throw new Error("Dungeon not found");
+
+        // Level Requirement Check
+        const dungeonLevel = char.state.skills?.DUNGEONEERING?.level || 1;
+        if (dungeonLevel < (dungeon.reqLevel || 1)) {
+            throw new Error(`Dungeoneering level ${dungeon.reqLevel} required to enter this dungeon`);
+        }
+
+        // Consume all resources (Silver, Map, Food)
+        const { playerIP } = await this.checkAndConsumeResources(char, dungeon);
+
         const now = Date.now();
-        const duration = getDungeonDuration(dungeonTier, playerIP);
+        const duration = getDungeonDuration(dungeon.tier, playerIP);
         const finishAt = now + duration;
 
-        // Initialize Dungeon State as an Exploration Activity
+        // Initialize Dungeon State
         char.state.dungeon = {
             id: dungeonId,
             tier: dungeon.tier,
             active: true,
             started_at: now,
             finish_at: finishAt,
-            total_duration: duration / 1000, // duration in seconds for logging
+            total_duration: duration / 1000,
             status: 'EXPLORING',
             repeatCount: repeatCount,
             initialRepeats: repeatCount,
@@ -234,23 +225,42 @@ export class DungeonManager {
         if (char.state.dungeon.lootLog.length > 50) char.state.dungeon.lootLog.pop();
 
         // Check for Repeats
-        if (char.state.dungeon.repeatCount > 0 && this.gameManager.inventoryManager.hasItems(char, { [mapId]: 1 })) {
-            this.gameManager.inventoryManager.consumeItems(char, { [mapId]: 1 });
-            char.state.dungeon.repeatCount--;
-            char.state.dungeon.started_at = new Date(now).toISOString();
-            char.state.dungeon.finish_at = now + DUNGEON_DURATION;
-            char.state.dungeon.status = 'EXPLORING';
+        if (char.state.dungeon.repeatCount > 0) {
+            try {
+                // Consume all resources (Silver, Map, Food) for the next run
+                const { playerIP } = await this.checkAndConsumeResources(char, config);
+                const duration = getDungeonDuration(config.tier, playerIP);
 
-            return {
-                dungeonUpdate: {
-                    status: 'EXPLORING',
-                    message: `Starting repeat run...`,
-                    rewards: { xp: rewards.xp, items: loot },
-                    autoRepeat: true,
-                    lootLog: char.state.dungeon.lootLog
-                },
-                leveledUp
-            };
+                char.state.dungeon.repeatCount--;
+                char.state.dungeon.started_at = now;
+                char.state.dungeon.finish_at = now + duration;
+                char.state.dungeon.status = 'EXPLORING';
+
+                return {
+                    dungeonUpdate: {
+                        status: 'EXPLORING',
+                        message: `Starting repeat run...`,
+                        rewards: { xp: rewards.xp, items: loot },
+                        autoRepeat: true,
+                        lootLog: char.state.dungeon.lootLog
+                    },
+                    leveledUp
+                };
+            } catch (e) {
+                // Not enough resources to start the next run
+                await this.saveDungeonLog(char, config, 'COMPLETED', null, now);
+                char.state.dungeon.status = 'COMPLETED';
+
+                return {
+                    dungeonUpdate: {
+                        status: 'COMPLETED',
+                        message: `Queue stopped: ${e.message}`,
+                        rewards: { xp: rewards.xp, items: loot },
+                        lootLog: char.state.dungeon.lootLog
+                    },
+                    leveledUp
+                };
+            }
         }
 
         // Final Run Completed

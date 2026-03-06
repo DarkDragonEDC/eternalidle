@@ -19,6 +19,11 @@ const ToastContainer = ({ socket, settings }) => {
                 return;
             }
 
+            // Hide Dungeon activity toasts
+            if (msg.startsWith('Exploring') || msg.startsWith('Starting repeat run')) {
+                return;
+            }
+
             // Hide Settings
             if (settings?.hideCollectionPopups) {
                 // If the message is a typical gathering success message like (+1 Wood, Gained X XP)
@@ -44,24 +49,14 @@ const ToastContainer = ({ socket, settings }) => {
             addToast(data.message || 'Trade completed!', 'success');
         };
 
-        const handleDungeonQueueStop = (data) => {
-            if (data.success) {
-                addToast(data.message || 'Dungeon will stop after this run', 'success');
-            } else {
-                addToast(data.message || 'Failed to stop dungeon queue', 'error');
-            }
-        };
-
         socket.on('action_result', handleActionResult);
         socket.on('error', handleError);
         socket.on('trade_success', handleTradeSuccess);
-        socket.on('stop_dungeon_queue_result', handleDungeonQueueStop);
 
         return () => {
             socket.off('action_result', handleActionResult);
             socket.off('error', handleError);
             socket.off('trade_success', handleTradeSuccess);
-            socket.off('stop_dungeon_queue_result', handleDungeonQueueStop);
         };
     }, [socket]);
 

@@ -10,7 +10,11 @@
 - **Ajuste de Visual**: A cor customizada da guilda agora é aplicada dinamicamente aos botões e elementos de destaque no painel de membros.
 
 ### ⚙️ Sistema e Sincronização
-- **Versão 1.3.4**: Atualização obrigatória de versão para garantir a sincronia entre cliente e servidor com as novas colunas de banco de dados.
+- **Correção de Chat da Guilda**: Implementada sincronização automática de `guild_id` para membros. Isso resolve o erro "You must be in a guild" que ocorria para alguns membros.
+- **Entrada em Guildas**: Jogadores que entram em guildas abertas agora têm seu acesso ao chat liberado instantaneamente.
+- **Compactação de UI**: A interface de Dungeon foi otimizada para ser mais densa e caber melhor em diferentes resoluções de tela.
+- **Chat Sem Duplicatas**: Corrigido erro de chaves duplicadas no Chat, garantindo uma interface estável e sem avisos de console.
+- **Versão 1.3.4**: Atualização obrigatória de versão para garantir a sincronia entre cliente e servidor.
 
 ---
 

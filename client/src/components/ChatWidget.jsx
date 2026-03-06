@@ -64,11 +64,23 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
             socket.emit('get_chat_history');
 
             socket.on('chat_history', (history) => {
-                setMessages(history);
+                // Remove any duplicates that might have leaked from DB or race conditions
+                const uniqueHistory = [];
+                const seenIds = new Set();
+                history.forEach(msg => {
+                    if (msg.id && !seenIds.has(msg.id)) {
+                        seenIds.add(msg.id);
+                        uniqueHistory.push(msg);
+                    }
+                });
+                setMessages(uniqueHistory);
             });
 
             socket.on('new_message', (msg) => {
-                setMessages(prev => [...prev, msg]);
+                setMessages(prev => {
+                    if (msg.id && prev.some(m => m.id === msg.id)) return prev;
+                    return [...prev, msg];
+                });
                 if (!isOpenRef.current) {
                     setUnreadCount(prev => prev + 1);
                 }

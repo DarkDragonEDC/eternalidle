@@ -607,8 +607,30 @@ export class InventoryManager {
         return { success: true, unlockedSets: state.unlocked_sets, silver: state.silver, orbs: state.orbs };
     }
 
+    calculateCharacterIP(char) {
+        const equipment = char.state?.equipment || {};
+        const combatSlots = ['helmet', 'chest', 'boots', 'gloves', 'cape', 'mainHand', 'offHand'];
+        let totalIP = 0;
+        const hasWeapon = !!equipment.mainHand;
+
+        combatSlots.forEach(slot => {
+            const item = equipment[slot];
+            if (item) {
+                // If no weapon, only mainHand counts for IP
+                if (!hasWeapon && slot !== 'mainHand') return;
+
+                const freshItem = this.resolveItem(item.id);
+                totalIP += freshItem?.ip || item.ip || 0;
+            }
+        });
+
+        return Math.floor(totalIP / 7);
+    }
+
     calculateStats(char, nowOverride = null) {
-        if (!char?.state?.skills) return { warriorProf: 0, hunterProf: 0, mageProf: 0, maxHP: 100, damage: 5, defense: 0, dmgBonus: 0 };
+        if (!char || !char.state || !char.state.skills) {
+            return { warriorProf: 0, hunterProf: 0, mageProf: 0, maxHP: 100, damage: 5, defense: 0, dmgBonus: 0 };
+        }
         const skills = char.state.skills;
 
         // Use equipment from state (which is the active set)

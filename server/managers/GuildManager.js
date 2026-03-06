@@ -165,6 +165,18 @@ export class GuildManager {
 
         if (guildError || !guild) return null;
 
+        // --- SYNC GUILD ID IN STATE ---
+        // This fixed the common "You must be in a guild" error when state is out of sync
+        const char = this.gameManager.cache.get(characterId);
+        if (char && char.state && char.state.guild_id !== member.guild_id) {
+            console.log(`[GUILD-SYNC] Updating missing/wrong guild_id in state for ${char.name}`);
+            char.state.guild_id = member.guild_id;
+            this.gameManager.markDirty(char.id);
+            // Do not block - let it save in background
+            this.gameManager.persistCharacter(char.id).catch(e => console.error("[GUILD-SYNC] Persist error:", e));
+        }
+        // ----------------------------
+
         // Fetch other members
         const { data: members } = await this.supabase
             .from('guild_members')
@@ -330,6 +342,13 @@ export class GuildManager {
                     return { success: false, message: "You are already in this guild", type: 'info' };
                 }
                 throw new Error(`Failed to join guild: ${joinError.message}`);
+            }
+
+            // Update character state immediately for the online character
+            if (char.state) {
+                char.state.guild_id = guildId;
+                this.gameManager.markDirty(char.id);
+                this.gameManager.persistCharacter(char.id).catch(e => console.error("[GUILD-JOIN] Persist error:", e));
             }
 
             return { success: true, joined: true };

@@ -2206,10 +2206,19 @@ io.on('connection', (socket) => {
                 }
             }
 
-            // Sort everything chronologically before sending
+            // Sort everything chronologically and deduplicate by ID before sending
             allMessages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
-            socket.emit('chat_history', allMessages);
+            const finalMessages = [];
+            const seenIds = new Set();
+            for (const m of allMessages) {
+                if (m.id && !seenIds.has(m.id)) {
+                    seenIds.add(m.id);
+                    finalMessages.push(m);
+                }
+            }
+
+            socket.emit('chat_history', finalMessages);
         } catch (err) {
             console.error('Error fetching chat history:', err);
         }
