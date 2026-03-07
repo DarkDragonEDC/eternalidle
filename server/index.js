@@ -976,6 +976,94 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("get_guild_tasks", async () => {
+    try {
+      if (!socket.data.characterId || socket.data.characterId === "undefined")
+        return;
+      
+      const char = await gameManager.getCharacter(
+        socket.user.id,
+        socket.data.characterId,
+      );
+      
+      if (!char || !char.state) {
+        throw new Error("Character data not found or invalid");
+      }
+      
+      const tasks = await gameManager.guildManager.getGuildTasks(char);
+      socket.emit("guild_tasks_data", tasks);
+    } catch (err) {
+      console.error("[GUILD] Error in get_guild_tasks socket:", err);
+      socket.emit("error", { message: err.message });
+    }
+  });
+
+  socket.on("reroll_guild_task", async ({ taskId }) => {
+    try {
+      if (!socket.data.characterId || socket.data.characterId === "undefined")
+        return;
+      await gameManager.executeLocked(socket.user.id, async () => {
+        const char = await gameManager.getCharacter(
+          socket.user.id,
+          socket.data.characterId,
+        );
+        if (!char || !char.state) {
+          throw new Error("Character data not found or invalid");
+        }
+        const tasks = await gameManager.guildManager.rerollTask(char, taskId);
+        socket.emit("guild_tasks_data", tasks);
+        // Also update status to sync any changes
+        socket.emit(
+          "status_update",
+          await gameManager.getStatus(
+            socket.user.id,
+            true,
+            socket.data.characterId,
+          ),
+        );
+      });
+    } catch (err) {
+      console.error("[GUILD] Error in reroll_guild_task socket:", err);
+      socket.emit("error", { message: err.message });
+    }
+  });
+
+  socket.on("contribute_to_guild_task", async ({ taskId, amount }) => {
+    try {
+      if (!socket.data.characterId || socket.data.characterId === "undefined")
+        return;
+      await gameManager.executeLocked(socket.user.id, async () => {
+        const char = await gameManager.getCharacter(
+          socket.user.id,
+          socket.data.characterId,
+        );
+        if (!char || !char.state) {
+          throw new Error("Character data not found or invalid");
+        }
+        const result = await gameManager.guildManager.contributeToTask(char, {
+          taskId,
+          amount,
+        });
+        socket.emit("guild_task_contribute_result", {
+          success: true,
+          tasks: result.tasks,
+        });
+        // Update status for inventory and possible GP/XP changes
+        socket.emit(
+          "status_update",
+          await gameManager.getStatus(
+            socket.user.id,
+            true,
+            socket.data.characterId,
+          ),
+        );
+      });
+    } catch (err) {
+      console.error("[GUILD] Error in contribute_to_guild_task socket:", err);
+      socket.emit("error", { message: err.message });
+    }
+  });
+
   socket.on("update_guild_settings", async ({ minLevel, joinMode }) => {
     try {
       if (!socket.data.characterId || socket.data.characterId === "undefined")
@@ -1079,7 +1167,7 @@ io.on("connection", (socket) => {
         );
         const result = await gameManager.guildManager.upgradeBuilding(
           char,
-          { buildingType },
+          data,
         );
         if (result.success) {
           socket.emit(

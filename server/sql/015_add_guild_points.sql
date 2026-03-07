@@ -1,0 +1,2 @@
+ALTER TABLE guilds 
+ADD COLUMN guild_points BIGINT DEFAULT 0;

@@ -1,4 +1,4 @@
-﻿import crypto from 'crypto';
+import crypto from 'crypto';
 import { ITEMS, ALL_RUNE_TYPES, RUNES_BY_CATEGORY, ITEM_LOOKUP, resolveItem } from '../shared/items.js';
 import { CHEST_DROP_TABLE, WORLDBOSS_DROP_TABLE, getChestRuneShardRange } from '../shared/chest_drops.js';
 import { INITIAL_SKILLS, calculateNextLevelXP, XP_TABLE } from '../shared/skills.js';
@@ -40,6 +40,7 @@ export class GameManager {
         this.globalStats = null;
         this.leaderboardCache = new Map(); // type+mode -> { data, timestamp }
         this.LEADERBOARD_CACHE_TTL = 30 * 60 * 1000; // 30 minutes in ms
+        this.guildBonusesCache = new Map(); // guildId -> { bonuses, timestamp }
 
         // Load Global Stats initially (Store promise to avoid race conditions)
         this.statsPromise = this.loadGlobalStats();
@@ -768,7 +769,12 @@ export class GameManager {
             // console.log(`[CACHE] Hit for ${characterId}`);
             data = this.cache.get(characterId);
             fromCache = true;
-            if (!catchup) return data;
+            if (!catchup) {
+                if (data && data.state && data.state.guild_id && !data.guild_bonuses) {
+                    data.guild_bonuses = await this.getGuildBonuses(data.state.guild_id);
+                }
+                return data;
+            }
         }
 
         if (!data) {
@@ -802,6 +808,9 @@ export class GameManager {
             if (!fromCache) {
                 // Use the shared hydration helper to ensure consistent data structures
                 this._hydrateCharacterFromRaw(data);
+                if (data.state && data.state.guild_id) {
+                    data.guild_bonuses = await this.getGuildBonuses(data.state.guild_id);
+                }
 
                 // Perform all character data migrations upon login/load
                 this._migrateCharacter(data);
@@ -3483,5 +3492,49 @@ export class GameManager {
         data.state = hydrateState(data.state || {});
 
         return data;
-    } // End of getCharacter
+    }
+
+    async getGuildBonuses(guildId) {
+        if (!guildId) return null;
+
+        const now = Date.now();
+        const cached = this.guildBonusesCache.get(guildId);
+        
+        // Use cache for 5 minutes
+        if (cached && (now - cached.timestamp < 300000)) {
+            return cached.bonuses;
+        }
+
+        try {
+            const { data, error } = await this.supabase
+                .from('guilds')
+                .select('gathering_xp_level, gathering_duplic_level, gathering_auto_level, refining_xp_level, refining_duplic_level, refining_effic_level, crafting_xp_level, crafting_duplic_level, crafting_effic_level')
+                .eq('id', guildId)
+                .maybeSingle();
+
+            if (error || !data) return null;
+
+            const bonuses = {
+                gathering_xp: (data.gathering_xp_level || 0) * 1, // 1% per level
+                gathering_duplic: (data.gathering_duplic_level || 0) * 1,
+                gathering_auto: (data.gathering_auto_level || 0) * 1,
+                refining_xp: (data.refining_xp_level || 0) * 1,
+                refining_duplic: (data.refining_duplic_level || 0) * 1,
+                refining_effic: (data.refining_effic_level || 0) * 1,
+                crafting_xp: (data.crafting_xp_level || 0) * 1,
+                crafting_duplic: (data.crafting_duplic_level || 0) * 1,
+                crafting_effic: (data.crafting_effic_level || 0) * 1
+            };
+
+            this.guildBonusesCache.set(guildId, {
+                bonuses,
+                timestamp: now
+            });
+
+            return bonuses;
+        } catch (err) {
+            console.error(`[GUILD-BONUS] Error fetching for ${guildId}:`, err);
+            return null;
+        }
+    }
 }

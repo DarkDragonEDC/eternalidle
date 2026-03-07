@@ -819,6 +819,79 @@ export class InventoryManager {
             ATTACK_SPEED: 0
         };
 
+        // 4.5 Guild Bonuses (Gathering Station)
+        // If the character has guild bonus data attached (loaded into cache by GameManager)
+        if (char.guild_bonuses) {
+            const gb = char.guild_bonuses;
+            // Apply XP Bonus to all Gathering activities
+            if (gb.gathering_xp) {
+                const gatheringActs = ['WOOD', 'ORE', 'HIDE', 'FIBER', 'FISH', 'HERB'];
+                gatheringActs.forEach(act => {
+                    xpBonus[act] = (xpBonus[act] || 0) + gb.gathering_xp;
+                });
+            }
+            // Apply Duplication Bonus
+            if (gb.gathering_duplic) {
+                const gatheringActs = ['WOOD', 'ORE', 'HIDE', 'FIBER', 'FISH', 'HERB'];
+                gatheringActs.forEach(act => {
+                    duplication[act] = (duplication[act] || 0) + gb.gathering_duplic;
+                });
+            }
+            // Apply Auto-Refine Bonus
+            if (gb.gathering_auto) {
+                const gatheringActs = ['WOOD', 'ORE', 'HIDE', 'FIBER', 'FISH', 'HERB'];
+                gatheringActs.forEach(act => {
+                    if (autoRefine[act] !== undefined) {
+                        autoRefine[act] = (autoRefine[act] || 0) + gb.gathering_auto;
+                    }
+                });
+            }
+
+            // --- REFINING STATION ---
+            const refiningActs = ['PLANK', 'METAL', 'LEATHER', 'CLOTH', 'EXTRACT'];
+            
+            // Apply XP Bonus
+            if (gb.refining_xp) {
+                refiningActs.forEach(act => {
+                    xpBonus[act] = (xpBonus[act] || 0) + gb.refining_xp;
+                });
+            }
+            // Apply Duplication Bonus
+            if (gb.refining_duplic) {
+                refiningActs.forEach(act => {
+                    duplication[act] = (duplication[act] || 0) + gb.refining_duplic;
+                });
+            }
+            // Apply Efficiency (Time Reduction) Bonus
+            if (gb.refining_effic) {
+                refiningActs.forEach(act => {
+                    efficiency[act] = (efficiency[act] || 0) + gb.refining_effic;
+                });
+            }
+
+            // --- CRAFTING STATION ---
+            const craftingActs = ['WARRIOR', 'HUNTER', 'MAGE', 'ALCHEMY', 'TOOLS', 'COOKING'];
+
+            // Apply XP Bonus
+            if (gb.crafting_xp) {
+                craftingActs.forEach(act => {
+                    xpBonus[act] = (xpBonus[act] || 0) + gb.crafting_xp;
+                });
+            }
+            // Apply Duplication Bonus
+            if (gb.crafting_duplic) {
+                craftingActs.forEach(act => {
+                    duplication[act] = (duplication[act] || 0) + gb.crafting_duplic;
+                });
+            }
+            // Apply Efficiency Bonus
+            if (gb.crafting_effic) {
+                craftingActs.forEach(act => {
+                    efficiency[act] = (efficiency[act] || 0) + gb.crafting_effic;
+                });
+            }
+        }
+
         // 5. Rune Bonuses
         Object.entries(equipment).forEach(([slot, item]) => {
             if (slot.startsWith('rune_') && item) {

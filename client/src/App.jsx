@@ -323,15 +323,6 @@ function App() {
     if (socket && Object.keys(settings).length > 0 && settingsFromSyncRef.current !== settingsStr) {
       socket.emit('set_settings', { settings });
     }
-
-    // Also update local session metadata to keep it in sync without logout/login
-    if (session?.user && Object.keys(settings).length > 0 && settingsFromSyncRef.current !== settingsStr) {
-      // Use a small delay or debouncing if needed, but for now we'll do it direct
-      // throttle this if performance issues arise
-      supabase.auth.updateUser({
-        data: { game_settings: settings }
-      }).catch(e => console.error("[SETTINGS] Auth sync error:", e));
-    }
   }, [settings, socket, session]);
 
   // characterSelected is no longer needed, we use selectedCharacter (charId) as the source of truth
@@ -440,13 +431,6 @@ function App() {
     // 1. Save to character state if socket is connected
     if (socket) {
       socket.emit('set_theme', { themeId: newTheme });
-    }
-
-    // 2. Save to global user preference in Supabase metadata
-    if (session?.user) {
-      supabase.auth.updateUser({
-        data: { theme: newTheme }
-      }).catch(err => console.error("Error updating theme metadata:", err));
     }
   }, [socket, session]);
 
@@ -1102,6 +1086,60 @@ function App() {
       if (socket) socket.disconnect();
     }
   }, [socket]);
+
+  // ── Background/Foreground Reconnection (Mobile & Tab Switch) ──
+  const backgroundTimestampRef = useRef(null);
+
+  useEffect(() => {
+    if (!socket || !session?.access_token) return;
+
+    const STALE_THRESHOLD_MS = 10_000; // 10s in background = request full refresh
+
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'hidden') {
+        // User left the tab — record when they left
+        backgroundTimestampRef.current = Date.now();
+        return;
+      }
+
+      // User came back to the tab
+      const wentBackgroundAt = backgroundTimestampRef.current;
+      backgroundTimestampRef.current = null;
+      const elapsedMs = wentBackgroundAt ? Date.now() - wentBackgroundAt : 0;
+
+      console.log(`[VISIBILITY] Tab resumed after ${Math.round(elapsedMs / 1000)}s`);
+
+      if (!socket.connected) {
+        // Socket disconnected while in background — reconnect
+        console.log('[VISIBILITY] Socket disconnected. Refreshing token and reconnecting...');
+        setIsConnecting(true);
+        setConnectionError(null);
+
+        try {
+          const { data: { session: refreshedSession }, error } = await supabase.auth.refreshSession();
+          if (refreshedSession && !error) {
+            setSession(refreshedSession);
+            socket.auth.token = refreshedSession.access_token;
+            socket.connect();
+          } else {
+            console.error('[VISIBILITY] Token refresh failed:', error);
+            // Fallback: try connecting with current token anyway
+            socket.connect();
+          }
+        } catch (err) {
+          console.error('[VISIBILITY] Error during reconnection:', err);
+          socket.connect();
+        }
+      } else if (elapsedMs >= STALE_THRESHOLD_MS) {
+        // Socket still connected but state is likely stale — request full refresh
+        console.log('[VISIBILITY] Requesting full state refresh...');
+        socket.emit('get_status');
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [socket, session]);
 
   const handleCharacterSelect = (charId) => {
     setCanSpin(false); // Reset to false while loading new char
