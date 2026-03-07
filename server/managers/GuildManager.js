@@ -193,8 +193,11 @@ export class GuildManager {
             `)
             .eq('guild_id', guild.id);
 
+        const maxMembers = 10 + (guild.guild_hall_level || 0) * 2;
+
         return {
             ...guild,
+            maxMembers,
             myMemberId: characterId,
             myRole: member.role,
             members: members.map(m => {
@@ -218,7 +221,7 @@ export class GuildManager {
         };
     }
 
-    async searchGuilds(query, countryCode = null) {
+    async searchGuilds(query, countryCode = null, characterId = null) {
         const cleanQuery = (query || "").trim();
 
         let queryBuilder = this.supabase.from('guilds').select('*');
@@ -243,7 +246,29 @@ export class GuildManager {
             .limit(20);
 
         if (error) throw error;
-        return data || [];
+
+        let guilds = data || [];
+
+        // If characterId is provided, check for pending applications
+        if (characterId && guilds.length > 0) {
+            const guildIds = guilds.map(g => g.id);
+            const { data: requests, error: reqErr } = await this.supabase
+                .from('guild_requests')
+                .select('guild_id')
+                .eq('character_id', characterId)
+                .in('guild_id', guildIds)
+                .eq('status', 'PENDING');
+
+            if (!reqErr && requests) {
+                const pendingGuildIds = new Set(requests.map(r => r.guild_id));
+                guilds = guilds.map(g => ({
+                    ...g,
+                    my_request_pending: pendingGuildIds.has(g.id)
+                }));
+            }
+        }
+
+        return guilds;
     }
 
     async leaveGuild(char) {
@@ -319,13 +344,16 @@ export class GuildManager {
             throw new Error(`You need to be at least level ${guild.min_level} to join this guild`);
         }
 
-        // Count members (max 10 for now)
+        // Count members (dynamic max based on Guild Hall level: 10 + level * 2)
+        const guildHallLevel = guild.guild_hall_level || 0;
+        const maxMembers = 10 + (guildHallLevel * 2);
+
         const { count } = await this.supabase
             .from('guild_members')
             .select('*', { count: 'exact', head: true })
             .eq('guild_id', guildId);
 
-        if (count >= 10) throw new Error("Guild is full");
+        if (count >= maxMembers) throw new Error("Guild is full");
 
         // If OPEN mode, join directly
         if (guild.join_mode === 'OPEN') {
@@ -469,12 +497,22 @@ export class GuildManager {
             throw new Error("Player is already in another guild");
         }
 
+        // Count members (dynamic max based on Guild Hall level)
+        const { data: guildData } = await this.supabase
+            .from('guilds')
+            .select('guild_hall_level')
+            .eq('id', member.guild_id)
+            .single();
+
+        const guildHallLevel = guildData?.guild_hall_level || 0;
+        const maxMembers = 10 + (guildHallLevel * 2);
+
         const { count } = await this.supabase
             .from('guild_members')
             .select('*', { count: 'exact', head: true })
             .eq('guild_id', member.guild_id);
 
-        if (count >= 10) throw new Error("Guild is full");
+        if (count >= maxMembers) throw new Error("Guild is full");
 
         const { error: insErr } = await this.supabase
             .from('guild_members')
@@ -901,5 +939,180 @@ export class GuildManager {
                 });
             }
         }
+    }
+
+    async upgradeBuilding(char, { buildingType }) {
+        console.log(`[GUILD-MANAGER-DEBUG] upgradeBuilding received buildingType:`, buildingType);
+        if (!char) throw new Error("Character not found");
+        if (buildingType !== 'GUILD_HALL') throw new Error("Invalid building type");
+
+        // 1. Find membership and guild
+        const { data: member, error: memberError } = await this.supabase
+            .from('guild_members')
+            .select('guild_id, role')
+            .eq('character_id', char.id)
+            .maybeSingle();
+
+        if (memberError || !member) throw new Error("Character is not in a guild");
+
+        // 2. Check permissions (Leader or Officer)
+        const hasPerm = await this.hasPermission(char.id, 'manage_roles'); // Using manage_roles as a proxy for high-level management
+        if (!hasPerm && member.role !== 'LEADER') {
+            throw new Error("You don't have permission to upgrade buildings");
+        }
+
+        const { data: guild, error: guildError } = await this.supabase
+            .from('guilds')
+            .select('*')
+            .eq('id', member.guild_id)
+            .single();
+
+        if (guildError || !guild) throw new Error("Guild not found");
+
+        const currentLevel = guild.guild_hall_level || 0;
+        if (currentLevel >= 10) throw new Error("Guild Hall is already at maximum level");
+
+        // 3. Calculate Costs
+        const nextLevel = currentLevel + 1;
+        const silverCost = nextLevel * 50000;
+        const materialReq = {
+            'T1_WOOD': 1000,
+            'T1_ORE': 1000,
+            'T1_HIDE': 1000,
+            'T1_FIBER': 1000,
+            'T1_FISH': 1000,
+            'T1_HERB': 1000
+        };
+
+        // 4. Validate Bank Resources
+        const bankSilver = BigInt(guild.bank_silver || 0);
+        if (bankSilver < BigInt(silverCost)) {
+            throw new Error(`Insufficient Bank Silver! Need ${silverCost.toLocaleString()}`);
+        }
+
+        const bankItems = guild.bank_items || {};
+        for (const [itemId, amount] of Object.entries(materialReq)) {
+            if ((bankItems[itemId] || 0) < amount) {
+                throw new Error(`Insufficient Bank Materials! Need 1,000 of ${itemId.replace(/_/g, ' ')}`);
+            }
+        }
+
+        // 5. Deduct from Bank
+        const newBankSilver = bankSilver - BigInt(silverCost);
+        const newBankItems = { ...bankItems };
+        for (const [itemId, amount] of Object.entries(materialReq)) {
+            newBankItems[itemId] = (newBankItems[itemId] || 0) - amount;
+        }
+
+        // 6. Update DB
+        const { error: updateError } = await this.supabase
+            .from('guilds')
+            .update({
+                guild_hall_level: nextLevel,
+                bank_silver: newBankSilver.toString(),
+                bank_items: newBankItems
+            })
+            .eq('id', guild.id);
+
+        if (updateError) {
+            console.error("[GUILD-UPGRADE] Error updating level:", updateError);
+            throw new Error("Internal server error during upgrade");
+        }
+
+        // 7. Persist Character state
+        this.gameManager.markDirty(char.id);
+        await this.gameManager.persistCharacter(char.id);
+
+        console.log(`[GUILD-UPGRADE] Guild ${guild.name} upgraded Guild Hall to Level ${nextLevel} by ${char.name}`);
+
+        return { success: true, nextLevel };
+    }
+
+    async donateToBank(char, { silver = 0, items = {} }) {
+        if (!char) throw new Error("Character not found");
+
+        const silverToDonate = Math.max(0, parseInt(silver) || 0);
+        const hasItems = items && Object.keys(items).length > 0;
+
+        if (silverToDonate === 0 && !hasItems) {
+            throw new Error("Nothing to donate");
+        }
+
+        // 1. Find membership
+        const { data: member, error: memberError } = await this.supabase
+            .from('guild_members')
+            .select('guild_id')
+            .eq('character_id', char.id)
+            .maybeSingle();
+
+        if (memberError || !member) throw new Error("Character is not in a guild");
+
+        // 2. Validate Silver
+        if (silverToDonate > 0 && (char.state.silver || 0) < silverToDonate) {
+            throw new Error("Insufficient Silver");
+        }
+
+        // 3. Validate Items
+        const invManager = this.gameManager.inventoryManager;
+        if (hasItems) {
+            // Validate that only allowed materials are donated (Exclude Runes/Shards)
+            for (const itemId of Object.keys(items)) {
+                if (itemId.includes('_RUNE_') || itemId.includes('_SHARD')) {
+                    throw new Error(`Item ${itemId} cannot be donated to the Guild Bank`);
+                }
+            }
+
+            if (!invManager.hasItems(char, items)) {
+                throw new Error("Insufficient items for donation");
+            }
+        }
+
+        // 4. Fetch Guild Data
+        const { data: guild, error: guildError } = await this.supabase
+            .from('guilds')
+            .select('id, name, bank_silver, bank_items')
+            .eq('id', member.guild_id)
+            .single();
+
+        if (guildError || !guild) throw new Error("Guild not found");
+
+        // 5. Update Balances
+        const newBankSilver = BigInt(guild.bank_silver || 0) + BigInt(silverToDonate);
+        const newBankItems = { ...(guild.bank_items || {}) };
+
+        if (hasItems) {
+            for (const [itemId, amount] of Object.entries(items)) {
+                const safeAmount = Math.max(0, parseInt(amount) || 0);
+                if (safeAmount > 0) {
+                    newBankItems[itemId] = (parseInt(newBankItems[itemId]) || 0) + safeAmount;
+                }
+            }
+        }
+
+        // 6. Deduct from Character
+        if (silverToDonate > 0) char.state.silver -= silverToDonate;
+        if (hasItems) invManager.consumeItems(char, items);
+
+        // 7. Update DB
+        const { error: updateError } = await this.supabase
+            .from('guilds')
+            .update({
+                bank_silver: newBankSilver.toString(),
+                bank_items: newBankItems
+            })
+            .eq('id', guild.id);
+
+        if (updateError) {
+            console.error("[GUILD-BANK] Error updating bank:", updateError);
+            throw new Error("Internal server error during donation");
+        }
+
+        // 8. Persist Character state
+        this.gameManager.markDirty(char.id);
+        await this.gameManager.persistCharacter(char.id);
+
+        console.log(`[GUILD-BANK] ${char.name} donated ${silverToDonate} silver and items to ${guild.name}`);
+
+        return { success: true };
     }
 }

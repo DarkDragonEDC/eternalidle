@@ -1,5 +1,29 @@
 # Patch Notes - Eternal Idle
 
+## v1.3.5
+
+### 🏰 Gestão de Guilda: Guild Hall & Bank
+- **Guild Hall**: Novo sistema de níveis para a sede da guilda. Aumente o nível do seu Guild Hall para expandir o limite máximo de membros (até 30).
+- **Guild Bank**: Implementado o Banco da Guilda para armazenamento compartilhado.
+    - **Depósitos**: Membros agora podem doar Prata e recursos de coleta (T1-T10) diretamente para o banco.
+    - **Upgrade por Banco**: As melhorias do Guild Hall agora consomem recursos (Prata e Materiais) diretamente do saldo do Banco da Guilda, incentivando a cooperação entre os membros.
+- **Transparência**: Adicionada a exibição de quantidades exatas (ex: 50.000 em vez de 50k) em todas as abas do banco para melhor precisão.
+- **Identificação Visual**: Itens no banco agora exibem claramente seu Tier (T1-T10) no nome para facilitar a gestão.
+
+### 📱 Otimização Mobile (AAA)
+- **Interface Responsiva**: Todo o painel de Guilda (Membros, Building e Bank) foi redesenhado para dispositivos móveis.
+- **Grids de 2 Colunas**: Requisitos de upgrade e inventário do banco agora usam um layout de duas colunas no mobile, aproveitando melhor o espaço vertical.
+- **Formulários Empilhados**: O sistema de doação foi otimizado com campos empilhados, facilitando o preenchimento e clique em telas menores.
+- **Cards Compactos**: Ícones, fontes e espaçamentos foram reduzidos no mobile para garantir uma navegação fluida e sem excesso de scroll.
+
+### ⚙️ Ajustes e Correções
+- **Aba Padrão**: A aba "Home" (Membros) voltou a ser a aba principal e padrão ao abrir o painel da guilda.
+- **Botões MAX**: Adicionados botões de "MAX" nos campos de doação de Prata e Itens.
+- **Correção de Upgrade**: Corrigido um erro de "Invalid building type" que impedia o upgrade de construções em certas condições.
+- **Versão 1.3.5**: Atualização obrigatória para sincronia de novos sistemas de construção e banco.
+
+---
+
 ## v1.3.4
 
 ### 🛡️ Guildas - Novos Rankings e XP

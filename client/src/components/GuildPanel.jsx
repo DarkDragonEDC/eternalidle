@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Users, Sword, Swords, Trophy, Settings, Plus, Info, Check, X, Coins, Sparkles, Tag, User, Zap, LogOut, Edit2, Save, Menu, Home, Building2, ChevronDown, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
+import { Shield, Users, Sword, Swords, Trophy, Settings, Plus, Info, Check, X, Coins, Sparkles, Tag, User, Zap, LogOut, Edit2, Save, Menu, Home, Building2, ChevronDown, ArrowUp, ArrowDown, Trash2, Landmark } from 'lucide-react';
 import { formatSilver } from '@utils/format';
 import { COUNTRIES } from '../../../shared/countries';
 
@@ -38,7 +38,7 @@ const GUILD_PERMISSIONS = [
     { id: 'change_member_roles', label: 'Manage Ranks', desc: 'Can promote/demote members' }
 ];
 
-const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
+const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
     if (!guild) return null;
 
     const members = guild.members || [];
@@ -81,6 +81,14 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
     const [deleteRoleConfirm, setDeleteRoleConfirm] = useState(null); // { id, name }
     // Kick Member Confirmation
     const [kickConfirm, setKickConfirm] = useState(null); // { id, name }
+
+    // Building Selector States
+    const [selectedBuilding, setSelectedBuilding] = useState('BANK'); // 'BANK' | 'GUILD_HALL'
+    const [showBuildingDropdown, setShowBuildingDropdown] = useState(false);
+    const [donationSilver, setDonationSilver] = useState('');
+    const [selectedDonationItem, setSelectedDonationItem] = useState(null);
+    const [donationItemAmount, setDonationItemAmount] = useState('');
+    const [donationPending, setDonationPending] = useState(false);
 
     useEffect(() => {
         if (!socket) return;
@@ -642,11 +650,483 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
 
                     {activeTab === 'BUILDING' && (
-                        <div style={{ padding: '20px', textAlign: 'center', color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
-                            <Building2 size={40} style={{ marginBottom: '15px', opacity: 0.2 }} />
-                            <p>Guild Building Area</p>
-                            <p style={{ fontSize: '0.7rem' }}>Expand your territory and unlock exclusive bonuses.</p>
-                            <span style={{ background: 'rgba(212,175,55,0.1)', color: 'var(--accent)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.6rem', marginTop: '10px', display: 'inline-block' }}>COMING SOON</span>
+                        <div style={{ padding: '20px' }}>
+                            {/* Building Selector */}
+                            <div style={{ marginBottom: '20px', position: 'relative' }}>
+                                <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 'bold', marginBottom: '8px', letterSpacing: '0.5px' }}>SELECT BUILDING</div>
+                                <div
+                                    onClick={() => setShowBuildingDropdown(!showBuildingDropdown)}
+                                    style={{
+                                        background: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        borderRadius: '12px',
+                                        padding: '12px 16px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s ease'
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        {selectedBuilding === 'GUILD_HALL' ? <Building2 size={18} color="var(--accent)" /> : <Landmark size={18} color="var(--accent)" />}
+                                        <span style={{ color: '#fff', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                                            {selectedBuilding === 'GUILD_HALL' ? 'Guild Hall' : 'Bank'}
+                                        </span>
+                                    </div>
+                                    <ChevronDown size={16} color="rgba(255,255,255,0.3)" style={{ transform: showBuildingDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
+                                </div>
+
+                                <AnimatePresence>
+                                    {showBuildingDropdown && (
+                                        <>
+                                            <div
+                                                onClick={() => setShowBuildingDropdown(false)}
+                                                style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100 }}
+                                            />
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -10 }}
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: 'calc(100% + 8px)',
+                                                    left: 0,
+                                                    right: 0,
+                                                    background: '#1a1a1a',
+                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                    borderRadius: '12px',
+                                                    overflow: 'hidden',
+                                                    zIndex: 101,
+                                                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+                                                }}
+                                            >
+                                                {[
+                                                    { id: 'BANK', name: 'Bank', icon: Landmark },
+                                                    { id: 'GUILD_HALL', name: 'Guild Hall', icon: Building2 }
+                                                ].map(b => (
+                                                    <div
+                                                        key={b.id}
+                                                        onClick={() => {
+                                                            setSelectedBuilding(b.id);
+                                                            setShowBuildingDropdown(false);
+                                                        }}
+                                                        style={{
+                                                            padding: '12px 16px',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '12px',
+                                                            cursor: 'pointer',
+                                                            background: selectedBuilding === b.id ? 'rgba(212,175,55,0.1)' : 'transparent',
+                                                            transition: 'background 0.2s ease'
+                                                        }}
+                                                    >
+                                                        <b.icon size={16} color={selectedBuilding === b.id ? 'var(--accent)' : 'rgba(255,255,255,0.4)'} />
+                                                        <span style={{ color: selectedBuilding === b.id ? '#fff' : 'rgba(255,255,255,0.6)', fontSize: '0.75rem', fontWeight: selectedBuilding === b.id ? 'bold' : 'normal' }}>
+                                                            {b.name}
+                                                        </span>
+                                                        {selectedBuilding === b.id && <Check size={14} color="var(--accent)" style={{ marginLeft: 'auto' }} />}
+                                                    </div>
+                                                ))}
+                                            </motion.div>
+                                        </>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+
+                            {selectedBuilding === 'GUILD_HALL' && (
+                                <div style={{
+                                    background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(0,0,0,0) 100%)',
+                                    borderRadius: '20px',
+                                    border: '1px solid rgba(212, 175, 55, 0.2)',
+                                    padding: isMobile ? '15px' : '20px',
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isMobile ? '15px' : '20px' }}>
+                                        <div>
+                                            <h3 style={{ color: 'var(--accent)', margin: 0, fontSize: isMobile ? '1rem' : '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <Building2 size={isMobile ? 20 : 24} /> GUILD HALL
+                                            </h3>
+                                            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', margin: '5px 0 0 0' }}>Expand your member slots.</p>
+                                        </div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ color: '#fff', fontSize: isMobile ? '1.1rem' : '1.2rem', fontWeight: 'bold' }}>LVL {guild.guild_hall_level || 0}</div>
+                                            <div style={{ color: 'var(--accent)', fontSize: '0.6rem', fontWeight: 'bold' }}>MAX LVL 10</div>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(140px, 1fr))', gap: isMobile ? '10px' : '15px', marginBottom: isMobile ? '20px' : '25px' }}>
+                                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: isMobile ? '10px' : '12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.6rem', marginBottom: '5px', textTransform: 'uppercase' }}>Current Slots</div>
+                                            <div style={{ color: '#fff', fontSize: isMobile ? '1rem' : '1.1rem', fontWeight: 'bold' }}>{10 + (guild.guild_hall_level || 0) * 2} <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)' }}>Members</span></div>
+                                        </div>
+                                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: isMobile ? '10px' : '12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.6rem', marginBottom: '5px', textTransform: 'uppercase' }}>Next Level</div>
+                                            <div style={{ color: '#fff', fontSize: isMobile ? '1rem' : '1.1rem', fontWeight: 'bold' }}>
+                                                {(guild.guild_hall_level || 0) < 10 ? 10 + ((guild.guild_hall_level || 0) + 1) * 2 : 'MAX'}
+                                                {(guild.guild_hall_level || 0) < 10 && <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)' }}> Slots</span>}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {(guild.guild_hall_level || 0) < 10 ? (
+                                        <>
+                                            <div style={{ marginBottom: '15px' }}>
+                                                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem', fontWeight: 'bold', marginBottom: '10px' }}>UPGRADE REQUIREMENTS</div>
+                                                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(120px, 1fr))', gap: '10px' }}>
+                                                    {/* Silver Cost */}
+                                                    <div style={{
+                                                        background: 'rgba(0,0,0,0.3)',
+                                                        padding: isMobile ? '8px' : '10px',
+                                                        borderRadius: '10px',
+                                                        border: '1px solid rgba(255,255,255,0.05)',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: isMobile ? '6px' : '10px'
+                                                    }}>
+                                                        <Coins size={isMobile ? 14 : 16} color="#ffd700" />
+                                                        <div>
+                                                            <div style={{ color: (guild.bank_silver || 0) >= ((guild.guild_hall_level || 0) + 1) * 50000 ? '#44ff44' : '#ff4444', fontSize: isMobile ? '0.7rem' : '0.75rem', fontWeight: 'bold' }}>
+                                                                {(((guild.guild_hall_level || 0) + 1) * 50000).toLocaleString()}
+                                                            </div>
+                                                            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.55rem' }}>Bank Silver</div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Material Costs */}
+                                                    {[
+                                                        { id: 'T1_WOOD', name: 'Wood', icon: '/items/T1_WOOD.webp' },
+                                                        { id: 'T1_ORE', name: 'Ore', icon: '/items/T1_ORE.webp' },
+                                                        { id: 'T1_HIDE', name: 'Hide', icon: '/items/T1_HIDE.webp' },
+                                                        { id: 'T1_FIBER', name: 'Fiber', icon: '/items/T1_FIBER.webp' },
+                                                        { id: 'T1_FISH', name: 'Fish', icon: '/items/T1_FISH.webp' },
+                                                        { id: 'T1_HERB', name: 'Herb', icon: '/items/T1_HERB.webp' }
+                                                    ].map(mat => {
+                                                        const amount = guild.bank_items?.[mat.id] || 0;
+                                                        const hasEnough = amount >= 1000;
+
+                                                        return (
+                                                            <div key={mat.id} style={{
+                                                                background: 'rgba(0,0,0,0.3)',
+                                                                padding: isMobile ? '8px' : '10px',
+                                                                borderRadius: '10px',
+                                                                border: '1px solid rgba(255,255,255,0.05)',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: isMobile ? '6px' : '10px'
+                                                            }}>
+                                                                <div style={{ width: isMobile ? '20px' : '24px', height: isMobile ? '20px' : '24px', position: 'relative' }}>
+                                                                    <img src={mat.icon} alt={mat.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                                                </div>
+                                                                <div>
+                                                                    <div style={{ color: hasEnough ? '#44ff44' : '#ff4444', fontSize: isMobile ? '0.7rem' : '0.75rem', fontWeight: 'bold' }}>
+                                                                        {amount.toLocaleString()} / 1K
+                                                                    </div>
+                                                                    <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.55rem' }}>Bank {mat.name}</div>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+
+                                            <motion.button
+                                                whileHover={(guild.myRole === 'LEADER' || guild.myRole === 'OFFICER') ? { scale: 1.02 } : {}}
+                                                whileTap={(guild.myRole === 'LEADER' || guild.myRole === 'OFFICER') ? { scale: 0.98 } : {}}
+                                                disabled={guild.myRole !== 'LEADER' && guild.myRole !== 'OFFICER'}
+                                                onClick={() => {
+                                                    socket?.emit('upgrade_guild_building', { buildingType: 'GUILD_HALL' });
+                                                }}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '12px',
+                                                    background: (guild.myRole === 'LEADER' || guild.myRole === 'OFFICER') ? 'var(--accent)' : 'rgba(255,255,255,0.05)',
+                                                    border: 'none',
+                                                    borderRadius: '12px',
+                                                    color: (guild.myRole === 'LEADER' || guild.myRole === 'OFFICER') ? '#000' : 'rgba(255,255,255,0.2)',
+                                                    fontWeight: 'bold',
+                                                    fontSize: '0.9rem',
+                                                    cursor: (guild.myRole === 'LEADER' || guild.myRole === 'OFFICER') ? 'pointer' : 'not-allowed',
+                                                    boxShadow: (guild.myRole === 'LEADER' || guild.myRole === 'OFFICER') ? '0 4px 15px rgba(212, 175, 55, 0.3)' : 'none'
+                                                }}
+                                            >
+                                                {guild.myRole !== 'LEADER' && guild.myRole !== 'OFFICER' ? 'ONLY LEADER/OFFICER' : 'UPGRADE TO LVL ' + ((guild.guild_hall_level || 0) + 1)}
+                                            </motion.button>
+                                        </>
+                                    ) : (
+                                        <div style={{ textAlign: 'center', padding: '20px', background: 'rgba(212, 175, 55, 0.1)', borderRadius: '12px', border: '1px solid var(--accent)' }}>
+                                            <Sparkles size={32} color="var(--accent)" style={{ marginBottom: '10px' }} />
+                                            <div style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '0.9rem' }}>MAXIMUM LEVEL REACHED</div>
+                                            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem' }}>Your Guild Hall is at its peak power!</div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {selectedBuilding === 'BANK' && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    {/* Donation Section */}
+                                    <div style={{
+                                        background: 'rgba(255,255,255,0.03)',
+                                        borderRadius: '20px',
+                                        border: '1px solid rgba(255,255,255,0.05)',
+                                        padding: isMobile ? '15px' : '20px'
+                                    }}>
+                                        <div style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--accent)', letterSpacing: '1px', marginBottom: '15px' }}>MAKE A DONATION</div>
+
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                            {/* Silver Donation */}
+                                            <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '10px' }}>
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                                        <div style={{ position: 'relative', flex: 1 }}>
+                                                            <input
+                                                                type="number"
+                                                                placeholder="Amount of silver..."
+                                                                value={donationSilver}
+                                                                onChange={(e) => setDonationSilver(e.target.value)}
+                                                                style={{
+                                                                    width: '100%',
+                                                                    padding: isMobile ? '10px 10px 10px 35px' : '12px 12px 12px 40px',
+                                                                    background: 'rgba(0,0,0,0.3)',
+                                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                                    borderRadius: '12px',
+                                                                    color: '#fff',
+                                                                    fontSize: '0.85rem',
+                                                                    outline: 'none'
+                                                                }}
+                                                            />
+                                                            <Coins size={16} color="#ffd700" style={{ position: 'absolute', left: isMobile ? '10px' : '14px', top: '50%', transform: 'translateY(-50%)' }} />
+                                                        </div>
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={() => setDonationSilver(gameState?.state?.silver?.toString() || '0')}
+                                                            style={{
+                                                                padding: '0 12px',
+                                                                background: 'rgba(212, 175, 55, 0.1)',
+                                                                border: '1px solid rgba(212, 175, 55, 0.3)',
+                                                                borderRadius: '10px',
+                                                                color: 'var(--accent)',
+                                                                fontSize: '0.65rem',
+                                                                fontWeight: '900',
+                                                                cursor: 'pointer'
+                                                            }}
+                                                        >
+                                                            MAX
+                                                        </motion.button>
+                                                    </div>
+                                                </div>
+                                                <motion.button
+                                                    whileHover={{ scale: 1.05 }}
+                                                    whileTap={{ scale: 0.95 }}
+                                                    disabled={donationPending || !donationSilver || parseInt(donationSilver) <= 0}
+                                                    onClick={() => {
+                                                        const amount = parseInt(donationSilver);
+                                                        if (isNaN(amount) || amount <= 0) return;
+                                                        setDonationPending(true);
+                                                        socket?.emit('donate_to_guild_bank', { silver: amount });
+                                                        setDonationSilver('');
+                                                        setTimeout(() => setDonationPending(false), 1000);
+                                                    }}
+                                                    style={{
+                                                        padding: isMobile ? '12px' : '0 20px',
+                                                        background: 'var(--accent)',
+                                                        border: 'none',
+                                                        borderRadius: '12px',
+                                                        color: '#000',
+                                                        fontWeight: 'bold',
+                                                        fontSize: '0.75rem',
+                                                        cursor: donationPending ? 'not-allowed' : 'pointer',
+                                                        opacity: (!donationSilver || parseInt(donationSilver) <= 0) ? 0.3 : 1
+                                                    }}
+                                                >
+                                                    DONATE SILVER
+                                                </motion.button>
+                                            </div>
+
+                                            <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '5px 0' }} />
+
+                                            {/* Item Donation */}
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                                <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '10px' }}>
+                                                    <div style={{ flex: isMobile ? 'none' : 2, position: 'relative' }}>
+                                                        <select
+                                                            value={selectedDonationItem?.id || ''}
+                                                            onChange={(e) => {
+                                                                const itemId = e.target.value;
+                                                                if (!itemId) {
+                                                                    setSelectedDonationItem(null);
+                                                                    return;
+                                                                }
+                                                                const amount = Object.entries(gameState?.state?.inventory || {}).reduce((sum, [key, val]) => {
+                                                                    if (key === itemId) return sum + (typeof val === 'object' ? (val.amount || 0) : val);
+                                                                    return sum;
+                                                                }, 0);
+                                                                setSelectedDonationItem({ id: itemId, max: amount });
+                                                            }}
+                                                            style={{
+                                                                width: '100%',
+                                                                padding: '12px',
+                                                                background: 'rgba(0,0,0,0.3)',
+                                                                border: '1px solid rgba(255,255,255,0.1)',
+                                                                borderRadius: '12px',
+                                                                color: '#fff',
+                                                                fontSize: '0.8rem',
+                                                                outline: 'none',
+                                                                appearance: 'none'
+                                                            }}
+                                                        >
+                                                            <option value="">Select an item...</option>
+                                                            {Object.entries(gameState?.state?.inventory || {})
+                                                                .filter(([key, val]) => {
+                                                                    const amount = typeof val === 'object' ? (val.amount || 0) : val;
+                                                                    const isRunic = key.includes('_RUNE_') || key.includes('_SHARD');
+                                                                    return amount > 0 && !isRunic && (key.includes('_WOOD') || key.includes('_ORE') || key.includes('_HIDE') || key.includes('_FIBER') || key.includes('_FISH') || key.includes('_HERB'));
+                                                                })
+                                                                .map(([id, val]) => (
+                                                                    <option key={id} value={id}>
+                                                                        {id.replace(/_/g, ' ')} ({(typeof val === 'object' ? val.amount : val).toLocaleString()})
+                                                                    </option>
+                                                                ))}
+                                                        </select>
+                                                        <ChevronDown size={14} color="rgba(255,255,255,0.3)" style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                                                    </div>
+                                                    <div style={{ flex: 1, display: 'flex', gap: '8px' }}>
+                                                        <input
+                                                            type="number"
+                                                            placeholder="Qty"
+                                                            value={donationItemAmount}
+                                                            onChange={(e) => setDonationItemAmount(e.target.value)}
+                                                            style={{
+                                                                flex: 1,
+                                                                minWidth: 0,
+                                                                padding: '12px',
+                                                                background: 'rgba(0,0,0,0.3)',
+                                                                border: '1px solid rgba(255,255,255,0.1)',
+                                                                borderRadius: '12px',
+                                                                color: '#fff',
+                                                                fontSize: '0.85rem',
+                                                                outline: 'none',
+                                                                textAlign: 'center'
+                                                            }}
+                                                        />
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={() => {
+                                                                if (selectedDonationItem) {
+                                                                    setDonationItemAmount(selectedDonationItem.max.toString());
+                                                                }
+                                                            }}
+                                                            style={{
+                                                                padding: '0 12px',
+                                                                background: 'rgba(255,255,255,0.05)',
+                                                                border: '1px solid rgba(255,255,255,0.1)',
+                                                                borderRadius: '10px',
+                                                                color: 'rgba(255,255,255,0.5)',
+                                                                fontSize: '0.65rem',
+                                                                fontWeight: '900',
+                                                                cursor: 'pointer'
+                                                            }}
+                                                        >
+                                                            MAX
+                                                        </motion.button>
+                                                    </div>
+                                                </div>
+
+                                                <motion.button
+                                                    whileHover={{ scale: 1.02 }}
+                                                    whileTap={{ scale: 0.98 }}
+                                                    disabled={donationPending || !selectedDonationItem || !donationItemAmount}
+                                                    onClick={() => {
+                                                        const amount = parseInt(donationItemAmount);
+                                                        if (isNaN(amount) || amount <= 0 || !selectedDonationItem) return;
+                                                        if (amount > selectedDonationItem.max) return;
+
+                                                        setDonationPending(true);
+                                                        socket?.emit('donate_to_guild_bank', {
+                                                            items: { [selectedDonationItem.id]: amount }
+                                                        });
+                                                        setDonationItemAmount('');
+                                                        setSelectedDonationItem(null);
+                                                        setTimeout(() => setDonationPending(false), 1000);
+                                                    }}
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '12px',
+                                                        background: 'var(--accent)',
+                                                        border: 'none',
+                                                        borderRadius: '12px',
+                                                        color: '#000',
+                                                        fontWeight: 'bold',
+                                                        fontSize: '0.8rem',
+                                                        cursor: donationPending ? 'not-allowed' : 'pointer',
+                                                        opacity: (!selectedDonationItem || !donationItemAmount) ? 0.3 : 1
+                                                    }}
+                                                >
+                                                    DONATE ITEM
+                                                </motion.button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Bank Balances Card */}
+                                    <div style={{
+                                        background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(0,0,0,0) 100%)',
+                                        borderRadius: '20px',
+                                        border: '1px solid rgba(212, 175, 55, 0.2)',
+                                        padding: isMobile ? '15px' : '20px'
+                                    }}>
+                                        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', marginBottom: isMobile ? '15px' : '20px', gap: '10px' }}>
+                                            <h3 style={{ color: 'var(--accent)', margin: 0, fontSize: isMobile ? '1rem' : '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <Landmark size={isMobile ? 20 : 24} /> GUILD BANK
+                                            </h3>
+                                            <div style={{ color: '#fff', fontSize: isMobile ? '1rem' : '1.1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <Coins size={isMobile ? 16 : 18} color="#ffd700" />
+                                                {formatSilver(guild.bank_silver || 0)}
+                                            </div>
+                                        </div>
+
+                                        {/* Item Balances Grid */}
+                                        <div style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(130px, 1fr))',
+                                            gap: isMobile ? '8px' : '10px',
+                                            maxHeight: isMobile ? '300px' : '200px',
+                                            overflowY: 'auto',
+                                            paddingRight: '5px'
+                                        }}>
+                                            {Object.entries(guild.bank_items || {}).length > 0 ? (
+                                                Object.entries(guild.bank_items).sort().map(([itemId, amount]) => (
+                                                    <div key={itemId} style={{
+                                                        background: 'rgba(255,255,255,0.03)',
+                                                        padding: isMobile ? '8px' : '10px',
+                                                        borderRadius: '12px',
+                                                        border: '1px solid rgba(255,255,255,0.05)',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: isMobile ? '6px' : '10px'
+                                                    }}>
+                                                        <div style={{ width: isMobile ? '18px' : '24px', height: isMobile ? '18px' : '24px' }}>
+                                                            <img src={`/items/${itemId.split('::')[0]}.webp`} alt={itemId} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                                        </div>
+                                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                                            <div style={{ color: '#fff', fontSize: isMobile ? '0.7rem' : '0.8rem', fontWeight: 'bold' }}>{amount.toLocaleString()}</div>
+                                                            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.5rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{itemId.replace(/_/g, ' ')}</div>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '20px', color: 'rgba(255,255,255,0.2)', fontSize: '0.75rem', fontStyle: 'italic' }}>
+                                                    The bank is empty.
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -721,10 +1201,20 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
                                             <label style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>Minimum Level</label>
                                             <input
                                                 type="number"
-                                                min="1"
+                                                min="0"
                                                 max="9999"
                                                 value={settingsMinLevel}
-                                                onChange={(e) => setSettingsMinLevel(Math.max(1, Math.min(9999, parseInt(e.target.value) || 1)))}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    if (val === '') {
+                                                        setSettingsMinLevel('');
+                                                        return;
+                                                    }
+                                                    const num = parseInt(val);
+                                                    if (!isNaN(num)) {
+                                                        setSettingsMinLevel(Math.max(0, Math.min(9999, num)));
+                                                    }
+                                                }}
                                                 style={{
                                                     width: '80px',
                                                     padding: '8px 12px',
@@ -775,7 +1265,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect }) => {
                                             onClick={() => {
                                                 setSettingsPending(true);
                                                 socket?.emit('update_guild_settings', {
-                                                    minLevel: settingsMinLevel,
+                                                    minLevel: Number(settingsMinLevel) || 1,
                                                     joinMode: settingsJoinMode
                                                 });
                                                 setTimeout(() => setSettingsPending(false), 2000);
@@ -2198,6 +2688,13 @@ const GuildPanel = ({ gameState, socket, isMobile, onInspect }) => {
     const [bgColor, setBgColor] = useState('#d4af37'); // Default gold
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [statusMessage, setStatusMessage] = useState(null);
+    const [isApplying, setIsApplying] = useState(false);
+
+    // Calculate player's total level
+    const playerLevel = useMemo(() => {
+        const skills = gameState?.state?.skills || {};
+        return Object.values(skills).reduce((sum, s) => sum + (s?.level || 1), 0);
+    }, [gameState?.state?.skills]);
     const [guildSummary, setGuildSummary] = useState('');
     const [activeTab, setActiveTab] = useState('search'); // 'search' or 'create'
     const [searchQuery, setSearchQuery] = useState('');
@@ -2326,7 +2823,7 @@ const GuildPanel = ({ gameState, socket, isMobile, onInspect }) => {
             <div className="scroll-container" style={{ flex: 1, padding: isMobile ? '2px 5px 5px' : '2px 10px 10px' }}>
                 <div style={{ maxWidth: '800px', margin: '0 auto', width: '100%' }}>
                     {gameState?.guild ? (
-                        <GuildDashboard guild={gameState.guild} socket={socket} isMobile={isMobile} onInspect={onInspect} />
+                        <GuildDashboard guild={gameState.guild} socket={socket} isMobile={isMobile} onInspect={onInspect} gameState={gameState} />
                     ) : (
                         <>
 
@@ -2627,7 +3124,7 @@ const GuildPanel = ({ gameState, socket, isMobile, onInspect }) => {
                                                                     <span style={{ color: 'var(--accent)', fontSize: '0.7rem', fontWeight: 'bold' }}>[{g.tag}]</span>
                                                                 </div>
                                                                 <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>
-                                                                    LVL {g.level || 1} • {g.summary || 'Stronger Together'}
+                                                                    LVL {g.level || 1} • MIN LVL {g.min_level || 1} • {g.summary || 'Stronger Together'}
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -2651,25 +3148,32 @@ const GuildPanel = ({ gameState, socket, isMobile, onInspect }) => {
                                                                 </div>
                                                             ) : (
                                                                 <motion.button
-                                                                    whileHover={{ scale: 1.05 }}
-                                                                    whileTap={{ scale: 0.95 }}
+                                                                    whileHover={!(isApplying || playerLevel < g.min_level) ? { scale: 1.05 } : {}}
+                                                                    whileTap={!(isApplying || playerLevel < g.min_level) ? { scale: 0.95 } : {}}
+                                                                    disabled={isApplying || playerLevel < g.min_level}
                                                                     onClick={() => {
+                                                                        if (isApplying || playerLevel < g.min_level) return;
+                                                                        setIsApplying(true);
                                                                         socket?.emit('apply_to_guild', { guildId: g.id });
                                                                         // Optimistic UI updates
                                                                         setSearchResults(prev => prev.map(searchGuild => searchGuild.id === g.id ? { ...searchGuild, my_request_pending: true } : searchGuild));
+
+                                                                        // Reset isApplying after a short delay or when search results return
+                                                                        setTimeout(() => setIsApplying(false), 2000);
                                                                     }}
                                                                     style={{
                                                                         padding: '6px 16px',
-                                                                        background: 'var(--accent)',
-                                                                        border: 'none',
+                                                                        background: playerLevel < g.min_level ? 'rgba(255,255,255,0.05)' : 'var(--accent)',
+                                                                        border: playerLevel < g.min_level ? '1px solid rgba(255,255,255,0.1)' : 'none',
                                                                         borderRadius: '8px',
-                                                                        color: '#000',
+                                                                        color: playerLevel < g.min_level ? 'rgba(255,255,255,0.2)' : '#000',
                                                                         fontSize: '0.7rem',
                                                                         fontWeight: '900',
-                                                                        cursor: 'pointer'
+                                                                        cursor: (isApplying || playerLevel < g.min_level) ? 'not-allowed' : 'pointer',
+                                                                        transition: '0.2s'
                                                                     }}
                                                                 >
-                                                                    JOIN
+                                                                    {playerLevel < g.min_level ? `REQ. LVL ${g.min_level}` : (g.join_mode === 'OPEN' ? 'JOIN' : 'APPLY')}
                                                                 </motion.button>
                                                             )}
                                                             <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>{g.member_count || 1}/{g.member_limit || 10}</span>
@@ -2755,7 +3259,7 @@ const GuildPanel = ({ gameState, socket, isMobile, onInspect }) => {
                                                             <span style={{ color: 'var(--accent)', fontSize: '0.7rem', fontWeight: 'bold' }}>[{guildTag || 'TAG'}]</span>
                                                         </div>
                                                         <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>
-                                                            LVL 1 {guildSummary ? `\u2022 ${guildSummary}` : '\u2022 Stronger Together'}
+                                                            LVL 1 • MIN LVL 1 {guildSummary ? `\u2022 ${guildSummary}` : '\u2022 Stronger Together'}
                                                         </div>
                                                     </div>
                                                 </div>
