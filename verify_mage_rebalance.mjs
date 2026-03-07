@@ -10,8 +10,8 @@ const tests = [
     { id: 'T10_CLOTH_ARMOR_Q4', expected: { hp: 300000, defense: 500 } },
     { id: 'T1_CLOTH_BOOTS', expected: { hp: 10314, defense: 17.2, speed: 30.3 } },
     { id: 'T10_CLOTH_BOOTS_Q4', expected: { hp: 112500, defense: 187.5, speed: 332.22 } },
-    { id: 'T1_MAGE_CAPE', expected: { damage: 6751, speed: 13, efficiency: { GLOBAL: 1.37 } } },
-    { id: 'T10_MAGE_CAPE_Q4', expected: { damage: 74000, speed: 142.32, efficiency: { GLOBAL: 15.0 } } }
+    { id: 'T1_MAGE_CAPE', expected: { damage: 6751, speed: 13 } },
+    { id: 'T10_MAGE_CAPE_Q4', expected: { damage: 74000, speed: 142.32 } }
 ];
 
 let failed = false;

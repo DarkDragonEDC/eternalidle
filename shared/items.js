@@ -727,14 +727,6 @@ const genGear = (category, slot, type, idSuffix, matType, statMultipliers = {}) 
             }
         }
         if (statMultipliers.eff) stats.efficiency = 1; // Base value, logic moved to resolveItem
-        if (statMultipliers.globalEff) {
-            // New Curve: T1 (~1%) to T10 (~5% Base -> 15% Max)
-            // Formula: (Tier * 0.45) + 0.55
-            // T10 Base: 5.05. T10 MP: 15.15%
-            // T1 Base: 1.00. T1 Normal: 1.00%
-            const baseVal = parseFloat(((t * 0.45) + 0.55).toFixed(2));
-            stats.efficiency = { GLOBAL: baseVal };
-        }
         if (statMultipliers.atkSpeed) stats.attackSpeed = statMultipliers.atkSpeed; // Fixed base speed
         if (statMultipliers.crit) stats.critChance = t * statMultipliers.crit; // New Crit support
 
@@ -1212,10 +1204,11 @@ export const resolveItem = (itemId, overrideQuality = null) => {
             for (const key in baseItem.stats) {
                 if (typeof baseItem.stats[key] === 'number') {
                     if (key === 'efficiency' && baseItem.isTool) {
-                        const index = (baseItem.tier - 1) * 5 + effectiveQualityId;
-
-                        // Formula: 1.0 + (Index * (44 / 49))
-                        newStats[key] = parseFloat((1.0 + (index * (44 / 49))).toFixed(1));
+                        // Formula: Aggressive overlap (T(X) MP > T(X+1) Good). Gap is 2.5.
+                        // Max index is 26.5 (T10 MP). Max Eff gain is 39% (1% Base to 40% Max).
+                        const gap = 2.5;
+                        const index = (baseItem.tier - 1) * gap + effectiveQualityId;
+                        newStats[key] = parseFloat((1.0 + (index * (39 / 26.5))).toFixed(1));
                     } else if (key === 'speed') {
                         // Universal Speed Calculation
                         // For Weapons: Base (e.g. 1300) + Bonus. High = Fast.
@@ -1239,22 +1232,6 @@ export const resolveItem = (itemId, overrideQuality = null) => {
                         }
                     } else {
                         newStats[key] = parseFloat((baseItem.stats[key] * statMultiplier).toFixed(1));
-                    }
-                } else if (key === 'efficiency' && typeof baseItem.stats[key] === 'object') {
-                    // Handle Efficiency Object specifically
-                    newStats[key] = {};
-                    for (const subKey in baseItem.stats[key]) {
-                        if (subKey === 'GLOBAL') {
-                            // 50-step linear progression: 10 Tiers * 5 Qualities
-                            // Index: 0 (T1 Normal) to 49 (T10 Masterpiece)
-                            const index = (baseItem.tier - 1) * 5 + effectiveQualityId;
-                            // Formula: 1.0 + (Index * (14 / 49))
-                            // Explicitly rounding to 1 decimal place to ensure 15.0
-                            const calculated = 1.0 + (index * (14 / 49));
-                            newStats[key][subKey] = Math.round(calculated * 10) / 10;
-                        } else {
-                            newStats[key][subKey] = parseFloat((baseItem.stats[key][subKey] * statMultiplier).toFixed(1));
-                        }
                     }
                 } else {
                     newStats[key] = baseItem.stats[key];

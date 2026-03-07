@@ -108,7 +108,7 @@ export class AdminManager {
         if (!baseItem) return { success: false, error: `Invalid item ID: ${itemId} | DBG: keys=${keys}, hasBtn=${hasPotion}` };
 
         let customItem = null;
-        let finalItemId = itemId;
+        let finalItemId = baseItem.id; // Use the resolved authentic ID, not the query param
 
         if (quality !== undefined || signature) {
             customItem = { ...baseItem };

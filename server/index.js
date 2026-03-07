@@ -1614,6 +1614,32 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("start_dungeon", async ({ dungeonId, repeatCount }) => {
+    try {
+      if (!socket.data.characterId || socket.data.characterId === "undefined")
+        return;
+      await gameManager.executeLocked(socket.user.id, async () => {
+        const result = await gameManager.startDungeon(
+          socket.user.id,
+          socket.data.characterId,
+          dungeonId,
+          repeatCount
+        );
+        socket.emit("dungeon_started", result);
+        socket.emit(
+          "status_update",
+          await gameManager.getStatus(
+            socket.user.id,
+            true,
+            socket.data.characterId,
+          ),
+        );
+      });
+    } catch (err) {
+      socket.emit("error", { message: err.message });
+    }
+  });
+
   socket.on("stop_dungeon", async () => {
     try {
       if (!socket.data.characterId || socket.data.characterId === "undefined")

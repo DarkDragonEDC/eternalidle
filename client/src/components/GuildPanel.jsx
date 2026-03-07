@@ -35,7 +35,8 @@ const GUILD_PERMISSIONS = [
     { id: 'manage_roles', label: 'Manage Roles', desc: 'Can edit rank names and permissions' },
     { id: 'kick_members', label: 'Kick Members', desc: 'Can remove players from the guild' },
     { id: 'manage_requests', label: 'Manage Requests', desc: 'Can accept/reject applications' },
-    { id: 'change_member_roles', label: 'Manage Ranks', desc: 'Can promote/demote members' }
+    { id: 'change_member_roles', label: 'Manage Ranks', desc: 'Can promote/demote members' },
+    { id: 'manage_upgrades', label: 'Manage Upgrades', desc: 'Can upgrade guild buildings' }
 ];
 
 const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
@@ -118,7 +119,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
     }, [socket, guild.myRole, activeTab]);
 
     const currentXP = guild.xp || 0;
-    const memberLimit = guild.member_limit || 10;
+    const memberLimit = 10 + (guild.guild_hall_level || 0) * 2;
     const nextLevelXP = guild.nextLevelXP || (guild.level || 1) * 1000;
     const xpProgress = Math.min(100, (currentXP / nextLevelXP) * 100);
 
@@ -143,6 +144,19 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
         return roleId;
     };
 
+    const getRoleColor = (roleId) => {
+        if (!roleId) return 'rgba(255, 255, 255, 0.4)';
+        const roles = guild.roles || {};
+        if (roles[roleId] && roles[roleId].color) return roles[roleId].color;
+
+        const mapping = {
+            'LEADER': '#d4af37',
+            'OFFICER': '#c0c0c0',
+            'MEMBER': 'rgba(255, 255, 255, 0.4)'
+        };
+        return mapping[roleId] || 'rgba(255, 255, 255, 0.4)';
+    };
+
     const playerHasPermission = (permission) => {
         if (guild.myRole === 'LEADER') return true;
         const roles = guild.roles || {};
@@ -158,6 +172,8 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
             sorted.sort((a, b) => new Date(a.joinedAt || 0) - new Date(b.joinedAt || 0));
         } else if (membersSortBy === 'TOTAL_XP') {
             sorted.sort((a, b) => (b.donatedXP || 0) - (a.donatedXP || 0));
+        } else if (membersSortBy === 'TOTAL_SILVER') {
+            sorted.sort((a, b) => ((b.donatedSilver || 0) + (b.donatedItemsValue || 0)) - ((a.donatedSilver || 0) + (a.donatedItemsValue || 0)));
         } else if (membersSortBy === 'DAILY_XP') {
             const getDaily = (m) => {
                 if (!m.donatedXP) return 0;
@@ -573,7 +589,8 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                     { id: 'DEFAULT', label: 'Members' },
                                                     { id: 'DATE', label: 'Date' },
                                                     { id: 'TOTAL_XP', label: 'Total XP' },
-                                                    { id: 'DAILY_XP', label: 'Daily XP' }
+                                                    { id: 'DAILY_XP', label: 'Daily XP' },
+                                                    { id: 'TOTAL_SILVER', label: 'Total Silver' }
                                                 ].map(opt => (
                                                     <div
                                                         key={opt.id}
@@ -790,19 +807,22 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                             <div style={{ color: (guild.bank_silver || 0) >= ((guild.guild_hall_level || 0) + 1) * 50000 ? '#44ff44' : '#ff4444', fontSize: isMobile ? '0.7rem' : '0.75rem', fontWeight: 'bold' }}>
                                                                 {(((guild.guild_hall_level || 0) + 1) * 50000).toLocaleString()}
                                                             </div>
-                                                            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.55rem' }}>Bank Silver</div>
+                                                            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.55rem' }}>Silver (Bank)</div>
                                                         </div>
                                                     </div>
 
                                                     {/* Material Costs */}
-                                                    {[
-                                                        { id: 'T1_WOOD', name: 'Wood', icon: '/items/T1_WOOD.webp' },
-                                                        { id: 'T1_ORE', name: 'Ore', icon: '/items/T1_ORE.webp' },
-                                                        { id: 'T1_HIDE', name: 'Hide', icon: '/items/T1_HIDE.webp' },
-                                                        { id: 'T1_FIBER', name: 'Fiber', icon: '/items/T1_FIBER.webp' },
-                                                        { id: 'T1_FISH', name: 'Fish', icon: '/items/T1_FISH.webp' },
-                                                        { id: 'T1_HERB', name: 'Herb', icon: '/items/T1_HERB.webp' }
-                                                    ].map(mat => {
+                                                    {(() => {
+                                                        const tier = (guild.guild_hall_level || 0) + 1;
+                                                        return [
+                                                            { id: `T${tier}_WOOD`, name: 'Wood', icon: `/items/T${tier}_WOOD.webp` },
+                                                            { id: `T${tier}_ORE`, name: 'Ore', icon: `/items/T${tier}_ORE.webp` },
+                                                            { id: `T${tier}_HIDE`, name: 'Hide', icon: `/items/T${tier}_HIDE.webp` },
+                                                            { id: `T${tier}_FIBER`, name: 'Fiber', icon: `/items/T${tier}_FIBER.webp` },
+                                                            { id: `T${tier}_FISH`, name: 'Fish', icon: `/items/T${tier}_FISH.webp` },
+                                                            { id: `T${tier}_HERB`, name: 'Herb', icon: `/items/T${tier}_HERB.webp` }
+                                                        ];
+                                                    })().map(mat => {
                                                         const amount = guild.bank_items?.[mat.id] || 0;
                                                         const hasEnough = amount >= 1000;
 
@@ -823,31 +843,60 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                                     <div style={{ color: hasEnough ? '#44ff44' : '#ff4444', fontSize: isMobile ? '0.7rem' : '0.75rem', fontWeight: 'bold' }}>
                                                                         {amount.toLocaleString()} / 1K
                                                                     </div>
-                                                                    <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.55rem' }}>Bank {mat.name}</div>
+                                                                    <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.55rem' }}>{mat.id.replace(/_/g, ' ')} (Bank)</div>
                                                                 </div>
                                                             </div>
                                                         );
                                                     })}
+                                                    {/* Guild Level Requirement */}
+                                                    {(() => {
+                                                        const nextLevel = (guild.guild_hall_level || 0) + 1;
+                                                        const reqGuildLevel = Math.max(1, (nextLevel - 1) * 10);
+                                                        const hasGuildLevel = (guild.level || 1) >= reqGuildLevel;
+
+                                                        return (
+                                                            <div style={{
+                                                                background: 'rgba(0,0,0,0.3)',
+                                                                padding: isMobile ? '8px' : '10px',
+                                                                borderRadius: '10px',
+                                                                border: '1px solid rgba(255,255,255,0.05)',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: isMobile ? '6px' : '10px'
+                                                            }}>
+                                                                <Trophy size={isMobile ? 14 : 16} color="#4488ff" />
+                                                                <div>
+                                                                    <div style={{ color: hasGuildLevel ? '#44ff44' : '#ff4444', fontSize: isMobile ? '0.7rem' : '0.75rem', fontWeight: 'bold' }}>
+                                                                        LVL {reqGuildLevel}
+                                                                    </div>
+                                                                    <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.55rem' }}>Guild Level Req.</div>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })()}
                                                 </div>
                                             </div>
 
                                             <motion.button
-                                                whileHover={(guild.myRole === 'LEADER' || guild.myRole === 'OFFICER') ? { scale: 1.02 } : {}}
-                                                whileTap={(guild.myRole === 'LEADER' || guild.myRole === 'OFFICER') ? { scale: 0.98 } : {}}
-                                                disabled={guild.myRole !== 'LEADER' && guild.myRole !== 'OFFICER'}
+                                                whileHover={playerHasPermission('manage_upgrades') && (guild.level || 1) >= Math.max(1, ((guild.guild_hall_level || 0) + 1 - 1) * 10) ? { scale: 1.02 } : {}}
+                                                whileTap={playerHasPermission('manage_upgrades') && (guild.level || 1) >= Math.max(1, ((guild.guild_hall_level || 0) + 1 - 1) * 10) ? { scale: 0.98 } : {}}
+                                                disabled={
+                                                    !playerHasPermission('manage_upgrades') ||
+                                                    (guild.level || 1) < Math.max(1, ((guild.guild_hall_level || 0) + 1 - 1) * 10)
+                                                }
                                                 onClick={() => {
                                                     socket?.emit('upgrade_guild_building', { buildingType: 'GUILD_HALL' });
                                                 }}
                                                 style={{
                                                     width: '100%',
                                                     padding: '12px',
-                                                    background: (guild.myRole === 'LEADER' || guild.myRole === 'OFFICER') ? 'var(--accent)' : 'rgba(255,255,255,0.05)',
+                                                    background: playerHasPermission('manage_upgrades') ? 'var(--accent)' : 'rgba(255,255,255,0.05)',
                                                     border: 'none',
                                                     borderRadius: '12px',
-                                                    color: (guild.myRole === 'LEADER' || guild.myRole === 'OFFICER') ? '#000' : 'rgba(255,255,255,0.2)',
+                                                    color: playerHasPermission('manage_upgrades') ? '#000' : 'rgba(255,255,255,0.2)',
                                                     fontWeight: 'bold',
                                                     fontSize: '0.9rem',
-                                                    cursor: (guild.myRole === 'LEADER' || guild.myRole === 'OFFICER') ? 'pointer' : 'not-allowed',
+                                                    cursor: playerHasPermission('manage_upgrades') ? 'pointer' : 'not-allowed',
                                                     boxShadow: (guild.myRole === 'LEADER' || guild.myRole === 'OFFICER') ? '0 4px 15px rgba(212, 175, 55, 0.3)' : 'none'
                                                 }}
                                             >
@@ -1366,9 +1415,11 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                 `${Math.floor((new Date() - new Date(member.joinedAt)) / (1000 * 60 * 60 * 24))} days ago` :
                                                 membersSortBy === 'TOTAL_XP' ?
                                                     `Total XP: ${formatNumber(member.donatedXP || 0)}` :
-                                                    membersSortBy === 'DAILY_XP' ?
-                                                        `${formatNumber(Math.floor((member.donatedXP || 0) / Math.max(1, Math.floor((new Date() - new Date(member.joinedAt || Date.now())) / (1000 * 60 * 60 * 24)))))} XP/day` :
-                                                        `LVL ${member.level}`}
+                                                    membersSortBy === 'TOTAL_SILVER' ?
+                                                        `Silver ${formatNumber(member.donatedSilver || 0)} + Items ${formatNumber(member.donatedItemsValue || 0)} = ${formatNumber((member.donatedSilver || 0) + (member.donatedItemsValue || 0))} Total` :
+                                                        membersSortBy === 'DAILY_XP' ?
+                                                            `${formatNumber(Math.floor((member.donatedXP || 0) / Math.max(1, Math.floor((new Date() - new Date(member.joinedAt || Date.now())) / (1000 * 60 * 60 * 24)))))} XP/day` :
+                                                            `LVL ${member.level}`}
                                         </div>
                                     </div>
                                 </div>
@@ -1384,13 +1435,13 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                         style={{
                                             fontSize: '0.65rem',
                                             fontWeight: '900',
-                                            color: member.role === 'LEADER' ? 'var(--accent)' : 'rgba(255,255,255,0.4)',
-                                            background: member.role === 'LEADER' ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255,255,255,0.03)',
+                                            color: getRoleColor(member.role),
+                                            background: `${getRoleColor(member.role).startsWith('#') ? getRoleColor(member.role) : 'rgba(255,255,255,0.03)'}${getRoleColor(member.role).startsWith('#') ? '15' : ''}`,
                                             padding: '4px 10px',
                                             borderRadius: '8px',
                                             letterSpacing: '0.5px',
-                                            border: member.role === 'LEADER' ? '1px solid rgba(212, 175, 55, 0.2)' : '1px solid transparent',
-                                            cursor: guild.myRole === 'LEADER' ? 'pointer' : 'default',
+                                            border: `1px solid ${getRoleColor(member.role).startsWith('#') ? getRoleColor(member.role) : 'transparent'}${getRoleColor(member.role).startsWith('#') ? '33' : ''}`,
+                                            cursor: (playerHasPermission('change_member_roles') && member.role !== 'LEADER' && member.id !== guild.myMemberId) ? 'pointer' : 'default',
                                             display: 'flex',
                                             alignItems: 'center',
                                             gap: '5px'
@@ -2198,7 +2249,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                     {Object.entries({
                                         LEADER: { name: 'Leader', color: guild.icon_color || '#d4af37', members: 1, limit: 1 },
                                         OFFICER: { name: 'Co-Leader', color: '#c0c0c0', members: 0, limit: 3 },
-                                        MEMBER: { name: 'Member', color: '#808080', members: members.filter(m => m.role === 'MEMBER').length, limit: guild.member_limit || 10 },
+                                        MEMBER: { name: 'Member', color: '#808080', members: members.filter(m => m.role === 'MEMBER').length, limit: memberLimit },
                                         ...(guild.roles || {})
                                     }).map(([id, baseRole]) => {
                                         const config = (guild.roles || {})[id] || {};
@@ -2207,7 +2258,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                             name: config.name || baseRole.name,
                                             color: config.color || baseRole.color,
                                             members: id === 'LEADER' ? 1 : (id === 'OFFICER' ? members.filter(m => m.role === 'OFFICER').length : (id === 'MEMBER' ? members.filter(m => m.role === 'MEMBER').length : members.filter(m => m.role === id).length)),
-                                            limit: baseRole.limit || 10,
+                                            limit: baseRole.limit || memberLimit,
                                             permissions: config.permissions || []
                                         };
                                     }).map((role) => {
@@ -3176,7 +3227,7 @@ const GuildPanel = ({ gameState, socket, isMobile, onInspect }) => {
                                                                     {playerLevel < g.min_level ? `REQ. LVL ${g.min_level}` : (g.join_mode === 'OPEN' ? 'JOIN' : 'APPLY')}
                                                                 </motion.button>
                                                             )}
-                                                            <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>{g.member_count || 1}/{g.member_limit || 10}</span>
+                                                            <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>{g.member_count || 1}/{10 + (g.guild_hall_level || 0) * 2}</span>
                                                         </div>
                                                     </motion.div>
                                                 ))

@@ -1,5 +1,23 @@
 # Patch Notes - Eternal Idle
 
+## v1.3.6
+
+### 🛡️ Sistema de Permissões e Gestão
+- **Correção de Upgrade**: Corrigido o erro "Invalid building type" ao tentar evoluir construções, garantindo que o servidor processe corretamente os pedidos de upgrade.
+- **Permissão de Upgrade**: Adicionada a nova permissão "**Manage Upgrades**". Agora os líderes podem delegar individualmente quem tem autoridade para evoluir as construções da guilda.
+- **Clareza de Requisitos**: Os requisitos de upgrade no Guild Hall agora exibem o **Tier** correto do material (ex: **T1 WOOD**) para total consistência com o Banco.
+- **Identificação de Saldo**: Rótulos de recursos do banco foram padronizados para "**Recurso (Bank)**".
+
+### 🏆 Guildas & Rankings
+- **Ranking Silver de Doações**: Novo modo de ordenação na lista de membros baseado no valor total doado ao banco. Ele soma a Prata pura doada com o valor base de venda rápida dos itens depositados por aquele jogador.
+
+### ⚙️ Sistema de Dungeons & Comandos
+- **Dungeons**: Corrigido um bug crítico onde o botão "ENTER" parava de responder ao tentar iniciar a Dungeon.
+- **Comando Admin**: O comando `/give` agora cadastra os itens perfeitamente usando o ID autêntico do sistema, resolvendo o erro do "Mapa Fantasma" recém-reportado.
+- **Versão 1.3.6**: Atualização final de sincronia para suporte ao novo sistema de permissões granuladas.
+
+---
+
 ## v1.3.5
 
 ### 🏰 Gestão de Guilda: Guild Hall & Bank

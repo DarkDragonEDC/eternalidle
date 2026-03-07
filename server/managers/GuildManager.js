@@ -184,6 +184,8 @@ export class GuildManager {
                 role,
                 joined_at,
                 donated_xp,
+                donated_silver,
+                donated_items_value,
                 characters (
                     id,
                     name,
@@ -213,6 +215,8 @@ export class GuildManager {
                     role: m.role,
                     joinedAt: m.joined_at,
                     donatedXP: m.donated_xp || 0,
+                    donatedSilver: Number(m.donated_silver || 0),
+                    donatedItemsValue: Number(m.donated_items_value || 0),
                     online: isOnline,
                     level: this._calculateCharLevel(state)
                 };
@@ -332,7 +336,7 @@ export class GuildManager {
         // Check if guild exists and is not full
         const { data: guild, error: guildErr } = await this.supabase
             .from('guilds')
-            .select('id, min_level, join_mode')
+            .select('id, min_level, join_mode, guild_hall_level')
             .eq('id', guildId)
             .maybeSingle();
 
@@ -941,9 +945,9 @@ export class GuildManager {
         }
     }
 
-    async upgradeBuilding(char, { buildingType }) {
-        console.log(`[GUILD-MANAGER-DEBUG] upgradeBuilding received buildingType:`, buildingType);
+    async upgradeBuilding(char, params) {
         if (!char) throw new Error("Character not found");
+        const buildingType = typeof params === 'string' ? params : params?.buildingType;
         if (buildingType !== 'GUILD_HALL') throw new Error("Invalid building type");
 
         // 1. Find membership and guild
@@ -955,8 +959,8 @@ export class GuildManager {
 
         if (memberError || !member) throw new Error("Character is not in a guild");
 
-        // 2. Check permissions (Leader or Officer)
-        const hasPerm = await this.hasPermission(char.id, 'manage_roles'); // Using manage_roles as a proxy for high-level management
+        // 2. Check permissions
+        const hasPerm = await this.hasPermission(char.id, 'manage_upgrades');
         if (!hasPerm && member.role !== 'LEADER') {
             throw new Error("You don't have permission to upgrade buildings");
         }
@@ -972,16 +976,23 @@ export class GuildManager {
         const currentLevel = guild.guild_hall_level || 0;
         if (currentLevel >= 10) throw new Error("Guild Hall is already at maximum level");
 
-        // 3. Calculate Costs
+        // 2.5 Validate Guild Level Requirement
         const nextLevel = currentLevel + 1;
+        const requiredGuildLevel = Math.max(1, (nextLevel - 1) * 10);
+        if ((guild.level || 1) < requiredGuildLevel) {
+            throw new Error(`Guild needs to be at least Level ${requiredGuildLevel} to upgrade to Building Level ${nextLevel}`);
+        }
+
+        // 3. Calculate Costs
         const silverCost = nextLevel * 50000;
+        const tier = currentLevel + 1;
         const materialReq = {
-            'T1_WOOD': 1000,
-            'T1_ORE': 1000,
-            'T1_HIDE': 1000,
-            'T1_FIBER': 1000,
-            'T1_FISH': 1000,
-            'T1_HERB': 1000
+            [`T${tier}_WOOD`]: 1000,
+            [`T${tier}_ORE`]: 1000,
+            [`T${tier}_HIDE`]: 1000,
+            [`T${tier}_FIBER`]: 1000,
+            [`T${tier}_FISH`]: 1000,
+            [`T${tier}_HERB`]: 1000
         };
 
         // 4. Validate Bank Resources
@@ -1001,7 +1012,7 @@ export class GuildManager {
         const newBankSilver = bankSilver - BigInt(silverCost);
         const newBankItems = { ...bankItems };
         for (const [itemId, amount] of Object.entries(materialReq)) {
-            newBankItems[itemId] = (newBankItems[itemId] || 0) - amount;
+            newBankItems[itemId] = (parseInt(newBankItems[itemId]) || 0) - amount;
         }
 
         // 6. Update DB
@@ -1041,7 +1052,7 @@ export class GuildManager {
         // 1. Find membership
         const { data: member, error: memberError } = await this.supabase
             .from('guild_members')
-            .select('guild_id')
+            .select('guild_id, donated_silver, donated_items_value')
             .eq('character_id', char.id)
             .maybeSingle();
 
@@ -1054,11 +1065,19 @@ export class GuildManager {
 
         // 3. Validate Items
         const invManager = this.gameManager.inventoryManager;
+        let totalItemsValue = 0;
         if (hasItems) {
             // Validate that only allowed materials are donated (Exclude Runes/Shards)
-            for (const itemId of Object.keys(items)) {
+            for (const [itemId, amount] of Object.entries(items)) {
                 if (itemId.includes('_RUNE_') || itemId.includes('_SHARD')) {
                     throw new Error(`Item ${itemId} cannot be donated to the Guild Bank`);
+                }
+                const safeAmount = Math.max(0, parseInt(amount) || 0);
+                if (safeAmount > 0) {
+                    const resolvedItem = invManager.resolveItem(itemId);
+                    if (resolvedItem && resolvedItem.stats && resolvedItem.stats.value) {
+                        totalItemsValue += resolvedItem.stats.value * safeAmount;
+                    }
                 }
             }
 
@@ -1105,6 +1124,23 @@ export class GuildManager {
         if (updateError) {
             console.error("[GUILD-BANK] Error updating bank:", updateError);
             throw new Error("Internal server error during donation");
+        }
+
+        // 8. Update Member Profile for ranking
+        const newDonatedSilver = BigInt(member.donated_silver || 0) + BigInt(silverToDonate);
+        const newDonatedItemsValue = BigInt(member.donated_items_value || 0) + BigInt(totalItemsValue);
+
+        if (silverToDonate > 0 || totalItemsValue > 0) {
+            const { error: memberUpdateError } = await this.supabase
+                .from('guild_members')
+                .update({
+                    donated_silver: newDonatedSilver.toString(),
+                    donated_items_value: newDonatedItemsValue.toString()
+                })
+                .eq('character_id', char.id);
+            if (memberUpdateError) {
+                console.error("[GUILD-BANK] Error updating member rankings:", memberUpdateError);
+            }
         }
 
         // 8. Persist Character state
