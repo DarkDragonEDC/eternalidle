@@ -9,7 +9,8 @@ const SettingsModal = ({
     settings,
     setSettings,
     session,
-    isGoogleLinked
+    isGoogleLinked,
+    socket
 }) => {
     const handleSettingChange = (key, value) => {
         setSettings(prev => ({ ...prev, [key]: value }));
@@ -256,10 +257,14 @@ const SettingsModal = ({
                                                     const { PushService } = await import('../services/PushService');
                                                     const sub = await PushService.subscribeUser();
                                                     if (sub) {
+                                                        const subJSON = sub.toJSON();
+                                                        if (socket) {
+                                                            socket.emit('save_push_subscription', { subscription: subJSON, settings });
+                                                        }
                                                         handleSettingChange('pushEnabled', true);
-                                                        // App.jsx effect will handle syncing this to server
                                                     }
                                                 } catch (e) {
+                                                    console.error('[PUSH] Subscribe error:', e);
                                                     alert("Failed to enable notifications. Please check browser permissions.");
                                                 }
                                             }}

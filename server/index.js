@@ -879,6 +879,20 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Push Notifications
+  socket.on("save_push_subscription", async (data) => {
+    try {
+      if (!socket.user?.id) return;
+      const { subscription, settings } = data || {};
+      if (!subscription) return;
+      const result = await gameManager.pushManager.saveSubscription(socket.user.id, subscription, settings);
+      socket.emit("push_subscription_saved", result);
+    } catch (err) {
+      console.error("[PUSH] Error saving subscription:", err);
+      socket.emit("error", { message: err.message });
+    }
+  });
+
   socket.on("handle_guild_request", async ({ requestId, action }) => {
     try {
       if (!socket.data.characterId || socket.data.characterId === "undefined")

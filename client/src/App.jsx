@@ -3093,6 +3093,7 @@ function App() {
           setSettings={setSettings}
           session={session}
           isGoogleLinked={isGoogleLinked}
+          socket={socket}
         />
 
         {/* Global Overlays for Header Menus (Moved here to bypass header backdrop-filter clip) */}
