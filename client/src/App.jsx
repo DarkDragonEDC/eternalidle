@@ -361,7 +361,7 @@ function App() {
     const validTabs = [
       'inventory', 'profile', 'combat', 'gathering', 'refining', 'crafting',
       'town_overview', 'skills_overview', 'combat_overview', 'market',
-      'dungeon', 'merging', 'rest_camp', 'world_boss', 'taxometer', 'ranking', 'guild', 'guild_develop'
+      'dungeon', 'merging', 'rest_camp', 'world_boss', 'taxometer', 'ranking', 'guild'
     ];
     if (validTabs.includes(path)) return path;
     return localStorage.getItem('activeTab') || 'inventory';
@@ -2172,32 +2172,6 @@ function App() {
           </div>
         );
       case 'guild':
-        return (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <SkillProgressHeader tab="guild" category="GUILDS" />
-            <div className="glass-panel" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '16px', background: 'var(--panel-bg)', margin: '10px' }}>
-              <div style={{ textAlign: 'center', opacity: 0.8 }}>
-                <div style={{ position: 'relative', marginBottom: '30px', display: 'flex', justifyContent: 'center' }}>
-                  <motion.div
-                    animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.4, 0.2] }}
-                    transition={{ repeat: Infinity, duration: 4 }}
-                    style={{ position: 'absolute', width: '120px', height: '120px', background: 'var(--accent)', filter: 'blur(40px)', borderRadius: '50%', zIndex: 1 }}
-                  />
-                  <Shield size={80} color="var(--accent)" style={{ position: 'relative', zIndex: 2, filter: 'drop-shadow(0 0 15px var(--accent-soft))' }} />
-                </div>
-                <h2 style={{ color: 'var(--text-main)', fontSize: '2rem', fontWeight: '900', letterSpacing: '4px', textTransform: 'uppercase', margin: '0 0 15px' }}>GUILD SYSTEM</h2>
-                <p style={{ color: 'var(--accent)', fontSize: '1rem', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '8px' }}>UNDER DEVELOPMENT</p>
-                <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', maxWidth: '300px', margin: '0 auto', lineHeight: '1.5' }}>Prepare your banners and gather your allies. The age of guilds is coming soon to Eternal Idle.</p>
-                <div style={{ marginTop: '30px', display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent)', opacity: 0.3 }} />
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent)', opacity: 0.6 }} />
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent)', opacity: 0.3 }} />
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      case 'guild_develop':
         return (
           <GuildPanel
             gameState={displayedGameState}

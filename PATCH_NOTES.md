@@ -1,5 +1,10 @@
 # Patch Notes - Eternal Idle
 
+### 🏰 Lançamento Oficial: Guildas (Beta)
+- **Guildas Chegaram!**: O sistema de guildas agora está oficialmente acessível para todos através do menu lateral e do menu de Town no mobile.
+- **Em Desenvolvimento**: Esta é uma versão inicial para testes (Beta). Muitas novidades, construções de guilda e conteúdos cooperativos ainda estão por vir!
+
+
 ### 🐛 Correção Crítica - Perda de Equipamento
 - **Equipment Swap Fix**: Corrigido um bug crítico onde itens equipados eram **perdidos silenciosamente** ao trocar equipamento com o inventário cheio. O item antigo era removido do slot antes do novo ser retirado do inventário, causando falha na devolução por falta de espaço.
 - **Ordem de Operações**: A lógica de troca agora remove o novo item do inventário **primeiro** (liberando espaço) e só depois devolve o item antigo, garantindo que nenhum item seja perdido.
@@ -8,7 +13,6 @@
 ### ⚔️ Combate, Dungeons & Bosses
 - **Turnos de Combate**: Alterada a dinâmica de batalha inicial. Ao encontrar um monstro, ele agora causa o seu dano primeiro, e só então o ataque do jogador é processado.
 - **Consumo de Comida**: Corrigido um bug onde jogadores ficavam tecnicamente imortais (a comida não era consumida) ao enfrentar monstros de dano muito baixo, como os Rabbits. O sistema agora consome a comida adequadamente mesmo em níveis muito baixos de dano.
-- **World Boss**: A classificação de World Boss deixou de ser dividida em categorias diferentes. Agora, jogadores padrão e Ironman competem em um ranking único e conjunto.
 - **Cooldown de Poção**: O indicador visual de recarga da poção na interface de combate foi alinhado com o tempo de recarga exato do servidor para evitar descompassos.
 
 ### 💰 Mercado & Inventário
@@ -18,8 +22,7 @@
 
 ### 🎯 QoL (Qualidade de Vida) & Correções
 - **Daily Spin (Roleta)**: Implementada validação que impede girar a roleta com o inventário completamente cheio. Além disso, foi corrigido o erro visual de cálculo da roda que a fazia parar em prêmios incorretos na animação.
-- **Visual de Tasks**: O Pop-up de informações de Tarefas (Tasks) foi simplificado e agora dá total foco à imagem/banner representativo da respectiva Dungeon associada à Tarefa.
-- **Auto-Merge de Runas**: Ao utilizar a funcionalidade "Merge All Runes", você agora visualizará um modal de confirmação sumarizando o custo total em Silver da operação inteira antes de efetivá-la.
+
 - **Restrição da Foice**: Resolvido o erro na interface que mencionava que o requisito de status para equipar e usar a Foice (Sickle) era a habilidade de Mining (Mineração). Agora indica Harvesting/Tool Crafter corretamente.
 
 ### 🚀 Sistema & Infraestrutura
