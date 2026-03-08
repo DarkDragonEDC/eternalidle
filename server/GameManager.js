@@ -2303,6 +2303,9 @@ export class GameManager {
                 stateChanged = true;
             }
 
+            const stats = this.inventoryManager.calculateStats(char);
+            const atkSpeed = Math.max(200, Number(stats.attackSpeed) || 1000);
+
             // Respawn Delay Check
             if (combat.respawn_at) {
                 if (now < combat.respawn_at) {
@@ -2319,8 +2322,6 @@ export class GameManager {
                 }
             }
 
-            const stats = this.inventoryManager.calculateStats(char);
-            const atkSpeed = Math.max(200, Number(stats.attackSpeed) || 1000);
             let roundsThisTick = 0;
             const MAX_ROUNDS = 20; // Allow catching up faster
             const combatRounds = [];
