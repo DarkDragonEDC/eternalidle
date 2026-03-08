@@ -642,7 +642,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                         </div>
                     )}
 
-                    {playerHasPermission('manage_requests') && (activeTab === 'MEMBERS' || activeTab === 'REQUESTS') && (
+                    {(activeTab === 'MEMBERS' || activeTab === 'REQUESTS') && (
                         <div style={{ display: 'flex', gap: '8px' }}>
                             <div style={{ position: 'relative' }}>
                                 <motion.button
@@ -732,50 +732,53 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                     )}
                                 </AnimatePresence>
                             </div>
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => setActiveTab('REQUESTS')}
-                                style={{
-                                    background: activeTab === 'REQUESTS' ? 'rgba(212, 175, 55, 0.2)' : 'rgba(255,255,255,0.05)',
-                                    border: activeTab === 'REQUESTS' ? '1px solid var(--accent)' : '1px solid rgba(255,255,255,0.1)',
-                                    padding: '6px 12px',
-                                    borderRadius: '8px',
-                                    color: activeTab === 'REQUESTS' ? 'var(--accent)' : 'rgba(255,255,255,0.5)',
-                                    fontSize: '0.65rem',
-                                    fontWeight: 'bold',
-                                    cursor: 'pointer',
-                                    position: 'relative'
-                                }}
-                            >
-                                REQUESTS
-                                {requests.length > 0 && (
-                                    <motion.div
-                                        initial={{ scale: 0 }}
-                                        animate={{ scale: 1 }}
-                                        style={{
-                                            position: 'absolute',
-                                            top: '-6px',
-                                            right: '-6px',
-                                            background: '#ff4444',
-                                            color: '#fff',
-                                            fontSize: '0.55rem',
-                                            fontWeight: 'bold',
-                                            height: '16px',
-                                            minWidth: '16px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            borderRadius: '8px',
-                                            padding: '0 4px',
-                                            boxShadow: '0 0 10px rgba(255,68,68,0.5)',
-                                            border: '1px solid rgba(255,255,255,0.2)'
-                                        }}
-                                    >
-                                        {requests.length}
-                                    </motion.div>
-                                )}
-                            </motion.button>
+
+                            {playerHasPermission('manage_requests') && (
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => setActiveTab('REQUESTS')}
+                                    style={{
+                                        background: activeTab === 'REQUESTS' ? 'rgba(212, 175, 55, 0.2)' : 'rgba(255,255,255,0.05)',
+                                        border: activeTab === 'REQUESTS' ? '1px solid var(--accent)' : '1px solid rgba(255,255,255,0.1)',
+                                        padding: '6px 12px',
+                                        borderRadius: '8px',
+                                        color: activeTab === 'REQUESTS' ? 'var(--accent)' : 'rgba(255,255,255,0.5)',
+                                        fontSize: '0.65rem',
+                                        fontWeight: 'bold',
+                                        cursor: 'pointer',
+                                        position: 'relative'
+                                    }}
+                                >
+                                    REQUESTS
+                                    {requests.length > 0 && (
+                                        <motion.div
+                                            initial={{ scale: 0 }}
+                                            animate={{ scale: 1 }}
+                                            style={{
+                                                position: 'absolute',
+                                                top: '-6px',
+                                                right: '-6px',
+                                                background: '#ff4444',
+                                                color: '#fff',
+                                                fontSize: '0.55rem',
+                                                fontWeight: 'bold',
+                                                height: '16px',
+                                                minWidth: '16px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                borderRadius: '8px',
+                                                padding: '0 4px',
+                                                boxShadow: '0 0 10px rgba(255,68,68,0.5)',
+                                                border: '1px solid rgba(255,255,255,0.2)'
+                                            }}
+                                        >
+                                            {requests.length}
+                                        </motion.div>
+                                    )}
+                                </motion.button>
+                            )}
                         </div>
                     )}
                 </div>
@@ -1261,7 +1264,17 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
 
                                                                 <div>
                                                                     <div style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 'bold' }}>{pathConfig.name}</div>
-                                                                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem' }}>Current: <span style={{ color: pathColor }}>+{STATION_BONUS_TABLE[currentLevel] || 0}{pathConfig.suffix}</span></div>
+                                                                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem', display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                                                                        <span>Current:</span>
+                                                                        <span style={{ color: pathColor }}>+{STATION_BONUS_TABLE[currentLevel] || 0}{pathConfig.suffix}</span>
+                                                                        {!isMax && (
+                                                                            <>
+                                                                                <span style={{ opacity: 0.5 }}>-</span>
+                                                                                <span>Next lvl</span>
+                                                                                <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>(+{STATION_BONUS_TABLE[nextLevel]}{pathConfig.suffix})</span>
+                                                                            </>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
 
                                                                 {!isMax ? (
@@ -1269,7 +1282,9 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                                         {isSyncBlocked && (
                                                                             <div style={{ background: 'rgba(255,68,68,0.1)', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '5px' }}>
                                                                                 <Lock size={12} color="#ff4444" />
-                                                                                <span style={{ fontSize: '0.55rem', color: '#ff4444', fontWeight: 'bold' }}>SYNC REQUIRED</span>
+                                                                                <span style={{ fontSize: '0.55rem', color: "#ff4444", fontWeight: 'bold' }}>SYNC REQUIRED</span>
+                                                                            </div>
+                                                                        )}
                                                                             </div>
                                                                         )}
                                                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
