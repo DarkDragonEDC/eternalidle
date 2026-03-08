@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Users, Sword, Swords, Trophy, Settings, Plus, Info, Check, X, Coins, Sparkles, Tag, User, Zap, LogOut, Edit2, Save, Menu, Home, Building2, ChevronDown, ArrowUp, ArrowDown, Trash2, Landmark, ClipboardList, Pickaxe, FlaskConical, Hammer, Lock, Dices, Library } from 'lucide-react';
 import { formatSilver } from '@utils/format';
 import { COUNTRIES } from '../../../shared/countries';
-import { GUILD_BUILDINGS, calculateGuildNextLevelXP, GUILD_TASKS_CONFIG, UPGRADE_COSTS, calculateMaterialNeeds, STATION_BONUS_TABLE } from '../../../shared/guilds.js';
+import { GUILD_BUILDINGS, calculateGuildNextLevelXP, GUILD_TASKS_CONFIG, UPGRADE_COSTS, calculateMaterialNeeds, STATION_BONUS_TABLE, GUILD_XP_TABLE } from '../../../shared/guilds.js';
 
 const formatNumber = (num) => {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
@@ -220,10 +220,12 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
         showContributeModal]);
 
 
-    const currentXP = guild.xp || 0;
     const memberLimit = 10 + (guild.guild_hall_level || 0) * 2;
-    const nextLevelXP = guild.nextLevelXP || (guild.level || 1) * 1000;
-    const xpProgress = Math.min(100, (currentXP / nextLevelXP) * 100);
+    const nextLevelXPDelta = guild.nextLevelXP || calculateGuildNextLevelXP(guild.level || 1);
+    const xpProgress = Math.min(100, ((guild.xp || 0) / nextLevelXPDelta) * 100);
+
+    const totalCurrentXP = (GUILD_XP_TABLE[(guild.level || 1) - 1] || 0) + (guild.xp || 0);
+    const totalNextLevelXP = GUILD_XP_TABLE[guild.level || 1] || totalCurrentXP;
 
     const ICONS = {
         Shield: Shield, Sword: Sword, Sword2: Swords, Trophy: Trophy,
@@ -507,7 +509,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                         <div style={{ marginTop: '15px', width: '100%' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', marginBottom: '5px', fontWeight: 'bold', letterSpacing: '0.5px' }}>
                                 <span>GUILD PROGRESS</span>
-                                <span>{formatSilver(currentXP)} / {formatSilver(nextLevelXP)} - {xpProgress.toFixed(0)}%</span>
+                                <span>{formatSilver(totalCurrentXP)} / {GUILD_XP_TABLE[guild.level] ? formatSilver(totalNextLevelXP) : 'MAX'} - {xpProgress.toFixed(0)}%</span>
                             </div>
                             <div style={{
                                 height: '6px',

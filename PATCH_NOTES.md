@@ -3,6 +3,7 @@
 ### 🏰 Guildas & Cooperação
 - **Rankings Internos**: Liberada a visualização dos rankings internos da guilda para todos os membros. Acompanhe as doações e níveis dos seus companheiros.
 - **Estações de Trabalho**: As Guild Stations agora exibem claramente o bônus atual e o bônus que será obtido no próximo nível.
+- **Progressão de XP**: Sincronizado o formato do XP da guilda com as skills, mostrando o XP total acumulado sobre o total necessário para o próximo nível.
 
 ### 🏆 Hall of Fame
 - **Ranking de Guildas**: Adicionada a aba de Guildas no Hall of Fame, permitindo comparar o progresso das guildas por Nível e XP.

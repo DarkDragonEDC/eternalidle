@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { resolveItem } from '@shared/items';
 import { XP_TABLE } from '../../../shared/skills.js';
+import { GUILD_XP_TABLE } from '../../../shared/guilds.js';
 import { formatNumber, formatSilver } from '@utils/format';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Users, Star, Coins, Circle, ChevronDown, Sword, Shield, Swords, Sparkles, Settings } from 'lucide-react';
@@ -93,7 +94,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
     const [rankMode, setRankMode] = useState(gameState?.state?.isIronman ? 'IRONMAN' : 'NORMAL');
 
     useEffect(() => {
-        if (!socket) return;
+        if (!socket || !gameState) return;
 
         // Use subCategory as the primary sort key (e.g., 'FISHING', 'COMBAT', 'SILVER')
         // mainCategory is just for UI grouping now
@@ -136,7 +137,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
             return [...characters].map(guild => ({
                 ...guild,
                 value: guild.level || 1,
-                subValue: guild.xp || 0,
+                subValue: (GUILD_XP_TABLE[(guild.level || 1) - 1] || 0) + (guild.xp || 0),
                 label: ''
             })).sort((a, b) => {
                 if (b.value !== a.value) return b.value - a.value;
