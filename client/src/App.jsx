@@ -942,7 +942,7 @@ function App() {
         window.VAPID_PUBLIC_KEY = vapidPublicKey;
       }
       // client version is 1.0.0
-      const CLIENT_VERSION = '1.3.9'; // Keep synchronized with server/package.json
+      const CLIENT_VERSION = '1.4.0'; // Keep synchronized with server/package.json
       if (version && version !== CLIENT_VERSION) {
         console.warn(`[VERSION] Mismatch! Server: ${version}, Client: ${CLIENT_VERSION}`);
 

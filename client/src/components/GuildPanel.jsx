@@ -2037,26 +2037,11 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                 <User size={20} color="rgba(255,255,255,0.4)" />
                                             )}
                                         </div>
-                                        <motion.div
-                                            animate={{ scale: [1, 1.2, 1] }}
-                                            transition={{ repeat: Infinity, duration: 2 }}
-                                            style={{
-                                                width: '10px',
-                                                height: '10px',
-                                                borderRadius: '50%',
-                                                background: member.online ? '#44ff44' : '#555',
-                                                position: 'absolute',
-                                                bottom: '-2px',
-                                                right: '-2px',
-                                                border: '2px solid #000',
-                                                boxShadow: member.online ? '0 0 8px #44ff4466' : 'none'
-                                            }}
-                                        />
                                     </div>
                                     <div>
                                         <div
                                             onClick={() => onInspect && onInspect(member.name)}
-                                            style={{ fontSize: '0.9rem', fontWeight: 'bold', color: member.online ? '#fff' : 'rgba(255,255,255,0.5)', cursor: 'pointer' }}
+                                            style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#fff', cursor: 'pointer' }}
                                         >{member.name}</div>
                                         <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>
                                             {membersSortBy === 'DATE' && member.joinedAt ?

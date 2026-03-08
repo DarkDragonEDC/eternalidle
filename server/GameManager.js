@@ -2663,16 +2663,66 @@ export class GameManager {
 
         // Check if we have valid cached data (within TTL)
         if (cached && (now - cached.timestamp) < this.LEADERBOARD_CACHE_TTL) {
-            // console.log(`[RANKING] Using cached data for ${cacheKey}`);
             // Still need to calculate userRank for the requester
             const sorted = cached.data;
             let userRank = null;
             if (requesterId) {
-                const index = sorted.findIndex(c => c.id === requesterId);
-                if (index !== -1) {
-                    userRank = { rank: index + 1, character: sorted[index] };
+                if (type === 'GUILDS') {
+                    // For guilds, we need the character's guild_id
+                    const char = this.cache.get(requesterId);
+                    const guildId = char?.state?.guild_id;
+                    if (guildId) {
+                        const index = sorted.findIndex(g => g.id === guildId);
+                        if (index !== -1) {
+                            userRank = { rank: index + 1, guild: sorted[index] };
+                        }
+                    }
+                } else {
+                    const index = sorted.findIndex(c => c.id === requesterId);
+                    if (index !== -1) {
+                        userRank = { rank: index + 1, character: sorted[index] };
+                    }
                 }
             }
+            return { type, mode, top100: sorted.slice(0, 100), userRank };
+        }
+
+        if (type === 'GUILDS') {
+            const { data, error } = await this.supabase
+                .from('guilds')
+                .select('id, name, tag, level, xp, icon, icon_color, bg_color, guild_hall_level, guild_members(character_id)')
+                .limit(1000);
+
+            if (error) {
+                console.error("[RANKING] Guild DB Error:", error);
+                return { type, top100: [], userRank: null };
+            }
+
+            const sorted = (data || []).map(guild => {
+                const memberCount = guild.guild_members?.length || 0;
+                const maxMembers = 10 + (guild.guild_hall_level || 0) * 2;
+                // Cleanup the object for the client
+                const { guild_members, ...rest } = guild;
+                return { ...rest, memberCount, maxMembers };
+            }).sort((a, b) => {
+                if (b.level !== a.level) return (b.level || 1) - (a.level || 1);
+                return (b.xp || 0) - (a.xp || 0);
+            });
+
+            this.leaderboardCache.set(cacheKey, { data: sorted, timestamp: now });
+
+            let userRank = null;
+            if (requesterId) {
+                const char = this.cache.get(requesterId);
+                const guildId = char?.state?.guild_id;
+                if (guildId) {
+                    const index = sorted.findIndex(g => g.id === guildId);
+                    if (index !== -1) {
+                        userRank = { rank: index + 1, guild: sorted[index] };
+                    }
+                }
+            }
+
             return { type, mode, top100: sorted.slice(0, 100), userRank };
         }
 

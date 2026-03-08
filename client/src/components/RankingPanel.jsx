@@ -3,7 +3,7 @@ import { resolveItem } from '@shared/items';
 import { XP_TABLE } from '../../../shared/skills.js';
 import { formatNumber, formatSilver } from '@utils/format';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Users, Star, Coins, Circle, ChevronDown, Sword } from 'lucide-react';
+import { Trophy, Users, Star, Coins, Circle, ChevronDown, Sword, Shield, Swords, Sparkles, Settings } from 'lucide-react';
 
 const CATEGORIES = {
     GENERAL: {
@@ -73,6 +73,17 @@ const CATEGORIES = {
     }
 };
 
+const GUILD_ICONS = {
+    Shield: Shield,
+    Sword: Sword,
+    Sword2: Swords,
+    Trophy: Trophy,
+    Sparkles: Sparkles,
+    Users: Users,
+    Settings: Settings,
+    Coins: Coins
+};
+
 const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
     const [characters, setCharacters] = useState([]);
     const [userRankData, setUserRankData] = useState(null);
@@ -86,11 +97,12 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
 
         // Use subCategory as the primary sort key (e.g., 'FISHING', 'COMBAT', 'SILVER')
         // mainCategory is just for UI grouping now
-        const type = subCategory;
+        const type = rankMode === 'GUILDS' ? 'GUILDS' : subCategory;
+        const mode = rankMode === 'GUILDS' ? 'NORMAL' : rankMode;
 
         setLoading(true);
         // Pass object with type and mode
-        socket.emit('get_leaderboard', { type, mode: rankMode });
+        socket.emit('get_leaderboard', { type, mode });
 
         const handleLeaderboard = (response) => {
             const data = response.top100 || [];
@@ -119,6 +131,18 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
 
     const getSortedData = () => {
         if (!characters.length) return [];
+
+        if (rankMode === 'GUILDS') {
+            return [...characters].map(guild => ({
+                ...guild,
+                value: guild.level || 1,
+                subValue: guild.xp || 0,
+                label: ''
+            })).sort((a, b) => {
+                if (b.value !== a.value) return b.value - a.value;
+                return b.subValue - a.subValue;
+            });
+        }
 
         return [...characters].map(char => {
             const state = char.state || {};
@@ -202,7 +226,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
 
                 {/* Mode Toggles */}
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-                    {['NORMAL', 'IRONMAN'].map(mode => (
+                    {['NORMAL', 'IRONMAN', 'GUILDS'].map(mode => (
                         <button
                             key={mode}
                             onClick={() => setRankMode(mode)}
@@ -228,7 +252,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                 </div>
 
                 {/* Filtros */}
-                {/* Filtros */}
+                {rankMode !== 'GUILDS' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '30px' }}>
                     {/* Horizontal Scrollable Tabs */}
                     <div className="ranking-tabs-scroll" style={{
@@ -308,6 +332,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                         <ChevronDown size={12} color="var(--text-dim)" style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                     </div>
                 </div>
+                )}
 
                 {/* Lista */}
                 <div className="scroll-container" style={{ flex: 1, paddingRight: '10px', overflowY: 'auto' }}>
@@ -334,9 +359,12 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                         borderColor: index === 0 ? 'var(--accent)' : 'var(--border)',
                                         position: 'relative',
                                         overflow: 'hidden',
-                                        cursor: 'pointer'
+                                        cursor: rankMode === 'GUILDS' ? 'default' : 'pointer'
                                     }}
-                                    onClick={() => onInspect && onInspect(char.name)}
+                                    onClick={() => {
+                                        if (rankMode === 'GUILDS') return;
+                                        if (onInspect) onInspect(char.name);
+                                    }}
                                 >
                                     {/* Medalha / Numero */}
                                     <div style={{ width: '40px', fontSize: '1.2rem', fontWeight: '900', color: index === 0 ? '#d4af37' : index === 1 ? '#94a3b8' : index === 2 ? '#cd7f32' : 'var(--text-dim)' }}>
@@ -344,16 +372,53 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                     </div>
 
                                     {/* Player Info */}
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{
-                                            fontSize: '0.9rem',
-                                            fontWeight: '900',
-                                            color: char.state?.membership?.active && char.state?.membership?.expiresAt > Date.now()
-                                                ? 'var(--accent)'
-                                                : (index < 3 ? 'var(--text-main)' : 'var(--text-dim)')
-                                        }}>
-                                            {char.name}
-                                        </div>
+                                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        {rankMode === 'GUILDS' && (
+                                            <div style={{
+                                                width: '32px',
+                                                height: '32px',
+                                                borderRadius: '6px',
+                                                background: char.bg_color || 'var(--slot-bg)',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                border: '1px solid var(--border)',
+                                                flexShrink: 0
+                                            }}>
+                                                {(() => {
+                                                    const IconComp = GUILD_ICONS[char.icon] || Shield;
+                                                    return <IconComp size={16} color={char.icon_color || 'var(--accent)'} />;
+                                                })()}
+                                            </div>
+                                        )}
+                                        <div>
+                                            <div style={{
+                                                fontSize: '0.9rem',
+                                                fontWeight: '900',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                color: (rankMode !== 'GUILDS' && char.state?.membership?.active && char.state?.membership?.expiresAt > Date.now())
+                                                    ? 'var(--accent)'
+                                                    : (index < 3 ? 'var(--text-main)' : 'var(--text-dim)')
+                                            }}>
+                                                {rankMode === 'GUILDS' && <span style={{ color: 'var(--accent)', opacity: 0.8 }}>[{char.tag}]</span>}
+                                                {char.name}
+                                                {rankMode === 'GUILDS' && (
+                                                    <span style={{ 
+                                                        fontSize: '0.65rem', 
+                                                        color: 'var(--text-dim)', 
+                                                        opacity: 0.6,
+                                                        background: 'var(--slot-bg)',
+                                                        padding: '1px 6px',
+                                                        borderRadius: '4px',
+                                                        border: '1px solid var(--border)',
+                                                        marginLeft: '4px'
+                                                    }}>
+                                                        {char.memberCount || 0}/{char.maxMembers || 10}
+                                                    </span>
+                                                )}
+                                            </div>
                                         {char.state?.selectedTitle && (
                                             <div style={{
                                                 fontSize: '0.65rem',
@@ -381,30 +446,37 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                                 {char.state.selectedTitle}
                                             </div>
                                         )}
-                                        <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px', opacity: 0.5 }}>
-                                            {char.label}
-                                        </div>
+                                        {char.label && (
+                                            <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px', opacity: 0.5 }}>
+                                                {char.label}
+                                            </div>
+                                        )}
                                     </div>
+                                </div>
 
                                     {/* Valor */}
                                     <div style={{ textAlign: 'right' }}>
                                         <div style={{ fontSize: '1.1rem', fontWeight: '900', color: index === 0 ? 'var(--accent)' : 'var(--text-main)', lineHeight: 1 }}>
                                             {formatNumber(char.value)}
                                         </div>
-                                        {subCategory !== 'ITEM_POWER' && (
+                                        {rankMode !== 'GUILDS' && subCategory !== 'ITEM_POWER' ? (
                                             <div style={{ fontSize: '0.65rem', color: index === 0 ? 'var(--accent)' : 'var(--text-dim)', fontWeight: 'bold', opacity: 0.8, marginTop: '2px' }}>
                                                 {subCategory === 'TOTAL_XP' ? `LVL ${formatNumber(char.subValue)}` : `${formatNumber(char.subValue)} XP`}
                                             </div>
+                                        ) : rankMode === 'GUILDS' && (
+                                            <div style={{ fontSize: '0.65rem', color: index === 0 ? 'var(--accent)' : 'var(--text-dim)', fontWeight: 'bold', opacity: 0.8, marginTop: '2px' }}>
+                                                {formatNumber(char.subValue)} XP
+                                            </div>
                                         )}
                                         <div style={{ fontSize: '0.5rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '0.5px', marginTop: '4px', opacity: 0.5, textTransform: 'uppercase' }}>
-                                            {char.label}
+                                            {rankMode === 'GUILDS' ? '' : char.label}
                                         </div>
                                     </div>
                                 </motion.div>
                             ))}
 
                             {/* User Position if not in Top 100 */}
-                            {!loading && userRankData && !sortedData.some(c => c.id === userRankData.character.id) && (
+                            {!loading && userRankData && !sortedData.some(item => item.id === (rankMode === 'GUILDS' ? userRankData.guild?.id : userRankData.character?.id)) && (
                                 <>
                                     <div style={{ padding: '10px 0', textAlign: 'center', opacity: 0.3, fontSize: '0.8rem', fontWeight: 'bold' }}>
                                         ...
@@ -430,9 +502,27 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                         </div>
                                         <div style={{ flex: 1 }}>
                                             <div style={{ fontSize: '0.9rem', fontWeight: '900', color: 'var(--accent)' }}>
-                                                {userRankData.character.name} (YOU)
+                                                {rankMode === 'GUILDS' ? (
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <span style={{ color: 'var(--accent)', opacity: 0.8 }}>[{userRankData.guild?.tag}]</span>
+                                                        {userRankData.guild?.name} (YOUR)
+                                                        <span style={{ 
+                                                            fontSize: '0.65rem', 
+                                                            color: 'var(--accent)', 
+                                                            opacity: 0.7,
+                                                            background: 'rgba(0,0,0,0.2)',
+                                                            padding: '1px 6px',
+                                                            borderRadius: '4px',
+                                                            border: '1px solid rgba(255,255,255,0.1)'
+                                                        }}>
+                                                            {userRankData.guild?.memberCount || 0}/{userRankData.guild?.maxMembers || 10}
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <>{userRankData.character?.name} (YOU)</>
+                                                )}
                                             </div>
-                                            {userRankData.character.state?.selectedTitle && (
+                                            {rankMode !== 'GUILDS' && userRankData.character?.state?.selectedTitle && (
                                                 <div style={{
                                                     fontSize: '0.65rem',
                                                     fontWeight: '900',
@@ -452,10 +542,14 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                         <div style={{ textAlign: 'right' }}>
                                             <div style={{ fontSize: '1.1rem', fontWeight: '900', color: 'var(--accent)', lineHeight: 1 }}>
                                                 {(() => {
+                                                    if (rankMode === 'GUILDS') return formatNumber(userRankData.guild?.level || 1);
                                                     const char = userRankData.character;
                                                     let val = 0;
                                                     if (subCategory === 'LEVEL') val = Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.level || 1), 0);
-                                                    else if (subCategory === 'TOTAL_XP') val = Object.values(char.state.skills || {}).reduce((acc, s) => acc + getTotalSkillXP(char.state.skills || {}), 0); // Note: Fix here to use actual total XP if needed
+                                                    else if (subCategory === 'TOTAL_XP') {
+                                                        const skills = char.state.skills || {};
+                                                        val = Object.values(skills).reduce((acc, s) => acc + getTotalSkillXP(s), 0);
+                                                    }
                                                     else if (subCategory === 'ITEM_POWER') {
                                                         const equipment = char.state.equipment || {};
                                                         const hasWeapon = !!equipment.mainHand;
@@ -476,9 +570,10 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                                     return formatNumber(val);
                                                 })()}
                                             </div>
-                                            {subCategory !== 'ITEM_POWER' && (
+                                            {(rankMode === 'GUILDS' || subCategory !== 'ITEM_POWER') && (
                                                 <div style={{ fontSize: '0.65rem', color: 'var(--accent)', fontWeight: 'bold', opacity: 0.8, marginTop: '2px' }}>
                                                     {(() => {
+                                                        if (rankMode === 'GUILDS') return `${formatNumber(userRankData.guild?.xp || 0)} XP`;
                                                         const char = userRankData.character;
                                                         let subVal = 0;
                                                         if (subCategory === 'LEVEL') subVal = Object.values(char.state.skills || {}).reduce((acc, s) => acc + getTotalSkillXP(s), 0);
