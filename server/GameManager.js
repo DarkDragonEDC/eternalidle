@@ -71,7 +71,7 @@ export class GameManager {
         // 24h Snapshot Check (Every hour)
         setInterval(() => this.checkTaxSnapshot(), 3600000);
         setTimeout(() => this.checkTaxSnapshot(), 5000); // Check once shortly after startup
-        
+
         // Push notification scheduler (Midnight UTC check)
         setInterval(() => this.checkMidnightTriggers(), 60000);
 
@@ -215,12 +215,12 @@ export class GameManager {
         // 00:00 UTC
         if (hours === 0 && minutes === 0) {
             console.log('[PUSH] Midnight UTC detected. Sending Daily Spin notifications...');
-            
+
             // Get all subscriptions that have daily_spin enabled
             const { data: subs, error } = await this.supabase
                 .from('push_subscriptions')
                 .select('user_id, settings');
-            
+
             if (error) {
                 console.error('[PUSH] Error fetching subscriptions for midnight:', error);
                 return;
@@ -233,9 +233,9 @@ export class GameManager {
             console.log(`[PUSH] Notifying ${uniqueUsers.length} users about Daily Spin.`);
             for (const userId of uniqueUsers) {
                 this.pushManager.notifyUser(
-                    userId, 
-                    'push_daily_spin', 
-                    'Daily Spin Available! 🎡', 
+                    userId,
+                    'push_daily_spin',
+                    'Daily Spin Available! 🎡',
                     'Your daily reward is waiting for you in Eternal Idle.'
                 );
             }
@@ -3565,7 +3565,7 @@ export class GameManager {
 
         const now = Date.now();
         const cached = this.guildBonusesCache.get(guildId);
-        
+
         // Use cache for 5 minutes
         if (cached && (now - cached.timestamp < 300000)) {
             return cached.bonuses;

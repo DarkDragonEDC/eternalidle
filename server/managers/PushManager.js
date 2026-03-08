@@ -103,14 +103,10 @@ export class PushManager {
     
     async notifyUser(userId, eventType, title, body, url = '/') {
         const payload = {
-            notification: {
-                title,
-                body,
-                icon: '/icons/icon-192x192.png',
-                data: {
-                    url: url
-                }
-            }
+            title,
+            body,
+            icon: '/icons/icon-192x192.png',
+            url: url
         };
         return await this.sendNotification(userId, eventType, payload);
     }
