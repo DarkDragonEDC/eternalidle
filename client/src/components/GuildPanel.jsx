@@ -1285,8 +1285,6 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                                                 <span style={{ fontSize: '0.55rem', color: "#ff4444", fontWeight: 'bold' }}>SYNC REQUIRED</span>
                                                                             </div>
                                                                         )}
-                                                                            </div>
-                                                                        )}
                                                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
                                                                             <div style={{ background: 'rgba(0,0,0,0.2)', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                                                 <Coins size={12} color="#ffd700" />
