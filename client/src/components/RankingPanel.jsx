@@ -79,7 +79,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
     const [loading, setLoading] = useState(true);
     const [mainCategory, setMainCategory] = useState('GENERAL');
     const [subCategory, setSubCategory] = useState('LEVEL');
-    const [rankMode, setRankMode] = useState('NORMAL');
+    const [rankMode, setRankMode] = useState(gameState?.state?.isIronman ? 'IRONMAN' : 'NORMAL');
 
     useEffect(() => {
         if (!socket) return;

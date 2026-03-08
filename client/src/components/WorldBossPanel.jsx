@@ -179,7 +179,7 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge, onInspect, o
     const [loadingHistory, setLoadingHistory] = useState(false);
 
     // Ranking Sub-tabs
-    const [rankingType, setRankingType] = useState('ALL'); // 'ALL' | 'NORMAL' | 'IRONMAN'
+    const [rankingType, setRankingType] = useState(gameState?.state?.isIronman ? 'IRONMAN' : 'NORMAL'); // 'ALL' | 'NORMAL' | 'IRONMAN'
 
     useEffect(() => {
         if (!socket) return;

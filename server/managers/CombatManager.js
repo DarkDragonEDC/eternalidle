@@ -43,6 +43,9 @@ export class CombatManager {
 
         const mobMaxHP = customStats?.health || mobData.health;
 
+        const playerStats = this.gameManager.inventoryManager.calculateStats(char);
+        const playerAtkSpeed = Math.max(200, playerStats.attackSpeed || 2000);
+
         char.state.combat = {
             mobId: mobData.id,
             tier: tierNum,
@@ -51,7 +54,9 @@ export class CombatManager {
             mobHealth: mobMaxHP,
             mobDamage: customStats?.damage || mobData.damage,
             mobDefense: customStats?.defense || mobData.defense,
-            mob_next_attack_at: Date.now() + 1000,
+            mob_next_attack_at: Date.now(),
+            player_next_attack_at: Date.now() + playerAtkSpeed,
+            next_attack_at: Date.now(), // Trigger first tick immediately
             mobAtkSpeed: 1000, // Default mob speed
             playerHealth: currentHealth,
             auto: true,
@@ -414,6 +419,17 @@ export class CombatManager {
             await this.saveCombatLog(char, 'DEFEAT');
 
             delete char.state.combat;
+
+            // Push Notification: Character Death
+            if (char.user_id) {
+                this.gameManager.pushManager.notifyUser(
+                    char.user_id,
+                    'push_character_death',
+                    'Character Defeated! 💀',
+                    `${char.name} has been defeated by ${combat.mobName}.`,
+                    '/combat'
+                );
+            }
         }
 
         return { message, leveledUp, details: roundDetails };

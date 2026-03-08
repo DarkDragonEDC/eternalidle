@@ -270,7 +270,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
             // Open partial buy modal
             setBuyModal({
                 listing: listing,
-                quantity: numericAmount, // Default to MAX
+                quantity: 1, // Default to 1
                 max: numericAmount,
                 pricePerUnit: listing.price / numericAmount
             });

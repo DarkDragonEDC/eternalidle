@@ -361,7 +361,7 @@ const genPotions = () => {
                 type: 'POTION',
                 effect: key,
                 value: val,
-                desc: `${data.desc} by ${Math.round(val * 100)}%`,
+                desc: `${data.desc} by ${Math.round(val * 100)}%. (Duration: 1 hour)`,
                 duration: 3600, // 1 Hour Duration
                 icon: {
                     'REFINE_XP': `/items/T${t}_REFINING_POTION.webp`,
@@ -1286,6 +1286,10 @@ export const getTierColor = (tier) => {
 };
 export const calculateItemSellPrice = (item, itemId) => {
     if (!item) return 0;
+
+    // 0. Specific Price Overrides (User Requested)
+    if (item.id === 'T1_RUNE_SHARD') return 5;
+    if (item.id === 'T1_BATTLE_RUNE_SHARD') return 10;
 
     // 0. Unsellable Items (Premium, Special, Chests)
     if (item.id === 'INVENTORY_SLOT_TICKET' ||

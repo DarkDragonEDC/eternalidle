@@ -296,6 +296,18 @@ export class DungeonManager {
         // Final Run Completed
         await this.saveDungeonLog(char, config, 'COMPLETED', null, now);
         char.state.dungeon.status = 'COMPLETED';
+        
+        // Push Notification: Dungeon Complete
+        if (char.user_id) {
+            this.gameManager.pushManager.notifyUser(
+                char.user_id,
+                'push_dungeon_complete',
+                'Dungeon Complete! 🏰',
+                `You have successfully explored ${config.name}.`,
+                '/dungeon'
+            );
+        }
+
         // Save immediately after final run
         await this.gameManager.saveState(char.id, char.state);
         console.log(`[DUNGEON-DEBUG] completeDungeon finished successfully for ${char.name}`);

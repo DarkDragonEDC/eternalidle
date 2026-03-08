@@ -54,6 +54,15 @@ export class InventoryManager {
             const item = this.resolveItem(storageKey);
             if (!item?.noInventorySpace) {
                 if (this.getUsedSlots(char) >= this.getMaxSlots(char)) {
+                    if (char.user_id) {
+                        this.gameManager.pushManager.notifyUser(
+                            char.user_id,
+                            'push_inventory_full',
+                            'Inventory Full! 🎒',
+                            'No more space! Free some space to continue looting.',
+                            '/inventory'
+                        );
+                    }
                     return false;
                 }
             }
@@ -415,16 +424,8 @@ export class InventoryManager {
                 }
             }
         } else {
-            const currentEquip = state.equipment[slotName];
-            if (currentEquip && currentEquip.id) {
-                // Return old item to inventory with its metadata
-                const oldId = currentEquip.id;
-                const { id: _, stats: __, ...metadata } = currentEquip;
-                this.addItemToInventory(char, oldId, 1, Object.keys(metadata).length > 0 ? metadata : null);
-            }
-
             // Create equipment object with metadata from inventory
-            // CRITICAL FIX: We must capture the metadata BEFORE we decrement/delete the entry
+            // CRITICAL: Capture metadata BEFORE we decrement/delete the entry
             const inventoryEntry = state.inventory[itemId];
             const equipmentObject = { ...item }; // item is resolved from itemId
 
@@ -437,13 +438,27 @@ export class InventoryManager {
                 });
             }
 
-            // Now safely decrement/delete from inventory
+            // FIX: Remove new item from inventory FIRST to free a slot,
+            // THEN return old item. This prevents item loss when inventory is full.
             if (typeof inventoryEntry === 'object' && inventoryEntry !== null) {
                 inventoryEntry.amount--;
                 if (inventoryEntry.amount <= 0) delete state.inventory[itemId];
             } else {
                 state.inventory[itemId]--;
                 if (state.inventory[itemId] <= 0) delete state.inventory[itemId];
+            }
+
+            // Now return old equipped item to inventory (slot is freed above)
+            const currentEquip = state.equipment[slotName];
+            if (currentEquip && currentEquip.id) {
+                const oldId = currentEquip.id;
+                const { id: _, stats: __, ...oldMetadata } = currentEquip;
+                const returned = this.addItemToInventory(char, oldId, 1, Object.keys(oldMetadata).length > 0 ? oldMetadata : null);
+                if (!returned) {
+                    // Safety: if inventory is STILL full, re-add the new item and abort
+                    this.addItemToInventory(char, itemId, 1);
+                    throw new Error("Inventory full! Cannot swap equipment.");
+                }
             }
 
             state.equipment[slotName] = equipmentObject;

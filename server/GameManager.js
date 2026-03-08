@@ -15,6 +15,7 @@ import { TradeManager } from './managers/TradeManager.js';
 import { WorldBossManager } from './managers/WorldBossManager.js';
 import { SocialManager } from './managers/SocialManager.js';
 import { GuildManager } from './managers/GuildManager.js';
+import { PushManager } from './managers/PushManager.js';
 import { pruneState, hydrateState } from './utils/statePruner.js';
 
 // Removed local ITEM_LOOKUP generation in favor of shared source of truth
@@ -35,6 +36,7 @@ export class GameManager {
         this.worldBossManager = new WorldBossManager(this);
         this.socialManager = new SocialManager(this);
         this.guildManager = new GuildManager(this);
+        this.pushManager = new PushManager(this);
         this.userLocks = new Map(); // userId -> Promise (current task)
         this.cache = new Map(); // charId -> character object
         this.dirty = new Set(); // set of charIds that need persisting
@@ -69,6 +71,9 @@ export class GameManager {
         // 24h Snapshot Check (Every hour)
         setInterval(() => this.checkTaxSnapshot(), 3600000);
         setTimeout(() => this.checkTaxSnapshot(), 5000); // Check once shortly after startup
+        
+        // Push notification scheduler (Midnight UTC check)
+        setInterval(() => this.checkMidnightTriggers(), 60000);
 
         this.worldBossManager.initialize();
 
@@ -199,6 +204,41 @@ export class GameManager {
 
         if (charData && charData.user_id) {
             this.io.to(`user:${charData.user_id}`).emit(event, data);
+        }
+    }
+
+    async checkMidnightTriggers() {
+        const now = new Date();
+        const minutes = now.getUTCMinutes();
+        const hours = now.getUTCHours();
+
+        // 00:00 UTC
+        if (hours === 0 && minutes === 0) {
+            console.log('[PUSH] Midnight UTC detected. Sending Daily Spin notifications...');
+            
+            // Get all subscriptions that have daily_spin enabled
+            const { data: subs, error } = await this.supabase
+                .from('push_subscriptions')
+                .select('user_id, settings');
+            
+            if (error) {
+                console.error('[PUSH] Error fetching subscriptions for midnight:', error);
+                return;
+            }
+
+            const uniqueUsers = [...new Set(subs
+                .filter(s => s.settings?.push_daily_spin !== false)
+                .map(s => s.user_id))];
+
+            console.log(`[PUSH] Notifying ${uniqueUsers.length} users about Daily Spin.`);
+            for (const userId of uniqueUsers) {
+                this.pushManager.notifyUser(
+                    userId, 
+                    'push_daily_spin', 
+                    'Daily Spin Available! 🎡', 
+                    'Your daily reward is waiting for you in Eternal Idle.'
+                );
+            }
         }
     }
 
@@ -2210,6 +2250,17 @@ export class GameManager {
                                 autoRefineCount: activity.autoRefineCount
                             }, 'Summary');
 
+                            // PUSH NOTIFICATION: Activity Finished
+                            if (char.user_id) {
+                                this.pushManager.notifyUser(
+                                    char.user_id,
+                                    'push_activity_finished',
+                                    'Activity Finished! ✅',
+                                    `Your ${activity.type.toLowerCase().replace('_', ' ')} activity is complete. Tap to start a new one!`,
+                                    '/activities'
+                                );
+                            }
+
                             char.current_activity = null;
                             char.activity_started_at = null;
                         } else {
@@ -2260,7 +2311,9 @@ export class GameManager {
                 } else {
                     // Respawn time reached!
                     combat.mobHealth = combat.mobMaxHealth;
-                    combat.next_attack_at = now; // Reset timer to now to prevent burst
+                    combat.mob_next_attack_at = now;
+                    combat.player_next_attack_at = now + atkSpeed;
+                    combat.next_attack_at = now; // Reset trigger timer to now
                     delete combat.respawn_at;
                     stateChanged = true;
                 }
@@ -2583,6 +2636,17 @@ export class GameManager {
             // Auto-remove food if empty
             if (char.state.equipment.food.amount <= 0) {
                 delete char.state.equipment.food;
+            }
+
+            // PUSH NOTIFICATION: HP Fully Recovered
+            if (char.state.health >= maxHp && char.user_id) {
+                this.pushManager.notifyUser(
+                    char.user_id,
+                    'push_hp_recovered',
+                    'HP Fully Recovered! ❤️',
+                    'You are back to full health and ready for battle!',
+                    '/combat'
+                );
             }
 
             return { used: true, amount: actualHeal, eaten: 1, savedCount };

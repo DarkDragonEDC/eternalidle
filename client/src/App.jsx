@@ -38,6 +38,7 @@ import DailySpinModal from './components/DailySpinModal';
 import SocialPanel from './components/SocialPanel';
 import TradePanel from './components/TradePanel';
 import SettingsModal from './components/SettingsModal';
+import { PushService } from './services/PushService';
 import GuildPanel from './components/GuildPanel';
 import AnnouncementModal, { shouldShowAnnouncement } from './components/AnnouncementModal';
 import {
@@ -322,8 +323,35 @@ function App() {
     const settingsStr = JSON.stringify(settings);
     if (socket && Object.keys(settings).length > 0 && settingsFromSyncRef.current !== settingsStr) {
       socket.emit('set_settings', { settings });
+      
+      // Also sync push settings if enabled
+      if (settings.pushEnabled) {
+        socket.emit('push_update_settings', { settings });
+      }
     }
   }, [settings, socket, session]);
+
+  // Push Subscription Effect
+  useEffect(() => {
+    if (socket && settings.pushEnabled) {
+      const syncPush = async () => {
+        try {
+          const sub = await PushService.getSubscription();
+          if (sub) {
+            socket.emit('push_subscribe', { subscription: sub });
+          }
+        } catch (e) {
+          console.error('[PUSH] Failed to sync subscription:', e);
+        }
+      };
+      syncPush();
+    }
+  }, [socket, settings.pushEnabled]);
+
+  // Register SW on mount
+  useEffect(() => {
+    PushService.registerServiceWorker();
+  }, []);
 
   // characterSelected is no longer needed, we use selectedCharacter (charId) as the source of truth
 
@@ -909,9 +937,12 @@ function App() {
       }
     });
 
-    newSocket.on('server_version', ({ version }) => {
+    newSocket.on('server_version', ({ version, vapidPublicKey }) => {
+      if (vapidPublicKey) {
+        window.VAPID_PUBLIC_KEY = vapidPublicKey;
+      }
       // client version is 1.0.0
-      const CLIENT_VERSION = '1.3.6'; // Mantenha sincronizado com server/package.json
+      const CLIENT_VERSION = '1.3.9'; // Keep synchronized with server/package.json
       if (version && version !== CLIENT_VERSION) {
         console.warn(`[VERSION] Mismatch! Server: ${version}, Client: ${CLIENT_VERSION}`);
 
@@ -2515,8 +2546,27 @@ function App() {
 
             {!isMobile && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-                <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, #90d5ff 0%, #003366 100%)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <User color="#000" size={16} />
+                <div style={{ 
+                  width: 32, 
+                  height: 32, 
+                  background: displayedGameState?.state?.avatar ? 'var(--slot-bg)' : 'linear-gradient(135deg, #90d5ff 0%, #003366 100%)', 
+                  borderRadius: '6px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  flexShrink: 0,
+                  overflow: 'hidden',
+                  border: displayedGameState?.state?.avatar ? '1px solid var(--border)' : 'none'
+                }}>
+                  {displayedGameState?.state?.avatar ? (
+                    <img 
+                      src={displayedGameState.state.avatar.replace(/\.(png|jpg|jpeg)$/, '.webp')} 
+                      alt="" 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                    />
+                  ) : (
+                    <User color="#000" size={16} />
+                  )}
                 </div>
                 <div style={{ fontWeight: '900', fontSize: '1rem', color: 'var(--text-main)', letterSpacing: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>{displayedGameState?.name?.toUpperCase() || 'ADVENTURER'}</div>
               </div>

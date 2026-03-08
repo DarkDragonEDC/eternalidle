@@ -605,37 +605,45 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
 
             {/* Item Action Modal */}
             {selectedItemForModal && (
-                <ItemActionModal
-                    item={selectedItemForModal}
-                    isIronman={gameState?.state?.isIronman}
-                    onClose={() => setSelectedItemForModal(null)}
-                    onEquip={onEquip}
-                    onEquipFood={handleEquipFood}
-                    onUse={(id) => {
-                        setSelectedItemForModal(null);
-                        const item = resolveItem(id);
-                        if (id === 'NOOB_CHEST') {
-                            onUse(id);
-                            return;
-                        }
+                (() => {
+                    const isInventory = activeTab?.toLowerCase() === 'inventory';
+                    const isBank = activeTab?.toLowerCase() === 'bank';
 
-                        if (item?.type === 'POTION' || item?.type === 'CHEST' || id.includes('CHEST') || item?.type === 'CONSUMABLE') {
-                            setUsePotionModal({
-                                itemId: id,
-                                item: item,
-                                max: inventoryItems.find(i => i.id === id)?.qty || 1,
-                                quantity: 1
-                            });
-                        } else {
-                            onUse(id);
-                        }
-                    }}
-                    onSell={(id) => { setSelectedItemForModal(null); handleQuickSell(id); }}
-                    onList={(id, item) => { setSelectedItemForModal(null); onListOnMarket({ itemId: id, max: item.qty }); }}
-                    onDismantle={(id) => { setSelectedItemForModal(null); handleDismantle(id); }}
-                    onDeposit={activeTab === 'INVENTORY' ? handleDeposit : null}
-                    onWithdraw={activeTab === 'BANK' ? handleWithdraw : null}
-                />
+                    return (
+                        <ItemActionModal
+                            item={selectedItemForModal}
+                            isIronman={gameState?.state?.isIronman}
+                            onClose={() => setSelectedItemForModal(null)}
+                            onEquip={isInventory ? onEquip : null}
+                            onEquipFood={isInventory ? handleEquipFood : null}
+                            onUse={isInventory ? (id) => {
+                                setSelectedItemForModal(null);
+                                const item = resolveItem(id);
+                                if (id === 'NOOB_CHEST') {
+                                    onUse(id);
+                                    return;
+                                }
+
+                                if (item?.type === 'POTION' || item?.type === 'CHEST' || id.includes('CHEST') || item?.type === 'CONSUMABLE') {
+                                    setUsePotionModal({
+                                        itemId: id,
+                                        item: item,
+                                        max: inventoryItems.find(i => i.id === id)?.qty || 1,
+                                        quantity: 1
+                                    });
+                                } else {
+                                    onUse(id);
+                                }
+                            } : null}
+                            onShowInfo={onShowInfo}
+                            onSell={isInventory ? (id) => { setSelectedItemForModal(null); handleQuickSell(id); } : null}
+                            onList={isInventory ? (id, item) => { setSelectedItemForModal(null); onListOnMarket({ itemId: id, max: item.qty }); } : null}
+                            onDismantle={isInventory ? (id) => { setSelectedItemForModal(null); handleDismantle(id); } : null}
+                            onDeposit={isInventory ? handleDeposit : null}
+                            onWithdraw={isBank ? handleWithdraw : null}
+                        />
+                    );
+                })()
             )}
 
 

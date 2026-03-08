@@ -1033,7 +1033,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
                                 const finalDmg = Math.max(1, baseMitigatedDmg * avgDmgMultiplier);
 
                                 const rounds = Math.ceil(mob.health / finalDmg);
-                                const killTime = Math.max(0, (rounds - 1) * ((stats.attackSpeed || 1000) / 1000));
+                                const killTime = rounds * ((stats.attackSpeed || 1000) / 1000);
                                 const xpH = (3600 / (killTime + 1.0)) * Math.floor(mob.xp * (1 + (stats.globals?.xpYield || 0) / 100));
 
                                 const sessionXp = xpH * survivalDurationHours;

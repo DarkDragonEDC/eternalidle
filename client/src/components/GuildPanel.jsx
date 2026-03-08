@@ -12,6 +12,26 @@ const formatNumber = (num) => {
     return num.toString();
 };
 
+const formatRelativeTime = (date) => {
+    if (!date) return '';
+    const diff = new Date() - new Date(date);
+    const minutes = Math.floor(diff / (1000 * 60));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+    if (days >= 1) {
+        const remainingHours = hours % 24;
+        return `${days}d ${remainingHours}h ago`;
+    }
+    if (hours >= 1) {
+        return `${hours}h ago`;
+    }
+    if (minutes >= 1) {
+        return `${minutes}m ago`;
+    }
+    return 'Just now';
+};
+
 const CountryFlag = ({ code, name, size = '1.2rem', style = {} }) => {
     if (!code) return <span style={{ fontSize: size, ...style }}>🌐</span>;
     return (
@@ -645,7 +665,10 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                         gap: '4px'
                                     }}
                                 >
-                                    {membersSortBy === 'DATE' ? 'DATE' : membersSortBy === 'TOTAL_XP' ? 'TOTAL XP' : membersSortBy === 'DAILY_XP' ? 'DAILY XP' : 'MEMBERS'}
+                                    {membersSortBy === 'DATE' ? 'DATE' : 
+                                     membersSortBy === 'TOTAL_XP' ? 'TOTAL XP' : 
+                                     membersSortBy === 'DAILY_XP' ? 'DAILY XP' : 
+                                     membersSortBy === 'TOTAL_SILVER' ? 'TOTAL SILVER' : 'MEMBERS'}
                                     {activeTab === 'MEMBERS' && (
                                         <ChevronDown size={12} style={{ opacity: 0.7, transform: showMembersDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                                     )}
@@ -1356,9 +1379,15 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                     <Plus size={14} /> DONATE
                                                 </motion.button>
                                             </div>
-                                            <div style={{ color: '#fff', fontSize: isMobile ? '1rem' : '1.1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                <Coins size={isMobile ? 16 : 18} color="#ffd700" />
-                                                {formatSilver(guild.bank_silver || 0)}
+                                            <div style={{ color: '#fff', fontSize: isMobile ? '1rem' : '1.1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <Coins size={isMobile ? 16 : 18} color="#ffd700" />
+                                                    {formatSilver(guild.bank_silver || 0)}
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent)' }}>
+                                                    <ClipboardList size={isMobile ? 16 : 18} />
+                                                    <span>{(guild.guild_points || 0).toLocaleString()} GP</span>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -1530,28 +1559,18 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                 key={task.id}
                                                 whileHover={{ y: -5 }}
                                                 style={{
-                                                    background: 'rgba(255,255,255,0.03)',
-                                                    borderRadius: '16px',
-                                                    border: `1px solid ${isCompleted ? 'rgba(68, 255, 68, 0.2)' : 'rgba(255,255,255,0.08)'}`,
-                                                    padding: '12px',
+                                                    background: isCompleted ? 'rgba(68, 255, 68, 0.08)' : 'rgba(255,255,255,0.03)',
+                                                    borderRadius: '10px',
+                                                    border: `1px solid ${isCompleted ? 'rgba(68, 255, 68, 0.4)' : 'rgba(255,255,255,0.08)'}`,
+                                                    padding: '4px 8px',
                                                     position: 'relative',
                                                     overflow: 'hidden',
-                                                    gridColumn: isLastAndLonely ? '2' : 'auto'
+                                                    gridColumn: isLastAndLonely ? '2' : 'auto',
+                                                    boxShadow: isCompleted ? '0 0 15px rgba(68, 255, 68, 0.05)' : 'none'
                                                 }}
                                             >
-                                                {isCompleted ? (
-                                                    <div style={{
-                                                        position: 'absolute', top: '10px', right: '10px',
-                                                        background: 'rgba(68, 255, 68, 0.15)', color: '#44ff44',
-                                                        fontSize: '0.6rem', fontWeight: '900', padding: '4px 8px',
-                                                        borderRadius: '6px', border: '1px solid rgba(68, 255, 68, 0.3)',
-                                                        zIndex: 2, display: 'flex', alignItems: 'center', gap: '4px'
-                                                    }}>
-                                                        <Check size={12} /> COMPLETED
-                                                    </div>
-                                                ) : null}
 
-                                                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '0px' }}>
+                                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '2px' }}>
                                                     <div style={{
                                                         width: '36px', height: '36px',
                                                         background: 'rgba(0,0,0,0.3)', borderRadius: '10px',
@@ -1600,7 +1619,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                 </div>
 
                                                 {/* Progress Bar & Contribute Button */}
-                                                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', marginBottom: '4px', marginTop: '-16px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', marginBottom: '2px', marginTop: '-14px' }}>
                                                     <div style={{ flex: 1 }}>
                                                         <div style={{ display: 'flex', justifyContent: 'flex-end', fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', marginBottom: '2px', fontWeight: 'bold' }}>
                                                             <span>{task.progress} / {task.required}</span>
@@ -1998,7 +2017,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                 <img 
                                                     src={member.avatar.replace(/\.(png|jpg|jpeg)$/, '.webp')} 
                                                     alt={member.name}
-                                                    style={{ width: '100%', height: '100%', borderRadius: 'inherit', objectFit: 'cover' }}
+                                                    style={{ width: '100%', height: '100%', borderRadius: 'inherit', objectFit: 'cover', objectPosition: 'center 20%' }}
                                                 />
                                             ) : (
                                                 <User size={20} color="rgba(255,255,255,0.4)" />
@@ -2027,7 +2046,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                         >{member.name}</div>
                                         <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>
                                             {membersSortBy === 'DATE' && member.joinedAt ?
-                                                `${Math.floor((new Date() - new Date(member.joinedAt)) / (1000 * 60 * 60 * 24))} days ago` :
+                                                formatRelativeTime(member.joinedAt) :
                                                 membersSortBy === 'TOTAL_XP' ?
                                                     `Total XP: ${formatNumber(member.donatedXP || 0)}` :
                                                     membersSortBy === 'TOTAL_SILVER' ?
@@ -2186,7 +2205,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                     <img 
                                                         src={req.avatar.replace(/\.(png|jpg|jpeg)$/, '.webp')} 
                                                         alt={req.name}
-                                                        style={{ width: '100%', height: '100%', borderRadius: 'inherit', objectFit: 'cover' }}
+                                                        style={{ width: '100%', height: '100%', borderRadius: 'inherit', objectFit: 'cover', objectPosition: 'center 20%' }}
                                                     />
                                                 ) : (
                                                     <User size={20} color="rgba(255,255,255,0.4)" />

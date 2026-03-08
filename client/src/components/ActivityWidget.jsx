@@ -33,12 +33,12 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
     const doneQty = Math.max(0, initialQty - remainingQty);
     const timePerAction = activity?.time_per_action || 3;
 
-    // Cálculo de Stats (Replicado do ProfilePanel para consistência)
+    // Stats Calculation (Replicated from ProfilePanel for consistency)
     const stats = useMemo(() => {
         return gameState?.calculatedStats || { hp: 100, damage: 5, attackSpeed: 1000, defense: 0 };
     }, [gameState?.calculatedStats]);
 
-    // Timer para Atividade (Legacy/Fallback)
+    // Timer for Activity (Legacy/Fallback)
     useEffect(() => {
         if (!activity || !gameState?.activity_started_at) return;
         const interval = setInterval(() => {
@@ -49,9 +49,9 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
         return () => clearInterval(interval);
     }, [activity?.item_id, activity?.next_action_at, gameState?.activity_started_at, serverTimeOffset]);
 
-    // Timer para Combate
+    // Timer for Combat
 
-    // Timer para Combate
+    // Timer for Combat
     useEffect(() => {
         if (!combat) return;
         const startTime = combat.started_at ? new Date(combat.started_at).getTime() : Date.now();
@@ -65,7 +65,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
         return () => clearInterval(interval);
     }, [combat?.started_at, !!combat]); // Only restart if started_at changes or combat toggles
 
-    // Timer para Dungeon
+    // Timer for Dungeon
     useEffect(() => {
         if (!dungeonState || !dungeonState.active) return;
         const startTime = dungeonState.started_at ? new Date(dungeonState.started_at).getTime() : Date.now();
@@ -136,7 +136,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
         return () => cancelAnimationFrame(animationFrameId);
     }, [activity?.next_action_at, activity?.time_per_action, serverTimeOffset]);
 
-    // Listener para o World Boss
+    // World Boss Listener
     useEffect(() => {
         if (!socket) return;
         const handleUpdate = (result) => {
@@ -148,7 +148,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
         return () => socket.off('action_result', handleUpdate);
     }, [socket]);
 
-    // Auto-limpeza do World Boss quando terminar
+    // Auto-cleanup for World Boss when finished
     useEffect(() => {
         if (worldBossData?.status === 'FINISHED') {
             const timer = setTimeout(() => setWorldBossData(null), 5000);
@@ -175,7 +175,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
         : 0;
 
     const skillProgressCapped = smoothProgress;
-    // Formatar Tempo (HH:MM:SS)
+    // Format Time (HH:MM:SS)
     const formatTime = (secs) => {
         const h = Math.floor(secs / 3600);
         const m = Math.floor((secs % 3600) / 60);
@@ -231,15 +231,18 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                 }}
             >
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                    {/* LOGICA DE ICONE CORRIGIDA: Split View ou Single View */}
+                    {/* ICON LOGIC: Split View or Single View */}
                     {(() => {
                         const isCombat = combat && (combat.mobId || combat.active);
                         const isActivity = !!activity;
                         const isDungeon = dungeonState?.active;
-                        const isMultitasking = isCombat && isActivity;
-
-                        // Helper para renderizar Mob Icon
+                        const isMultitasking = (isCombat || isDungeon) && isActivity;
+ 
+                        // Helper to render Mob Icon
                         const renderMobIcon = () => {
+                            if (isDungeon && !isCombat) {
+                                return <Skull size={20} color="#ae00ff" />;
+                            }
                             const tier = Number(combat.tier) || 1;
                             const mobId = combat.mobId;
                             const mob = MONSTERS[tier]?.find(m => m.id === mobId);
@@ -249,7 +252,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                             return <Skull size={20} color="#ff4444" />;
                         };
 
-                        // Helper para renderizar Activity Icon
+                        // Helper to render Activity Icon
                         const renderActivityIcon = () => {
                             const item = resolveItem(activity?.item_id);
                             if (item?.icon) return <img src={item.icon} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="" />;
@@ -260,7 +263,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                             return (
                                 <div style={{ width: '100%', height: '100%', position: 'relative' }}>
 
-                                    {/* Metade Superior-Esquerda: Combate */}
+                                    {/* Top-Left Half: Combat */}
                                     <div style={{
                                         position: 'absolute',
                                         top: '2px',
@@ -274,7 +277,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                     }}>
                                         {renderMobIcon()}
                                     </div>
-                                    {/* Metade Inferior-Direita: Atividade */}
+                                    {/* Bottom-Right Half: Activity */}
                                     <div style={{
                                         position: 'absolute',
                                         bottom: '2px',
@@ -354,13 +357,13 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                             flexDirection: 'column',
                             gap: '0px',
                             zIndex: 1001,
-                            alignItems: 'flex-end', // Alinha à direita
+                            alignItems: 'flex-end', // Align to right
                             transition: '0.2s',
                             opacity: 1,
                             pointerEvents: 'auto'
                         }}>
 
-                            {/* --- CARD DE ATIVIDADE (Se houver) --- */}
+                            {/* --- ACTIVITY CARD (If any) --- */}
                             {activity && (
                                 <motion.div
                                     initial={{ opacity: 0, x: 20, scale: 0.95 }}
@@ -505,7 +508,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                 </motion.div>
                             )}
 
-                            {/* --- CARD DE DESCANSO (Se estiver descansando) --- */}
+                            {/* --- REST CARD (If resting) --- */}
                             {gameState?.state?.resting && (() => {
                                 const resting = gameState.state.resting;
                                 const now = Date.now();
@@ -608,7 +611,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                 );
                             })()}
 
-                            {/* --- CARD DE COMBATE (Se houver) --- */}
+                            {/* --- COMBAT CARD (If any) --- */}
                             {combat && (
                                 <motion.div
                                     initial={{ opacity: 0, x: 20, scale: 0.95 }}
@@ -834,7 +837,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                 </motion.div>
                             )}
 
-                            {/* --- CARD DE DUNGEON (Se houver) --- */}
+                            {/* --- DUNGEON CARD (If any) --- */}
                             {(dungeonState && dungeonState.active) && (
                                 <motion.div
                                     initial={{ opacity: 0, x: 20, scale: 0.95 }}
@@ -965,7 +968,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                 </motion.div>
                             )}
 
-                            {/* --- CARD DO WORLD BOSS (Se houver) --- */}
+                            {/* --- WORLD BOSS CARD (If any) --- */}
                             {worldBossData && (
                                 <motion.div
                                     initial={{ opacity: 0, x: 20, scale: 0.95 }}
@@ -1061,7 +1064,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                     </button>
                                 </motion.div>
                             )}
-                            {/* --- CAIXA INFORMATIVA MULTITAREFA --- */}
+                            {/* --- MULTITASK INFO BOX --- */}
                             <motion.div
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}

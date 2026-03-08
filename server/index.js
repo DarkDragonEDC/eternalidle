@@ -457,7 +457,10 @@ io.on("connection", (socket) => {
   console.log(
     `[VERSION] Emitting server version: ${pkg.version} to match client ${pkg.version}`,
   );
-  socket.emit("server_version", { version: pkg.version });
+  socket.emit("server_version", { 
+    version: pkg.version,
+    vapidPublicKey: process.env.VAPID_PUBLIC_KEY 
+  });
 
   // 1. Initial Account Status Check (Bans & Warnings)
   if (socket.user?.id) {
@@ -622,6 +625,28 @@ io.on("connection", (socket) => {
     } catch (err) {
       console.error(`[SOCKET] Error joining character ${characterId}:`, err);
       socket.emit("error", { message: "Failed to load character data." });
+    }
+  });
+
+  socket.on("push_subscribe", async ({ subscription }) => {
+    try {
+      if (!socket.user?.id) return;
+      const result = await gameManager.pushManager.saveSubscription(socket.user.id, subscription);
+      socket.emit("push_subscribe_result", result);
+    } catch (err) {
+      console.error("[PUSH] Subscription error:", err);
+      socket.emit("error", { message: "Failed to save push subscription." });
+    }
+  });
+
+  socket.on("push_update_settings", async ({ settings }) => {
+    try {
+      if (!socket.user?.id) return;
+      const result = await gameManager.pushManager.updateSettings(socket.user.id, settings);
+      socket.emit("push_update_settings_result", result);
+    } catch (err) {
+      console.error("[PUSH] Settings update error:", err);
+      socket.emit("error", { message: "Failed to update push settings." });
     }
   });
 

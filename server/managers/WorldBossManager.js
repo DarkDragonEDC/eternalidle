@@ -12,6 +12,7 @@ export class WorldBossManager {
 
     async initialize() {
         console.log('[WORLD_BOSS] Initializing manager...');
+        this.lastBossName = null;
         await this.checkBossCycle();
         await this.refreshRankings();
 
@@ -117,6 +118,35 @@ export class WorldBossManager {
             };
         } else {
             this.currentBoss = null;
+        }
+
+        // Push Notification: World Boss Spawn
+        if (this.currentBoss && this.currentBoss.name !== this.lastBossName) {
+            this.lastBossName = this.currentBoss.name;
+            console.log(`[PUSH] World Boss Spawned: ${this.lastBossName}. Sending notifications...`);
+            
+            // Broadcast to all users with world_boss enabled
+            const { data: subs } = await this.gameManager.supabase
+                .from('push_subscriptions')
+                .select('user_id, settings');
+            
+            if (subs) {
+                const uniqueUsers = [...new Set(subs
+                    .filter(s => s.settings?.push_world_boss !== false)
+                    .map(s => s.user_id))];
+                
+                for (const userId of uniqueUsers) {
+                    this.gameManager.pushManager.notifyUser(
+                        userId,
+                        'push_world_boss',
+                        'World Boss Spawned! 🐉',
+                        `${this.lastBossName} is terrorizing the world. Join the fight!`,
+                        '/world_boss'
+                    );
+                }
+            }
+        } else if (!this.currentBoss) {
+            this.lastBossName = null;
         }
     }
 

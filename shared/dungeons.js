@@ -11,7 +11,7 @@ export const DUNGEONS = {
             resource: { id: 'T1_ORE', chance: 0.50, min: 5, max: 10 },
             crest: { id: 'T1_CREST', chance: 0.25 }
         },
-        entrySilver: 300,
+        entrySilver: 10,
         reqIP: 150,
     },
     2: {
@@ -26,7 +26,7 @@ export const DUNGEONS = {
             resource: { id: 'T2_WOOD', chance: 0.50, min: 5, max: 10 },
             crest: { id: 'T2_CREST', chance: 0.25 }
         },
-        entrySilver: 500,
+        entrySilver: 100,
         reqIP: 250,
     },
     3: {
@@ -41,7 +41,7 @@ export const DUNGEONS = {
             resource: { id: 'T3_HIDE', chance: 0.50, min: 5, max: 10 },
             crest: { id: 'T3_CREST', chance: 0.25 }
         },
-        entrySilver: 1050,
+        entrySilver: 200,
         reqIP: 350,
     },
     4: {
@@ -56,7 +56,7 @@ export const DUNGEONS = {
             resource: { id: 'T4_BAR', chance: 0.50, min: 3, max: 8 },
             crest: { id: 'T4_CREST', chance: 0.25 }
         },
-        entrySilver: 1350,
+        entrySilver: 300,
         reqIP: 450,
     },
     5: {
@@ -71,7 +71,7 @@ export const DUNGEONS = {
             resource: { id: 'T5_HIDE', chance: 0.50, min: 3, max: 8 },
             crest: { id: 'T5_CREST', chance: 0.25 }
         },
-        entrySilver: 2200,
+        entrySilver: 400,
         reqIP: 550,
     },
     6: {
@@ -86,7 +86,7 @@ export const DUNGEONS = {
             resource: { id: 'T6_ORE', chance: 0.50, min: 3, max: 8 },
             crest: { id: 'T6_CREST', chance: 0.25 }
         },
-        entrySilver: 2600,
+        entrySilver: 500,
         reqIP: 650,
     },
     7: {
@@ -101,7 +101,7 @@ export const DUNGEONS = {
             resource: { id: 'T7_HIDE', chance: 0.50, min: 2, max: 6 },
             crest: { id: 'T7_CREST', chance: 0.25 }
         },
-        entrySilver: 3750,
+        entrySilver: 600,
         reqIP: 750,
     },
     8: {
@@ -116,7 +116,7 @@ export const DUNGEONS = {
             resource: { id: 'T8_ORE', chance: 0.50, min: 2, max: 6 },
             crest: { id: 'T8_CREST', chance: 0.25 }
         },
-        entrySilver: 4250,
+        entrySilver: 700,
         reqIP: 850,
     },
     9: {
@@ -131,7 +131,7 @@ export const DUNGEONS = {
             resource: { id: 'T9_BAR', chance: 0.50, min: 2, max: 5 },
             crest: { id: 'T9_CREST', chance: 0.25 }
         },
-        entrySilver: 5700,
+        entrySilver: 800,
         reqIP: 950,
     },
     10: {
@@ -146,7 +146,7 @@ export const DUNGEONS = {
             resource: { id: 'T10_BAR', chance: 0.50, min: 2, max: 5 },
             crest: { id: 'T10_CREST', chance: 0.25 }
         },
-        entrySilver: 6300,
+        entrySilver: 900,
         reqIP: 1050,
     },
 };

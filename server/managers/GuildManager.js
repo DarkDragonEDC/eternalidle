@@ -540,6 +540,27 @@ export class GuildManager {
             this.gameManager.markDirty(request.character_id);
         }
 
+        // Push Notification: New Member
+        const { data: members } = await this.supabase
+            .from('guild_members')
+            .select('character_id')
+            .eq('guild_id', member.guild_id);
+        
+        if (members) {
+            for (const m of members) {
+                const { data: charData } = await this.supabase.from('characters').select('user_id').eq('id', m.character_id).single();
+                if (charData && charData.user_id) {
+                    this.gameManager.pushManager.notifyUser(
+                        charData.user_id,
+                        'push_guild_new_member',
+                        'New Guild Member! 🛡️',
+                        `A new member has joined your guild. Welcome them!`,
+                        '/guild'
+                    );
+                }
+            }
+        }
+
         return { success: true, action: 'ACCEPTED' };
     }
 
@@ -1304,12 +1325,10 @@ export class GuildManager {
 
     _generateNewTasks(libraryLevel = 1) {
         const config = GUILD_TASKS_CONFIG;
-        const scaling = config.SCALING;
         const tasks = [];
 
-        // Library level scales tier and required amount
+        // Library level scales tier
         const tier = Math.min(10, Math.max(1, libraryLevel));
-        const requiredAmount = scaling.ITEMS_PER_LEVEL * libraryLevel;
 
         // 13 Fixed Daily Tasks defined by the user
         // We will randomize the tier (T1-T3) for each, but keep the item types fixed.
@@ -1346,6 +1365,9 @@ export class GuildManager {
                 itemId = `T${tier}_FOOD`;
             }
 
+            // Look up specific required amount from config
+            const requiredAmount = config.REQUIREMENTS[def.type]?.[tier] || 100;
+
             tasks.push({
                 id: i,
                 type: def.type,
@@ -1366,7 +1388,7 @@ export class GuildManager {
 
         const { data: guild, error } = await this.supabase
             .from('guilds')
-            .select('daily_tasks, library_level')
+            .select('id, daily_tasks, library_level')
             .eq('id', guildId)
             .single();
 
@@ -1394,6 +1416,31 @@ export class GuildManager {
         // Update task progress
         task.progress += contributeAmount;
 
+        // NEW: Update Member Profile ranking for task contribution
+        try {
+            const resolved = resolveItem(task.itemId);
+            if (resolved) {
+                const itemValue = calculateItemSellPrice(resolved, task.itemId) * contributeAmount;
+                if (itemValue > 0) {
+                    const { data: member } = await this.supabase
+                        .from('guild_members')
+                        .select('donated_items_value')
+                        .eq('character_id', char.id)
+                        .maybeSingle();
+
+                    if (member) {
+                        const newDonatedItemsValue = BigInt(member.donated_items_value || 0) + BigInt(itemValue);
+                        await this.supabase
+                            .from('guild_members')
+                            .update({ donated_items_value: newDonatedItemsValue.toString() })
+                            .eq('character_id', char.id);
+                    }
+                }
+            }
+        } catch (rankError) {
+            console.error("[GUILD-TASK] Error updating member ranking:", rankError);
+        }
+
         // Rewards logic
         if (task.progress >= task.required) {
             // Task completed! Give guild rewards
@@ -1417,6 +1464,27 @@ export class GuildManager {
                 timestamp: Date.now(),
                 isSystem: true
             });
+
+            // Push Notification: Guild Task Completed
+            const { data: members } = await this.supabase
+                .from('guild_members')
+                .select('character_id')
+                .eq('guild_id', guildId);
+            
+            if (members) {
+                for (const m of members) {
+                    const { data: charData } = await this.supabase.from('characters').select('user_id').eq('id', m.character_id).single();
+                    if (charData && charData.user_id) {
+                        this.gameManager.pushManager.notifyUser(
+                            charData.user_id,
+                            'push_guild_task',
+                            'Guild Task Complete! ✅',
+                            `Your guild has completed a task: ${task.itemId.replace(/_/g, ' ')}.`,
+                            '/guild'
+                        );
+                    }
+                }
+            }
         }
 
         const { error: updateError } = await this.supabase

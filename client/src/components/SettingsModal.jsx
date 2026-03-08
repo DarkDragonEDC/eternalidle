@@ -245,6 +245,72 @@ const SettingsModal = ({
                                 </div>
                             </div>
 
+                            {/* Push Notifications Settings */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', paddingBottom: '20px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <h3 style={{ color: 'var(--text-dim)', fontSize: '0.75rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>Push Notifications</h3>
+                                    {!settings.pushEnabled && (
+                                        <button 
+                                            onClick={async () => {
+                                                try {
+                                                    const { PushService } = await import('../services/PushService');
+                                                    const sub = await PushService.subscribeUser();
+                                                    if (sub) {
+                                                        handleSettingChange('pushEnabled', true);
+                                                        // App.jsx effect will handle syncing this to server
+                                                    }
+                                                } catch (e) {
+                                                    alert("Failed to enable notifications. Please check browser permissions.");
+                                                }
+                                            }}
+                                            style={{
+                                                padding: '6px 12px',
+                                                background: 'var(--accent)',
+                                                border: 'none',
+                                                borderRadius: '6px',
+                                                color: 'white',
+                                                fontSize: '0.7rem',
+                                                fontWeight: '900',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            ENABLE ON THIS DEVICE
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', opacity: settings.pushEnabled ? 1 : 0.5, pointerEvents: settings.pushEnabled ? 'all' : 'none' }}>
+                                    {[
+                                        { key: 'push_daily_spin', label: 'Daily Spin Available', desc: 'At 00:00 UTC' },
+                                        { key: 'push_character_death', label: 'Character Death', desc: 'When you die in combat' },
+                                        { key: 'push_world_boss', label: 'World Boss', desc: 'Spawn announcements' },
+                                        { key: 'push_dungeon_complete', label: 'Dungeon Complete', desc: 'Success notifications' },
+                                        { key: 'push_guild_task', label: 'Guild Task', desc: 'New tasks or completion' },
+                                        { key: 'push_new_member', label: 'New Guild Member', desc: 'For leaders/officers' },
+                                        { key: 'push_market_sale', label: 'Market Sale', desc: 'When your items sell' },
+                                        { key: 'push_item_bought', label: 'Item Bought', desc: 'Market purchase confirmation' },
+                                        { key: 'push_activity_finished', label: 'Activity Completed', desc: 'Action finished' },
+                                        { key: 'push_inventory_full', label: 'Inventory Full', desc: 'Stop wasting time!' },
+                                        { key: 'push_hp_recovered', label: 'HP Fully Recovered', desc: 'Ready to fight again' }
+                                    ].map(item => (
+                                        <label key={item.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '12px 15px', borderRadius: '12px', border: '1px solid var(--border)', cursor: 'pointer' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                <div style={{ background: settings[item.key] !== false ? 'var(--accent)' : 'var(--text-dim)', width: '8px', height: '8px', borderRadius: '50%' }} />
+                                                <div>
+                                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 'bold' }}>{item.label}</div>
+                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{item.desc}</div>
+                                                </div>
+                                            </div>
+                                            <input
+                                                type="checkbox"
+                                                checked={settings[item.key] !== false}
+                                                onChange={(e) => handleSettingChange(item.key, e.target.checked)}
+                                                style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--accent)' }}
+                                            />
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </motion.div>
                 </div>

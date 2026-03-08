@@ -177,12 +177,12 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onEquipFood, onSell,
                             {onWithdraw && (
                                 <ActionButton onClick={() => { onWithdraw(item.id); onClose(); }} icon={ArrowRight} label="Withdraw from Bank" />
                             )}
-                            {(['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFF_HAND', 'FOOD'].includes(item.type) || item.type.startsWith('TOOL')) && (
+                            {(onEquip || onEquipFood) && (['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFF_HAND', 'FOOD'].includes(item.type) || item.type.startsWith('TOOL')) && (
                                 <ActionButton
                                     onClick={() => {
                                         if (item.type === 'FOOD' && onEquipFood) {
                                             onEquipFood(item);
-                                        } else {
+                                        } else if (onEquip) {
                                             onEquip(item.id);
                                         }
                                         onClose();
@@ -192,19 +192,19 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onEquipFood, onSell,
                                 />
                             )}
 
-                            {((['POTION', 'CONSUMABLE', 'CHEST'].includes(item.type)) || (item.id && item.id.includes('CHEST'))) && (
+                            {onUse && (['POTION', 'CONSUMABLE', 'CHEST'].includes(item.type) || (item.id && item.id.includes('CHEST'))) && (
                                 <ActionButton id="open-chest-button" onClick={() => { onUse(item.id); onClose(); }} icon={Zap} label={item.type === 'POTION' ? 'Drink Potion' : (item.id.includes('CHEST') ? 'Open Chest' : 'Use Item')} />
                             )}
 
-                            {(['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFF_HAND'].includes(item.type) || item.type.startsWith('TOOL_')) && (
+                            {onDismantle && (['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFF_HAND'].includes(item.type) || item.type.startsWith('TOOL_')) && (
                                 <ActionButton onClick={() => { onDismantle(item.id); onClose(); }} icon={Trash2} label="Dismantle" variant="dismantle" />
                             )}
 
-                            {!isIronman && item.id !== 'NOOB_CHEST' && (
+                            {onList && !isIronman && item.id !== 'NOOB_CHEST' && (
                                 <ActionButton onClick={() => { onList(item.id, item); onClose(); }} icon={Tag} label="List on Market" variant="outline" />
                             )}
 
-                            {calculateItemSellPrice(item, item.id) > 0 && (
+                            {onSell && calculateItemSellPrice(item, item.id) > 0 && (
                                 <ActionButton onClick={() => { onSell(item.id); onClose(); }} icon={Coins} label="Sell Quickly" variant="soft" subLabel={calculateItemSellPrice(item, item.id)} />
                             )}
                         </div>

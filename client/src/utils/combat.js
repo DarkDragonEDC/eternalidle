@@ -55,8 +55,8 @@ export const calculateSurvivalTime = (playerStats, mobData, foodItem, foodAmount
     const timeToKill = hitsToKill * playerAtkSpeed;
 
     // Mob Attacks during TTK
-    // Mob first attack is at t=1000ms. Subsequent attacks every 1000ms.
-    const mobAttacksPerKill = Math.floor(timeToKill / 1000);
+    // Mob now attacks at t=0. Subsequent attacks every 1000ms.
+    const mobAttacksPerKill = 1 + Math.floor(timeToKill / 1000);
     const totalDmgPerKill = mobAttacksPerKill * dmgToPlayer;
     const totalCycleTime = timeToKill + 1000; // TTK + 1s Respawn
 

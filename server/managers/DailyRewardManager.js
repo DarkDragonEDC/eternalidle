@@ -68,7 +68,10 @@ export class DailyRewardManager {
         let rewardData = { ...reward };
 
         if (reward.type === 'ITEM') {
-            this.gameManager.inventoryManager.addItemToInventory(char, reward.id, reward.qty);
+            const added = this.gameManager.inventoryManager.addItemToInventory(char, reward.id, reward.qty);
+            if (!added) {
+                return { success: false, error: "Inventory Full! Please free some space." };
+            }
 
             // Refined Friendly Name Logic
             let friendlyName = reward.id;
@@ -92,7 +95,10 @@ export class DailyRewardManager {
             this.gameManager.orbsManager.addOrbs(char, reward.qty, 'DAILY_SPIN');
             message = `Won ${reward.qty} Orbs`;
         } else if (reward.type === 'STORE_ITEM') {
-            this.gameManager.inventoryManager.addItemToInventory(char, reward.id, reward.qty);
+            const added = this.gameManager.inventoryManager.addItemToInventory(char, reward.id, reward.qty);
+            if (!added) {
+                return { success: false, error: "Inventory Full! Please free some space." };
+            }
             message = `Won ${reward.qty}x Membership!`;
         }
 

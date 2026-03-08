@@ -213,6 +213,17 @@ export class MarketManager {
                         }
 
                         this.gameManager.addNotification(buyer, 'SUCCESS', `Your buy order for ${itemData.name} was partially filled (x${fillQty}). Refund: ${buyerChange} Silver.`);
+                        
+                        // Push Notification: Item Bought (Auto-match)
+                        if (buyer.user_id) {
+                            this.gameManager.pushManager.notifyUser(
+                                buyer.user_id,
+                                'push_market_bought',
+                                'Item Bought! 💰',
+                                `Your buy order for ${itemData.name} was partially filled (x${fillQty}).`,
+                                '/market'
+                            );
+                        }
                         await this.gameManager.saveState(buyer.id, buyer.state);
                     }
 
@@ -359,6 +370,17 @@ export class MarketManager {
             cost: totalCost
         });
         this.gameManager.addNotification(buyer, 'SUCCESS', `You bought ${qtyNum}x ${listing.item_data.name} for ${totalCost} Silver.`);
+        
+        // Push Notification: Item Bought
+        if (buyer.user_id) {
+            this.gameManager.pushManager.notifyUser(
+                buyer.user_id,
+                'push_market_bought',
+                'Item Bought! 💰',
+                `You bought ${qtyNum}x ${listing.item_data.name} for ${totalCost} Silver.`,
+                '/market'
+            );
+        }
         await this.gameManager.saveState(buyer.id, buyer.state);
 
         // Update Global Taxometer IMMEDIATELY after buyer pays
@@ -379,6 +401,17 @@ export class MarketManager {
                 timestamp: Date.now()
             });
             this.gameManager.addNotification(seller, 'SUCCESS', `Your item ${listing.item_data.name} (x${qtyNum}) was sold! +${sellerProfit} Silver (after tax).`);
+            
+            // Push Notification: Market Sale
+            if (seller.user_id) {
+                this.gameManager.pushManager.notifyUser(
+                    seller.user_id,
+                    'push_market_sale',
+                    'Item Sold! 💵',
+                    `Your item ${listing.item_data.name} (x${qtyNum}) was sold for ${sellerProfit} Silver.`,
+                    '/market'
+                );
+            }
             await this.gameManager.saveState(seller.id, seller.state);
         }
 

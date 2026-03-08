@@ -84,8 +84,22 @@ const DailySpinModal = ({ isOpen, onClose, socket, isPreviewActive, onPreviewAct
         };
     }, [socket]);
 
+    const inventory = gameState?.state?.inventory || {};
+    const membership = gameState?.state?.membership;
+    const isPremium = membership?.active && membership?.expiresAt > Date.now();
+    const baseSlots = isPremium ? 50 : 30;
+    const extraSlots = parseInt(gameState?.state?.extraInventorySlots) || 0;
+    const maxSlots = baseSlots + extraSlots;
+    
+    const usedSlots = Object.keys(inventory).filter(itemId => {
+        const item = resolveItem(itemId);
+        return !item?.noInventorySpace;
+    }).length;
+
+    const isInventoryFull = usedSlots >= maxSlots;
+
     const handleSpin = () => {
-        if (spinning || reward) return;
+        if (spinning || reward || isInventoryFull) return;
         if (isPreviewActive) return onPreviewActionBlocked();
         setSpinning(true);
         socket.emit('spin_daily');
@@ -196,27 +210,45 @@ const DailySpinModal = ({ isOpen, onClose, socket, isPreviewActive, onPreviewAct
                     ))}
                 </div>
 
-                {/* SPIN BUTTON */}
-                <button
-                    onClick={handleSpin}
-                    disabled={spinning || reward}
-                    style={{
-                        marginTop: '40px',
-                        padding: '15px 50px',
-                        fontSize: '1.5rem',
-                        fontWeight: '900',
-                        background: spinning ? '#555' : 'linear-gradient(to bottom, #ffd700, #b8860b)',
-                        color: spinning ? '#aaa' : '#000',
-                        border: '2px solid #fff',
-                        borderRadius: '50px',
-                        cursor: spinning ? 'not-allowed' : 'pointer',
-                        boxShadow: spinning ? 'none' : '0 0 20px rgba(255, 215, 0, 0.6), inset 0 2px 0 rgba(255,255,255,0.5)',
-                        transition: '0.2s',
-                        transform: spinning ? 'scale(0.95)' : 'scale(1)'
-                    }}
-                >
-                    {spinning ? 'GOOD LUCK!' : 'SPIN!'}
-                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                    <button
+                        onClick={handleSpin}
+                        disabled={spinning || reward || isInventoryFull}
+                        style={{
+                            marginTop: '40px',
+                            padding: '15px 50px',
+                            fontSize: '1.5rem',
+                            fontWeight: '900',
+                            background: spinning ? '#555' : (isInventoryFull ? 'linear-gradient(to bottom, #ff4444, #990000)' : 'linear-gradient(to bottom, #ffd700, #b8860b)'),
+                            color: spinning ? '#aaa' : (isInventoryFull ? '#fff' : '#000'),
+                            border: '2px solid #fff',
+                            borderRadius: '50px',
+                            cursor: (spinning || isInventoryFull) ? 'not-allowed' : 'pointer',
+                            boxShadow: (spinning || isInventoryFull) ? 'none' : '0 0 20px rgba(255, 215, 0, 0.6), inset 0 2px 0 rgba(255,255,255,0.5)',
+                            transition: '0.2s',
+                            transform: (spinning || isInventoryFull) ? 'scale(0.95)' : 'scale(1)',
+                            opacity: isInventoryFull ? 0.8 : 1
+                        }}
+                    >
+                        {spinning ? 'GOOD LUCK!' : (isInventoryFull ? 'INVENTORY FULL!' : 'SPIN!')}
+                    </button>
+                    
+                    {isInventoryFull && !spinning && !reward && (
+                        <div style={{
+                            color: '#ff4444',
+                            fontSize: '0.85rem',
+                            fontWeight: 'bold',
+                            textShadow: '0 1px 2px rgba(0,0,0,0.8)',
+                            marginTop: '10px',
+                            background: 'rgba(0,0,0,0.4)',
+                            padding: '4px 12px',
+                            borderRadius: '20px',
+                            border: '1px solid rgba(255, 68, 68, 0.3)'
+                        }}>
+                           Inventory Full! Please free some space to spin.
+                        </div>
+                    )}
+                </div>
 
                 {/* CLOSE BUTTON */}
                 {!spinning && (

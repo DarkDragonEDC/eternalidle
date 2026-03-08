@@ -158,10 +158,23 @@ export const GUILD_BUILDINGS = {
 
 export const GUILD_TASKS_CONFIG = {
     MAX_TASKS: 13,
-    ITEMS_REQUIRED: 250,
     POOLS: {
         RAW: ['WOOD', 'ORE', 'HIDE', 'FIBER', 'FISH', 'HERB'],
         REFINED: ['PLANK', 'BAR', 'LEATHER', 'CLOTH', 'EXTRACT']
+    },
+    REQUIREMENTS: {
+        RAW: {
+            1: 120, 2: 160, 3: 250, 4: 500, 5: 750, 6: 1000, 7: 1200, 8: 1450, 9: 1700, 10: 2000
+        },
+        REFINED: {
+            1: 56, 2: 74, 3: 116, 4: 233, 5: 349, 6: 465, 7: 558, 8: 674, 9: 791, 10: 930
+        },
+        FOOD: {
+            1: 56, 2: 74, 3: 116, 4: 233, 5: 349, 6: 465, 7: 558, 8: 674, 9: 791, 10: 930
+        },
+        POTION: {
+            1: 11, 2: 14, 3: 23, 4: 45, 5: 68, 6: 90, 7: 108, 8: 131, 9: 154, 10: 181
+        }
     },
     REWARDS: {
         XP_TABLE: {
@@ -190,9 +203,6 @@ export const GUILD_TASKS_CONFIG = {
             9: 167,
             10: 202
         }
-    },
-    SCALING: {
-        ITEMS_PER_LEVEL: 250
     }
 };
 
