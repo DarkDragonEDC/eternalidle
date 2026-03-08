@@ -1128,7 +1128,7 @@ io.on("connection", (socket) => {
           socket.data.characterId,
         );
         const result = await gameManager.guildManager.kickMember(char, {
-          targetMemberId: memberId,
+          memberId: memberId,
         });
         if (result.success) {
           socket.emit(

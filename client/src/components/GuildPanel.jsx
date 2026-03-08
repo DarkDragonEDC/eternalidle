@@ -66,6 +66,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
 
     const members = guild.members || [];
     const [confirmLeave, setConfirmLeave] = useState(false);
+    const [disbandText, setDisbandText] = useState('');
     const [activeTab, setActiveTab] = useState('MEMBERS'); // HOME | MEMBERS | REQUESTS | SETTINGS | BUILDING
     const [membersSortBy, setMembersSortBy] = useState('DEFAULT'); // 'DEFAULT' | 'DATE'
     const [showMembersDropdown, setShowMembersDropdown] = useState(false);
@@ -2275,7 +2276,10 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                 {(activeTab === 'MEMBERS' || activeTab === 'REQUESTS') && <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => setConfirmLeave(true)}
+                    onClick={() => {
+                        setDisbandText('');
+                        setConfirmLeave(true);
+                    }}
                     style={{
                         width: '100%',
                         padding: '12px',
@@ -2297,99 +2301,133 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                     <LogOut size={14} />
                     {guild.myRole === 'LEADER' && members.length <= 1 ? 'DISBAND GUILD' : 'LEAVE GUILD'}
                 </motion.button>}
-
                 {/* Leave Confirmation Modal */}
-                <AnimatePresence>
-                    {confirmLeave && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setConfirmLeave(false)}
-                            style={{
-                                position: 'fixed',
-                                top: 0, left: 0, right: 0, bottom: 0,
-                                background: 'rgba(0,0,0,0.8)',
-                                backdropFilter: 'blur(5px)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                zIndex: 9999,
-                                padding: '20px'
-                            }}
-                        >
+                {ReactDOM.createPortal(
+                    <AnimatePresence>
+                        {confirmLeave && (
                             <motion.div
-                                initial={{ scale: 0.9, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                exit={{ scale: 0.9, opacity: 0 }}
-                                onClick={e => e.stopPropagation()}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setConfirmLeave(false)}
                                 style={{
-                                    background: 'var(--panel-bg, #1a1a2e)',
-                                    border: '1px solid rgba(255, 68, 68, 0.3)',
-                                    borderRadius: '20px',
-                                    padding: '30px',
-                                    maxWidth: '350px',
-                                    width: '100%',
-                                    textAlign: 'center'
+                                    position: 'fixed',
+                                    top: 0, left: 0, right: 0, bottom: 0,
+                                    background: '#000000',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    zIndex: 2147483647,
+                                    padding: '20px'
                                 }}
                             >
-                                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(255,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px' }}>
-                                    <LogOut size={24} color="#ff4444" />
-                                </div>
-                                <h3 style={{ color: '#ff4444', fontSize: '1rem', fontWeight: '900', margin: '0 0 10px' }}>
-                                    {guild.myRole === 'LEADER' && members.length <= 1 ? 'DISBAND GUILD?' : 'LEAVE GUILD?'}
-                                </h3>
-                                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', margin: '0 0 20px', lineHeight: '1.5' }}>
-                                    {guild.myRole === 'LEADER' && members.length <= 1
-                                        ? 'You are the only member. Leaving will permanently disband the guild.'
-                                        : 'Are you sure you want to leave this guild?'
-                                    }
-                                </p>
-                                <div style={{ display: 'flex', gap: '10px' }}>
-                                    <motion.button
-                                        whileHover={{ scale: 1.03 }}
-                                        whileTap={{ scale: 0.97 }}
-                                        onClick={() => setConfirmLeave(false)}
-                                        style={{
-                                            flex: 1,
-                                            padding: '10px',
-                                            background: 'rgba(255,255,255,0.05)',
-                                            border: '1px solid rgba(255,255,255,0.1)',
-                                            borderRadius: '10px',
-                                            color: 'rgba(255,255,255,0.6)',
-                                            fontSize: '0.75rem',
-                                            fontWeight: 'bold',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        CANCEL
-                                    </motion.button>
-                                    <motion.button
-                                        whileHover={{ scale: 1.03 }}
-                                        whileTap={{ scale: 0.97 }}
-                                        onClick={() => {
-                                            if (socket) socket.emit('leave_guild');
-                                            setConfirmLeave(false);
-                                        }}
-                                        style={{
-                                            flex: 1,
-                                            padding: '10px',
-                                            background: 'rgba(255, 68, 68, 0.2)',
-                                            border: '1px solid rgba(255, 68, 68, 0.3)',
-                                            borderRadius: '10px',
-                                            color: '#ff4444',
-                                            fontSize: '0.75rem',
-                                            fontWeight: '900',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        CONFIRM
-                                    </motion.button>
-                                </div>
+                                <motion.div
+                                    initial={{ scale: 0.9, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    exit={{ scale: 0.9, opacity: 0 }}
+                                    onClick={e => e.stopPropagation()}
+                                    style={{
+                                        background: '#0a0a0a',
+                                        border: '2px solid #ff4444',
+                                        borderRadius: '20px',
+                                        padding: '30px',
+                                        maxWidth: '350px',
+                                        width: '100%',
+                                        textAlign: 'center'
+                                    }}
+                                >
+                                    <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(255,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px' }}>
+                                        <LogOut size={24} color="#ff4444" />
+                                    </div>
+                                    <h3 style={{ color: '#ff4444', fontSize: '1rem', fontWeight: '900', margin: '0 0 10px' }}>
+                                        {guild.myRole === 'LEADER' && members.length <= 1 ? 'DISBAND GUILD?' : 'LEAVE GUILD?'}
+                                    </h3>
+                                    <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', margin: '0 0 20px', lineHeight: '1.5' }}>
+                                        {guild.myRole === 'LEADER' && members.length <= 1
+                                            ? 'You are the only member. Leaving will permanently disband the guild.'
+                                            : 'Are you sure you want to leave this guild?'
+                                        }
+                                    </p>
+                                    {guild.myRole === 'LEADER' && members.length <= 1 && (
+                                        <div style={{ marginBottom: '20px' }}>
+                                            <p style={{ color: 'var(--text-main)', fontSize: '0.8rem', marginBottom: '10px', fontWeight: 'bold' }}>
+                                                Type <span style={{ color: '#ff4444' }}>Disband {guild.name}</span> to confirm:
+                                            </p>
+                                            <input
+                                                type="text"
+                                                value={disbandText}
+                                                onChange={(e) => setDisbandText(e.target.value)}
+                                                placeholder={`Disband ${guild.name}`}
+                                                spellCheck={false}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '10px',
+                                                    background: 'rgba(0,0,0,0.3)',
+                                                    border: '1px solid var(--border)',
+                                                    borderRadius: '8px',
+                                                    color: 'var(--text-main)',
+                                                    outline: 'none',
+                                                    textAlign: 'center',
+                                                    fontFamily: 'inherit'
+                                                }}
+                                            />
+                                        </div>
+                                    )}
+                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                        <motion.button
+                                            whileHover={{ scale: 1.03 }}
+                                            whileTap={{ scale: 0.97 }}
+                                            onClick={() => setConfirmLeave(false)}
+                                            style={{
+                                                flex: 1,
+                                                padding: '10px',
+                                                background: 'rgba(255,255,255,0.05)',
+                                                border: '1px solid rgba(255,255,255,0.1)',
+                                                borderRadius: '10px',
+                                                color: 'rgba(255,255,255,0.6)',
+                                                fontSize: '0.75rem',
+                                                fontWeight: 'bold',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            CANCEL
+                                        </motion.button>
+                                        <motion.button
+                                            whileHover={{ scale: 1.03 }}
+                                            whileTap={{ scale: 0.97 }}
+                                            onClick={() => {
+                                                if (guild.myRole === 'LEADER' && members.length <= 1) {
+                                                    if (disbandText === `Disband ${guild.name}`) {
+                                                        socket?.emit('leave_guild');
+                                                        setConfirmLeave(false);
+                                                    }
+                                                } else {
+                                                    socket?.emit('leave_guild');
+                                                    setConfirmLeave(false);
+                                                }
+                                            }}
+                                            style={{
+                                                flex: 1,
+                                                padding: '10px',
+                                                background: '#ff4444',
+                                                border: 'none',
+                                                borderRadius: '10px',
+                                                color: '#000',
+                                                fontSize: '0.75rem',
+                                                fontWeight: '900',
+                                                cursor: (guild.myRole === 'LEADER' && members.length <= 1 && disbandText !== `Disband ${guild.name}`) ? 'not-allowed' : 'pointer',
+                                                opacity: (guild.myRole === 'LEADER' && members.length <= 1 && disbandText !== `Disband ${guild.name}`) ? 0.3 : 1
+                                            }}
+                                        >
+                                            CONFIRM
+                                        </motion.button>
+                                    </div>
+                                </motion.div>
                             </motion.div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                        )}
+                    </AnimatePresence>,
+                    document.body
+                )}
 
                 {/* Info Modal */}
                 {ReactDOM.createPortal(

@@ -2309,8 +2309,8 @@ export class GameManager {
             // Respawn Delay Check
             if (combat.respawn_at) {
                 if (now < combat.respawn_at) {
-                    // Waiting for respawn...
-                    return null; // Skip processing this tick
+                    // Waiting for respawn... 
+                    // No action this tick, but we continue to return the current status
                 } else {
                     // Respawn time reached!
                     combat.mobHealth = combat.mobMaxHealth;
