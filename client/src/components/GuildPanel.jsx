@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Users, Sword, Swords, Trophy, Settings, Plus, Info, Check, X, Coins, Sparkles, Tag, User, Zap, LogOut, Edit2, Save, Menu, Home, Building2, ChevronDown, ArrowUp, ArrowDown, Trash2, Landmark, ClipboardList, Pickaxe, FlaskConical, Hammer, Lock } from 'lucide-react';
+import { Shield, Users, Sword, Swords, Trophy, Settings, Plus, Info, Check, X, Coins, Sparkles, Tag, User, Zap, LogOut, Edit2, Save, Menu, Home, Building2, ChevronDown, ArrowUp, ArrowDown, Trash2, Landmark, ClipboardList, Pickaxe, FlaskConical, Hammer, Lock, Dices, Library } from 'lucide-react';
 import { formatSilver } from '@utils/format';
 import { COUNTRIES } from '../../../shared/countries';
-import { GUILD_BUILDINGS, GUILD_TASKS_CONFIG } from '../../../shared/guilds';
+import { GUILD_BUILDINGS, calculateGuildNextLevelXP, GUILD_TASKS_CONFIG, UPGRADE_COSTS, calculateMaterialNeeds, STATION_BONUS_TABLE } from '../../../shared/guilds.js';
 
 const formatNumber = (num) => {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
@@ -38,7 +38,7 @@ const GUILD_PERMISSIONS = [
     { id: 'manage_requests', label: 'Manage Requests', desc: 'Can accept/reject applications' },
     { id: 'change_member_roles', label: 'Manage Ranks', desc: 'Can promote/demote members' },
     { id: 'manage_upgrades', label: 'Manage Upgrades', desc: 'Can upgrade guild buildings' },
-    { id: 'manage_tasks', label: 'Manage Tasks', desc: 'Can reroll guild daily tasks' }
+    { id: 'manage_guild', label: 'Manage Guild', desc: 'Can edit guild settings and appearance' },
 ];
 
 const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
@@ -172,12 +172,10 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
         };
         socket.on('guild_tasks_data', handleTasksData);
         socket.on('guild_task_contribute_result', handleContributeResult);
-        socket.on('guild_task_reroll_result', handleTasksData);
 
         return () => {
             socket.off('guild_tasks_data', handleTasksData);
             socket.off('guild_task_contribute_result', handleContributeResult);
-            socket.off('guild_task_reroll_result', handleTasksData);
         };
     }, [socket]);
 
@@ -550,7 +548,9 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                             }}>
                                 {activeTab === 'MEMBERS' ? 'Home' :
                                     activeTab === 'SETTINGS' ? 'Settings' :
-                                        activeTab === 'BUILDING' ? 'Building' : activeTab}
+                                        activeTab === 'BUILDING' ? 'Building' :
+                                            activeTab === 'TASKS' ? 'Tasks' :
+                                                activeTab === 'REQUESTS' ? 'Requests' : activeTab}
                             </h3>
                             <ChevronDown size={14} color="rgba(255,255,255,0.5)" style={{ transform: showNavDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                         </div>
@@ -584,7 +584,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                             { id: 'MEMBERS', label: 'Home', icon: Home },
                                             { id: 'TASKS', label: 'Tasks', icon: ClipboardList },
                                             { id: 'BUILDING', label: 'Building', icon: Building2 },
-                                            { id: 'SETTINGS', label: 'Settings', icon: Settings, permission: 'manage_roles' }
+                                            { id: 'SETTINGS', label: 'Settings', icon: Settings, permission: 'manage_guild' }
                                         ].filter(opt => !opt.permission || playerHasPermission(opt.permission)).map((opt) => (
                                             <div
                                                 key={opt.id}
@@ -613,6 +613,13 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                             )}
                         </AnimatePresence>
                     </div>
+
+                    {activeTab === 'TASKS' && (
+                        <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '0.45rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold', letterSpacing: '1px' }}>RESETS IN</div>
+                            <div style={{ fontSize: isMobile ? '0.7rem' : '0.8rem', color: 'var(--accent)', fontWeight: '900', fontFamily: 'monospace' }}>{timeUntilReset}</div>
+                        </div>
+                    )}
 
                     {playerHasPermission('manage_requests') && (activeTab === 'MEMBERS' || activeTab === 'REQUESTS') && (
                         <div style={{ display: 'flex', gap: '8px' }}>
@@ -752,6 +759,19 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
 
                     {activeTab === 'BUILDING' && (
                         <div style={{ padding: '20px' }}>
+                            {/* Global Bank Normalization for this tab */}
+                            {(() => {
+                                const bankTotals = {};
+                                if (guild.bank_items) {
+                                    Object.entries(guild.bank_items).forEach(([id, qty]) => {
+                                        const upperId = id.split('::')[0].toUpperCase();
+                                        const amount = (typeof qty === 'object' ? (qty.amount || 0) : qty);
+                                        bankTotals[upperId] = (bankTotals[upperId] || 0) + amount;
+                                    });
+                                }
+                                globalThis.currentBankTotals = bankTotals; // Helper for nested scopes if needed
+                                return null;
+                            })()}
                             {/* Building Selector */}
                             <div style={{ marginBottom: '20px', position: 'relative' }}>
                                 <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 'bold', marginBottom: '8px', letterSpacing: '0.5px' }}>SELECT BUILDING</div>
@@ -770,10 +790,25 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                     }}
                                 >
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                        {selectedBuilding === 'GUILD_HALL' ? <Building2 size={18} color="var(--accent)" /> : <Landmark size={18} color="var(--accent)" />}
-                                        <span style={{ color: '#fff', fontSize: '0.8rem', fontWeight: 'bold' }}>
-                                            {selectedBuilding === 'GUILD_HALL' ? 'Guild Hall' : 'Bank'}
-                                        </span>
+                                        {(() => {
+                                            const b = [
+                                                { id: 'BANK', name: 'Bank', icon: Landmark },
+                                                { id: 'GUILD_HALL', name: 'Guild Hall', icon: Building2 },
+                                                { id: 'LIBRARY', name: 'Library', icon: Library },
+                                                { id: 'GATHERING', name: 'Gathering Station', icon: Pickaxe },
+                                                { id: 'REFINING', name: 'Refining Station', icon: FlaskConical },
+                                                { id: 'CRAFTING', name: 'Crafting Station', icon: Hammer }
+                                            ].find(x => x.id === selectedBuilding) || { name: 'Bank', icon: Landmark };
+                                            const Icon = b.icon;
+                                            return (
+                                                <>
+                                                    <Icon size={18} color="var(--accent)" />
+                                                    <span style={{ color: '#fff', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                                                        {b.name}
+                                                    </span>
+                                                </>
+                                            );
+                                        })()}
                                     </div>
                                     <ChevronDown size={16} color="rgba(255,255,255,0.3)" style={{ transform: showBuildingDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
                                 </div>
@@ -805,6 +840,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                 {[
                                                     { id: 'BANK', name: 'Bank', icon: Landmark },
                                                     { id: 'GUILD_HALL', name: 'Guild Hall', icon: Building2 },
+                                                    { id: 'LIBRARY', name: 'Library', icon: Library },
                                                     { id: 'GATHERING', name: 'Gathering Station', icon: Pickaxe },
                                                     { id: 'REFINING', name: 'Refining Station', icon: FlaskConical },
                                                     { id: 'CRAFTING', name: 'Crafting Station', icon: Hammer }
@@ -884,17 +920,18 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                     {(() => {
                                                         const currentLevel = guild.guild_hall_level || 0;
                                                         const nextLevel = currentLevel + 1;
-                                                        const silverCost = GUILD_BUILDINGS.GUILD_HALL.baseSilverCost + (currentLevel * GUILD_BUILDINGS.GUILD_HALL.perLevelSilverCost);
-                                                        const gpCost = GUILD_BUILDINGS.GUILD_HALL.baseGPCost + (currentLevel * GUILD_BUILDINGS.GUILD_HALL.perLevelGPCost);
-                                                        const matAmount = GUILD_BUILDINGS.GUILD_HALL.baseMaterialCost;
-                                                        const tier = Math.min(10, currentLevel + 1);
+                                                        const costs = UPGRADE_COSTS[nextLevel];
+                                                        const silverCost = costs?.silver || 0;
+                                                        const gpCost = costs?.gp || 0;
+                                                        const matAmount = costs?.mats || 0;
+                                                        const tier = Math.min(10, nextLevel);
                                                         const reqGuildLevel = Math.max(1, (nextLevel - 1) * 10);
                                                         
                                                         const hasSilver = (guild.bank_silver || 0) >= silverCost;
                                                         const hasGP = (guild.guild_points || 0) >= gpCost;
                                                         const hasGuildLevel = (guild.level || 1) >= reqGuildLevel;
                                                         const materials = ['WOOD', 'ORE', 'HIDE', 'FIBER', 'FISH', 'HERB'].map(m => ({ id: `T${tier}_${m}`, name: `T${tier} ${m}` }));
-                                                        const hasMats = materials.every(m => (guild.bank_items?.[m.id] || 0) >= matAmount);
+                                                        const hasMats = materials.every(m => ((globalThis.currentBankTotals || {})[m.id] || 0) >= matAmount);
                                                         const canUpgrade = playerHasPermission('manage_upgrades') && hasSilver && hasGP && hasMats && hasGuildLevel;
 
                                                         return (
@@ -906,13 +943,15 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                                         <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.55rem' }}>Silver in Bank</div>
                                                                     </div>
                                                                 </div>
-                                                                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px', border: hasGP ? '1px solid rgba(68, 255, 68, 0.1)' : '1px solid rgba(255, 68, 68, 0.1)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                                    <ClipboardList size={16} color="var(--accent)" />
-                                                                    <div>
-                                                                        <div style={{ color: hasGP ? '#44ff44' : '#ff4444', fontSize: '0.75rem', fontWeight: 'bold' }}>{gpCost.toLocaleString()} GP</div>
-                                                                        <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.55rem' }}>Guild Points</div>
+                                                                 {gpCost > 0 && (
+                                                                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px', border: hasGP ? '1px solid rgba(68, 255, 68, 0.1)' : '1px solid rgba(255, 68, 68, 0.1)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                                        <ClipboardList size={16} color="var(--accent)" />
+                                                                        <div>
+                                                                            <div style={{ color: hasGP ? '#44ff44' : '#ff4444', fontSize: '0.75rem', fontWeight: 'bold' }}>{gpCost.toLocaleString()} GP</div>
+                                                                            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.55rem' }}>Guild Points</div>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
+                                                                )}
                                                                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px', border: hasGuildLevel ? '1px solid rgba(68, 255, 68, 0.1)' : '1px solid rgba(255, 68, 68, 0.1)', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                                     <Trophy size={16} color="#4488ff" />
                                                                     <div>
@@ -922,12 +961,16 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                                 </div>
                                                                 <div style={{ gridColumn: '1/-1', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginTop: '5px' }}>
                                                                     {materials.map(m => {
-                                                                        const cur = guild.bank_items?.[m.id] || 0;
+                                                                        const cur = (globalThis.currentBankTotals || {})[m.id] || 0;
                                                                         const has = cur >= matAmount;
+                                                                        const [tierPart, namePart] = m.id.split('_');
                                                                         return (
-                                                                            <div key={m.id} style={{ background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '10px', border: has ? '1px solid rgba(68, 255, 68, 0.1)' : '1px solid rgba(255, 68, 68, 0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                                                                                <img src={`/items/${m.id}.webp`} style={{ width: '16px', height: '16px' }} />
-                                                                                <div style={{ color: has ? '#44ff44' : '#ff4444', fontSize: '0.6rem', fontWeight: 'bold' }}>{cur >= 1000 ? (cur / 1000).toFixed(1) + 'K' : cur}/{matAmount >= 1000 ? (matAmount / 1000).toFixed(0) + 'K' : matAmount}</div>
+                                                                            <div key={m.id} style={{ background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '10px', border: has ? '1px solid rgba(68, 255, 68, 0.1)' : '1px solid rgba(255, 68, 68, 0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                                                                                <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.45rem', fontWeight: 'bold' }}>{tierPart} {namePart}</div>
+                                                                                <img src={`/items/${m.id}.webp`} style={{ width: '16px', height: '16px' }} alt={m.name} />
+                                                                                <div style={{ color: has ? '#44ff44' : '#ff4444', fontSize: '0.55rem', fontWeight: 'bold' }}>
+                                                                                    {cur >= 1000 ? (cur / 1000).toFixed(1) + 'K' : cur}/{matAmount >= 1000 ? (matAmount / 1000).toFixed(0) + 'K' : matAmount}
+                                                                                </div>
                                                                             </div>
                                                                         );
                                                                     })}
@@ -968,6 +1011,161 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                     )}
                                 </div>
                             )}
+                            {selectedBuilding === 'LIBRARY' && (
+                                <div style={{ 
+                                    background: 'rgba(255,255,255,0.02)', 
+                                    padding: isMobile ? '15px' : '25px', 
+                                    borderRadius: '24px', 
+                                    border: '1px solid rgba(212, 175, 55, 0.15)',
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isMobile ? '15px' : '20px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '12px' }}>
+                                            <div style={{ background: 'rgba(212, 175, 55, 0.1)', padding: isMobile ? '8px' : '10px', borderRadius: '12px' }}>
+                                                <Library size={isMobile ? 20 : 24} color="var(--accent)" />
+                                            </div>
+                                            <div>
+                                                <h3 style={{ color: 'var(--accent)', margin: 0, fontSize: isMobile ? '1rem' : '1.2rem', fontWeight: '900', letterSpacing: '1px' }}>LIBRARY</h3>
+                                                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: isMobile ? '0.65rem' : '0.75rem', margin: '2px 0 0 0' }}>Expand your task capabilities and tiers.</p>
+                                            </div>
+                                        </div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ color: '#fff', fontSize: isMobile ? '1.1rem' : '1.4rem', fontWeight: '900' }}>LVL {guild.library_level || 0}</div>
+                                            <div style={{ color: 'var(--accent)', fontSize: '0.6rem', fontWeight: '900', letterSpacing: '1px' }}>MAX LVL 10</div>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(130px, 1fr))', gap: isMobile ? '10px' : '15px', marginBottom: isMobile ? '20px' : '25px' }}>
+                                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: isMobile ? '10px' : '15px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.6rem', marginBottom: '5px', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '1px' }}>Current Status</div>
+                                            <div style={{ color: '#fff', fontSize: isMobile ? '0.9rem' : '1.1rem', fontWeight: 'bold' }}>
+                                                {guild.library_level > 0 ? `T${guild.library_level} Tasks ` : 'No Tasks'}
+                                                {guild.library_level > 0 && <span style={{ fontSize: '0.65rem', color: 'var(--accent)', marginLeft: '5px' }}>(+{GUILD_TASKS_CONFIG.REWARDS.GP_TABLE[guild.library_level] || 0} GP)</span>}
+                                            </div>
+                                        </div>
+                                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: isMobile ? '10px' : '15px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.6rem', marginBottom: '5px', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '1px' }}>Next Milestone</div>
+                                            <div style={{ color: '#fff', fontSize: isMobile ? '0.9rem' : '1.1rem', fontWeight: 'bold' }}>
+                                                {(guild.library_level || 0) < 10 ? `T${(guild.library_level || 0) + 1} Tasks ` : 'MAX'}
+                                                {(guild.library_level || 0) < 10 && <span style={{ fontSize: '0.65rem', color: 'var(--accent)', marginLeft: '5px' }}>(+{GUILD_TASKS_CONFIG.REWARDS.GP_TABLE[(guild.library_level || 0) + 1] || 0} GP)</span>}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {(guild.library_level || 0) < 10 ? (
+                                        <>
+                                            <div style={{ marginBottom: '20px' }}>
+                                                <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 'bold', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '1px' }}>
+                                                    <ArrowUp size={12} color="var(--accent)" /> UPGRADE REQUIREMENTS
+                                                </div>
+                                                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '10px' }}>
+                                                    {(() => {
+                                                        const currentLevel = guild.library_level || 0;
+                                                        const nextLevel = currentLevel + 1;
+                                                        const costs = UPGRADE_COSTS[nextLevel];
+                                                        const silverCost = costs?.silver || 0;
+                                                        const gpCost = (nextLevel === 1) ? 0 : (costs?.gp || 0);
+                                                        const matAmount = costs?.mats || 0;
+                                                        const tier = Math.min(10, nextLevel);
+                                                        const reqGuildLevel = Math.max(1, (nextLevel - 1) * 10);
+                                                        
+                                                        const hasSilver = (guild.bank_silver || 0) >= silverCost;
+                                                        const hasGP = (guild.guild_points || 0) >= gpCost;
+                                                        const hasGuildLevel = (guild.level || 1) >= reqGuildLevel;
+                                                        const materials = ['WOOD', 'ORE', 'HIDE', 'FIBER', 'FISH', 'HERB'].map(m => ({ id: `T${tier}_${m}`, name: `T${tier} ${m}` }));
+                                                        const hasMats = materials.every(m => ((globalThis.currentBankTotals || {})[m.id] || 0) >= matAmount);
+                                                        const canUpgrade = playerHasPermission('manage_upgrades') && hasSilver && hasGP && hasMats && hasGuildLevel;
+
+                                                        return (
+                                                            <>
+                                                                <div style={{ background: 'rgba(0,0,0,0.25)', padding: isMobile ? '10px' : '15px', borderRadius: '12px', border: hasSilver ? '1px solid rgba(68, 255, 68, 0.1)' : '1px solid rgba(255, 68, 68, 0.1)', display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '15px' }}>
+                                                                    <div style={{ background: 'rgba(255,215,0,0.1)', padding: isMobile ? '8px' : '10px', borderRadius: '10px' }}>
+                                                                        <Coins size={isMobile ? 16 : 20} color="#ffd700" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <div style={{ color: hasSilver ? '#44ff44' : '#ff4444', fontSize: isMobile ? '0.9rem' : '1.1rem', fontWeight: '900' }}>{formatSilver(silverCost)}</div>
+                                                                        <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.6rem', fontWeight: 'bold' }}>Silver in Bank</div>
+                                                                    </div>
+                                                                </div>
+
+                                                                 {gpCost > 0 && (
+                                                                    <div style={{ background: 'rgba(0,0,0,0.25)', padding: isMobile ? '10px' : '15px', borderRadius: '12px', border: hasGP ? '1px solid rgba(68, 255, 68, 0.1)' : '1px solid rgba(255, 68, 68, 0.1)', display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '15px' }}>
+                                                                        <div style={{ background: 'rgba(68,136,255,0.1)', padding: isMobile ? '8px' : '10px', borderRadius: '10px' }}>
+                                                                            <ClipboardList size={isMobile ? 16 : 20} color="var(--accent)" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <div style={{ color: hasGP ? '#44ff44' : '#ff4444', fontSize: isMobile ? '0.9rem' : '1.1rem', fontWeight: '900' }}>{gpCost.toLocaleString()} GP</div>
+                                                                            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.6rem', fontWeight: 'bold' }}>Guild Points</div>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+
+                                                                <div style={{ background: 'rgba(0,0,0,0.25)', padding: isMobile ? '10px' : '15px', borderRadius: '12px', border: hasGuildLevel ? '1px solid rgba(68, 255, 68, 0.1)' : '1px solid rgba(255, 68, 68, 0.1)', display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '15px' }}>
+                                                                    <div style={{ background: 'rgba(68,136,255,0.1)', padding: isMobile ? '8px' : '10px', borderRadius: '10px' }}>
+                                                                        <Trophy size={isMobile ? 16 : 20} color="#4488ff" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <div style={{ color: hasGuildLevel ? '#44ff44' : '#ff4444', fontSize: isMobile ? '0.9rem' : '1.1rem', fontWeight: '900' }}>LVL {reqGuildLevel}</div>
+                                                                        <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.6rem', fontWeight: 'bold' }}>Guild Level Req.</div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div style={{ gridColumn: isMobile ? 'auto' : '1/-1', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: isMobile ? '8px' : '10px', marginTop: '5px' }}>
+                                                                    {materials.map(m => {
+                                                                        const cur = (globalThis.currentBankTotals || {})[m.id] || 0;
+                                                                        const has = cur >= matAmount;
+                                                                        const [tierPart, namePart] = m.id.split('_');
+                                                                        return (
+                                                                            <div key={m.id} style={{ background: 'rgba(0,0,0,0.25)', padding: isMobile ? '6px' : '10px', borderRadius: '12px', border: has ? '1px solid rgba(68, 255, 68, 0.1)' : '1px solid rgba(255, 68, 68, 0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                                                                                <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.5rem', fontWeight: 'bold' }}>{tierPart} {namePart}</div>
+                                                                                <img src={`/items/${m.id}.webp`} style={{ width: isMobile ? '16px' : '22px', height: isMobile ? '16px' : '22px' }} alt={m.name} />
+                                                                                <div style={{ color: has ? '#44ff44' : '#ff4444', fontSize: isMobile ? '0.55rem' : '0.7rem', fontWeight: 'bold' }}>
+                                                                                    {cur >= 1000 ? (cur / 1000).toFixed(1) + 'K' : cur}/{matAmount >= 1000 ? (matAmount / 1000).toFixed(0) + 'K' : matAmount}
+                                                                                </div>
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+
+                                                                <div style={{ gridColumn: isMobile ? 'auto' : '1/-1', marginTop: isMobile ? '10px' : '15px' }}>
+                                                                    <motion.button
+                                                                        whileHover={canUpgrade ? { scale: 1.02 } : {}}
+                                                                        whileTap={canUpgrade ? { scale: 0.98 } : {}}
+                                                                        disabled={!canUpgrade}
+                                                                        onClick={() => socket?.emit('upgrade_guild_building', { buildingType: 'LIBRARY' })}
+                                                                        style={{
+                                                                            width: '100%',
+                                                                            padding: isMobile ? '12px' : '16px',
+                                                                            background: canUpgrade ? 'var(--accent)' : 'rgba(255,255,255,0.05)',
+                                                                            border: 'none',
+                                                                            borderRadius: '12px',
+                                                                            color: canUpgrade ? '#000' : 'rgba(255,255,255,0.2)',
+                                                                            fontWeight: '900',
+                                                                            fontSize: isMobile ? '0.8rem' : '0.9rem',
+                                                                            cursor: canUpgrade ? 'pointer' : 'not-allowed',
+                                                                            letterSpacing: '1px'
+                                                                        }}
+                                                                    >
+                                                                        {!playerHasPermission('manage_upgrades') ? 'NO PERMISSION' : canUpgrade ? 'UPGRADE LIBRARY' : 'MISSING REQUIREMENTS'}
+                                                                    </motion.button>
+                                                                </div>
+                                                            </>
+                                                        );
+                                                    })()}
+                                                </div>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div style={{ textAlign: 'center', padding: isMobile ? '20px' : '40px', background: 'rgba(212, 175, 55, 0.05)', borderRadius: '24px', border: '1px solid var(--accent)' }}>
+                                            <Sparkles size={isMobile ? 32 : 48} color="var(--accent)" style={{ marginBottom: '15px' }} />
+                                            <div style={{ color: 'var(--accent)', fontWeight: '900', fontSize: isMobile ? '1rem' : '1.2rem', letterSpacing: '1px' }}>MAXIMUM LEVEL REACHED</div>
+                                            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: isMobile ? '0.7rem' : '0.8rem', marginTop: '5px' }}>Your Library has reached the peak of ancient knowledge.</div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
 
                             {['GATHERING', 'REFINING', 'CRAFTING'].includes(selectedBuilding) && (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -988,7 +1186,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                     border: `1px solid ${color}33`,
                                                     padding: isMobile ? '15px' : '20px'
                                                 }}>
-                                                    <h3 style={{ color, margin: 0, fontSize: isMobile ? '1rem' : '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <h3 style={{ color, margin: 0, fontSize: isMobile ? '1rem' : '1.2rem', fontWeight: '900', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                         <Icon size={isMobile ? 20 : 24} /> {config.name}
                                                     </h3>
                                                     <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', margin: '5px 0 0 0' }}>{config.description}</p>
@@ -998,18 +1196,20 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                     {Object.entries(config.paths).map(([path, pathConfig]) => {
                                                         const currentLevel = guild[pathConfig.column] || 0;
                                                         const nextLevel = currentLevel + 1;
+                                                        const costs = UPGRADE_COSTS[nextLevel];
                                                         const isMax = currentLevel >= config.maxLevel;
                                                         
-                                                        const silverCost = config.baseSilverCost + (currentLevel * config.perLevelSilverCost);
-                                                        const gpCost = config.baseGPCost + (currentLevel * config.perLevelGPCost);
-                                                        const matAmount = config.baseMaterialCost;
-                                                        const tier = Math.min(10, currentLevel + 1);
+                                                        const silverCost = costs?.silver || 0;
+                                                        const gpCost = costs?.gp || 0;
+                                                        const matAmount = costs?.mats || 0;
+                                                        const tier = Math.min(10, nextLevel);
                                                         const reqGuildLevel = Math.max(1, (nextLevel - 1) * 10);
                                                         const hasGuildLevel = (guild.level || 1) >= reqGuildLevel;
                                                         const isSyncBlocked = Object.values(config.paths).some(p => (guild[p.column] || 0) < currentLevel);
                                                         
                                                         const materials = ['WOOD', 'ORE', 'HIDE', 'FIBER', 'FISH', 'HERB'].map(m => `T${tier}_${m}`);
-                                                        const hasMats = materials.every(m => (guild.bank_items?.[m] || 0) >= matAmount);
+                                                        const bankTotals = globalThis.currentBankTotals || {};
+                                                        const hasMats = materials.every(m => (bankTotals[m] || 0) >= matAmount);
                                                         const hasSilver = (guild.bank_silver || 0) >= silverCost;
                                                         const hasGP = (guild.guild_points || 0) >= gpCost;
                                                         const canUpgrade = playerHasPermission('manage_upgrades') && hasGuildLevel && hasSilver && hasGP && hasMats && !isSyncBlocked;
@@ -1037,7 +1237,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
 
                                                                 <div>
                                                                     <div style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 'bold' }}>{pathConfig.name}</div>
-                                                                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem' }}>Current: <span style={{ color: pathColor }}>+{currentLevel * pathConfig.bonusPerLevel}{pathConfig.suffix}</span></div>
+                                                                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem' }}>Current: <span style={{ color: pathColor }}>+{STATION_BONUS_TABLE[currentLevel] || 0}{pathConfig.suffix}</span></div>
                                                                 </div>
 
                                                                 {!isMax ? (
@@ -1053,24 +1253,31 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                                                 <Coins size={12} color="#ffd700" />
                                                                                 <span style={{ fontSize: '0.65rem', color: hasSilver ? '#44ff44' : '#ff4444', fontWeight: 'bold' }}>{formatSilver(silverCost)}</span>
                                                                             </div>
-                                                                            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                                <ClipboardList size={12} color="var(--accent)" />
-                                                                                <span style={{ fontSize: '0.65rem', color: hasGP ? '#44ff44' : '#ff4444', fontWeight: 'bold' }}>{gpCost} GP</span>
-                                                                            </div>
+                                                                             {gpCost > 0 && (
+                                                                                <div style={{ background: 'rgba(0,0,0,0.2)', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                                    <ClipboardList size={12} color="var(--accent)" />
+                                                                                    <span style={{ fontSize: '0.65rem', color: hasGP ? '#44ff44' : '#ff4444', fontWeight: 'bold' }}>{gpCost} GP</span>
+                                                                                </div>
+                                                                            )}
                                                                             <div style={{ background: 'rgba(0,0,0,0.2)', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                                                 <Trophy size={12} color="#4488ff" />
                                                                                 <span style={{ fontSize: '0.65rem', color: hasGuildLevel ? '#44ff44' : '#ff4444', fontWeight: 'bold' }}>LVL {reqGuildLevel}</span>
                                                                             </div>
                                                                         </div>
                                                                         
-                                                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
+                                                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: isMobile ? '4px' : '5px' }}>
                                                                             {materials.map(m => {
-                                                                                const cur = guild.bank_items?.[m] || 0;
+                                                                                const bankTotals = globalThis.currentBankTotals || {};
+                                                                                const cur = bankTotals[m] || 0;
                                                                                 const has = cur >= matAmount;
+                                                                                const [tierPart, namePart] = m.split('_');
                                                                                 return (
-                                                                                    <div key={m} style={{ background: 'rgba(0,0,0,0.2)', padding: '4px', borderRadius: '6px', border: has ? '1px solid rgba(68,255,68,0.1)' : '1px solid rgba(255,68,68,0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                                                        <img src={`/items/${m}.webp`} style={{ width: '12px', height: '12px' }} />
-                                                                                        <span style={{ fontSize: '0.5rem', color: has ? '#44ff44' : '#ff4444' }}>{cur >= 1000 ? (cur / 1000).toFixed(1) + 'K' : cur}</span>
+                                                                                    <div key={m} style={{ background: 'rgba(0,0,0,0.2)', padding: isMobile ? '4px' : '5px', borderRadius: '12px', border: has ? '1px solid rgba(68,255,68,0.1)' : '1px solid rgba(255,68,68,0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                                                                                        <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: isMobile ? '0.4rem' : '0.45rem', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{tierPart} {namePart}</div>
+                                                                                        <img src={`/items/${m}.webp`} style={{ width: isMobile ? '12px' : '22px', height: isMobile ? '12px' : '22px' }} />
+                                                                                        <div style={{ color: has ? '#44ff44' : '#ff4444', fontSize: isMobile ? '0.45rem' : '0.7rem', fontWeight: 'bold' }}>
+                                                                                            {cur >= 1000 ? (cur / 1000).toFixed(1) + 'K' : cur}/{matAmount >= 1000 ? (matAmount / 1000).toFixed(0) + 'K' : matAmount}
+                                                                                        </div>
                                                                                     </div>
                                                                                 );
                                                                             })}
@@ -1124,7 +1331,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                     }}>
                                         <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', marginBottom: isMobile ? '15px' : '20px', gap: '10px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                <h3 style={{ color: 'var(--accent)', margin: 0, fontSize: isMobile ? '1rem' : '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <h3 style={{ color: 'var(--accent)', margin: 0, fontSize: isMobile ? '1rem' : '1.2rem', fontWeight: '900', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                     <Landmark size={isMobile ? 20 : 24} /> GUILD BANK
                                                 </h3>
                                                 <motion.button
@@ -1164,31 +1371,60 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                             overflowY: 'auto',
                                             paddingRight: '5px'
                                         }}>
-                                            {Object.entries(guild.bank_items || {}).length > 0 ? (
-                                                Object.entries(guild.bank_items).sort().map(([itemId, amount]) => (
-                                                    <div key={itemId} style={{
-                                                        background: 'rgba(255,255,255,0.03)',
-                                                        padding: isMobile ? '8px' : '10px',
-                                                        borderRadius: '12px',
-                                                        border: '1px solid rgba(255,255,255,0.05)',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: isMobile ? '6px' : '10px'
-                                                    }}>
-                                                        <div style={{ width: isMobile ? '18px' : '24px', height: isMobile ? '18px' : '24px' }}>
-                                                            <img src={`/items/${itemId.split('::')[0]}.webp`} alt={itemId} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                            {(() => {
+                                                const rawMaterials = ['WOOD', 'ORE', 'HIDE', 'FIBER', 'FISH', 'HERB'];
+                                                const tiers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+                                                const materialList = [];
+                                                tiers.forEach(t => {
+                                                    rawMaterials.forEach(m => {
+                                                        materialList.push(`T${t}_${m}`);
+                                                    });
+                                                });
+
+                                                const bankItems = globalThis.currentBankTotals || {};
+
+                                                const materialNeeds = calculateMaterialNeeds(guild);
+                                                const otherItems = Object.keys(bankItems).filter(id => !materialList.includes(id));
+                                                const finalIds = [...materialList, ...otherItems.sort()];
+
+                                                return finalIds.map(itemId => {
+                                                    const amount = bankItems[itemId] || 0;
+                                                    const totalNeeded = materialNeeds[itemId];
+                                                    const isTracked = totalNeeded !== undefined;
+                                                    const isComplete = isTracked && amount >= totalNeeded && totalNeeded > 0;
+                                                    
+                                                    return (
+                                                        <div key={itemId} style={{
+                                                            background: isComplete ? 'rgba(68, 255, 68, 0.05)' : 'rgba(255,255,255,0.03)',
+                                                            padding: isMobile ? '8px' : '10px',
+                                                            borderRadius: '12px',
+                                                            border: isComplete ? '1px solid rgba(68, 255, 68, 0.2)' : '1px solid rgba(255,255,255,0.05)',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: isMobile ? '6px' : '10px',
+                                                            opacity: (isTracked && totalNeeded === 0) ? 0.2 : (amount > 0 || isTracked ? 1 : 0.4)
+                                                        }}>
+                                                            <div style={{ width: isMobile ? '18px' : '24px', height: isMobile ? '18px' : '24px' }}>
+                                                                <img src={`/items/${itemId}.webp`} alt={itemId} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                                            </div>
+                                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                                <div style={{ color: isComplete ? '#44ff44' : (amount > 0 ? '#fff' : 'rgba(255,255,255,0.2)'), fontSize: isMobile ? '0.7rem' : '0.8rem', fontWeight: 'bold' }}>
+                                                                    {amount.toLocaleString()}
+                                                                    {isTracked && totalNeeded > 0 && (
+                                                                        <span style={{ fontSize: '0.6rem', color: isComplete ? '#44ff4488' : 'rgba(255,255,255,0.3)', marginLeft: '4px' }}>
+                                                                            / {totalNeeded.toLocaleString()}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.5rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                    {itemId.replace(/_/g, ' ')}
+                                                                    {isComplete && <Check size={8} color="#44ff44" />}
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        <div style={{ flex: 1, minWidth: 0 }}>
-                                                            <div style={{ color: '#fff', fontSize: isMobile ? '0.7rem' : '0.8rem', fontWeight: 'bold' }}>{amount.toLocaleString()}</div>
-                                                            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.5rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{itemId.replace(/_/g, ' ')}</div>
-                                                        </div>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '20px', color: 'rgba(255,255,255,0.2)', fontSize: '0.75rem', fontStyle: 'italic' }}>
-                                                    The bank is empty.
-                                                </div>
-                                            )}
+                                                    );
+                                                });
+                                            })()}
                                         </div>
                                     </div>
                                 </div>
@@ -1197,14 +1433,37 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                     )}
 
                     {activeTab === 'TASKS' && (
-                        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <h3 style={{ color: 'var(--accent)', margin: 0, fontSize: '1.1rem', fontWeight: '900', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <ClipboardList size={22} /> DAILY GUILD TASKS
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                            <div style={{ 
+                                display: 'flex', 
+                                justifyContent: 'space-between', 
+                                alignItems: isMobile ? 'flex-start' : 'center',
+                                flexDirection: isMobile ? 'column' : 'row',
+                                gap: isMobile ? '15px' : '0'
+                            }}>
+                                <h3 style={{ color: 'var(--accent)', margin: 0, fontSize: isMobile ? '1rem' : '1.2rem', fontWeight: '900', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <ClipboardList size={isMobile ? 18 : 22} /> DAILY TASKS
                                 </h3>
-                                 <div style={{ textAlign: 'right' }}>
-                                    <div style={{ fontSize: '0.45rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold', letterSpacing: '1px' }}>RESETS IN</div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--accent)', fontWeight: '900', fontFamily: 'monospace' }}>{timeUntilReset}</div>
+                                  <div style={{ display: 'flex', gap: '20px' }}>
+                                    <div style={{ textAlign: isMobile ? 'left' : 'right' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <div style={{ fontSize: '0.45rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold', letterSpacing: '1px' }}>REWARD PER TASK:</div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                    <Trophy size={11} color="var(--accent)" />
+                                                    <span style={{ fontSize: '0.7rem', color: '#fff', fontWeight: '900' }}>
+                                                        +{(GUILD_TASKS_CONFIG.REWARDS.XP_TABLE[guild.library_level || 1] || 0).toLocaleString()} XP
+                                                    </span>
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                    <ClipboardList size={11} color="#4488ff" />
+                                                    <span style={{ fontSize: '0.7rem', color: '#fff', fontWeight: '900' }}>
+                                                        +{(GUILD_TASKS_CONFIG.REWARDS.GP_TABLE[guild.library_level || 1] || 0).toLocaleString()} GP
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1212,12 +1471,59 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                 <div style={{ padding: '40px', display: 'flex', justifyContent: 'center' }}>
                                     <div className="spinner-small" style={{ width: '30px', height: '30px' }} />
                                 </div>
+                            ) : guildTasks.locked ? (
+                                <div style={{ 
+                                    padding: '60px 20px', 
+                                    textAlign: 'center', 
+                                    background: 'rgba(68, 136, 255, 0.05)', 
+                                    borderRadius: '24px', 
+                                    border: '1px dashed rgba(68, 136, 255, 0.3)',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    gap: '20px'
+                                }}>
+                                    <div style={{ position: 'relative' }}>
+                                        <Library size={48} color="#4488ff" style={{ opacity: 0.5 }} />
+                                        <Lock size={20} color="#ff4444" style={{ position: 'absolute', bottom: -5, right: -5 }} />
+                                    </div>
+                                    <div>
+                                        <h4 style={{ color: '#fff', margin: '0 0 10px 0', fontSize: '1.1rem', fontWeight: '900' }}>TASKS LOCKED</h4>
+                                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', maxWidth: '300px', margin: 0 }}>
+                                            {guildTasks.message || "Upgrade the Library to Level 1 to unlock daily guild tasks."}
+                                        </p>
+                                    </div>
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => {
+                                            setSelectedBuilding('LIBRARY');
+                                            setActiveTab('BUILDING');
+                                        }}
+                                        style={{
+                                            background: '#4488ff',
+                                            color: '#fff',
+                                            border: 'none',
+                                            padding: '10px 20px',
+                                            borderRadius: '12px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        GO TO LIBRARY
+                                    </motion.button>
+                                </div>
                             ) : guildTasks.length > 0 ? (
-                                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '15px' }}>
-                                    {guildTasks.map((task) => {
+                                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '10px' }}>
+                                    {guildTasks.map((task, index) => {
                                         const isCompleted = task.progress >= task.required;
                                         const progressPct = Math.min(100, (task.progress / task.required) * 100);
                                         const item = task.itemId;
+                                        const hasItemInInventory = !isCompleted && (gameState?.state?.inventory?.[item] || 0) > 0;
+
+                                        // Center the 13th item on desktop
+                                        const isLastAndLonely = !isMobile && index === 12;
 
                                         return (
                                             <motion.div
@@ -1225,14 +1531,15 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                 whileHover={{ y: -5 }}
                                                 style={{
                                                     background: 'rgba(255,255,255,0.03)',
-                                                    borderRadius: '20px',
+                                                    borderRadius: '16px',
                                                     border: `1px solid ${isCompleted ? 'rgba(68, 255, 68, 0.2)' : 'rgba(255,255,255,0.08)'}`,
-                                                    padding: '20px',
+                                                    padding: '12px',
                                                     position: 'relative',
-                                                    overflow: 'hidden'
+                                                    overflow: 'hidden',
+                                                    gridColumn: isLastAndLonely ? '2' : 'auto'
                                                 }}
                                             >
-                                                {isCompleted && (
+                                                {isCompleted ? (
                                                     <div style={{
                                                         position: 'absolute', top: '10px', right: '10px',
                                                         background: 'rgba(68, 255, 68, 0.15)', color: '#44ff44',
@@ -1242,104 +1549,98 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                     }}>
                                                         <Check size={12} /> COMPLETED
                                                     </div>
-                                                )}
+                                                ) : null}
 
-                                                <div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginBottom: '15px' }}>
+                                                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '0px' }}>
                                                     <div style={{
-                                                        width: '50px', height: '50px',
-                                                        background: 'rgba(0,0,0,0.3)', borderRadius: '12px',
+                                                        width: '36px', height: '36px',
+                                                        background: 'rgba(0,0,0,0.3)', borderRadius: '10px',
                                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                         border: '1px solid rgba(255,255,255,0.1)',
-                                                        flexShrink: 0
+                                                        flexShrink: 0,
+                                                        position: 'relative'
                                                     }}>
-                                                        <img src={`/items/${item}.webp`} alt={item} style={{ width: '32px', height: '32px' }} />
-                                                    </div>
-                                                    <div style={{ flex: 1 }}>
-                                                        <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 'bold', textTransform: 'capitalize' }}>
-                                                            {item.split('_').slice(1).join(' ').toLowerCase()}
-                                                        </div>
-                                                        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem' }}>
-                                                            Required: <span style={{ color: '#fff' }}>{task.required} {item.split('_')[0]} Materials</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {/* Progress Bar */}
-                                                <div style={{ marginBottom: '20px' }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', marginBottom: '6px', fontWeight: 'bold' }}>
-                                                        <span>PROGRESS</span>
-                                                        <span>{task.progress} / {task.required}</span>
-                                                    </div>
-                                                    <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                                        <motion.div
-                                                            initial={{ width: 0 }}
-                                                            animate={{ width: `${progressPct}%` }}
-                                                            style={{
-                                                                height: '100%',
-                                                                background: isCompleted ? 'linear-gradient(90deg, #44ff44 0%, #fff 100%)' : 'linear-gradient(90deg, var(--accent) 0%, #fff 100%)',
-                                                                boxShadow: isCompleted ? '0 0 10px rgba(68, 255, 68, 0.4)' : '0 0 10px rgba(212, 175, 55, 0.4)'
-                                                            }}
+                                                        {hasItemInInventory && (
+                                                            <div style={{
+                                                                position: 'absolute', top: '-3px', right: '-3px',
+                                                                width: '8px', height: '8px',
+                                                                background: '#44ff44',
+                                                                borderRadius: '50%',
+                                                                border: '2px solid rgba(0,0,0,0.6)',
+                                                                zIndex: 2
+                                                            }} />
+                                                        )}
+                                                        <img 
+                                                            src={
+                                                                item.includes('_POTION_XP') ? `/items/${item.split('_')[0]}_KNOWLEDGE_POTION.webp` :
+                                                                item.includes('_POTION_GATHER') ? `/items/${item.split('_')[0]}_GATHERING_POTION.webp` :
+                                                                item.includes('_POTION_REFINE') ? `/items/${item.split('_')[0]}_REFINING_POTION.webp` :
+                                                                item.includes('_POTION_CRAFT') ? `/items/${item.split('_')[0]}_CRAFTING_POTION.webp` :
+                                                                item.includes('_POTION_SILVER') ? `/items/${item.split('_')[0]}_SILVER_POTION.webp` :
+                                                                item.includes('_POTION_QUALITY') ? `/items/${item.split('_')[0]}_QUALITY_POTION.webp` :
+                                                                item.includes('_POTION_LUCK') ? `/items/${item.split('_')[0]}_LUCK_POTION.webp` :
+                                                                item.includes('_POTION_DAMAGE') ? `/items/${item.split('_')[0]}_DAMAGE_POTION.webp` :
+                                                                item.includes('_POTION_CRIT') ? `/items/${item.split('_')[0]}_CRITICAL_POTION.webp` :
+                                                                `/items/${item}.webp`
+                                                            } 
+                                                            alt={item} 
+                                                            style={{ width: '22px', height: '22px' }} 
                                                         />
                                                     </div>
+                                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                                        <div style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 'bold', textTransform: 'capitalize', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                            {item.split('_')[0]} {
+                                                                item.includes('_POTION_') ? 
+                                                                item.split('_').slice(1).join(' ').toLowerCase().replace('xp', 'knowledge') : 
+                                                                item.split('_').slice(1).join(' ').toLowerCase()
+                                                            }
+                                                        </div>
+
+                                                    </div>
                                                 </div>
 
-                                                <div style={{ display: 'flex', gap: '10px' }}>
+                                                {/* Progress Bar & Contribute Button */}
+                                                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', marginBottom: '4px', marginTop: '-16px' }}>
+                                                    <div style={{ flex: 1 }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'flex-end', fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', marginBottom: '2px', fontWeight: 'bold' }}>
+                                                            <span>{task.progress} / {task.required}</span>
+                                                        </div>
+                                                        <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                            <motion.div
+                                                                initial={{ width: 0 }}
+                                                                animate={{ width: `${progressPct}%` }}
+                                                                style={{
+                                                                    height: '100%',
+                                                                    background: isCompleted ? 'linear-gradient(90deg, #44ff44 0%, #fff 100%)' : 'linear-gradient(90deg, var(--accent) 0%, #fff 100%)',
+                                                                    boxShadow: isCompleted ? '0 0 10px rgba(68, 255, 68, 0.4)' : '0 0 10px rgba(212, 175, 55, 0.4)'
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+
                                                     {!isCompleted && (
                                                         <motion.button
-                                                            whileHover={{ scale: 1.05 }}
-                                                            whileTap={{ scale: 0.95 }}
+                                                            whileHover={{ scale: 1.1, background: 'var(--accent)', color: '#000' }}
+                                                            whileTap={{ scale: 0.9 }}
                                                             onClick={() => {
                                                                 setShowContributeModal(task);
                                                                 setContributeAmount("");
                                                             }}
                                                             style={{
-                                                                flex: 2, padding: '10px',
-                                                                background: 'var(--accent)', color: '#000',
-                                                                border: 'none', borderRadius: '10px',
-                                                                fontSize: '0.7rem', fontWeight: '900',
-                                                                cursor: 'pointer', transition: '0.2s'
+                                                                width: '24px', height: '24px',
+                                                                background: 'rgba(255,255,255,0.05)', color: 'var(--accent)',
+                                                                border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px',
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                cursor: 'pointer', flexShrink: 0
                                                             }}
+                                                            title="Contribute"
                                                         >
-                                                            CONTRIBUTE
-                                                        </motion.button>
-                                                    )}
-                                                    
-                                                    {!task.rerolled && playerHasPermission('manage_tasks') && (
-                                                        <motion.button
-                                                            whileHover={{ scale: 1.05 }}
-                                                            whileTap={{ scale: 0.95 }}
-                                                            onClick={() => socket?.emit('reroll_guild_task', { taskId: task.id })}
-                                                            style={{
-                                                                flex: 1, padding: '10px',
-                                                                background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.6)',
-                                                                border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px',
-                                                                fontSize: '0.7rem', fontWeight: 'bold',
-                                                                cursor: 'pointer'
-                                                            }}
-                                                        >
-                                                            REROLL
+                                                            <Plus size={14} />
                                                         </motion.button>
                                                     )}
                                                 </div>
 
-                                                <div style={{ 
-                                                    marginTop: '15px', padding: '10px', 
-                                                    background: 'rgba(0,0,0,0.2)', borderRadius: '10px', 
-                                                    border: '1px solid rgba(255,255,255,0.03)',
-                                                    display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                                                }}>
-                                                    <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>REWARDS</span>
-                                                    <div style={{ display: 'flex', gap: '10px' }}>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                            <Trophy size={10} color="var(--accent)" />
-                                                            <span style={{ fontSize: '0.65rem', color: '#fff', fontWeight: 'bold' }}>+{GUILD_TASKS_CONFIG.REWARDS.XP} XP</span>
-                                                        </div>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                            <ClipboardList size={10} color="#4488ff" />
-                                                            <span style={{ fontSize: '0.65rem', color: '#fff', fontWeight: 'bold' }}>+{GUILD_TASKS_CONFIG.REWARDS.GP} GP</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
+
                                             </motion.div>
                                         );
                                     })}
@@ -1491,7 +1792,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                 <h4 style={{ color: '#fff', margin: '0 0 10px 0', fontSize: '0.8rem' }}>Guild Preferences</h4>
                                 <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem' }}>Configure who can join and view guild information.</p>
                             </div>
-                            {playerHasPermission('edit_appearance') || playerHasPermission('manage_roles') ? (
+                            {playerHasPermission('manage_guild') ? (
                                 <>
                                     {playerHasPermission('edit_appearance') && (
                                         <div
@@ -1693,7 +1994,15 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                             alignItems: 'center',
                                             justifyContent: 'center'
                                         }}>
-                                            <User size={20} color="rgba(255,255,255,0.4)" />
+                                            {member.avatar ? (
+                                                <img 
+                                                    src={member.avatar.replace(/\.(png|jpg|jpeg)$/, '.webp')} 
+                                                    alt={member.name}
+                                                    style={{ width: '100%', height: '100%', borderRadius: 'inherit', objectFit: 'cover' }}
+                                                />
+                                            ) : (
+                                                <User size={20} color="rgba(255,255,255,0.4)" />
+                                            )}
                                         </div>
                                         <motion.div
                                             animate={{ scale: [1, 1.2, 1] }}
@@ -1873,7 +2182,15 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                 alignItems: 'center',
                                                 justifyContent: 'center'
                                             }}>
-                                                <User size={20} color="rgba(255,255,255,0.4)" />
+                                                {req.avatar ? (
+                                                    <img 
+                                                        src={req.avatar.replace(/\.(png|jpg|jpeg)$/, '.webp')} 
+                                                        alt={req.name}
+                                                        style={{ width: '100%', height: '100%', borderRadius: 'inherit', objectFit: 'cover' }}
+                                                    />
+                                                ) : (
+                                                    <User size={20} color="rgba(255,255,255,0.4)" />
+                                                )}
                                             </div>
                                         </div>
                                         <div>
@@ -2143,7 +2460,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                         lineHeight: '1.5'
                                     }}>
                                         <p style={{ margin: '0 0 10px 0' }}>
-                                            Whenever any member of the guild performs actions that grant experience, <strong>a 5% bonus</strong> of that XP is copied and granted directly to the Guild!
+                                            Whenever any member of the guild performs actions that grant experience, <strong>a 10% bonus</strong> of that XP is copied and granted directly to the Guild!
                                         </p>
                                         <ul style={{ paddingLeft: '20px', margin: 0, color: 'var(--accent)', fontWeight: 'bold' }}>
                                             <li>⚔️ Combat (Killing Mobs)</li>
@@ -3104,42 +3421,55 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                         <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 'bold', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Donate Raw Items</div>
                                         
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', maxHeight: '150px', overflowY: 'auto', paddingRight: '4px', marginBottom: '15px' }}>
-                                            {Object.entries(gameState?.state?.inventory || {})
-                                                .filter(([id, val]) => {
-                                                    const cleanId = id.split('::')[0];
-                                                    const amount = (typeof val === 'object' && val !== null) ? (val.amount || 0) : (val || 0);
-                                                    const isRaw = /^(T[0-9]+)_(WOOD|ORE|HIDE|FIBER|FISH|HERB)$/.test(cleanId);
-                                                    return amount > 0 && isRaw;
-                                                })
-                                                .map(([id, val]) => {
-                                                    const amount = (typeof val === 'object' && val !== null) ? (val.amount || 0) : (val || 0);
-                                                    const isSelected = selectedDonationItem?.id === id;
-                                                    return (
-                                                        <motion.div
-                                                            key={id}
-                                                            whileHover={{ scale: 1.05 }}
-                                                            whileTap={{ scale: 0.95 }}
-                                                            onClick={() => setSelectedDonationItem({ id, max: amount })}
-                                                            style={{
-                                                                aspectRatio: '1',
-                                                                background: isSelected ? 'rgba(212, 175, 55, 0.2)' : 'rgba(0,0,0,0.3)',
-                                                                borderRadius: '12px',
-                                                                border: isSelected ? '1px solid var(--accent)' : '1px solid rgba(255,255,255,0.1)',
-                                                                display: 'flex',
-                                                                flexDirection: 'column',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center',
-                                                                gap: '4px',
-                                                                cursor: 'pointer',
-                                                                position: 'relative'
-                                                            }}
-                                                        >
-                                                            <img src={`/items/${id.split('::')[0]}.webp`} style={{ width: '24px', height: '24px' }} alt={id} />
-                                                            <div style={{ fontSize: '0.6rem', color: isSelected ? 'var(--accent)' : '#fff', fontWeight: 'bold' }}>{amount >= 1000 ? (amount/1000).toFixed(1) + 'K' : amount}</div>
-                                                        </motion.div>
-                                                    );
-                                                })
-                                            }
+                                            {(() => {
+                                                const needs = calculateMaterialNeeds(guild);
+                                                return Object.entries(gameState?.state?.inventory || {})
+                                                    .map(([id, val]) => {
+                                                        const cleanId = id.split('::')[0].toUpperCase();
+                                                        const amount = (typeof val === 'object' && val !== null) ? (val.amount || 0) : (val || 0);
+                                                        const isRaw = /^(T[0-9]+)_(WOOD|ORE|HIDE|FIBER|FISH|HERB)$/i.test(cleanId);
+                                                        
+                                                        const neededAmount = Math.floor(Number(needs[cleanId] || 0));
+                                                        const bankedAmount = Math.floor(Number(guild.bank_items?.[cleanId] || 0));
+                                                        const shouldShow = neededAmount > bankedAmount;
+
+                                                        return { id, cleanId, amount, isRaw, neededAmount, bankedAmount, shouldShow };
+                                                    })
+                                                    .filter(item => item.isRaw && item.amount > 0 && item.shouldShow)
+                                                    .map(({ id, amount, cleanId, neededAmount, bankedAmount }) => {
+                                                        const isSelected = selectedDonationItem?.id === id;
+                                                        const remainingNeed = Math.max(0, neededAmount - bankedAmount);
+                                                        const effectiveMax = Math.min(amount, remainingNeed);
+
+                                                        return (
+                                                            <motion.div
+                                                                key={id}
+                                                                whileHover={{ scale: 1.05 }}
+                                                                whileTap={{ scale: 0.95 }}
+                                                                onClick={() => {
+                                                                    setSelectedDonationItem({ id, max: effectiveMax, inventoryAmount: amount, remainingNeed });
+                                                                    setDonationItemAmount(effectiveMax.toString());
+                                                                }}
+                                                                style={{
+                                                                    aspectRatio: '1',
+                                                                    background: isSelected ? 'rgba(212, 175, 55, 0.2)' : 'rgba(0,0,0,0.3)',
+                                                                    borderRadius: '12px',
+                                                                    border: isSelected ? '1px solid var(--accent)' : '1px solid rgba(255,255,255,0.1)',
+                                                                    display: 'flex',
+                                                                    flexDirection: 'column',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    gap: '4px',
+                                                                    cursor: 'pointer',
+                                                                    position: 'relative'
+                                                                }}
+                                                            >
+                                                                <img src={`/items/${cleanId}.webp`} style={{ width: '24px', height: '24px' }} alt={id} />
+                                                                <div style={{ fontSize: '0.6rem', color: isSelected ? 'var(--accent)' : '#fff', fontWeight: 'bold' }}>{amount >= 1000 ? (amount/1000).toFixed(1) + 'K' : amount}</div>
+                                                            </motion.div>
+                                                        );
+                                                    });
+                                            })()}
                                         </div>
 
                                         {selectedDonationItem && (
@@ -3149,7 +3479,16 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                         type="number"
                                                         placeholder="Qty"
                                                         value={donationItemAmount}
-                                                        onChange={(e) => setDonationItemAmount(e.target.value)}
+                                                        onChange={(e) => {
+                                                            let val = parseInt(e.target.value);
+                                                            if (isNaN(val)) {
+                                                                setDonationItemAmount('');
+                                                                return;
+                                                            }
+                                                            if (val < 0) val = 0;
+                                                            if (val > selectedDonationItem.max) val = selectedDonationItem.max;
+                                                            setDonationItemAmount(val.toString());
+                                                        }}
                                                         style={{ width: '100%', padding: '10px 10px 10px 35px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: '#fff', fontSize: '0.85rem', outline: 'none' }}
                                                     />
                                                     <img src={`/items/${selectedDonationItem.id.split('::')[0]}.webp`} style={{ width: '16px', height: '16px', position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />

@@ -1,4 +1,4 @@
-import { calculateGuildNextLevelXP, GUILD_BUILDINGS, GUILD_TASKS_CONFIG } from '../../shared/guilds.js';
+import { calculateGuildNextLevelXP, GUILD_BUILDINGS, GUILD_TASKS_CONFIG, UPGRADE_COSTS, calculateMaterialNeeds } from '../../shared/guilds.js';
 import { resolveItem, calculateItemSellPrice } from '../../shared/items.js';
 
 export class GuildManager {
@@ -6,7 +6,7 @@ export class GuildManager {
         this.gameManager = gameManager;
         this.supabase = gameManager.supabase;
 
-        // Memory buffer for 5% fractional XP gained by members
+        // Memory buffer for 10% fractional XP gained by members
         this.pendingGuildXP = {}; // { guild_id: 15.23 }
 
         // Flush memory to DB every 30 minutes
@@ -218,8 +218,8 @@ export class GuildManager {
                     donatedXP: m.donated_xp || 0,
                     donatedSilver: Number(m.donated_silver || 0),
                     donatedItemsValue: Number(m.donated_items_value || 0),
-                    online: isOnline,
-                    level: this._calculateCharLevel(state)
+                    level: this._calculateCharLevel(state),
+                    avatar: state.avatar || dbChar.avatar || '/profile/1 - male.png'
                 };
             }),
             nextLevelXP: calculateGuildNextLevelXP(guild.level || 1)
@@ -449,9 +449,9 @@ export class GuildManager {
             return {
                 id: r.id,
                 characterId: charId,
-                name: r.characters.name,
+                name: dbChar.name,
                 level: this._calculateCharLevel(state),
-                status: r.status,
+                avatar: state.avatar || dbChar.avatar || '/profile/1 - male.png',
                 createdAt: r.created_at
             };
         });
@@ -981,6 +981,8 @@ export class GuildManager {
         let levelColumn = '';
         if (bType === 'GUILD_HALL') {
             levelColumn = 'guild_hall_level';
+        } else if (bType === 'LIBRARY') {
+            levelColumn = 'library_level';
         } else if (config.paths) {
             if (!bPath || !config.paths[bPath]) throw new Error("Invalid building path");
             levelColumn = config.paths[bPath].column;
@@ -1009,10 +1011,14 @@ export class GuildManager {
         }
 
         // 5. Calculate Costs
-        const silverCost = config.baseSilverCost + (currentLevel * config.perLevelSilverCost);
-        const gpCost = config.baseGPCost + (currentLevel * config.perLevelGPCost);
-        const tier = Math.min(10, currentLevel + 1);
-        const matAmount = config.baseMaterialCost;
+        const costs = UPGRADE_COSTS[nextLevel];
+        if (!costs) throw new Error("Upgrade configuration not found for this level");
+
+        const silverCost = costs.silver;
+        const gpCost = (bType === 'LIBRARY' && nextLevel === 1) ? 0 : costs.gp;
+        const tier = Math.min(10, nextLevel); // Tier usually matches the level you are upgrading to
+        const matAmount = costs.mats;
+        
         const materialReq = {
             [`T${tier}_WOOD`]: matAmount,
             [`T${tier}_ORE`]: matAmount,
@@ -1022,7 +1028,16 @@ export class GuildManager {
             [`T${tier}_HERB`]: matAmount
         };
 
-        // 6. Validate Bank Resources
+        // 6. Validate Bank Resources (Normalized IDs)
+        const bankTotals = {};
+        if (guild.bank_items) {
+            Object.entries(guild.bank_items).forEach(([id, qty]) => {
+                const upperId = id.split('::')[0].toUpperCase();
+                const amount = (typeof qty === 'object' ? (qty.amount || 0) : qty);
+                bankTotals[upperId] = (bankTotals[upperId] || 0) + parseInt(amount || 0);
+            });
+        }
+
         const bankSilver = BigInt(guild.bank_silver || 0);
         if (bankSilver < BigInt(silverCost)) {
             throw new Error(`Insufficient Bank Silver! Need ${silverCost.toLocaleString()}`);
@@ -1033,18 +1048,17 @@ export class GuildManager {
             throw new Error(`Insufficient Guild Points! Need ${gpCost.toLocaleString()} GP`);
         }
 
-        const bankItems = guild.bank_items || {};
         for (const [itemId, amount] of Object.entries(materialReq)) {
-            if ((bankItems[itemId] || 0) < amount) {
+            if ((bankTotals[itemId] || 0) < amount) {
                 throw new Error(`Insufficient Bank Materials! Need ${amount.toLocaleString()} of ${itemId.replace(/_/g, ' ')}`);
             }
         }
 
-        // 7. Deduct from Bank
+        // 7. Deduct from Bank (Consolidating to UpperCase IDs)
         const newBankSilver = bankSilver - BigInt(silverCost);
-        const newBankItems = { ...bankItems };
+        const newBankItems = { ...bankTotals }; // Use normalized pool
         for (const [itemId, amount] of Object.entries(materialReq)) {
-            newBankItems[itemId] = (parseInt(newBankItems[itemId]) || 0) - amount;
+            newBankItems[itemId] = (newBankItems[itemId] || 0) - amount;
         }
 
         // 8. Update DB
@@ -1095,7 +1109,14 @@ export class GuildManager {
             .eq('character_id', char.id)
             .maybeSingle();
 
-        if (memberError || !member) throw new Error("Character is not in a guild");
+        if (memberError || !member) {
+            if (char.state.guild_id) {
+                console.warn(`[GUILD] Clearing stale guild_id for character ${char.name} (membership not found)`);
+                char.state.guild_id = null;
+                this.gameManager.markDirty(char.id);
+            }
+            throw new Error("Character is not in a guild");
+        }
 
         // 2. Validate Silver
         if (silverToDonate > 0 && (char.state.silver || 0) < silverToDonate) {
@@ -1135,15 +1156,39 @@ export class GuildManager {
 
         if (guildError || !guild) throw new Error("Guild not found");
 
-        // 5. Update Balances
+        // 5. Update Balances (Normalizing IDs to UPPERCASE)
         const newBankSilver = BigInt(guild.bank_silver || 0) + BigInt(silverToDonate);
-        const newBankItems = { ...(guild.bank_items || {}) };
+        
+        // Build normalized bank items map first to handle existing data
+        const normalizedBankItems = {};
+        if (guild.bank_items) {
+            Object.entries(guild.bank_items).forEach(([id, qty]) => {
+                const upperId = id.split('::')[0].toUpperCase();
+                const amount = (typeof qty === 'object' ? (qty.amount || 0) : qty);
+                normalizedBankItems[upperId] = (normalizedBankItems[upperId] || 0) + parseInt(amount || 0);
+            });
+        }
+        
+        const newBankItems = { ...normalizedBankItems };
 
         if (hasItems) {
+            const materialNeeds = calculateMaterialNeeds(guild);
             for (const [itemId, amount] of Object.entries(items)) {
+                const upperId = itemId.split('::')[0].toUpperCase();
                 const safeAmount = Math.max(0, parseInt(amount) || 0);
                 if (safeAmount > 0) {
-                    newBankItems[itemId] = (parseInt(newBankItems[itemId]) || 0) + safeAmount;
+                    const currentInBank = parseInt(newBankItems[upperId] || 0);
+                    const totalNeeded = materialNeeds[upperId];
+
+                    // Only enforce limit on materials tracked in materialNeeds (T1-T10 base mats)
+                    if (totalNeeded !== undefined) {
+                        const canAccept = Math.max(0, totalNeeded - currentInBank);
+                        if (safeAmount > canAccept) {
+                            throw new Error(`The bank only needs ${canAccept.toLocaleString()} more of ${itemId.replace(/_/g, ' ')}. It currently has ${currentInBank.toLocaleString()} / ${totalNeeded.toLocaleString()}`);
+                        }
+                    }
+
+                    newBankItems[upperId] = currentInBank + safeAmount;
                 }
             }
         }
@@ -1200,11 +1245,27 @@ export class GuildManager {
 
         const { data: guild, error } = await this.supabase
             .from('guilds')
-            .select('daily_tasks, tasks_last_reset')
+            .select('daily_tasks, tasks_last_reset, library_level')
             .eq('id', guildId)
             .single();
 
-        if (error || !guild) throw new Error("Guild not found");
+        if (error) {
+            console.error(`[GUILD-TASKS] Erro ao buscar guilda ${guildId}:`, error);
+            // Se for erro de coluna faltando (42703), damos um erro mais amigável
+            if (error.code === '42703') {
+                throw new Error("Configuração da guilda incompleta no banco de dados. Contate o administrador.");
+            }
+            throw new Error("Erro ao acessar dados da guilda.");
+        }
+
+        if (!guild) {
+            if (char.state.guild_id) {
+                console.warn(`[GUILD] Clearing stale guild_id for character ${char.name} (guild ${guildId} not found)`);
+                char.state.guild_id = null;
+                this.gameManager.markDirty(char.id);
+            }
+            throw new Error("Guilda não encontrada.");
+        }
 
         // Check for daily reset (00:00 UTC)
         const now = new Date();
@@ -1214,9 +1275,16 @@ export class GuildManager {
         const nowUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
         const lastResetUTC = new Date(Date.UTC(lastReset.getUTCFullYear(), lastReset.getUTCMonth(), lastReset.getUTCDate()));
 
-        if (nowUTC > lastResetUTC || !guild.daily_tasks || guild.daily_tasks.length === 0) {
+        const config = GUILD_TASKS_CONFIG;
+        const libraryLevel = guild.library_level || 0;
+
+        if (libraryLevel < 1) {
+            return { locked: true, message: "Upgrade Library to Level 1 to unlock Guild Tasks" };
+        }
+
+        if (nowUTC > lastResetUTC || !guild.daily_tasks || guild.daily_tasks.length !== config.MAX_TASKS) {
             console.log(`[GUILD-TASKS] Resetting tasks for guild ${guildId}`);
-            const newTasks = this._generateNewTasks();
+            const newTasks = this._generateNewTasks(libraryLevel);
             
             const { error: updateError } = await this.supabase
                 .from('guilds')
@@ -1234,81 +1302,62 @@ export class GuildManager {
         return guild.daily_tasks;
     }
 
-    _generateNewTasks() {
+    _generateNewTasks(libraryLevel = 1) {
         const config = GUILD_TASKS_CONFIG;
+        const scaling = config.SCALING;
         const tasks = [];
 
-        for (let i = 0; i < config.MAX_TASKS; i++) {
-            const type = Math.random() > 0.5 ? 'RAW' : 'REFINED';
-            const pool = config.POOLS[type];
-            const mat = pool[Math.floor(Math.random() * pool.length)];
-            const tier = 1 + Math.floor(Math.random() * 3); // T1-T3
+        // Library level scales tier and required amount
+        const tier = Math.min(10, Math.max(1, libraryLevel));
+        const requiredAmount = scaling.ITEMS_PER_LEVEL * libraryLevel;
+
+        // 13 Fixed Daily Tasks defined by the user
+        // We will randomize the tier (T1-T3) for each, but keep the item types fixed.
+        const taskDefinitions = [
+            { type: 'RAW', mat: 'WOOD' },         // 1: Wood
+            { type: 'RAW', mat: 'ORE' },          // 2: Ore
+            { type: 'RAW', mat: 'HIDE' },         // 3: Hide
+            { type: 'RAW', mat: 'FIBER' },        // 4: Fiber
+            { type: 'RAW', mat: 'HERB' },         // 5: Herb
+            { type: 'RAW', mat: 'FISH' },         // 6: Fish
+            { type: 'REFINED', mat: 'PLANK' },    // 7: Plank
+            { type: 'REFINED', mat: 'BAR' },      // 8: Bar
+            { type: 'REFINED', mat: 'LEATHER' },  // 9: Leather
+            { type: 'REFINED', mat: 'CLOTH' },    // 10: Cloth
+            { type: 'REFINED', mat: 'EXTRACT' },  // 11: Extract
+            { type: 'POTION', mat: 'POTION' },    // 12: Random Potion
+            { type: 'FOOD', mat: 'FOOD' }         // 13: Food
+        ];
+
+        // Potion suffixes from shared/items.js
+        const potionSuffixes = [
+            '_POTION_GATHER', '_POTION_REFINE', '_POTION_CRAFT', '_POTION_SILVER',
+            '_POTION_QUALITY', '_POTION_LUCK', '_POTION_XP', '_POTION_CRIT', '_POTION_DAMAGE'
+        ];
+
+        for (let i = 0; i < taskDefinitions.length && i < config.MAX_TASKS; i++) {
+            const def = taskDefinitions[i];
+            let itemId = `T${tier}_${def.mat}`;
+
+            if (def.type === 'POTION') {
+                const randomPotionSuffix = potionSuffixes[Math.floor(Math.random() * potionSuffixes.length)];
+                itemId = `T${tier}${randomPotionSuffix}`;
+            } else if (def.type === 'FOOD') {
+                itemId = `T${tier}_FOOD`;
+            }
 
             tasks.push({
                 id: i,
-                type: type,
-                itemId: `T${tier}_${mat}`,
-                required: config.ITEMS_REQUIRED,
-                progress: 0,
-                rerolled: false
+                type: def.type,
+                itemId: itemId,
+                required: requiredAmount,
+                progress: 0
             });
         }
 
         return tasks;
     }
 
-    async rerollTask(char, taskId) {
-        if (!char) throw new Error("Character not found");
-        const guildId = char.state.guild_id;
-        if (!guildId) throw new Error("You are not in a guild");
-
-        // Check permission
-        const hasPerm = await this.hasPermission(char.id, 'manage_tasks');
-        if (!hasPerm) throw new Error("No permission to reroll tasks");
-
-        const { data: guild, error } = await this.supabase
-            .from('guilds')
-            .select('daily_tasks')
-            .eq('id', guildId)
-            .single();
-
-        if (error || !guild) throw new Error("Guild not found");
-
-        const tasks = guild.daily_tasks || [];
-        const task = tasks.find(t => t.id === taskId);
-        if (!task) throw new Error("Task not found");
-        if (task.rerolled) throw new Error("Task already rerolled today");
-
-        // Generate new random type and item for this task
-        const config = GUILD_TASKS_CONFIG;
-        let newType = Math.random() > 0.5 ? 'RAW' : 'REFINED';
-        let pool = config.POOLS[newType];
-        let newItemMat = pool[Math.floor(Math.random() * pool.length)];
-        let newTier = 1 + Math.floor(Math.random() * 3);
-        let newItemId = `T${newTier}_${newItemMat}`;
-
-        // Ensure it's different from current
-        while (newItemId === task.itemId) {
-            newType = Math.random() > 0.5 ? 'RAW' : 'REFINED';
-            pool = config.POOLS[newType];
-            newItemMat = pool[Math.floor(Math.random() * pool.length)];
-            newTier = 1 + Math.floor(Math.random() * 3);
-            newItemId = `T${newTier}_${newItemMat}`;
-        }
-
-        task.type = newType;
-        task.itemId = newItemId;
-        task.rerolled = true;
-
-        const { error: updateError } = await this.supabase
-            .from('guilds')
-            .update({ daily_tasks: tasks })
-            .eq('id', guildId);
-
-        if (updateError) throw new Error("Failed to reroll task");
-
-        return tasks;
-    }
 
     async contributeToTask(char, { taskId, amount }) {
         if (!char) throw new Error("Character not found");
@@ -1317,7 +1366,7 @@ export class GuildManager {
 
         const { data: guild, error } = await this.supabase
             .from('guilds')
-            .select('daily_tasks')
+            .select('daily_tasks, library_level')
             .eq('id', guildId)
             .single();
 
@@ -1348,19 +1397,23 @@ export class GuildManager {
         // Rewards logic
         if (task.progress >= task.required) {
             // Task completed! Give guild rewards
-            const rewards = GUILD_TASKS_CONFIG.REWARDS;
-            await this.addExactGuildXP(guildId, rewards.XP);
+            const scaling = GUILD_TASKS_CONFIG.SCALING;
+            const libraryLevel = guild.library_level || 1;
+            const xpReward = GUILD_TASKS_CONFIG.REWARDS.XP_TABLE[libraryLevel] || 0;
+            const gpReward = GUILD_TASKS_CONFIG.REWARDS.GP_TABLE[libraryLevel] || 0;
+
+            await this.addExactGuildXP(guildId, xpReward);
             
             // Add Guild Points
             const { data: currentGuild } = await this.supabase.from('guilds').select('guild_points').eq('id', guildId).single();
-            const newGP = BigInt(currentGuild.guild_points || 0) + BigInt(rewards.GP);
+            const newGP = BigInt(currentGuild.guild_points || 0) + BigInt(gpReward);
             await this.supabase.from('guilds').update({ guild_points: newGP.toString() }).eq('id', guildId);
 
             this.gameManager.broadcastToGuild(guildId, 'new_message', {
                 id: Date.now() + Math.random(),
                 channel: 'Guild',
                 sender: 'System',
-                message: `✅ Guild Task Completed: ${task.itemId.replace(/_/g, ' ')}! +${rewards.XP} XP, +${rewards.GP} GP`,
+                message: `✅ Guild Task Completed: ${task.itemId.replace(/_/g, ' ')}! +${xpReward} XP, +${gpReward} GP`,
                 timestamp: Date.now(),
                 isSystem: true
             });

@@ -3009,7 +3009,7 @@ const RuneBuffSummary = ({ activeRuneBuffs }) => {
                             )}
                             {(buffs.SPEED || buffs.AUTO) && (
                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-main)', display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ color: 'var(--text-dim)' }}>{act === 'COMBAT' ? 'Speed:' : 'Auto Proc:'}</span>
+                                    <span style={{ color: 'var(--text-dim)' }}>{act === 'COMBAT' ? 'Speed:' : 'Auto Refine:'}</span>
                                     <span style={{ color: '#2196f3', fontWeight: 'bold' }}>+{(buffs.SPEED || buffs.AUTO)}%</span>
                                 </div>
                             )}

@@ -22,6 +22,7 @@ export class AdminManager {
                 case 'add_crowns': return await this.cmdAddOrbs(socket, args); // Alias for backward compatibility during transition
                 case 'xp': return await this.cmdAddXp(socket, args);
                 case 'gxp': return await this.cmdAddGuildXp(socket, args);
+                case 'gp': return await this.cmdAddGuildGP(socket, args);
                 case 'resetdaily': return await this.cmdResetDaily(socket, args);
                 case 'ban': return await this.cmdBan(socket, args);
                 case 'title': return await this.cmdTitle(socket, args);
@@ -208,6 +209,30 @@ export class AdminManager {
         return { success: true, message: `Added ${amount} XP directly to your guild.` };
     }
 
+    async cmdAddGuildGP(socket, args) {
+        let amount = parseInt(args[0]);
+        if (isNaN(amount)) return { success: false, error: "Usage: /gp [amount]" };
+
+        const char = await this.resolveTarget(socket, 'me');
+        if (!char.state.guild_id) return { success: false, error: "You are not in a guild." };
+
+        const { data: guild, error: gErr } = await this.gameManager.supabase
+            .from('guilds')
+            .select('guild_points')
+            .eq('id', char.state.guild_id)
+            .single();
+
+        if (gErr || !guild) return { success: false, error: "Guild not found." };
+
+        const newGP = BigInt(guild.guild_points || 0) + BigInt(amount);
+        await this.gameManager.supabase
+            .from('guilds')
+            .update({ guild_points: newGP.toString() })
+            .eq('id', char.state.guild_id);
+
+        return { success: true, message: `Added ${amount} GP to your guild. Total: ${newGP.toString()}` };
+    }
+
     async cmdResetDaily(socket, args) {
         let targetName = args[0] || 'me';
         const char = await this.resolveTarget(socket, targetName);
@@ -310,7 +335,7 @@ export class AdminManager {
     async cmdHelp(socket) {
         return {
             success: true,
-            message: "Commands: /give, /heal, /add_orbs, /xp, /title, /ban. (Optional target argument supported)"
+            message: "Commands: /give, /heal, /add_orbs, /xp, /gxp, /gp, /title, /ban, /resetdaily. (Optional target argument supported)"
         };
     }
 

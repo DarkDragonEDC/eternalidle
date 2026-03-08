@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { ITEMS, ALL_RUNE_TYPES, RUNES_BY_CATEGORY, ITEM_LOOKUP, resolveItem } from '../shared/items.js';
 import { CHEST_DROP_TABLE, WORLDBOSS_DROP_TABLE, getChestRuneShardRange } from '../shared/chest_drops.js';
 import { INITIAL_SKILLS, calculateNextLevelXP, XP_TABLE } from '../shared/skills.js';
+import { STATION_BONUS_TABLE } from '../shared/guilds.js';
 import { InventoryManager } from './managers/InventoryManager.js';
 import { ActivityManager } from './managers/ActivityManager.js';
 import { CombatManager } from './managers/CombatManager.js';
@@ -1222,7 +1223,7 @@ export class GameManager {
                             totalOfflineXp += (Number(xp) || 0);
                         }
                         if (totalOfflineXp > 0) {
-                            const guildXpToAdd = totalOfflineXp * 0.05;
+                            const guildXpToAdd = totalOfflineXp * 0.10;
                             if (this.guildManager && this.guildManager.addPendingGuildXP) {
                                 this.guildManager.addPendingGuildXP(data.state.guild_id, guildXpToAdd, data.id);
                                 console.log(`[CATCHUP] ${data.name} generated ${guildXpToAdd.toFixed(2)} Guild XP while offline.`);
@@ -2436,7 +2437,7 @@ export class GameManager {
         // --- GUILD XP INTEGRATION (5%) ---
         // If char is in a guild, route 5% of the gained XP into the guild manager's memory buffer
         if (char.state.guild_id && safeAmount > 0) {
-            const guildXpGained = safeAmount * 0.05;
+            const guildXpGained = safeAmount * 0.10;
             // The guild manager will handle adding to memory and flushing every 30m
             if (this.guildManager && this.guildManager.addPendingGuildXP) {
                 this.guildManager.addPendingGuildXP(char.state.guild_id, guildXpGained, char.id);
@@ -3515,15 +3516,15 @@ export class GameManager {
             if (error || !data) return null;
 
             const bonuses = {
-                gathering_xp: (data.gathering_xp_level || 0) * 1, // 1% per level
-                gathering_duplic: (data.gathering_duplic_level || 0) * 1,
-                gathering_auto: (data.gathering_auto_level || 0) * 1,
-                refining_xp: (data.refining_xp_level || 0) * 1,
-                refining_duplic: (data.refining_duplic_level || 0) * 1,
-                refining_effic: (data.refining_effic_level || 0) * 1,
-                crafting_xp: (data.crafting_xp_level || 0) * 1,
-                crafting_duplic: (data.crafting_duplic_level || 0) * 1,
-                crafting_effic: (data.crafting_effic_level || 0) * 1
+                gathering_xp: STATION_BONUS_TABLE[data.gathering_xp_level || 0] || 0,
+                gathering_duplic: STATION_BONUS_TABLE[data.gathering_duplic_level || 0] || 0,
+                gathering_auto: STATION_BONUS_TABLE[data.gathering_auto_level || 0] || 0,
+                refining_xp: STATION_BONUS_TABLE[data.refining_xp_level || 0] || 0,
+                refining_duplic: STATION_BONUS_TABLE[data.refining_duplic_level || 0] || 0,
+                refining_effic: STATION_BONUS_TABLE[data.refining_effic_level || 0] || 0,
+                crafting_xp: STATION_BONUS_TABLE[data.crafting_xp_level || 0] || 0,
+                crafting_duplic: STATION_BONUS_TABLE[data.crafting_duplic_level || 0] || 0,
+                crafting_effic: STATION_BONUS_TABLE[data.crafting_effic_level || 0] || 0
             };
 
             this.guildBonusesCache.set(guildId, {
