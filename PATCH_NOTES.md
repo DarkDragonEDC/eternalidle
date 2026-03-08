@@ -1,8 +1,8 @@
 # Patch Notes - Eternal Idle
 
-### 🏰 Lançamento Oficial: Guildas (Beta)
+### 🏰 Lançamento Oficial: Guildas (Alpha)
 - **Guildas Chegaram!**: O sistema de guildas agora está oficialmente acessível para todos através do menu lateral e do menu de Town no mobile.
-- **Em Desenvolvimento**: Esta é uma versão inicial para testes (Beta). Muitas novidades, construções de guilda e conteúdos cooperativos ainda estão por vir!
+- **Em Desenvolvimento**: Esta é uma versão inicial para testes (Alpha). Muitas novidades e conteúdos cooperativos ainda estão por vir!
 
 
 ### 🐛 Correção Crítica - Perda de Equipamento
@@ -25,8 +25,6 @@
 
 - **Restrição da Foice**: Resolvido o erro na interface que mencionava que o requisito de status para equipar e usar a Foice (Sickle) era a habilidade de Mining (Mineração). Agora indica Harvesting/Tool Crafter corretamente.
 
-### 🚀 Sistema & Infraestrutura
-- **Push Notifications**: Implementada a base tecnológica para notificações push, incluindo configuração VAPID e infraestrutura de banco de dados para alertas nativos.
 
 ### ✨ Runas & Visuais
 - **Rune Shards**: Simplificado o nome das Rune Shards para remover a indicação de Tier, mantendo a interface mais limpa.
