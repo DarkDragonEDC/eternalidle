@@ -3677,6 +3677,7 @@ io.on("connection", (socket) => {
 
           // Manually add channel to broadcast data even if not persisted
           retryData.channel = channel;
+          if (!retryData.created_at) retryData.created_at = new Date().toISOString();
 
           if (channel === "Guild" && char.state.guild_id) {
             gameManager.broadcastToGuild(
@@ -3693,6 +3694,8 @@ io.on("connection", (socket) => {
       } else {
         // Force include channel in case select() didn't pick it up (schema cache)
         const outData = { ...data, channel: data.channel || channel };
+        if (!outData.created_at) outData.created_at = new Date().toISOString();
+        
         if (channel === "Guild" && char.state.guild_id) {
           outData.channel = "Guild"; // Normalize for the client
           gameManager.broadcastToGuild(

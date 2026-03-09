@@ -2690,7 +2690,7 @@ export class GameManager {
         if (type === 'GUILDS') {
             const { data, error } = await this.supabase
                 .from('guilds')
-                .select('id, name, tag, level, xp, icon, icon_color, bg_color, guild_hall_level, guild_members(character_id)')
+                .select('id, name, tag, level, xp, icon, icon_color, bg_color, country_code, guild_hall_level, guild_members(character_id)')
                 .limit(1000);
 
             if (error) {

@@ -3499,31 +3499,66 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                         const effectiveMax = Math.min(amount, remainingNeed);
 
                                                         return (
-                                                            <motion.div
+                                                            <div
                                                                 key={id}
-                                                                whileHover={{ scale: 1.05 }}
-                                                                whileTap={{ scale: 0.95 }}
                                                                 onClick={() => {
                                                                     setSelectedDonationItem({ id, max: effectiveMax, inventoryAmount: amount, remainingNeed });
                                                                     setDonationItemAmount(effectiveMax.toString());
                                                                 }}
-                                                                style={{
-                                                                    aspectRatio: '1',
-                                                                    background: isSelected ? 'rgba(212, 175, 55, 0.2)' : 'rgba(0,0,0,0.3)',
-                                                                    borderRadius: '12px',
-                                                                    border: isSelected ? '1px solid var(--accent)' : '1px solid rgba(255,255,255,0.1)',
+                                                                style={{ cursor: 'pointer', position: 'relative' }}
+                                                            >
+                                                                <div style={{
+                                                                    width: '50px',
+                                                                    height: '50px',
+                                                                    background: isSelected ? 'rgba(212, 175, 55, 0.2)' : 'rgba(0,0,0,0.5)',
+                                                                    borderRadius: '8px',
+                                                                    border: isSelected ? '2px solid var(--accent)' : `1px solid ${
+                                                                        cleanId.startsWith('T1_') ? '#a0aec0' :
+                                                                        cleanId.startsWith('T2_') ? '#48bb78' :
+                                                                        cleanId.startsWith('T3_') ? '#4299e1' :
+                                                                        cleanId.startsWith('T4_') ? '#9f7aea' :
+                                                                        cleanId.startsWith('T5_') ? '#ed8936' :
+                                                                        cleanId.startsWith('T6_') ? '#f56565' : 'rgba(255,255,255,0.2)'
+                                                                    }`,
                                                                     display: 'flex',
-                                                                    flexDirection: 'column',
                                                                     alignItems: 'center',
                                                                     justifyContent: 'center',
-                                                                    gap: '4px',
-                                                                    cursor: 'pointer',
-                                                                    position: 'relative'
-                                                                }}
-                                                            >
-                                                                <img src={`/items/${cleanId}.webp`} style={{ width: '24px', height: '24px' }} alt={id} />
-                                                                <div style={{ fontSize: '0.6rem', color: isSelected ? 'var(--accent)' : '#fff', fontWeight: 'bold' }}>{amount >= 1000 ? (amount/1000).toFixed(1) + 'K' : amount}</div>
-                                                            </motion.div>
+                                                                    position: 'relative',
+                                                                    boxShadow: isSelected ? '0 0 10px rgba(212, 175, 55, 0.5)' : 'none',
+                                                                    transform: isSelected ? 'scale(1.05)' : 'scale(1)',
+                                                                    transition: 'all 0.1s ease',
+                                                                    overflow: 'hidden'
+                                                                }}>
+                                                                    <img src={`/items/${cleanId}.webp`} style={{ width: '32px', height: '32px' }} alt={cleanId} />
+                                                                    <div style={{
+                                                                        position: 'absolute',
+                                                                        bottom: '-1px',
+                                                                        right: '-1px',
+                                                                        background: 'rgba(0,0,0,0.8)',
+                                                                        padding: '1px 4px',
+                                                                        borderRadius: '4px 0 0 0',
+                                                                        fontSize: '0.6rem',
+                                                                        fontWeight: 'bold',
+                                                                        color: '#fff',
+                                                                        borderTop: '1px solid rgba(255,255,255,0.2)',
+                                                                        borderLeft: '1px solid rgba(255,255,255,0.2)'
+                                                                    }}>
+                                                                        {amount >= 1e6 ? (amount/1e6).toFixed(1) + 'M' : amount >= 1000 ? (amount/1000).toFixed(1) + 'K' : amount}
+                                                                    </div>
+                                                                </div>
+                                                                <div style={{
+                                                                    fontSize: '0.55rem',
+                                                                    color: isSelected ? 'var(--accent)' : 'var(--text-dim)',
+                                                                    marginTop: '4px',
+                                                                    textAlign: 'center',
+                                                                    maxWidth: '56px',
+                                                                    whiteSpace: 'nowrap',
+                                                                    overflow: 'hidden',
+                                                                    textOverflow: 'ellipsis'
+                                                                }}>
+                                                                    {cleanId.replace('_', ' ')}
+                                                                </div>
+                                                            </div>
                                                         );
                                                     });
                                             })()}
@@ -4017,8 +4052,8 @@ const GuildPanel = ({ gameState, socket, isMobile, onInspect }) => {
                                                     >
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                                                             <div style={{
-                                                                width: '40px',
-                                                                height: '40px',
+                                                                width: '46px',
+                                                                height: '46px',
                                                                 background: g.bg_color || '#1a1a1a',
                                                                 borderRadius: '10px',
                                                                 display: 'flex',
@@ -4027,24 +4062,24 @@ const GuildPanel = ({ gameState, socket, isMobile, onInspect }) => {
                                                                 border: '1px solid rgba(255,255,255,0.1)',
                                                                 position: 'relative'
                                                             }}>
-                                                                {g.country_code && (
-                                                                    <div style={{
-                                                                        position: 'absolute',
-                                                                        top: '-6px',
-                                                                        left: '-6px',
-                                                                        background: 'rgba(0,0,0,0.8)',
-                                                                        padding: '2px 4px',
-                                                                        borderRadius: '6px',
-                                                                        border: '1px solid rgba(255,255,255,0.2)',
-                                                                        zIndex: 10,
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                        justifyContent: 'center',
-                                                                        backdropFilter: 'blur(2px)'
-                                                                    }}>
-                                                                        <CountryFlag code={g.country_code} name={COUNTRIES.find(c => c.code === g.country_code)?.name} size="0.6rem" />
-                                                                    </div>
-                                                                )}
+                                                                
+                                                                <div style={{
+                                                                    position: 'absolute',
+                                                                    top: '0',
+                                                                    left: '0',
+                                                                    transform: 'translate(-50%, -50%)',
+                                                                    background: 'rgba(0,0,0,0.8)',
+                                                                    padding: '1px 3px',
+                                                                    borderRadius: '4px',
+                                                                    border: '1px solid rgba(255,255,255,0.2)',
+                                                                    zIndex: 10,
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    backdropFilter: 'blur(2px)'
+                                                                }}>
+                                                                    <CountryFlag code={g.country_code} name={COUNTRIES.find(c => c.code === g.country_code)?.name} size="0.7rem" />
+                                                                </div>
                                                                 {(() => {
                                                                     const ResultIcon = ICONS[g.icon] || Shield;
                                                                     return <ResultIcon size={20} color={g.icon_color || '#fff'} />;
@@ -4108,7 +4143,7 @@ const GuildPanel = ({ gameState, socket, isMobile, onInspect }) => {
                                                                     {playerLevel < g.min_level ? `REQ. LVL ${g.min_level}` : (g.join_mode === 'OPEN' ? 'JOIN' : 'APPLY')}
                                                                 </motion.button>
                                                             )}
-                                                            <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>{g.member_count || 1}/{10 + (g.guild_hall_level || 0) * 2}</span>
+                                                            <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>{g.memberCount || 0}/{g.maxMembers || 10}</span>
                                                         </div>
                                                     </motion.div>
                                                 ))

@@ -4,7 +4,27 @@ import { XP_TABLE } from '../../../shared/skills.js';
 import { GUILD_XP_TABLE } from '../../../shared/guilds.js';
 import { formatNumber, formatSilver } from '@utils/format';
 import { motion, AnimatePresence } from 'framer-motion';
+import { COUNTRIES } from '../../../shared/countries';
 import { Trophy, Users, Star, Coins, Circle, ChevronDown, Sword, Shield, Swords, Sparkles, Settings } from 'lucide-react';
+
+const CountryFlag = ({ code, name, size = '1.2rem', style = {} }) => {
+    if (!code) return <span style={{ fontSize: size, ...style }}>🌐</span>;
+    return (
+        <img
+            src={`https://flagcdn.com/w40/${code.toLowerCase()}.png`}
+            alt={name || code}
+            title={name || code}
+            style={{
+                height: isNaN(size) ? size : `${size}px`,
+                width: 'auto',
+                borderRadius: '2px',
+                display: 'inline-block',
+                verticalAlign: 'middle',
+                ...style
+            }}
+        />
+    );
+};
 
 const CATEGORIES = {
     GENERAL: {
@@ -376,16 +396,34 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                     <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
                                         {rankMode === 'GUILDS' && (
                                             <div style={{
-                                                width: '32px',
-                                                height: '32px',
+                                                width: '38px',
+                                                height: '38px',
                                                 borderRadius: '6px',
                                                 background: char.bg_color || 'var(--slot-bg)',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
                                                 border: '1px solid var(--border)',
-                                                flexShrink: 0
+                                                flexShrink: 0,
+                                                position: 'relative'
                                             }}>
+                                                <div style={{
+                                                    position: 'absolute',
+                                                    top: '0',
+                                                    left: '0',
+                                                    transform: 'translate(-50%, -50%)',
+                                                    background: 'rgba(0,0,0,0.8)',
+                                                    padding: '1px 3px',
+                                                    borderRadius: '4px',
+                                                    border: '1px solid rgba(255,255,255,0.2)',
+                                                    zIndex: 10,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    backdropFilter: 'blur(2px)'
+                                                }}>
+                                                    <CountryFlag code={char.country_code} name={COUNTRIES.find(c => c.code === char.country_code)?.name} size="0.65rem" />
+                                                </div>
                                                 {(() => {
                                                     const IconComp = GUILD_ICONS[char.icon] || Shield;
                                                     return <IconComp size={16} color={char.icon_color || 'var(--accent)'} />;
@@ -536,7 +574,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                                     border: '1px solid rgba(255,255,255,0.1)',
                                                     color: 'var(--text-main)'
                                                 }}>
-                                                    {userRankData.character.state.selectedTitle}
+                                                    {userRankData.character?.state?.selectedTitle}
                                                 </div>
                                             )}
                                         </div>
@@ -545,6 +583,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                                 {(() => {
                                                     if (rankMode === 'GUILDS') return formatNumber(userRankData.guild?.level || 1);
                                                     const char = userRankData.character;
+                                                    if (!char || !char.state) return 0;
                                                     let val = 0;
                                                     if (subCategory === 'LEVEL') val = Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.level || 1), 0);
                                                     else if (subCategory === 'TOTAL_XP') {
@@ -576,6 +615,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                                     {(() => {
                                                         if (rankMode === 'GUILDS') return `${formatNumber(userRankData.guild?.xp || 0)} XP`;
                                                         const char = userRankData.character;
+                                                        if (!char || !char.state) return "0 XP";
                                                         let subVal = 0;
                                                         if (subCategory === 'LEVEL') subVal = Object.values(char.state.skills || {}).reduce((acc, s) => acc + getTotalSkillXP(s), 0);
                                                         else if (subCategory === 'TOTAL_XP') subVal = Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.level || 1), 0);

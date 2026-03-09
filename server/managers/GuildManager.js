@@ -229,30 +229,31 @@ export class GuildManager {
     async searchGuilds(query, countryCode = null, characterId = null) {
         const cleanQuery = (query || "").trim();
 
-        let queryBuilder = this.supabase.from('guilds').select('*');
+        let queryBuilder = this.supabase.from('guilds').select('*, guild_members(character_id)');
 
         if (countryCode) {
             queryBuilder = queryBuilder.eq('country_code', countryCode);
         }
 
-        // If query is too short, return empty or some featured guilds
-        // For now, let's just search if 2+ chars
+        let rawData;
         if (cleanQuery.length < 2) {
-            // Return top 10 guilds
-            const { data, error } = await queryBuilder
-                .limit(10);
-
+            const { data, error } = await queryBuilder.limit(10);
             if (error) throw error;
-            return data || [];
+            rawData = data || [];
+        } else {
+            const { data, error } = await queryBuilder
+                .or(`name.ilike.%${cleanQuery}%,tag.ilike.%${cleanQuery}%`)
+                .limit(20);
+            if (error) throw error;
+            rawData = data || [];
         }
 
-        const { data, error } = await queryBuilder
-            .or(`name.ilike.%${cleanQuery}%,tag.ilike.%${cleanQuery}%`)
-            .limit(20);
-
-        if (error) throw error;
-
-        let guilds = data || [];
+        let guilds = rawData.map(g => {
+            const memberCount = g.guild_members?.length || 0;
+            const maxMembers = 10 + (g.guild_hall_level || 0) * 2;
+            const { guild_members, ...rest } = g;
+            return { ...rest, memberCount, maxMembers };
+        });
 
         // If characterId is provided, check for pending applications
         if (characterId && guilds.length > 0) {
