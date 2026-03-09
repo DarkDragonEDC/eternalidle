@@ -3631,7 +3631,9 @@ io.on("connection", (socket) => {
 
       // char is already fetched above for the permission check
 
-      socket.data.lastChatTime = now;
+      if (channel !== "Guild") {
+        socket.data.lastChatTime = now;
+      }
 
       // Enforce character limit (Bypass for admins)
       if (content.length > 100 && !char.is_admin) {

@@ -95,7 +95,7 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
 
     const handleSend = (e) => {
         e.preventDefault();
-        if (!message.trim() || !socket || cooldown > 0 || activeTab === 'SYSTEM') return;
+        if (!message.trim() || !socket || (activeTab !== 'Guild' && cooldown > 0) || activeTab === 'SYSTEM') return;
 
         socket.emit('send_message', { content: message.trim(), channel: activeTab });
         setMessage('');
