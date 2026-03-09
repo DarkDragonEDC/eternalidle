@@ -2790,16 +2790,15 @@ export class GameManager {
         let query = this.supabase
             .from('characters')
             .select('id, name, state, skills, info, equipment') // Fetch skills, info and equipment
-            .or('is_admin.is.null,is_admin.eq.false'); // Exclude admins
+            .eq('is_admin', false); // Exclude admins directly in DB using index
 
-        // Mode Filtering
+        // Mode Filtering (Database Level)
         if (mode === 'IRONMAN') {
-            // Check if isIronman is true in the state JSON
-            // Postgres JSONB query for boolean true
+            // Check if isIronman is true in the state JSON (Uses GIN index)
             query = query.contains('state', { isIronman: true });
         } else {
-            // NORMAL mode: isIronman is false OR null/undefined
-            // We use 'not' contains { isIronman: true } to cover both false and missing
+            // NORMAL mode: Filter out Ironman characters in DB
+            query = query.not('state', 'cs', '{"isIronman": true}');
         }
 
         // Increased limit to 2000 to allow in-memory filtering effectively
