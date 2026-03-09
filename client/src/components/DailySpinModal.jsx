@@ -16,7 +16,7 @@ const SEGMENTS = [
 
 const SEGMENT_ANGLE = 360 / SEGMENTS.length;
 
-const DailySpinModal = ({ isOpen, onClose, socket, isPreviewActive, onPreviewActionBlocked }) => {
+const DailySpinModal = ({ isOpen, onClose, socket, isPreviewActive, onPreviewActionBlocked, gameState }) => {
     const [spinning, setSpinning] = useState(false);
     const [reward, setReward] = useState(null);
     const [rotation, setRotation] = useState(0);
