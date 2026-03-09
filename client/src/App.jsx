@@ -21,6 +21,7 @@ import { SkillsOverview, TownOverview, CombatOverview } from './components/Mobil
 import WorldBossPanel from './components/WorldBossPanel';
 import WorldBossFight from './components/WorldBossFight';
 import InspectModal from './components/InspectModal';
+import GuildProfileModal from './components/GuildProfileModal';
 import LeaderboardModal from './components/LeaderboardModal';
 import TutorialOverlay from './components/TutorialOverlay';
 
@@ -507,6 +508,7 @@ function App() {
   const pendingTradeOpenRef = React.useRef(false);
   const [showSocialModal, setShowSocialModal] = useState(false);
   const [inspectData, setInspectData] = useState(null);
+  const [inspectGuildId, setInspectGuildId] = useState(null);
   const [banModalData, setBanModalData] = useState(null);
   const [banWarning, setBanWarning] = useState(null);
   const [lastWarningSeen, setLastWarningSeen] = useState(null);
@@ -942,7 +944,7 @@ function App() {
         window.VAPID_PUBLIC_KEY = vapidPublicKey;
       }
       // client version is 1.0.0
-      const CLIENT_VERSION = '1.4.0'; // Keep synchronized with server/package.json
+      const CLIENT_VERSION = '1.4.1'; // Keep synchronized with server/package.json
       if (version && version !== CLIENT_VERSION) {
         console.warn(`[VERSION] Mismatch! Server: ${version}, Client: ${CLIENT_VERSION}`);
 
@@ -3013,8 +3015,20 @@ function App() {
             onClose={handleCloseInspect}
             onMessage={handleInspectMessage}
             onItemClick={handleItemClick}
+            onInspectGuild={(id) => {
+              setInspectGuildId(id);
+            }}
           />
         )}
+
+        <GuildProfileModal
+          isOpen={!!inspectGuildId}
+          onClose={() => setInspectGuildId(null)}
+          guildId={inspectGuildId}
+          socket={socket}
+          onInspect={handleInspectPlayer}
+          isMobile={isMobile}
+        />
 
         <LeaderboardModal
           isOpen={showLeaderboard}

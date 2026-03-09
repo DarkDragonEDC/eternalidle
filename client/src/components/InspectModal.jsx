@@ -233,12 +233,12 @@ const RuneSlot = ({ slot, label, icon, item: rawItem, onItemClick }) => {
 };
 
 
-const InspectModal = React.memo(({ data, theme: propTheme, onClose, onItemClick }) => {
+const InspectModal = React.memo(({ data, theme: propTheme, onClose, onItemClick, onInspectGuild }) => {
     const [activeTab, setActiveTab] = useState('EQUIPMENT'); // EQUIPMENT | SKILLS | RUNES
     const [expandedCategory, setExpandedCategory] = useState(null);
     const [breakdownModal, setBreakdownModal] = useState(null);
 
-    const { name, level, selectedTitle, health = 0, equipment = {}, skills = {}, runes = {}, stats = {}, isPremium, guildName, selectedBanner } = data;
+    const { name, level, selectedTitle, health = 0, equipment = {}, skills = {}, runes = {}, stats = {}, isPremium, guildName, guildId, selectedBanner } = data;
 
     // Use propTheme or fallback to data.theme, then to global default
     const activeTheme = propTheme || data.theme || 'dark';
@@ -464,16 +464,35 @@ const InspectModal = React.memo(({ data, theme: propTheme, onClose, onItemClick 
                         </div>
 
                         {guildName && (
-                            <div style={{
-                                fontSize: '0.8rem',
-                                color: '#4ade80',
-                                fontWeight: 'bold',
-                                marginTop: '4px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '4px'
-                            }}>
+                            <div
+                                onClick={() => {
+                                    if (guildId && onInspectGuild) onInspectGuild(guildId);
+                                }}
+                                style={{
+                                    fontSize: '0.8rem',
+                                    color: '#4ade80',
+                                    fontWeight: 'bold',
+                                    marginTop: '4px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '4px',
+                                    cursor: guildId ? 'pointer' : 'default',
+                                    transition: '0.2s'
+                                }}
+                                onMouseOver={e => {
+                                    if (guildId) {
+                                        e.currentTarget.style.color = '#fff';
+                                        e.currentTarget.style.textShadow = '0 0 5px #4ade80';
+                                    }
+                                }}
+                                onMouseOut={e => {
+                                    if (guildId) {
+                                        e.currentTarget.style.color = '#4ade80';
+                                        e.currentTarget.style.textShadow = 'none';
+                                    }
+                                }}
+                            >
                                 <span style={{ opacity: 0.4 }}>‹</span>
                                 {guildName}
                                 <span style={{ opacity: 0.4 }}>›</span>

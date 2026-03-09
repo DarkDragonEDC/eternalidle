@@ -1,21 +1,23 @@
 # Patch Notes - Eternal Idle
 
 ### 🏰 Guildas & Cooperação
-- **Correção Geral no Painel**: Resolvidos erros técnicos que impediam a abertura do modal de edição da guilda e causavam instabilidades visuais.
-- **Painel de Edição Centralizado**: O modal de customização da guilda agora aparece perfeitamente centralizado em todas as resoluções.
-- **Sincronização de Estilo**: O avatar do jogador no topo da tela (header desktop) agora utiliza o mesmo padrão visual da lista de membros da guilda, com bordas suaves e melhor enquadramento do rosto.
-- Fixed guild bonus display in Profile and Activity Modals, ensuring they are correctly applied and visible.
-- Added Ironman indicator icon to the guild member list and pending applications.
-- **Melhoria no Inventário**: Corrigido bug visual que exibia itens de comida e equipamentos como "[object Object]" no momento da contribuição de materiais.
+- **Custo para Edição**: Alterar o Nome da sua Guilda agora custa **250 Orbs**, e alterar a Tag custa **100 Orbs**.
+- **Correção no Painel Geral**: Resolvemos erros técnicos que impediam as configurações da guilda de abrirem corretamente, além de resolver instabilidades visuais.
+- **Painel de Edição Centralizado**: A janela de customização da guilda agora aparece perfeitamente centralizada em qualquer resolução de tela (PC ou Celular).
+- **Estilo Sincronizado**: O avatar do jogador no topo da tela (PC) agora segue o mesmo formato visual da lista de membros da guilda, com bordas suaves e melhor enquadramento do rosto.
+- **Correção no Inventário**: Corrigimos um erro visual bizarro onde comidas e equipamentos apareciam como "[object Object]" durante as doações de materiais para a guilda.
+- **Sincronia Rápida de Bônus**: Agora as atualizações de bônus (Coleta, Refino ou Forja) valem instantaneamente para todos os membros online quando uma estação da guilda sobe de nível.
+- **Sem Bônus Residuais**: Resolvemos o problema em que jogadores mantinham os bônus da guilda mesmo após saírem ou serem expulsos. Os bônus agora somem na mesma hora.
+- **Padronização de Idioma**: Todos os textos e botões relacionados às guildas foram revisados e padronizados para Inglês.
+- **Estabilidade no Sistema**: Melhoramos a forma como o jogo lê grandes quantidades de itens no seu inventário, evitando travamentos ao doar.
+- **Remoção de Alertas Internos**: Removemos avisos chatos ("Duplicate Keys") que ficavam poluindo o código relacionados à seleção de cores da guilda.
+- **Visualização de Bônus da Guilda**: Todos os bônus dados ativamente pela guilda (Eficiência em Habilidades, Multiplicador de XP, Duplicação de Itens / Auto-Refino) aparecem corretamente listados no seu Perfil e nas janelas de Atividades.
+- **Sincronia Servidor-Cliente**: Consertamos o erro em que os bônus da guilda não eram enviados ao jogo, garantindo que os buffs aparecem sem você precisar deslogar e logar de novo.
 
-- **Sincronização de Buffs**: Implementada atualização instantânea de bônus para todos os membros online quando uma estação da guilda (Gathering, Refining ou Crafting) recebe um upgrade.
-- **Correção de Buffs Residuais**: Resolvido problema onde jogadores mantinham buffs de guilda mesmo após sair ou serem expulsos; agora os bônus são removidos imediatamente.
-- **Internacionalização (I18N)**: Padronização completa de textos e botões para o Inglês em toda a interface da Guilda, eliminando termos inconsistentes.
-- **Estabilidade de State**: Otimização na forma como o jogo lê as quantidades de itens complexos (objetos) no inventário para evitar falhas de cálculo em doações.
-- **Correção de Keys**: Removidos avisos de "Duplicate Keys" no console do navegador relacionados às opções de cores da guilda.
-- **Visualização de Bônus da Guilda**: Agora todos os bônus providos pelas estações da guilda (Skill Efficiency, XP Multiplier, Duplication/Auto-Refine) são exibidos corretamente no Perfil e nos modais de atividades.
-    - [x] Exibir bônus da guilda na interface de Eficiência
-    - [x] Integrar `guild_bonuses` no cálculo de eficiência do `ProfilePanel`
-    - [x] Adicionar linha "Guild Bonus" no `StatBreakdownModal`
-    - [x] Exibir chance de Duplicação e Auto-Refino no `ActivityModal`
-- **Sincronização Server-Client**: Corrigida falha no envio de dados de bônus da guilda do servidor para o cliente, garantindo que os buffs apareçam sem necessidade de relogar.
+### ⚔️ Combate & Personagens
+- **Aviso de Ironman**: Jogadores do modo Ironman agora exibem um ícone de Escudo no canto superior esquerdo de suas fotos de perfil na lista de membros da guilda e nas candidaturas pendentes.
+
+### 📊 Dados & Análises (Sistemas)
+- **Tabela de Proficiência**: Criamos uma tabela completa de balanceamento de atributos (Dano, HP, Defesa, Velocidade de Movimento) para os Níveis de Proficiência do 1 ao 100 para Arqueiros, Magos e Guerreiros.
+- **Tabela de Runas de Velocidade de Ataque**: Uma nova tabela detalhada cobrindo todos os bônus possíveis de Runas de Attack Speed do Tier 1 ao 10, de 1 a 3 estrelas.
+- **Estatísticas de Equipamento**: Completamos a tabela de todos os equipamentos de combate do jogo, do Tier 1 ao 10, com estatísticas baseadas em todas as Raridades (Normal até Masterpiece).

@@ -105,7 +105,7 @@ export class GuildManager {
         };
     }
 
-    async updateCustomization(char, { icon, iconColor, bgColor, countryCode }) {
+    async updateCustomization(char, { name, tag, icon, iconColor, bgColor, summary, countryCode }) {
         if (!char) throw new Error("Character data required");
 
         // 1. Find character's guild membership
@@ -117,33 +117,112 @@ export class GuildManager {
 
         if (memberError || !member) throw new Error("Character is not in a guild");
 
-        // 2. Check permissions
+        // 2. Fetch current guild data
+        const { data: currentGuild, error: fetchError } = await this.supabase
+            .from('guilds')
+            .select('name, tag, summary, icon, icon_color, bg_color, country_code')
+            .eq('id', member.guild_id)
+            .single();
+
+        if (fetchError || !currentGuild) throw new Error("Guild not found");
+
+        // 3. Check permissions
         const hasPerm = await this.hasPermission(char.id, 'edit_appearance');
         if (!hasPerm) {
             throw new Error("You don't have permission to update guild customization");
         }
 
-        // 3. Update the guild
+        // 4. Calculate Orbs Cost
+        let orbsCost = 0;
+        const nameChanged = name && name.trim() !== currentGuild.name;
+        const tagChanged = tag && tag.toUpperCase().slice(0, 4) !== currentGuild.tag;
+
+        if (nameChanged) orbsCost += 250;
+        if (tagChanged) orbsCost += 100;
+
+        // 5. Check and deduct Orbs
+        if (orbsCost > 0) {
+            const currentOrbs = this.gameManager.orbsManager.getOrbs(char);
+            if (currentOrbs < orbsCost) {
+                throw new Error(`Insufficient Orbs. You need ${orbsCost} Orbs to make these changes.`);
+            }
+
+            char.state.orbs -= orbsCost;
+
+            // Log transaction
+            this.gameManager.orbsManager.logTransaction(char, {
+                type: 'GUILD_EDIT',
+                details: `Changed ${nameChanged ? 'Name' : ''} ${nameChanged && tagChanged ? '& ' : ''}${tagChanged ? 'Tag' : ''}`,
+                cost: orbsCost,
+                timestamp: Date.now(),
+                balanceAfter: char.state.orbs
+            });
+
+            this.gameManager.markDirty(char.id);
+        }
+
+        // 6. Validate new Name and Tag if changed
+        let finalName = currentGuild.name;
+        let finalTag = currentGuild.tag;
+
+        if (nameChanged) {
+            const cleanName = name.trim();
+            if (cleanName.length < 3 || cleanName.length > 20) throw new Error("Guild name must be between 3 and 20 characters");
+            // Check name uniqueness
+            const { data: existingName } = await this.supabase
+                .from('guilds')
+                .select('id')
+                .ilike('name', cleanName)
+                .neq('id', member.guild_id)
+                .maybeSingle();
+            if (existingName) throw new Error("A guild with this name already exists");
+            finalName = cleanName;
+        }
+
+        if (tagChanged) {
+            const cleanTag = tag.toUpperCase().slice(0, 4);
+            if (cleanTag.length < 2 || cleanTag.length > 4) throw new Error("Guild tag must be between 2 and 4 characters");
+            // Check tag uniqueness
+            const { data: existingTag } = await this.supabase
+                .from('guilds')
+                .select('id')
+                .ilike('tag', cleanTag)
+                .neq('id', member.guild_id)
+                .maybeSingle();
+            if (existingTag) throw new Error("A guild with this tag already exists");
+            finalTag = cleanTag;
+        }
+
+        // 7. Update the guild
         const { data: updatedGuild, error: updateError } = await this.supabase
             .from('guilds')
             .update({
-                icon: icon || 'Shield',
-                icon_color: iconColor || '#ffffff',
-                bg_color: bgColor || '#1a1a1a',
-                country_code: countryCode || null
+                name: finalName,
+                tag: finalTag,
+                summary: summary !== undefined ? summary : currentGuild.summary,
+                icon: icon || currentGuild.icon,
+                icon_color: iconColor || currentGuild.icon_color,
+                bg_color: bgColor || currentGuild.bg_color,
+                country_code: countryCode !== undefined ? countryCode : currentGuild.country_code
             })
             .eq('id', member.guild_id)
             .select()
             .single();
 
         if (updateError) {
+            // Refund orbs on DB failure
+            if (orbsCost > 0) {
+                char.state.orbs += orbsCost;
+                this.gameManager.markDirty(char.id);
+            }
             console.error("[GUILD] Error updating customization:", updateError);
             throw new Error("Failed to update guild customization");
         }
 
         return {
             success: true,
-            guild: updatedGuild
+            guild: updatedGuild,
+            orbsDeducted: orbsCost
         };
     }
 
@@ -205,9 +284,8 @@ export class GuildManager {
             myRole: member.role,
             members: members.map(m => {
                 const charId = m.characters.id;
-                const isOnline = this.gameManager.cache.has(charId);
-                // Use cached (live) state for online members, DB state for offline
-                const cachedChar = isOnline ? this.gameManager.cache.get(charId) : null;
+                // Use DB state, but check if we have a live one
+                const cachedChar = this.gameManager.cache.get(charId) || null;
                 const dbChar = m.characters;
                 const state = cachedChar?.state || { ...dbChar.state, skills: dbChar.skills };
                 return {
@@ -227,7 +305,57 @@ export class GuildManager {
         };
     }
 
+    async getPublicGuildProfile(guildId) {
+        if (!guildId) return null;
+
+        const { data: guild, error: guildError } = await this.supabase
+            .from('guilds')
+            .select('id, name, tag, level, xp, summary, icon, icon_color, bg_color, country_code, guild_hall_level, created_at')
+            .eq('id', guildId)
+            .single();
+
+        if (guildError || !guild) return null;
+
+        const { data: members } = await this.supabase
+            .from('guild_members')
+            .select(`
+                role,
+                joined_at,
+                donated_xp,
+                characters (
+                    id,
+                    name,
+                    state
+                )
+            `)
+            .eq('guild_id', guild.id);
+
+        const maxMembers = 10 + (guild.guild_hall_level || 0) * 2;
+
+        return {
+            ...guild,
+            maxMembers,
+            members: (members || []).map(m => {
+                const charId = m.characters.id;
+                const cachedChar = this.gameManager.cache.get(charId) || null;
+                const state = cachedChar?.state || m.characters.state || {};
+                return {
+                    id: charId,
+                    name: m.characters.name,
+                    role: m.role,
+                    joinedAt: m.joined_at,
+                    donatedXP: m.donated_xp || 0,
+                    level: this._calculateCharLevel(state),
+                    avatar: state.avatar || '/profile/1 - male.png',
+                    isIronman: !!state.isIronman
+                };
+            }),
+            nextLevelXP: calculateGuildNextLevelXP(guild.level || 1)
+        };
+    }
+
     async searchGuilds(query, countryCode = null, characterId = null) {
+
         const cleanQuery = (query || "").trim();
 
         let queryBuilder = this.supabase.from('guilds').select('*, guild_members(character_id)');

@@ -3532,7 +3532,31 @@ export class GameManager {
             }
         }
 
-        // 3. Prune data for public consumption
+        // 3. Fetch up-to-date guild info (Tag + Name)
+        let guildDisplay = char.state?.guildName || null;
+        let guildId = char.state?.guild_id || null;
+        try {
+            const { data: memberData } = await this.supabase
+                .from('guild_members')
+                .select(`
+                    guild_id,
+                    guilds (name, tag)
+                `)
+                .eq('character_id', char.id)
+                .maybeSingle();
+
+            if (memberData && memberData.guilds) {
+                guildDisplay = `[${memberData.guilds.tag}] ${memberData.guilds.name}`;
+                guildId = memberData.guild_id;
+            } else {
+                guildDisplay = null;
+                guildId = null;
+            }
+        } catch (e) {
+            console.error("Error fetching guild for public profile:", e);
+        }
+
+        // 4. Prune data for public consumption
         // We only want: name, level, title, equipment, skills, stats, and guild
         const publicData = {
             id: char.id,
@@ -3546,8 +3570,9 @@ export class GameManager {
             skills: char.state?.skills || {},
             stats: this.inventoryManager.calculateStats(char),
             isPremium: char.state?.isPremium || char.state?.membership?.active || false,
-            // Add guild if it exists in state
-            guildName: char.state?.guildName || null,
+            // Fetch real-time guild if available
+            guildName: guildDisplay,
+            guildId: guildId,
             theme: char.state?.theme || 'medieval'
         };
 

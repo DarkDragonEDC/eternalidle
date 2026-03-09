@@ -690,7 +690,17 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("get_guild_profile", async ({ guildId }) => {
+    try {
+      const profile = await gameManager.guildManager.getPublicGuildProfile(guildId);
+      socket.emit("guild_profile_data", profile);
+    } catch (err) {
+      socket.emit("error", { message: err.message });
+    }
+  });
+
   socket.on("create_character", async ({ name, isIronman }) => {
+
     console.log(
       `[SERVER] Received create_character request: "${name}" (Ironman: ${isIronman}) from user ${socket.user.email} `,
     );

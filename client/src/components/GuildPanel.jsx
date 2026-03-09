@@ -2678,264 +2678,297 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                         </button>
                                     </div>
 
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                        {/* Guild Name */}
-                                        <div>
-                                            <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', display: 'block', marginBottom: '8px' }}>GUILD NAME</label>
-                                            <input
-                                                type="text"
-                                                value={editGuildName}
-                                                onChange={(e) => setEditGuildName(e.target.value)}
-                                                placeholder="Enter guild name..."
-                                                style={{
-                                                    width: '100%',
-                                                    background: 'rgba(255,255,255,0.03)',
-                                                    border: '1px solid rgba(255,255,255,0.1)',
-                                                    borderRadius: '12px',
-                                                    padding: '12px 15px',
-                                                    color: '#fff',
-                                                    fontSize: '0.9rem'
-                                                }}
-                                            />
-                                        </div>
+                                    {(() => {
+                                        let orbsCost = 0;
+                                        const nameChanged = editGuildName.trim() !== guild.name;
+                                        const tagChanged = editGuildTag.toUpperCase().slice(0, 4) !== guild.tag;
+                                        if (nameChanged) orbsCost += 250;
+                                        if (tagChanged) orbsCost += 100;
+                                        const playerOrbs = gameState?.state?.orbs || 0;
+                                        const hasEnoughOrbs = playerOrbs >= orbsCost;
 
-                                        {/* Guild Tag */}
-                                        <div>
-                                            <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', display: 'block', marginBottom: '8px' }}>GUILD TAG</label>
-                                            <input
-                                                type="text"
-                                                value={editGuildTag}
-                                                onChange={(e) => setEditGuildTag(e.target.value.toUpperCase().slice(0, 4))}
-                                                placeholder="TAG"
-                                                style={{
-                                                    width: '100px',
-                                                    background: 'rgba(255,255,255,0.03)',
-                                                    border: '1px solid rgba(255,255,255,0.1)',
-                                                    borderRadius: '12px',
-                                                    padding: '12px',
-                                                    color: '#fff',
-                                                    fontSize: '0.9rem',
-                                                    textAlign: 'center',
-                                                    fontWeight: 'bold'
-                                                }}
-                                            />
-                                        </div>
-
-                                        {/* Guild Summary */}
-                                        <div>
-                                            <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', display: 'block', marginBottom: '8px' }}>GUILD SUMMARY</label>
-                                            <textarea
-                                                value={editGuildSummary}
-                                                onChange={(e) => setEditGuildSummary(e.target.value)}
-                                                placeholder="Write a short description..."
-                                                rows={3}
-                                                style={{
-                                                    width: '100%',
-                                                    background: 'rgba(255,255,255,0.03)',
-                                                    border: '1px solid rgba(255,255,255,0.1)',
-                                                    borderRadius: '12px',
-                                                    padding: '12px 15px',
-                                                    color: '#fff',
-                                                    fontSize: '0.85rem',
-                                                    resize: 'none'
-                                                }}
-                                            />
-                                        </div>
-
-                                        {/* Appearance Switcher */}
-                                        <div>
-                                            <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', display: 'block', marginBottom: '12px' }}>GUILD EMBLEM</label>
-                                            <div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginBottom: '15px' }}>
-                                                <div style={{
-                                                    width: '70px',
-                                                    height: '70px',
-                                                    background: editBgColor,
-                                                    borderRadius: '16px',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    boxShadow: '0 8px 16px rgba(0,0,0,0.3)',
-                                                    border: '2px solid rgba(255,255,255,0.1)'
-                                                }}>
-                                                    {(() => {
-                                                        const IconComp = ICONS[editIcon] || Shield;
-                                                        return <IconComp size={35} color={editIconColor} />;
-                                                    })()}
-                                                </div>
-
-                                                <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                                                    {Object.keys(ICONS).map(iconName => {
-                                                        const IconOption = ICONS[iconName];
-                                                        return (
-                                                            <button
-                                                                key={iconName}
-                                                                onClick={() => setEditIcon(iconName)}
+                                        return (
+                                            <>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                                    {/* Guild Name & Tag Row */}
+                                                    <div style={{ display: 'flex', gap: '15px' }}>
+                                                        <div style={{ flex: 1 }}>
+                                                            <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', display: 'block', marginBottom: '8px' }}>GUILD NAME</label>
+                                                            <input
+                                                                type="text"
+                                                                value={editGuildName}
+                                                                onChange={(e) => setEditGuildName(e.target.value)}
+                                                                placeholder="Enter guild name..."
                                                                 style={{
-                                                                    padding: '8px',
-                                                                    background: editIcon === iconName ? 'rgba(212, 175, 55, 0.2)' : 'rgba(255,255,255,0.03)',
-                                                                    border: editIcon === iconName ? '1px solid var(--accent)' : '1px solid rgba(255,255,255,0.05)',
-                                                                    borderRadius: '8px',
-                                                                    cursor: 'pointer',
-                                                                    color: editIcon === iconName ? 'var(--accent)' : 'rgba(255,255,255,0.3)',
-                                                                    transition: 'all 0.2s'
+                                                                    width: '100%',
+                                                                    background: 'rgba(255,255,255,0.03)',
+                                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                                    borderRadius: '12px',
+                                                                    padding: '12px 15px',
+                                                                    color: '#fff',
+                                                                    fontSize: '0.9rem'
                                                                 }}
-                                                            >
-                                                                <IconOption size={18} />
-                                                            </button>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-
-                                            <div style={{ display: 'flex', gap: '20px' }}>
-                                                <div style={{ flex: 1 }}>
-                                                    <label style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', marginBottom: '8px', display: 'block' }}>ICON COLOR</label>
-                                                    <div style={{ display: 'flex', gap: '6px' }}>
-                                                        {ICON_COLORS.map((c, idx) => (
-                                                            <div key={`${c}-${idx}`} onClick={() => setEditIconColor(c)} style={{ width: '20px', height: '20px', borderRadius: '50%', background: c, cursor: 'pointer', border: editIconColor === c ? '2px solid #fff' : '1px solid rgba(0,0,0,0.5)' }} />
-                                                        ))}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', display: 'block', marginBottom: '8px' }}>GUILD TAG</label>
+                                                            <input
+                                                                type="text"
+                                                                value={editGuildTag}
+                                                                onChange={(e) => setEditGuildTag(e.target.value.toUpperCase().slice(0, 4))}
+                                                                placeholder="TAG"
+                                                                style={{
+                                                                    width: '100px',
+                                                                    background: 'rgba(255,255,255,0.03)',
+                                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                                    borderRadius: '12px',
+                                                                    padding: '12px',
+                                                                    color: '#fff',
+                                                                    fontSize: '0.9rem',
+                                                                    textAlign: 'center',
+                                                                    fontWeight: 'bold'
+                                                                }}
+                                                            />
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div style={{ flex: 1 }}>
-                                                    <label style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', marginBottom: '8px', display: 'block' }}>BACKGROUND COLOR</label>
-                                                    <div style={{ display: 'flex', gap: '6px' }}>
-                                                        {BG_COLORS.map((c, idx) => (
-                                                            <div key={`${c}-${idx}`} onClick={() => setEditBgColor(c)} style={{ width: '20px', height: '20px', borderRadius: '50%', background: c, cursor: 'pointer', border: editBgColor === c ? '2px solid #fff' : '1px solid rgba(0,0,0,0.5)' }} />
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
 
-                                        {/* Country Selector for Edit */}
-                                        <div style={{ position: 'relative' }}>
-                                            <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', display: 'block', marginBottom: '8px' }}>GUILD REGION</label>
-                                            <button
-                                                onClick={() => setShowEditCountryPicker(!showEditCountryPicker)}
-                                                style={{
-                                                    width: '100%',
-                                                    background: 'rgba(255,255,255,0.03)',
-                                                    border: '1px solid rgba(255,255,255,0.1)',
-                                                    borderRadius: '12px',
-                                                    padding: '12px 15px',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '12px',
-                                                    cursor: 'pointer'
-                                                }}
-                                            >
-                                                <CountryFlag code={editCountry?.code} name={editCountry?.name} size="1.2rem" />
-                                                <span style={{ color: '#fff', fontSize: '0.9rem' }}>{editCountry?.name || 'Select Region'}</span>
-                                                <div style={{ marginLeft: 'auto', opacity: 0.3 }}><Users size={14} /></div>
-                                            </button>
-
-                                            <AnimatePresence>
-                                                {showEditCountryPicker && (
-                                                    <motion.div
-                                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                        style={{
-                                                            position: 'absolute',
-                                                            bottom: '100%',
-                                                            left: 0,
-                                                            right: 0,
-                                                            marginBottom: '10px',
-                                                            background: '#111',
-                                                            border: '1px solid var(--accent)',
-                                                            borderRadius: '16px',
-                                                            padding: '15px',
-                                                            zIndex: 100,
-                                                            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                                                            maxHeight: '300px',
-                                                            display: 'flex',
-                                                            flexDirection: 'column',
-                                                            gap: '10px'
-                                                        }}
-                                                    >
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Search region..."
-                                                            value={editCountrySearch}
-                                                            onChange={(e) => setEditCountrySearch(e.target.value)}
+                                                    {/* Guild Summary */}
+                                                    <div>
+                                                        <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', display: 'block', marginBottom: '8px' }}>GUILD SUMMARY</label>
+                                                        <textarea
+                                                            value={editGuildSummary}
+                                                            onChange={(e) => setEditGuildSummary(e.target.value)}
+                                                            placeholder="Write a short description..."
+                                                            rows={2}
                                                             style={{
                                                                 width: '100%',
-                                                                padding: '10px',
-                                                                background: '#0a0a0a',
+                                                                background: 'rgba(255,255,255,0.03)',
                                                                 border: '1px solid rgba(255,255,255,0.1)',
-                                                                borderRadius: '8px',
+                                                                borderRadius: '12px',
+                                                                padding: '10px 15px',
                                                                 color: '#fff',
-                                                                fontSize: '0.8rem',
-                                                                outline: 'none'
+                                                                fontSize: '0.85rem',
+                                                                resize: 'none'
                                                             }}
-                                                            autoFocus
                                                         />
-                                                        <div style={{ overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
-                                                            {COUNTRIES.filter(c => c.name.toLowerCase().includes(editCountrySearch.toLowerCase())).map(c => (
-                                                                <button
-                                                                    key={c.code}
-                                                                    onClick={() => {
-                                                                        setEditCountry(c);
-                                                                        setShowEditCountryPicker(false);
-                                                                    }}
+                                                    </div>
+
+                                                    {/* Appearance Switcher */}
+                                                    <div>
+                                                        <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', display: 'block', marginBottom: '8px' }}>GUILD EMBLEM & COLORS</label>
+                                                        <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '15px', alignItems: 'flex-start', flexDirection: isMobile ? 'column' : 'row' }}>
+
+                                                            {/* Left: Preview & Colors */}
+                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: isMobile ? '100%' : '140px', alignItems: 'center' }}>
+                                                                {/* Preview */}
+                                                                <div style={{
+                                                                    width: '64px',
+                                                                    height: '64px',
+                                                                    background: editBgColor,
+                                                                    borderRadius: '16px',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    boxShadow: '0 8px 16px rgba(0,0,0,0.3)',
+                                                                    border: '2px solid rgba(255,255,255,0.1)'
+                                                                }}>
+                                                                    {(() => {
+                                                                        const IconComp = ICONS[editIcon] || Shield;
+                                                                        return <IconComp size={32} color={editIconColor} />;
+                                                                    })()}
+                                                                </div>
+
+                                                                {/* Colors */}
+                                                                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                                                    <div>
+                                                                        <label style={{ fontSize: '0.5rem', color: 'rgba(255,255,255,0.4)', marginBottom: '4px', display: 'block', textAlign: 'center' }}>ICON COLOR</label>
+                                                                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                                                                            {ICON_COLORS.map((c, idx) => (
+                                                                                <div key={`${c}-${idx}`} onClick={() => setEditIconColor(c)} style={{ width: '16px', height: '16px', borderRadius: '50%', background: c, cursor: 'pointer', border: editIconColor === c ? '2px solid #fff' : '1px solid rgba(0,0,0,0.5)' }} />
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <label style={{ fontSize: '0.5rem', color: 'rgba(255,255,255,0.4)', marginBottom: '4px', display: 'block', textAlign: 'center' }}>BG COLOR</label>
+                                                                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                                                                            {BG_COLORS.map((c, idx) => (
+                                                                                <div key={`${c}-${idx}`} onClick={() => setEditBgColor(c)} style={{ width: '16px', height: '16px', borderRadius: '50%', background: c, cursor: 'pointer', border: editBgColor === c ? '2px solid #fff' : '1px solid rgba(0,0,0,0.5)' }} />
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Right: Icon Selectors Grid */}
+                                                            <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: isMobile ? 'center' : 'flex-start' }}>
+                                                                {Object.keys(ICONS).map(iconName => {
+                                                                    const IconOption = ICONS[iconName];
+                                                                    return (
+                                                                        <button
+                                                                            key={iconName}
+                                                                            onClick={() => setEditIcon(iconName)}
+                                                                            style={{
+                                                                                padding: '8px',
+                                                                                background: editIcon === iconName ? 'rgba(212, 175, 55, 0.2)' : 'rgba(255,255,255,0.03)',
+                                                                                border: editIcon === iconName ? '1px solid var(--accent)' : '1px solid rgba(255,255,255,0.05)',
+                                                                                borderRadius: '8px',
+                                                                                cursor: 'pointer',
+                                                                                color: editIcon === iconName ? 'var(--accent)' : 'rgba(255,255,255,0.3)',
+                                                                                transition: 'all 0.2s',
+                                                                                display: 'flex',
+                                                                                alignItems: 'center',
+                                                                                justifyContent: 'center'
+                                                                            }}
+                                                                        >
+                                                                            <IconOption size={18} />
+                                                                        </button>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Country Selector for Edit */}
+                                                    <div style={{ position: 'relative' }}>
+                                                        <label style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '900', display: 'block', marginBottom: '8px' }}>GUILD REGION</label>
+                                                        <button
+                                                            onClick={() => setShowEditCountryPicker(!showEditCountryPicker)}
+                                                            style={{
+                                                                width: '100%',
+                                                                background: 'rgba(255,255,255,0.03)',
+                                                                border: '1px solid rgba(255,255,255,0.1)',
+                                                                borderRadius: '12px',
+                                                                padding: '12px 15px',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '12px',
+                                                                cursor: 'pointer'
+                                                            }}
+                                                        >
+                                                            <CountryFlag code={editCountry?.code} name={editCountry?.name} size="1.2rem" />
+                                                            <span style={{ color: '#fff', fontSize: '0.9rem' }}>{editCountry?.name || 'Select Region'}</span>
+                                                            <div style={{ marginLeft: 'auto', opacity: 0.3 }}><Users size={14} /></div>
+                                                        </button>
+
+                                                        <AnimatePresence>
+                                                            {showEditCountryPicker && (
+                                                                <motion.div
+                                                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
                                                                     style={{
-                                                                        aspectRatio: '1',
-                                                                        background: editCountry?.code === c.code ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255,255,255,0.03)',
-                                                                        border: editCountry?.code === c.code ? '2px solid var(--accent)' : '1px solid rgba(255,255,255,0.05)',
-                                                                        borderRadius: '12px',
-                                                                        cursor: 'pointer',
+                                                                        position: 'absolute',
+                                                                        bottom: '100%',
+                                                                        left: 0,
+                                                                        right: 0,
+                                                                        marginBottom: '10px',
+                                                                        background: '#111',
+                                                                        border: '1px solid var(--accent)',
+                                                                        borderRadius: '16px',
+                                                                        padding: '15px',
+                                                                        zIndex: 100,
+                                                                        boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                                                                        maxHeight: '300px',
                                                                         display: 'flex',
                                                                         flexDirection: 'column',
-                                                                        alignItems: 'center',
-                                                                        justifyContent: 'center',
-                                                                        gap: '5px'
+                                                                        gap: '10px'
                                                                     }}
                                                                 >
-                                                                    <CountryFlag code={c.code} name={c.name} size="1.4rem" />
-                                                                    <span style={{ fontSize: '0.5rem', color: '#fff', textAlign: 'center' }}>{c.code}</span>
-                                                                </button>
-                                                            ))}
-                                                        </div>
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
-                                        </div>
-                                    </div>
+                                                                    <input
+                                                                        type="text"
+                                                                        placeholder="Search region..."
+                                                                        value={editCountrySearch}
+                                                                        onChange={(e) => setEditCountrySearch(e.target.value)}
+                                                                        style={{
+                                                                            width: '100%',
+                                                                            padding: '10px',
+                                                                            background: '#0a0a0a',
+                                                                            border: '1px solid rgba(255,255,255,0.1)',
+                                                                            borderRadius: '8px',
+                                                                            color: '#fff',
+                                                                            fontSize: '0.8rem',
+                                                                            outline: 'none'
+                                                                        }}
+                                                                        autoFocus
+                                                                    />
+                                                                    <div style={{ overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+                                                                        {COUNTRIES.filter(c => c.name.toLowerCase().includes(editCountrySearch.toLowerCase())).map(c => (
+                                                                            <button
+                                                                                key={c.code}
+                                                                                onClick={() => {
+                                                                                    setEditCountry(c);
+                                                                                    setShowEditCountryPicker(false);
+                                                                                }}
+                                                                                style={{
+                                                                                    aspectRatio: '1',
+                                                                                    background: editCountry?.code === c.code ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255,255,255,0.03)',
+                                                                                    border: editCountry?.code === c.code ? '2px solid var(--accent)' : '1px solid rgba(255,255,255,0.05)',
+                                                                                    borderRadius: '12px',
+                                                                                    cursor: 'pointer',
+                                                                                    display: 'flex',
+                                                                                    flexDirection: 'column',
+                                                                                    alignItems: 'center',
+                                                                                    justifyContent: 'center',
+                                                                                    gap: '5px'
+                                                                                }}
+                                                                            >
+                                                                                <CountryFlag code={c.code} name={c.name} size="1.4rem" />
+                                                                                <span style={{ fontSize: '0.5rem', color: '#fff', textAlign: 'center' }}>{c.code}</span>
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
+                                                                </motion.div>
+                                                            )}
+                                                        </AnimatePresence>
+                                                    </div>
+                                                </div>
 
-                                    <button
-                                        disabled={editPending}
-                                        onClick={() => {
-                                            setEditPending(true);
-                                            socket?.emit('update_guild_customization', {
-                                                name: editGuildName,
-                                                tag: editGuildTag,
-                                                icon: editIcon,
-                                                iconColor: editIconColor,
-                                                bgColor: editBgColor,
-                                                summary: editGuildSummary,
-                                                countryCode: editCountry?.code || null
-                                            });
-                                            setTimeout(() => {
-                                                setEditPending(false);
-                                                setShowEditCustomization(false);
-                                            }, 1500);
-                                        }}
-                                        style={{
-                                            width: '100%',
-                                            padding: '16px',
-                                            background: 'var(--accent)',
-                                            border: 'none',
-                                            borderRadius: '16px',
-                                            color: '#000',
-                                            fontWeight: '900',
-                                            cursor: editPending ? 'not-allowed' : 'pointer',
-                                            marginTop: '10px',
-                                            boxShadow: '0 8px 16px rgba(212, 175, 55, 0.15)',
-                                            letterSpacing: '0.5px'
-                                        }}
-                                    >
-                                        {editPending ? 'SAVING CHANGES...' : 'SAVE CHANGES'}
-                                    </button>
+                                                <button
+                                                    disabled={editPending || !hasEnoughOrbs || editGuildName.trim().length < 3 || editGuildTag.length < 2}
+                                                    onClick={() => {
+                                                        setEditPending(true);
+                                                        socket?.emit('update_guild_customization', {
+                                                            name: editGuildName,
+                                                            tag: editGuildTag,
+                                                            icon: editIcon,
+                                                            iconColor: editIconColor,
+                                                            bgColor: editBgColor,
+                                                            summary: editGuildSummary,
+                                                            countryCode: editCountry?.code || null
+                                                        });
+                                                        setTimeout(() => {
+                                                            setEditPending(false);
+                                                            setShowEditCustomization(false);
+                                                        }, 1500);
+                                                    }}
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '16px',
+                                                        background: (!hasEnoughOrbs || editGuildName.trim().length < 3) ? '#444' : 'var(--accent)',
+                                                        border: 'none',
+                                                        borderRadius: '16px',
+                                                        color: (!hasEnoughOrbs || editGuildName.trim().length < 3) ? '#888' : '#000',
+                                                        fontWeight: '900',
+                                                        cursor: (editPending || !hasEnoughOrbs || editGuildName.trim().length < 3) ? 'not-allowed' : 'pointer',
+                                                        marginTop: '10px',
+                                                        boxShadow: (!hasEnoughOrbs || editGuildName.trim().length < 3) ? 'none' : '0 8px 16px rgba(212, 175, 55, 0.15)',
+                                                        letterSpacing: '0.5px',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        alignItems: 'center',
+                                                        gap: '4px'
+                                                    }}
+                                                >
+                                                    <span>{editPending ? 'SAVING CHANGES...' : 'SAVE CHANGES'}</span>
+                                                    {orbsCost > 0 && (
+                                                        <span style={{ fontSize: '0.7rem', opacity: 0.8, color: !hasEnoughOrbs ? '#ff4d4d' : 'inherit' }}>
+                                                            Cost: {formatNumber(orbsCost)} Orbs {(!hasEnoughOrbs) && '(Not enough Orbs)'}
+                                                        </span>
+                                                    )}
+                                                </button>
+                                            </>
+                                        );
+                                    })()}
                                 </motion.div>
                             </motion.div>
                         )}
