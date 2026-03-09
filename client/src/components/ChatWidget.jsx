@@ -254,11 +254,20 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
                             No messages in {activeTab.toLowerCase()}...
                         </div>
                     )}
-                    {filteredMessages.map((msg) => (
-                        <div key={msg.id} style={{
-                            alignSelf: msg.sender_name === characterName ? 'flex-end' : 'flex-start',
-                            maxWidth: '85%'
-                        }}>
+                    {filteredMessages.map((rawMsg) => {
+                        // Normalize message properties for robustness
+                        const msg = {
+                            ...rawMsg,
+                            content: rawMsg.content || rawMsg.message || '',
+                            sender_name: rawMsg.sender_name || rawMsg.sender || 'Unknown',
+                            created_at: rawMsg.created_at || rawMsg.timestamp || new Date().toISOString()
+                        };
+
+                        return (
+                            <div key={msg.id} style={{
+                                alignSelf: msg.sender_name === characterName ? 'flex-end' : 'flex-start',
+                                maxWidth: '85%'
+                            }}>
                             <div style={{
                                 fontSize: '0.7rem',
                                 color: msg.sender_name === '[SYSTEM]' ? '#ffaa00' :
@@ -290,9 +299,10 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
                                 {msg.content}
                             </div>
                         </div>
-                    ))}
-                    <div ref={messagesEndRef} />
-                </div>
+                    );
+                })}
+                <div ref={messagesEndRef} />
+            </div>
 
                 {/* Input Area */}
                 {activeTab !== 'SYSTEM' && (

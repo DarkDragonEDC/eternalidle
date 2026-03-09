@@ -287,12 +287,22 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
             };
             sorted.sort((a, b) => getDaily(b) - getDaily(a));
         } else {
-            // Default sorting: LEADER first, then OFFICER, then MEMBER (by level)
-            const roleOrder = { 'LEADER': 0, 'OFFICER': 1, 'MEMBER': 2 };
+            // Default sorting: respecting the hierarchy defined in guild.roles
+            const getRoleOrder = (roleId) => {
+                const roleConfig = (guild.roles || {})[roleId] || {};
+                if (roleConfig.order !== undefined) return roleConfig.order;
+                
+                // Fallback to same logic as roles modal
+                if (roleId === 'LEADER') return -100;
+                if (roleId === 'OFFICER') return -50;
+                if (roleId === 'MEMBER') return 0;
+                return 100;
+            };
+
             sorted.sort((a, b) => {
-                const roleA = roleOrder[a.role] ?? 99;
-                const roleB = roleOrder[b.role] ?? 99;
-                if (roleA !== roleB) return roleA - roleB;
+                const orderA = getRoleOrder(a.role);
+                const orderB = getRoleOrder(b.role);
+                if (orderA !== orderB) return orderA - orderB;
                 return (b.level || 1) - (a.level || 1);
             });
         }
@@ -1478,7 +1488,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                     )}
 
                     {activeTab === 'TASKS' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '100px' }}>
                             <div style={{ 
                                 display: 'flex', 
                                 justifyContent: 'space-between', 

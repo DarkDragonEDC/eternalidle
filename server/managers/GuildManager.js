@@ -616,12 +616,16 @@ export class GuildManager {
         if (memberError || !member) throw new Error("Character is not in a guild");
 
         // Check permission
-        if (member.role !== 'LEADER' && !await this.hasPermission(char.id, 'manage_roles')) {
+        const isLeader = member.role === 'LEADER';
+        if (!isLeader && !await this.hasPermission(char.id, 'manage_roles')) {
             throw new Error("No permission to manage roles");
         }
 
-        if (roleId === member.role) throw new Error("Cannot edit your own role");
-        if (roleId === 'LEADER') throw new Error("Cannot edit the LEADER role");
+        // Leaders can edit their own role and the LEADER role (except deleting it)
+        if (!isLeader) {
+            if (roleId === member.role) throw new Error("Cannot edit your own role");
+            if (roleId === 'LEADER') throw new Error("Cannot edit the LEADER role");
+        }
 
         const guildId = member.guild_id;
         const roles = member.guilds.roles || {};
@@ -943,11 +947,11 @@ export class GuildManager {
             // Broadcast Level Up to Guild Chat
             // This relies on the new Guild Chat channel we will implement
             this.gameManager.broadcastToGuild(guildId, 'new_message', {
-                id: Date.now() + Math.random(),
+                id: `lvl-${guildId}-${currentLevel}-${Date.now()}`,
                 channel: 'Guild',
-                sender: 'System',
-                message: `🎉 The Guild has reached Level ${currentLevel}!`,
-                timestamp: Date.now(),
+                sender_name: '[SYSTEM]',
+                content: `🎉 The Guild has reached Level ${currentLevel}!`,
+                created_at: new Date().toISOString(),
                 isSystem: true
             });
 
@@ -1458,11 +1462,11 @@ export class GuildManager {
             await this.supabase.from('guilds').update({ guild_points: newGP.toString() }).eq('id', guildId);
 
             this.gameManager.broadcastToGuild(guildId, 'new_message', {
-                id: Date.now() + Math.random(),
+                id: `task-${guildId}-${task.itemId}-${Date.now()}`,
                 channel: 'Guild',
-                sender: 'System',
-                message: `✅ Guild Task Completed: ${task.itemId.replace(/_/g, ' ')}! +${xpReward} XP, +${gpReward} GP`,
-                timestamp: Date.now(),
+                sender_name: '[SYSTEM]',
+                content: `✅ Guild Task Completed: ${task.itemId.replace(/_/g, ' ')}! +${xpReward} XP, +${gpReward} GP`,
+                created_at: new Date().toISOString(),
                 isSystem: true
             });
 
