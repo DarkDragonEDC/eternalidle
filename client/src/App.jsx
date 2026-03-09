@@ -323,7 +323,7 @@ function App() {
     const settingsStr = JSON.stringify(settings);
     if (socket && Object.keys(settings).length > 0 && settingsFromSyncRef.current !== settingsStr) {
       socket.emit('set_settings', { settings });
-      
+
       // Also sync push settings if enabled
       if (settings.pushEnabled) {
         socket.emit('push_update_settings', { settings });
@@ -2520,26 +2520,26 @@ function App() {
 
             {!isMobile && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-                <div style={{ 
-                  width: 32, 
-                  height: 32, 
-                  background: displayedGameState?.state?.avatar ? 'var(--slot-bg)' : 'linear-gradient(135deg, #90d5ff 0%, #003366 100%)', 
-                  borderRadius: '6px', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
+                <div style={{
+                  width: 40,
+                  height: 40,
+                  background: 'rgba(0,0,0,0.3)',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   flexShrink: 0,
                   overflow: 'hidden',
-                  border: displayedGameState?.state?.avatar ? '1px solid var(--border)' : 'none'
+                  border: '1px solid rgba(255,255,255,0.1)'
                 }}>
                   {displayedGameState?.state?.avatar ? (
-                    <img 
-                      src={displayedGameState.state.avatar.replace(/\.(png|jpg|jpeg)$/, '.webp')} 
-                      alt="" 
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                    <img
+                      src={displayedGameState.state.avatar.replace(/\.(png|jpg|jpeg)$/, '.webp')}
+                      alt=""
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%', display: 'block' }}
                     />
                   ) : (
-                    <User color="#000" size={16} />
+                    <User color="rgba(255,255,255,0.4)" size={20} />
                   )}
                 </div>
                 <div style={{ fontWeight: '900', fontSize: '1rem', color: 'var(--text-main)', letterSpacing: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>{displayedGameState?.name?.toUpperCase() || 'ADVENTURER'}</div>

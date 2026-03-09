@@ -219,7 +219,8 @@ export class GuildManager {
                     donatedSilver: Number(m.donated_silver || 0),
                     donatedItemsValue: Number(m.donated_items_value || 0),
                     level: this._calculateCharLevel(state),
-                    avatar: state.avatar || dbChar.avatar || '/profile/1 - male.png'
+                    avatar: state.avatar || dbChar.avatar || '/profile/1 - male.png',
+                    isIronman: !!state.isIronman
                 };
             }),
             nextLevelXP: calculateGuildNextLevelXP(guild.level || 1)
@@ -316,8 +317,9 @@ export class GuildManager {
             console.log(`[GUILD] ${char.name} left guild ${guildId}`);
         }
 
-        // 3. Clear guild reference from character state
+        // 3. Clear guild reference from character state and cache
         delete char.state.guild_id;
+        delete char.guild_bonuses;
         this.gameManager.markDirty(char.id);
 
         return { success: true };
@@ -453,6 +455,7 @@ export class GuildManager {
                 name: dbChar.name,
                 level: this._calculateCharLevel(state),
                 avatar: state.avatar || dbChar.avatar || '/profile/1 - male.png',
+                isIronman: !!state.isIronman,
                 createdAt: r.created_at
             };
         });
@@ -538,6 +541,8 @@ export class GuildManager {
         const targetCharCache = this.gameManager.cache.get(request.character_id);
         if (targetCharCache) {
             targetCharCache.state.guild_id = member.guild_id;
+            // Fetch initial guild bonuses for the new online member
+            targetCharCache.guild_bonuses = await this.gameManager.getGuildBonuses(member.guild_id);
             this.gameManager.markDirty(request.character_id);
         }
 
@@ -546,7 +551,7 @@ export class GuildManager {
             .from('guild_members')
             .select('character_id')
             .eq('guild_id', member.guild_id);
-        
+
         if (members) {
             for (const m of members) {
                 const { data: charData } = await this.supabase.from('characters').select('user_id').eq('id', m.character_id).single();
@@ -756,6 +761,7 @@ export class GuildManager {
         const targetCharCache = this.gameManager.cache.get(memberId);
         if (targetCharCache) {
             delete targetCharCache.state.guild_id;
+            delete targetCharCache.guild_bonuses;
             this.gameManager.markDirty(memberId);
         }
 
@@ -1044,7 +1050,7 @@ export class GuildManager {
         const gpCost = (bType === 'LIBRARY' && nextLevel === 1) ? 0 : costs.gp;
         const tier = Math.min(10, nextLevel); // Tier usually matches the level you are upgrading to
         const matAmount = costs.mats;
-        
+
         const materialReq = {
             [`T${tier}_WOOD`]: matAmount,
             [`T${tier}_ORE`]: matAmount,
@@ -1107,9 +1113,19 @@ export class GuildManager {
         if (this.gameManager.guildBonusesCache) {
             this.gameManager.guildBonusesCache.delete(guild.id);
         }
-        char.guild_bonuses = await this.gameManager.getGuildBonuses(guild.id);
 
-        // 9. Persist Character state
+        // Refresh bonuses for all online members of this guild
+        const newBonuses = await this.gameManager.getGuildBonuses(guild.id);
+        if (this.gameManager.cache) {
+            for (const [charId, cachedChar] of this.gameManager.cache.entries()) {
+                if (cachedChar?.state?.guild_id === guild.id) {
+                    console.log(`[GUILD-SYNC] Propagating new buffs to online member: ${cachedChar.name}`);
+                    cachedChar.guild_bonuses = newBonuses;
+                }
+            }
+        }
+
+        // 9. Persist Character state (for the one who performed the upgrade)
         this.gameManager.markDirty(char.id);
         await this.gameManager.persistCharacter(char.id);
 
@@ -1184,7 +1200,7 @@ export class GuildManager {
 
         // 5. Update Balances (Normalizing IDs to UPPERCASE)
         const newBankSilver = BigInt(guild.bank_silver || 0) + BigInt(silverToDonate);
-        
+
         // Build normalized bank items map first to handle existing data
         const normalizedBankItems = {};
         if (guild.bank_items) {
@@ -1194,7 +1210,7 @@ export class GuildManager {
                 normalizedBankItems[upperId] = (normalizedBankItems[upperId] || 0) + parseInt(amount || 0);
             });
         }
-        
+
         const newBankItems = { ...normalizedBankItems };
 
         if (hasItems) {
@@ -1296,7 +1312,7 @@ export class GuildManager {
         // Check for daily reset (00:00 UTC)
         const now = new Date();
         const lastReset = new Date(guild.tasks_last_reset || 0);
-        
+
         // Normalize dates to UTC 00:00 for comparison
         const nowUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
         const lastResetUTC = new Date(Date.UTC(lastReset.getUTCFullYear(), lastReset.getUTCMonth(), lastReset.getUTCDate()));
@@ -1311,7 +1327,7 @@ export class GuildManager {
         if (nowUTC > lastResetUTC || !guild.daily_tasks || guild.daily_tasks.length !== config.MAX_TASKS) {
             console.log(`[GUILD-TASKS] Resetting tasks for guild ${guildId}`);
             const newTasks = this._generateNewTasks(libraryLevel);
-            
+
             const { error: updateError } = await this.supabase
                 .from('guilds')
                 .update({
@@ -1321,7 +1337,7 @@ export class GuildManager {
                 .eq('id', guildId);
 
             if (updateError) throw new Error("Failed to reset guild tasks");
-            
+
             return newTasks;
         }
 
@@ -1455,7 +1471,7 @@ export class GuildManager {
             const gpReward = GUILD_TASKS_CONFIG.REWARDS.GP_TABLE[libraryLevel] || 0;
 
             await this.addExactGuildXP(guildId, xpReward);
-            
+
             // Add Guild Points
             const { data: currentGuild } = await this.supabase.from('guilds').select('guild_points').eq('id', guildId).single();
             const newGP = BigInt(currentGuild.guild_points || 0) + BigInt(gpReward);
@@ -1475,7 +1491,7 @@ export class GuildManager {
                 .from('guild_members')
                 .select('character_id')
                 .eq('guild_id', guildId);
-            
+
             if (members) {
                 for (const m of members) {
                     const { data: charData } = await this.supabase.from('characters').select('user_id').eq('id', m.character_id).single();

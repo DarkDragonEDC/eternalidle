@@ -343,25 +343,30 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
             globalEff += 10; // Add 10% (or 10 points, assuming 10 means 10%)
         }
 
+        const guildBuffs = gameState?.guild_bonuses || {};
+        const gEffic = guildBuffs.gathering_effic || 0;
+        const rEffic = guildBuffs.refining_effic || 0;
+        const cEffic = guildBuffs.crafting_effic || 0;
+
         // ... (efficiency map remains same, just ensuring scope remains valid) ...
         const efficiency = {
-            WOOD: (skills.LUMBERJACK?.level || 1) * 0.2 + getToolEff('tool_axe') + globalEff + (activeRuneBuffs.WOOD?.EFF || 0),
-            ORE: (skills.ORE_MINER?.level || 1) * 0.2 + getToolEff('tool_pickaxe') + globalEff + (activeRuneBuffs.ORE?.EFF || 0),
-            HIDE: (skills.ANIMAL_SKINNER?.level || 1) * 0.2 + getToolEff('tool_knife') + globalEff + (activeRuneBuffs.HIDE?.EFF || 0),
-            FIBER: (skills.FIBER_HARVESTER?.level || 1) * 0.2 + getToolEff('tool_sickle') + globalEff + (activeRuneBuffs.FIBER?.EFF || 0),
-            HERB: (skills.HERBALISM?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.HERB?.EFF || 0),
-            FISH: (skills.FISHING?.level || 1) * 0.2 + getToolEff('tool_rod') + globalEff + (activeRuneBuffs.FISH?.EFF || 0),
-            PLANK: (skills.PLANK_REFINER?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.PLANK?.EFF || 0),
-            METAL: (skills.METAL_BAR_REFINER?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.METAL?.EFF || 0),
-            LEATHER: (skills.LEATHER_REFINER?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.LEATHER?.EFF || 0),
-            CLOTH: (skills.CLOTH_REFINER?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.CLOTH?.EFF || 0),
-            EXTRACT: (skills.DISTILLATION?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.EXTRACT?.EFF || 0),
-            WARRIOR: (skills.WARRIOR_CRAFTER?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.WARRIOR?.EFF || 0),
-            HUNTER: (skills.HUNTER_CRAFTER?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.HUNTER?.EFF || 0),
-            MAGE: (skills.MAGE_CRAFTER?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.MAGE?.EFF || 0),
-            ALCHEMY: (skills.ALCHEMY?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.ALCHEMY?.EFF || 0),
-            TOOLS: (skills.TOOL_CRAFTER?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.TOOLS?.EFF || 0),
-            COOKING: (skills.COOKING?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.COOKING?.EFF || 0),
+            WOOD: (skills.LUMBERJACK?.level || 1) * 0.2 + getToolEff('tool_axe') + globalEff + (activeRuneBuffs.WOOD?.EFF || 0) + gEffic,
+            ORE: (skills.ORE_MINER?.level || 1) * 0.2 + getToolEff('tool_pickaxe') + globalEff + (activeRuneBuffs.ORE?.EFF || 0) + gEffic,
+            HIDE: (skills.ANIMAL_SKINNER?.level || 1) * 0.2 + getToolEff('tool_knife') + globalEff + (activeRuneBuffs.HIDE?.EFF || 0) + gEffic,
+            FIBER: (skills.FIBER_HARVESTER?.level || 1) * 0.2 + getToolEff('tool_sickle') + globalEff + (activeRuneBuffs.FIBER?.EFF || 0) + gEffic,
+            HERB: (skills.HERBALISM?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.HERB?.EFF || 0) + gEffic,
+            FISH: (skills.FISHING?.level || 1) * 0.2 + getToolEff('tool_rod') + globalEff + (activeRuneBuffs.FISH?.EFF || 0) + gEffic,
+            PLANK: (skills.PLANK_REFINER?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.PLANK?.EFF || 0) + rEffic,
+            METAL: (skills.METAL_BAR_REFINER?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.METAL?.EFF || 0) + rEffic,
+            LEATHER: (skills.LEATHER_REFINER?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.LEATHER?.EFF || 0) + rEffic,
+            CLOTH: (skills.CLOTH_REFINER?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.CLOTH?.EFF || 0) + rEffic,
+            EXTRACT: (skills.DISTILLATION?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.EXTRACT?.EFF || 0) + rEffic,
+            WARRIOR: (skills.WARRIOR_CRAFTER?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.WARRIOR?.EFF || 0) + cEffic,
+            HUNTER: (skills.HUNTER_CRAFTER?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.HUNTER?.EFF || 0) + cEffic,
+            MAGE: (skills.MAGE_CRAFTER?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.MAGE?.EFF || 0) + cEffic,
+            ALCHEMY: (skills.ALCHEMY?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.ALCHEMY?.EFF || 0) + cEffic,
+            TOOLS: (skills.TOOL_CRAFTER?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.TOOLS?.EFF || 0) + cEffic,
+            COOKING: (skills.COOKING?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.COOKING?.EFF || 0) + cEffic,
             GLOBAL: globalEff
         };
 
@@ -390,7 +395,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
             burstChance: (activeRuneBuffs.ATTACK?.BURST || 0) + gearCritChance + potionCritChance,
             silverMultiplier: 1.0 + (isPremium ? 0.10 : 0)
         };
-    }, [gameState?.calculatedStats, calculatedStats, health, skills, equipment, isPremium, activeRuneBuffs, active_buffs]);
+    }, [gameState?.calculatedStats, gameState?.guild_bonuses, calculatedStats, health, skills, equipment, isPremium, activeRuneBuffs, active_buffs]);
 
     const avgIP = useMemo(() => {
         const combatSlots = ['helmet', 'chest', 'boots', 'gloves', 'cape', 'mainHand', 'offHand'];
@@ -2404,7 +2409,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                         statType={breakdownModal.type}
                         value={typeof breakdownModal.value === 'object' ? breakdownModal.value.total : breakdownModal.value}
                         statId={typeof breakdownModal.value === 'object' ? breakdownModal.value.id : null}
-                        stats={{ ...stats, skills }} // Pass skills for efficiency breakdown
+                        stats={{ ...stats, skills, guild_bonuses: gameState?.guild_bonuses }} // Pass skills and guild_bonuses for efficiency breakdown
                         equipment={gameState?.state?.equipment || {}}
                         membership={gameState?.state?.membership}
                         onClose={() => setBreakdownModal(null)}

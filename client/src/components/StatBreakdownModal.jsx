@@ -217,6 +217,21 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
 
                 const isPremium = membership?.active && membership?.expiresAt > Date.now();
                 if (isPremium) breakdown.push({ label: 'Premium Membership', value: '+10%' });
+
+                // Guild Bonus
+                const guildBuffs = stats.guild_bonuses || {};
+                const gatheringSkills = ['WOOD', 'ORE', 'HIDE', 'FIBER', 'FISH', 'HERB'];
+                const refiningSkills = ['PLANK', 'METAL', 'LEATHER', 'CLOTH', 'EXTRACT'];
+                const craftingSkills = ['WARRIOR', 'HUNTER', 'MAGE', 'ALCHEMY', 'TOOLS', 'COOKING'];
+
+                let guildVal = 0;
+                if (gatheringSkills.includes(effId)) guildVal = guildBuffs.gathering_effic || 0;
+                else if (refiningSkills.includes(effId)) guildVal = guildBuffs.refining_effic || 0;
+                else if (craftingSkills.includes(effId)) guildVal = guildBuffs.crafting_effic || 0;
+
+                if (guildVal > 0) {
+                    breakdown.push({ label: 'Guild Bonus', value: `+${guildVal}%` });
+                }
             }
         } else if (statType === 'CRIT') {
             const gearCritChance = Object.values(equipment).reduce((acc, item) => {

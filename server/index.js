@@ -457,9 +457,9 @@ io.on("connection", (socket) => {
   console.log(
     `[VERSION] Emitting server version: ${pkg.version} to match client ${pkg.version}`,
   );
-  socket.emit("server_version", { 
+  socket.emit("server_version", {
     version: pkg.version,
-    vapidPublicKey: process.env.VAPID_PUBLIC_KEY 
+    vapidPublicKey: process.env.VAPID_PUBLIC_KEY
   });
 
   // 1. Initial Account Status Check (Bans & Warnings)
@@ -1019,16 +1019,16 @@ io.on("connection", (socket) => {
     try {
       if (!socket.data.characterId || socket.data.characterId === "undefined")
         return;
-      
+
       const char = await gameManager.getCharacter(
         socket.user.id,
         socket.data.characterId,
       );
-      
+
       if (!char || !char.state) {
         throw new Error("Character data not found or invalid");
       }
-      
+
       const tasks = await gameManager.guildManager.getGuildTasks(char);
       socket.emit("guild_tasks_data", tasks);
     } catch (err) {
@@ -3697,7 +3697,7 @@ io.on("connection", (socket) => {
         // Force include channel in case select() didn't pick it up (schema cache)
         const outData = { ...data, channel: data.channel || channel };
         if (!outData.created_at) outData.created_at = new Date().toISOString();
-        
+
         if (channel === "Guild" && char.state.guild_id) {
           outData.channel = "Guild"; // Normalize for the client
           gameManager.broadcastToGuild(

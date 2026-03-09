@@ -243,6 +243,8 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                     {/* Stats Panel */}
                     <div className="glass-panel" style={{ padding: '12px', borderRadius: '14px', background: 'var(--accent-soft)', border: '1px solid var(--border)' }}>
                         <StatRow icon={TrendingUp} label="Efficiency" value={`+${efficiency}%`} valColor="#90d5ff" />
+                        {(stats.duplication?.[effKey] > 0) && <StatRow icon={Package} label="Duplication" value={`${stats.duplication[effKey]}%`} valColor="#4ade80" />}
+                        {(type === 'GATHERING' && stats.autoRefine?.[effKey] > 0) && <StatRow icon={Zap} label="Auto-Refine" value={`${stats.autoRefine[effKey]}%`} valColor="#fcd34d" />}
                         <StatRow icon={Star} label="XP Multiplier" value={`+${totalBonusPc.toFixed(1)}%`} valColor="#fbbf24" />
                         <StatRow icon={Timer} label="Time per action" value={`${finalTime.toFixed(1)}s`} subValue={finalTime < baseTime ? `${baseTime}s` : null} />
                         <StatRow icon={Zap} label="XP per action" value={xpPerAction} subValue={xpPerAction > baseXp ? baseXp : null} valColor="var(--accent)" />

@@ -211,11 +211,11 @@ export class GameManager {
         const now = new Date();
         const nextMidnight = new Date(now);
         nextMidnight.setUTCHours(24, 0, 1, 0); // Next day at 00:00:01 UTC
-        
+
         const delay = nextMidnight.getTime() - now.getTime();
-        
+
         console.log(`[SCHEDULER] Next midnight notifications (WB & Spin) scheduled in ${Math.floor(delay / 3600000)}h ${Math.floor((delay % 3600000) / 60000)}m.`);
-        
+
         setTimeout(() => {
             this.checkMidnightTriggers();
             this.scheduleMidnightTriggers(); // Schedule for the following day
@@ -256,7 +256,7 @@ export class GameManager {
             const wbUsers = [...new Set(subs
                 .filter(s => s.settings?.push_world_boss !== false)
                 .map(s => s.user_id))];
-            
+
             console.log(`[PUSH] Notifying ${wbUsers.length} users about World Boss Spawn.`);
             const bossName = "The Ancient Dragon"; // Hardcoded for fixed notification
             for (const userId of wbUsers) {
@@ -273,16 +273,16 @@ export class GameManager {
             const { data: guildMembers } = await this.supabase
                 .from('guild_members')
                 .select('characters ( user_id )');
-            
+
             if (guildMembers) {
                 const guildUserIds = [...new Set(guildMembers
                     .filter(m => m.characters && m.characters.user_id)
                     .map(m => m.characters.user_id))];
-                
+
                 const guildPushUsers = [...new Set(subs
                     .filter(s => guildUserIds.includes(s.user_id) && s.settings?.push_guild_tasks !== false)
                     .map(s => s.user_id))];
-                
+
                 console.log(`[PUSH] Notifying ${guildPushUsers.length} users about Guild Tasks reset.`);
                 for (const userId of guildPushUsers) {
                     this.pushManager.notifyUser(
@@ -2000,6 +2000,7 @@ export class GameManager {
             globalStats: this.globalStats,
             serverTime: Date.now(),
             guild: await this.guildManager.getCharacterGuild(characterId || char.id),
+            guild_bonuses: char.guild_bonuses,
             banWarning: (ban && ban.level === 1 && !ban.ack) ? ban.reason : null
         };
 
@@ -2505,6 +2506,7 @@ export class GameManager {
                     state: char.state,
                     guild: await this.guildManager.getCharacterGuild(char.id),
                     calculatedStats: this.inventoryManager.calculateStats(char),
+                    guild_bonuses: char.guild_bonuses,
                     current_activity: char.current_activity,
                     activity_started_at: char.activity_started_at,
                     dungeon_state: char.state.dungeon,
