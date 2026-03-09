@@ -73,7 +73,7 @@ export class GameManager {
         setTimeout(() => this.checkTaxSnapshot(), 5000); // Check once shortly after startup
 
         // Push notification scheduler (Midnight UTC check)
-        setInterval(() => this.checkMidnightTriggers(), 60000);
+        this.scheduleMidnightTriggers();
 
         this.worldBossManager.initialize();
 
@@ -207,16 +207,25 @@ export class GameManager {
         }
     }
 
-    async checkMidnightTriggers() {
+    scheduleMidnightTriggers() {
         const now = new Date();
-        const minutes = now.getUTCMinutes();
-        const hours = now.getUTCHours();
+        const nextMidnight = new Date(now);
+        nextMidnight.setUTCHours(24, 0, 1, 0); // Next day at 00:00:01 UTC
+        
+        const delay = nextMidnight.getTime() - now.getTime();
+        
+        console.log(`[SCHEDULER] Next midnight notifications (WB & Spin) scheduled in ${Math.floor(delay / 3600000)}h ${Math.floor((delay % 3600000) / 60000)}m.`);
+        
+        setTimeout(() => {
+            this.checkMidnightTriggers();
+            this.scheduleMidnightTriggers(); // Schedule for the following day
+        }, delay);
+    }
 
-        // 00:00 UTC
-        if (hours === 0 && minutes === 0) {
-            console.log('[PUSH] Midnight UTC detected. Sending Daily Spin notifications...');
+    async checkMidnightTriggers() {
+        console.log('[PUSH] 00:00 UTC reached. Sending daily notifications...');
 
-            // Get all subscriptions that have daily_spin enabled
+        try {
             const { data: subs, error } = await this.supabase
                 .from('push_subscriptions')
                 .select('user_id, settings');
@@ -226,12 +235,15 @@ export class GameManager {
                 return;
             }
 
-            const uniqueUsers = [...new Set(subs
+            if (!subs || subs.length === 0) return;
+
+            // 1. Daily Spin Notifications
+            const spinUsers = [...new Set(subs
                 .filter(s => s.settings?.push_daily_spin !== false)
                 .map(s => s.user_id))];
 
-            console.log(`[PUSH] Notifying ${uniqueUsers.length} users about Daily Spin.`);
-            for (const userId of uniqueUsers) {
+            console.log(`[PUSH] Notifying ${spinUsers.length} users about Daily Spin.`);
+            for (const userId of spinUsers) {
                 this.pushManager.notifyUser(
                     userId,
                     'push_daily_spin',
@@ -239,6 +251,52 @@ export class GameManager {
                     'Your daily reward is waiting for you in Eternal Idle.'
                 );
             }
+
+            // 2. World Boss Spawn Notifications (Since it always spawns at 00:00 UTC)
+            const wbUsers = [...new Set(subs
+                .filter(s => s.settings?.push_world_boss !== false)
+                .map(s => s.user_id))];
+            
+            console.log(`[PUSH] Notifying ${wbUsers.length} users about World Boss Spawn.`);
+            const bossName = "The Ancient Dragon"; // Hardcoded for fixed notification
+            for (const userId of wbUsers) {
+                this.pushManager.notifyUser(
+                    userId,
+                    'push_world_boss',
+                    'World Boss Spawned! 🐉',
+                    `${bossName} is terrorizing the world. Join the fight!`,
+                    '/world_boss'
+                );
+            }
+
+            // 3. Guild Tasks Reset Notifications
+            const { data: guildMembers } = await this.supabase
+                .from('guild_members')
+                .select('characters ( user_id )');
+            
+            if (guildMembers) {
+                const guildUserIds = [...new Set(guildMembers
+                    .filter(m => m.characters && m.characters.user_id)
+                    .map(m => m.characters.user_id))];
+                
+                const guildPushUsers = [...new Set(subs
+                    .filter(s => guildUserIds.includes(s.user_id) && s.settings?.push_guild_tasks !== false)
+                    .map(s => s.user_id))];
+                
+                console.log(`[PUSH] Notifying ${guildPushUsers.length} users about Guild Tasks reset.`);
+                for (const userId of guildPushUsers) {
+                    this.pushManager.notifyUser(
+                        userId,
+                        'push_guild_tasks',
+                        'New Guild Tasks! 🛡️',
+                        'Fresh daily tasks are available for your guild. Help your team and earn rewards!',
+                        '/guild'
+                    );
+                }
+            }
+
+        } catch (err) {
+            console.error('[PUSH] Fatal error in checkMidnightTriggers:', err);
         }
     }
 
