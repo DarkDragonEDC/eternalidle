@@ -3552,7 +3552,7 @@ io.on("connection", (socket) => {
       const now = Date.now();
       const IS_ADMIN = !!char.is_admin;
 
-      if (now - lastChat < 10000 && !IS_ADMIN) {
+      if (now - lastChat < 10000 && !IS_ADMIN && channel !== "Guild") {
         // Allow commands to bypass cooldown
         if (!content.startsWith("/")) {
           const remaining = Math.ceil((10000 - (now - lastChat)) / 1000);

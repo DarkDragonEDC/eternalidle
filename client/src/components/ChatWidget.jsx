@@ -99,7 +99,9 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
 
         socket.emit('send_message', { content: message.trim(), channel: activeTab });
         setMessage('');
-        setCooldown(10);
+        if (activeTab !== 'Guild') {
+            setCooldown(10);
+        }
     };
 
     const filteredMessages = messages.filter(msg => {
