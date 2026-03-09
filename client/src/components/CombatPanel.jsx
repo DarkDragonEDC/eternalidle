@@ -599,7 +599,15 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
                                         position: 'relative',
                                         zIndex: 2
                                     }}>
-                                    <User size={isMobile ? 25 : 50} color="#000" />
+                                    {gameState?.state?.avatar ? (
+                                        <img
+                                            src={gameState.state.avatar.replace(/\.(png|jpg|jpeg)$/, '.webp')}
+                                            alt="Avatar"
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%', borderRadius: '50%' }}
+                                        />
+                                    ) : (
+                                        <User size={isMobile ? 25 : 50} color="#000" />
+                                    )}
 
                                 </motion.div>
                                 <div style={{ fontSize: isMobile ? '0.6rem' : '0.9rem', fontWeight: '900', color: 'var(--text-main)', textAlign: 'center', width: '100%' }}>{gameState?.name?.toUpperCase()}</div>

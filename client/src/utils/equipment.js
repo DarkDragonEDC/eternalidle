@@ -31,7 +31,16 @@ export const isBetterItem = (candidate, current) => {
     if (cTier > curTier) return true;
     if (cTier < curTier) return false;
 
-    // 2. IP (Within same tier, higher quality usually means higher IP)
+    // 2. Efficiency (Priority for Tools)
+    const isTool = (type) => type?.startsWith('TOOL_') || type === 'TOOL';
+    if (isTool(candidate.type) && isTool(resolvedCurrent.type)) {
+        const cEff = (candidate.stats?.efficiency || resolveItem(candidate.id || candidate.item_id)?.stats?.efficiency) || 0;
+        const curEff = (resolvedCurrent.stats?.efficiency || resolveItem(resolvedCurrent.id || resolvedCurrent.item_id)?.stats?.efficiency) || 0;
+        if (cEff > curEff) return true;
+        if (cEff < curEff) return false;
+    }
+
+    // 3. IP (Within same tier, higher quality usually means higher IP)
     const cIp = candidate.ip || 0;
     const curIp = resolvedCurrent.ip || 0;
     if (cIp > curIp) return true;
@@ -168,6 +177,15 @@ export const getBestItemForSlot = (slot, inventory, weaponClass = null, skills =
         }
 
         if ((b.tier || 0) !== (a.tier || 0)) return (b.tier || 0) - (a.tier || 0);
+
+        // Tool Efficiency Priority
+        const isTool = (type) => type?.startsWith('TOOL_') || type === 'TOOL';
+        if (isTool(a.type) && isTool(b.type)) {
+            const bEff = b.stats?.efficiency || 0;
+            const aEff = a.stats?.efficiency || 0;
+            if (bEff !== aEff) return bEff - aEff;
+        }
+
         if ((b.ip || 0) !== (a.ip || 0)) return (b.ip || 0) - (a.ip || 0);
         const bQual = b.quality || b.stars || 0;
         const aQual = a.quality || a.stars || 0;

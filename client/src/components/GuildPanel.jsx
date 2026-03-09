@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Users, Sword, Swords, Trophy, Settings, Plus, Info, Check, X, Coins, Sparkles, Tag, User, Zap, LogOut, Edit2, Save, Menu, Home, Building2, ChevronDown, ArrowUp, ArrowDown, Trash2, Landmark, ClipboardList, Pickaxe, FlaskConical, Hammer, Lock, Dices, Library } from 'lucide-react';
 import { formatSilver } from '@utils/format';
+import GuildProfileModal from './GuildProfileModal';
 import { COUNTRIES } from '../../../shared/countries';
 import { GUILD_BUILDINGS, calculateGuildNextLevelXP, GUILD_TASKS_CONFIG, UPGRADE_COSTS, calculateMaterialNeeds, STATION_BONUS_TABLE, GUILD_XP_TABLE } from '../../../shared/guilds.js';
 
@@ -14,6 +15,33 @@ const formatNumber = (num) => {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
     if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
     return num.toString();
+};
+
+const getItemIcon = (itemId) => {
+    if (!itemId) return '/items/placeholder.webp';
+
+    // Handle potions mapping
+    if (itemId.includes('_POTION_')) {
+        const parts = itemId.split('_');
+        const tier = parts[0];
+        const type = parts[parts.length - 1];
+
+        const potionMap = {
+            'GATHER': 'GATHERING',
+            'REFINE': 'REFINING',
+            'CRAFT': 'CRAFTING',
+            'SILVER': 'SILVER',
+            'QUALITY': 'QUALITY',
+            'LUCK': 'LUCK',
+            'XP': 'KNOWLEDGE',
+            'CRIT': 'CRITICAL',
+            'DAMAGE': 'DAMAGE'
+        };
+
+        return `/items/${tier}_${potionMap[type] || type}_POTION.webp`;
+    }
+
+    return `/items/${itemId}.webp`;
 };
 
 const formatRelativeTime = (date) => {
@@ -1017,7 +1045,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                                         return (
                                                                             <div key={m.id} style={{ background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '10px', border: has ? '1px solid rgba(68, 255, 68, 0.1)' : '1px solid rgba(255, 68, 68, 0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
                                                                                 <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.45rem', fontWeight: 'bold' }}>{tierPart} {namePart}</div>
-                                                                                <img src={`/items/${m.id}.webp`} style={{ width: '16px', height: '16px' }} alt={m.name} />
+                                                                                <img src={getItemIcon(m.id)} style={{ width: '16px', height: '16px' }} alt={m.name} />
                                                                                 <div style={{ color: has ? '#44ff44' : '#ff4444', fontSize: '0.55rem', fontWeight: 'bold' }}>
                                                                                     {cur >= 1000 ? (cur / 1000).toFixed(1) + 'K' : cur}/{matAmount >= 1000 ? (matAmount / 1000).toFixed(0) + 'K' : matAmount}
                                                                                 </div>
@@ -1169,7 +1197,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                                         return (
                                                                             <div key={m.id} style={{ background: 'rgba(0,0,0,0.25)', padding: isMobile ? '6px' : '10px', borderRadius: '12px', border: has ? '1px solid rgba(68, 255, 68, 0.1)' : '1px solid rgba(255, 68, 68, 0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
                                                                                 <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.5rem', fontWeight: 'bold' }}>{tierPart} {namePart}</div>
-                                                                                <img src={`/items/${m.id}.webp`} style={{ width: isMobile ? '16px' : '22px', height: isMobile ? '16px' : '22px' }} alt={m.name} />
+                                                                                <img src={getItemIcon(m.id)} style={{ width: isMobile ? '16px' : '22px', height: isMobile ? '16px' : '22px' }} alt={m.name} />
                                                                                 <div style={{ color: has ? '#44ff44' : '#ff4444', fontSize: isMobile ? '0.55rem' : '0.7rem', fontWeight: 'bold' }}>
                                                                                     {cur >= 1000 ? (cur / 1000).toFixed(1) + 'K' : cur}/{matAmount >= 1000 ? (matAmount / 1000).toFixed(0) + 'K' : matAmount}
                                                                                 </div>
@@ -1334,7 +1362,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                                                 return (
                                                                                     <div key={m} style={{ background: 'rgba(0,0,0,0.2)', padding: isMobile ? '4px' : '5px', borderRadius: '12px', border: has ? '1px solid rgba(68,255,68,0.1)' : '1px solid rgba(255,68,68,0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
                                                                                         <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: isMobile ? '0.4rem' : '0.45rem', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{tierPart} {namePart}</div>
-                                                                                        <img src={`/items/${m}.webp`} style={{ width: isMobile ? '12px' : '22px', height: isMobile ? '12px' : '22px' }} />
+                                                                                        <img src={getItemIcon(m)} style={{ width: isMobile ? '12px' : '22px', height: isMobile ? '12px' : '22px' }} />
                                                                                         <div style={{ color: has ? '#44ff44' : '#ff4444', fontSize: isMobile ? '0.45rem' : '0.7rem', fontWeight: 'bold' }}>
                                                                                             {cur >= 1000 ? (cur / 1000).toFixed(1) + 'K' : cur}/{matAmount >= 1000 ? (matAmount / 1000).toFixed(0) + 'K' : matAmount}
                                                                                         </div>
@@ -1471,7 +1499,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                             opacity: (isTracked && totalNeeded === 0) ? 0.2 : (amount > 0 || isTracked ? 1 : 0.4)
                                                         }}>
                                                             <div style={{ width: isMobile ? '18px' : '24px', height: isMobile ? '18px' : '24px' }}>
-                                                                <img src={`/items/${itemId}.webp`} alt={itemId} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                                                <img src={getItemIcon(itemId)} alt={itemId} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                                                             </div>
                                                             <div style={{ flex: 1, minWidth: 0 }}>
                                                                 <div style={{ color: isComplete ? '#44ff44' : (amount > 0 ? '#fff' : 'rgba(255,255,255,0.2)'), fontSize: isMobile ? '0.7rem' : '0.8rem', fontWeight: 'bold' }}>
@@ -1627,18 +1655,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                             }} />
                                                         )}
                                                         <img
-                                                            src={
-                                                                item.includes('_POTION_XP') ? `/items/${item.split('_')[0]}_KNOWLEDGE_POTION.webp` :
-                                                                    item.includes('_POTION_GATHER') ? `/items/${item.split('_')[0]}_GATHERING_POTION.webp` :
-                                                                        item.includes('_POTION_REFINE') ? `/items/${item.split('_')[0]}_REFINING_POTION.webp` :
-                                                                            item.includes('_POTION_CRAFT') ? `/items/${item.split('_')[0]}_CRAFTING_POTION.webp` :
-                                                                                item.includes('_POTION_SILVER') ? `/items/${item.split('_')[0]}_SILVER_POTION.webp` :
-                                                                                    item.includes('_POTION_QUALITY') ? `/items/${item.split('_')[0]}_QUALITY_POTION.webp` :
-                                                                                        item.includes('_POTION_LUCK') ? `/items/${item.split('_')[0]}_LUCK_POTION.webp` :
-                                                                                            item.includes('_POTION_DAMAGE') ? `/items/${item.split('_')[0]}_DAMAGE_POTION.webp` :
-                                                                                                item.includes('_POTION_CRIT') ? `/items/${item.split('_')[0]}_CRITICAL_POTION.webp` :
-                                                                                                    `/items/${item}.webp`
-                                                            }
+                                                            src={getItemIcon(item)}
                                                             alt={item}
                                                             style={{ width: '22px', height: '22px' }}
                                                         />
@@ -1750,7 +1767,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
 
                                                 <div style={{ padding: '15px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '15px' }}>
                                                     <div style={{ width: '40px', height: '40px', background: 'rgba(0,0,0,0.3)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifySelf: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                                        <img src={`/items/${showContributeModal.itemId}.webp`} style={{ width: '24px', height: '24px', margin: '0 auto' }} />
+                                                        <img src={getItemIcon(showContributeModal.itemId)} style={{ width: '24px', height: '24px', margin: '0 auto' }} />
                                                     </div>
                                                     <div>
                                                         <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 'bold' }}>YOUR INVENTORY</div>
@@ -3775,6 +3792,7 @@ const GuildPanel = ({ gameState, socket, isMobile, onInspect }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [statusMessage, setStatusMessage] = useState(null);
     const [isApplying, setIsApplying] = useState(false);
+    const [selectedGuildId, setSelectedGuildId] = useState(null);
 
     // Calculate player's total level
     const playerLevel = useMemo(() => {
@@ -4156,7 +4174,10 @@ const GuildPanel = ({ gameState, socket, isMobile, onInspect }) => {
                                                             justifyContent: 'space-between'
                                                         }}
                                                     >
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                                        <div
+                                                            style={{ display: 'flex', alignItems: 'center', gap: '15px', cursor: 'pointer' }}
+                                                            onClick={() => setSelectedGuildId(g.id)}
+                                                        >
                                                             <div style={{
                                                                 width: '46px',
                                                                 height: '46px',
@@ -4880,6 +4901,18 @@ const GuildPanel = ({ gameState, socket, isMobile, onInspect }) => {
                     )}
                 </div>
             </div>
+
+            <GuildProfileModal
+                isOpen={!!selectedGuildId}
+                onClose={() => setSelectedGuildId(null)}
+                guildId={selectedGuildId}
+                socket={socket}
+                onInspect={(name) => {
+                    setSelectedGuildId(null);
+                    if (onInspect) onInspect(name);
+                }}
+                isMobile={isMobile}
+            />
         </div>
     );
 };

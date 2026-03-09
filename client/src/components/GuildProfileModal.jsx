@@ -9,9 +9,41 @@ const GUILD_ICONS = {
     Shield, Users, Sword, Swords, Sword2: Swords, Trophy, Settings, Plus, Info, Check, X, Coins, Sparkles, Tag, User, Zap, Landmark, ClipboardList, Pickaxe, FlaskConical, Hammer, Lock, Dices, Library
 };
 
-const ROLE_ORDER = { owner: 0, officer: 1, member: 2 };
-const ROLE_LABELS = { owner: 'Leader', officer: 'Officer', member: 'Member' };
-const ROLE_COLORS = { owner: '#d4af37', officer: '#60a5fa', member: 'var(--text-dim)' };
+const ROLE_ORDER = { LEADER: 0, OFFICER: 1, MEMBER: 2, owner: 0, officer: 1, member: 2 };
+
+const getRoleDisplayName = (guild, roleId) => {
+    if (!roleId) return 'Member';
+    const roles = guild?.roles || {};
+    if (roles[roleId]) return roles[roleId].name;
+
+    const mapping = {
+        'LEADER': 'Leader',
+        'OFFICER': 'Co-Leader',
+        'MEMBER': 'Member',
+        'owner': 'Leader',
+        'officer': 'Co-Leader',
+        'member': 'Member'
+    };
+    if (mapping[roleId]) return mapping[roleId];
+    if (roleId.startsWith('CUSTOM_')) return roleId.replace('CUSTOM_', '');
+    return roleId;
+};
+
+const getRoleColor = (guild, roleId) => {
+    if (!roleId) return 'var(--text-dim)';
+    const roles = guild?.roles || {};
+    if (roles[roleId] && roles[roleId].color) return roles[roleId].color;
+
+    const mapping = {
+        'LEADER': '#d4af37',
+        'OFFICER': '#60a5fa',
+        'MEMBER': 'var(--text-dim)',
+        'owner': '#d4af37',
+        'officer': '#60a5fa',
+        'member': 'var(--text-dim)'
+    };
+    return mapping[roleId] || 'var(--text-dim)';
+};
 
 const CountryFlag = ({ code, size = '1.2rem', style = {} }) => {
     if (!code) return <span style={{ fontSize: size, ...style }}>🌐</span>;
@@ -56,7 +88,15 @@ const GuildProfileModal = ({ isOpen, onClose, guildId, socket, onInspect, isMobi
     if (!isOpen) return null;
 
     const sortedMembers = guild?.members
-        ? [...guild.members].sort((a, b) => (ROLE_ORDER[a.role] ?? 99) - (ROLE_ORDER[b.role] ?? 99))
+        ? [...guild.members].sort((a, b) => {
+            const aIsLeader = a.role === 'LEADER' || a.role === 'owner';
+            const bIsLeader = b.role === 'LEADER' || b.role === 'owner';
+
+            if (aIsLeader && !bIsLeader) return -1;
+            if (!aIsLeader && bIsLeader) return 1;
+
+            return (b.donatedXP || 0) - (a.donatedXP || 0);
+        })
         : [];
 
     const IconComp = guild ? (GUILD_ICONS[guild.icon] || Shield) : Shield;
@@ -374,21 +414,27 @@ const GuildProfileModal = ({ isOpen, onClose, guildId, socket, onInspect, isMobi
                                                         width: '36px',
                                                         height: '36px',
                                                         borderRadius: '8px',
-                                                        border: `1px solid ${ROLE_COLORS[member.role] || 'var(--border)'}`,
+                                                        border: `1px solid ${getRoleColor(guild, member.role)}`,
                                                         overflow: 'hidden',
                                                         background: 'var(--slot-bg)'
                                                     }}>
-                                                        <img
-                                                            src={member.avatar}
-                                                            alt={member.name}
-                                                            style={{
-                                                                width: '100%',
-                                                                height: '100%',
-                                                                objectFit: 'cover',
-                                                                objectPosition: 'center 15%',
-                                                                display: 'block'
-                                                            }}
-                                                        />
+                                                        {member.avatar ? (
+                                                            <img
+                                                                src={member.avatar.replace(/\.(png|jpg|jpeg)$/, '.webp')}
+                                                                alt={member.name}
+                                                                style={{
+                                                                    width: '100%',
+                                                                    height: '100%',
+                                                                    objectFit: 'cover',
+                                                                    objectPosition: 'center 15%',
+                                                                    display: 'block'
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.3 }}>
+                                                                <User size={20} color="#fff" />
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     {member.isIronman && (
                                                         <div style={{
@@ -423,15 +469,15 @@ const GuildProfileModal = ({ isOpen, onClose, guildId, socket, onInspect, isMobi
                                                     <div style={{
                                                         fontSize: '0.6rem',
                                                         fontWeight: '900',
-                                                        color: ROLE_COLORS[member.role] || 'var(--text-dim)',
+                                                        color: getRoleColor(guild, member.role),
                                                         letterSpacing: '1px',
                                                         textTransform: 'uppercase',
                                                         display: 'flex',
                                                         alignItems: 'center',
                                                         gap: '4px'
                                                     }}>
-                                                        {member.role === 'owner' && <Crown size={10} />}
-                                                        {ROLE_LABELS[member.role] || member.role}
+                                                        {(member.role === 'owner' || member.role === 'LEADER') && <Crown size={10} />}
+                                                        {getRoleDisplayName(guild, member.role)}
                                                     </div>
                                                 </div>
 

@@ -86,6 +86,15 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onEquipFood
             }
 
             if ((b.tier || 0) !== (a.tier || 0)) return (b.tier || 0) - (a.tier || 0);
+
+            // Tool Efficiency Priority
+            const isTool = (type) => type?.startsWith('TOOL_') || type === 'TOOL';
+            if (isTool(a.type) && isTool(b.type)) {
+                const bEff = b.stats?.efficiency || 0;
+                const aEff = a.stats?.efficiency || 0;
+                if (bEff !== aEff) return bEff - aEff;
+            }
+
             if ((b.ip || 0) !== (a.ip || 0)) return (b.ip || 0) - (a.ip || 0);
             const bQual = b.quality || b.stars || 0;
             const aQual = a.quality || a.stars || 0;
@@ -415,7 +424,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onEquipFood
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 {candidates.map((item, idx) => {
-                                    const isItemRecommended = isRecommended(item);
+                                    const isItemRecommended = bestCandidate && item.id === bestCandidate.id && isRecommended(item);
                                     return (
                                         <div
                                             key={`${item.id}-${idx}`}

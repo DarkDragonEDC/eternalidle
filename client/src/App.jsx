@@ -244,6 +244,8 @@ const StatCard = ({ label, value, icon, color }) => (
   </div>
 );
 
+const CLIENT_VERSION = '1.4.2';
+
 function App() {
   const [session, setSession] = useState(null);
   const [socket, setSocket] = useState(null);

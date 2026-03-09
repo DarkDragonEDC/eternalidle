@@ -13,6 +13,10 @@
 - **Remoção de Alertas Internos**: Removemos avisos chatos ("Duplicate Keys") que ficavam poluindo o código relacionados à seleção de cores da guilda.
 - **Visualização de Bônus da Guilda**: Todos os bônus dados ativamente pela guilda (Eficiência em Habilidades, Multiplicador de XP, Duplicação de Itens / Auto-Refino) aparecem corretamente listados no seu Perfil e nas janelas de Atividades.
 - **Sincronia Servidor-Cliente**: Consertamos o erro em que os bônus da guilda não eram enviados ao jogo, garantindo que os buffs aparecem sem você precisar deslogar e logar de novo.
+- **Perfil da Guilda Completo**: Agora você pode clicar no nome de uma guilda na busca para ver o perfil dela.
+- **Cargos Customizados**: Os nomes e cores dos cargos criados pelas guildas agora aparecem corretamente no perfil.
+- **Ordenação de Membros**: A lista de membros agora prioriza o Líder no topo, seguido pelos membros com mais XP contribuído.
+- **Correção de Avatares**: Resolvemos o problema de fotos cinzas ou quebradas no perfil da guilda, adicionando suporte a imagens `.webp` e ícones de reserva.
 
 ### ⚔️ Combate & Personagens
 - **Aviso de Ironman**: Jogadores do modo Ironman agora exibem um ícone de Escudo no canto superior esquerdo de suas fotos de perfil na lista de membros da guilda e nas candidaturas pendentes.
