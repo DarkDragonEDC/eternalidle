@@ -1,0 +1,1622 @@
+{
+  "tables": {
+    "market_buy_orders": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "column_default": "gen_random_uuid()",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "buyer_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "buyer_character_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "buyer_name",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "item_id",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "item_data",
+        "data_type": "jsonb",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "amount",
+        "data_type": "integer",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "filled",
+        "data_type": "integer",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "price_per_unit",
+        "data_type": "bigint",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "status",
+        "data_type": "text",
+        "column_default": "'ACTIVE'::text",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "expires_at",
+        "data_type": "timestamp with time zone",
+        "column_default": null,
+        "is_nullable": "YES"
+      }
+    ],
+    "market_listings": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "column_default": "gen_random_uuid()",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "seller_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "seller_name",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "item_id",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "item_data",
+        "data_type": "jsonb",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "amount",
+        "data_type": "bigint",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "price",
+        "data_type": "bigint",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "unit_price",
+        "data_type": "bigint",
+        "column_default": null,
+        "is_nullable": "YES"
+      }
+    ],
+    "characters": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "column_default": "auth.uid()",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "name",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "state",
+        "data_type": "jsonb",
+        "column_default": "'{\"silver\": 0, \"skills\": {}, \"inventory\": {}}'::jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "current_activity",
+        "data_type": "jsonb",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "activity_started_at",
+        "data_type": "timestamp with time zone",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "dungeon_state",
+        "data_type": "jsonb",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "last_saved",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "is_admin",
+        "data_type": "boolean",
+        "column_default": "false",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "inventory",
+        "data_type": "jsonb",
+        "column_default": "'{}'::jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "skills",
+        "data_type": "jsonb",
+        "column_default": "'{}'::jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "equipment",
+        "data_type": "jsonb",
+        "column_default": "'{}'::jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "info",
+        "data_type": "jsonb",
+        "column_default": "'{}'::jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "combat",
+        "data_type": "jsonb",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "dungeon",
+        "data_type": "jsonb",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "bank",
+        "data_type": "jsonb",
+        "column_default": "'{\"items\": {}, \"slots\": 10}'::jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "settings",
+        "data_type": "jsonb",
+        "column_default": "'{}'::jsonb",
+        "is_nullable": "YES"
+      }
+    ],
+    "user_sessions": [
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "last_active_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "ip_address",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "player_name",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      }
+    ],
+    "messages": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "column_default": "nextval('messages_id_seq'::regclass)",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "sender_name",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "content",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "channel",
+        "data_type": "text",
+        "column_default": "'GLOBAL'::text",
+        "is_nullable": "YES"
+      }
+    ],
+    "combat_history": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "character_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "mob_id",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "mob_name",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "duration_seconds",
+        "data_type": "integer",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "outcome",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "xp_gained",
+        "data_type": "bigint",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "silver_gained",
+        "data_type": "bigint",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "loot_gained",
+        "data_type": "jsonb",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "damage_dealt",
+        "data_type": "bigint",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "damage_taken",
+        "data_type": "bigint",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "occurred_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "timezone('utc'::text, now())",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "kills",
+        "data_type": "integer",
+        "column_default": "0",
+        "is_nullable": "YES"
+      }
+    ],
+    "trade_sessions": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "column_default": "gen_random_uuid()",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "sender_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "receiver_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "sender_offer",
+        "data_type": "jsonb",
+        "column_default": "'{\"items\": [], \"silver\": 0}'::jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "receiver_offer",
+        "data_type": "jsonb",
+        "column_default": "'{\"items\": [], \"silver\": 0}'::jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "sender_accepted",
+        "data_type": "boolean",
+        "column_default": "false",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "receiver_accepted",
+        "data_type": "boolean",
+        "column_default": "false",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "status",
+        "data_type": "text",
+        "column_default": "'PENDING'::text",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "sender_name",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "receiver_name",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      }
+    ],
+    "dungeon_history": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "character_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "dungeon_id",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "dungeon_name",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "tier",
+        "data_type": "integer",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "wave_reached",
+        "data_type": "integer",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "max_waves",
+        "data_type": "integer",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "duration_seconds",
+        "data_type": "bigint",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "outcome",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "xp_gained",
+        "data_type": "bigint",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "silver_gained",
+        "data_type": "bigint",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "loot_gained",
+        "data_type": "jsonb",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "occurred_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "timezone('utc'::text, now())",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "runs_completed",
+        "data_type": "integer",
+        "column_default": "1",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "total_runs",
+        "data_type": "integer",
+        "column_default": "1",
+        "is_nullable": "YES"
+      }
+    ],
+    "trade_history": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "column_default": "nextval('trade_history_id_seq'::regclass)",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "trade_id",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "sender_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "receiver_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "sender_name",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "receiver_name",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "sender_items",
+        "data_type": "jsonb",
+        "column_default": "'[]'::jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "sender_silver",
+        "data_type": "bigint",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "sender_tax",
+        "data_type": "bigint",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "receiver_items",
+        "data_type": "jsonb",
+        "column_default": "'[]'::jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "receiver_silver",
+        "data_type": "bigint",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "receiver_tax",
+        "data_type": "bigint",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "YES"
+      }
+    ],
+    "push_subscriptions": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "column_default": "uuid_generate_v4()",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "endpoint",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "p256dh",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "auth",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "settings",
+        "data_type": "jsonb",
+        "column_default": "'{\"daily_spin\": true, \"guild_task\": true, \"new_member\": true, \"world_boss\": true, \"item_bought\": true, \"market_sale\": true, \"hp_recovered\": true, \"inventory_full\": true, \"character_death\": true, \"dungeon_complete\": true, \"activity_complete\": true}'::jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "YES"
+      }
+    ],
+    "daily_rewards": [
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "last_spin",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "character_name",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "reward_id",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      }
+    ],
+    "world_boss_attempts": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "column_default": "uuid_generate_v4()",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "character_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "date",
+        "data_type": "date",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "damage",
+        "data_type": "bigint",
+        "column_default": "0",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "claimed",
+        "data_type": "boolean",
+        "column_default": "false",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "player_name",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      }
+    ],
+    "global_stats": [
+      {
+        "column_name": "id",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "total_market_tax",
+        "data_type": "bigint",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "market_tax_total",
+        "data_type": "bigint",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "trade_tax_total",
+        "data_type": "bigint",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "tax_24h_ago",
+        "data_type": "bigint",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "history",
+        "data_type": "jsonb",
+        "column_default": "'[]'::jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "last_snapshot_at",
+        "data_type": "timestamp with time zone",
+        "column_default": null,
+        "is_nullable": "YES"
+      }
+    ],
+    "user_bans": [
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "ban_level",
+        "data_type": "integer",
+        "column_default": "1",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "banned_until",
+        "data_type": "timestamp with time zone",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "reason",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "player_name",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "ack",
+        "data_type": "boolean",
+        "column_default": "false",
+        "is_nullable": "YES"
+      }
+    ],
+    "friends": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "column_default": "uuid_generate_v4()",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "sender_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "receiver_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "status",
+        "data_type": "text",
+        "column_default": "'PENDING'::text",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "is_best_friend",
+        "data_type": "boolean",
+        "column_default": "false",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "best_friend_request_sender",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "sender_name",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "receiver_name",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      }
+    ],
+    "guild_requests": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "column_default": "gen_random_uuid()",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "guild_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "character_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "status",
+        "data_type": "text",
+        "column_default": "'PENDING'::text",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "YES"
+      }
+    ],
+    "guilds": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "column_default": "gen_random_uuid()",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "name",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "tag",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "summary",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "icon",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "icon_color",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "bg_color",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "leader_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "level",
+        "data_type": "integer",
+        "column_default": "1",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "xp",
+        "data_type": "bigint",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "country_code",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "roles",
+        "data_type": "jsonb",
+        "column_default": "'{\"LEADER\": {\"name\": \"Leader\", \"color\": \"#d4af37\", \"permissions\": [\"edit_appearance\", \"manage_roles\", \"kick_members\", \"manage_requests\", \"change_member_roles\", \"manage_upgrades\"]}, \"MEMBER\": {\"name\": \"Member\", \"color\": \"#808080\", \"permissions\": []}, \"OFFICER\": {\"name\": \"Co-Leader\", \"color\": \"#c0c0c0\", \"permissions\": [\"kick_members\", \"manage_requests\", \"manage_upgrades\"]}}'::jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "min_level",
+        "data_type": "integer",
+        "column_default": "1",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "join_mode",
+        "data_type": "text",
+        "column_default": "'APPLY'::text",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "bank_silver",
+        "data_type": "bigint",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "bank_items",
+        "data_type": "jsonb",
+        "column_default": "'{}'::jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "guild_hall_level",
+        "data_type": "integer",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "gathering_xp_level",
+        "data_type": "integer",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "gathering_duplic_level",
+        "data_type": "integer",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "gathering_auto_level",
+        "data_type": "integer",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "refining_xp_level",
+        "data_type": "integer",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "refining_duplic_level",
+        "data_type": "integer",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "refining_effic_level",
+        "data_type": "integer",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "daily_tasks",
+        "data_type": "jsonb",
+        "column_default": "'[]'::jsonb",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "tasks_last_reset",
+        "data_type": "timestamp with time zone",
+        "column_default": "'-infinity'::timestamp with time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "library_level",
+        "data_type": "integer",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "crafting_xp_level",
+        "data_type": "integer",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "crafting_duplic_level",
+        "data_type": "integer",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "crafting_effic_level",
+        "data_type": "integer",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "guild_points",
+        "data_type": "bigint",
+        "column_default": "0",
+        "is_nullable": "YES"
+      }
+    ],
+    "market_history": [
+      {
+        "column_name": "id",
+        "data_type": "bigint",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "item_id",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "item_data",
+        "data_type": "jsonb",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "seller_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "buyer_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "seller_name",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "buyer_name",
+        "data_type": "text",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "quantity",
+        "data_type": "bigint",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "price_total",
+        "data_type": "bigint",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "price_per_unit",
+        "data_type": "double precision",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "tax_paid",
+        "data_type": "bigint",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "timezone('utc'::text, now())",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "order_type",
+        "data_type": "text",
+        "column_default": "'SELL_ORDER'::text",
+        "is_nullable": "YES"
+      }
+    ],
+    "guild_members": [
+      {
+        "column_name": "guild_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "character_id",
+        "data_type": "uuid",
+        "column_default": null,
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "role",
+        "data_type": "text",
+        "column_default": "'MEMBER'::text",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "joined_at",
+        "data_type": "timestamp with time zone",
+        "column_default": "now()",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "donated_xp",
+        "data_type": "bigint",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "donated_silver",
+        "data_type": "bigint",
+        "column_default": "0",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "donated_items_value",
+        "data_type": "bigint",
+        "column_default": "0",
+        "is_nullable": "YES"
+      }
+    ]
+  },
+  "foreignKeys": [
+    {
+      "table_name": "guild_requests",
+      "column_name": "guild_id",
+      "foreign_table_name": "guilds",
+      "foreign_column_name": "id"
+    },
+    {
+      "table_name": "trade_sessions",
+      "column_name": "sender_id",
+      "foreign_table_name": "characters",
+      "foreign_column_name": "id"
+    },
+    {
+      "table_name": "trade_sessions",
+      "column_name": "receiver_id",
+      "foreign_table_name": "characters",
+      "foreign_column_name": "id"
+    },
+    {
+      "table_name": "combat_history",
+      "column_name": "character_id",
+      "foreign_table_name": "characters",
+      "foreign_column_name": "id"
+    },
+    {
+      "table_name": "dungeon_history",
+      "column_name": "character_id",
+      "foreign_table_name": "characters",
+      "foreign_column_name": "id"
+    },
+    {
+      "table_name": "world_boss_attempts",
+      "column_name": "character_id",
+      "foreign_table_name": "characters",
+      "foreign_column_name": "id"
+    },
+    {
+      "table_name": "friends",
+      "column_name": "sender_id",
+      "foreign_table_name": "characters",
+      "foreign_column_name": "id"
+    },
+    {
+      "table_name": "friends",
+      "column_name": "receiver_id",
+      "foreign_table_name": "characters",
+      "foreign_column_name": "id"
+    },
+    {
+      "table_name": "friends",
+      "column_name": "best_friend_request_sender",
+      "foreign_table_name": "characters",
+      "foreign_column_name": "id"
+    },
+    {
+      "table_name": "guild_members",
+      "column_name": "guild_id",
+      "foreign_table_name": "guilds",
+      "foreign_column_name": "id"
+    },
+    {
+      "table_name": "guild_members",
+      "column_name": "character_id",
+      "foreign_table_name": "characters",
+      "foreign_column_name": "id"
+    },
+    {
+      "table_name": "guild_requests",
+      "column_name": "character_id",
+      "foreign_table_name": "characters",
+      "foreign_column_name": "id"
+    },
+    {
+      "table_name": "guilds",
+      "column_name": "leader_id",
+      "foreign_table_name": "characters",
+      "foreign_column_name": "id"
+    }
+  ],
+  "indexes": [
+    {
+      "tablename": "market_buy_orders",
+      "indexname": "market_buy_orders_pkey",
+      "indexdef": "CREATE UNIQUE INDEX market_buy_orders_pkey ON public.market_buy_orders USING btree (id)"
+    },
+    {
+      "tablename": "market_buy_orders",
+      "indexname": "market_buy_orders_status_item_id_idx",
+      "indexdef": "CREATE INDEX market_buy_orders_status_item_id_idx ON public.market_buy_orders USING btree (status, item_id)"
+    },
+    {
+      "tablename": "market_buy_orders",
+      "indexname": "market_buy_orders_buyer_id_idx",
+      "indexdef": "CREATE INDEX market_buy_orders_buyer_id_idx ON public.market_buy_orders USING btree (buyer_id)"
+    },
+    {
+      "tablename": "market_listings",
+      "indexname": "market_listings_pkey",
+      "indexdef": "CREATE UNIQUE INDEX market_listings_pkey ON public.market_listings USING btree (id)"
+    },
+    {
+      "tablename": "market_listings",
+      "indexname": "idx_market_listings_unit_price",
+      "indexdef": "CREATE INDEX idx_market_listings_unit_price ON public.market_listings USING btree (unit_price)"
+    },
+    {
+      "tablename": "characters",
+      "indexname": "characters_pkey",
+      "indexdef": "CREATE UNIQUE INDEX characters_pkey ON public.characters USING btree (id)"
+    },
+    {
+      "tablename": "characters",
+      "indexname": "characters_name_key",
+      "indexdef": "CREATE UNIQUE INDEX characters_name_key ON public.characters USING btree (name)"
+    },
+    {
+      "tablename": "characters",
+      "indexname": "idx_characters_active",
+      "indexdef": "CREATE INDEX idx_characters_active ON public.characters USING btree (id) WHERE (current_activity IS NOT NULL)"
+    },
+    {
+      "tablename": "characters",
+      "indexname": "idx_characters_current_activity",
+      "indexdef": "CREATE INDEX idx_characters_current_activity ON public.characters USING btree (current_activity) WHERE (current_activity IS NOT NULL)"
+    },
+    {
+      "tablename": "characters",
+      "indexname": "idx_characters_is_admin",
+      "indexdef": "CREATE INDEX idx_characters_is_admin ON public.characters USING btree (is_admin) WHERE ((is_admin IS NULL) OR (is_admin = false))"
+    },
+    {
+      "tablename": "user_sessions",
+      "indexname": "user_sessions_pkey",
+      "indexdef": "CREATE UNIQUE INDEX user_sessions_pkey ON public.user_sessions USING btree (user_id)"
+    },
+    {
+      "tablename": "user_sessions",
+      "indexname": "idx_user_sessions_ip",
+      "indexdef": "CREATE INDEX idx_user_sessions_ip ON public.user_sessions USING btree (ip_address)"
+    },
+    {
+      "tablename": "combat_history",
+      "indexname": "combat_history_pkey",
+      "indexdef": "CREATE UNIQUE INDEX combat_history_pkey ON public.combat_history USING btree (id)"
+    },
+    {
+      "tablename": "combat_history",
+      "indexname": "combat_history_character_id_idx",
+      "indexdef": "CREATE INDEX combat_history_character_id_idx ON public.combat_history USING btree (character_id)"
+    },
+    {
+      "tablename": "dungeon_history",
+      "indexname": "dungeon_history_pkey",
+      "indexdef": "CREATE UNIQUE INDEX dungeon_history_pkey ON public.dungeon_history USING btree (id)"
+    },
+    {
+      "tablename": "dungeon_history",
+      "indexname": "dungeon_history_character_id_idx",
+      "indexdef": "CREATE INDEX dungeon_history_character_id_idx ON public.dungeon_history USING btree (character_id)"
+    },
+    {
+      "tablename": "trade_sessions",
+      "indexname": "trade_sessions_pkey",
+      "indexdef": "CREATE UNIQUE INDEX trade_sessions_pkey ON public.trade_sessions USING btree (id)"
+    },
+    {
+      "tablename": "trade_sessions",
+      "indexname": "idx_trade_sender",
+      "indexdef": "CREATE INDEX idx_trade_sender ON public.trade_sessions USING btree (sender_id)"
+    },
+    {
+      "tablename": "trade_sessions",
+      "indexname": "idx_trade_receiver",
+      "indexdef": "CREATE INDEX idx_trade_receiver ON public.trade_sessions USING btree (receiver_id)"
+    },
+    {
+      "tablename": "trade_sessions",
+      "indexname": "idx_trade_status",
+      "indexdef": "CREATE INDEX idx_trade_status ON public.trade_sessions USING btree (status)"
+    },
+    {
+      "tablename": "messages",
+      "indexname": "messages_pkey",
+      "indexdef": "CREATE UNIQUE INDEX messages_pkey ON public.messages USING btree (id)"
+    },
+    {
+      "tablename": "messages",
+      "indexname": "idx_messages_channel",
+      "indexdef": "CREATE INDEX idx_messages_channel ON public.messages USING btree (channel)"
+    },
+    {
+      "tablename": "trade_history",
+      "indexname": "trade_history_pkey",
+      "indexdef": "CREATE UNIQUE INDEX trade_history_pkey ON public.trade_history USING btree (id)"
+    },
+    {
+      "tablename": "trade_history",
+      "indexname": "idx_trade_history_date",
+      "indexdef": "CREATE INDEX idx_trade_history_date ON public.trade_history USING btree (created_at DESC)"
+    },
+    {
+      "tablename": "trade_history",
+      "indexname": "idx_trade_history_sender",
+      "indexdef": "CREATE INDEX idx_trade_history_sender ON public.trade_history USING btree (sender_id)"
+    },
+    {
+      "tablename": "trade_history",
+      "indexname": "idx_trade_history_receiver",
+      "indexdef": "CREATE INDEX idx_trade_history_receiver ON public.trade_history USING btree (receiver_id)"
+    },
+    {
+      "tablename": "push_subscriptions",
+      "indexname": "push_subscriptions_pkey",
+      "indexdef": "CREATE UNIQUE INDEX push_subscriptions_pkey ON public.push_subscriptions USING btree (id)"
+    },
+    {
+      "tablename": "push_subscriptions",
+      "indexname": "push_subscriptions_user_id_endpoint_key",
+      "indexdef": "CREATE UNIQUE INDEX push_subscriptions_user_id_endpoint_key ON public.push_subscriptions USING btree (user_id, endpoint)"
+    },
+    {
+      "tablename": "push_subscriptions",
+      "indexname": "idx_push_subs_user",
+      "indexdef": "CREATE INDEX idx_push_subs_user ON public.push_subscriptions USING btree (user_id)"
+    },
+    {
+      "tablename": "global_stats",
+      "indexname": "global_stats_pkey",
+      "indexdef": "CREATE UNIQUE INDEX global_stats_pkey ON public.global_stats USING btree (id)"
+    },
+    {
+      "tablename": "world_boss_attempts",
+      "indexname": "world_boss_attempts_pkey",
+      "indexdef": "CREATE UNIQUE INDEX world_boss_attempts_pkey ON public.world_boss_attempts USING btree (id)"
+    },
+    {
+      "tablename": "world_boss_attempts",
+      "indexname": "world_boss_attempts_character_id_date_key",
+      "indexdef": "CREATE UNIQUE INDEX world_boss_attempts_character_id_date_key ON public.world_boss_attempts USING btree (character_id, date)"
+    },
+    {
+      "tablename": "world_boss_attempts",
+      "indexname": "idx_wb_attempts_date_damage",
+      "indexdef": "CREATE INDEX idx_wb_attempts_date_damage ON public.world_boss_attempts USING btree (date, damage DESC)"
+    },
+    {
+      "tablename": "daily_rewards",
+      "indexname": "daily_rewards_pkey",
+      "indexdef": "CREATE UNIQUE INDEX daily_rewards_pkey ON public.daily_rewards USING btree (user_id)"
+    },
+    {
+      "tablename": "user_bans",
+      "indexname": "user_bans_pkey",
+      "indexdef": "CREATE UNIQUE INDEX user_bans_pkey ON public.user_bans USING btree (user_id)"
+    },
+    {
+      "tablename": "friends",
+      "indexname": "friends_pkey",
+      "indexdef": "CREATE UNIQUE INDEX friends_pkey ON public.friends USING btree (id)"
+    },
+    {
+      "tablename": "friends",
+      "indexname": "unique_friendship",
+      "indexdef": "CREATE UNIQUE INDEX unique_friendship ON public.friends USING btree (sender_id, receiver_id)"
+    },
+    {
+      "tablename": "friends",
+      "indexname": "idx_friends_sender",
+      "indexdef": "CREATE INDEX idx_friends_sender ON public.friends USING btree (sender_id)"
+    },
+    {
+      "tablename": "friends",
+      "indexname": "idx_friends_receiver",
+      "indexdef": "CREATE INDEX idx_friends_receiver ON public.friends USING btree (receiver_id)"
+    },
+    {
+      "tablename": "guild_requests",
+      "indexname": "guild_requests_pkey",
+      "indexdef": "CREATE UNIQUE INDEX guild_requests_pkey ON public.guild_requests USING btree (id)"
+    },
+    {
+      "tablename": "guild_requests",
+      "indexname": "guild_requests_guild_id_character_id_key",
+      "indexdef": "CREATE UNIQUE INDEX guild_requests_guild_id_character_id_key ON public.guild_requests USING btree (guild_id, character_id)"
+    },
+    {
+      "tablename": "guild_requests",
+      "indexname": "guild_requests_guild_id_idx",
+      "indexdef": "CREATE INDEX guild_requests_guild_id_idx ON public.guild_requests USING btree (guild_id)"
+    },
+    {
+      "tablename": "guild_requests",
+      "indexname": "guild_requests_char_id_idx",
+      "indexdef": "CREATE INDEX guild_requests_char_id_idx ON public.guild_requests USING btree (character_id)"
+    },
+    {
+      "tablename": "market_history",
+      "indexname": "market_history_pkey",
+      "indexdef": "CREATE UNIQUE INDEX market_history_pkey ON public.market_history USING btree (id)"
+    },
+    {
+      "tablename": "market_history",
+      "indexname": "market_history_created_at_idx",
+      "indexdef": "CREATE INDEX market_history_created_at_idx ON public.market_history USING btree (created_at DESC)"
+    },
+    {
+      "tablename": "market_history",
+      "indexname": "market_history_item_id_idx",
+      "indexdef": "CREATE INDEX market_history_item_id_idx ON public.market_history USING btree (item_id)"
+    },
+    {
+      "tablename": "market_history",
+      "indexname": "market_history_seller_id_idx",
+      "indexdef": "CREATE INDEX market_history_seller_id_idx ON public.market_history USING btree (seller_id, created_at DESC)"
+    },
+    {
+      "tablename": "market_history",
+      "indexname": "market_history_buyer_id_idx",
+      "indexdef": "CREATE INDEX market_history_buyer_id_idx ON public.market_history USING btree (buyer_id, created_at DESC)"
+    },
+    {
+      "tablename": "market_history",
+      "indexname": "market_history_order_type_idx",
+      "indexdef": "CREATE INDEX market_history_order_type_idx ON public.market_history USING btree (order_type)"
+    },
+    {
+      "tablename": "guild_members",
+      "indexname": "guild_members_pkey",
+      "indexdef": "CREATE UNIQUE INDEX guild_members_pkey ON public.guild_members USING btree (character_id)"
+    },
+    {
+      "tablename": "guild_members",
+      "indexname": "guild_members_guild_id_idx",
+      "indexdef": "CREATE INDEX guild_members_guild_id_idx ON public.guild_members USING btree (guild_id)"
+    },
+    {
+      "tablename": "guilds",
+      "indexname": "guilds_pkey",
+      "indexdef": "CREATE UNIQUE INDEX guilds_pkey ON public.guilds USING btree (id)"
+    },
+    {
+      "tablename": "guilds",
+      "indexname": "guilds_name_key",
+      "indexdef": "CREATE UNIQUE INDEX guilds_name_key ON public.guilds USING btree (name)"
+    },
+    {
+      "tablename": "guilds",
+      "indexname": "guilds_tag_key",
+      "indexdef": "CREATE UNIQUE INDEX guilds_tag_key ON public.guilds USING btree (tag)"
+    },
+    {
+      "tablename": "guilds",
+      "indexname": "guilds_name_idx",
+      "indexdef": "CREATE INDEX guilds_name_idx ON public.guilds USING btree (name)"
+    },
+    {
+      "tablename": "guilds",
+      "indexname": "guilds_tag_idx",
+      "indexdef": "CREATE INDEX guilds_tag_idx ON public.guilds USING btree (tag)"
+    }
+  ]
+}

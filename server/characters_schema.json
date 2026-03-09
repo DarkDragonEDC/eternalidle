@@ -1,0 +1,110 @@
+[
+  {
+    "column_name": "id",
+    "data_type": "uuid",
+    "column_default": "auth.uid()",
+    "is_nullable": "NO"
+  },
+  {
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "column_default": null,
+    "is_nullable": "NO"
+  },
+  {
+    "column_name": "name",
+    "data_type": "text",
+    "column_default": null,
+    "is_nullable": "NO"
+  },
+  {
+    "column_name": "state",
+    "data_type": "jsonb",
+    "column_default": "'{\"silver\": 0, \"skills\": {}, \"inventory\": {}}'::jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "current_activity",
+    "data_type": "jsonb",
+    "column_default": null,
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "activity_started_at",
+    "data_type": "timestamp with time zone",
+    "column_default": null,
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "dungeon_state",
+    "data_type": "jsonb",
+    "column_default": null,
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "last_saved",
+    "data_type": "timestamp with time zone",
+    "column_default": "now()",
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "is_admin",
+    "data_type": "boolean",
+    "column_default": "false",
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "column_default": "now()",
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "inventory",
+    "data_type": "jsonb",
+    "column_default": "'{}'::jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "skills",
+    "data_type": "jsonb",
+    "column_default": "'{}'::jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "equipment",
+    "data_type": "jsonb",
+    "column_default": "'{}'::jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "info",
+    "data_type": "jsonb",
+    "column_default": "'{}'::jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "combat",
+    "data_type": "jsonb",
+    "column_default": null,
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "dungeon",
+    "data_type": "jsonb",
+    "column_default": null,
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "bank",
+    "data_type": "jsonb",
+    "column_default": "'{\"items\": {}, \"slots\": 10}'::jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "column_name": "settings",
+    "data_type": "jsonb",
+    "column_default": "'{}'::jsonb",
+    "is_nullable": "YES"
+  }
+]
