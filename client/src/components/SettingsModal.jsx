@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Settings, X, LogOut, Link2, Monitor, Backpack, BellOff, Bell, ImageOff, Image } from 'lucide-react';
 import { supabase } from '../supabase';
@@ -15,6 +15,23 @@ const SettingsModal = ({
     const handleSettingChange = (key, value) => {
         setSettings(prev => ({ ...prev, [key]: value }));
     };
+
+    const [hasRealSubscription, setHasRealSubscription] = useState(false);
+
+    useEffect(() => {
+        const checkSubscription = async () => {
+            try {
+                const { PushService } = await import('../services/PushService');
+                const sub = await PushService.getSubscription();
+                setHasRealSubscription(!!sub);
+            } catch (e) {
+                console.error('[PUSH] Failed to check subscription:', e);
+            }
+        };
+        if (isOpen) {
+            checkSubscription();
+        }
+    }, [isOpen]);
 
     return (
         <AnimatePresence>
@@ -250,7 +267,7 @@ const SettingsModal = ({
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', paddingBottom: '20px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <h3 style={{ color: 'var(--text-dim)', fontSize: '0.75rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>Push Notifications</h3>
-                                    {!settings.pushEnabled && (
+                                    {!hasRealSubscription && (
                                         <button 
                                             onClick={async () => {
                                                 try {
@@ -262,6 +279,7 @@ const SettingsModal = ({
                                                             socket.emit('save_push_subscription', { subscription: subJSON, settings });
                                                         }
                                                         handleSettingChange('pushEnabled', true);
+                                                        setHasRealSubscription(true);
                                                     }
                                                 } catch (e) {
                                                     console.error('[PUSH] Subscribe error:', e);
@@ -284,7 +302,7 @@ const SettingsModal = ({
                                     )}
                                 </div>
 
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', opacity: settings.pushEnabled ? 1 : 0.5, pointerEvents: settings.pushEnabled ? 'all' : 'none' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', opacity: hasRealSubscription ? 1 : 0.5, pointerEvents: hasRealSubscription ? 'all' : 'none' }}>
                                     {[
                                         { key: 'push_daily_spin', label: 'Daily Spin Available', desc: 'At 00:00 UTC' },
                                         { key: 'push_character_death', label: 'Character Death', desc: 'When you die in combat' },
