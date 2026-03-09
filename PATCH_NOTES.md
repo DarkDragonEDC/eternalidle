@@ -1,5 +1,13 @@
 # Patch Notes - Eternal Idle
 
+### 🛒 Mercado & Trocas
+- **Preço Automático no Buy Order**: Ao mudar a raridade ou estrelas na tela de criar Buy Order, o campo "Price per Unit" agora atualiza automaticamente para o valor correto do item (preço de venda rápida). Antes ficava travado em 1 Silver.
+- **Itens Assinados em Buy Orders**: Corrigido um bug onde itens assinados (ex: `Fishing Rod::Eterno`) não eram reconhecidos ao preencher Buy Orders existentes, dando erro de "item não encontrado".
+- **Sessão de Troca Duplicada**: Ao tentar trocar com alguém que já tem uma sessão de troca pendente, o jogo agora abre a troca existente ao invés de mostrar um erro.
+- **Proteção contra Crash**: Adicionada proteção no sistema de trocas para evitar erros internos quando o personagem ainda não foi carregado.
+
+### 📊 Interface & Habilidades
+- **Header de Skill Sempre Visível**: A caixa de progresso de habilidade (Nível, XP, barra) agora aparece mesmo quando a skill está no nível 1 com 0 XP. Antes ela sumia completamente para skills que nunca foram treinadas.
 ### 🏰 Guildas & Cooperação
 - **Custo para Edição**: Alterar o Nome da sua Guilda agora custa **250 Orbs**, e alterar a Tag custa **100 Orbs**.
 - **Correção no Painel Geral**: Resolvemos erros técnicos que impediam as configurações da guilda de abrirem corretamente, além de resolver instabilidades visuais.

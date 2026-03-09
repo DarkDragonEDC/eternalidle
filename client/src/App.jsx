@@ -1385,9 +1385,7 @@ function App() {
     if (!displayedGameState?.state?.skills) return null;
 
     const skillKey = mapTabCategoryToSkill(tab, category);
-    const skill = displayedGameState.state.skills[skillKey];
-
-    if (!skill) return null;
+    const skill = displayedGameState.state.skills[skillKey] || { level: 1, xp: 0 };
 
     if (skillKey === 'RUNE') {
       return (

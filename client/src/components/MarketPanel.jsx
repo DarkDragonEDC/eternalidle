@@ -205,7 +205,15 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
         const handleMarketPrice = (data) => {
             setLoadingPrice(false);
-            setLowestSellPrice(data.lowestPrice || null);
+            const price = data.lowestPrice || null;
+            setLowestSellPrice(price);
+            // Auto-update pricePerUnit to the lowest sell price (or keep minPrice if none)
+            if (price) {
+                setCreateBuyOrderModal(prev => prev ? ({ ...prev, pricePerUnit: price }) : prev);
+            } else {
+                // No listings found — set to minPrice
+                setCreateBuyOrderModal(prev => prev ? ({ ...prev, pricePerUnit: prev.minPrice || 1 }) : prev);
+            }
         };
 
         socket.on('market_listings_update', handleUpdate);
@@ -2788,63 +2796,87 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                         <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-dim)', marginBottom: '10px' }}>
                                             {createBuyOrderModal.canHaveQuality ? 'Select Quality' : 'Select Stars'}
                                         </label>
-                                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                            {createBuyOrderModal.canHaveQuality ? (
-                                                [0, 1, 2, 3, 4].map(q => (
-                                                    <button
-                                                        key={`opt-q-${q}`}
-                                                        onClick={() => {
-                                                            const baseId = createBuyOrderModal.itemId.split('_Q')[0].split('_')[0];
-                                                            const finalId = q > 0 ? `${baseId}_Q${q}` : baseId;
-                                                            const tempItem = resolveItem(baseId, q);
-                                                            const minP = tempItem ? calculateItemSellPrice(tempItem, finalId) || 1 : 1;
+                                        
+                                        {createBuyOrderModal.canHaveQuality ? (
+                                            <select
+                                                value={createBuyOrderModal.quality}
+                                                onChange={(e) => {
+                                                    const q = parseInt(e.target.value);
+                                                    const baseId = createBuyOrderModal.itemId.replace(/_Q\d+$/, '');
+                                                    const finalId = q > 0 ? `${baseId}_Q${q}` : baseId;
+                                                    const tempItem = resolveItem(baseId, q);
+                                                    const minP = tempItem ? calculateItemSellPrice(tempItem, finalId) || 1 : 1;
 
-                                                            setCreateBuyOrderModal(prev => ({ ...prev, quality: q, minPrice: minP, pricePerUnit: (prev.pricePerUnit < minP) ? minP : prev.pricePerUnit }));
-                                                            setLowestSellPrice(null);
-                                                            setLoadingPrice(true);
-                                                            socket.emit('get_item_market_price', { itemId: finalId });
-                                                        }}
-                                                        style={{
-                                                            padding: '6px 12px', borderRadius: '4px', border: '1px solid',
-                                                            borderColor: createBuyOrderModal.quality === q ? (QUALITIES[q]?.color || 'var(--accent)') : 'var(--border)',
-                                                            background: createBuyOrderModal.quality === q ? `${QUALITIES[q]?.color || 'var(--accent)'}20` : 'transparent',
-                                                            color: createBuyOrderModal.quality === q ? (QUALITIES[q]?.color || '#fff') : 'var(--text-dim)',
-                                                            fontSize: '0.8rem', cursor: 'pointer', transition: '0.2s'
-                                                        }}
-                                                    >
+                                                    setCreateBuyOrderModal(prev => ({ 
+                                                        ...prev, 
+                                                        quality: q, 
+                                                        minPrice: minP, 
+                                                        pricePerUnit: minP 
+                                                    }));
+                                                    setLowestSellPrice(null);
+                                                    setLoadingPrice(true);
+                                                    socket.emit('get_item_market_price', { itemId: finalId });
+                                                }}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '10px',
+                                                    background: 'rgba(0,0,0,0.3)',
+                                                    border: '1px solid var(--border)',
+                                                    borderRadius: '8px',
+                                                    color: (QUALITIES[createBuyOrderModal.quality]?.color || '#fff'),
+                                                    fontSize: '0.9rem',
+                                                    fontWeight: 'bold',
+                                                    cursor: 'pointer',
+                                                    outline: 'none'
+                                                }}
+                                            >
+                                                {[0, 1, 2, 3, 4].map(q => (
+                                                    <option key={`opt-q-${q}`} value={q} style={{ background: '#1a1a1a', color: QUALITIES[q]?.color }}>
                                                         {QUALITIES[q]?.name}
-                                                    </button>
-                                                ))
-                                            ) : (
-                                                [1, 2, 3].map(s => (
-                                                    <button
-                                                        key={`opt-s-${s}`}
-                                                        onClick={() => {
-                                                            const baseId = createBuyOrderModal.itemId.split('_')[0];
-                                                            const finalId = `${baseId}_${s}STAR`;
-                                                            const tempItem = resolveItem(baseId, 0);
-                                                            if (tempItem) tempItem.stars = s;
-                                                            const minP = tempItem ? calculateItemSellPrice(tempItem, finalId) || 1 : 1;
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            <select
+                                                value={createBuyOrderModal.stars}
+                                                onChange={(e) => {
+                                                    const s = parseInt(e.target.value);
+                                                    const baseId = createBuyOrderModal.itemId.replace(/_\dSTAR$/, '');
+                                                    const finalId = `${baseId}_${s}STAR`;
+                                                    const tempItem = resolveItem(baseId, 0);
+                                                    if (tempItem) tempItem.stars = s;
+                                                    const minP = tempItem ? calculateItemSellPrice(tempItem, finalId) || 1 : 1;
 
-                                                            setCreateBuyOrderModal(prev => ({ ...prev, stars: s, minPrice: minP, pricePerUnit: (prev.pricePerUnit < minP) ? minP : prev.pricePerUnit }));
-                                                            setLowestSellPrice(null);
-                                                            setLoadingPrice(true);
-                                                            socket.emit('get_item_market_price', { itemId: finalId });
-                                                        }}
-                                                        style={{
-                                                            padding: '6px 12px', borderRadius: '4px', border: '1px solid',
-                                                            borderColor: createBuyOrderModal.stars === s ? '#FFD700' : 'var(--border)',
-                                                            background: createBuyOrderModal.stars === s ? 'rgba(255, 215, 0, 0.1)' : 'transparent',
-                                                            color: createBuyOrderModal.stars === s ? '#FFD700' : 'var(--text-dim)',
-                                                            fontSize: '0.8rem', cursor: 'pointer', transition: '0.2s',
-                                                            display: 'flex', alignItems: 'center', gap: '4px'
-                                                        }}
-                                                    >
-                                                        {s} <Star size={12} fill={createBuyOrderModal.stars === s ? '#FFD700' : 'none'} />
-                                                    </button>
-                                                ))
-                                            )}
-                                        </div>
+                                                    setCreateBuyOrderModal(prev => ({ 
+                                                        ...prev, 
+                                                        stars: s, 
+                                                        minPrice: minP, 
+                                                        pricePerUnit: minP 
+                                                    }));
+                                                    setLowestSellPrice(null);
+                                                    setLoadingPrice(true);
+                                                    socket.emit('get_item_market_price', { itemId: finalId });
+                                                }}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '10px',
+                                                    background: 'rgba(0,0,0,0.3)',
+                                                    border: '1px solid var(--border)',
+                                                    borderRadius: '8px',
+                                                    color: '#FFD700',
+                                                    fontSize: '0.9rem',
+                                                    fontWeight: 'bold',
+                                                    cursor: 'pointer',
+                                                    outline: 'none'
+                                                }}
+                                            >
+                                                {[1, 2, 3].map(s => (
+                                                    <option key={`opt-s-${s}`} value={s} style={{ background: '#1a1a1a' }}>
+                                                        {s} Star{s > 1 ? 's' : ''}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        )}
                                     </div>
                                 )}
 

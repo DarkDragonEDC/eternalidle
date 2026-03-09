@@ -3768,6 +3768,7 @@ io.on("connection", (socket) => {
 
   socket.on("trade_create", async ({ receiverName }) => {
     try {
+      if (!socket.user) throw new Error("Not authenticated.");
       if (socket.user.is_anonymous)
         throw new Error("Trading is locked for Guest accounts.");
       await gameManager.executeLocked(socket.user.id, async () => {
@@ -3775,6 +3776,7 @@ io.on("connection", (socket) => {
           socket.user.id,
           socket.data.characterId,
         );
+        if (!char) throw new Error("Character not loaded.");
         const trade = await gameManager.tradeManager.createTrade(
           char,
           receiverName,
