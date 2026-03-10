@@ -868,7 +868,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
                                             gap: '5px'
                                         }}>
                                             <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{qty}x</span>
-                                            <span style={{ fontSize: '0.7rem', color: '#ae00ff', textTransform: 'capitalize' }}>{itemData ? (itemData.tier ? `T${itemData.tier} ${formatItemId(itemData.id || itemData.name)}` : formatItemId(itemData.id || itemData.name)) : formatItemId(id)}</span>
+                                            <span style={{ fontSize: '0.7rem', color: '#ae00ff', textTransform: 'capitalize' }}>{itemData ? formatItemId(itemData.id || itemData.name) : formatItemId(id)}</span>
                                         </div>
                                     );
                                 })
