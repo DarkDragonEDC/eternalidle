@@ -209,19 +209,26 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
     }, [socket]);
 
     useEffect(() => {
-        if (guild.myRole === 'LEADER' || guild.myRole === 'OFFICER') {
-            if (activeTab === 'REQUESTS') setIsLoadingRequests(true);
-            socket?.emit('get_guild_requests');
+        if (!socket) return;
 
-            const handleRequestsData = (data) => {
-                setRequests(data);
-                setIsLoadingRequests(false);
-            };
+        const handleRequestsData = (data) => {
+            setRequests(data);
+            setIsLoadingRequests(false);
+        };
 
-            socket?.on('guild_requests_data', handleRequestsData);
-            return () => socket?.off('guild_requests_data', handleRequestsData);
+        if (activeTab === 'REQUESTS' && playerHasPermission('manage_requests')) {
+            setIsLoadingRequests(true);
+            socket.emit('get_guild_requests');
+            socket.on('guild_requests_data', handleRequestsData);
+        } else {
+            setRequests([]);
+            setIsLoadingRequests(false);
         }
-    }, [socket, guild.myRole, activeTab]);
+
+        return () => {
+            socket.off('guild_requests_data', handleRequestsData);
+        };
+    }, [socket, activeTab, playerHasPermission]);
 
     useEffect(() => {
         if (activeTab === 'TASKS') {
@@ -311,12 +318,14 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
         return mapping[roleId] || 'rgba(255, 255, 255, 0.4)';
     };
 
-    const playerHasPermission = (permission) => {
-        if (guild.myRole === 'LEADER') return true;
+    const playerHasPermission = useCallback((permission) => {
+        if (!guild) return false;
+        // Leader always has all permissions
+        if (guild.myRole === 'LEADER' || guild.leader_id === guild.myMemberId) return true;
         const roles = guild.roles || {};
         const myRoleConfig = roles[guild.myRole];
         return myRoleConfig?.permissions?.includes(permission);
-    };
+    }, [guild]);
 
     const sortedMembers = useMemo(() => {
         if (!members || members.length === 0) return [];
@@ -480,7 +489,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                             color={guild.icon_color || '#fff'}
                             style={{ filter: `drop-shadow(0 0 10px ${guild.icon_color || '#ffffff'}88)` }}
                         />
-                        {guild.myRole === 'LEADER' && (
+                        {playerHasPermission('edit_appearance') && (
                             <button
                                 onClick={() => {
                                     setEditIcon(guild.icon || 'Shield');
@@ -2456,7 +2465,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                     }}
                 >
                     <LogOut size={14} />
-                    {guild.myRole === 'LEADER' && members.length <= 1 ? 'DISBAND GUILD' : 'LEAVE GUILD'}
+                    {playerHasPermission('manage_guild') && members.length <= 1 ? 'DISBAND GUILD' : 'LEAVE GUILD'}
                 </motion.button>}
                 {/* Leave Confirmation Modal */}
                 {ReactDOM.createPortal(
@@ -2497,15 +2506,15 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                         <LogOut size={24} color="#ff4444" />
                                     </div>
                                     <h3 style={{ color: '#ff4444', fontSize: '1rem', fontWeight: '900', margin: '0 0 10px' }}>
-                                        {guild.myRole === 'LEADER' && members.length <= 1 ? 'DISBAND GUILD?' : 'LEAVE GUILD?'}
+                                        {playerHasPermission('manage_guild') && members.length <= 1 ? 'DISBAND GUILD?' : 'LEAVE GUILD?'}
                                     </h3>
                                     <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', margin: '0 0 20px', lineHeight: '1.5' }}>
-                                        {guild.myRole === 'LEADER' && members.length <= 1
+                                        {playerHasPermission('manage_guild') && members.length <= 1
                                             ? 'You are the only member. Leaving will permanently disband the guild.'
                                             : 'Are you sure you want to leave this guild?'
                                         }
                                     </p>
-                                    {guild.myRole === 'LEADER' && members.length <= 1 && (
+                                    {playerHasPermission('manage_guild') && members.length <= 1 && (
                                         <div style={{ marginBottom: '20px' }}>
                                             <p style={{ color: 'var(--text-main)', fontSize: '0.8rem', marginBottom: '10px', fontWeight: 'bold' }}>
                                                 Type <span style={{ color: '#ff4444' }}>Disband {guild.name}</span> to confirm:
@@ -2553,7 +2562,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                             whileHover={{ scale: 1.03 }}
                                             whileTap={{ scale: 0.97 }}
                                             onClick={() => {
-                                                if (guild.myRole === 'LEADER' && members.length <= 1) {
+                                                if (playerHasPermission('manage_guild') && members.length <= 1) {
                                                     if (disbandText === `Disband ${guild.name}`) {
                                                         socket?.emit('leave_guild');
                                                         setConfirmLeave(false);
