@@ -213,7 +213,7 @@ export class MarketManager {
                         }
 
                         this.gameManager.addNotification(buyer, 'SUCCESS', `Your buy order for ${itemData.name} was partially filled (x${fillQty}). Refund: ${buyerChange} Silver.`);
-                        
+
                         // Push Notification: Item Bought (Auto-match)
                         if (buyer.user_id) {
                             this.gameManager.pushManager.notifyUser(
@@ -370,7 +370,7 @@ export class MarketManager {
             cost: totalCost
         });
         this.gameManager.addNotification(buyer, 'SUCCESS', `You bought ${qtyNum}x ${listing.item_data.name} for ${totalCost} Silver.`);
-        
+
         // Push Notification: Item Bought
         if (buyer.user_id) {
             this.gameManager.pushManager.notifyUser(
@@ -401,7 +401,7 @@ export class MarketManager {
                 timestamp: Date.now()
             });
             this.gameManager.addNotification(seller, 'SUCCESS', `Your item ${listing.item_data.name} (x${qtyNum}) was sold! +${sellerProfit} Silver (after tax).`);
-            
+
             // Push Notification: Market Sale
             if (seller.user_id) {
                 this.gameManager.pushManager.notifyUser(
@@ -879,15 +879,25 @@ export class MarketManager {
         if (currentQty < qtyNum) throw new Error("Insufficient items in inventory");
 
         // Validate quality/stars match if the order requires a specific quality
-        if (requiredQuality !== undefined && typeof entry === 'object') {
-            const entryQuality = entry.quality !== undefined ? entry.quality : 0;
-            if (entryQuality !== requiredQuality) {
+        if (typeof entry === 'object') {
+            // First check metadata, then fallback to parsing ID if metadata is missing/zero
+            let entryQuality = entry.quality !== undefined ? entry.quality : 0;
+            let entryStars = entry.stars !== undefined ? entry.stars : 0;
+
+            // Fallback: Parse from invKey if still 0/undefined but order requires it
+            if (requiredQuality !== undefined && entryQuality === 0) {
+                const qMatch = invKey.match(/_Q(\d)/);
+                if (qMatch) entryQuality = parseInt(qMatch[1]);
+            }
+            if (requiredStars !== undefined && entryStars === 0) {
+                const sMatch = invKey.match(/_(\d)STAR/);
+                if (sMatch) entryStars = parseInt(sMatch[1]);
+            }
+
+            if (requiredQuality !== undefined && entryQuality !== requiredQuality) {
                 throw new Error(`Item quality mismatch. Order requires quality ${requiredQuality}, but your item has quality ${entryQuality}.`);
             }
-        }
-        if (requiredStars !== undefined && typeof entry === 'object') {
-            const entryStars = entry.stars !== undefined ? entry.stars : 0;
-            if (entryStars !== requiredStars) {
+            if (requiredStars !== undefined && entryStars !== requiredStars) {
                 throw new Error(`Item stars mismatch. Order requires ${requiredStars} stars, but your item has ${entryStars}.`);
             }
         }

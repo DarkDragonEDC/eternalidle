@@ -16,6 +16,7 @@
 ### 🛒 Mercado & Trocas
 - **Preço Automático no Buy Order**: Ao mudar a raridade ou estrelas na tela de criar Buy Order, o campo "Price per Unit" agora atualiza automaticamente para o valor correto do item (preço de venda rápida). Antes ficava travado em 1 Silver.
 - **Itens Assinados em Buy Orders**: Corrigido um bug onde itens assinados (ex: `Fishing Rod::Eterno`) não eram reconhecidos ao preencher Buy Orders existentes, dando erro de "item não encontrado".
+- **Itens de Qualidade em Ordens de Compra**: Corrigido um bug onde o mercado não reconhecia a qualidade de itens excelentes (ex: `T3_FISHING_ROD_Q3`) ao preencher ordens de compra, resultando no erro "Item quality mismatch". O sistema agora identifica corretamente a qualidade tanto pelos metadados quanto pelo nome do item.
 - **Sessão de Troca Duplicada**: Ao tentar trocar com alguém que já tem uma sessão de troca pendente, o jogo agora abre a troca existente ao invés de mostrar um erro.
 - **Proteção contra Crash**: Adicionada proteção no sistema de trocas para evitar erros internos quando o personagem ainda não foi carregado.
 
