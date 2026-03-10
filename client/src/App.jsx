@@ -955,9 +955,11 @@ function App() {
         window.VAPID_PUBLIC_KEY = vapidPublicKey;
       }
       const CLIENT_VERSION = '1.4.3'; 
+      const serverVersion = (version || '').trim();
+      const clientVersion = CLIENT_VERSION.trim();
       
-      if (version && version !== CLIENT_VERSION) {
-        console.warn(`[VERSION] Mismatch! Server: ${version}, Client: ${CLIENT_VERSION}`);
+      if (serverVersion && serverVersion !== clientVersion) {
+        console.warn(`[VERSION] Mismatch! Server: "${serverVersion}", Client: "${clientVersion}"`);
 
         // Prevent loop if server is stuck on old version or cache is stubborn
         const reloadCount = parseInt(sessionStorage.getItem('version_reload_count') || '0');
