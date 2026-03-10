@@ -413,6 +413,7 @@ function App() {
   const [previewAvatarData, setPreviewAvatarData] = useState(null); // { path, filename, name, preview }
   const [previewBannerData, setPreviewBannerData] = useState(null);
   const [confirmModal, setConfirmModal] = useState(null); // { message, onConfirm, onCancel }
+  const [versionMismatch, setVersionMismatch] = useState(false);
 
   const isPreviewActive = !!previewThemeId || !!previewAvatarData || !!previewBannerData;
 
@@ -824,18 +825,26 @@ function App() {
 
             if (isFatalAuthError || err.message?.includes('Invalid token')) {
               console.warn('Fatal Auth Error detected. Clearing storage and logging out...');
-              await supabase.auth.signOut();
 
-              // Deep cleanup to avoid search loops with old data
+              // Prevent loop for auth reloads
+              const authReloads = parseInt(sessionStorage.getItem('fatal_auth_reloads') || '0');
+              if (authReloads > 2) {
+                console.error('Too many auth reloads. Stopping to avoid loop.');
+                setServerError('Critical authentication error. Please try logging in manually.');
+                setIsConnecting(false);
+                return;
+              }
+              sessionStorage.setItem('fatal_auth_reloads', (authReloads + 1).toString());
+
+              await supabase.auth.signOut();
               localStorage.clear();
-              sessionStorage.clear();
+              sessionStorage.removeItem('selectedCharacterId'); // Specific cleanup
 
               setSession(null);
               setGameState(null);
               setSelectedCharacter(null);
               setSocket(null);
 
-              // Reload to ensure Supabase state is reset
               window.location.reload();
               return;
             }
@@ -939,27 +948,49 @@ function App() {
       }
     });
 
-    newSocket.on('server_version', ({ version, vapidPublicKey }) => {
+    newSocket.on('server_version', async ({ version, vapidPublicKey }) => {
       if (vapidPublicKey) {
         window.VAPID_PUBLIC_KEY = vapidPublicKey;
       }
-      // client version is 1.0.0
-      const CLIENT_VERSION = '1.4.1'; // Keep synchronized with server/package.json
+      const CLIENT_VERSION = '1.4.3'; 
+      
       if (version && version !== CLIENT_VERSION) {
         console.warn(`[VERSION] Mismatch! Server: ${version}, Client: ${CLIENT_VERSION}`);
 
-        // Prevent loop if server is stuck on old version
-        const lastReload = sessionStorage.getItem('last_version_reload');
+        // Prevent loop if server is stuck on old version or cache is stubborn
+        const reloadCount = parseInt(sessionStorage.getItem('version_reload_count') || '0');
+        const lastReloadAt = parseInt(sessionStorage.getItem('last_version_reload') || '0');
         const now = Date.now();
-        if (lastReload && (now - parseInt(lastReload)) < 15000) {
-          console.error('[VERSION] Refresh loop detected! Please restart the server manually.');
+
+        // If we reloaded more than 3 times in the last 5 minutes, stop and show error
+        if (reloadCount >= 3 && (now - lastReloadAt) < 300000) {
+          console.error('[VERSION] Persistent version mismatch. Showing update required overlay.');
+          setVersionMismatch(true);
           return;
         }
 
+        sessionStorage.setItem('version_reload_count', (reloadCount + 1).toString());
         sessionStorage.setItem('last_version_reload', now.toString());
+
+        // Try to unregister service worker to break cache
+        try {
+          if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (let registration of registrations) {
+              await registration.unregister();
+            }
+            console.log('[VERSION] Unregistered service workers before reload.');
+          }
+        } catch (swErr) {
+          console.error('[VERSION] SW unregister failed:', swErr);
+        }
+
         setTimeout(() => {
           window.location.reload(true);
-        }, 1000);
+        }, 1500);
+      } else {
+        // Versions match - reset reload count
+        sessionStorage.setItem('version_reload_count', '0');
       }
     });
 
@@ -2263,6 +2294,44 @@ function App() {
   };
 
 
+
+  if (versionMismatch) {
+    return (
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        background: 'rgba(0,0,0,0.95)', zIndex: 999999,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        padding: '20px', textAlign: 'center'
+      }}>
+        <div style={{ 
+          background: 'var(--panel-bg)', padding: '40px', borderRadius: '20px', 
+          border: '2px solid var(--accent)', boxShadow: '0 0 30px var(--accent-soft)',
+          maxWidth: '500px'
+        }}>
+          <h1 style={{ color: 'var(--accent)', marginBottom: '20px' }}>UPDATE REQUIRED</h1>
+          <p style={{ color: 'var(--text-main)', fontSize: '1.1rem', marginBottom: '30px' }}>
+            A new version of Eternal Idle is available, but your browser is struggling to update.
+          </p>
+          <p style={{ color: 'var(--text-dim)', marginBottom: '30px' }}>
+            Please close all game tabs and try clearing your browser cache if this persists.
+          </p>
+          <button 
+            onClick={() => {
+              sessionStorage.setItem('version_reload_count', '0');
+              window.location.reload(true);
+            }}
+            style={{
+              background: 'var(--accent)', color: 'black', padding: '15px 40px',
+              borderRadius: '10px', fontSize: '1.2rem', fontWeight: '900',
+              border: 'none', cursor: 'pointer', transition: '0.2s'
+            }}
+          >
+            TRY AGAIN
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (banModalData) {
     return (
