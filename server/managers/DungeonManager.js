@@ -194,10 +194,15 @@ export class DungeonManager {
         console.log(`[DUNGEON-DEBUG] Adding ${chestId} for ${char.name}`);
         const added = this.gameManager.inventoryManager.addItemToInventory(char, chestId, 1);
 
+        let inventoryFullStop = false;
         if (added) {
             loot.push(`1x ${chestId}`);
         } else {
             loot.push(`(Full) ${chestId} LOST`);
+            // STOP THE QUEUE if inventory is full
+            inventoryFullStop = true;
+            char.state.dungeon.repeatCount = 0;
+            console.log(`[DUNGEON-STOP] Inventory full for ${char.name}. Stopping queue.`);
         }
 
         if (!char.state.stats) char.state.stats = {};
@@ -293,29 +298,36 @@ export class DungeonManager {
             }
         }
 
-        // Final Run Completed
-        await this.saveDungeonLog(char, config, 'COMPLETED', null, now);
+        // Final Run Completed (or stopped due to error/full inventory)
+        const outcome = inventoryFullStop ? 'COMPLETED (Inventory Full)' : 'COMPLETED';
+        const message = inventoryFullStop ? 'Queue stopped: Inventory Full!' : null;
+
+        await this.saveDungeonLog(char, config, outcome, null, now);
         char.state.dungeon.status = 'COMPLETED';
-        
+
         // Push Notification: Dungeon Complete
         if (char.user_id) {
+            const pushMsg = inventoryFullStop
+                ? `Dungeon queue stopped because your inventory is full!`
+                : `You have successfully explored ${config.name}.`;
+
             this.gameManager.pushManager.notifyUser(
                 char.user_id,
                 'push_dungeon_complete',
                 'Dungeon Complete! 🏰',
-                `You have successfully explored ${config.name}.`,
+                pushMsg,
                 '/dungeon'
             );
         }
 
         // Save immediately after final run
         await this.gameManager.saveState(char.id, char.state);
-        console.log(`[DUNGEON-DEBUG] completeDungeon finished successfully for ${char.name}`);
+        console.log(`[DUNGEON-DEBUG] completeDungeon finished successfully for ${char.name} with outcome: ${outcome}`);
 
         return {
             dungeonUpdate: {
                 status: 'COMPLETED',
-                message: null,
+                message: message,
                 rewards: { xp: rewards.xp, items: loot },
                 lootLog: char.state.dungeon.lootLog
             },
