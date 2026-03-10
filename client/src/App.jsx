@@ -244,7 +244,7 @@ const StatCard = ({ label, value, icon, color }) => (
   </div>
 );
 
-const CLIENT_VERSION = '1.4.4';
+const CLIENT_VERSION = '1.4.5';
 
 function App() {
   const [session, setSession] = useState(null);
@@ -954,10 +954,10 @@ function App() {
       if (vapidPublicKey) {
         window.VAPID_PUBLIC_KEY = vapidPublicKey;
       }
-      const CLIENT_VERSION = '1.4.4'; 
+      const CLIENT_VERSION = '1.4.4';
       const serverVersion = (version || '').trim();
       const clientVersion = CLIENT_VERSION.trim();
-      
+
       if (serverVersion && serverVersion !== clientVersion) {
         console.warn(`[VERSION] Mismatch! Server: "${serverVersion}", Client: "${clientVersion}"`);
 
@@ -2307,8 +2307,8 @@ function App() {
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         padding: '20px', textAlign: 'center'
       }}>
-        <div style={{ 
-          background: 'var(--panel-bg)', padding: '40px', borderRadius: '20px', 
+        <div style={{
+          background: 'var(--panel-bg)', padding: '40px', borderRadius: '20px',
           border: '2px solid var(--accent)', boxShadow: '0 0 30px var(--accent-soft)',
           maxWidth: '500px'
         }}>
@@ -2319,7 +2319,7 @@ function App() {
           <p style={{ color: 'var(--text-dim)', marginBottom: '30px' }}>
             Please close all game tabs and try clearing your browser cache if this persists.
           </p>
-          <button 
+          <button
             onClick={() => {
               sessionStorage.setItem('version_reload_count', '0');
               window.location.reload(true);

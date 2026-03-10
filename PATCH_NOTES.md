@@ -1,6 +1,6 @@
 # Patch Notes - Eternal Idle
 
-## v1.4.4
+## v1.4.5
 
 ### ⚔️ Balanceamento de Equipamentos
 - **Restauração do HP**: O atributo HP foi restaurado em todas as peças de armadura (Peitoral, Elmo, Botas e Luvas) para todas as classes.

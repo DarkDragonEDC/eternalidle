@@ -29,7 +29,7 @@ export class DungeonManager {
         let foodToConsume = null;
         let requiredAmount = 0;
 
-        console.log(`[DUNGEON-FOOD] Player=${char.name}, DungeonTier=${dungeonTier}, PlayerIP=${playerIP}`);
+
 
         // 1. Check equipped food FIRST (this is what the user sees)
         const equippedFood = char.state.equipment?.food;
@@ -155,8 +155,7 @@ export class DungeonManager {
             if (now >= dungeonState.finish_at) {
                 return await this.completeDungeon(char, dungeonConfig, now);
             } else {
-                const timeLeft = Math.ceil((dungeonState.finish_at - now) / 1000);
-                console.log(`[DUNGEON-DEBUG] processDungeonTick: char=${char.name}, time_left=${timeLeft}s`);
+
                 return {
                     dungeonUpdate: {
                         status: 'EXPLORING',
@@ -171,7 +170,6 @@ export class DungeonManager {
     }
 
     async completeDungeon(char, config, virtualNow = null) {
-        console.log(`[DUNGEON-DEBUG] completeDungeon called for ${char.name}, tier: ${config.tier}`);
         const now = virtualNow || Date.now();
         const rewards = config.rewards;
         const loot = [];
@@ -262,7 +260,6 @@ export class DungeonManager {
 
                 // Save immediately after starting a new repeat run
                 await this.gameManager.saveState(char.id, char.state);
-                console.log(`[DUNGEON-DEBUG] Starting repeat run. Current run: ${char.state.dungeon.currentRun}`);
 
                 return {
                     dungeonUpdate: {
@@ -322,7 +319,6 @@ export class DungeonManager {
 
         // Save immediately after final run
         await this.gameManager.saveState(char.id, char.state);
-        console.log(`[DUNGEON-DEBUG] completeDungeon finished successfully for ${char.name} with outcome: ${outcome}`);
 
         return {
             dungeonUpdate: {
