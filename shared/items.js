@@ -1772,7 +1772,8 @@ indexItems(ITEMS);
 // Format item ID for display (replace underscores with spaces and capitalize)
 export const formatItemId = (itemId) => {
     if (!itemId) return '';
-    let formatted = itemId
+    const baseId = itemId.split('::')[0];
+    let formatted = baseId
         .replace(/_/g, ' ')
         .toLowerCase()
         .replace(/\b\w/g, char => char.toUpperCase());
