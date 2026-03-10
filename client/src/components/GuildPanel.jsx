@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Users, Sword, Swords, Trophy, Settings, Plus, Info, Check, X, Coins, Sparkles, Tag, User, Zap, LogOut, Edit2, Save, Menu, Home, Building2, ChevronDown, ArrowUp, ArrowDown, Trash2, Landmark, ClipboardList, Pickaxe, FlaskConical, Hammer, Lock, Dices, Library } from 'lucide-react';
