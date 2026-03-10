@@ -555,8 +555,8 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                                     onClick={(e) => { e.stopPropagation(); if (gameState?.state?.tutorialStep && gameState.state.tutorialStep !== 'COMPLETED') return; onShowInfo(item); }}
                                     style={{
                                         position: 'absolute',
-                                        bottom: 22,
-                                        left: 6,
+                                        bottom: 5,
+                                        right: 5,
                                         color: 'var(--text-main)',
                                         opacity: 0.7,
                                         cursor: 'pointer',
