@@ -917,10 +917,13 @@ export class GuildManager {
 
         if (error || !member) return false;
 
-        // Leader ID check (absolute fallback)
-        if (member.guilds.leader_id === characterId || member.role === 'LEADER') return true;
+        // Leader check - absolute fallback
+        // Fix: Ensure we check characterId against guild's leader_id as primary source of truth
+        if (member.guilds?.leader_id === characterId || member.role === 'LEADER') {
+            return true;
+        }
 
-        const rolesConfig = member.guilds.roles || {};
+        const rolesConfig = member.guilds?.roles || {};
         const myRoleConfig = rolesConfig[member.role];
 
         if (!myRoleConfig || !myRoleConfig.permissions) return false;
