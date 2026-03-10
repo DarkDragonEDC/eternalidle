@@ -572,7 +572,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                         WebkitBoxOrient: 'vertical',
                         overflow: 'hidden'
                     }}>
-                        {formatItemId(item.id || item.name)}
+                        {formatItemId(item.id || item.name, { nameOnly: true })}
                     </span>
                 )}
             </div>

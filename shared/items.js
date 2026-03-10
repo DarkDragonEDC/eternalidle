@@ -1770,8 +1770,9 @@ for (const t of TIERS) {
 indexItems(ITEMS);
 
 // Format item ID for display (replace underscores with spaces and capitalize)
-export const formatItemId = (itemId) => {
+export const formatItemId = (itemId, options = {}) => {
     if (!itemId) return '';
+    const { nameOnly = false } = options;
     const baseId = itemId.split('::')[0];
     let formatted = baseId
         .replace(/_/g, ' ')
@@ -1781,6 +1782,13 @@ export const formatItemId = (itemId) => {
     // Remove "T1 ", "T2 " etc from Rune Shards since only one tier exists
     if (formatted.includes('Rune Shard')) {
         formatted = formatted.replace(/T\d+\s+/i, '');
+    }
+
+    if (nameOnly) {
+        // Remove Tier prefix (e.g., "T10 ")
+        formatted = formatted.replace(/^T\d+\s+/i, '');
+        // Remove Quality suffix (e.g., " Q4")
+        formatted = formatted.replace(/\s+Q\d+$/i, '');
     }
 
     return formatted;

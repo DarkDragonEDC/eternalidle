@@ -101,7 +101,7 @@ const EquipmentSlot = ({ slot, icon, label, item: rawItem, delay = 0, onItemClic
                     overflow: 'hidden',
                     marginTop: '2px'
                 }}>
-                    {item.name}
+                    {formatItemId(item.id || item.name, { nameOnly: true })}
                 </span>
             ) : (
                 <span style={{ fontSize: '0.45rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.5px', opacity: 0.6 }}>

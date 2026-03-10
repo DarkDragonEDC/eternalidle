@@ -1642,7 +1642,7 @@ function App() {
             <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRadius: '16px', background: 'var(--panel-bg)' }}>
               <div style={{ padding: isMobile ? '20px' : '30px 40px', borderBottom: '1px solid var(--border)' }}>
                 <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '2px' }}>
-                  {activeCategory} {isGathering ? 'GATHERING' : 'REFINING'}
+                  {activeCategory.replace(/_/g, ' ')} {isGathering ? 'GATHERING' : 'REFINING'}
                 </h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', marginTop: '15px' }}>
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(t => (
@@ -1841,7 +1841,7 @@ function App() {
             <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRadius: '16px', background: 'var(--panel-bg)' }}>
               <div style={{ padding: isMobile ? '20px' : '30px 40px', borderBottom: '1px solid var(--border)' }}>
                 <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '2px' }}>
-                  {activeCategory} CRAFTING
+                  {activeCategory.replace(/_/g, ' ')} CRAFTING
                 </h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', marginTop: '15px' }}>
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(t => (
@@ -2029,7 +2029,6 @@ function App() {
       case 'world_boss':
         return (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <SkillProgressHeader tab="world_boss" category="WORLD_BOSS" />
             <WorldBossPanel
               socket={socket}
               gameState={displayedGameState}
@@ -2045,7 +2044,6 @@ function App() {
       case 'market':
         return (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <SkillProgressHeader tab="market" category="MARKETPLACE" />
             <MarketPanel
               socket={socket}
               gameState={displayedGameState}
