@@ -344,9 +344,50 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
             // 0. Inventory Filter
             if (buyOrdersFilterInventory) {
-                const invEntry = inventory[order.item_id];
-                const qty = typeof invEntry === 'object' ? (invEntry?.amount || 0) : (Number(invEntry) || 0);
-                if (qty <= 0) return false;
+                // Buy orders encode quality in item_id (e.g. T1_FISHING_ROD_Q3)
+                // but inventory stores items as base ID with quality metadata (e.g. T1_FISHING_ROD { quality: 3 })
+                // or with signatures (e.g. T1_FISHING_ROD_Q3::PlayerName)
+                let hasItem = false;
+                const orderId = order.item_id;
+
+                // Parse quality/stars from order item_id
+                const qMatch = orderId.match(/^(.+?)_Q(\d)$/);
+                const sMatch = orderId.match(/^(.+?)_(\d)STAR$/);
+                const orderBaseId = qMatch ? qMatch[1] : (sMatch ? sMatch[1] : orderId);
+                const orderQuality = qMatch ? parseInt(qMatch[2]) : null;
+                const orderStars = sMatch ? parseInt(sMatch[2]) : null;
+
+                for (const [key, entry] of Object.entries(inventory)) {
+                    const keyBase = key.split('::')[0]; // Strip signature
+                    const qty = typeof entry === 'object' ? (entry?.amount || 0) : (Number(entry) || 0);
+                    if (qty <= 0) continue;
+
+                    // Direct match (exact key or signature-stripped key matches order item_id)
+                    if (keyBase === orderId || key === orderId) {
+                        hasItem = true;
+                        break;
+                    }
+
+                    // Quality match: order is T1_FISHING_ROD_Q3, inventory has T1_FISHING_ROD with quality=3
+                    if (orderQuality !== null && keyBase === orderBaseId && typeof entry === 'object') {
+                        const entryQuality = entry.quality !== undefined ? entry.quality : 0;
+                        if (entryQuality === orderQuality) {
+                            hasItem = true;
+                            break;
+                        }
+                    }
+
+                    // Stars match: order is RUNE_XP_WOOD_2STAR, inventory has RUNE_XP_WOOD with stars=2
+                    if (orderStars !== null && keyBase === orderBaseId && typeof entry === 'object') {
+                        const entryStars = entry.stars !== undefined ? entry.stars : 0;
+                        if (entryStars === orderStars) {
+                            hasItem = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!hasItem) return false;
             }
 
             // 1. Keyword Search

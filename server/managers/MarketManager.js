@@ -921,7 +921,7 @@ export class MarketManager {
         if (buyer) {
             this.addClaim(buyer, {
                 type: 'BOUGHT_ITEM',
-                itemId: lookupId,
+                itemId: order.item_id,
                 amount: qtyNum,
                 metadata: { quality: requiredQuality, stars: requiredStars },
                 timestamp: Date.now(),
