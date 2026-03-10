@@ -310,7 +310,7 @@ export class GuildManager {
 
         const { data: guild, error: guildError } = await this.supabase
             .from('guilds')
-            .select('id, name, tag, level, xp, summary, icon, icon_color, bg_color, country_code, guild_hall_level, created_at')
+            .select('id, name, tag, level, xp, summary, icon, icon_color, bg_color, country_code, guild_hall_level, created_at, roles')
             .eq('id', guildId)
             .single();
 
