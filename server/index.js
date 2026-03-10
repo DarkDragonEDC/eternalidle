@@ -1,4 +1,4 @@
-// Force Reload Trigger (Social Activity Debug) - 2026-02-27 17:12
+// Force Reload Trigger (Social Activity Debug) - 2026-03-09 21:58
 // Force restart for items sync
 // Forced reload to pick up shared/items.js changes
 import express from "express";
