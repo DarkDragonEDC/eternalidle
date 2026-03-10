@@ -1,5 +1,6 @@
 # Patch Notes - Eternal Idle
 
+<<<<<<< Updated upstream
 ### 🛒 Mercado & Trocas
 - **Preço Automático no Buy Order**: Ao mudar a raridade ou estrelas na tela de criar Buy Order, o campo "Price per Unit" agora atualiza automaticamente para o valor correto do item (preço de venda rápida). Antes ficava travado em 1 Silver.
 - **Itens Assinados em Buy Orders**: Corrigido um bug onde itens assinados (ex: `Fishing Rod::Eterno`) não eram reconhecidos ao preencher Buy Orders existentes, dando erro de "item não encontrado".
@@ -30,4 +31,7 @@
 - **Perfil de Guilda no Ranking**: Agora você pode clicar em qualquer guilda no Ranking para abrir um modal com o perfil detalhado dela.
 - **Contribuidores de Tarefas**: Agora você pode ver exatamente quem doou e quanto cada um contribuiu para as Tarefas Diárias da Guilda. Basta clicar no ícone de seta (`\/`) no card de cada missão para abrir a lista detalhada.
 - **Lista Ordenada**: A lista de contribuidores mostra os jogadores que mais ajudaram no topo, facilitando o reconhecimento dos membros mais ativos.
+=======
+### 
+>>>>>>> Stashed changes
 

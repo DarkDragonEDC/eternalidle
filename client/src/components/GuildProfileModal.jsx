@@ -145,7 +145,8 @@ const GuildProfileModal = ({ isOpen, onClose, guildId, socket, onInspect, isMobi
                                     borderBottom: '1px solid var(--border)',
                                     zIndex: 1,
                                     overflow: 'hidden',
-                                    padding: '20px 20px 15px' // Compacted padding
+                                    padding: '20px 20px 15px', // Compacted padding
+                                    flexShrink: 0
                                 }}>
                                     {/* Dark Base */}
                                     <div style={{
