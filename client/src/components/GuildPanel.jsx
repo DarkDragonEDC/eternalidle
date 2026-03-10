@@ -208,6 +208,15 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
         return () => socket.off('guild_customization_updated', handleCustomizationUpdated);
     }, [socket]);
 
+    const playerHasPermission = useCallback((permission) => {
+        if (!guild) return false;
+        // Leader always has all permissions
+        if (guild.myRole === 'LEADER' || guild.leader_id === guild.myMemberId) return true;
+        const roles = guild.roles || {};
+        const myRoleConfig = roles[guild.myRole];
+        return myRoleConfig?.permissions?.includes(permission);
+    }, [guild]);
+
     useEffect(() => {
         if (!socket) return;
 
@@ -318,14 +327,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
         return mapping[roleId] || 'rgba(255, 255, 255, 0.4)';
     };
 
-    const playerHasPermission = useCallback((permission) => {
-        if (!guild) return false;
-        // Leader always has all permissions
-        if (guild.myRole === 'LEADER' || guild.leader_id === guild.myMemberId) return true;
-        const roles = guild.roles || {};
-        const myRoleConfig = roles[guild.myRole];
-        return myRoleConfig?.permissions?.includes(permission);
-    }, [guild]);
+
 
     const sortedMembers = useMemo(() => {
         if (!members || members.length === 0) return [];
