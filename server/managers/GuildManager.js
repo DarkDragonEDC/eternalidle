@@ -540,13 +540,20 @@ export class GuildManager {
     async getGuildRequests(char) {
         if (!char) throw new Error("Character not found");
 
-        const { data: member } = await this.supabase
+        const { data: member, error: memberErr } = await this.supabase
             .from('guild_members')
             .select('guild_id, role')
             .eq('character_id', char.id)
             .maybeSingle();
 
-        const hasPerm = await this.hasPermission(char.id, 'manage_requests');
+        if (memberErr || !member) {
+            return [];
+        }
+
+        // Check permission - Leaders and Officers should always see requests
+        const isLeaderOrOfficer = member.role === 'LEADER' || member.role === 'OFFICER';
+        const hasPerm = isLeaderOrOfficer || await this.hasPermission(char.id, 'manage_requests');
+
         if (!hasPerm) {
             throw new Error("No permission to view requests");
         }
@@ -578,7 +585,7 @@ export class GuildManager {
             const isOnline = this.gameManager.cache.has(charId);
             const cachedChar = isOnline ? this.gameManager.cache.get(charId) : null;
             const dbChar = r.characters;
-            const state = cachedChar?.state || { ...dbChar.state, skills: dbChar.skills };
+            const state = cachedChar?.state || { ...(dbChar.state || {}), skills: dbChar.skills || {} };
 
             return {
                 id: r.id,
