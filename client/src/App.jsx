@@ -954,7 +954,6 @@ function App() {
       if (vapidPublicKey) {
         window.VAPID_PUBLIC_KEY = vapidPublicKey;
       }
-      const CLIENT_VERSION = '1.4.4';
       const serverVersion = (version || '').trim();
       const clientVersion = CLIENT_VERSION.trim();
 
