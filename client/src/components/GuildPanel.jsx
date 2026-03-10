@@ -157,6 +157,16 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
     const [contributeAmount, setContributeAmount] = useState("");
     const [taskPending, setTaskPending] = useState(false);
     const [timeUntilReset, setTimeUntilReset] = useState("");
+    const [expandedTasks, setExpandedTasks] = useState(new Set());
+
+    const toggleTaskExpanded = (taskId) => {
+        setExpandedTasks(prev => {
+            const next = new Set(prev);
+            if (next.has(taskId)) next.delete(taskId);
+            else next.add(taskId);
+            return next;
+        });
+    };
 
     useEffect(() => {
         const updateTimer = () => {
@@ -1673,23 +1683,35 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                 </div>
 
                                                 {/* Progress Bar & Contribute Button */}
-                                                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', marginBottom: '2px', marginTop: '-14px' }}>
-                                                    <div style={{ flex: 1 }}>
-                                                        <div style={{ display: 'flex', justifyContent: 'flex-end', fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', marginBottom: '2px', fontWeight: 'bold' }}>
-                                                            <span>{task.progress} / {task.required}</span>
-                                                        </div>
-                                                        <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                                            <motion.div
-                                                                initial={{ width: 0 }}
-                                                                animate={{ width: `${progressPct}%` }}
-                                                                style={{
-                                                                    height: '100%',
-                                                                    background: isCompleted ? 'linear-gradient(90deg, #44ff44 0%, #fff 100%)' : 'linear-gradient(90deg, var(--accent) 0%, #fff 100%)',
-                                                                    boxShadow: isCompleted ? '0 0 10px rgba(68, 255, 68, 0.4)' : '0 0 10px rgba(212, 175, 55, 0.4)'
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    </div>
+                                                {/* Absolute Buttons Container */}
+                                                <div style={{ 
+                                                    position: 'absolute', 
+                                                    top: '6px', 
+                                                    right: '6px', 
+                                                    display: 'flex', 
+                                                    flexDirection: 'column', 
+                                                    gap: '4px',
+                                                    zIndex: 5
+                                                }}>
+                                                    <motion.button
+                                                        whileHover={{ scale: 1.1, background: 'rgba(255,255,255,0.1)' }}
+                                                        whileTap={{ scale: 0.9 }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            toggleTaskExpanded(task.id);
+                                                        }}
+                                                        style={{
+                                                            width: '24px', height: '24px',
+                                                            background: expandedTasks.has(task.id) ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
+                                                            color: 'rgba(255,255,255,0.7)',
+                                                            border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px',
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                            cursor: 'pointer', flexShrink: 0
+                                                        }}
+                                                        title="Toggle Contributors"
+                                                    >
+                                                        <ChevronDown size={14} style={{ transform: expandedTasks.has(task.id) ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                                                    </motion.button>
 
                                                     {!isCompleted && (
                                                         <motion.button
@@ -1712,6 +1734,62 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                         </motion.button>
                                                     )}
                                                 </div>
+
+                                                {/* Progress Bar Container */}
+                                                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', marginBottom: '4px', paddingRight: '28px' }}>
+                                                    <div style={{ flex: 1 }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'flex-end', fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', marginBottom: '2px', fontWeight: 'bold' }}>
+                                                            <span>{task.progress} / {task.required}</span>
+                                                        </div>
+                                                        <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                            <motion.div
+                                                                initial={{ width: 0 }}
+                                                                animate={{ width: `${progressPct}%` }}
+                                                                style={{
+                                                                    height: '100%',
+                                                                    background: isCompleted ? 'linear-gradient(90deg, #44ff44 0%, #fff 100%)' : 'linear-gradient(90deg, var(--accent) 0%, #fff 100%)',
+                                                                    boxShadow: isCompleted ? '0 0 10px rgba(68, 255, 68, 0.4)' : '0 0 10px rgba(212, 175, 55, 0.4)'
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <AnimatePresence>
+                                                    {expandedTasks.has(task.id) && (
+                                                        <motion.div
+                                                            initial={{ height: 0, opacity: 0 }}
+                                                            animate={{ height: 'auto', opacity: 1 }}
+                                                            exit={{ height: 0, opacity: 0 }}
+                                                            style={{ overflow: 'hidden' }}
+                                                        >
+                                                            <div style={{ 
+                                                                padding: '6px 8px', 
+                                                                marginTop: '4px',
+                                                                background: 'rgba(0,0,0,0.2)', 
+                                                                borderRadius: '8px',
+                                                                border: '1px solid rgba(255,255,255,0.05)',
+                                                                display: 'flex',
+                                                                flexDirection: 'column',
+                                                                gap: '4px'
+                                                            }}>
+                                                                <div style={{ fontSize: '0.5rem', color: 'rgba(255,255,255,0.4)', fontWeight: 'bold', letterSpacing: '0.5px' }}>CONTRIBUTORS</div>
+                                                                {!task.contributors || Object.keys(task.contributors).length === 0 ? (
+                                                                    <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.2)', fontStyle: 'italic' }}>No contributions yet.</div>
+                                                                ) : (
+                                                                    Object.entries(task.contributors)
+                                                                        .sort((a,b) => b[1] - a[1])
+                                                                        .map(([name, qty]) => (
+                                                                            <div key={name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.65rem' }}>
+                                                                                <span style={{ color: 'rgba(255,255,255,0.8)', fontWeight: '500' }}>{name}</span>
+                                                                                <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{qty.toLocaleString()}</span>
+                                                                            </div>
+                                                                        ))
+                                                                )}
+                                                            </div>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
 
 
                                             </motion.div>

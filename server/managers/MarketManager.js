@@ -854,12 +854,21 @@ export class MarketManager {
 
         const inventory = seller.state.inventory;
 
-        // Try exact match first (order.item_id), then fallback to parsed base ID
+        // --- FIX: Handle items with signatures in inventory ---
         let invKey = null;
         if (inventory[order.item_id]) {
             invKey = order.item_id;
         } else if (inventory[lookupId]) {
             invKey = lookupId;
+        } else {
+            // Check if any item in inventory matches when stripping signatures (e.g., T1_FISHING_ROD_Q4::Eterno)
+            for (const key of Object.keys(inventory)) {
+                const keyBase = key.split('::')[0];
+                if (keyBase === order.item_id || keyBase === lookupId) {
+                    invKey = key;
+                    break;
+                }
+            }
         }
 
         if (!invKey) throw new Error("Insufficient items in inventory");
@@ -912,7 +921,7 @@ export class MarketManager {
         if (buyer) {
             this.addClaim(buyer, {
                 type: 'BOUGHT_ITEM',
-                itemId: lookupId,
+                itemId: order.item_id,
                 amount: qtyNum,
                 metadata: { quality: requiredQuality, stars: requiredStars },
                 timestamp: Date.now(),

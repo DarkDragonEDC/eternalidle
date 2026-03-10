@@ -55,9 +55,12 @@ const io = new Server(httpServer, {
 // Manual socket registry for Ticker reliability
 const connectedSockets = new Map();
 
-app.use(cors());
-
 // Webhook must be BEFORE express.json() to get raw body
+// Cache version at startup
+const SERVER_VERSION = JSON.parse(fs.readFileSync("./package.json", "utf8")).version;
+console.log(`[STARTUP] Eternal Idle Server v${SERVER_VERSION}`);
+
+app.use(cors());
 app.post(
   "/api/webhooks/stripe",
   express.raw({ type: "application/json" }),
@@ -453,12 +456,8 @@ io.on("connection", (socket) => {
   };
 
   // Version Handshake for Auto-Refresh
-  const pkg = JSON.parse(fs.readFileSync("./package.json", "utf8"));
-  console.log(
-    `[VERSION] Emitting server version: ${pkg.version} to match client ${pkg.version}`,
-  );
   socket.emit("server_version", {
-    version: pkg.version,
+    version: SERVER_VERSION,
     vapidPublicKey: process.env.VAPID_PUBLIC_KEY
   });
 
@@ -3768,6 +3767,7 @@ io.on("connection", (socket) => {
 
   socket.on("trade_create", async ({ receiverName }) => {
     try {
+      if (!socket.user) throw new Error("Not authenticated.");
       if (socket.user.is_anonymous)
         throw new Error("Trading is locked for Guest accounts.");
       await gameManager.executeLocked(socket.user.id, async () => {
@@ -3775,6 +3775,7 @@ io.on("connection", (socket) => {
           socket.user.id,
           socket.data.characterId,
         );
+        if (!char) throw new Error("Character not loaded.");
         const trade = await gameManager.tradeManager.createTrade(
           char,
           receiverName,
@@ -4178,20 +4179,35 @@ io.on("connection", (socket) => {
   });
 
   // Purchase item with orbs
-  socket.on("purchase_orb_item", async ({ itemId }) => {
+  socket.on("purchase_orb_item", async ({ itemId, quantity }) => {
     try {
       await gameManager.executeLocked(socket.user.id, async () => {
         const char = await gameManager.getCharacter(
           socket.user.id,
           socket.data.characterId,
         );
-        const result = await gameManager.orbsManager.purchaseItem(char, itemId);
+        const qty = Math.max(1, Math.min(Math.floor(Number(quantity) || 1), 100));
+        let lastResult = null;
+        let successCount = 0;
 
-        if (result.success) {
+        for (let i = 0; i < qty; i++) {
+          const result = await gameManager.orbsManager.purchaseItem(char, itemId);
+          lastResult = result;
+          if (!result.success) break;
+          successCount++;
+        }
+
+        if (successCount > 0) {
           await gameManager.saveState(char.id, char.state);
-          socket.emit("orb_purchase_success", result);
+          socket.emit("orb_purchase_success", {
+            ...lastResult,
+            success: true,
+            message: successCount > 1
+              ? `Successfully purchased x${successCount}!`
+              : (lastResult.message || 'Purchase successful!')
+          });
         } else {
-          socket.emit("orb_purchase_error", result);
+          socket.emit("orb_purchase_error", lastResult);
         }
 
         socket.emit(

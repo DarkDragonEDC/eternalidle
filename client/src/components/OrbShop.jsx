@@ -6,6 +6,7 @@ const OrbShop = ({ socket, gameState, onClose, isPreviewActive, onPreviewActionB
     const [loading, setLoading] = useState(true);
     const [purchasing, setPurchasing] = useState(null);
     const [purchaseResult, setPurchaseResult] = useState(null);
+    const [quantityModal, setQuantityModal] = useState(null); // { item, quantity }
 
     const [showMSInfo, setShowMSInfo] = useState(false);
 
@@ -60,12 +61,20 @@ const OrbShop = ({ socket, gameState, onClose, isPreviewActive, onPreviewActionB
         if (isPreviewActive) return onPreviewActionBlocked();
         if (item.category === 'PACKAGE' || item.category === 'MEMBERSHIP') {
             setPurchasing(item.id);
-            // Simulate payment gateway start
             socket.emit('buy_orb_package', { packageId: item.id, locale: navigator.language || 'en-US' });
         } else {
-            setPurchasing(item.id);
-            socket.emit('purchase_orb_item', { itemId: item.id });
+            // Open quantity modal for orb-priced items
+            setQuantityModal({ item, quantity: 1 });
         }
+    };
+
+    const confirmPurchase = () => {
+        if (!quantityModal) return;
+        const { item, quantity } = quantityModal;
+        const qty = Math.max(1, Math.floor(Number(quantity) || 1));
+        setPurchasing(item.id);
+        setQuantityModal(null);
+        socket.emit('purchase_orb_item', { itemId: item.id, quantity: qty });
     };
 
     const getCategoryIcon = (category) => {
@@ -417,6 +426,168 @@ const OrbShop = ({ socket, gameState, onClose, isPreviewActive, onPreviewActionB
                             ))
                     )}
                 </div>
+
+                {/* Quantity Modal */}
+                {quantityModal && (
+                    <div style={{
+                        position: 'fixed',
+                        top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(0,0,0,0.8)',
+                        zIndex: 13000,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '20px'
+                    }} onClick={() => setQuantityModal(null)}>
+                        <div style={{
+                            background: 'var(--panel-bg)',
+                            border: '1px solid var(--border-active)',
+                            borderRadius: '16px',
+                            padding: '25px',
+                            maxWidth: '360px',
+                            width: '100%',
+                            boxShadow: 'var(--panel-shadow)'
+                        }} onClick={e => e.stopPropagation()}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <ShoppingBag size={20} color="var(--accent)" />
+                                    <h3 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.1rem' }}>{quantityModal.item.name}</h3>
+                                </div>
+                                <button onClick={() => setQuantityModal(null)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}>
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div style={{ marginBottom: '15px', fontSize: '0.75rem', color: 'var(--text-dim)' }}>
+                                Cost per unit: <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{quantityModal.item.cost}</span> Orbs
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '6px', marginBottom: '15px', alignItems: 'center' }}>
+                                <button
+                                    onClick={() => setQuantityModal(prev => ({ ...prev, quantity: Math.max(1, prev.quantity - 1) }))}
+                                    style={{
+                                        width: '38px', height: '38px',
+                                        background: 'var(--accent-soft)',
+                                        border: '1px solid var(--border-active)',
+                                        borderRadius: '8px',
+                                        color: 'var(--accent)',
+                                        fontWeight: '900',
+                                        fontSize: '1.2rem',
+                                        cursor: 'pointer',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        flexShrink: 0
+                                    }}
+                                >−</button>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={quantityModal.quantity}
+                                    onChange={(e) => {
+                                        const val = Math.max(1, Math.floor(Number(e.target.value) || 1));
+                                        setQuantityModal(prev => ({ ...prev, quantity: val }));
+                                    }}
+                                    style={{
+                                        flex: 1,
+                                        minWidth: 0,
+                                        padding: '8px 6px',
+                                        background: 'rgba(0,0,0,0.3)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '8px',
+                                        color: 'var(--text-main)',
+                                        fontSize: '1rem',
+                                        fontWeight: 'bold',
+                                        outline: 'none',
+                                        textAlign: 'center'
+                                    }}
+                                />
+                                <button
+                                    onClick={() => setQuantityModal(prev => ({ ...prev, quantity: prev.quantity + 1 }))}
+                                    style={{
+                                        width: '38px', height: '38px',
+                                        background: 'var(--accent-soft)',
+                                        border: '1px solid var(--border-active)',
+                                        borderRadius: '8px',
+                                        color: 'var(--accent)',
+                                        fontWeight: '900',
+                                        fontSize: '1.2rem',
+                                        cursor: 'pointer',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        flexShrink: 0
+                                    }}
+                                >+</button>
+                                <button
+                                    onClick={() => {
+                                        const maxQty = Math.floor(orbs / quantityModal.item.cost);
+                                        setQuantityModal(prev => ({ ...prev, quantity: Math.max(1, maxQty) }));
+                                    }}
+                                    style={{
+                                        padding: '8px 12px',
+                                        background: 'var(--accent-soft)',
+                                        border: '1px solid var(--border-active)',
+                                        borderRadius: '8px',
+                                        color: 'var(--accent)',
+                                        fontWeight: '900',
+                                        fontSize: '0.75rem',
+                                        cursor: 'pointer',
+                                        letterSpacing: '1px',
+                                        flexShrink: 0
+                                    }}
+                                >
+                                    MAX
+                                </button>
+                            </div>
+
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                padding: '10px 14px',
+                                background: 'var(--slot-bg)',
+                                borderRadius: '8px',
+                                marginBottom: '18px',
+                                border: '1px solid var(--border)'
+                            }}>
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Total Cost</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <img src="/items/ORB.webp" alt="Orb" style={{ width: 16, height: 16, objectFit: 'contain' }} />
+                                    <span style={{
+                                        fontWeight: '900',
+                                        fontSize: '1rem',
+                                        color: (quantityModal.quantity * quantityModal.item.cost) > orbs ? '#f44336' : 'var(--accent)'
+                                    }}>
+                                        {(quantityModal.quantity * quantityModal.item.cost).toLocaleString()}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={confirmPurchase}
+                                disabled={(quantityModal.quantity * quantityModal.item.cost) > orbs || quantityModal.quantity < 1}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    background: (quantityModal.quantity * quantityModal.item.cost) > orbs
+                                        ? 'rgba(100,100,100,0.2)'
+                                        : 'linear-gradient(90deg, var(--accent), var(--accent-soft))',
+                                    border: `1px solid ${(quantityModal.quantity * quantityModal.item.cost) > orbs ? 'rgba(100,100,100,0.3)' : 'var(--accent)'}`,
+                                    borderRadius: '8px',
+                                    color: (quantityModal.quantity * quantityModal.item.cost) > orbs ? '#666' : 'var(--accent)',
+                                    fontWeight: '900',
+                                    fontSize: '0.85rem',
+                                    cursor: (quantityModal.quantity * quantityModal.item.cost) > orbs ? 'not-allowed' : 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px',
+                                    letterSpacing: '1px'
+                                }}
+                            >
+                                <ShoppingBag size={16} />
+                                CONFIRM PURCHASE
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* Membership Benefits Modal */}
                 {showMSInfo && (

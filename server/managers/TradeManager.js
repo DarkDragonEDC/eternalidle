@@ -86,7 +86,11 @@ export class TradeManager {
             .or(`and(sender_id.eq.${sender.id},receiver_id.eq.${receiverData.id}),and(sender_id.eq.${receiverData.id},receiver_id.eq.${sender.id})`)
             .maybeSingle();
 
-        if (existing) throw new Error("A trade session already exists with this player.");
+        if (existing) {
+            // Return the existing trade instead of throwing an error
+            const existingTrade = await this.getTrade(existing.id);
+            return existingTrade;
+        }
 
         // Ensure names are not null
         const sName = sender.name || (sender.state ? sender.state.name : null) || 'Unknown';

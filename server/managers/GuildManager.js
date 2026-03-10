@@ -1522,7 +1522,8 @@ export class GuildManager {
                 type: def.type,
                 itemId: itemId,
                 required: requiredAmount,
-                progress: 0
+                progress: 0,
+                contributors: {}
             });
         }
 
@@ -1564,6 +1565,10 @@ export class GuildManager {
 
         // Update task progress
         task.progress += contributeAmount;
+
+        // Record contributor
+        if (!task.contributors) task.contributors = {};
+        task.contributors[char.name] = (task.contributors[char.name] || 0) + contributeAmount;
 
         // NEW: Update Member Profile ranking for task contribution
         try {
