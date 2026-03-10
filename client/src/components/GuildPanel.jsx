@@ -225,13 +225,10 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
             setIsLoadingRequests(false);
         };
 
-        if (activeTab === 'REQUESTS' && playerHasPermission('manage_requests')) {
-            setIsLoadingRequests(true);
+        if (playerHasPermission('manage_requests')) {
+            if (activeTab === 'REQUESTS') setIsLoadingRequests(true);
             socket.emit('get_guild_requests');
             socket.on('guild_requests_data', handleRequestsData);
-        } else {
-            setRequests([]);
-            setIsLoadingRequests(false);
         }
 
         return () => {
