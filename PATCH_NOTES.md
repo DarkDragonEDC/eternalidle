@@ -43,6 +43,9 @@
 - **Contribuidores de Tarefas**: Agora você pode ver exatamente quem doou e quanto cada um contribuiu para as Tarefas Diárias da Guilda. Basta clicar no ícone de seta no card de cada missão para abrir a lista detalhada.
 - **Lista Ordenada**: A lista de contribuidores mostra os jogadores que mais ajudaram no topo, facilitando o reconhecimento dos membros mais ativos.
 
+### ⚔️ Dungeons & Exploração
+- **Segurança de Inventário**: Agora as dungeons e suas repetições param automaticamente se o seu inventário ficar cheio. Isso evita que você perca baús e recursos importantes por falta de espaço. Quando isso acontecer, você verá o status "COMPLETED (Inventory Full)" no seu histórico de dungeons.
+
 ### ⚔️ Combate & Personagens
 - **Aviso de Ironman**: Jogadores do modo Ironman agora exibem um ícone de Escudo no canto superior esquerdo de suas fotos de perfil na lista de membros da guilda e nas candidaturas pendentes.
 - **Foto no Combate**: Sua foto de perfil agora é exibida também na interface de combate.
