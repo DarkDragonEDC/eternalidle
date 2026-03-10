@@ -1786,3 +1786,11 @@ export const formatItemId = (itemId) => {
     return formatted;
 };
 
+// Returns a shorter name without Tier prefix (e.g. "T1 ") and Quality suffix (e.g. " Q3")
+export const formatItemNameShort = (itemId) => {
+    let name = formatItemId(itemId);
+    name = name.replace(/^T\d+\s+/i, '');
+    name = name.replace(/\s+Q\d+$/i, '');
+    return name;
+};
+

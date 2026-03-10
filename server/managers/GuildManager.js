@@ -523,7 +523,8 @@ export class GuildManager {
             .from('guild_requests')
             .insert({
                 guild_id: guildId,
-                character_id: char.id
+                character_id: char.id,
+                status: 'PENDING'
             });
 
         if (error) {
@@ -567,10 +568,12 @@ export class GuildManager {
             .eq('status', 'PENDING');
 
         if (error) {
+            console.error("[GUILD] db error on getGuildRequests:", error);
             return []; // Fail silently if table doesn't exist yet, avoiding crashing UI
         }
 
         return (requests || []).map(r => {
+            if (!r.characters) return null;
             const charId = r.characters.id;
             const isOnline = this.gameManager.cache.has(charId);
             const cachedChar = isOnline ? this.gameManager.cache.get(charId) : null;
@@ -586,7 +589,7 @@ export class GuildManager {
                 isIronman: !!state.isIronman,
                 createdAt: r.created_at
             };
-        });
+        }).filter(Boolean);
     }
 
     async handleGuildRequest(char, requestId, action) {

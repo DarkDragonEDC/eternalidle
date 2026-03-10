@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { formatNumber, formatSilver } from '@utils/format';
-import { resolveItem, getTierColor, calculateItemSellPrice, formatItemId } from '@shared/items';
+import { resolveItem, getTierColor, calculateItemSellPrice, formatItemId, formatItemNameShort } from '@shared/items';
 import { Package, Shield, Coins, Tag, Trash2, Info, ChevronDown, ChevronUp, ArrowUpAZ, ArrowDownZA, Search, Hammer, Zap, PlusCircle } from 'lucide-react';
 import ItemActionModal from './ItemActionModal';
 
@@ -556,7 +556,7 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                                     style={{
                                         position: 'absolute',
                                         bottom: 22,
-                                        right: 6,
+                                        left: 6,
                                         color: 'var(--text-main)',
                                         opacity: 0.7,
                                         cursor: 'pointer',
@@ -594,7 +594,7 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                                     lineHeight: '1.2',
                                     height: '1.55rem' // Ensure fixed height for 2 lines to keep grid consistent
                                 }}>
-                                    {formatItemId(item.id || item.name)}
+                                    {formatItemNameShort(item.id || item.name)}
                                 </div>
                             </div>
                         );
