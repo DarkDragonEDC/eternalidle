@@ -1259,7 +1259,7 @@ export const resolveItem = (itemId, overrideQuality = null) => {
         qualityName: effectiveQuality.name,
         originalId: baseId,
         craftedBy: creatorName, // Ensure signature is part of the resolved object
-        ip: (baseItem.ip || 0) + ipBonus,
+        ip: newStats.ip || (baseItem.ip || 0) + ipBonus,
         stats: newStats
     };
 
@@ -1506,22 +1506,19 @@ export const calculateRuneBonus = (tier, stars, effType = null) => {
     const starBonusMap = { 1: 1, 2: 3, 3: 5 }; // Max 3 stars
     let bonus = (tier - 1) * 5 + (starBonusMap[stars] || stars);
 
-    // ATTACK (Combat) and ATTACK_SPEED runes: Specific linear growth requested by user
+    // --- NOVOS BÔNUS DE RUNAS DE COMBATE (User Request) ---
+    // Cada "rank" (Tiers x 3 Estrelas) adiciona:
+    // Velocidade: 3.33% por rank (Total 100%)
+    // Dano: 40 por rank (Total 1200)
     if (effType === 'ATTACK' || effType === 'ATTACK_SPEED') {
-        const combatBonusMap = {
-            1: { 1: 0.5, 2: 1.2, 3: 1.8 },
-            2: { 1: 2.5, 2: 3.2, 3: 3.9 },
-            3: { 1: 4.5, 2: 5.2, 3: 5.9 },
-            4: { 1: 6.6, 2: 7.2, 3: 7.9 },
-            5: { 1: 8.6, 2: 9.2, 3: 9.9 },
-            6: { 1: 10.6, 2: 11.3, 3: 11.9 },
-            7: { 1: 12.6, 2: 13.3, 3: 14.0 },
-            8: { 1: 14.6, 2: 15.3, 3: 16.0 },
-            9: { 1: 16.6, 2: 17.3, 3: 18.0 },
-            10: { 1: 18.7, 2: 19.3, 3: 20.0 }
-        };
-        const tierData = combatBonusMap[tier] || combatBonusMap[1];
-        return tierData[stars] || tierData[1];
+        const rank = (tier - 1) * 3 + stars;
+        if (effType === 'ATTACK_SPEED') {
+            // Retorna o valor em % (ex: 3.3, 10.0, 100)
+            return parseFloat((rank * (100 / 30)).toFixed(1));
+        } else {
+            // ATTACK -> Bônus de Dano Flat
+            return rank * 40;
+        }
     }
 
     // Food Saving runes give 30% bonus (max ~15% instead of ~50%)
@@ -1647,8 +1644,10 @@ for (const t of TIERS) {
                 } else {
                     description = `Chance to automatically refine gathered materials by ${bonusValue}%.`;
                 }
-            } else if (eff === 'EFF' || eff === 'ATTACK') {
-                description = `Increases ${eff === 'EFF' ? 'speed' : 'damage'} by ${bonusValue}%.`;
+            } else if (eff === 'EFF') {
+                description = `Increases speed by ${bonusValue}%.`;
+            } else if (eff === 'ATTACK') {
+                description = `Increases damage by ${bonusValue}.`;
             } else if (eff === 'SAVE_FOOD') {
                 description = `Chance to consume no food when healing by ${bonusValue}%.`;
             } else if (eff === 'BURST') {

@@ -1,4 +1,4 @@
-export const WARRIOR_STATS_FIXED = {
+{
     "Sword": {
         "1": {
             "0": {
@@ -860,7 +860,7 @@ export const WARRIOR_STATS_FIXED = {
             },
             "4": {
                 "defense": 300,
-                "hp": 614,
+                "hp": 612,
                 "ip": 1200
             }
         }
@@ -1772,7 +1772,7 @@ export const WARRIOR_STATS_FIXED = {
             }
         }
     },
-    "Warrior Cape": {
+    "Plate Cape": {
         "1": {
             "0": {
                 "damage": 18,
@@ -2044,4 +2044,4 @@ export const WARRIOR_STATS_FIXED = {
             }
         }
     }
-};
+}

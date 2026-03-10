@@ -23,6 +23,7 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onEquipFood, onSell,
         (item.stats.str || 0) > 0 ||
         (item.stats.agi || 0) > 0 ||
         (item.stats.int || 0) > 0 ||
+        (item.stats.speed || 0) > 0 ||
         ((typeof item.stats.efficiency === 'number' && item.stats.efficiency > 0) || (typeof item.stats.efficiency === 'object' && item.stats.efficiency !== null))
     );
 
@@ -145,7 +146,8 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onEquipFood, onSell,
                                     {item.stats.damage > 0 && <StatRow icon={Sword} label="Damage" value={item.stats.damage} valColor="#f87171" />}
                                     {item.stats.defense > 0 && <StatRow icon={Shield} label="Defense" value={item.stats.defense} valColor="#4ade80" />}
                                     {item.stats.hp > 0 && <StatRow icon={Heart} label="Health" value={`+${item.stats.hp}`} valColor="#fb7185" />}
-                                    {item.stats.attackSpeed > 0 && <StatRow icon={Zap} label="Attack Speed" value={`${(1000 / item.stats.attackSpeed).toFixed(1)} /s`} valColor="#ffd700" />}
+                                    {item.stats.attackSpeed > 0 && <StatRow icon={Zap} label="Attack Speed" value={`${(1000 / item.stats.attackSpeed).toFixed(2)} /s`} valColor="#ffd700" />}
+                                    {item.stats.speed > 0 && <StatRow icon={Zap} label="Speed" value={`${item.stats.speed}%`} valColor="#90d5ff" />}
 
                                     {(item.stats.str > 0 || item.stats.agi > 0 || item.stats.int > 0) && (
                                         <div style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-around', gap: '8px' }}>

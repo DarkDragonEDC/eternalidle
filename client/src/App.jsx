@@ -244,7 +244,7 @@ const StatCard = ({ label, value, icon, color }) => (
   </div>
 );
 
-const CLIENT_VERSION = '1.4.2';
+const CLIENT_VERSION = '1.4.4';
 
 function App() {
   const [session, setSession] = useState(null);
@@ -954,7 +954,7 @@ function App() {
       if (vapidPublicKey) {
         window.VAPID_PUBLIC_KEY = vapidPublicKey;
       }
-      const CLIENT_VERSION = '1.4.3'; 
+      const CLIENT_VERSION = '1.4.4'; 
       const serverVersion = (version || '').trim();
       const clientVersion = CLIENT_VERSION.trim();
       

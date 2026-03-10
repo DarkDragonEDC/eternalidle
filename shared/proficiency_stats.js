@@ -6,1808 +6,1808 @@
 export const PROFICIENCY_STATS = {
     "warrior": {
         "1": {
-            "dmg": 5.0,
-            "hp": 20,
-            "def": 15,
-            "speedBonus": 5.0
+            "dmg": 0.0,
+            "hp": 0,
+            "def": 0,
+            "speedBonus": 0.0
         },
         "2": {
-            "dmg": 23.0,
-            "hp": 45,
-            "def": 30,
-            "speedBonus": 10.0
+            "dmg": 12.0,
+            "hp": 25,
+            "def": 15,
+            "speedBonus": 1.0
         },
         "3": {
-            "dmg": 41.0,
-            "hp": 70,
-            "def": 45,
-            "speedBonus": 15.0
+            "dmg": 24.0,
+            "hp": 50,
+            "def": 30,
+            "speedBonus": 2.0
         },
         "4": {
-            "dmg": 59.0,
-            "hp": 95,
-            "def": 60,
-            "speedBonus": 20.0
+            "dmg": 36.0,
+            "hp": 74,
+            "def": 45,
+            "speedBonus": 3.0
         },
         "5": {
-            "dmg": 78.0,
-            "hp": 120,
-            "def": 75,
-            "speedBonus": 25.0
+            "dmg": 48.0,
+            "hp": 99,
+            "def": 61,
+            "speedBonus": 4.0
         },
         "6": {
-            "dmg": 96.0,
-            "hp": 145,
-            "def": 90,
-            "speedBonus": 30.0
+            "dmg": 60.0,
+            "hp": 124,
+            "def": 76,
+            "speedBonus": 5.1
         },
         "7": {
-            "dmg": 114.0,
-            "hp": 170,
-            "def": 105,
-            "speedBonus": 35.0
+            "dmg": 72.0,
+            "hp": 149,
+            "def": 91,
+            "speedBonus": 6.1
         },
         "8": {
-            "dmg": 132.0,
-            "hp": 195,
-            "def": 120,
-            "speedBonus": 40.0
+            "dmg": 84.0,
+            "hp": 173,
+            "def": 106,
+            "speedBonus": 7.1
         },
         "9": {
-            "dmg": 150.0,
-            "hp": 220,
-            "def": 135,
-            "speedBonus": 45.0
+            "dmg": 97.0,
+            "hp": 198,
+            "def": 121,
+            "speedBonus": 8.1
         },
         "10": {
-            "dmg": 168.0,
-            "hp": 245,
-            "def": 150,
-            "speedBonus": 50.0
+            "dmg": 109.0,
+            "hp": 223,
+            "def": 136,
+            "speedBonus": 9.1
         },
         "11": {
-            "dmg": 186.0,
-            "hp": 271,
-            "def": 165,
-            "speedBonus": 55.0
+            "dmg": 121.0,
+            "hp": 248,
+            "def": 152,
+            "speedBonus": 10.1
         },
         "12": {
-            "dmg": 204.0,
-            "hp": 296,
-            "def": 180,
-            "speedBonus": 60.0
+            "dmg": 133.0,
+            "hp": 272,
+            "def": 167,
+            "speedBonus": 11.1
         },
         "13": {
-            "dmg": 223.0,
-            "hp": 321,
-            "def": 195,
-            "speedBonus": 65.0
+            "dmg": 145.0,
+            "hp": 297,
+            "def": 182,
+            "speedBonus": 12.1
         },
         "14": {
-            "dmg": 241.0,
-            "hp": 346,
-            "def": 210,
-            "speedBonus": 70.0
+            "dmg": 157.0,
+            "hp": 322,
+            "def": 197,
+            "speedBonus": 13.1
         },
         "15": {
-            "dmg": 259.0,
-            "hp": 371,
-            "def": 225,
-            "speedBonus": 75.0
+            "dmg": 169.0,
+            "hp": 347,
+            "def": 212,
+            "speedBonus": 14.1
         },
         "16": {
-            "dmg": 277.0,
-            "hp": 396,
-            "def": 240,
-            "speedBonus": 80.0
+            "dmg": 181.0,
+            "hp": 371,
+            "def": 227,
+            "speedBonus": 15.2
         },
         "17": {
-            "dmg": 295.0,
-            "hp": 421,
-            "def": 255,
-            "speedBonus": 85.0
+            "dmg": 194.0,
+            "hp": 396,
+            "def": 242,
+            "speedBonus": 16.2
         },
         "18": {
-            "dmg": 313.0,
-            "hp": 446,
-            "def": 270,
-            "speedBonus": 90.0
+            "dmg": 206.0,
+            "hp": 421,
+            "def": 258,
+            "speedBonus": 17.2
         },
         "19": {
-            "dmg": 331.0,
-            "hp": 471,
-            "def": 285,
-            "speedBonus": 95.0
+            "dmg": 218.0,
+            "hp": 446,
+            "def": 273,
+            "speedBonus": 18.2
         },
         "20": {
-            "dmg": 349.0,
-            "hp": 496,
-            "def": 300,
-            "speedBonus": 100.0
+            "dmg": 230.0,
+            "hp": 470,
+            "def": 288,
+            "speedBonus": 19.2
         },
         "21": {
-            "dmg": 368.0,
-            "hp": 521,
-            "def": 315,
-            "speedBonus": 105.0
+            "dmg": 242.0,
+            "hp": 495,
+            "def": 303,
+            "speedBonus": 20.2
         },
         "22": {
-            "dmg": 386.0,
-            "hp": 546,
-            "def": 330,
-            "speedBonus": 110.0
+            "dmg": 254.0,
+            "hp": 520,
+            "def": 318,
+            "speedBonus": 21.2
         },
         "23": {
-            "dmg": 404.0,
-            "hp": 571,
-            "def": 345,
-            "speedBonus": 115.0
+            "dmg": 266.0,
+            "hp": 545,
+            "def": 333,
+            "speedBonus": 22.2
         },
         "24": {
-            "dmg": 422.0,
-            "hp": 596,
-            "def": 360,
-            "speedBonus": 120.0
+            "dmg": 278.0,
+            "hp": 569,
+            "def": 348,
+            "speedBonus": 23.2
         },
         "25": {
-            "dmg": 440.0,
-            "hp": 621,
-            "def": 375,
-            "speedBonus": 125.0
+            "dmg": 291.0,
+            "hp": 594,
+            "def": 364,
+            "speedBonus": 24.2
         },
         "26": {
-            "dmg": 458.0,
-            "hp": 646,
-            "def": 390,
-            "speedBonus": 130.0
+            "dmg": 303.0,
+            "hp": 619,
+            "def": 379,
+            "speedBonus": 25.3
         },
         "27": {
-            "dmg": 476.0,
-            "hp": 671,
-            "def": 405,
-            "speedBonus": 135.0
+            "dmg": 315.0,
+            "hp": 644,
+            "def": 394,
+            "speedBonus": 26.3
         },
         "28": {
-            "dmg": 495.0,
-            "hp": 696,
-            "def": 420,
-            "speedBonus": 140.0
+            "dmg": 327.0,
+            "hp": 668,
+            "def": 409,
+            "speedBonus": 27.3
         },
         "29": {
-            "dmg": 513.0,
-            "hp": 721,
-            "def": 435,
-            "speedBonus": 145.0
+            "dmg": 339.0,
+            "hp": 693,
+            "def": 424,
+            "speedBonus": 28.3
         },
         "30": {
-            "dmg": 531.0,
-            "hp": 746,
-            "def": 450,
-            "speedBonus": 150.0
+            "dmg": 351.0,
+            "hp": 718,
+            "def": 439,
+            "speedBonus": 29.3
         },
         "31": {
-            "dmg": 549.0,
-            "hp": 772,
-            "def": 465,
-            "speedBonus": 155.0
+            "dmg": 363.0,
+            "hp": 743,
+            "def": 455,
+            "speedBonus": 30.3
         },
         "32": {
-            "dmg": 567.0,
-            "hp": 797,
-            "def": 480,
-            "speedBonus": 160.0
+            "dmg": 375.0,
+            "hp": 767,
+            "def": 470,
+            "speedBonus": 31.3
         },
         "33": {
-            "dmg": 585.0,
-            "hp": 822,
-            "def": 495,
-            "speedBonus": 165.0
+            "dmg": 388.0,
+            "hp": 792,
+            "def": 485,
+            "speedBonus": 32.3
         },
         "34": {
-            "dmg": 603.0,
-            "hp": 847,
-            "def": 510,
-            "speedBonus": 170.0
+            "dmg": 400.0,
+            "hp": 817,
+            "def": 500,
+            "speedBonus": 33.3
         },
         "35": {
-            "dmg": 621.0,
-            "hp": 872,
-            "def": 525,
-            "speedBonus": 175.0
+            "dmg": 412.0,
+            "hp": 842,
+            "def": 515,
+            "speedBonus": 34.3
         },
         "36": {
-            "dmg": 640.0,
-            "hp": 897,
-            "def": 540,
-            "speedBonus": 180.0
+            "dmg": 424.0,
+            "hp": 866,
+            "def": 530,
+            "speedBonus": 35.4
         },
         "37": {
-            "dmg": 658.0,
-            "hp": 922,
-            "def": 555,
-            "speedBonus": 185.0
+            "dmg": 436.0,
+            "hp": 891,
+            "def": 545,
+            "speedBonus": 36.4
         },
         "38": {
-            "dmg": 676.0,
-            "hp": 947,
-            "def": 570,
-            "speedBonus": 190.0
+            "dmg": 448.0,
+            "hp": 916,
+            "def": 561,
+            "speedBonus": 37.4
         },
         "39": {
-            "dmg": 694.0,
-            "hp": 972,
-            "def": 585,
-            "speedBonus": 195.0
+            "dmg": 460.0,
+            "hp": 941,
+            "def": 576,
+            "speedBonus": 38.4
         },
         "40": {
-            "dmg": 712.0,
-            "hp": 997,
-            "def": 600,
-            "speedBonus": 200.0
+            "dmg": 472.0,
+            "hp": 965,
+            "def": 591,
+            "speedBonus": 39.4
         },
         "41": {
-            "dmg": 730.0,
-            "hp": 1022,
-            "def": 615,
-            "speedBonus": 205.0
+            "dmg": 485.0,
+            "hp": 990,
+            "def": 606,
+            "speedBonus": 40.4
         },
         "42": {
-            "dmg": 748.0,
-            "hp": 1047,
-            "def": 630,
-            "speedBonus": 210.0
+            "dmg": 497.0,
+            "hp": 1015,
+            "def": 621,
+            "speedBonus": 41.4
         },
         "43": {
-            "dmg": 767.0,
-            "hp": 1072,
-            "def": 645,
-            "speedBonus": 215.0
+            "dmg": 509.0,
+            "hp": 1040,
+            "def": 636,
+            "speedBonus": 42.4
         },
         "44": {
-            "dmg": 785.0,
-            "hp": 1097,
-            "def": 660,
-            "speedBonus": 220.0
+            "dmg": 521.0,
+            "hp": 1064,
+            "def": 652,
+            "speedBonus": 43.4
         },
         "45": {
-            "dmg": 803.0,
-            "hp": 1122,
-            "def": 675,
-            "speedBonus": 225.0
+            "dmg": 533.0,
+            "hp": 1089,
+            "def": 667,
+            "speedBonus": 44.4
         },
         "46": {
-            "dmg": 821.0,
-            "hp": 1147,
-            "def": 690,
-            "speedBonus": 230.0
+            "dmg": 545.0,
+            "hp": 1114,
+            "def": 682,
+            "speedBonus": 45.5
         },
         "47": {
-            "dmg": 839.0,
-            "hp": 1172,
-            "def": 705,
-            "speedBonus": 235.0
+            "dmg": 557.0,
+            "hp": 1139,
+            "def": 697,
+            "speedBonus": 46.5
         },
         "48": {
-            "dmg": 857.0,
-            "hp": 1197,
-            "def": 720,
-            "speedBonus": 240.0
+            "dmg": 569.0,
+            "hp": 1163,
+            "def": 712,
+            "speedBonus": 47.5
         },
         "49": {
-            "dmg": 875.0,
-            "hp": 1222,
-            "def": 735,
-            "speedBonus": 245.0
+            "dmg": 582.0,
+            "hp": 1188,
+            "def": 727,
+            "speedBonus": 48.5
         },
         "50": {
-            "dmg": 893.0,
-            "hp": 1247,
-            "def": 750,
-            "speedBonus": 250.0
+            "dmg": 594.0,
+            "hp": 1213,
+            "def": 742,
+            "speedBonus": 49.5
         },
         "51": {
-            "dmg": 912.0,
-            "hp": 1273,
-            "def": 765,
-            "speedBonus": 256.0
+            "dmg": 606.0,
+            "hp": 1238,
+            "def": 758,
+            "speedBonus": 50.5
         },
         "52": {
-            "dmg": 930.0,
-            "hp": 1298,
-            "def": 780,
-            "speedBonus": 261.0
+            "dmg": 618.0,
+            "hp": 1262,
+            "def": 773,
+            "speedBonus": 51.5
         },
         "53": {
-            "dmg": 948.0,
-            "hp": 1323,
-            "def": 795,
-            "speedBonus": 266.0
+            "dmg": 630.0,
+            "hp": 1287,
+            "def": 788,
+            "speedBonus": 52.5
         },
         "54": {
-            "dmg": 966.0,
-            "hp": 1348,
-            "def": 810,
-            "speedBonus": 271.0
+            "dmg": 642.0,
+            "hp": 1312,
+            "def": 803,
+            "speedBonus": 53.5
         },
         "55": {
-            "dmg": 984.0,
-            "hp": 1373,
-            "def": 825,
-            "speedBonus": 276.0
+            "dmg": 654.0,
+            "hp": 1337,
+            "def": 818,
+            "speedBonus": 54.5
         },
         "56": {
-            "dmg": 1002.0,
-            "hp": 1398,
-            "def": 840,
-            "speedBonus": 281.0
+            "dmg": 666.0,
+            "hp": 1361,
+            "def": 833,
+            "speedBonus": 55.6
         },
         "57": {
-            "dmg": 1020.0,
-            "hp": 1423,
-            "def": 855,
-            "speedBonus": 286.0
+            "dmg": 679.0,
+            "hp": 1386,
+            "def": 848,
+            "speedBonus": 56.6
         },
         "58": {
-            "dmg": 1038.0,
-            "hp": 1448,
-            "def": 870,
-            "speedBonus": 291.0
+            "dmg": 691.0,
+            "hp": 1411,
+            "def": 864,
+            "speedBonus": 57.6
         },
         "59": {
-            "dmg": 1057.0,
-            "hp": 1473,
-            "def": 885,
-            "speedBonus": 296.0
+            "dmg": 703.0,
+            "hp": 1436,
+            "def": 879,
+            "speedBonus": 58.6
         },
         "60": {
-            "dmg": 1075.0,
-            "hp": 1498,
-            "def": 900,
-            "speedBonus": 301.0
+            "dmg": 715.0,
+            "hp": 1460,
+            "def": 894,
+            "speedBonus": 59.6
         },
         "61": {
-            "dmg": 1093.0,
-            "hp": 1523,
-            "def": 915,
-            "speedBonus": 306.0
+            "dmg": 727.0,
+            "hp": 1485,
+            "def": 909,
+            "speedBonus": 60.6
         },
         "62": {
-            "dmg": 1111.0,
-            "hp": 1548,
-            "def": 930,
-            "speedBonus": 311.0
+            "dmg": 739.0,
+            "hp": 1510,
+            "def": 924,
+            "speedBonus": 61.6
         },
         "63": {
-            "dmg": 1129.0,
-            "hp": 1573,
-            "def": 945,
-            "speedBonus": 316.0
+            "dmg": 751.0,
+            "hp": 1535,
+            "def": 939,
+            "speedBonus": 62.6
         },
         "64": {
-            "dmg": 1147.0,
-            "hp": 1598,
-            "def": 960,
-            "speedBonus": 321.0
+            "dmg": 763.0,
+            "hp": 1559,
+            "def": 955,
+            "speedBonus": 63.6
         },
         "65": {
-            "dmg": 1165.0,
-            "hp": 1623,
-            "def": 975,
-            "speedBonus": 326.0
+            "dmg": 776.0,
+            "hp": 1584,
+            "def": 970,
+            "speedBonus": 64.6
         },
         "66": {
-            "dmg": 1184.0,
-            "hp": 1648,
-            "def": 990,
-            "speedBonus": 331.0
+            "dmg": 788.0,
+            "hp": 1609,
+            "def": 985,
+            "speedBonus": 65.7
         },
         "67": {
-            "dmg": 1202.0,
-            "hp": 1673,
-            "def": 1005,
-            "speedBonus": 336.0
+            "dmg": 800.0,
+            "hp": 1634,
+            "def": 1000,
+            "speedBonus": 66.7
         },
         "68": {
-            "dmg": 1220.0,
-            "hp": 1698,
-            "def": 1020,
-            "speedBonus": 341.0
+            "dmg": 812.0,
+            "hp": 1658,
+            "def": 1015,
+            "speedBonus": 67.7
         },
         "69": {
-            "dmg": 1238.0,
-            "hp": 1723,
-            "def": 1035,
-            "speedBonus": 346.0
+            "dmg": 824.0,
+            "hp": 1683,
+            "def": 1030,
+            "speedBonus": 68.7
         },
         "70": {
-            "dmg": 1256.0,
-            "hp": 1748,
-            "def": 1050,
-            "speedBonus": 351.0
+            "dmg": 836.0,
+            "hp": 1708,
+            "def": 1045,
+            "speedBonus": 69.7
         },
         "71": {
-            "dmg": 1274.0,
-            "hp": 1774,
-            "def": 1065,
-            "speedBonus": 356.0
+            "dmg": 848.0,
+            "hp": 1733,
+            "def": 1061,
+            "speedBonus": 70.7
         },
         "72": {
-            "dmg": 1292.0,
-            "hp": 1799,
-            "def": 1080,
-            "speedBonus": 361.0
+            "dmg": 860.0,
+            "hp": 1757,
+            "def": 1076,
+            "speedBonus": 71.7
         },
         "73": {
-            "dmg": 1310.0,
-            "hp": 1824,
-            "def": 1095,
-            "speedBonus": 366.0
+            "dmg": 873.0,
+            "hp": 1782,
+            "def": 1091,
+            "speedBonus": 72.7
         },
         "74": {
-            "dmg": 1329.0,
-            "hp": 1849,
-            "def": 1110,
-            "speedBonus": 371.0
+            "dmg": 885.0,
+            "hp": 1807,
+            "def": 1106,
+            "speedBonus": 73.7
         },
         "75": {
-            "dmg": 1347.0,
-            "hp": 1874,
-            "def": 1125,
-            "speedBonus": 376.0
+            "dmg": 897.0,
+            "hp": 1832,
+            "def": 1121,
+            "speedBonus": 74.7
         },
         "76": {
-            "dmg": 1365.0,
-            "hp": 1899,
-            "def": 1140,
-            "speedBonus": 381.0
+            "dmg": 909.0,
+            "hp": 1856,
+            "def": 1136,
+            "speedBonus": 75.8
         },
         "77": {
-            "dmg": 1383.0,
-            "hp": 1924,
-            "def": 1155,
-            "speedBonus": 386.0
+            "dmg": 921.0,
+            "hp": 1881,
+            "def": 1152,
+            "speedBonus": 76.8
         },
         "78": {
-            "dmg": 1401.0,
-            "hp": 1949,
-            "def": 1170,
-            "speedBonus": 391.0
+            "dmg": 933.0,
+            "hp": 1906,
+            "def": 1167,
+            "speedBonus": 77.8
         },
         "79": {
-            "dmg": 1419.0,
-            "hp": 1974,
-            "def": 1185,
-            "speedBonus": 396.0
+            "dmg": 945.0,
+            "hp": 1931,
+            "def": 1182,
+            "speedBonus": 78.8
         },
         "80": {
-            "dmg": 1437.0,
-            "hp": 1999,
-            "def": 1200,
-            "speedBonus": 401.0
+            "dmg": 957.0,
+            "hp": 1955,
+            "def": 1197,
+            "speedBonus": 79.8
         },
         "81": {
-            "dmg": 1456.0,
-            "hp": 2024,
-            "def": 1215,
-            "speedBonus": 406.0
+            "dmg": 970.0,
+            "hp": 1980,
+            "def": 1212,
+            "speedBonus": 80.8
         },
         "82": {
-            "dmg": 1474.0,
-            "hp": 2049,
-            "def": 1230,
-            "speedBonus": 411.0
+            "dmg": 982.0,
+            "hp": 2005,
+            "def": 1227,
+            "speedBonus": 81.8
         },
         "83": {
-            "dmg": 1492.0,
-            "hp": 2074,
-            "def": 1245,
-            "speedBonus": 416.0
+            "dmg": 994.0,
+            "hp": 2030,
+            "def": 1242,
+            "speedBonus": 82.8
         },
         "84": {
-            "dmg": 1510.0,
-            "hp": 2099,
-            "def": 1260,
-            "speedBonus": 421.0
+            "dmg": 1006.0,
+            "hp": 2054,
+            "def": 1258,
+            "speedBonus": 83.8
         },
         "85": {
-            "dmg": 1528.0,
-            "hp": 2124,
-            "def": 1275,
-            "speedBonus": 426.0
+            "dmg": 1018.0,
+            "hp": 2079,
+            "def": 1273,
+            "speedBonus": 84.8
         },
         "86": {
-            "dmg": 1546.0,
-            "hp": 2149,
-            "def": 1290,
-            "speedBonus": 431.0
+            "dmg": 1030.0,
+            "hp": 2104,
+            "def": 1288,
+            "speedBonus": 85.9
         },
         "87": {
-            "dmg": 1564.0,
-            "hp": 2174,
-            "def": 1305,
-            "speedBonus": 436.0
+            "dmg": 1042.0,
+            "hp": 2129,
+            "def": 1303,
+            "speedBonus": 86.9
         },
         "88": {
-            "dmg": 1582.0,
-            "hp": 2199,
-            "def": 1320,
-            "speedBonus": 441.0
+            "dmg": 1054.0,
+            "hp": 2153,
+            "def": 1318,
+            "speedBonus": 87.9
         },
         "89": {
-            "dmg": 1601.0,
-            "hp": 2224,
-            "def": 1335,
-            "speedBonus": 446.0
+            "dmg": 1067.0,
+            "hp": 2178,
+            "def": 1333,
+            "speedBonus": 88.9
         },
         "90": {
-            "dmg": 1619.0,
-            "hp": 2249,
-            "def": 1350,
-            "speedBonus": 451.0
+            "dmg": 1079.0,
+            "hp": 2203,
+            "def": 1348,
+            "speedBonus": 89.9
         },
         "91": {
-            "dmg": 1637.0,
-            "hp": 2275,
-            "def": 1365,
-            "speedBonus": 456.0
+            "dmg": 1091.0,
+            "hp": 2228,
+            "def": 1364,
+            "speedBonus": 90.9
         },
         "92": {
-            "dmg": 1655.0,
-            "hp": 2300,
-            "def": 1380,
-            "speedBonus": 461.0
+            "dmg": 1103.0,
+            "hp": 2252,
+            "def": 1379,
+            "speedBonus": 91.9
         },
         "93": {
-            "dmg": 1673.0,
-            "hp": 2325,
-            "def": 1395,
-            "speedBonus": 466.0
+            "dmg": 1115.0,
+            "hp": 2277,
+            "def": 1394,
+            "speedBonus": 92.9
         },
         "94": {
-            "dmg": 1691.0,
-            "hp": 2350,
-            "def": 1410,
-            "speedBonus": 471.0
+            "dmg": 1127.0,
+            "hp": 2302,
+            "def": 1409,
+            "speedBonus": 93.9
         },
         "95": {
-            "dmg": 1709.0,
-            "hp": 2375,
-            "def": 1425,
-            "speedBonus": 476.0
+            "dmg": 1139.0,
+            "hp": 2327,
+            "def": 1424,
+            "speedBonus": 94.9
         },
         "96": {
-            "dmg": 1727.0,
-            "hp": 2400,
-            "def": 1440,
-            "speedBonus": 481.0
+            "dmg": 1151.0,
+            "hp": 2351,
+            "def": 1439,
+            "speedBonus": 96.0
         },
         "97": {
-            "dmg": 1746.0,
-            "hp": 2425,
+            "dmg": 1164.0,
+            "hp": 2376,
             "def": 1455,
-            "speedBonus": 486.0
+            "speedBonus": 97.0
         },
         "98": {
-            "dmg": 1764.0,
-            "hp": 2450,
+            "dmg": 1176.0,
+            "hp": 2401,
             "def": 1470,
-            "speedBonus": 491.0
+            "speedBonus": 98.0
         },
         "99": {
-            "dmg": 1782.0,
-            "hp": 2475,
+            "dmg": 1188.0,
+            "hp": 2426,
             "def": 1485,
-            "speedBonus": 496.0
+            "speedBonus": 99.0
         },
         "100": {
-            "dmg": 1800.0,
-            "hp": 2500,
+            "dmg": 1200.0,
+            "hp": 2450,
             "def": 1500,
-            "speedBonus": 501.0
+            "speedBonus": 100.0
         }
     },
     "hunter": {
         "1": {
-            "dmg": 5.0,
-            "hp": 20,
-            "def": 15,
-            "speedBonus": 5.0
+            "dmg": 0.0,
+            "hp": 0,
+            "def": 0,
+            "speedBonus": 0.0
         },
         "2": {
-            "dmg": 23.0,
-            "hp": 45,
-            "def": 30,
-            "speedBonus": 10.0
+            "dmg": 12.0,
+            "hp": 25,
+            "def": 15,
+            "speedBonus": 1.0
         },
         "3": {
-            "dmg": 41.0,
-            "hp": 70,
-            "def": 45,
-            "speedBonus": 15.0
+            "dmg": 24.0,
+            "hp": 50,
+            "def": 30,
+            "speedBonus": 2.0
         },
         "4": {
-            "dmg": 59.0,
-            "hp": 95,
-            "def": 60,
-            "speedBonus": 20.0
+            "dmg": 36.0,
+            "hp": 74,
+            "def": 45,
+            "speedBonus": 3.0
         },
         "5": {
-            "dmg": 78.0,
-            "hp": 120,
-            "def": 75,
-            "speedBonus": 25.0
+            "dmg": 48.0,
+            "hp": 99,
+            "def": 61,
+            "speedBonus": 4.0
         },
         "6": {
-            "dmg": 96.0,
-            "hp": 145,
-            "def": 90,
-            "speedBonus": 30.0
+            "dmg": 60.0,
+            "hp": 124,
+            "def": 76,
+            "speedBonus": 5.1
         },
         "7": {
-            "dmg": 114.0,
-            "hp": 170,
-            "def": 105,
-            "speedBonus": 35.0
+            "dmg": 72.0,
+            "hp": 149,
+            "def": 91,
+            "speedBonus": 6.1
         },
         "8": {
-            "dmg": 132.0,
-            "hp": 195,
-            "def": 120,
-            "speedBonus": 40.0
+            "dmg": 84.0,
+            "hp": 173,
+            "def": 106,
+            "speedBonus": 7.1
         },
         "9": {
-            "dmg": 150.0,
-            "hp": 220,
-            "def": 135,
-            "speedBonus": 45.0
+            "dmg": 97.0,
+            "hp": 198,
+            "def": 121,
+            "speedBonus": 8.1
         },
         "10": {
-            "dmg": 168.0,
-            "hp": 245,
-            "def": 150,
-            "speedBonus": 50.0
+            "dmg": 109.0,
+            "hp": 223,
+            "def": 136,
+            "speedBonus": 9.1
         },
         "11": {
-            "dmg": 186.0,
-            "hp": 271,
-            "def": 165,
-            "speedBonus": 55.0
+            "dmg": 121.0,
+            "hp": 248,
+            "def": 152,
+            "speedBonus": 10.1
         },
         "12": {
-            "dmg": 204.0,
-            "hp": 296,
-            "def": 180,
-            "speedBonus": 60.0
+            "dmg": 133.0,
+            "hp": 272,
+            "def": 167,
+            "speedBonus": 11.1
         },
         "13": {
-            "dmg": 223.0,
-            "hp": 321,
-            "def": 195,
-            "speedBonus": 65.0
+            "dmg": 145.0,
+            "hp": 297,
+            "def": 182,
+            "speedBonus": 12.1
         },
         "14": {
-            "dmg": 241.0,
-            "hp": 346,
-            "def": 210,
-            "speedBonus": 70.0
+            "dmg": 157.0,
+            "hp": 322,
+            "def": 197,
+            "speedBonus": 13.1
         },
         "15": {
-            "dmg": 259.0,
-            "hp": 371,
-            "def": 225,
-            "speedBonus": 75.0
+            "dmg": 169.0,
+            "hp": 347,
+            "def": 212,
+            "speedBonus": 14.1
         },
         "16": {
-            "dmg": 277.0,
-            "hp": 396,
-            "def": 240,
-            "speedBonus": 80.0
+            "dmg": 181.0,
+            "hp": 371,
+            "def": 227,
+            "speedBonus": 15.2
         },
         "17": {
-            "dmg": 295.0,
-            "hp": 421,
-            "def": 255,
-            "speedBonus": 85.0
+            "dmg": 194.0,
+            "hp": 396,
+            "def": 242,
+            "speedBonus": 16.2
         },
         "18": {
-            "dmg": 313.0,
-            "hp": 446,
-            "def": 270,
-            "speedBonus": 90.0
+            "dmg": 206.0,
+            "hp": 421,
+            "def": 258,
+            "speedBonus": 17.2
         },
         "19": {
-            "dmg": 331.0,
-            "hp": 471,
-            "def": 285,
-            "speedBonus": 95.0
+            "dmg": 218.0,
+            "hp": 446,
+            "def": 273,
+            "speedBonus": 18.2
         },
         "20": {
-            "dmg": 349.0,
-            "hp": 496,
-            "def": 300,
-            "speedBonus": 100.0
+            "dmg": 230.0,
+            "hp": 470,
+            "def": 288,
+            "speedBonus": 19.2
         },
         "21": {
-            "dmg": 368.0,
-            "hp": 521,
-            "def": 315,
-            "speedBonus": 105.0
+            "dmg": 242.0,
+            "hp": 495,
+            "def": 303,
+            "speedBonus": 20.2
         },
         "22": {
-            "dmg": 386.0,
-            "hp": 546,
-            "def": 330,
-            "speedBonus": 110.0
+            "dmg": 254.0,
+            "hp": 520,
+            "def": 318,
+            "speedBonus": 21.2
         },
         "23": {
-            "dmg": 404.0,
-            "hp": 571,
-            "def": 345,
-            "speedBonus": 115.0
+            "dmg": 266.0,
+            "hp": 545,
+            "def": 333,
+            "speedBonus": 22.2
         },
         "24": {
-            "dmg": 422.0,
-            "hp": 596,
-            "def": 360,
-            "speedBonus": 120.0
+            "dmg": 278.0,
+            "hp": 569,
+            "def": 348,
+            "speedBonus": 23.2
         },
         "25": {
-            "dmg": 440.0,
-            "hp": 621,
-            "def": 375,
-            "speedBonus": 125.0
+            "dmg": 291.0,
+            "hp": 594,
+            "def": 364,
+            "speedBonus": 24.2
         },
         "26": {
-            "dmg": 458.0,
-            "hp": 646,
-            "def": 390,
-            "speedBonus": 130.0
+            "dmg": 303.0,
+            "hp": 619,
+            "def": 379,
+            "speedBonus": 25.3
         },
         "27": {
-            "dmg": 476.0,
-            "hp": 671,
-            "def": 405,
-            "speedBonus": 135.0
+            "dmg": 315.0,
+            "hp": 644,
+            "def": 394,
+            "speedBonus": 26.3
         },
         "28": {
-            "dmg": 495.0,
-            "hp": 696,
-            "def": 420,
-            "speedBonus": 140.0
+            "dmg": 327.0,
+            "hp": 668,
+            "def": 409,
+            "speedBonus": 27.3
         },
         "29": {
-            "dmg": 513.0,
-            "hp": 721,
-            "def": 435,
-            "speedBonus": 145.0
+            "dmg": 339.0,
+            "hp": 693,
+            "def": 424,
+            "speedBonus": 28.3
         },
         "30": {
-            "dmg": 531.0,
-            "hp": 746,
-            "def": 450,
-            "speedBonus": 150.0
+            "dmg": 351.0,
+            "hp": 718,
+            "def": 439,
+            "speedBonus": 29.3
         },
         "31": {
-            "dmg": 549.0,
-            "hp": 772,
-            "def": 465,
-            "speedBonus": 155.0
+            "dmg": 363.0,
+            "hp": 743,
+            "def": 455,
+            "speedBonus": 30.3
         },
         "32": {
-            "dmg": 567.0,
-            "hp": 797,
-            "def": 480,
-            "speedBonus": 160.0
+            "dmg": 375.0,
+            "hp": 767,
+            "def": 470,
+            "speedBonus": 31.3
         },
         "33": {
-            "dmg": 585.0,
-            "hp": 822,
-            "def": 495,
-            "speedBonus": 165.0
+            "dmg": 388.0,
+            "hp": 792,
+            "def": 485,
+            "speedBonus": 32.3
         },
         "34": {
-            "dmg": 603.0,
-            "hp": 847,
-            "def": 510,
-            "speedBonus": 170.0
+            "dmg": 400.0,
+            "hp": 817,
+            "def": 500,
+            "speedBonus": 33.3
         },
         "35": {
-            "dmg": 621.0,
-            "hp": 872,
-            "def": 525,
-            "speedBonus": 175.0
+            "dmg": 412.0,
+            "hp": 842,
+            "def": 515,
+            "speedBonus": 34.3
         },
         "36": {
-            "dmg": 640.0,
-            "hp": 897,
-            "def": 540,
-            "speedBonus": 180.0
+            "dmg": 424.0,
+            "hp": 866,
+            "def": 530,
+            "speedBonus": 35.4
         },
         "37": {
-            "dmg": 658.0,
-            "hp": 922,
-            "def": 555,
-            "speedBonus": 185.0
+            "dmg": 436.0,
+            "hp": 891,
+            "def": 545,
+            "speedBonus": 36.4
         },
         "38": {
-            "dmg": 676.0,
-            "hp": 947,
-            "def": 570,
-            "speedBonus": 190.0
+            "dmg": 448.0,
+            "hp": 916,
+            "def": 561,
+            "speedBonus": 37.4
         },
         "39": {
-            "dmg": 694.0,
-            "hp": 972,
-            "def": 585,
-            "speedBonus": 195.0
+            "dmg": 460.0,
+            "hp": 941,
+            "def": 576,
+            "speedBonus": 38.4
         },
         "40": {
-            "dmg": 712.0,
-            "hp": 997,
-            "def": 600,
-            "speedBonus": 200.0
+            "dmg": 472.0,
+            "hp": 965,
+            "def": 591,
+            "speedBonus": 39.4
         },
         "41": {
-            "dmg": 730.0,
-            "hp": 1022,
-            "def": 615,
-            "speedBonus": 205.0
+            "dmg": 485.0,
+            "hp": 990,
+            "def": 606,
+            "speedBonus": 40.4
         },
         "42": {
-            "dmg": 748.0,
-            "hp": 1047,
-            "def": 630,
-            "speedBonus": 210.0
+            "dmg": 497.0,
+            "hp": 1015,
+            "def": 621,
+            "speedBonus": 41.4
         },
         "43": {
-            "dmg": 767.0,
-            "hp": 1072,
-            "def": 645,
-            "speedBonus": 215.0
+            "dmg": 509.0,
+            "hp": 1040,
+            "def": 636,
+            "speedBonus": 42.4
         },
         "44": {
-            "dmg": 785.0,
-            "hp": 1097,
-            "def": 660,
-            "speedBonus": 220.0
+            "dmg": 521.0,
+            "hp": 1064,
+            "def": 652,
+            "speedBonus": 43.4
         },
         "45": {
-            "dmg": 803.0,
-            "hp": 1122,
-            "def": 675,
-            "speedBonus": 225.0
+            "dmg": 533.0,
+            "hp": 1089,
+            "def": 667,
+            "speedBonus": 44.4
         },
         "46": {
-            "dmg": 821.0,
-            "hp": 1147,
-            "def": 690,
-            "speedBonus": 230.0
+            "dmg": 545.0,
+            "hp": 1114,
+            "def": 682,
+            "speedBonus": 45.5
         },
         "47": {
-            "dmg": 839.0,
-            "hp": 1172,
-            "def": 705,
-            "speedBonus": 235.0
+            "dmg": 557.0,
+            "hp": 1139,
+            "def": 697,
+            "speedBonus": 46.5
         },
         "48": {
-            "dmg": 857.0,
-            "hp": 1197,
-            "def": 720,
-            "speedBonus": 240.0
+            "dmg": 569.0,
+            "hp": 1163,
+            "def": 712,
+            "speedBonus": 47.5
         },
         "49": {
-            "dmg": 875.0,
-            "hp": 1222,
-            "def": 735,
-            "speedBonus": 245.0
+            "dmg": 582.0,
+            "hp": 1188,
+            "def": 727,
+            "speedBonus": 48.5
         },
         "50": {
-            "dmg": 893.0,
-            "hp": 1247,
-            "def": 750,
-            "speedBonus": 250.0
+            "dmg": 594.0,
+            "hp": 1213,
+            "def": 742,
+            "speedBonus": 49.5
         },
         "51": {
-            "dmg": 912.0,
-            "hp": 1273,
-            "def": 765,
-            "speedBonus": 256.0
+            "dmg": 606.0,
+            "hp": 1238,
+            "def": 758,
+            "speedBonus": 50.5
         },
         "52": {
-            "dmg": 930.0,
-            "hp": 1298,
-            "def": 780,
-            "speedBonus": 261.0
+            "dmg": 618.0,
+            "hp": 1262,
+            "def": 773,
+            "speedBonus": 51.5
         },
         "53": {
-            "dmg": 948.0,
-            "hp": 1323,
-            "def": 795,
-            "speedBonus": 266.0
+            "dmg": 630.0,
+            "hp": 1287,
+            "def": 788,
+            "speedBonus": 52.5
         },
         "54": {
-            "dmg": 966.0,
-            "hp": 1348,
-            "def": 810,
-            "speedBonus": 271.0
+            "dmg": 642.0,
+            "hp": 1312,
+            "def": 803,
+            "speedBonus": 53.5
         },
         "55": {
-            "dmg": 984.0,
-            "hp": 1373,
-            "def": 825,
-            "speedBonus": 276.0
+            "dmg": 654.0,
+            "hp": 1337,
+            "def": 818,
+            "speedBonus": 54.5
         },
         "56": {
-            "dmg": 1002.0,
-            "hp": 1398,
-            "def": 840,
-            "speedBonus": 281.0
+            "dmg": 666.0,
+            "hp": 1361,
+            "def": 833,
+            "speedBonus": 55.6
         },
         "57": {
-            "dmg": 1020.0,
-            "hp": 1423,
-            "def": 855,
-            "speedBonus": 286.0
+            "dmg": 679.0,
+            "hp": 1386,
+            "def": 848,
+            "speedBonus": 56.6
         },
         "58": {
-            "dmg": 1038.0,
-            "hp": 1448,
-            "def": 870,
-            "speedBonus": 291.0
+            "dmg": 691.0,
+            "hp": 1411,
+            "def": 864,
+            "speedBonus": 57.6
         },
         "59": {
-            "dmg": 1057.0,
-            "hp": 1473,
-            "def": 885,
-            "speedBonus": 296.0
+            "dmg": 703.0,
+            "hp": 1436,
+            "def": 879,
+            "speedBonus": 58.6
         },
         "60": {
-            "dmg": 1075.0,
-            "hp": 1498,
-            "def": 900,
-            "speedBonus": 301.0
+            "dmg": 715.0,
+            "hp": 1460,
+            "def": 894,
+            "speedBonus": 59.6
         },
         "61": {
-            "dmg": 1093.0,
-            "hp": 1523,
-            "def": 915,
-            "speedBonus": 306.0
+            "dmg": 727.0,
+            "hp": 1485,
+            "def": 909,
+            "speedBonus": 60.6
         },
         "62": {
-            "dmg": 1111.0,
-            "hp": 1548,
-            "def": 930,
-            "speedBonus": 311.0
+            "dmg": 739.0,
+            "hp": 1510,
+            "def": 924,
+            "speedBonus": 61.6
         },
         "63": {
-            "dmg": 1129.0,
-            "hp": 1573,
-            "def": 945,
-            "speedBonus": 316.0
+            "dmg": 751.0,
+            "hp": 1535,
+            "def": 939,
+            "speedBonus": 62.6
         },
         "64": {
-            "dmg": 1147.0,
-            "hp": 1598,
-            "def": 960,
-            "speedBonus": 321.0
+            "dmg": 763.0,
+            "hp": 1559,
+            "def": 955,
+            "speedBonus": 63.6
         },
         "65": {
-            "dmg": 1165.0,
-            "hp": 1623,
-            "def": 975,
-            "speedBonus": 326.0
+            "dmg": 776.0,
+            "hp": 1584,
+            "def": 970,
+            "speedBonus": 64.6
         },
         "66": {
-            "dmg": 1184.0,
-            "hp": 1648,
-            "def": 990,
-            "speedBonus": 331.0
+            "dmg": 788.0,
+            "hp": 1609,
+            "def": 985,
+            "speedBonus": 65.7
         },
         "67": {
-            "dmg": 1202.0,
-            "hp": 1673,
-            "def": 1005,
-            "speedBonus": 336.0
+            "dmg": 800.0,
+            "hp": 1634,
+            "def": 1000,
+            "speedBonus": 66.7
         },
         "68": {
-            "dmg": 1220.0,
-            "hp": 1698,
-            "def": 1020,
-            "speedBonus": 341.0
+            "dmg": 812.0,
+            "hp": 1658,
+            "def": 1015,
+            "speedBonus": 67.7
         },
         "69": {
-            "dmg": 1238.0,
-            "hp": 1723,
-            "def": 1035,
-            "speedBonus": 346.0
+            "dmg": 824.0,
+            "hp": 1683,
+            "def": 1030,
+            "speedBonus": 68.7
         },
         "70": {
-            "dmg": 1256.0,
-            "hp": 1748,
-            "def": 1050,
-            "speedBonus": 351.0
+            "dmg": 836.0,
+            "hp": 1708,
+            "def": 1045,
+            "speedBonus": 69.7
         },
         "71": {
-            "dmg": 1274.0,
-            "hp": 1774,
-            "def": 1065,
-            "speedBonus": 356.0
+            "dmg": 848.0,
+            "hp": 1733,
+            "def": 1061,
+            "speedBonus": 70.7
         },
         "72": {
-            "dmg": 1292.0,
-            "hp": 1799,
-            "def": 1080,
-            "speedBonus": 361.0
+            "dmg": 860.0,
+            "hp": 1757,
+            "def": 1076,
+            "speedBonus": 71.7
         },
         "73": {
-            "dmg": 1310.0,
-            "hp": 1824,
-            "def": 1095,
-            "speedBonus": 366.0
+            "dmg": 873.0,
+            "hp": 1782,
+            "def": 1091,
+            "speedBonus": 72.7
         },
         "74": {
-            "dmg": 1329.0,
-            "hp": 1849,
-            "def": 1110,
-            "speedBonus": 371.0
+            "dmg": 885.0,
+            "hp": 1807,
+            "def": 1106,
+            "speedBonus": 73.7
         },
         "75": {
-            "dmg": 1347.0,
-            "hp": 1874,
-            "def": 1125,
-            "speedBonus": 376.0
+            "dmg": 897.0,
+            "hp": 1832,
+            "def": 1121,
+            "speedBonus": 74.7
         },
         "76": {
-            "dmg": 1365.0,
-            "hp": 1899,
-            "def": 1140,
-            "speedBonus": 381.0
+            "dmg": 909.0,
+            "hp": 1856,
+            "def": 1136,
+            "speedBonus": 75.8
         },
         "77": {
-            "dmg": 1383.0,
-            "hp": 1924,
-            "def": 1155,
-            "speedBonus": 386.0
+            "dmg": 921.0,
+            "hp": 1881,
+            "def": 1152,
+            "speedBonus": 76.8
         },
         "78": {
-            "dmg": 1401.0,
-            "hp": 1949,
-            "def": 1170,
-            "speedBonus": 391.0
+            "dmg": 933.0,
+            "hp": 1906,
+            "def": 1167,
+            "speedBonus": 77.8
         },
         "79": {
-            "dmg": 1419.0,
-            "hp": 1974,
-            "def": 1185,
-            "speedBonus": 396.0
+            "dmg": 945.0,
+            "hp": 1931,
+            "def": 1182,
+            "speedBonus": 78.8
         },
         "80": {
-            "dmg": 1437.0,
-            "hp": 1999,
-            "def": 1200,
-            "speedBonus": 401.0
+            "dmg": 957.0,
+            "hp": 1955,
+            "def": 1197,
+            "speedBonus": 79.8
         },
         "81": {
-            "dmg": 1456.0,
-            "hp": 2024,
-            "def": 1215,
-            "speedBonus": 406.0
+            "dmg": 970.0,
+            "hp": 1980,
+            "def": 1212,
+            "speedBonus": 80.8
         },
         "82": {
-            "dmg": 1474.0,
-            "hp": 2049,
-            "def": 1230,
-            "speedBonus": 411.0
+            "dmg": 982.0,
+            "hp": 2005,
+            "def": 1227,
+            "speedBonus": 81.8
         },
         "83": {
-            "dmg": 1492.0,
-            "hp": 2074,
-            "def": 1245,
-            "speedBonus": 416.0
+            "dmg": 994.0,
+            "hp": 2030,
+            "def": 1242,
+            "speedBonus": 82.8
         },
         "84": {
-            "dmg": 1510.0,
-            "hp": 2099,
-            "def": 1260,
-            "speedBonus": 421.0
+            "dmg": 1006.0,
+            "hp": 2054,
+            "def": 1258,
+            "speedBonus": 83.8
         },
         "85": {
-            "dmg": 1528.0,
-            "hp": 2124,
-            "def": 1275,
-            "speedBonus": 426.0
+            "dmg": 1018.0,
+            "hp": 2079,
+            "def": 1273,
+            "speedBonus": 84.8
         },
         "86": {
-            "dmg": 1546.0,
-            "hp": 2149,
-            "def": 1290,
-            "speedBonus": 431.0
+            "dmg": 1030.0,
+            "hp": 2104,
+            "def": 1288,
+            "speedBonus": 85.9
         },
         "87": {
-            "dmg": 1564.0,
-            "hp": 2174,
-            "def": 1305,
-            "speedBonus": 436.0
+            "dmg": 1042.0,
+            "hp": 2129,
+            "def": 1303,
+            "speedBonus": 86.9
         },
         "88": {
-            "dmg": 1582.0,
-            "hp": 2199,
-            "def": 1320,
-            "speedBonus": 441.0
+            "dmg": 1054.0,
+            "hp": 2153,
+            "def": 1318,
+            "speedBonus": 87.9
         },
         "89": {
-            "dmg": 1601.0,
-            "hp": 2224,
-            "def": 1335,
-            "speedBonus": 446.0
+            "dmg": 1067.0,
+            "hp": 2178,
+            "def": 1333,
+            "speedBonus": 88.9
         },
         "90": {
-            "dmg": 1619.0,
-            "hp": 2249,
-            "def": 1350,
-            "speedBonus": 451.0
+            "dmg": 1079.0,
+            "hp": 2203,
+            "def": 1348,
+            "speedBonus": 89.9
         },
         "91": {
-            "dmg": 1637.0,
-            "hp": 2275,
-            "def": 1365,
-            "speedBonus": 456.0
+            "dmg": 1091.0,
+            "hp": 2228,
+            "def": 1364,
+            "speedBonus": 90.9
         },
         "92": {
-            "dmg": 1655.0,
-            "hp": 2300,
-            "def": 1380,
-            "speedBonus": 461.0
+            "dmg": 1103.0,
+            "hp": 2252,
+            "def": 1379,
+            "speedBonus": 91.9
         },
         "93": {
-            "dmg": 1673.0,
-            "hp": 2325,
-            "def": 1395,
-            "speedBonus": 466.0
+            "dmg": 1115.0,
+            "hp": 2277,
+            "def": 1394,
+            "speedBonus": 92.9
         },
         "94": {
-            "dmg": 1691.0,
-            "hp": 2350,
-            "def": 1410,
-            "speedBonus": 471.0
+            "dmg": 1127.0,
+            "hp": 2302,
+            "def": 1409,
+            "speedBonus": 93.9
         },
         "95": {
-            "dmg": 1709.0,
-            "hp": 2375,
-            "def": 1425,
-            "speedBonus": 476.0
+            "dmg": 1139.0,
+            "hp": 2327,
+            "def": 1424,
+            "speedBonus": 94.9
         },
         "96": {
-            "dmg": 1727.0,
-            "hp": 2400,
-            "def": 1440,
-            "speedBonus": 481.0
+            "dmg": 1151.0,
+            "hp": 2351,
+            "def": 1439,
+            "speedBonus": 96.0
         },
         "97": {
-            "dmg": 1746.0,
-            "hp": 2425,
+            "dmg": 1164.0,
+            "hp": 2376,
             "def": 1455,
-            "speedBonus": 486.0
+            "speedBonus": 97.0
         },
         "98": {
-            "dmg": 1764.0,
-            "hp": 2450,
+            "dmg": 1176.0,
+            "hp": 2401,
             "def": 1470,
-            "speedBonus": 491.0
+            "speedBonus": 98.0
         },
         "99": {
-            "dmg": 1782.0,
-            "hp": 2475,
+            "dmg": 1188.0,
+            "hp": 2426,
             "def": 1485,
-            "speedBonus": 496.0
+            "speedBonus": 99.0
         },
         "100": {
-            "dmg": 1800.0,
-            "hp": 2500,
+            "dmg": 1200.0,
+            "hp": 2450,
             "def": 1500,
-            "speedBonus": 501.0
+            "speedBonus": 100.0
         }
     },
     "mage": {
         "1": {
-            "dmg": 5.0,
-            "hp": 20,
-            "def": 15,
-            "speedBonus": 5.0
+            "dmg": 0.0,
+            "hp": 0,
+            "def": 0,
+            "speedBonus": 0.0
         },
         "2": {
-            "dmg": 23.0,
-            "hp": 45,
-            "def": 30,
-            "speedBonus": 10.0
+            "dmg": 12.0,
+            "hp": 25,
+            "def": 15,
+            "speedBonus": 1.0
         },
         "3": {
-            "dmg": 41.0,
-            "hp": 70,
-            "def": 45,
-            "speedBonus": 15.0
+            "dmg": 24.0,
+            "hp": 50,
+            "def": 30,
+            "speedBonus": 2.0
         },
         "4": {
-            "dmg": 59.0,
-            "hp": 95,
-            "def": 60,
-            "speedBonus": 20.0
+            "dmg": 36.0,
+            "hp": 74,
+            "def": 45,
+            "speedBonus": 3.0
         },
         "5": {
-            "dmg": 78.0,
-            "hp": 120,
-            "def": 75,
-            "speedBonus": 25.0
+            "dmg": 48.0,
+            "hp": 99,
+            "def": 61,
+            "speedBonus": 4.0
         },
         "6": {
-            "dmg": 96.0,
-            "hp": 145,
-            "def": 90,
-            "speedBonus": 30.0
+            "dmg": 60.0,
+            "hp": 124,
+            "def": 76,
+            "speedBonus": 5.1
         },
         "7": {
-            "dmg": 114.0,
-            "hp": 170,
-            "def": 105,
-            "speedBonus": 35.0
+            "dmg": 72.0,
+            "hp": 149,
+            "def": 91,
+            "speedBonus": 6.1
         },
         "8": {
-            "dmg": 132.0,
-            "hp": 195,
-            "def": 120,
-            "speedBonus": 40.0
+            "dmg": 84.0,
+            "hp": 173,
+            "def": 106,
+            "speedBonus": 7.1
         },
         "9": {
-            "dmg": 150.0,
-            "hp": 220,
-            "def": 135,
-            "speedBonus": 45.0
+            "dmg": 97.0,
+            "hp": 198,
+            "def": 121,
+            "speedBonus": 8.1
         },
         "10": {
-            "dmg": 168.0,
-            "hp": 245,
-            "def": 150,
-            "speedBonus": 50.0
+            "dmg": 109.0,
+            "hp": 223,
+            "def": 136,
+            "speedBonus": 9.1
         },
         "11": {
-            "dmg": 186.0,
-            "hp": 271,
-            "def": 165,
-            "speedBonus": 55.0
+            "dmg": 121.0,
+            "hp": 248,
+            "def": 152,
+            "speedBonus": 10.1
         },
         "12": {
-            "dmg": 204.0,
-            "hp": 296,
-            "def": 180,
-            "speedBonus": 60.0
+            "dmg": 133.0,
+            "hp": 272,
+            "def": 167,
+            "speedBonus": 11.1
         },
         "13": {
-            "dmg": 223.0,
-            "hp": 321,
-            "def": 195,
-            "speedBonus": 65.0
+            "dmg": 145.0,
+            "hp": 297,
+            "def": 182,
+            "speedBonus": 12.1
         },
         "14": {
-            "dmg": 241.0,
-            "hp": 346,
-            "def": 210,
-            "speedBonus": 70.0
+            "dmg": 157.0,
+            "hp": 322,
+            "def": 197,
+            "speedBonus": 13.1
         },
         "15": {
-            "dmg": 259.0,
-            "hp": 371,
-            "def": 225,
-            "speedBonus": 75.0
+            "dmg": 169.0,
+            "hp": 347,
+            "def": 212,
+            "speedBonus": 14.1
         },
         "16": {
-            "dmg": 277.0,
-            "hp": 396,
-            "def": 240,
-            "speedBonus": 80.0
+            "dmg": 181.0,
+            "hp": 371,
+            "def": 227,
+            "speedBonus": 15.2
         },
         "17": {
-            "dmg": 295.0,
-            "hp": 421,
-            "def": 255,
-            "speedBonus": 85.0
+            "dmg": 194.0,
+            "hp": 396,
+            "def": 242,
+            "speedBonus": 16.2
         },
         "18": {
-            "dmg": 313.0,
-            "hp": 446,
-            "def": 270,
-            "speedBonus": 90.0
+            "dmg": 206.0,
+            "hp": 421,
+            "def": 258,
+            "speedBonus": 17.2
         },
         "19": {
-            "dmg": 331.0,
-            "hp": 471,
-            "def": 285,
-            "speedBonus": 95.0
+            "dmg": 218.0,
+            "hp": 446,
+            "def": 273,
+            "speedBonus": 18.2
         },
         "20": {
-            "dmg": 349.0,
-            "hp": 496,
-            "def": 300,
-            "speedBonus": 100.0
+            "dmg": 230.0,
+            "hp": 470,
+            "def": 288,
+            "speedBonus": 19.2
         },
         "21": {
-            "dmg": 368.0,
-            "hp": 521,
-            "def": 315,
-            "speedBonus": 105.0
+            "dmg": 242.0,
+            "hp": 495,
+            "def": 303,
+            "speedBonus": 20.2
         },
         "22": {
-            "dmg": 386.0,
-            "hp": 546,
-            "def": 330,
-            "speedBonus": 110.0
+            "dmg": 254.0,
+            "hp": 520,
+            "def": 318,
+            "speedBonus": 21.2
         },
         "23": {
-            "dmg": 404.0,
-            "hp": 571,
-            "def": 345,
-            "speedBonus": 115.0
+            "dmg": 266.0,
+            "hp": 545,
+            "def": 333,
+            "speedBonus": 22.2
         },
         "24": {
-            "dmg": 422.0,
-            "hp": 596,
-            "def": 360,
-            "speedBonus": 120.0
+            "dmg": 278.0,
+            "hp": 569,
+            "def": 348,
+            "speedBonus": 23.2
         },
         "25": {
-            "dmg": 440.0,
-            "hp": 621,
-            "def": 375,
-            "speedBonus": 125.0
+            "dmg": 291.0,
+            "hp": 594,
+            "def": 364,
+            "speedBonus": 24.2
         },
         "26": {
-            "dmg": 458.0,
-            "hp": 646,
-            "def": 390,
-            "speedBonus": 130.0
+            "dmg": 303.0,
+            "hp": 619,
+            "def": 379,
+            "speedBonus": 25.3
         },
         "27": {
-            "dmg": 476.0,
-            "hp": 671,
-            "def": 405,
-            "speedBonus": 135.0
+            "dmg": 315.0,
+            "hp": 644,
+            "def": 394,
+            "speedBonus": 26.3
         },
         "28": {
-            "dmg": 495.0,
-            "hp": 696,
-            "def": 420,
-            "speedBonus": 140.0
+            "dmg": 327.0,
+            "hp": 668,
+            "def": 409,
+            "speedBonus": 27.3
         },
         "29": {
-            "dmg": 513.0,
-            "hp": 721,
-            "def": 435,
-            "speedBonus": 145.0
+            "dmg": 339.0,
+            "hp": 693,
+            "def": 424,
+            "speedBonus": 28.3
         },
         "30": {
-            "dmg": 531.0,
-            "hp": 746,
-            "def": 450,
-            "speedBonus": 150.0
+            "dmg": 351.0,
+            "hp": 718,
+            "def": 439,
+            "speedBonus": 29.3
         },
         "31": {
-            "dmg": 549.0,
-            "hp": 772,
-            "def": 465,
-            "speedBonus": 155.0
+            "dmg": 363.0,
+            "hp": 743,
+            "def": 455,
+            "speedBonus": 30.3
         },
         "32": {
-            "dmg": 567.0,
-            "hp": 797,
-            "def": 480,
-            "speedBonus": 160.0
+            "dmg": 375.0,
+            "hp": 767,
+            "def": 470,
+            "speedBonus": 31.3
         },
         "33": {
-            "dmg": 585.0,
-            "hp": 822,
-            "def": 495,
-            "speedBonus": 165.0
+            "dmg": 388.0,
+            "hp": 792,
+            "def": 485,
+            "speedBonus": 32.3
         },
         "34": {
-            "dmg": 603.0,
-            "hp": 847,
-            "def": 510,
-            "speedBonus": 170.0
+            "dmg": 400.0,
+            "hp": 817,
+            "def": 500,
+            "speedBonus": 33.3
         },
         "35": {
-            "dmg": 621.0,
-            "hp": 872,
-            "def": 525,
-            "speedBonus": 175.0
+            "dmg": 412.0,
+            "hp": 842,
+            "def": 515,
+            "speedBonus": 34.3
         },
         "36": {
-            "dmg": 640.0,
-            "hp": 897,
-            "def": 540,
-            "speedBonus": 180.0
+            "dmg": 424.0,
+            "hp": 866,
+            "def": 530,
+            "speedBonus": 35.4
         },
         "37": {
-            "dmg": 658.0,
-            "hp": 922,
-            "def": 555,
-            "speedBonus": 185.0
+            "dmg": 436.0,
+            "hp": 891,
+            "def": 545,
+            "speedBonus": 36.4
         },
         "38": {
-            "dmg": 676.0,
-            "hp": 947,
-            "def": 570,
-            "speedBonus": 190.0
+            "dmg": 448.0,
+            "hp": 916,
+            "def": 561,
+            "speedBonus": 37.4
         },
         "39": {
-            "dmg": 694.0,
-            "hp": 972,
-            "def": 585,
-            "speedBonus": 195.0
+            "dmg": 460.0,
+            "hp": 941,
+            "def": 576,
+            "speedBonus": 38.4
         },
         "40": {
-            "dmg": 712.0,
-            "hp": 997,
-            "def": 600,
-            "speedBonus": 200.0
+            "dmg": 472.0,
+            "hp": 965,
+            "def": 591,
+            "speedBonus": 39.4
         },
         "41": {
-            "dmg": 730.0,
-            "hp": 1022,
-            "def": 615,
-            "speedBonus": 205.0
+            "dmg": 485.0,
+            "hp": 990,
+            "def": 606,
+            "speedBonus": 40.4
         },
         "42": {
-            "dmg": 748.0,
-            "hp": 1047,
-            "def": 630,
-            "speedBonus": 210.0
+            "dmg": 497.0,
+            "hp": 1015,
+            "def": 621,
+            "speedBonus": 41.4
         },
         "43": {
-            "dmg": 767.0,
-            "hp": 1072,
-            "def": 645,
-            "speedBonus": 215.0
+            "dmg": 509.0,
+            "hp": 1040,
+            "def": 636,
+            "speedBonus": 42.4
         },
         "44": {
-            "dmg": 785.0,
-            "hp": 1097,
-            "def": 660,
-            "speedBonus": 220.0
+            "dmg": 521.0,
+            "hp": 1064,
+            "def": 652,
+            "speedBonus": 43.4
         },
         "45": {
-            "dmg": 803.0,
-            "hp": 1122,
-            "def": 675,
-            "speedBonus": 225.0
+            "dmg": 533.0,
+            "hp": 1089,
+            "def": 667,
+            "speedBonus": 44.4
         },
         "46": {
-            "dmg": 821.0,
-            "hp": 1147,
-            "def": 690,
-            "speedBonus": 230.0
+            "dmg": 545.0,
+            "hp": 1114,
+            "def": 682,
+            "speedBonus": 45.5
         },
         "47": {
-            "dmg": 839.0,
-            "hp": 1172,
-            "def": 705,
-            "speedBonus": 235.0
+            "dmg": 557.0,
+            "hp": 1139,
+            "def": 697,
+            "speedBonus": 46.5
         },
         "48": {
-            "dmg": 857.0,
-            "hp": 1197,
-            "def": 720,
-            "speedBonus": 240.0
+            "dmg": 569.0,
+            "hp": 1163,
+            "def": 712,
+            "speedBonus": 47.5
         },
         "49": {
-            "dmg": 875.0,
-            "hp": 1222,
-            "def": 735,
-            "speedBonus": 245.0
+            "dmg": 582.0,
+            "hp": 1188,
+            "def": 727,
+            "speedBonus": 48.5
         },
         "50": {
-            "dmg": 893.0,
-            "hp": 1247,
-            "def": 750,
-            "speedBonus": 250.0
+            "dmg": 594.0,
+            "hp": 1213,
+            "def": 742,
+            "speedBonus": 49.5
         },
         "51": {
-            "dmg": 912.0,
-            "hp": 1273,
-            "def": 765,
-            "speedBonus": 256.0
+            "dmg": 606.0,
+            "hp": 1238,
+            "def": 758,
+            "speedBonus": 50.5
         },
         "52": {
-            "dmg": 930.0,
-            "hp": 1298,
-            "def": 780,
-            "speedBonus": 261.0
+            "dmg": 618.0,
+            "hp": 1262,
+            "def": 773,
+            "speedBonus": 51.5
         },
         "53": {
-            "dmg": 948.0,
-            "hp": 1323,
-            "def": 795,
-            "speedBonus": 266.0
+            "dmg": 630.0,
+            "hp": 1287,
+            "def": 788,
+            "speedBonus": 52.5
         },
         "54": {
-            "dmg": 966.0,
-            "hp": 1348,
-            "def": 810,
-            "speedBonus": 271.0
+            "dmg": 642.0,
+            "hp": 1312,
+            "def": 803,
+            "speedBonus": 53.5
         },
         "55": {
-            "dmg": 984.0,
-            "hp": 1373,
-            "def": 825,
-            "speedBonus": 276.0
+            "dmg": 654.0,
+            "hp": 1337,
+            "def": 818,
+            "speedBonus": 54.5
         },
         "56": {
-            "dmg": 1002.0,
-            "hp": 1398,
-            "def": 840,
-            "speedBonus": 281.0
+            "dmg": 666.0,
+            "hp": 1361,
+            "def": 833,
+            "speedBonus": 55.6
         },
         "57": {
-            "dmg": 1020.0,
-            "hp": 1423,
-            "def": 855,
-            "speedBonus": 286.0
+            "dmg": 679.0,
+            "hp": 1386,
+            "def": 848,
+            "speedBonus": 56.6
         },
         "58": {
-            "dmg": 1038.0,
-            "hp": 1448,
-            "def": 870,
-            "speedBonus": 291.0
+            "dmg": 691.0,
+            "hp": 1411,
+            "def": 864,
+            "speedBonus": 57.6
         },
         "59": {
-            "dmg": 1057.0,
-            "hp": 1473,
-            "def": 885,
-            "speedBonus": 296.0
+            "dmg": 703.0,
+            "hp": 1436,
+            "def": 879,
+            "speedBonus": 58.6
         },
         "60": {
-            "dmg": 1075.0,
-            "hp": 1498,
-            "def": 900,
-            "speedBonus": 301.0
+            "dmg": 715.0,
+            "hp": 1460,
+            "def": 894,
+            "speedBonus": 59.6
         },
         "61": {
-            "dmg": 1093.0,
-            "hp": 1523,
-            "def": 915,
-            "speedBonus": 306.0
+            "dmg": 727.0,
+            "hp": 1485,
+            "def": 909,
+            "speedBonus": 60.6
         },
         "62": {
-            "dmg": 1111.0,
-            "hp": 1548,
-            "def": 930,
-            "speedBonus": 311.0
+            "dmg": 739.0,
+            "hp": 1510,
+            "def": 924,
+            "speedBonus": 61.6
         },
         "63": {
-            "dmg": 1129.0,
-            "hp": 1573,
-            "def": 945,
-            "speedBonus": 316.0
+            "dmg": 751.0,
+            "hp": 1535,
+            "def": 939,
+            "speedBonus": 62.6
         },
         "64": {
-            "dmg": 1147.0,
-            "hp": 1598,
-            "def": 960,
-            "speedBonus": 321.0
+            "dmg": 763.0,
+            "hp": 1559,
+            "def": 955,
+            "speedBonus": 63.6
         },
         "65": {
-            "dmg": 1165.0,
-            "hp": 1623,
-            "def": 975,
-            "speedBonus": 326.0
+            "dmg": 776.0,
+            "hp": 1584,
+            "def": 970,
+            "speedBonus": 64.6
         },
         "66": {
-            "dmg": 1184.0,
-            "hp": 1648,
-            "def": 990,
-            "speedBonus": 331.0
+            "dmg": 788.0,
+            "hp": 1609,
+            "def": 985,
+            "speedBonus": 65.7
         },
         "67": {
-            "dmg": 1202.0,
-            "hp": 1673,
-            "def": 1005,
-            "speedBonus": 336.0
+            "dmg": 800.0,
+            "hp": 1634,
+            "def": 1000,
+            "speedBonus": 66.7
         },
         "68": {
-            "dmg": 1220.0,
-            "hp": 1698,
-            "def": 1020,
-            "speedBonus": 341.0
+            "dmg": 812.0,
+            "hp": 1658,
+            "def": 1015,
+            "speedBonus": 67.7
         },
         "69": {
-            "dmg": 1238.0,
-            "hp": 1723,
-            "def": 1035,
-            "speedBonus": 346.0
+            "dmg": 824.0,
+            "hp": 1683,
+            "def": 1030,
+            "speedBonus": 68.7
         },
         "70": {
-            "dmg": 1256.0,
-            "hp": 1748,
-            "def": 1050,
-            "speedBonus": 351.0
+            "dmg": 836.0,
+            "hp": 1708,
+            "def": 1045,
+            "speedBonus": 69.7
         },
         "71": {
-            "dmg": 1274.0,
-            "hp": 1774,
-            "def": 1065,
-            "speedBonus": 356.0
+            "dmg": 848.0,
+            "hp": 1733,
+            "def": 1061,
+            "speedBonus": 70.7
         },
         "72": {
-            "dmg": 1292.0,
-            "hp": 1799,
-            "def": 1080,
-            "speedBonus": 361.0
+            "dmg": 860.0,
+            "hp": 1757,
+            "def": 1076,
+            "speedBonus": 71.7
         },
         "73": {
-            "dmg": 1310.0,
-            "hp": 1824,
-            "def": 1095,
-            "speedBonus": 366.0
+            "dmg": 873.0,
+            "hp": 1782,
+            "def": 1091,
+            "speedBonus": 72.7
         },
         "74": {
-            "dmg": 1329.0,
-            "hp": 1849,
-            "def": 1110,
-            "speedBonus": 371.0
+            "dmg": 885.0,
+            "hp": 1807,
+            "def": 1106,
+            "speedBonus": 73.7
         },
         "75": {
-            "dmg": 1347.0,
-            "hp": 1874,
-            "def": 1125,
-            "speedBonus": 376.0
+            "dmg": 897.0,
+            "hp": 1832,
+            "def": 1121,
+            "speedBonus": 74.7
         },
         "76": {
-            "dmg": 1365.0,
-            "hp": 1899,
-            "def": 1140,
-            "speedBonus": 381.0
+            "dmg": 909.0,
+            "hp": 1856,
+            "def": 1136,
+            "speedBonus": 75.8
         },
         "77": {
-            "dmg": 1383.0,
-            "hp": 1924,
-            "def": 1155,
-            "speedBonus": 386.0
+            "dmg": 921.0,
+            "hp": 1881,
+            "def": 1152,
+            "speedBonus": 76.8
         },
         "78": {
-            "dmg": 1401.0,
-            "hp": 1949,
-            "def": 1170,
-            "speedBonus": 391.0
+            "dmg": 933.0,
+            "hp": 1906,
+            "def": 1167,
+            "speedBonus": 77.8
         },
         "79": {
-            "dmg": 1419.0,
-            "hp": 1974,
-            "def": 1185,
-            "speedBonus": 396.0
+            "dmg": 945.0,
+            "hp": 1931,
+            "def": 1182,
+            "speedBonus": 78.8
         },
         "80": {
-            "dmg": 1437.0,
-            "hp": 1999,
-            "def": 1200,
-            "speedBonus": 401.0
+            "dmg": 957.0,
+            "hp": 1955,
+            "def": 1197,
+            "speedBonus": 79.8
         },
         "81": {
-            "dmg": 1456.0,
-            "hp": 2024,
-            "def": 1215,
-            "speedBonus": 406.0
+            "dmg": 970.0,
+            "hp": 1980,
+            "def": 1212,
+            "speedBonus": 80.8
         },
         "82": {
-            "dmg": 1474.0,
-            "hp": 2049,
-            "def": 1230,
-            "speedBonus": 411.0
+            "dmg": 982.0,
+            "hp": 2005,
+            "def": 1227,
+            "speedBonus": 81.8
         },
         "83": {
-            "dmg": 1492.0,
-            "hp": 2074,
-            "def": 1245,
-            "speedBonus": 416.0
+            "dmg": 994.0,
+            "hp": 2030,
+            "def": 1242,
+            "speedBonus": 82.8
         },
         "84": {
-            "dmg": 1510.0,
-            "hp": 2099,
-            "def": 1260,
-            "speedBonus": 421.0
+            "dmg": 1006.0,
+            "hp": 2054,
+            "def": 1258,
+            "speedBonus": 83.8
         },
         "85": {
-            "dmg": 1528.0,
-            "hp": 2124,
-            "def": 1275,
-            "speedBonus": 426.0
+            "dmg": 1018.0,
+            "hp": 2079,
+            "def": 1273,
+            "speedBonus": 84.8
         },
         "86": {
-            "dmg": 1546.0,
-            "hp": 2149,
-            "def": 1290,
-            "speedBonus": 431.0
+            "dmg": 1030.0,
+            "hp": 2104,
+            "def": 1288,
+            "speedBonus": 85.9
         },
         "87": {
-            "dmg": 1564.0,
-            "hp": 2174,
-            "def": 1305,
-            "speedBonus": 436.0
+            "dmg": 1042.0,
+            "hp": 2129,
+            "def": 1303,
+            "speedBonus": 86.9
         },
         "88": {
-            "dmg": 1582.0,
-            "hp": 2199,
-            "def": 1320,
-            "speedBonus": 441.0
+            "dmg": 1054.0,
+            "hp": 2153,
+            "def": 1318,
+            "speedBonus": 87.9
         },
         "89": {
-            "dmg": 1601.0,
-            "hp": 2224,
-            "def": 1335,
-            "speedBonus": 446.0
+            "dmg": 1067.0,
+            "hp": 2178,
+            "def": 1333,
+            "speedBonus": 88.9
         },
         "90": {
-            "dmg": 1619.0,
-            "hp": 2249,
-            "def": 1350,
-            "speedBonus": 451.0
+            "dmg": 1079.0,
+            "hp": 2203,
+            "def": 1348,
+            "speedBonus": 89.9
         },
         "91": {
-            "dmg": 1637.0,
-            "hp": 2275,
-            "def": 1365,
-            "speedBonus": 456.0
+            "dmg": 1091.0,
+            "hp": 2228,
+            "def": 1364,
+            "speedBonus": 90.9
         },
         "92": {
-            "dmg": 1655.0,
-            "hp": 2300,
-            "def": 1380,
-            "speedBonus": 461.0
+            "dmg": 1103.0,
+            "hp": 2252,
+            "def": 1379,
+            "speedBonus": 91.9
         },
         "93": {
-            "dmg": 1673.0,
-            "hp": 2325,
-            "def": 1395,
-            "speedBonus": 466.0
+            "dmg": 1115.0,
+            "hp": 2277,
+            "def": 1394,
+            "speedBonus": 92.9
         },
         "94": {
-            "dmg": 1691.0,
-            "hp": 2350,
-            "def": 1410,
-            "speedBonus": 471.0
+            "dmg": 1127.0,
+            "hp": 2302,
+            "def": 1409,
+            "speedBonus": 93.9
         },
         "95": {
-            "dmg": 1709.0,
-            "hp": 2375,
-            "def": 1425,
-            "speedBonus": 476.0
+            "dmg": 1139.0,
+            "hp": 2327,
+            "def": 1424,
+            "speedBonus": 94.9
         },
         "96": {
-            "dmg": 1727.0,
-            "hp": 2400,
-            "def": 1440,
-            "speedBonus": 481.0
+            "dmg": 1151.0,
+            "hp": 2351,
+            "def": 1439,
+            "speedBonus": 96.0
         },
         "97": {
-            "dmg": 1746.0,
-            "hp": 2425,
+            "dmg": 1164.0,
+            "hp": 2376,
             "def": 1455,
-            "speedBonus": 486.0
+            "speedBonus": 97.0
         },
         "98": {
-            "dmg": 1764.0,
-            "hp": 2450,
+            "dmg": 1176.0,
+            "hp": 2401,
             "def": 1470,
-            "speedBonus": 491.0
+            "speedBonus": 98.0
         },
         "99": {
-            "dmg": 1782.0,
-            "hp": 2475,
+            "dmg": 1188.0,
+            "hp": 2426,
             "def": 1485,
-            "speedBonus": 496.0
+            "speedBonus": 99.0
         },
         "100": {
-            "dmg": 1800.0,
-            "hp": 2500,
+            "dmg": 1200.0,
+            "hp": 2450,
             "def": 1500,
-            "speedBonus": 501.0
+            "speedBonus": 100.0
         }
     }
 };

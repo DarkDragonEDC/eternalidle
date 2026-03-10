@@ -1483,7 +1483,11 @@ export class GameManager {
         const finalPrunedState = prunedState;
 
         // console.log(`[DB] Persisting character ${char.name} (${charId})`);
-        const saveTime = new Date().toISOString();
+        // FIX: Don't advance last_saved if the character has active tasks but is offline
+        // This ensures catchup properly calculates elapsed time when the player reconnects
+        const isOnline = this._isCharacterOnline ? this._isCharacterOnline(charId) : true;
+        const hasActiveWork = char.current_activity || char.state?.combat || char.state?.dungeon;
+        const saveTime = (!isOnline && hasActiveWork) ? (char.last_saved || new Date().toISOString()) : new Date().toISOString();
         const { error } = await this.supabase
             .from('characters')
             .update({

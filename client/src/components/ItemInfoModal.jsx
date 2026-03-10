@@ -36,7 +36,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
     const comparisonBaseStats = baseItemResult?.stats || {};
     const comparisonStatKeys = Object.keys(comparisonBaseStats).filter(k =>
         (typeof comparisonBaseStats[k] === 'number' || typeof comparisonBaseStats[k] === 'object') &&
-        ['damage', 'defense', 'hp', 'str', 'agi', 'int', 'efficiency', 'critChance'].includes(k)
+        ['damage', 'defense', 'hp', 'str', 'agi', 'int', 'efficiency', 'critChance', 'speed'].includes(k)
     );
 
     const rarityComparison = Object.values(QUALITIES).map(q => {
@@ -175,7 +175,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                     {baseStats.defense && <StatRow icon={Shield} label="Defense" value={item.stats.defense} valColor="#4ade80" />}
                                     {baseStats.critChance && <StatRow icon={Star} label="Crit Chance" value={`${item.stats.critChance.toFixed(2)}%`} valColor="#fbbf24" />}
                                     {baseStats.attackSpeed && <StatRow icon={Zap} label="Attack Speed" value={(1000 / item.stats.attackSpeed).toFixed(1)} valColor="#90d5ff" />}
-                                    {baseStats.speed && <StatRow icon={Zap} label="Speed" value={item.stats.speed} valColor="#90d5ff" />}
+                                    {baseStats.speed && <StatRow icon={Zap} label="Speed" value={`${item.stats.speed}%`} valColor="#90d5ff" />}
                                     {(baseStats.warriorProf || baseStats.str) && <StatRow icon={Award} label="War. Prof." value={`+${item.stats.warriorProf || item.stats.str}`} valColor="#ff8888" />}
                                     {(baseStats.hunterProf || baseStats.agi) && <StatRow icon={Award} label="Hun. Prof." value={`+${item.stats.hunterProf || item.stats.agi}`} valColor="#88ff88" />}
                                     {(baseStats.mageProf || baseStats.int) && <StatRow icon={Award} label="Mag. Prof." value={`+${item.stats.mageProf || item.stats.int}`} valColor="#8888ff" />}
@@ -285,9 +285,10 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                                     <span style={{ fontSize: '0.75rem', fontWeight: '800', color: q.color }}>{q.name}</span>
                                                 </div>
                                                 <div style={{ display: 'flex', gap: '8px', fontSize: '0.7rem', fontWeight: '900', color: isCurrent ? 'var(--text-main)' : 'var(--text-dim)' }}>
-                                                    {Object.entries(q.calculatedStats).map(([k, v]) => (
-                                                        <span key={k}>{k.slice(0, 3).toUpperCase()}: {v}</span>
-                                                    ))}
+                                                    {Object.entries(q.calculatedStats).map(([k, v]) => {
+                                                        const isPercent = ['speed', 'critChance', 'efficiency'].includes(k);
+                                                        return <span key={k}>{k.slice(0, 3).toUpperCase()}: {v}{isPercent ? '%' : ''}</span>
+                                                    })}
                                                 </div>
                                             </div>
                                         );

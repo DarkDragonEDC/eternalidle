@@ -1,0 +1,351 @@
+Category,Slot,Name,Tier,Rarity,Damage,Defense,HP,Speed
+Warrior's Forge,SWORD,Sword,1,Normal,18,0,0,1.5%
+Warrior's Forge,SWORD,Sword,1,Good,54,0,0,4.5%
+Warrior's Forge,SWORD,Sword,1,Outstanding,90,0,0,7.5%
+Warrior's Forge,SWORD,Sword,1,Excellent,126,0,0,10.5%
+Warrior's Forge,SWORD,Sword,1,Masterpiece,162,0,0,13.5%
+Warrior's Forge,SWORD,Sword,2,Normal,108,0,0,9.0%
+Warrior's Forge,SWORD,Sword,2,Good,144,0,0,12.0%
+Warrior's Forge,SWORD,Sword,2,Outstanding,180,0,0,15.0%
+Warrior's Forge,SWORD,Sword,2,Excellent,216,0,0,18.0%
+Warrior's Forge,SWORD,Sword,2,Masterpiece,252,0,0,21.0%
+Warrior's Forge,SWORD,Sword,3,Normal,198,0,0,16.5%
+Warrior's Forge,SWORD,Sword,3,Good,234,0,0,19.5%
+Warrior's Forge,SWORD,Sword,3,Outstanding,270,0,0,22.5%
+Warrior's Forge,SWORD,Sword,3,Excellent,306,0,0,25.5%
+Warrior's Forge,SWORD,Sword,3,Masterpiece,342,0,0,28.5%
+Warrior's Forge,SWORD,Sword,4,Normal,288,0,0,24.0%
+Warrior's Forge,SWORD,Sword,4,Good,324,0,0,27.0%
+Warrior's Forge,SWORD,Sword,4,Outstanding,360,0,0,30.0%
+Warrior's Forge,SWORD,Sword,4,Excellent,396,0,0,33.0%
+Warrior's Forge,SWORD,Sword,4,Masterpiece,432,0,0,36.0%
+Warrior's Forge,SWORD,Sword,5,Normal,378,0,0,31.5%
+Warrior's Forge,SWORD,Sword,5,Good,414,0,0,34.5%
+Warrior's Forge,SWORD,Sword,5,Outstanding,450,0,0,37.5%
+Warrior's Forge,SWORD,Sword,5,Excellent,486,0,0,40.5%
+Warrior's Forge,SWORD,Sword,5,Masterpiece,522,0,0,43.5%
+Warrior's Forge,SWORD,Sword,6,Normal,468,0,0,39.0%
+Warrior's Forge,SWORD,Sword,6,Good,504,0,0,42.0%
+Warrior's Forge,SWORD,Sword,6,Outstanding,540,0,0,45.0%
+Warrior's Forge,SWORD,Sword,6,Excellent,576,0,0,48.0%
+Warrior's Forge,SWORD,Sword,6,Masterpiece,612,0,0,51.0%
+Warrior's Forge,SWORD,Sword,7,Normal,558,0,0,46.5%
+Warrior's Forge,SWORD,Sword,7,Good,594,0,0,49.5%
+Warrior's Forge,SWORD,Sword,7,Outstanding,630,0,0,52.5%
+Warrior's Forge,SWORD,Sword,7,Excellent,666,0,0,55.5%
+Warrior's Forge,SWORD,Sword,7,Masterpiece,702,0,0,58.5%
+Warrior's Forge,SWORD,Sword,8,Normal,648,0,0,54.0%
+Warrior's Forge,SWORD,Sword,8,Good,684,0,0,57.0%
+Warrior's Forge,SWORD,Sword,8,Outstanding,720,0,0,60.0%
+Warrior's Forge,SWORD,Sword,8,Excellent,756,0,0,63.0%
+Warrior's Forge,SWORD,Sword,8,Masterpiece,792,0,0,66.0%
+Warrior's Forge,SWORD,Sword,9,Normal,738,0,0,61.5%
+Warrior's Forge,SWORD,Sword,9,Good,774,0,0,64.5%
+Warrior's Forge,SWORD,Sword,9,Outstanding,810,0,0,67.5%
+Warrior's Forge,SWORD,Sword,9,Excellent,846,0,0,70.5%
+Warrior's Forge,SWORD,Sword,9,Masterpiece,882,0,0,73.5%
+Warrior's Forge,SWORD,Sword,10,Normal,828,0,0,69.0%
+Warrior's Forge,SWORD,Sword,10,Good,864,0,0,72.0%
+Warrior's Forge,SWORD,Sword,10,Outstanding,900,0,0,75.0%
+Warrior's Forge,SWORD,Sword,10,Excellent,936,0,0,78.0%
+Warrior's Forge,SWORD,Sword,10,Masterpiece,972,0,0,81.0%
+Warrior's Forge,SHEATH,Sheath,1,Normal,18,6,0,1.5%
+Warrior's Forge,SHEATH,Sheath,1,Good,54,18,0,4.5%
+Warrior's Forge,SHEATH,Sheath,1,Outstanding,90,30,0,7.5%
+Warrior's Forge,SHEATH,Sheath,1,Excellent,126,42,0,10.5%
+Warrior's Forge,SHEATH,Sheath,1,Masterpiece,162,54,0,13.5%
+Warrior's Forge,SHEATH,Sheath,2,Normal,108,36,0,9.0%
+Warrior's Forge,SHEATH,Sheath,2,Good,144,48,0,12.0%
+Warrior's Forge,SHEATH,Sheath,2,Outstanding,180,60,0,15.0%
+Warrior's Forge,SHEATH,Sheath,2,Excellent,216,72,0,18.0%
+Warrior's Forge,SHEATH,Sheath,2,Masterpiece,252,84,0,21.0%
+Warrior's Forge,SHEATH,Sheath,3,Normal,198,66,0,16.5%
+Warrior's Forge,SHEATH,Sheath,3,Good,234,78,0,19.5%
+Warrior's Forge,SHEATH,Sheath,3,Outstanding,270,90,0,22.5%
+Warrior's Forge,SHEATH,Sheath,3,Excellent,306,102,0,25.5%
+Warrior's Forge,SHEATH,Sheath,3,Masterpiece,342,114,0,28.5%
+Warrior's Forge,SHEATH,Sheath,4,Normal,288,96,0,24.0%
+Warrior's Forge,SHEATH,Sheath,4,Good,324,108,0,27.0%
+Warrior's Forge,SHEATH,Sheath,4,Outstanding,360,120,0,30.0%
+Warrior's Forge,SHEATH,Sheath,4,Excellent,396,132,0,33.0%
+Warrior's Forge,SHEATH,Sheath,4,Masterpiece,432,144,0,36.0%
+Warrior's Forge,SHEATH,Sheath,5,Normal,378,126,0,31.5%
+Warrior's Forge,SHEATH,Sheath,5,Good,414,138,0,34.5%
+Warrior's Forge,SHEATH,Sheath,5,Outstanding,450,150,0,37.5%
+Warrior's Forge,SHEATH,Sheath,5,Excellent,486,162,0,40.5%
+Warrior's Forge,SHEATH,Sheath,5,Masterpiece,522,174,0,43.5%
+Warrior's Forge,SHEATH,Sheath,6,Normal,468,156,0,39.0%
+Warrior's Forge,SHEATH,Sheath,6,Good,504,168,0,42.0%
+Warrior's Forge,SHEATH,Sheath,6,Outstanding,540,180,0,45.0%
+Warrior's Forge,SHEATH,Sheath,6,Excellent,576,192,0,48.0%
+Warrior's Forge,SHEATH,Sheath,6,Masterpiece,612,204,0,51.0%
+Warrior's Forge,SHEATH,Sheath,7,Normal,558,186,0,46.5%
+Warrior's Forge,SHEATH,Sheath,7,Good,594,198,0,49.5%
+Warrior's Forge,SHEATH,Sheath,7,Outstanding,630,210,0,52.5%
+Warrior's Forge,SHEATH,Sheath,7,Excellent,666,222,0,55.5%
+Warrior's Forge,SHEATH,Sheath,7,Masterpiece,702,234,0,58.5%
+Warrior's Forge,SHEATH,Sheath,8,Normal,648,216,0,54.0%
+Warrior's Forge,SHEATH,Sheath,8,Good,684,228,0,57.0%
+Warrior's Forge,SHEATH,Sheath,8,Outstanding,720,240,0,60.0%
+Warrior's Forge,SHEATH,Sheath,8,Excellent,756,252,0,63.0%
+Warrior's Forge,SHEATH,Sheath,8,Masterpiece,792,264,0,66.0%
+Warrior's Forge,SHEATH,Sheath,9,Normal,738,246,0,61.5%
+Warrior's Forge,SHEATH,Sheath,9,Good,774,258,0,64.5%
+Warrior's Forge,SHEATH,Sheath,9,Outstanding,810,270,0,67.5%
+Warrior's Forge,SHEATH,Sheath,9,Excellent,846,282,0,70.5%
+Warrior's Forge,SHEATH,Sheath,9,Masterpiece,882,294,0,73.5%
+Warrior's Forge,SHEATH,Sheath,10,Normal,828,276,0,69.0%
+Warrior's Forge,SHEATH,Sheath,10,Good,864,288,0,72.0%
+Warrior's Forge,SHEATH,Sheath,10,Outstanding,900,300,0,75.0%
+Warrior's Forge,SHEATH,Sheath,10,Excellent,936,312,0,78.0%
+Warrior's Forge,SHEATH,Sheath,10,Masterpiece,972,324,0,81.0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,1,Normal,0,6,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,1,Good,0,18,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,1,Outstanding,0,30,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,1,Excellent,0,42,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,1,Masterpiece,0,54,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,2,Normal,0,36,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,2,Good,0,48,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,2,Outstanding,0,60,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,2,Excellent,0,72,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,2,Masterpiece,0,84,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,3,Normal,0,66,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,3,Good,0,78,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,3,Outstanding,0,90,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,3,Excellent,0,102,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,3,Masterpiece,0,114,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,4,Normal,0,96,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,4,Good,0,108,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,4,Outstanding,0,120,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,4,Excellent,0,132,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,4,Masterpiece,0,144,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,5,Normal,0,126,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,5,Good,0,138,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,5,Outstanding,0,150,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,5,Excellent,0,162,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,5,Masterpiece,0,174,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,6,Normal,0,156,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,6,Good,0,168,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,6,Outstanding,0,180,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,6,Excellent,0,192,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,6,Masterpiece,0,204,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,7,Normal,0,186,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,7,Good,0,198,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,7,Outstanding,0,210,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,7,Excellent,0,222,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,7,Masterpiece,0,234,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,8,Normal,0,216,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,8,Good,0,228,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,8,Outstanding,0,240,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,8,Excellent,0,252,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,8,Masterpiece,0,264,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,9,Normal,0,246,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,9,Good,0,258,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,9,Outstanding,0,270,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,9,Excellent,0,282,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,9,Masterpiece,0,294,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,10,Normal,0,276,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,10,Good,0,288,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,10,Outstanding,0,300,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,10,Excellent,0,312,0,0%
+Warrior's Forge,PLATE_ARMOR,Plate Armor,10,Masterpiece,0,324,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,1,Normal,0,6,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,1,Good,0,18,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,1,Outstanding,0,30,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,1,Excellent,0,42,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,1,Masterpiece,0,54,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,2,Normal,0,36,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,2,Good,0,48,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,2,Outstanding,0,60,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,2,Excellent,0,72,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,2,Masterpiece,0,84,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,3,Normal,0,66,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,3,Good,0,78,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,3,Outstanding,0,90,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,3,Excellent,0,102,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,3,Masterpiece,0,114,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,4,Normal,0,96,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,4,Good,0,108,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,4,Outstanding,0,120,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,4,Excellent,0,132,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,4,Masterpiece,0,144,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,5,Normal,0,126,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,5,Good,0,138,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,5,Outstanding,0,150,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,5,Excellent,0,162,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,5,Masterpiece,0,174,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,6,Normal,0,156,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,6,Good,0,168,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,6,Outstanding,0,180,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,6,Excellent,0,192,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,6,Masterpiece,0,204,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,7,Normal,0,186,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,7,Good,0,198,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,7,Outstanding,0,210,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,7,Excellent,0,222,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,7,Masterpiece,0,234,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,8,Normal,0,216,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,8,Good,0,228,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,8,Outstanding,0,240,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,8,Excellent,0,252,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,8,Masterpiece,0,264,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,9,Normal,0,246,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,9,Good,0,258,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,9,Outstanding,0,270,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,9,Excellent,0,282,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,9,Masterpiece,0,294,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,10,Normal,0,276,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,10,Good,0,288,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,10,Outstanding,0,300,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,10,Excellent,0,312,0,0%
+Warrior's Forge,PLATE_HELMET,Plate Helmet,10,Masterpiece,0,324,0,0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,1,Normal,0,6,0,1.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,1,Good,0,18,0,4.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,1,Outstanding,0,30,0,7.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,1,Excellent,0,42,0,10.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,1,Masterpiece,0,54,0,13.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,2,Normal,0,36,0,9.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,2,Good,0,48,0,12.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,2,Outstanding,0,60,0,15.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,2,Excellent,0,72,0,18.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,2,Masterpiece,0,84,0,21.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,3,Normal,0,66,0,16.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,3,Good,0,78,0,19.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,3,Outstanding,0,90,0,22.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,3,Excellent,0,102,0,25.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,3,Masterpiece,0,114,0,28.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,4,Normal,0,96,0,24.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,4,Good,0,108,0,27.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,4,Outstanding,0,120,0,30.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,4,Excellent,0,132,0,33.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,4,Masterpiece,0,144,0,36.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,5,Normal,0,126,0,31.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,5,Good,0,138,0,34.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,5,Outstanding,0,150,0,37.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,5,Excellent,0,162,0,40.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,5,Masterpiece,0,174,0,43.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,6,Normal,0,156,0,39.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,6,Good,0,168,0,42.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,6,Outstanding,0,180,0,45.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,6,Excellent,0,192,0,48.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,6,Masterpiece,0,204,0,51.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,7,Normal,0,186,0,46.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,7,Good,0,198,0,49.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,7,Outstanding,0,210,0,52.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,7,Excellent,0,222,0,55.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,7,Masterpiece,0,234,0,58.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,8,Normal,0,216,0,54.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,8,Good,0,228,0,57.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,8,Outstanding,0,240,0,60.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,8,Excellent,0,252,0,63.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,8,Masterpiece,0,264,0,66.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,9,Normal,0,246,0,61.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,9,Good,0,258,0,64.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,9,Outstanding,0,270,0,67.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,9,Excellent,0,282,0,70.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,9,Masterpiece,0,294,0,73.5%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,10,Normal,0,276,0,69.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,10,Good,0,288,0,72.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,10,Outstanding,0,300,0,75.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,10,Excellent,0,312,0,78.0%
+Warrior's Forge,PLATE_BOOTS,Plate Boots,10,Masterpiece,0,324,0,81.0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,1,Normal,18,6,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,1,Good,54,18,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,1,Outstanding,90,30,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,1,Excellent,126,42,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,1,Masterpiece,162,54,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,2,Normal,108,36,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,2,Good,144,48,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,2,Outstanding,180,60,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,2,Excellent,216,72,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,2,Masterpiece,252,84,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,3,Normal,198,66,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,3,Good,234,78,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,3,Outstanding,270,90,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,3,Excellent,306,102,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,3,Masterpiece,342,114,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,4,Normal,288,96,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,4,Good,324,108,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,4,Outstanding,360,120,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,4,Excellent,396,132,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,4,Masterpiece,432,144,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,5,Normal,378,126,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,5,Good,414,138,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,5,Outstanding,450,150,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,5,Excellent,486,162,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,5,Masterpiece,522,174,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,6,Normal,468,156,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,6,Good,504,168,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,6,Outstanding,540,180,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,6,Excellent,576,192,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,6,Masterpiece,612,204,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,7,Normal,558,186,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,7,Good,594,198,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,7,Outstanding,630,210,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,7,Excellent,666,222,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,7,Masterpiece,702,234,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,8,Normal,648,216,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,8,Good,684,228,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,8,Outstanding,720,240,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,8,Excellent,756,252,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,8,Masterpiece,792,264,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,9,Normal,738,246,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,9,Good,774,258,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,9,Outstanding,810,270,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,9,Excellent,846,282,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,9,Masterpiece,882,294,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,10,Normal,828,276,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,10,Good,864,288,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,10,Outstanding,900,300,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,10,Excellent,936,312,0,0%
+Warrior's Forge,PLATE_GLOVES,Plate Gloves,10,Masterpiece,972,324,0,0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,1,Normal,18,0,0,1.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,1,Good,54,0,0,4.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,1,Outstanding,90,0,0,7.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,1,Excellent,126,0,0,10.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,1,Masterpiece,162,0,0,13.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,2,Normal,108,0,0,9.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,2,Good,144,0,0,12.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,2,Outstanding,180,0,0,15.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,2,Excellent,216,0,0,18.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,2,Masterpiece,252,0,0,21.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,3,Normal,198,0,0,16.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,3,Good,234,0,0,19.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,3,Outstanding,270,0,0,22.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,3,Excellent,306,0,0,25.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,3,Masterpiece,342,0,0,28.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,4,Normal,288,0,0,24.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,4,Good,324,0,0,27.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,4,Outstanding,360,0,0,30.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,4,Excellent,396,0,0,33.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,4,Masterpiece,432,0,0,36.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,5,Normal,378,0,0,31.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,5,Good,414,0,0,34.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,5,Outstanding,450,0,0,37.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,5,Excellent,486,0,0,40.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,5,Masterpiece,522,0,0,43.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,6,Normal,468,0,0,39.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,6,Good,504,0,0,42.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,6,Outstanding,540,0,0,45.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,6,Excellent,576,0,0,48.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,6,Masterpiece,612,0,0,51.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,7,Normal,558,0,0,46.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,7,Good,594,0,0,49.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,7,Outstanding,630,0,0,52.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,7,Excellent,666,0,0,55.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,7,Masterpiece,702,0,0,58.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,8,Normal,648,0,0,54.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,8,Good,684,0,0,57.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,8,Outstanding,720,0,0,60.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,8,Excellent,756,0,0,63.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,8,Masterpiece,792,0,0,66.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,9,Normal,738,0,0,61.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,9,Good,774,0,0,64.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,9,Outstanding,810,0,0,67.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,9,Excellent,846,0,0,70.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,9,Masterpiece,882,0,0,73.5%
+Warrior's Forge,PLATE_CAPE,Plate Cape,10,Normal,828,0,0,69.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,10,Good,864,0,0,72.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,10,Outstanding,900,0,0,75.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,10,Excellent,936,0,0,78.0%
+Warrior's Forge,PLATE_CAPE,Plate Cape,10,Masterpiece,972,0,0,81.0%

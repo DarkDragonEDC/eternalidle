@@ -1012,22 +1012,27 @@ export class InventoryManager {
         });
         efficiency.GLOBAL = parseFloat((efficiency.GLOBAL + (globals.efficiency || 0)).toFixed(2));
 
-        // Total Reduction = Gear (including Weapon) + Proficiency
-        const totalBaseReduction = gearSpeedBonus + activeSpeedBonus;
-
-        // Apply Attack Speed Rune (Multiplies total reduction)
-        const totalBonusMultiplier = 1 + (combatRunes.ATTACK_SPEED / 100);
-        const finalReduction = totalBaseReduction * totalBonusMultiplier;
-
-        let finalAttackSpeed = Math.max(200, 2000 - finalReduction);
+        // --- NOVA FÓRMULA DE VELOCIDADE (H/S) ---
+        // Base Global = 0.5 H/S
+        // Bônus Total % = Gear + Proficiency + Runes
+        const totalBonusPercent = gearSpeedBonus + activeSpeedBonus + (combatRunes.ATTACK_SPEED || 0);
+        
+        // H/S = 0.5 * (1 + bônus/100)
+        const finalHPS = 0.5 * (1 + (totalBonusPercent / 100));
+        
+        // Intervalo em ms = 1000 / HPS
+        // Aplicamos um cap de 200ms (5 H/S) por segurança global
+        let finalAttackSpeed = Math.max(200, Math.floor(1000 / finalHPS));
 
         const stats = {
             warriorProf, hunterProf, mageProf,
             activeProf, // 'warrior' | 'hunter' | 'mage' | null
             maxHP: parseFloat((100 + activeHP + gearHP).toFixed(1)),
-            damage: parseFloat(((activeProfDmg + gearDamage) * (1 + gearDmgBonus) * (1 + (combatRunes.ATTACK / 100)) * (1 + potionDmgBonus)).toFixed(1)),
+            damage: parseFloat((activeProfDmg + gearDamage + combatRunes.ATTACK + (potionDmgBonus * 100)).toFixed(1)),
             defense: parseFloat((gearDefense + activeProfDefense).toFixed(1)),
             attackSpeed: finalAttackSpeed,
+            hitsPerSecond: parseFloat(finalHPS.toFixed(2)),
+            totalSpeedBonus: totalBonusPercent,
             dmgBonus: gearDmgBonus,
             runeAttackBonus: combatRunes.ATTACK,
             runeAtkSpdBonus: combatRunes.ATTACK_SPEED,

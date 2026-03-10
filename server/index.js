@@ -241,6 +241,11 @@ gameManager.onGlobalStatsUpdate = (stats) => {
   io.emit("global_stats_update", stats);
 };
 
+// FIX: Give gameManager access to connection state to protect last_saved for offline players
+gameManager._isCharacterOnline = (charId) => {
+    return Array.from(connectedSockets.values()).some(s => s.data?.characterId === charId);
+};
+
 import { characterRoutes } from "./routes/characters.js";
 app.use("/api/characters", authMiddleware, characterRoutes(gameManager));
 

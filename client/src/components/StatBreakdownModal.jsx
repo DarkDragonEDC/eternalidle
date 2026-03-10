@@ -55,14 +55,12 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
 
             breakdown.push({ label: 'Gear Damage', value: fmt(gearDamage) });
 
-            const rawTotal = activeProfDmg + gearDamage;
-
             const potionDmgBonus = stats.potionDmgBonus || 0;
-            if (gearDmgBonus > 0 || damageRuneBonus > 0 || potionDmgBonus > 0) {
-                breakdown.push({ label: 'Raw Total', value: fmt(rawTotal), isTotal: true });
-                if (gearDmgBonus > 0) breakdown.push({ label: 'Gear Modifier', value: `+${(gearDmgBonus * 100).toFixed(0)}%` });
-                if (damageRuneBonus > 0) breakdown.push({ label: 'Rune Modifier', value: `+${damageRuneBonus.toFixed(1)}%` });
-                if (potionDmgBonus > 0) breakdown.push({ label: 'Potion Modifier', value: `+${(potionDmgBonus * 100).toFixed(1)}%` });
+            if (damageRuneBonus > 0) {
+                breakdown.push({ label: 'Rune Bonus', value: `+${fmt(damageRuneBonus)}`, sub: '(Flat Damage)' });
+            }
+            if (potionDmgBonus > 0) {
+                breakdown.push({ label: 'Potion Bonus', value: `+${fmt(potionDmgBonus * 100)}`, sub: '(Flat Damage)' });
             }
         } else if (statType === 'DEFENSE') {
             const activeProf = stats.activeProf;
@@ -105,54 +103,54 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                 return acc;
             }, 0);
 
-            breakdown.push({ label: 'Global Base', value: '2.00s', sub: '(Attack Cycle Start)' });
+            breakdown.push({ label: 'Global Base', value: '0.50 H/S', sub: '(Starting Rate)' });
+            
+            let totalBonus = 0;
 
             if (activeSpeedBonus > 0) {
                 const label = activeProf === 'hunter' ? 'Hunter' : activeProf === 'mage' ? 'Mage' : 'Warrior';
                 breakdown.push({
                     label: `${label} Proficiency`,
-                    value: `-${(activeSpeedBonus / 1000).toFixed(2)}s`,
+                    value: `+${activeSpeedBonus.toFixed(1)}%`,
                     sub: `(Level Growth)`
                 });
+                totalBonus += activeSpeedBonus;
             }
 
             if (gearSpeed > 0) {
                 breakdown.push({
                     label: 'Gear Bonus',
-                    value: `-${(gearSpeed / 1000).toFixed(2)}s`,
-                    sub: '(Fast Gear)'
+                    value: `+${gearSpeed.toFixed(1)}%`,
+                    sub: '(Equipment Stats)'
                 });
+                totalBonus += gearSpeed;
             }
-
-            const totalBaseReduction = gearSpeed + activeSpeedBonus;
-            let finalReduction = totalBaseReduction;
 
             if (runeSpeedBonus > 0) {
                 breakdown.push({
                     label: 'Haste Rune',
                     value: `+${runeSpeedBonus.toFixed(1)}%`,
-                    sub: 'Bonus Multiplier'
+                    sub: '(Bonus Multiplier)'
                 });
-                finalReduction = totalBaseReduction * (1 + (runeSpeedBonus / 100));
+                totalBonus += runeSpeedBonus;
             }
 
-            let finalInterval = Math.max(200, 2000 - finalReduction);
+            const finalHPS = 0.5 * (1 + (totalBonus / 100));
+            const finalInterval = Math.max(200, Math.floor(1000 / finalHPS));
 
-            if (2000 - finalReduction < 200) {
-                breakdown.push({
-                    label: 'Cap Correction',
-                    value: `+${((200 - (2000 - finalReduction)) / 1000).toFixed(2)}s`,
-                    sub: '(0.20s global limit)'
-                });
-            }
+            breakdown.push({
+                label: 'Final HPS',
+                value: `${finalHPS.toFixed(2)} hits/s`,
+                isTotal: true
+            });
 
             breakdown.push({
                 label: 'Final Interval',
                 value: `${(finalInterval / 1000).toFixed(2)}s`,
-                isTotal: true
+                sub: '(Attack Frequency)'
             });
 
-            value = `${(1000 / finalInterval).toFixed(1)} h/s`;
+            value = `${finalHPS.toFixed(2)} h/s`;
         } else if (statType === 'HP') {
             const activeProf = stats.activeProf;
             const profData = activeProf ? getProficiencyStats(activeProf, stats[`${activeProf}Prof`]) : { dmg: 0, hp: 0 };

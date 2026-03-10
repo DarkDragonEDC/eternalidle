@@ -315,13 +315,9 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
         const activeProfDefense = profData.def || 0;
         const activeSpeedBonus = profData.speedBonus || 0;
 
-        const totalBaseReduction = gearSpeedBonus + activeSpeedBonus;
-
-        const atkSpdRune = activeRuneBuffs.ATTACK?.ATTACK_SPEED || 0;
-        const totalBonusMultiplier = 1 + (atkSpdRune / 100);
-        const finalReduction = totalBaseReduction * totalBonusMultiplier;
-
-        let finalAttackSpeed = Math.max(200, 2000 - finalReduction);
+        const totalBonus = gearSpeedBonus + activeSpeedBonus + (activeRuneBuffs.ATTACK?.ATTACK_SPEED || 0);
+        const hitsPerSecond = 0.5 * (1 + (totalBonus / 100));
+        let finalAttackSpeed = 1000 / hitsPerSecond;
 
         // Helper para ferramentas
         const getToolEff = (toolSlot) => {
@@ -380,7 +376,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
         return {
             hp: health !== undefined ? health : (100 + activeHP + gearHP),
             maxHp: 100 + activeHP + gearHP,
-            damage: Math.floor((activeProfDmg + gearDamage) * (1 + (gearDmgBonus || 0)) * (1 + (damageRuneBonus / 100)) * (1 + potionDmgBonus)),
+            damage: Math.floor(activeProfDmg + gearDamage + damageRuneBonus + (potionDmgBonus * 100)),
             defense: gearDefense + activeProfDefense,
             attackSpeed: finalAttackSpeed,
             warriorProf: calculatedStats.warriorProf,
@@ -613,7 +609,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
             { label: 'Damage', value: `+${formatNumber(hunterStats.dmg)}`, subtext: 'Exact Value', icon: <Sword size={18} /> },
             { label: 'Health', value: `+${formatNumber(hunterStats.hp)}`, subtext: 'Exact Value', icon: <Heart size={18} /> },
             { label: 'Defense', value: `+${formatNumber(hunterStats.def || 0)}`, subtext: 'Exact Value', icon: <Shield size={18} /> },
-            { label: 'Attack Speed', value: `-${(hunterStats.speedBonus || 0).toFixed(1)}ms`, subtext: 'Exact Value', icon: <Zap size={18} /> }
+            { label: 'Attack Speed', value: `+${(hunterStats.speedBonus || 0).toFixed(1)}%`, subtext: 'Exact Value', icon: <Zap size={18} /> }
         ],
         sources: []
     };
@@ -629,7 +625,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
             { label: 'Damage', value: `+${formatNumber(warriorStats.dmg)}`, subtext: 'Exact Value', icon: <Sword size={18} /> },
             { label: 'Health', value: `+${formatNumber(warriorStats.hp)}`, subtext: 'Exact Value', icon: <Heart size={18} /> },
             { label: 'Defense', value: `+${formatNumber(warriorStats.def || 0)}`, subtext: 'Exact Value', icon: <Shield size={18} /> },
-            { label: 'Attack Speed', value: `-${(warriorStats.speedBonus || 0).toFixed(1)}ms`, subtext: 'Exact Value', icon: <Zap size={18} /> }
+            { label: 'Attack Speed', value: `+${(warriorStats.speedBonus || 0).toFixed(1)}%`, subtext: 'Exact Value', icon: <Zap size={18} /> }
         ],
         sources: []
     };
@@ -645,7 +641,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
             { label: 'Damage', value: `+${formatNumber(mageStats.dmg)}`, subtext: 'Exact Value', icon: <Sword size={18} /> },
             { label: 'Health', value: `+${formatNumber(mageStats.hp)}`, subtext: 'Exact Value', icon: <Heart size={18} /> },
             { label: 'Defense', value: `+${formatNumber(mageStats.def || 0)}`, subtext: 'Exact Value', icon: <Shield size={18} /> },
-            { label: 'Attack Speed', value: `-${(mageStats.speedBonus || 0).toFixed(1)}ms`, subtext: 'Exact Value', icon: <Zap size={18} /> }
+            { label: 'Attack Speed', value: `+${(mageStats.speedBonus || 0).toFixed(1)}%`, subtext: 'Exact Value', icon: <Zap size={18} /> }
         ],
         sources: []
     };
@@ -1646,7 +1642,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                                                 <Zap size={10} color="#2196f3" /> SPEED
                                             </div>
                                             <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)' }}>
-                                                {(1000 / stats.attackSpeed).toFixed(1)} h/s
+                                                {(1000 / stats.attackSpeed).toFixed(2)} h/s
                                             </div>
                                         </div>
                                         <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setBreakdownModal({ type: 'CRIT', value: stats.burstChance })}>
@@ -3027,7 +3023,7 @@ const RuneBuffSummary = ({ activeRuneBuffs }) => {
                             {buffs.ATTACK && (
                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-main)', display: 'flex', justifyContent: 'space-between' }}>
                                     <span style={{ color: 'var(--text-dim)' }}>Attack:</span>
-                                    <span style={{ color: '#ff4444', fontWeight: 'bold' }}>+{buffs.ATTACK}%</span>
+                                    <span style={{ color: '#ff4444', fontWeight: 'bold' }}>+{buffs.ATTACK}</span>
                                 </div>
                             )}
                             {buffs.SAVE_FOOD && (
