@@ -2,7 +2,7 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import { X, Sword, Shield, Heart, Star, Zap, Award, Package, Clock, ShieldAlert, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { QUALITIES, resolveItem, getSkillForItem, getLevelRequirement, getRequiredProficiencyGroup } from '@shared/items';
+import { QUALITIES, resolveItem, getSkillForItem, getLevelRequirement, getRequiredProficiencyGroup, formatItemId } from '@shared/items';
 import { CHEST_DROP_TABLE, getChestRuneShardRange, WORLDBOSS_DROP_TABLE } from '@shared/chest_drops';
 
 const ItemInfoModal = ({ item: rawItem, onClose }) => {
@@ -118,7 +118,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                         </div>
 
                         <div style={{ textAlign: 'center' }}>
-                            <h2 style={{ fontSize: '1.4rem', fontWeight: '900', color: tierColor, letterSpacing: '-0.5px', marginBottom: '4px' }}>{item.name?.replace(/_/g, ' ')}</h2>
+                            <h2 style={{ fontSize: '1.4rem', fontWeight: '900', color: tierColor, letterSpacing: '-0.5px', marginBottom: '4px' }}>{formatItemId(item.id || item.name)}</h2>
                             <div style={{ display: 'center', justifyContent: 'center', gap: '4px', marginBottom: '8px' }}>
                                 {item.stars > 0 && Array.from({ length: item.stars }).map((_, i) => (
                                     <Star key={i} size={14} color="#fbbf24" fill="#fbbf24" strokeWidth={3} />
@@ -154,7 +154,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                     'TOOL_ROD': 'FISHING', 'TOOL_POUCH': 'HERBALISM'
                                 };
                                 const skillKey = TOOL_TYPE_TO_SKILL[item.type] || getSkillForItem(item.id, 'GATHERING') || getSkillForItem(item.id, 'REFINING') || getSkillForItem(item.id, 'CRAFTING');
-                                if (skillKey) reqText = `${skillKey.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())} Lv ${reqLv}`;
+                                if (skillKey) reqText = `${formatItemId(skillKey)} Lv ${reqLv}`;
                             }
                             if (!reqText) return null;
                             return (

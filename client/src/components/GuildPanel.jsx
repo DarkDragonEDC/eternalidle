@@ -6,6 +6,7 @@ import { formatSilver } from '@utils/format';
 import GuildProfileModal from './GuildProfileModal';
 import { COUNTRIES } from '../../../shared/countries';
 import { GUILD_BUILDINGS, calculateGuildNextLevelXP, GUILD_TASKS_CONFIG, UPGRADE_COSTS, calculateMaterialNeeds, STATION_BONUS_TABLE, GUILD_XP_TABLE } from '../../../shared/guilds.js';
+import { formatItemId } from '../../../shared/items.js';
 
 const ICONS = { Shield, Users, Sword, Swords, Trophy, Settings, Plus, Info, Check, X, Coins, Sparkles, Tag, User, Zap, Landmark, ClipboardList, Pickaxe, FlaskConical, Hammer, Lock, Dices, Library };
 const ICON_COLORS = ['#ffffff', '#ffd700', '#ff4444', '#4caf50', '#2196f3', '#9c27b0', '#ff9800', '#e91e63'];
@@ -1521,7 +1522,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                                     )}
                                                                 </div>
                                                                 <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.5rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                                    {itemId.replace(/_/g, ' ')}
+                                                                    {formatItemId(itemId)}
                                                                     {isComplete && <Check size={8} color="#44ff44" />}
                                                                 </div>
                                                             </div>
@@ -1684,12 +1685,12 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
 
                                                 {/* Progress Bar & Contribute Button */}
                                                 {/* Absolute Buttons Container */}
-                                                <div style={{ 
-                                                    position: 'absolute', 
-                                                    top: '6px', 
-                                                    right: '6px', 
-                                                    display: 'flex', 
-                                                    flexDirection: 'column', 
+                                                <div style={{
+                                                    position: 'absolute',
+                                                    top: '6px',
+                                                    right: '6px',
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
                                                     gap: '4px',
                                                     zIndex: 5
                                                 }}>
@@ -1763,10 +1764,10 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                             exit={{ height: 0, opacity: 0 }}
                                                             style={{ overflow: 'hidden' }}
                                                         >
-                                                            <div style={{ 
-                                                                padding: '6px 8px', 
+                                                            <div style={{
+                                                                padding: '6px 8px',
                                                                 marginTop: '4px',
-                                                                background: 'rgba(0,0,0,0.2)', 
+                                                                background: 'rgba(0,0,0,0.2)',
                                                                 borderRadius: '8px',
                                                                 border: '1px solid rgba(255,255,255,0.05)',
                                                                 display: 'flex',
@@ -1778,7 +1779,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                                     <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.2)', fontStyle: 'italic' }}>No contributions yet.</div>
                                                                 ) : (
                                                                     Object.entries(task.contributors)
-                                                                        .sort((a,b) => b[1] - a[1])
+                                                                        .sort((a, b) => b[1] - a[1])
                                                                         .map(([name, qty]) => (
                                                                             <div key={name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.65rem' }}>
                                                                                 <span style={{ color: 'rgba(255,255,255,0.8)', fontWeight: '500' }}>{name}</span>
@@ -1837,7 +1838,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                                     <div>
                                                         <div style={{ fontSize: '0.65rem', fontWeight: '900', color: 'var(--accent)', letterSpacing: '1px' }}>CONTRIBUTE MATERIALS</div>
                                                         <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff', marginTop: '4px' }}>
-                                                            {showContributeModal.itemId.replace(/_/g, ' ')}
+                                                            {formatItemId(showContributeModal.itemId)}
                                                         </div>
                                                     </div>
                                                     <button onClick={() => setShowContributeModal(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}><X size={24} /></button>

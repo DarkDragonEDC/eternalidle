@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import GuildProfileModal from './GuildProfileModal';
-import { resolveItem } from '@shared/items';
+import { resolveItem, formatItemId } from '@shared/items';
 import { XP_TABLE } from '../../../shared/skills.js';
 import { GUILD_XP_TABLE } from '../../../shared/guilds.js';
 import { formatNumber, formatSilver } from '@utils/format';
@@ -199,7 +199,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                 const skill = (state.skills || {})[subCategory] || { level: 1, xp: 0 };
                 value = skill.level;
                 subValue = getTotalSkillXP(skill);
-                label = subCategory.replace(/_/g, ' ') + ' LEVEL';
+                label = formatItemId(subCategory) + ' LEVEL';
             }
 
             return { ...char, value, subValue, label };

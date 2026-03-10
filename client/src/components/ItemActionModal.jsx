@@ -2,7 +2,7 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Shield, Coins, Tag, Trash2, ArrowRight, Zap, Award, Info, Heart, Sword, Star, Sparkles, Package } from 'lucide-react';
-import { getTierColor, calculateItemSellPrice, resolveItem } from '@shared/items';
+import { getTierColor, calculateItemSellPrice, resolveItem, formatItemId } from '@shared/items';
 
 const ItemActionModal = ({ item: rawItem, onClose, onEquip, onEquipFood, onSell, onList, onUse, onDismantle, onDeposit, onWithdraw, customAction, isIronman }) => {
     if (!rawItem) return null;
@@ -131,7 +131,7 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onEquipFood, onSell,
                             <img src={item.icon} style={{ width: item.scale || '130%', height: item.scale || '130%', objectFit: 'contain', filter: `drop-shadow(0 0 8px ${tierColor}40)` }} alt="" />
                         </div>
 
-                        <h2 style={{ fontSize: '1.4rem', fontWeight: '900', color: tierColor, letterSpacing: '-0.5px', marginBottom: '4px', textAlign: 'center' }}>{cleanBaseName?.replace(/_/g, ' ')}</h2>
+                        <h2 style={{ fontSize: '1.4rem', fontWeight: '900', color: tierColor, letterSpacing: '-0.5px', marginBottom: '4px', textAlign: 'center' }}>{formatItemId(cleanBaseName)}</h2>
                         <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '800', border: `1px solid ${tierColor}40`, padding: '2px 10px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '1px' }}>
                             T{item.tier} Item
                         </div>

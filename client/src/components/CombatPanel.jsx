@@ -288,7 +288,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
                             newLogs.push({
                                 id: generateLogId(),
                                 type: 'loot',
-                                content: `Item found: ${itemData ? (itemData.tier ? `T${itemData.tier} ${itemData.name?.replace(/_/g, ' ')}` : itemData.name?.replace(/_/g, ' ')) : formatItemId(item)}!`,
+                                content: `Item found: ${itemData ? (itemData.tier ? `T${itemData.tier} ${formatItemId(item)}` : formatItemId(item)) : formatItemId(item)}!`,
                                 color: '#ae00ff',
                                 timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
                             });
@@ -868,7 +868,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
                                             gap: '5px'
                                         }}>
                                             <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{qty}x</span>
-                                            <span style={{ fontSize: '0.7rem', color: '#ae00ff', textTransform: 'capitalize' }}>{itemData ? (itemData.tier ? `T${itemData.tier} ${itemData.name?.replace(/_/g, ' ')}` : itemData.name?.replace(/_/g, ' ')) : formatItemId(id)}</span>
+                                            <span style={{ fontSize: '0.7rem', color: '#ae00ff', textTransform: 'capitalize' }}>{itemData ? (itemData.tier ? `T${itemData.tier} ${formatItemId(itemData.id || itemData.name)}` : formatItemId(itemData.id || itemData.name)) : formatItemId(id)}</span>
                                         </div>
                                     );
                                 })
@@ -1256,7 +1256,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
                                                         alignItems: 'center',
                                                         gap: '4px'
                                                     }}>
-                                                        <Target size={10} /> {(chance * 100).toFixed(chance < 0.01 ? 1 : 0)}% {qtyText}T{activeTier} {id.replace(/T\d+_/, '').replace(/_/g, ' ')}
+                                                        <Target size={10} /> {(chance * 100).toFixed(chance < 0.01 ? 1 : 0)}% {qtyText}T{activeTier} {formatItemId(id.replace(/T\d+_/, ''))}
                                                     </div>
                                                 );
                                             })}

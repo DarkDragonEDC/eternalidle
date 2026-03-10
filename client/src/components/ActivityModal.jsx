@@ -260,7 +260,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                         {locked ? (
                             <div style={{ background: '#f8717115', border: '1px solid #f8717140', borderRadius: '14px', padding: '10px 12px', textAlign: 'center' }}>
                                 <div style={{ color: '#f87171', fontWeight: '900', fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                                    <Lock size={14} /> {skillKey.replace('_', ' ')} LV {requiredLevel} REQ
+                                    <Lock size={14} /> {formatItemId(skillKey)} LV {requiredLevel} REQ
                                 </div>
                                 <div style={{ fontSize: '0.55rem', color: '#f87171', opacity: 0.7, marginTop: '2px' }}>CURRENT LEVEL: {userLevel}</div>
                             </div>

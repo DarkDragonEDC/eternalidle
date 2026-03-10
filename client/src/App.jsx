@@ -1431,7 +1431,7 @@ function App() {
           borderRadius: '10px'
         }}>
           <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)', letterSpacing: '1px', textTransform: 'uppercase' }}>
-            {category}
+            {formatItemId(category)}
           </div>
         </div>
       );
@@ -1452,7 +1452,7 @@ function App() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)', letterSpacing: '1px', textTransform: 'uppercase' }}>
-              {category}
+              {formatItemId(category)}
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
@@ -1862,7 +1862,7 @@ function App() {
                     if (stats.damage) statsList.push({ icon: <Sword size={12} />, val: `${stats.damage} Dmg`, color: '#ff4444' });
                     if (stats.defense) statsList.push({ icon: <Shield size={12} />, val: `${stats.defense} Def`, color: '#4caf50' });
                     if (stats.hp) statsList.push({ icon: <Heart size={12} />, val: `${stats.hp} HP`, color: '#ff4d4d' });
-                    if (stats.speed) statsList.push({ icon: <Zap size={12} />, val: `${stats.speed} Spd`, color: 'var(--accent)' });
+                    if (stats.speed) statsList.push({ icon: <Zap size={12} />, val: `${stats.speed}% Spd`, color: 'var(--accent)' });
                     if (stats.attackSpeed) statsList.push({ icon: <Zap size={12} />, val: `${(1000 / stats.attackSpeed).toFixed(2)}/s`, color: 'var(--accent)' });
                     if (stats.efficiency) {
                       if (typeof stats.efficiency === 'number') {

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sword, Shield, Heart, Zap, User, Star, Layers, Info, Award, Crosshair, Hammer, Pickaxe, Flame, Droplets, Wind, Sparkles, Scissors, Anchor, ShoppingBag, Apple, Target, ChevronRight } from 'lucide-react';
-import { resolveItem, calculateRuneBonus } from '@shared/items';
+import { resolveItem, calculateRuneBonus, formatItemId } from '@shared/items';
 import { calculateNextLevelXP } from '@shared/skills';
 import StatBreakdownModal from './StatBreakdownModal';
 
@@ -155,7 +155,7 @@ const SkillCategory = ({ title, icon, skillsList, color, isExpanded, onToggle, s
                                     <div key={sId} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                                             <span style={{ fontSize: '0.75rem', color: 'var(--text-main)', fontWeight: 'bold', textTransform: 'capitalize' }}>
-                                                {sId.replace(/_/g, ' ')}
+                                                {formatItemId(sId)}
                                             </span>
                                             <span style={{ fontSize: '0.75rem', color: '#fff', fontWeight: '900' }}>
                                                 <span style={{ fontSize: '0.55rem', opacity: 0.4, marginRight: '4px' }}>LV</span>
@@ -944,7 +944,7 @@ const RuneBuffSummary = ({ activeRuneBuffs, activeRuneTab }) => {
                             {Object.entries(buffs).map(([eff, val]) => (
                                 <div key={eff} style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                     <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', fontWeight: '800', textTransform: 'uppercase' }}>
-                                        {eff.replace(/_/g, ' ')}
+                                        {formatItemId(eff)}
                                     </span>
                                     <span style={{
                                         fontSize: '0.85rem',

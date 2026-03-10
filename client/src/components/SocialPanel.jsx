@@ -492,7 +492,7 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, onOpenTrade, tradeInvi
                                                                                     </span>
                                                                                     {act.itemId && (
                                                                                         <span style={{ opacity: 0.6, fontSize: '0.55rem', borderLeft: '1px solid rgba(255, 215, 0, 0.2)', paddingLeft: '5px' }}>
-                                                                                            {act.itemId.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}
+                                                                                            {formatItemId(act.itemId)}
                                                                                         </span>
                                                                                     )}
                                                                                 </motion.div>
@@ -723,7 +723,7 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, onOpenTrade, tradeInvi
                                                                             </span>
                                                                             {act.itemId && (
                                                                                 <span style={{ opacity: 0.6, fontSize: '0.55rem', borderLeft: '1px solid rgba(255, 255, 255, 0.1)', paddingLeft: '5px' }}>
-                                                                                    {act.itemId.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}
+                                                                                    {formatItemId(act.itemId)}
                                                                                 </span>
                                                                             )}
                                                                         </motion.div>

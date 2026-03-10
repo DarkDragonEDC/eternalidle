@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { resolveItem, calculateItemSellPrice, RUNE_GATHER_ACTIVITIES, RUNE_REFINE_ACTIVITIES, RUNE_CRAFT_ACTIVITIES, RUNES_BY_CATEGORY } from '@shared/items';
+import { resolveItem, calculateItemSellPrice, RUNE_GATHER_ACTIVITIES, RUNE_REFINE_ACTIVITIES, RUNE_CRAFT_ACTIVITIES, RUNES_BY_CATEGORY, formatItemId } from '@shared/items';
 import { formatNumber } from '@utils/format';
 import { Package, Info, Sparkles, ArrowRight, Hammer, Coins, Star, Search, Filter, X, ChevronDown, ListFilter, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -760,7 +760,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                         </div>
 
                                         <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 'bold', textAlign: 'center', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                            {item.name?.replace(/_/g, ' ')}
+                                            {formatItemId(item.id || item.name)}
                                         </div>
 
                                         <div
@@ -882,7 +882,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                     )}
                                 </div>
                                 <div style={{ height: '15px', fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100px', textAlign: 'center' }}>
-                                    {selectedShard ? selectedShard.name?.replace(/_/g, ' ') : ''}
+                                    {selectedShard ? formatItemId(selectedShard.id || selectedShard.name) : ''}
                                 </div>
                             </div>
 
@@ -967,7 +967,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                     )}
                                 </div>
                                 <div style={{ height: '15px', fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100px', textAlign: 'center' }}>
-                                    {craftResult ? craftResult.name?.replace(/_/g, ' ') : ''}
+                                    {craftResult ? formatItemId(craftResult.id || craftResult.name) : ''}
                                 </div>
                             </div>
                         </div>
@@ -1167,7 +1167,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                             )}
 
                                             <div style={{ fontSize: '0.65rem', textAlign: 'center', marginTop: '5px', lineHeight: '1.1' }}>
-                                                {item.name?.replace(/_/g, ' ').replace(' Rune Shard', '').replace('Rune of ', '')}
+                                                {formatItemId(item.id || item.name).replace(' Rune Shard', '').replace('Rune of ', '')}
                                             </div>
                                             <div style={{ position: 'absolute', top: 2, right: 4, fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--text-dim)' }}>
                                                 {item.qty}

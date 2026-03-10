@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { formatNumber, formatSilver } from '@utils/format';
 import { Skull, Map as MapIcon, Shield, Lock, ChevronRight, AlertTriangle, Star, Coins, History, Heart, Sword, Package, Layers, Clock, Sparkles } from 'lucide-react';
-import { ITEMS, resolveItem } from '@shared/items';
+import { ITEMS, resolveItem, formatItemId } from '@shared/items';
 import { MONSTERS } from '@shared/monsters';
 import { DUNGEONS, FOOD_COST_MATRIX, getFoodCost, getDungeonDuration } from '@shared/dungeons';
 import DungeonHistoryModal from './DungeonHistoryModal';
@@ -600,7 +600,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                                                         padding: '6px 10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px'
                                                     }}>
                                                         <span style={{ color: '#fff', fontSize: '0.75rem', fontWeight: '700' }}>{qty}x</span>
-                                                        <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.7rem' }}>{itemData?.name || id.replace(/_/g, ' ')}</span>
+                                                        <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.7rem' }}>{formatItemId(id)}</span>
                                                     </div>
                                                 );
                                             })}
@@ -953,7 +953,7 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
                                                 return (
                                                     <div
                                                         key={`${loot.id}-${idx}`}
-                                                        title={`${item?.name || loot.id.replace(/_/g, ' ')} (${(loot.chance * 100).toFixed(0)}%)`}
+                                                        title={`${item?.name || formatItemId(loot.id)} (${(loot.chance * 100).toFixed(0)}%)`}
                                                         onClick={() => item && setSelectedLootItem({ item: { ...item, id: loot.id } })}
                                                         style={{
                                                             width: '42px', height: '42px', borderRadius: '10px', overflow: 'hidden',

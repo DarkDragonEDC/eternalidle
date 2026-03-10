@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sword, Shield, Heart, Zap, TrendingUp, Box } from 'lucide-react';
-import { resolveItem, QUALITIES, BASE_QUALITY_CHANCES } from '@shared/items';
+import { resolveItem, QUALITIES, BASE_QUALITY_CHANCES, formatItemId } from '@shared/items';
 
 const CraftingOddsModal = ({ isOpen, onClose, item, stats, tierColor }) => {
     if (!isOpen || !item) return null;
@@ -32,12 +32,16 @@ const CraftingOddsModal = ({ isOpen, onClose, item, stats, tierColor }) => {
                 {/* Header */}
                 <div style={{ padding: '20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ padding: '8px', background: 'var(--accent-soft)', borderRadius: '12px', color: 'var(--accent)' }}>
-                            <Box size={20} />
+                        <div style={{ width: '40px', height: '40px', background: 'var(--accent-soft)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: `1px solid ${tierColor || 'var(--border)'}33` }}>
+                            {resolvedItem?.icon ? (
+                                <img src={resolvedItem.icon} alt="" style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
+                            ) : (
+                                <Box size={20} color="var(--accent)" />
+                            )}
                         </div>
                         <div>
                             <h3 style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)', margin: 0 }}>Crafting Odds</h3>
-                            <p style={{ fontSize: '0.65rem', color: 'var(--text-dim)', margin: 0 }}>Base stats for T{tier} {item.name}</p>
+                            <p style={{ fontSize: '0.65rem', color: 'var(--text-dim)', margin: 0 }}>Base stats for T{tier} {resolvedItem?.name || formatItemId(item.id || item.name)}</p>
                         </div>
                     </div>
                     <button onClick={onClose} style={{ color: 'var(--text-dim)', padding: '4px' }}><X size={20} /></button>
@@ -100,6 +104,12 @@ const CraftingOddsModal = ({ isOpen, onClose, item, stats, tierColor }) => {
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)' }}>
                                             <Zap size={12} />
                                             <span style={{ fontSize: '0.7rem', fontWeight: '800' }}>{(s.attackSpeed / 1000).toFixed(2)}s</span>
+                                        </div>
+                                    )}
+                                    {s.speed && (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)' }}>
+                                            <Zap size={12} />
+                                            <span style={{ fontSize: '0.7rem', fontWeight: '800' }}>{s.speed}% SPD</span>
                                         </div>
                                     )}
                                     {s.efficiency && typeof s.efficiency === 'number' && (

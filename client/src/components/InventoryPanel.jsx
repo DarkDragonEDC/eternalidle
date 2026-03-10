@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { formatNumber, formatSilver } from '@utils/format';
-import { resolveItem, getTierColor, calculateItemSellPrice } from '@shared/items';
+import { resolveItem, getTierColor, calculateItemSellPrice, formatItemId } from '@shared/items';
 import { Package, Shield, Coins, Tag, Trash2, Info, ChevronDown, ChevronUp, ArrowUpAZ, ArrowDownZA, Search, Hammer, Zap, PlusCircle } from 'lucide-react';
 import ItemActionModal from './ItemActionModal';
 
@@ -594,7 +594,7 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                                     lineHeight: '1.2',
                                     height: '1.55rem' // Ensure fixed height for 2 lines to keep grid consistent
                                 }}>
-                                    {item.name?.replace(/_/g, ' ')}
+                                    {formatItemId(item.id || item.name)}
                                 </div>
                             </div>
                         );
@@ -673,7 +673,7 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                             overflowY: 'auto'
                         }} className="custom-scrollbar" onClick={e => e.stopPropagation()}>
                             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                                <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-main)' }}>Sell {sellModal.item.name?.replace(/_/g, ' ')}</h3>
+                                <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-main)' }}>Sell {formatItemId(sellModal.item.id || sellModal.item.name)}</h3>
                                 <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '4px' }}>
                                     Unit Price: <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{sellModal.unitPrice} Silver</span>
                                 </div>
@@ -1036,9 +1036,21 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                                             type="number"
                                             value={dismantleModal.quantity}
                                             onChange={(e) => {
-                                                const val = parseInt(e.target.value);
+                                                const rawVal = e.target.value;
+                                                if (rawVal === '') {
+                                                    setDismantleModal({ ...dismantleModal, quantity: '' });
+                                                    return;
+                                                }
+                                                let val = parseInt(rawVal);
                                                 if (isNaN(val)) return;
-                                                setDismantleModal({ ...dismantleModal, quantity: Math.min(dismantleModal.max, Math.max(1, val)) });
+                                                if (val < 1) val = 1;
+                                                if (val > dismantleModal.max) val = dismantleModal.max;
+                                                setDismantleModal({ ...dismantleModal, quantity: val });
+                                            }}
+                                            onBlur={() => {
+                                                if (dismantleModal.quantity === '' || dismantleModal.quantity < 1) {
+                                                    setDismantleModal({ ...dismantleModal, quantity: 1 });
+                                                }
                                             }}
                                             style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--text-main)', textAlign: 'center', fontSize: '1.1rem', fontWeight: '900', outline: 'none', width: '40px' }}
                                         />
@@ -1174,9 +1186,21 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                                                 type="number"
                                                 value={depositModal.quantity}
                                                 onChange={(e) => {
-                                                    const val = parseInt(e.target.value);
+                                                    const rawVal = e.target.value;
+                                                    if (rawVal === '') {
+                                                        setDepositModal({ ...depositModal, quantity: '' });
+                                                        return;
+                                                    }
+                                                    let val = parseInt(rawVal);
                                                     if (isNaN(val)) return;
-                                                    setDepositModal({ ...depositModal, quantity: Math.min(depositModal.max, Math.max(1, val)) });
+                                                    if (val < 1) val = 1;
+                                                    if (val > depositModal.max) val = depositModal.max;
+                                                    setDepositModal({ ...depositModal, quantity: val });
+                                                }}
+                                                onBlur={() => {
+                                                    if (depositModal.quantity === '' || depositModal.quantity < 1) {
+                                                        setDepositModal({ ...depositModal, quantity: 1 });
+                                                    }
                                                 }}
                                                 style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--text-main)', textAlign: 'center', fontSize: '1.1rem', fontWeight: '900', outline: 'none', width: '40px' }}
                                             />
@@ -1289,9 +1313,21 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                                                 type="number"
                                                 value={withdrawModal.quantity}
                                                 onChange={(e) => {
-                                                    const val = parseInt(e.target.value);
+                                                    const rawVal = e.target.value;
+                                                    if (rawVal === '') {
+                                                        setWithdrawModal({ ...withdrawModal, quantity: '' });
+                                                        return;
+                                                    }
+                                                    let val = parseInt(rawVal);
                                                     if (isNaN(val)) return;
-                                                    setWithdrawModal({ ...withdrawModal, quantity: Math.min(withdrawModal.max, Math.max(1, val)) });
+                                                    if (val < 1) val = 1;
+                                                    if (val > withdrawModal.max) val = withdrawModal.max;
+                                                    setWithdrawModal({ ...withdrawModal, quantity: val });
+                                                }}
+                                                onBlur={() => {
+                                                    if (withdrawModal.quantity === '' || withdrawModal.quantity < 1) {
+                                                        setWithdrawModal({ ...withdrawModal, quantity: 1 });
+                                                    }
                                                 }}
                                                 style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--text-main)', textAlign: 'center', fontSize: '1.1rem', fontWeight: '900', outline: 'none', width: '40px' }}
                                             />
