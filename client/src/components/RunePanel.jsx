@@ -292,8 +292,8 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                 }
                 if (activityFilter !== 'ALL' && !id.includes(`_RUNE_${activityFilter}_`)) return null;
                 if (effectFilter !== 'ALL' && !id.includes(`_${effectFilter}_`)) return null;
-                if (tierFilter !== 'ALL' && item.tier !== parseInt(tierFilter)) return null;
-                if (starsFilter !== 'ALL' && item.stars !== parseInt(starsFilter)) return null;
+                if (tierFilter !== 'ALL' && item.tier < parseInt(tierFilter)) return null;
+                if (starsFilter !== 'ALL' && item.stars < parseInt(starsFilter)) return null;
                 if (showThreePlus && qty < 2) return null;
 
                 return { ...item, id, qty };
@@ -354,8 +354,8 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                 }
                 if (activityFilter !== 'ALL' && !itemId.includes(`_RUNE_${activityFilter}_`)) continue;
                 if (effectFilter !== 'ALL' && !itemId.includes(`_${effectFilter}_`)) continue;
-                if (tierFilter !== 'ALL' && tier !== parseInt(tierFilter)) continue;
-                if (starsFilter !== 'ALL' && stars !== parseInt(starsFilter)) continue;
+                if (tierFilter !== 'ALL' && tier < parseInt(tierFilter)) continue;
+                if (starsFilter !== 'ALL' && stars < parseInt(starsFilter)) continue;
 
                 const pairs = Math.floor(qty / 2);
                 if (pairs > 0) {
@@ -382,7 +382,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
     }, [inventory, activeTab, categoryFilter, activityFilter, effectFilter, tierFilter, starsFilter, search]);
 
     return (
-        <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px', padding: isMobile ? '10px' : '20px', borderRadius: '16px', overflow: 'hidden' }}>
+        <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px', padding: isMobile ? '10px' : '20px', borderRadius: '16px' }}>
 
             {/* Tab Selection */}
             <div style={{ display: 'flex', gap: '10px' }}>
@@ -518,6 +518,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                 style={{
                                     background: 'var(--bg-dark)', borderRadius: '10px', padding: '15px',
                                     border: '1px solid var(--border)', display: 'grid',
+                                    overflow: 'hidden',
                                     gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '15px'
                                 }}
                             >
@@ -555,6 +556,10 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                         <option value="DUPLIC">Duplication</option>
                                         <option value="AUTO">Auto-Refine / Cooking</option>
                                         <option value="EFF">Efficiency</option>
+                                        <option value="ATTACK">Attack Damage</option>
+                                        <option value="ATTACK_SPEED">Attack Speed</option>
+                                        <option value="SAVE_FOOD">Food Saving</option>
+                                        <option value="BURST">Burst / Crit</option>
                                     </select>
                                 </div>
 
@@ -580,7 +585,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                         style={{ background: 'var(--panel-bg)', color: 'var(--text-main)', border: '1px solid var(--border)', padding: '5px', borderRadius: '4px' }}
                                     >
                                         <option value="ALL">All Stars</option>
-                                        {[1, 2, 3, 4, 5].map(s => <option key={s} value={s}>{s} Stars</option>)}
+                                        {[1, 2, 3].map(s => <option key={s} value={s}>{s} Stars</option>)}
                                     </select>
                                 </div>
 

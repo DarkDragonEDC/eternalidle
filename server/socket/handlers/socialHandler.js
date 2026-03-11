@@ -222,4 +222,14 @@ export const registerSocialHandlers = (socket, gameManager, io) => {
       });
     } catch (err) { socket.emit("error", { message: err.message }); }
   });
+
+  socket.on("get_public_profile", async ({ characterName, name }) => {
+    try {
+      const targetName = characterName || name;
+      const profile = await gameManager.socialManager.getPublicProfile(targetName);
+      socket.emit("public_profile_data", profile);
+    } catch (err) {
+      socket.emit("error", { message: err.message });
+    }
+  });
 };

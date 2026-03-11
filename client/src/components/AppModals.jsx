@@ -255,6 +255,7 @@ export const AppModals = ({
                         inventory={displayedGameState?.state?.inventory}
                         currentSilver={displayedGameState?.state?.silver}
                         onClose={() => setActiveTrade(null)}
+                        onInspect={handleInspectPlayer}
                         isMobile={isMobile}
                         isPreviewActive={isPreviewActive}
                         onPreviewActionBlocked={onPreviewActionBlocked}

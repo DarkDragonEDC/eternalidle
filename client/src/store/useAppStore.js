@@ -106,7 +106,31 @@ export const useAppStore = create((set, get) => ({
             newGameState = status;
         }
 
-        return { gameState: newGameState, isConnecting: false, globalStats };
+        let isWorldBossFight = state.isWorldBossFight;
+        
+        // Auto-open only if we detect a NEW fight or if we are logging in (state.gameState is null)
+        const hasActiveFight = !!newGameState?.state?.activeWorldBossFight;
+        const wasInFight = !!state.gameState?.state?.activeWorldBossFight;
+        
+        if (hasActiveFight && (!wasInFight || state.gameState === null)) {
+            const fight = newGameState.state.activeWorldBossFight;
+            const elapsed = Date.now() - (fight.startedAt || 0);
+            if (elapsed < 60000) {
+                isWorldBossFight = true;
+            }
+        }
+
+        // If the update is lightweight and we ARE in a fight, ensure the fight state persists in the store
+        if (status._lightweight && isWorldBossFight && !newGameState.state.activeWorldBossFight) {
+            newGameState.state.activeWorldBossFight = state.gameState?.state?.activeWorldBossFight;
+        }
+
+        // If fight finished (persisted state gone in a full status update), set to false
+        if (!status._lightweight && !hasActiveFight) {
+            isWorldBossFight = false;
+        }
+
+        return { gameState: newGameState, isConnecting: false, globalStats, isWorldBossFight };
     }),
     setSelectedCharacter: (id) => {
         if (id) localStorage.setItem('selectedCharacterId', id);
@@ -218,10 +242,13 @@ export const useAppStore = create((set, get) => ({
     offlineGains: null,
     setOfflineGains: (offlineGains) => set({ offlineGains }),
     acknowledgeOfflineReport: () => {
-      const { socket, selectedCharacter, setOfflineGains } = get();
+      const { socket, selectedCharacter, setOfflineGains, gameState, setGameState } = get();
       if (socket && selectedCharacter) {
         socket.emit('acknowledge_offline_report', { characterId: selectedCharacter });
         setOfflineGains(null);
+        if (gameState?.offlineReport) {
+          setGameState({ ...gameState, offlineReport: null });
+        }
       }
     },
     marketSellItem: null,

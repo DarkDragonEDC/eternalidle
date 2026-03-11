@@ -1060,7 +1060,7 @@ export class GameManager {
 
             try {
                 const needsHealing = (data.state.health || 0) < (this.inventoryManager.calculateStats(data).maxHP || 100) && (data.state.equipment?.food?.amount > 0);
-                if (catchup && (data.current_activity || data.state.combat || data.state.dungeon || needsHealing) && data.last_saved) {
+                if (catchup && (data.current_activity || data.state.combat || data.state.dungeon || data.state.activeWorldBossFight || needsHealing) && data.last_saved) {
                     if (isSignificantCatchup) {
                         console.log(`[CATCHUP] ${data.name}: last_saved=${data.last_saved}, elapsed=${elapsedSeconds.toFixed(1)}s, hasActivity=${!!data.current_activity}, hasCombat=${!!data.state.combat}, needsHealing=${needsHealing}`);
                     }
@@ -1216,6 +1216,15 @@ export class GameManager {
                             updated = true;
                         }
                     }
+
+                    // Process World Boss catchup independently
+                    if (data.state.activeWorldBossFight) {
+                        const wbReport = await this.worldBossManager.processBatchWorldBoss(data, now.getTime());
+                        if (wbReport) {
+                            updated = true;
+                        }
+                    }
+
                     // Idle Healing: If any offline time remains, use it for healing if needed
                     let remainingSeconds = elapsedSeconds - finalReport.totalTime;
                     const canHealIdle = (data.state.health || 0) < (this.inventoryManager.calculateStats(data).maxHP || 100) && (data.state.equipment?.food?.amount > 0);

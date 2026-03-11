@@ -320,4 +320,59 @@ export class SocialManager {
         if (error) throw error;
         return { success: true };
     }
+
+    async getPublicProfile(characterName) {
+        if (!characterName) throw new Error("Character name is required");
+
+        // 1. Fetch character from DB
+        const { data: charData, error: charError } = await this.supabase
+            .from('characters')
+            .select('*')
+            .ilike('name', characterName)
+            .maybeSingle();
+
+        if (charError || !charData) throw new Error(`Player '${characterName}' not found.`);
+
+        // Hydrate state and skills from raw columns
+        this.gameManager._hydrateCharacterFromRaw(charData);
+        const state = charData.state || {};
+        const skills = state.skills || {};
+
+        // 2. Fetch Guild Info
+        const { data: guildMember } = await this.supabase
+            .from('guild_members')
+            .select('guild_id, guilds(name)')
+            .eq('character_id', charData.id)
+            .maybeSingle();
+
+        // 3. Calculate Stats using InventoryManager
+        const calculatedStats = this.gameManager.inventoryManager.calculateStats(charData);
+
+        // 4. Determine total level
+        const totalLevel = Object.values(skills).reduce((acc, s) => acc + (Number(s.level) || 0), 0);
+
+        // 5. Structure data for InspectModal
+        return {
+            id: charData.id,
+            name: charData.name,
+            level: totalLevel,
+            selectedTitle: state.selectedTitle || charData.info?.selectedTitle || null,
+            health: charData.info?.health || 100,
+            equipment: state.equipment || {},
+            skills: skills,
+            runes: state.runes || {},
+            stats: {
+                ...calculatedStats,
+                warriorProf: skills.WARRIOR_PROFICIENCY?.level || 1,
+                hunterProf: skills.HUNTER_PROFICIENCY?.level || 1,
+                mageProf: skills.MAGE_PROFICIENCY?.level || 1
+            },
+            isPremium: !!(state.isPremium || state.membership?.active),
+            guildName: guildMember?.guilds?.name || null,
+            guildId: guildMember?.guild_id || null,
+            selectedBanner: state.selectedBanner || null,
+            avatar: state.avatar || null,
+            theme: state.theme || 'dark'
+        };
+    }
 }

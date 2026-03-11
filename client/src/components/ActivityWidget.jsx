@@ -6,7 +6,7 @@ import { MONSTERS } from '@shared/monsters';
 import { formatNumber, formatCompactNumber } from '@utils/format';
 import { calculateSurvivalTime } from '../utils/combat';
 
-const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serverTimeOffset = 0, skillProgress = 0 }) => { // Added skillProgress prop
+const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serverTimeOffset = 0, skillProgress = 0, onOpenWorldBoss }) => { // Added onOpenWorldBoss prop
     const [isOpen, setIsOpen] = useState(false);
     const [elapsed, setElapsed] = useState(0);
     const [combatElapsed, setCombatElapsed] = useState(0);
@@ -148,13 +148,19 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
         return () => socket.off('action_result', handleUpdate);
     }, [socket]);
 
-    // Auto-cleanup for World Boss when finished
+    // Auto-cleanup for World Boss when finished or state is cleared
     useEffect(() => {
+        // If server says fight is over OR state is gone, clear locally
         if (worldBossData?.status === 'FINISHED') {
-            const timer = setTimeout(() => setWorldBossData(null), 5000);
+            const timer = setTimeout(() => setWorldBossData(null), 3000); // reduced to 3s
             return () => clearTimeout(timer);
         }
-    }, [worldBossData?.status]);
+        
+        // If the main game state no longer shows an active WB fight, we should eventually clear the widget too
+        if (!gameState?.state?.activeWorldBossFight && worldBossData && worldBossData.status !== 'FINISHED') {
+            setWorldBossData(null);
+        }
+    }, [worldBossData?.status, !!gameState?.state?.activeWorldBossFight]);
 
     // ... keydown handler ...
 

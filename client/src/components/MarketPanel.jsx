@@ -30,7 +30,7 @@ const getTimeAgo = (dateStr) => {
     return `${days}d ago`;
 };
 
-const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket, isMobile, initialSearch = '', isAnonymous, isPreviewActive, onPreviewActionBlocked }) => {
+const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket, onInspect, isMobile, initialSearch = '', isAnonymous, isPreviewActive, onPreviewActionBlocked }) => {
     const [activeTab, setActiveTab] = useState('BUY'); // BUY, SELL, LISTINGS, CLAIM
     const [selectedCategory, setSelectedCategory] = useState('ALL');
     const [selectedSubCategory, setSelectedSubCategory] = useState('ALL');
@@ -794,7 +794,10 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                         </span>
                     </div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '4px' }}>
-                        Buyer: <span style={{ color: 'var(--accent)' }}>{order.buyer_name}</span>
+                        Buyer: <span 
+                            onClick={() => onInspect && onInspect(order.buyer_name)}
+                            style={{ color: 'var(--accent)', cursor: onInspect ? 'pointer' : 'default' }}
+                        >{order.buyer_name}</span>
                     </div>
                 </div>
 
@@ -1399,7 +1402,10 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                     </button>
                                                 </div>
                                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '2px', display: 'flex', gap: '15px' }}>
-                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                    <span 
+                                                        onClick={() => onInspect && onInspect(l.seller_name)}
+                                                        style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: onInspect ? 'pointer' : 'default', color: onInspect ? 'var(--accent)' : 'inherit' }}
+                                                    >
                                                         <User size={12} /> {l.seller_name}
                                                     </span>
                                                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -2051,7 +2057,15 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                     <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                                         <span>{name}</span>
                                                         {c.metadata?.craftedBy && (
-                                                            <span style={{ fontSize: '0.7rem', color: 'var(--accent)', opacity: 0.8, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                            <span 
+                                                                onClick={(e) => {
+                                                                    if (onInspect) {
+                                                                        e.stopPropagation();
+                                                                        onInspect(c.metadata.craftedBy);
+                                                                    }
+                                                                }}
+                                                                style={{ fontSize: '0.7rem', color: 'var(--accent)', opacity: 0.8, display: 'flex', alignItems: 'center', gap: '4px', cursor: onInspect ? 'pointer' : 'default' }}
+                                                            >
                                                                 <Hammer size={10} /> {c.metadata.craftedBy}
                                                             </span>
                                                         )}

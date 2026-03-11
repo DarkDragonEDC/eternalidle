@@ -174,7 +174,10 @@ export const registerInventoryHandlers = (socket, gameManager, io) => {
         if (typeof entry === "object") { entry.amount = (entry.amount || 0) - qty; if (entry.amount <= 0) delete inv[itemId]; }
         else { inv[itemId] = (Number(inv[itemId]) || 0) - qty; if (inv[itemId] <= 0) delete inv[itemId]; }
         if (metadata) {
-          if (!bank.items[itemId] || typeof bank.items[itemId] !== "object") bank.items[itemId] = { amount: 0 };
+          if (!bank.items[itemId] || typeof bank.items[itemId] !== "object") {
+            const currentBankQty = Number(bank.items[itemId]) || 0;
+            bank.items[itemId] = { amount: currentBankQty };
+          }
           Object.assign(bank.items[itemId], metadata);
           bank.items[itemId].amount = (bank.items[itemId].amount || 0) + qty;
         } else {
@@ -219,8 +222,12 @@ export const registerInventoryHandlers = (socket, gameManager, io) => {
         if (typeof bankEntry === "object") { metadata = { ...bankEntry }; delete metadata.amount; }
         if (typeof bankEntry === "object") { bankEntry.amount = (bankEntry.amount || 0) - qty; if (bankEntry.amount <= 0) delete bank.items[itemId]; }
         else { bank.items[itemId] = (Number(bank.items[itemId]) || 0) - qty; if (bank.items[itemId] <= 0) delete bank.items[itemId]; }
+
         if (metadata) {
-          if (!inv[itemId] || typeof inv[itemId] !== "object") inv[itemId] = { amount: 0 };
+          if (!inv[itemId] || typeof inv[itemId] !== "object") {
+            const currentInvQty = Number(inv[itemId]) || 0;
+            inv[itemId] = { amount: currentInvQty };
+          }
           Object.assign(inv[itemId], metadata);
           inv[itemId].amount = (inv[itemId].amount || 0) + qty;
         } else {

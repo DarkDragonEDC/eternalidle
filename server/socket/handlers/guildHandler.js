@@ -249,4 +249,14 @@ export const registerGuildHandlers = (socket, gameManager, io) => {
       socket.emit("error", { message: err.message });
     }
   });
+  
+  socket.on("get_guild_profile", async ({ guildId }) => {
+    try {
+      const profile = await gameManager.guildManager.getPublicGuildProfile(guildId);
+      socket.emit("guild_profile_data", profile);
+    } catch (err) {
+      console.error("[GUILD] Error in get_guild_profile socket:", err);
+      socket.emit("error", { message: err.message });
+    }
+  });
 };

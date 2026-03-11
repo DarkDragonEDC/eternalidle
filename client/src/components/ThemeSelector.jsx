@@ -5,7 +5,6 @@ import { Sun, Moon, Flame, Cpu, Heart, Leaf, Zap, Snowflake, Droplets, ChevronDo
 const THEMES = [
     { id: 'medieval', label: 'Medieval', icon: <Castle size={16} /> },
     { id: 'dark', label: 'Dark', icon: <Moon size={16} /> },
-    { id: 'light', label: 'Light', icon: <Sun size={16} /> },
     { id: 'ember', label: 'Ember', icon: <Flame size={16} /> },
     { id: 'cyber', label: 'Cyber', icon: <Cpu size={16} /> },
     { id: 'rose', label: 'Rose', icon: <Heart size={16} /> },
@@ -31,7 +30,7 @@ const ThemeSelector = ({ theme, setTheme, isMobile, gameState, onUnlockTheme, on
     }, []);
 
     const currentTheme = THEMES.find(t => t.id === theme) || THEMES[0];
-    const unlockedThemes = gameState?.state?.unlockedThemes || ['medieval', 'dark', 'light'];
+    const unlockedThemes = gameState?.state?.unlockedThemes || ['medieval', 'dark'];
 
     const handleThemeClick = (t) => {
         if (unlockedThemes.includes(t.id)) {

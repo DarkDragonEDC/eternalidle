@@ -188,17 +188,22 @@ export class WorldBossManager {
         if (!this.currentBoss) throw new Error("World Boss is currently resting.");
 
         const hasFought = await this.checkDailyParticipation(char.id);
-        console.log(`[WORLD_BOSS] hasAlreadyFought today? ${hasFought}`);
         if (hasFought) throw new Error("You already challenged the World Boss today.");
 
-        this.activeFights.set(char.id, {
+        const fightState = {
             characterId: char.id,
             name: char.name,
             startedAt: Date.now(),
             damage: 0,
             lastTick: Date.now(),
             lastBroadcastPos: null
-        });
+        };
+
+        this.activeFights.set(char.id, fightState);
+
+        // PERSISTENCE: Save to state so it survives disconnects
+        if (!char.state) char.state = {};
+        char.state.activeWorldBossFight = { ...fightState };
 
         return { success: true };
     }
@@ -210,15 +215,12 @@ export class WorldBossManager {
         const now = virtualTime || Date.now();
         const elapsed = now - fight.startedAt;
 
-        // console.log(`[WB_DEBUG] Tick for ${char.name}. Elapsed: ${elapsed}, Active: ${this.activeFights.has(char.id)}`);
-
         if (elapsed >= 60000) {
             console.log(`[WORLD_BOSS] Time limit reached for ${char.name}. Ending fight.`);
             return await this.endFight(char);
         }
 
         const stats = this.gameManager.inventoryManager.calculateStats(char);
-        const tickElapsed = now - fight.lastTick;
 
         // Process damage (allowing multiple hits if tick skipped)
         const atkSpeed = Math.max(200, stats.attackSpeed || 1000);
@@ -227,7 +229,6 @@ export class WorldBossManager {
 
         while (fight.lastTick + atkSpeed <= now && rounds < 10) {
             const damage = Math.max(1, stats.damage || 1);
-
             const burstChance = stats.burstChance || 0;
             let hitDmg = damage;
             let isCrit = false;
@@ -248,16 +249,99 @@ export class WorldBossManager {
             fight.lastBroadcastPos = currentPos;
         }
 
+        // PERSISTENCE: Keep state in sync for recovery on login
+        if (char.state && char.state.activeWorldBossFight) {
+            char.state.activeWorldBossFight.damage = fight.damage;
+            char.state.activeWorldBossFight.lastTick = fight.lastTick;
+        }
+
         // ALWAYS return status so the client timer updates
         return {
             worldBossUpdate: {
                 damage: fight.damage,
                 elapsed: elapsed,
                 rankingPos: fight.lastBroadcastPos || this.predictRankingPos(char.id, fight.damage),
-                rounds: rounds, // Might be 0
-                hits: hits, // Send individual hits
+                rounds: rounds,
+                hits: hits,
                 status: 'ACTIVE'
             }
+        };
+    }
+
+    /**
+     * Recovery logic for disconnected players who log back in mid-fight or after fight ended.
+     */
+    async processBatchWorldBoss(char, now) {
+        if (!char.state?.activeWorldBossFight) return null;
+
+        const fight = char.state.activeWorldBossFight;
+        const totalDuration = 60000;
+        const elapsedSinceStart = now - fight.startedAt;
+
+        console.log(`[WORLD_BOSS] Catchup for ${char.name}. Started at: ${new Date(fight.startedAt).toISOString()}, Now: ${new Date(now).toISOString()}, Elapsed: ${elapsedSinceStart}ms`);
+
+        // If more than 60s passed since start, the fight should have ended.
+        // We process exactly up to the 60s mark.
+        const effectiveNow = Math.min(now, fight.startedAt + totalDuration);
+
+        // Ensure character is in activeFights so processTick can take over if fight is still ongoing
+        if (elapsedSinceStart < totalDuration) {
+            console.log(`[WORLD_BOSS] Character ${char.name} re-added to activeFights for resumption.`);
+            this.activeFights.set(char.id, { ...fight });
+        } else {
+            console.log(`[WORLD_BOSS] Fight already expired for ${char.name} (${elapsedSinceStart}ms > ${totalDuration}ms).`);
+        }
+
+        // Process damage up to effectiveNow
+        const stats = this.gameManager.inventoryManager.calculateStats(char);
+        const atkSpeed = Math.max(200, stats.attackSpeed || 1000);
+        let rounds = 0;
+        let batchDamage = 0;
+
+        while (fight.lastTick + atkSpeed <= effectiveNow && rounds < 500) { // Safety cap
+            const damage = Math.max(1, stats.damage || 1);
+            const burstChance = stats.burstChance || 0;
+            let hitDmg = damage;
+
+            if (burstChance > 0 && Math.random() * 100 < burstChance) {
+                hitDmg = Math.floor(hitDmg * 1.5);
+            }
+
+            batchDamage += hitDmg;
+            fight.damage += hitDmg;
+            fight.lastTick += atkSpeed;
+            rounds++;
+        }
+
+        console.log(`[WORLD_BOSS] Catchup processed ${rounds} rounds, ${batchDamage} dmg for ${char.name}. Total: ${fight.damage}`);
+
+        // If fight ended during offline period
+        if (elapsedSinceStart >= totalDuration) {
+            console.log(`[WORLD_BOSS] Catchup determined fight ended for ${char.name}. Finalizing...`);
+            
+            // Step 1: Save damage to DB
+            await this.saveParticipation(char.id, fight.damage, char.name);
+            
+            // Step 2: Clear persistence from character state
+            if (char.state) delete char.state.activeWorldBossFight;
+            
+            // Step 3: Remove from active memory if it was there
+            this.activeFights.delete(char.id);
+
+            // Step 4: Refresh rankings so they appear immediately
+            await this.refreshRankings();
+
+            return {
+                totalDamage: fight.damage,
+                rounds: rounds,
+                status: 'FINISHED'
+            };
+        }
+
+        return {
+            totalDamage: fight.damage,
+            rounds: rounds,
+            status: 'ACTIVE'
         };
     }
 
@@ -276,15 +360,16 @@ export class WorldBossManager {
     }
 
     async endFight(char) {
-        const fight = this.activeFights.get(char.id);
+        const fight = this.activeFights.get(char.id) || char.state?.activeWorldBossFight;
         if (!fight) {
-            console.warn(`[WORLD_BOSS] endFight called for ${char.id} but no active fight found.`);
+            console.warn(`[WORLD_BOSS] endFight called for ${char.id} but no active fight found in memory or state.`);
             return;
         }
 
         console.log(`[WORLD_BOSS] Fight ended for ${char.name}. Total Damage: ${fight.damage}`);
 
-        const oldTop1 = this.rankings.length > 0 ? this.rankings[0] : null;
+        // PERSISTENCE: Clear from state
+        if (char.state) delete char.state.activeWorldBossFight;
 
         // Save to DB
         console.log(`[WORLD_BOSS] Attempting to save participation...`);

@@ -98,4 +98,19 @@ export const registerMiscHandlers = (socket, gameManager, io) => {
       socket.emit("my_trade_history", data);
     } catch (err) { console.error("Error getting trade history:", err); }
   });
+
+  socket.on("get_leaderboard", async ({ type, mode }) => {
+    try {
+      const response = await gameManager.getLeaderboard(type, socket.data.characterId, mode);
+      socket.emit("leaderboard_update", {
+        type: response.type,
+        mode: response.mode,
+        top100: response.top100,
+        userRank: response.userRank
+      });
+    } catch (err) {
+      console.error("[RANKING] Error fetching leaderboard:", err);
+      socket.emit("error", { message: "Error fetching leaderboard" });
+    }
+  });
 };

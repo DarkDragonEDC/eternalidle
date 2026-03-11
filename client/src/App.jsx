@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from './supabase';
 import { useAppStore } from './store/useAppStore';
 import { useOptimisticState } from './hooks/useOptimisticState';
@@ -81,6 +82,39 @@ function App() {
     useSocketEvents();
     useGameSync();
 
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    // Unified Navigation Synchronization
+    useEffect(() => {
+        if (!selectedCharacter) return;
+
+        const urlTab = location.pathname.substring(1);
+        const storeTab = activeTab;
+        const validTabs = [
+            'world_boss', 'combat', 'dungeon', 'market', 'guild', 'ranking', 
+            'taxometer', 'rest_camp', 'gathering', 'refining', 'crafting', 
+            'merging', 'inventory', 'profile', 'skills_overview', 'town_overview', 'combat_overview'
+        ];
+
+        // 1. URL has a valid tab -> Sync to Store
+        if (urlTab && validTabs.includes(urlTab)) {
+            if (urlTab !== storeTab) {
+                setActiveTab(urlTab);
+            }
+        } 
+        // 2. State has a tab that doesn't match URL -> Sync to URL
+        else if (storeTab && validTabs.includes(storeTab) && `/${storeTab}` !== location.pathname) {
+            navigate(`/${storeTab}`, { replace: true });
+        }
+        // 3. Fallback for root or invalid URL
+        else if (!urlTab || !validTabs.includes(urlTab)) {
+            if (location.pathname === '/') {
+                navigate(`/${storeTab || 'inventory'}`, { replace: true });
+            }
+        }
+    }, [location.pathname, activeTab, selectedCharacter, navigate, setActiveTab]);
+
     // Handlers
     const handleSetTheme = useCallback((newTheme) => {
         setTheme(newTheme);
@@ -127,10 +161,16 @@ function App() {
         if (socket) socket.emit('start_world_boss_fight');
     }, [socket, setModal]);
 
+    const handleSetActiveTab = useCallback((tab) => {
+        navigate(`/${tab}`);
+    }, [navigate]);
+
     const handleNavigate = useCallback((itemId, category = null) => {
-        if (['world_boss', 'combat', 'dungeon', 'market', 'guild', 'ranking', 'taxometer', 'rest_camp', 'gathering', 'refining', 'crafting', 'merging'].includes(itemId)) {
+        const validTabs = ['world_boss', 'combat', 'dungeon', 'market', 'guild', 'ranking', 'taxometer', 'rest_camp', 'gathering', 'refining', 'crafting', 'merging', 'inventory', 'profile', 'skills_overview', 'town_overview', 'combat_overview'];
+        
+        if (validTabs.includes(itemId)) {
             if (itemId === 'merging' && !category) category = 'RUNE';
-            setActiveTab(itemId);
+            navigate(`/${itemId}`);
             if (category) setActiveCategory(category);
             return;
         }
@@ -153,7 +193,7 @@ function App() {
                     for (const [, tiers] of Object.entries(types)) {
                         for (const [t, item] of Object.entries(tiers)) {
                             if (item.id === itemId) {
-                                setActiveTab('crafting');
+                                navigate('/crafting');
                                 setActiveCategory(station);
                                 setActiveTier(Number(t));
                                 setModalItem(null);
@@ -166,7 +206,7 @@ function App() {
                 for (const [cat, tiers] of Object.entries(data)) {
                     for (const [t, item] of Object.entries(tiers)) {
                         if (item.id === itemId) {
-                            setActiveTab(type);
+                            navigate(`/${type}`);
                             setActiveCategory(cat);
                             setActiveTier(Number(t));
                             setModalItem(null);
@@ -256,7 +296,7 @@ function App() {
             {!isMobile && (
                 <Sidebar
                     gameState={displayedGameState}
-                    activeTab={activeTab} setActiveTab={setActiveTab}
+                    activeTab={activeTab} setActiveTab={handleSetActiveTab}
                     activeCategory={activeCategory} setActiveCategory={setActiveCategory}
                     activeTier={activeTier} setActiveTier={setActiveTier}
                     onNavigate={handleNavigate}
@@ -276,7 +316,7 @@ function App() {
 
             {isMobile && <BottomNav
                 gameState={displayedGameState}
-                activeTab={activeTab} setActiveTab={setActiveTab}
+                activeTab={activeTab} setActiveTab={handleSetActiveTab}
                 onNavigate={handleNavigate}
                 canSpin={useAppStore.getState().canSpin}
                 hasActiveTrade={useAppStore.getState().tradeInvites?.length > 0 || !!useAppStore.getState().activeTrade}
@@ -327,6 +367,7 @@ function App() {
                     onNavigate={handleNavigate}
                     isMobile={isMobile}
                     serverTimeOffset={clockOffset.current}
+                    onOpenWorldBoss={() => setIsWorldBossFight(true)}
                     skillProgress={gameState?.current_activity && displayedGameState?.state?.skills ? (() => {
                         const s = displayedGameState.state.skills[getSkillForItem(gameState.current_activity.item_id, gameState.current_activity.type)];
                         if (!s || s.level >= 100) return s?.level >= 100 ? 100 : 0;
@@ -352,7 +393,7 @@ function App() {
                 />
 
                 <BanWarningOverlay banWarning={banWarning} setBanWarning={setBanWarning} socket={socket} />
-                {isWorldBossFight && <WorldBossFight gameState={displayedGameState} socket={socket} onFinish={() => { setIsWorldBossFight(false); setActiveTab('world_boss'); }} />}
+                {isWorldBossFight && <WorldBossFight gameState={displayedGameState} socket={socket} onMinimize={() => setIsWorldBossFight(false)} onFinish={() => { setIsWorldBossFight(false); setActiveTab('world_boss'); }} />}
             </div>
         </div>
     );

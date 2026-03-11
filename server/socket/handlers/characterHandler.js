@@ -401,7 +401,7 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
         if (!premiumThemes.includes(themeId)) throw new Error("Invalid theme.");
 
         if (!char.state.unlockedThemes) {
-          char.state.unlockedThemes = ["medieval", "dark", "light"];
+          char.state.unlockedThemes = ["medieval", "dark"];
         }
 
         if (char.state.unlockedThemes.includes(themeId)) {
@@ -449,7 +449,7 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
         );
         if (!char) return;
 
-        const unlocked = char.state.unlockedThemes || ["medieval", "dark", "light"];
+        const unlocked = char.state.unlockedThemes || ["medieval", "dark"];
         if (!unlocked.includes(themeId)) {
           throw new Error("You haven't unlocked this theme yet!");
         }

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { resolveItem, calculateItemSellPrice, formatItemId } from '@shared/items';
 
 
-const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, isMobile, isPreviewActive, onPreviewActionBlocked }) => {
+const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, onInspect, isMobile, isPreviewActive, onPreviewActionBlocked }) => {
     const [localOffer, setLocalOffer] = useState({ items: [], silver: 0 });
     const [isAccepting, setIsAccepting] = useState(false);
     const [filterText, setFilterText] = useState('');
@@ -512,7 +512,13 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                     {(!isMobile || mobileTab === 'OFFER') && (
                         <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', background: 'rgba(144,213,255,0.02)', padding: isMobile ? '10px' : '15px', borderRadius: '16px', border: '1px solid rgba(144,213,255,0.1)', height: '100%', overflow: 'hidden' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? '10px' : '15px' }}>
-                                <h3 style={{ margin: 0, fontSize: isMobile ? '0.9rem' : '0.9rem', fontWeight: '900', color: '#90d5ff', letterSpacing: '1px' }}>
+                                <h3 
+                                    onClick={() => {
+                                        const partnerName = trade.partner_name || (isSender ? trade.receiver_name : trade.sender_name);
+                                        if (onInspect && partnerName) onInspect(partnerName);
+                                    }}
+                                    style={{ margin: 0, fontSize: isMobile ? '0.9rem' : '0.9rem', fontWeight: '900', color: '#90d5ff', letterSpacing: '1px', cursor: onInspect ? 'pointer' : 'default' }}
+                                >
                                     {trade.partner_name || (isSender ? trade.receiver_name : trade.sender_name) || 'THEIR OFFER'}
                                 </h3>
                                 {partnerAccepted ? (

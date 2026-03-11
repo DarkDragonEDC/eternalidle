@@ -148,6 +148,7 @@ export const GameContent = ({
                         silver={displayedGameState?.state?.silver || 0}
                         onShowInfo={setInfoItem}
                         onListOnMarket={handleListOnMarket}
+                        onInspect={handleInspectPlayer}
                         isMobile={isMobile}
                         isAnonymous={session?.user?.is_anonymous}
                         filter={marketFilter}

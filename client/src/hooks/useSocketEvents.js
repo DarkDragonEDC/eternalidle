@@ -13,7 +13,8 @@ export const useSocketEvents = () => {
     setVersionMismatch,
     setInspectData,
     setLootModalData,
-    setOfflineGains
+    setOfflineGains,
+    setIsWorldBossFight
   } = useAppStore();
 
   useEffect(() => {
@@ -37,6 +38,7 @@ export const useSocketEvents = () => {
         setLootModalData(result.rewards);
       }
     });
+    socket.on('world_boss_started', () => setIsWorldBossFight(true));
 
     return () => {
       socket.off('status_update', handleStatusUpdate);
@@ -49,6 +51,7 @@ export const useSocketEvents = () => {
       socket.off('public_profile_data');
       socket.off('offline_report');
       socket.off('item_used');
+      socket.off('world_boss_started');
     };
   }, [
     socket,
@@ -61,6 +64,7 @@ export const useSocketEvents = () => {
     setVersionMismatch,
     setInspectData,
     setLootModalData,
-    setOfflineGains
+    setOfflineGains,
+    setIsWorldBossFight
   ]);
 };

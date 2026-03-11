@@ -60,7 +60,7 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                 breakdown.push({ label: 'Rune Bonus', value: `+${fmt(damageRuneBonus)}`, sub: '(Flat Damage)' });
             }
             if (potionDmgBonus > 0) {
-                breakdown.push({ label: 'Potion Bonus', value: `+${fmt(potionDmgBonus * 100)}`, sub: '(Flat Damage)' });
+                breakdown.push({ label: 'Potion Bonus', value: `+${fmt(potionDmgBonus * 100)}%`, sub: '(Multiplier)' });
             }
         } else if (statType === 'DEFENSE') {
             const activeProf = stats.activeProf;

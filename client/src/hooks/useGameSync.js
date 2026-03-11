@@ -89,13 +89,12 @@ export const useGameSync = () => {
         PushService.registerServiceWorker();
     }, []);
 
-    // Sync tab with URL (Only when URL changes externally)
+    // Persist Navigation to LocalStorage
     useEffect(() => {
-        const path = location.pathname.substring(1);
-        if (path && path !== activeTab) {
-            setActiveTab(path);
-        }
-    }, [location.pathname]); // Removed activeTab from deps
+        localStorage.setItem('activeTab', activeTab);
+        localStorage.setItem('activeCategory', activeCategory);
+        localStorage.setItem('activeTier', activeTier);
+    }, [activeTab, activeCategory, activeTier]);
 
     // Theme Sync
     useEffect(() => {
@@ -115,25 +114,6 @@ export const useGameSync = () => {
             if (serverTheme !== theme) setTheme(serverTheme);
         }
     }, [session, previewThemeId, theme, gameState, setTheme]);
-
-    // Persist Navigation
-    useEffect(() => {
-        localStorage.setItem('activeTab', activeTab);
-        localStorage.setItem('activeCategory', activeCategory);
-        localStorage.setItem('activeTier', activeTier);
-
-        if (activeTab === 'trade') {
-            const fallbackTab = prevTabRef.current || 'inventory';
-            setActiveTab(fallbackTab);
-            navigate(`/${fallbackTab}`, { replace: true });
-        } else {
-            prevTabRef.current = activeTab;
-            // SYNC URL with activeTab
-            if (activeTab && location.pathname !== `/${activeTab}`) {
-                navigate(`/${activeTab}`, { replace: true });
-            }
-        }
-    }, [activeTab, activeCategory, activeTier, navigate, setActiveTab]);
 
     // Update Last Active on Unload
     useEffect(() => {
