@@ -1,0 +1,15 @@
+import React, { useState, useEffect } from 'react';
+import { formatNumber, formatSilver } from '@utils/format';
+import {
+    Tag, ShoppingBag, Package, Search,
+    Coins, ArrowRight, User, Info, Trash2,
+    Shield, Zap, Apple, Box, Clock, Check, AlertTriangle, X, Star, Hammer, Lock, History, TrendingUp, TrendingDown,
+    Gavel
+} from 'lucide-react';
+import { resolveItem, getTierColor, formatItemId, getRequiredProficiencyGroup, calculateItemSellPrice } from '@shared/items';
+import MarketBuyOrdersTab from './market/MarketBuyOrdersTab';
+import MarketSellTab from './market/MarketSellTab';
+import MarketListingsTab from './market/MarketListingsTab';
+import MarketClaimTab from './market/MarketClaimTab';
+import MarketHistoryTab from './market/MarketHistoryTab';
+import MarketBrowseTab from './market/MarketBrowseTab';

@@ -239,6 +239,7 @@ export class MarketManager {
 
                     // Record History
                     await this.gameManager.supabase.from('market_history').insert([{
+                        id: Math.floor(Date.now() * 100) + Math.floor(Math.random() * 100),
                         item_id: itemId,
                         item_data: { ...itemData, quality, stars },
                         seller_id: userId,
@@ -448,9 +449,10 @@ export class MarketManager {
                 .eq('id', sellerCharId)
                 .single()).data?.name || 'Unknown';
 
-            await this.gameManager.supabase
+            const { error: historyError } = await this.gameManager.supabase
                 .from('market_history')
                 .insert([{
+                    id: Math.floor(Date.now() * 100) + Math.floor(Math.random() * 100),
                     item_id: listing.item_id,
                     item_data: listing.item_data,
                     seller_id: listing.seller_id,
@@ -463,6 +465,11 @@ export class MarketManager {
                     tax_paid: tax,
                     created_at: new Date().toISOString()
                 }]);
+            
+            if (historyError) {
+                console.error('[MarketManager] Supabase insert returning error for history:', historyError);
+                throw historyError;
+            }
             console.log(`[MarketManager] Recorded history for ${qtyNum}x ${listing.item_id}`);
         } catch (historyErr) {
             console.error('[MarketManager] Error recording history:', historyErr);
@@ -956,9 +963,10 @@ export class MarketManager {
         if (updateError) throw updateError;
 
         try {
-            await this.gameManager.supabase
+            const { error: historyError } = await this.gameManager.supabase
                 .from('market_history')
                 .insert([{
+                    id: Math.floor(Date.now() * 100) + Math.floor(Math.random() * 100),
                     item_id: lookupId,
                     item_data: order.item_data,
                     seller_id: sellerId,
@@ -969,10 +977,15 @@ export class MarketManager {
                     price_total: totalPrice,
                     price_per_unit: order.price_per_unit,
                     tax_paid: tax,
-                    order_type: 'BUY_ORDER',
                     created_at: new Date().toISOString()
                 }]);
-        } catch (e) { console.error("History recording failed", e); }
+            
+            if (historyError) {
+                console.error('[MarketManager] fillBuyOrder history insert error:', historyError);
+            }
+        } catch (e) {
+            console.error("History recording failed", e);
+        }
 
         await this.gameManager.saveState(seller.id, seller.state);
         return { success: true, message: `Successfully filled ${qtyNum}x of the buy order!` };

@@ -7,3 +7,6 @@
 - **Erro de Interface (Mercado)**: Corrigido um erro técnico no Painel de Mercado que podia impedir o carregamento correto da interface em certas condições.
 - **Sincronização de Dados**: Melhoramos a comunicação entre servidor e cliente para garantir que seu inventário e status estejam sempre atualizados ao trocar de abas.
 
+### 💰 Reformulação do Mercado
+- **Visualização de Ordens de Compra (Buy Orders)**: O painel de "Preencher Ordem de Compra" foi redesenhado completamente para oferecer mais clareza: agora ele exibe os itens desejados de forma detalhada, com informações precisas sobre taxas (imposto de 20%) e o lucro líquido em moedas da transação.
+- **Histórico de Vendas Completo**: Corrigimos um problema técnico na integração com nosso servidor onde as transações recentes desapareciam. Agora, todas as compras e vendas podem ser visualizadas com perfeição na aba Histórico.

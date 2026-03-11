@@ -906,6 +906,79 @@ export class GuildManager {
         return { success: true };
     }
 
+    async transferLeadership(char, targetMemberId) {
+        if (!char) throw new Error("Character data required");
+
+        // 1. Get char's guild and role
+        const { data: member, error: memberError } = await this.supabase
+            .from('guild_members')
+            .select('guild_id, role')
+            .eq('character_id', char.id)
+            .maybeSingle();
+
+        if (memberError || !member) throw new Error("You are not in a guild");
+        if (member.role !== 'LEADER') throw new Error("Only the leader can transfer leadership");
+
+        // 2. Fetch guild to confirm leader_id
+        const { data: guild, error: guildError } = await this.supabase
+            .from('guilds')
+            .select('id, leader_id')
+            .eq('id', member.guild_id)
+            .single();
+
+        if (guildError || !guild) throw new Error("Guild not found");
+        if (guild.leader_id !== char.id) throw new Error("Verification failed: You are not the recorded leader");
+
+        // 3. Verify target is a member of the same guild
+        const { data: targetMember, error: targetError } = await this.supabase
+            .from('guild_members')
+            .select('character_id, role')
+            .eq('guild_id', guild.id)
+            .eq('character_id', targetMemberId)
+            .maybeSingle();
+
+        if (targetError || !targetMember) throw new Error("Target player is not a member of your guild");
+        if (targetMemberId === char.id) throw new Error("You are already the leader");
+
+        // 4. Update Guild Table (leader_id)
+        const { error: updateGuildError } = await this.supabase
+            .from('guilds')
+            .update({ leader_id: targetMemberId })
+            .eq('id', guild.id);
+
+        if (updateGuildError) {
+            console.error("[GUILD] Error updating guild leader_id:", updateGuildError);
+            throw new Error("Failed to update guild leader in database");
+        }
+
+        // 5. Update Members Table (Roles)
+        // New Leader
+        const { error: updateNewLeaderError } = await this.supabase
+            .from('guild_members')
+            .update({ role: 'LEADER' })
+            .eq('guild_id', guild.id)
+            .eq('character_id', targetMemberId);
+
+        if (updateNewLeaderError) {
+            console.error("[GUILD] CRITICAL: Failed to update new leader role", updateNewLeaderError);
+        }
+
+        // Old Leader (demote to OFFICER)
+        const { error: updateOldLeaderError } = await this.supabase
+            .from('guild_members')
+            .update({ role: 'OFFICER' })
+            .eq('guild_id', guild.id)
+            .eq('character_id', char.id);
+
+        if (updateOldLeaderError) {
+            console.error("[GUILD] Warning: Failed to demote old leader to officer", updateOldLeaderError);
+        }
+
+        console.log(`[GUILD] Leadership transfer: ${guild.id} from ${char.name} to ID ${targetMemberId}`);
+
+        return { success: true };
+    }
+
     async hasPermission(characterId, permission) {
         if (!characterId) return false;
 

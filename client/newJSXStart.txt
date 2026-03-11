@@ -1,0 +1,283 @@
+    if (isIronman || isAnonymous) {
+        return (
+            <div className="panel" style={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '20px',
+                background: 'var(--panel-bg)',
+                borderRadius: '12px',
+                padding: '40px',
+                textAlign: 'center'
+            }}>
+                <div style={{
+                    width: '80px',
+                    height: '80px',
+                    borderRadius: '50%',
+                    background: isIronman ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255, 68, 68, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '10px',
+                    border: isIronman ? '2px solid rgba(212, 175, 55, 0.2)' : '2px solid rgba(255, 68, 68, 0.2)'
+                }}>
+                    {isIronman ? <Shield size={40} color="var(--accent)" /> : <Lock size={40} color="#ff4444" />}
+                </div>
+                <h2 style={{ color: isIronman ? 'var(--accent)' : '#ff4444', margin: 0, fontSize: '1.8rem', letterSpacing: '2px' }}>
+                    {isIronman ? 'IRONMAN MODE' : 'GUEST ACCOUNT'}
+                </h2>
+                <p style={{ color: 'var(--text-dim)', maxWidth: '400px', lineHeight: '1.6', fontSize: '1rem' }}>
+                    {isIronman
+                        ? "Ironman characters are self-sufficient and cannot use the Marketplace. All items must be gathered, crafted, or found through your own adventures!"
+                        : "Marketplace is locked for Guest accounts to prevent abuse. Please link your account in the Profile tab to access the shared trade system."}
+                </p>
+                <div style={{
+                    marginTop: '20px',
+                    padding: '15px 25px',
+                    background: 'var(--accent-soft)',
+                    borderRadius: '12px',
+                    border: '1px solid var(--border)',
+                    fontSize: '0.9rem',
+                    color: 'var(--accent)',
+                    fontWeight: 'bold'
+                }}>
+                    {isIronman ? 'STRICT SELF-SUFFICIENCY ACTIVE' : 'ACCOUNT LINKING REQUIRED'}
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="content-area" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <div className="panel" style={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '20px',
+                overflow: 'hidden',
+                background: 'var(--panel-bg)',
+                borderRadius: '12px',
+                padding: isMobile ? '15px' : '24px'
+            }}>
+                {/* HEADER */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: '15px', flexWrap: 'wrap', gap: '10px' }}>
+                    <div style={{ flex: '1 1 auto', minWidth: '200px' }}>
+                        <h2 style={{ color: 'var(--accent)', margin: 0, fontSize: isMobile ? '1.2rem' : '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <Tag size={isMobile ? 20 : 24} /> MARKETPLACE
+                        </h2>
+                        <p style={{ margin: '5px 0px 0px', fontSize: '0.8rem', color: 'var(--text-dim)' }}>Shared world trade system</p>
+                    </div>
+
+                    {/* TOP TABS */}
+                    <div style={{ display: 'flex', background: 'var(--glass-bg)', borderRadius: '12px', padding: '4px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                        <button
+                            onClick={() => setActiveTab('BUY')}
+                            style={{
+                                padding: '8px 16px',
+                                borderRadius: '8px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                fontSize: '0.85rem',
+                                fontWeight: 'bold',
+                                background: activeTab === 'BUY' ? 'var(--accent-soft)' : 'transparent',
+                                color: activeTab === 'BUY' ? 'var(--accent)' : 'var(--text-dim)',
+                                border: activeTab === 'BUY' ? '1px solid var(--accent)' : '1px solid transparent',
+                                transition: '0.2s'
+                            }}>
+                            Sell Orders
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('BUY_ORDERS')}
+                            style={{
+                                padding: '8px 16px',
+                                borderRadius: '8px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                fontSize: '0.85rem',
+                                fontWeight: 'bold',
+                                background: activeTab === 'BUY_ORDERS' ? 'var(--accent-soft)' : 'transparent',
+                                color: activeTab === 'BUY_ORDERS' ? 'var(--accent)' : 'var(--text-dim)',
+                                border: activeTab === 'BUY_ORDERS' ? '1px solid var(--accent)' : '1px solid transparent',
+                                transition: '0.2s'
+                            }}>
+                            Buy Orders
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('MY_ORDERS')}
+                            style={{
+                                padding: '8px 16px',
+                                borderRadius: '8px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                fontSize: '0.85rem',
+                                fontWeight: 'bold',
+                                background: activeTab === 'MY_ORDERS' ? 'var(--accent-soft)' : 'transparent',
+                                color: activeTab === 'MY_ORDERS' ? 'var(--accent)' : 'var(--text-dim)',
+                                border: activeTab === 'MY_ORDERS' ? '1px solid var(--accent)' : '1px solid transparent',
+                                transition: '0.2s'
+                            }}>
+                            My Listings
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('SELL')}
+                            style={{
+                                padding: '8px 16px',
+                                borderRadius: '8px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                fontSize: '0.85rem',
+                                fontWeight: 'bold',
+                                background: activeTab === 'SELL' ? 'var(--accent-soft)' : 'transparent',
+                                color: activeTab === 'SELL' ? 'var(--accent)' : 'var(--text-dim)',
+                                border: activeTab === 'SELL' ? '1px solid var(--accent)' : '1px solid transparent',
+                                transition: '0.2s'
+                            }}>
+                            Sell
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('CLAIM')}
+                            style={{
+                                padding: '8px 16px',
+                                borderRadius: '8px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                fontSize: '0.85rem',
+                                fontWeight: 'bold',
+                                position: 'relative',
+                                background: activeTab === 'CLAIM' ? 'var(--accent-soft)' : 'transparent',
+                                color: activeTab === 'CLAIM' ? 'var(--accent)' : 'var(--text-dim)',
+                                border: activeTab === 'CLAIM' ? '1px solid var(--accent)' : '1px solid transparent',
+                                transition: '0.2s'
+                            }}>
+                            Claim
+                            {gameState?.state?.claims?.length > 0 && (
+                                <span style={{
+                                    position: 'absolute',
+                                    top: '-2px',
+                                    right: '-2px',
+                                    background: '#ff4444',
+                                    color: '#fff',
+                                    borderRadius: '50%',
+                                    width: '16px',
+                                    height: '16px',
+                                    fontSize: '0.65rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}>{gameState?.state?.claims?.length}</span>
+                            )}
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('HISTORY')}
+                            style={{
+                                padding: '8px 16px',
+                                borderRadius: '8px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                fontSize: '0.85rem',
+                                fontWeight: 'bold',
+                                background: activeTab === 'HISTORY' ? 'var(--accent-soft)' : 'transparent',
+                                color: activeTab === 'HISTORY' ? 'var(--accent)' : 'var(--text-dim)',
+                                border: activeTab === 'HISTORY' ? '1px solid var(--accent)' : '1px solid transparent',
+                                transition: '0.2s'
+                            }}>
+                            History
+                        </button>
+                    </div>
+                </div>
+
+                <div className="scroll-container" style={{ flex: '1 1 0%', display: 'flex', flexDirection: 'column', gap: '8px', paddingRight: '5px' }}>
+                    {activeTab === 'BUY' && (
+                        <MarketBrowseTab
+                            marketListings={marketListings}
+                            gameState={gameState}
+                            silver={silver}
+                            onShowInfo={onShowInfo}
+                            onInspect={onInspect}
+                            initialSearch={initialSearch}
+                            onBuyItem={handleBuy}
+                            isPreviewActive={isPreviewActive}
+                            onPreviewActionBlocked={onPreviewActionBlocked}
+                        />
+                    )}
+                    {activeTab === 'SELL' && (
+                        <MarketSellTab
+                            gameState={gameState}
+                            socket={socket}
+                            onListOnMarket={onListOnMarket}
+                            maxListings={maxListings}
+                            currentListingsCount={marketListings.filter(l => isOwnListing(l) && l.status !== 'SOLD' && l.status !== 'EXPIRED').length}
+                            onShowInfo={onShowInfo}
+                            isPreviewActive={isPreviewActive}
+                            onPreviewActionBlocked={onPreviewActionBlocked}
+                        />
+                    )}
+                    {activeTab === 'MY_ORDERS' && (
+                        <MarketListingsTab
+                            myOrders={marketListings.filter(l => isOwnListing(l) && l.status !== 'SOLD' && l.status !== 'EXPIRED')}
+                            onCancelItem={handleCancel}
+                            onShowInfo={onShowInfo}
+                        />
+                    )}
+                    {activeTab === 'BUY_ORDERS' && (
+                        <MarketBuyOrdersTab
+                            buyOrders={buyOrders}
+                            gameState={gameState}
+                            socket={socket}
+                            onShowInfo={onShowInfo}
+                            onInspect={onInspect}
+                            isMobile={isMobile}
+                            isPreviewActive={isPreviewActive}
+                            onPreviewActionBlocked={onPreviewActionBlocked}
+                            onCreateBuyOrder={() => {
+                                if (isPreviewActive) return onPreviewActionBlocked();
+                                setCreateBuyOrderModal({
+                                    itemId: '',
+                                    amount: 1,
+                                    pricePerUnit: 1,
+                                    searchText: '',
+                                    quality: 0,
+                                    stars: 1,
+                                    canHaveQuality: false,
+                                    canHaveStars: false
+                                });
+                                setItemSuggestions([]);
+                                setLowestSellPrice(null);
+                            }}
+                            onCancelOrder={(order, remaining) => {
+                                const fee = (Date.now() - new Date(order.created_at).getTime()) < (3600 * 1000) ? Math.floor(remaining * order.price_per_unit * 0.10) : 0;
+                                setConfirmModal({
+                                    message: `Cancel this Buy Order?`,
+                                    subtext: `The remaining ${remaining}x items will be cancelled. ${fee > 0 ? `A 10% cancellation fee (${formatNumber(fee)} Silver) applies as the order is less than 1h old.` : 'No cancellation fee applies.'}`,
+                                    onConfirm: () => {
+                                        socket.emit('cancel_buy_order', { orderId: order.id });
+                                        setConfirmModal(null);
+                                    }
+                                });
+                            }}
+                            onFillOrder={(order) => {
+                                if (isPreviewActive) return onPreviewActionBlocked();
+                                setFillOrderModal(order);
+                                setFillQuantity(1);
+                            }}
+                        />
+                    )}
+                    {activeTab === 'CLAIM' && (
+                        <MarketClaimTab
+                            gameState={gameState}
+                            onClaim={handleClaim}
+                            onShowInfo={onShowInfo}
+                        />
+                    )}
+                    {activeTab === 'HISTORY' && (
+                        <MarketHistoryTab
+                            marketHistory={marketHistory}
+                            myMarketHistory={myMarketHistory}
+                            socket={socket}
+                            onShowInfo={onShowInfo}
+                            onInspect={onInspect}
+                        />
+                    )}
+                </div>

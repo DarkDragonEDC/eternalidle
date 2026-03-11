@@ -14,6 +14,7 @@ export class PersistenceService {
         this.leaderboardCache = new Map();
         this.guildBonusesCache = new Map();
         this.LEADERBOARD_CACHE_TTL = 30 * 60 * 1000;
+        this.statsPromise = this.loadGlobalStats();
     }
 
     async executeLocked(userId, task) {
@@ -152,30 +153,44 @@ export class PersistenceService {
     }
 
     async getCharacter(userId, characterId = null, bypassCache = false) {
-        if (!characterId || characterId === 'undefined' || characterId === 'null') return null;
+        if (!characterId && !userId) return null;
 
-        if (characterId && this.cache.has(characterId) && !bypassCache) {
-            return this.cache.get(characterId);
+        let data = characterId ? this.cache.get(characterId) : null;
+        let fromCache = !!data;
+
+        if (!data || bypassCache) {
+            let query = this.supabase.from('characters').select('*');
+            if (characterId) {
+                query = query.eq('id', characterId);
+                if (userId) query = query.eq('user_id', userId);
+                query = query.single();
+            } else {
+                query = query.eq('user_id', userId).limit(1).maybeSingle();
+            }
+
+            const { data: dbData, error } = await query;
+            if (error && error.code !== 'PGRST116') throw error;
+            data = dbData;
+            fromCache = false;
         }
 
-        let query = this.supabase.from('characters').select('*');
-        if (characterId) {
-            query = query.eq('id', characterId);
-            if (userId) query = query.eq('user_id', userId);
-            query = query.single();
-        } else {
-            if (!userId) throw new Error("userId is required when characterId is not provided");
-            query = query.eq('user_id', userId).limit(1).maybeSingle();
-        }
-
-        const { data, error } = await query;
-        if (error && error.code !== 'PGRST116') throw error;
-
-        if (data) {
+        if (data && !fromCache) {
             this.cache.set(data.id, data);
-            return data;
+            
+            // Basic Hydration
+            if (this.gm._hydrateCharacterFromRaw) {
+                this.gm._hydrateCharacterFromRaw(data);
+            }
+
+            // Trigger Migrations
+            if (this.gm.migrationManager) {
+                this.gm.migrationManager.migrateCharacter(data);
+            }
+
+            data.dbHash = this.calculateHash(data.state);
         }
-        return null;
+
+        return data;
     }
 
     async syncWithDatabase(charId, userId = null) {
@@ -204,5 +219,156 @@ export class PersistenceService {
             }
         }
         return false;
+    }
+    async loadGlobalStats() {
+        try {
+            const { data, error } = await this.supabase
+                .from('global_stats')
+                .select('*')
+                .eq('id', 'global')
+                .maybeSingle();
+
+            if (data) {
+                this.globalStats = {
+                    total_market_tax: Number(data.total_market_tax) || 0,
+                    market_tax_total: Number(data.market_tax_total) || 0,
+                    trade_tax_total: Number(data.trade_tax_total) || 0,
+                    tax_24h_ago: Number(data.tax_24h_ago) || 0,
+                    history: Array.isArray(data.history) ? data.history : []
+                };
+
+                if (this.globalStats.tax_24h_ago === 0 && this.globalStats.total_market_tax > 0) {
+                    console.log(`[PersistenceService] Initializing tax_24h_ago baseline to: ${this.globalStats.total_market_tax}`);
+                    this.globalStats.tax_24h_ago = this.globalStats.total_market_tax;
+
+                    if (this.globalStats.market_tax_total < 1000 && this.globalStats.trade_tax_total === 0) {
+                        const total = this.globalStats.total_market_tax;
+                        this.globalStats.market_tax_total = Math.floor(total * 0.80);
+                        this.globalStats.trade_tax_total = Math.floor(total * 0.20);
+                    }
+
+                    if (this.gm.onGlobalStatsUpdate) {
+                        this.gm.onGlobalStatsUpdate(this.globalStats);
+                    }
+
+                    this.supabase
+                        .from('global_stats')
+                        .update({
+                            tax_24h_ago: this.globalStats.tax_24h_ago,
+                            market_tax_total: this.globalStats.market_tax_total,
+                            trade_tax_total: this.globalStats.trade_tax_total,
+                            last_snapshot_at: new Date().toISOString()
+                        })
+                        .eq('id', 'global')
+                        .catch(err => console.error('[DB] Error initializing tax baseline:', err));
+                }
+            } else if (!error) {
+                this.globalStats = {
+                    total_market_tax: 0,
+                    market_tax_total: 0,
+                    trade_tax_total: 0,
+                    tax_24h_ago: 0,
+                    history: []
+                };
+
+                await this.supabase
+                    .from('global_stats')
+                    .insert([{
+                        id: 'global',
+                        total_market_tax: 0,
+                        market_tax_total: 0,
+                        trade_tax_total: 0,
+                        tax_24h_ago: 0,
+                        history: [],
+                        last_snapshot_at: new Date().toISOString()
+                    }]);
+            }
+        } catch (err) {
+            console.error('[DB] Error loading global stats:', err);
+        }
+    }
+
+    async updateGlobalTax(amount, source = 'MARKET') {
+        if (!amount || amount <= 0) return;
+        try {
+            if (this.statsPromise) await this.statsPromise;
+            if (!this.globalStats) return;
+
+            const taxAmount = Math.floor(amount);
+            this.globalStats.total_market_tax += taxAmount;
+
+            if (source === 'TRADE') {
+                this.globalStats.trade_tax_total = (this.globalStats.trade_tax_total || 0) + taxAmount;
+            } else {
+                this.globalStats.market_tax_total = (this.globalStats.market_tax_total || 0) + taxAmount;
+            }
+
+            const updateFields = {
+                total_market_tax: this.globalStats.total_market_tax,
+                updated_at: new Date().toISOString()
+            };
+
+            if (source === 'TRADE') updateFields.trade_tax_total = this.globalStats.trade_tax_total;
+            else updateFields.market_tax_total = this.globalStats.market_tax_total;
+
+            const { error } = await this.supabase
+                .from('global_stats')
+                .update(updateFields)
+                .eq('id', 'global');
+
+            if (error) console.error('[DB] Error updating global tax field:', error);
+        } catch (err) {
+            console.error('[DB] Error updating global tax:', err);
+        }
+    }
+
+    async checkTaxSnapshot() {
+        try {
+            if (this.statsPromise) await this.statsPromise;
+            const { data, error } = await this.supabase
+                .from('global_stats')
+                .select('*')
+                .eq('id', 'global')
+                .single();
+
+            if (error) return;
+
+            const now = new Date();
+            const lastSnapshotAt = data.last_snapshot_at ? new Date(data.last_snapshot_at) : null;
+
+            const isNewDay = !lastSnapshotAt || (
+                now.getUTCDate() !== lastSnapshotAt.getUTCDate() ||
+                now.getUTCMonth() !== lastSnapshotAt.getUTCMonth() ||
+                now.getUTCFullYear() !== lastSnapshotAt.getUTCFullYear()
+            );
+
+            if (isNewDay) {
+                const newTotal = Number(data.total_market_tax) || 0;
+                const oldTotal = Number(data.tax_24h_ago) || 0;
+                const dailyIncrease = Math.max(0, newTotal - oldTotal);
+
+                let history = Array.isArray(data.history) ? data.history : [];
+                history.push({ date: now.toISOString(), amount: dailyIncrease });
+                if (history.length > 7) history = history.slice(-7);
+
+                await this.supabase
+                    .from('global_stats')
+                    .update({
+                        tax_24h_ago: newTotal,
+                        last_snapshot_at: now.toISOString(),
+                        history: history
+                    })
+                    .eq('id', 'global');
+
+                this.globalStats.tax_24h_ago = newTotal;
+                this.globalStats.history = history;
+
+                if (this.gm.onGlobalStatsUpdate) {
+                    this.gm.onGlobalStatsUpdate(this.globalStats);
+                }
+            }
+        } catch (err) {
+            console.error('[PersistenceService] Error in checkTaxSnapshot:', err);
+        }
     }
 }

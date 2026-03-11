@@ -250,6 +250,23 @@ export const registerGuildHandlers = (socket, gameManager, io) => {
     }
   });
   
+  socket.on("transfer_guild_leadership", async ({ targetMemberId }) => {
+    try {
+      if (!socket.data.characterId || socket.data.characterId === "undefined") return;
+      await gameManager.executeLocked(socket.user.id, async () => {
+        const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+        const result = await gameManager.guildManager.transferLeadership(char, targetMemberId);
+        if (result.success) {
+          socket.emit("guild_leadership_transferred", result);
+          socket.emit("status_update", await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+        }
+      });
+    } catch (err) {
+      console.error("[GUILD] Error in transfer_guild_leadership socket:", err);
+      socket.emit("error", { message: err.message });
+    }
+  });
+
   socket.on("get_guild_profile", async ({ guildId }) => {
     try {
       const profile = await gameManager.guildManager.getPublicGuildProfile(guildId);
