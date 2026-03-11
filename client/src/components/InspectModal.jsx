@@ -15,7 +15,14 @@ const EquipmentSlot = ({ slot, icon, label, item: rawItem, delay = 0, onItemClic
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay }}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}
+            onClick={() => item && onItemClick(item)}
+            style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                gap: '2px',
+                cursor: item ? 'pointer' : 'default'
+            }}
         >
             <div style={{
                 width: '54px',
@@ -689,7 +696,7 @@ const InspectModal = React.memo(({ data, theme: propTheme, onClose, onItemClick,
                         )}
 
                         {activeTab === 'RUNES' && (
-                            <RunesTabView equipment={equipment} />
+                            <RunesTabView equipment={equipment} onItemClick={onItemClick} />
                         )}
                     </div>
 
@@ -874,13 +881,14 @@ const RunesTabView = ({ equipment, onItemClick }) => {
                                 {cat.icon} {cat.label}
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-                                <RuneSlot slot={`rune_${cat.id}_XP`} label="XP" icon={<Award size={18} />} item={equipment[`rune_${cat.id}_XP`]} />
-                                <RuneSlot slot={`rune_${cat.id}_DUPLIC`} label="DUPL" icon={<Layers size={18} />} item={equipment[`rune_${cat.id}_DUPLIC`]} />
+                                <RuneSlot slot={`rune_${cat.id}_XP`} label="XP" icon={<Award size={18} />} item={equipment[`rune_${cat.id}_XP`]} onItemClick={onItemClick} />
+                                <RuneSlot slot={`rune_${cat.id}_DUPLIC`} label="DUPL" icon={<Layers size={18} />} item={equipment[`rune_${cat.id}_DUPLIC`]} onItemClick={onItemClick} />
                                 <RuneSlot
                                     slot={activeRuneTab === 'GATHERING' ? `rune_${cat.id}_AUTO` : `rune_${cat.id}_EFF`}
                                     label={activeRuneTab === 'GATHERING' ? "AUTO" : "EFF"}
                                     icon={<Zap size={18} />}
                                     item={equipment[activeRuneTab === 'GATHERING' ? `rune_${cat.id}_AUTO` : `rune_${cat.id}_EFF`]}
+                                    onItemClick={onItemClick}
                                 />
                             </div>
                         </div>

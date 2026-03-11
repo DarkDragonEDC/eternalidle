@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { ITEMS, getSkillForItem, getLevelRequirement, ITEM_LOOKUP, QUALITIES, resolveItem, BASE_QUALITY_CHANCES } from '../../shared/items.js';
 
 // === STARTUP DIAGNOSTIC ===
@@ -29,7 +30,6 @@ export class ActivityManager {
             const diagMsg = `[${new Date().toISOString()}] ACTIVITY-ERROR: itemId='${itemId}', ITEM_LOOKUP size=${Object.keys(ITEM_LOOKUP).length}, T1_POTION_DAMAGE=${ITEM_LOOKUP['T1_POTION_DAMAGE'] ? 'YES' : 'NO'}, T1_POTION_GATHER=${ITEM_LOOKUP['T1_POTION_GATHER'] ? 'YES' : 'NO'}, charCodes=[${[...String(itemId)].map(c => c.charCodeAt(0)).join(',')}]\n`;
             console.error(diagMsg);
             try {
-                const fs = await import('fs');
                 fs.appendFileSync('activity_debug.log', diagMsg);
             } catch (e) {
                 console.error("FAILED TO WRITE DEBUG LOG", e);

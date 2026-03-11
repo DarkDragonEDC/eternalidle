@@ -1,15 +1,9 @@
-alteraçãoo no drp de mob 20% > 10%
+### 🌙 Sistema de Ganhos Offline
+- **Novo Modal de Progresso**: Agora, ao retornar ao jogo, você verá um resumo detalhado de tudo o que conquistou enquanto estava fora, incluindo itens, experiência e vitórias em combate.
+- **Relatório Persistente**: O modal só desaparece após você confirmar o recebimento, garantindo que você veja seus avanços mesmo se a conexão oscilar no login.
+- **Correção de Carregamento**: Resolvemos um problema onde o bônus offline às vezes não era enviado corretamente na entrada do personagem.
 
-melhoriras na nomeclatura de itens no inventario
+### 🛠️ Correções e Estabilidade
+- **Erro de Interface (Mercado)**: Corrigido um erro técnico no Painel de Mercado que podia impedir o carregamento correto da interface em certas condições.
+- **Sincronização de Dados**: Melhoramos a comunicação entre servidor e cliente para garantir que seu inventário e status estejam sempre atualizados ao trocar de abas.
 
-melhor posicionamento do botao de (i) dos itens no inventario
-
-### 📊 Interface & Habilidades
-- **Inventário Mais Limpo**: Retiramos a exibição em texto de Tier e Qualidade no nome dos itens dentro do inventário para reduzir a poluição visual, visto que essas informações já constam na moldura e no ícone do próprio card.
-- **Posição do Ícone de Informação**: O botão `(i)` para ver detalhes dos itens no inventário foi movido do canto inferior direito para o esquerdo.
-- **Legibilidade de Itens e Menus**: Removemos todos os "underscores" (ex: `COPPER_ORE`) dos nomes de itens, categorias e cabeçalhos de profissões (ex: `Mages Tower`), substituindo por espaços. A interface inteira agora está mais limpa e legível.
-- **Atributo de Velocidade**: O atributo "Speed" nas telas de Crafting e de Informações de Itens agora exibe corretamente o símbolo de porcentagem (ex: `1.5% SPD`), deixando claro que se trata de um bônus percentual.
-- **Ícones Reais no Modal de Crafting**: O Modal de Probabilidade de Crafting agora carrega a imagem real do item sendo inspecionado no cabeçalho, além de remover nomes duplicados.
-
-### 🏰 Guildas & Cooperação
-- **Aba de Requisições Corrigida**: Consertado um bug crítico no Painel da Guilda onde a aba "REQUESTS" ficava vazia (ou presa em carregamento infinito) mesmo quando havia novos pedidos pendentes para entrar na guilda.

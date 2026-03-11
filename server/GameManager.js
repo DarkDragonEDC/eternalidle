@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import fs from 'fs';
 import { ITEMS, ALL_RUNE_TYPES, RUNES_BY_CATEGORY, ITEM_LOOKUP, resolveItem } from '../shared/items.js';
 import { CHEST_DROP_TABLE, WORLDBOSS_DROP_TABLE, getChestRuneShardRange } from '../shared/chest_drops.js';
 import { INITIAL_SKILLS, calculateNextLevelXP, XP_TABLE } from '../shared/skills.js';
@@ -16,6 +17,12 @@ import { WorldBossManager } from './managers/WorldBossManager.js';
 import { SocialManager } from './managers/SocialManager.js';
 import { GuildManager } from './managers/GuildManager.js';
 import { PushManager } from './managers/PushManager.js';
+import { MigrationManager } from './managers/MigrationManager.js';
+import { UserManager } from './managers/UserManager.js';
+import { StatsManager } from './managers/StatsManager.js';
+import { CatchupManager } from './managers/CatchupManager.js';
+import { PersistenceService } from './services/PersistenceService.js';
+import { SocketService } from './services/SocketService.js';
 import { pruneState, hydrateState } from './utils/statePruner.js';
 
 // Removed local ITEM_LOOKUP generation in favor of shared source of truth
@@ -24,6 +31,10 @@ import { pruneState, hydrateState } from './utils/statePruner.js';
 export class GameManager {
     constructor(supabase) {
         this.supabase = supabase;
+        // New extracted services
+        this.persistence = new PersistenceService(supabase, this);
+        this.socket = new SocketService(supabase);
+
         this.inventoryManager = new InventoryManager(this);
         this.activityManager = new ActivityManager(this);
         this.combatManager = new CombatManager(this);
@@ -37,6 +48,10 @@ export class GameManager {
         this.socialManager = new SocialManager(this);
         this.guildManager = new GuildManager(this);
         this.pushManager = new PushManager(this);
+        this.migrationManager = new MigrationManager(this);
+        this.userManager = new UserManager(this);
+        this.statsManager = new StatsManager(this);
+        this.catchupManager = new CatchupManager(this);
         this.userLocks = new Map(); // userId -> Promise (current task)
         this.cache = new Map(); // charId -> character object
         this.dirty = new Set(); // set of charIds that need persisting
@@ -188,6 +203,7 @@ export class GameManager {
 
     setSocketServer(io) {
         this.io = io;
+        this.socket.setIo(io);
     }
 
     async broadcastToCharacter(characterId, event, data) {
@@ -1365,6 +1381,17 @@ export class GameManager {
         return data;
     }
 
+    /**
+     * Convenience wrapper around getCharacter with re-ordered parameters.
+     * Used by all socket handlers.
+     * @param {string} userId
+     * @param {boolean} catchup - Whether to process offline progress
+     * @param {string} characterId
+     * @param {boolean} bypassCache - Whether to force a DB fetch
+     */
+    async getStatus(userId, catchup = false, characterId = null, bypassCache = false) {
+        return this.getCharacter(userId, characterId, catchup, bypassCache);
+    }
 
     /**
      * Clears the offline report from memory for a character once the client acknowledges it.
@@ -2005,7 +2032,8 @@ export class GameManager {
             serverTime: Date.now(),
             guild: await this.guildManager.getCharacterGuild(characterId || char.id),
             guild_bonuses: char.guild_bonuses,
-            banWarning: (ban && ban.level === 1 && !ban.ack) ? ban.reason : null
+            banWarning: (ban && ban.level === 1 && !ban.ack) ? ban.reason : null,
+            offlineReport: char.offlineReport
         };
 
         return status;

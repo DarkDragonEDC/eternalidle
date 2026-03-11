@@ -1913,7 +1913,6 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                                         style={{
                                                             padding: '8px 16px',
                                                             borderRadius: '6px',
-                                                            border: 'none',
                                                             cursor: 'pointer',
                                                             background: 'rgba(255, 68, 68, 0.1)',
                                                             color: '#ff4444',
