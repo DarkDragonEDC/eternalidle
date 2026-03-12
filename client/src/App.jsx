@@ -191,7 +191,7 @@ function App() {
     if (banModalData) return <BannedOverlay banModalData={banModalData} />;
 
     // Privacy Policy route check
-    if (location.pathname === '/privacy') {
+    if (location.pathname.replace(/\/$/, '') === '/privacy') {
         return <PrivacyPolicy />;
     }
 
