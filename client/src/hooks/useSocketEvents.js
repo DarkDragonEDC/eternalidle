@@ -24,6 +24,11 @@ export const useSocketEvents = () => {
             store.setMarketNotification({ type: 'error', message: msg });
         });
         socket.on('ban_error', store.setBanModalData);
+        socket.on('account_status', (data) => {
+            if (data?.banWarning !== undefined) {
+                store.setBanWarning(data.banWarning);
+            }
+        });
         socket.on('daily_status', (data) => store.setCanSpin(data?.canSpin));
         socket.on('daily_spin_result', store.setDailySpinResult);
         socket.on('version_mismatch', () => store.setVersionMismatch(true));
@@ -239,6 +244,7 @@ export const useSocketEvents = () => {
             socket.off('active_players_update');
             socket.off('error');
             socket.off('ban_error');
+            socket.off('account_status');
             socket.off('daily_status');
             socket.off('daily_spin_result');
             socket.off('version_mismatch');

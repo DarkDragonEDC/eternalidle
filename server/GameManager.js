@@ -309,9 +309,8 @@ export class GameManager {
             }
         }
 
-        // PUSH NOTIFICATION: Cancel scheduled push on login
-        if (this.pushManager) {
-            this.pushManager.cancelActivityNotification(data.id);
+        if (data.state?.guild_id) {
+            data.guild_bonuses = await this.getGuildBonuses(data.state.guild_id);
         }
 
         return data;

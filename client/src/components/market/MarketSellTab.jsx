@@ -18,6 +18,8 @@ const MarketSellTab = ({
     const [sellSelectedClass, setSellSelectedClass] = useState('ALL');
     const [sellSelectedSortOrder, setSellSelectedSortOrder] = useState('NEWEST');
     const [sellSelectedCategory, setSellSelectedCategory] = useState('ALL');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     const totalSilver = gameState?.state?.currency?.silver || 0;
 
@@ -156,40 +158,462 @@ const MarketSellTab = ({
                         <option value="TIER_ASC">Tier: Low to High</option>
                     </select>
                 </div>
-
-                {/* Filter Buttons */}
-                <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px', width: '100%' }}>
-                    {[
-                        { id: 'ALL', label: 'All Items', icon: <ShoppingBag size={14} /> },
-                        { id: 'EQUIPMENT', label: 'Equipment', icon: <Shield size={14} /> },
-                        { id: 'RESOURCE', label: 'Resources', icon: <Package size={14} /> },
-                        { id: 'REFINED', label: 'Refined', icon: <Zap size={14} /> },
-                        { id: 'CONSUMABLE', label: 'Consumables', icon: <Apple size={14} /> }
-                    ].map(cat => (
-                        <button
-                            key={cat.id}
-                            onClick={() => setSellSelectedCategory(cat.id)}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                padding: '8px 12px',
-                                borderRadius: '8px',
-                                border: '1px solid',
-                                borderColor: sellSelectedCategory === cat.id ? 'var(--accent)' : 'var(--border)',
-                                whiteSpace: 'nowrap',
-                                fontSize: '0.8rem',
-                                fontWeight: '500',
-                                cursor: 'pointer',
-                                background: sellSelectedCategory === cat.id ? 'var(--accent-soft)' : 'var(--glass-bg)',
-                                color: sellSelectedCategory === cat.id ? 'var(--accent)' : 'var(--text-dim)'
-                            }}
-                        >
-                            {cat.icon} {cat.label}
-                        </button>
-                    ))}
-                </div>
             </div>
+
+            {/* Pagination Logic */}
+            {(() => {
+                const inventoryItemsTotal = Object.entries(gameState?.state?.inventory || {}).map(([id, entry]) => {
+                    const qty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
+                    const data = resolveItem(id);
+                    const mergedData = (entry && typeof entry === 'object') ? { ...data, ...entry } : data;
+                    return { id, qty, data: mergedData };
+                }).filter(item => {
+                    if (item.qty <= 0) return false;
+                    if (!item.data) return false;
+                    if (item.data.type === 'QUEST') return false;
+
+                    if (sellSearchQuery) {
+                        const searchLower = sellSearchQuery.toLowerCase();
+                        const itemName = item.data.name?.toLowerCase() || '';
+                        const itemId = item.id.toLowerCase();
+                        if (!itemName.includes(searchLower) && !itemId.includes(searchLower)) return false;
+                    }
+
+                    if (sellSelectedTier !== 'ALL' && item.data.tier !== parseInt(sellSelectedTier)) return false;
+
+                    const itemQuality = item.data.quality ?? 0;
+                    if (sellSelectedQuality !== 'ALL' && itemQuality !== parseInt(sellSelectedQuality)) return false;
+
+                    if (sellSelectedCategory !== 'ALL') {
+                        const type = item.data.type;
+                        if (sellSelectedCategory === 'EQUIPMENT') {
+                            if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'OFF_HAND', 'GLOVES', 'CAPE'].includes(type) && !type?.startsWith('TOOL')) return false;
+                        } else if (sellSelectedCategory === 'RESOURCE') {
+                            if (type !== 'RAW' && type !== 'RESOURCE') return false;
+                            const isRefined = item.id.includes('_BAR') || item.id.includes('_PLANK') || item.id.includes('_LEATHER') || item.id.includes('_CLOTH') || item.id.includes('_EXTRACT');
+                            if (isRefined) return false;
+                        } else if (sellSelectedCategory === 'REFINED') {
+                            if (type !== 'REFINED') {
+                                const isRefined = item.id.includes('_BAR') || item.id.includes('_PLANK') || item.id.includes('_LEATHER') || item.id.includes('_CLOTH') || item.id.includes('_EXTRACT');
+                                if (!isRefined) return false;
+                            }
+                        } else if (sellSelectedCategory === 'CONSUMABLE') {
+                            if (!['FOOD', 'POTION'].includes(type)) return false;
+                        }
+                    }
+
+                    if (sellSelectedClass !== 'ALL') {
+                        const requiredClass = getRequiredProficiencyGroup(item.id);
+                        if (requiredClass !== sellSelectedClass.toLowerCase()) return false;
+                    }
+
+                    return true;
+                });
+
+                inventoryItemsTotal.sort((a, b) => {
+                    if (sellSelectedSortOrder === 'TIER_DESC') return b.data.tier - a.data.tier;
+                    if (sellSelectedSortOrder === 'TIER_ASC') return a.data.tier - b.data.tier;
+                    return 0;
+                });
+
+                const totalPages = Math.ceil(inventoryItemsTotal.length / itemsPerPage);
+                const paginatedItems = inventoryItemsTotal.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+                return { paginatedItems, totalPages };
+            })().totalPages > 1 && (
+                <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center', 
+                    gap: '20px', 
+                    padding: '10px 0',
+                    borderTop: '1px solid var(--border)',
+                    marginBottom: '10px'
+                }}>
+                    <button
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                        style={{
+                            padding: '8px 16px',
+                            borderRadius: '8px',
+                            background: currentPage === 1 ? 'transparent' : 'var(--accent-soft)',
+                            color: currentPage === 1 ? 'var(--text-dim)' : 'var(--accent)',
+                            border: '1px solid',
+                            borderColor: currentPage === 1 ? 'var(--border)' : 'var(--accent)',
+                            cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                            fontWeight: 'bold',
+                            fontSize: '0.85rem'
+                        }}
+                    >
+                        Previous
+                    </button>
+                    
+                    <span style={{ color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: '500' }}>
+                        Page {currentPage} of {(() => {
+                            const inventoryItemsTotal = Object.entries(gameState?.state?.inventory || {}).map(([id, entry]) => {
+                                const qty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
+                                const data = resolveItem(id);
+                                const mergedData = (entry && typeof entry === 'object') ? { ...data, ...entry } : data;
+                                return { id, qty, data: mergedData };
+                            }).filter(item => {
+                                if (item.qty <= 0) return false;
+                                if (!item.data) return false;
+                                if (item.data.type === 'QUEST') return false;
+
+                                if (sellSearchQuery) {
+                                    const searchLower = sellSearchQuery.toLowerCase();
+                                    const itemName = item.data.name?.toLowerCase() || '';
+                                    const itemId = item.id.toLowerCase();
+                                    if (!itemName.includes(searchLower) && !itemId.includes(searchLower)) return false;
+                                }
+
+                                if (sellSelectedTier !== 'ALL' && item.data.tier !== parseInt(sellSelectedTier)) return false;
+
+                                const itemQuality = item.data.quality ?? 0;
+                                if (sellSelectedQuality !== 'ALL' && itemQuality !== parseInt(sellSelectedQuality)) return false;
+
+                                if (sellSelectedCategory !== 'ALL') {
+                                    const type = item.data.type;
+                                    if (sellSelectedCategory === 'EQUIPMENT') {
+                                        if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'OFF_HAND', 'GLOVES', 'CAPE'].includes(type) && !type?.startsWith('TOOL')) return false;
+                                    } else if (sellSelectedCategory === 'RESOURCE') {
+                                        if (type !== 'RAW' && type !== 'RESOURCE') return false;
+                                        const isRefined = item.id.includes('_BAR') || item.id.includes('_PLANK') || item.id.includes('_LEATHER') || item.id.includes('_CLOTH') || item.id.includes('_EXTRACT');
+                                        if (isRefined) return false;
+                                    } else if (sellSelectedCategory === 'REFINED') {
+                                        if (type !== 'REFINED') {
+                                            const isRefined = item.id.includes('_BAR') || item.id.includes('_PLANK') || item.id.includes('_LEATHER') || item.id.includes('_CLOTH') || item.id.includes('_EXTRACT');
+                                            if (!isRefined) return false;
+                                        }
+                                    } else if (sellSelectedCategory === 'CONSUMABLE') {
+                                        if (!['FOOD', 'POTION'].includes(type)) return false;
+                                    }
+                                }
+
+                                if (sellSelectedClass !== 'ALL') {
+                                    const requiredClass = getRequiredProficiencyGroup(item.id);
+                                    if (requiredClass !== sellSelectedClass.toLowerCase()) return false;
+                                }
+
+                                return true;
+                            });
+                            return Math.ceil(inventoryItemsTotal.length / itemsPerPage);
+                        })()}
+                    </span>
+
+                    <button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, (() => {
+                            const inventoryItemsTotal = Object.entries(gameState?.state?.inventory || {}).map(([id, entry]) => {
+                                const qty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
+                                const data = resolveItem(id);
+                                const mergedData = (entry && typeof entry === 'object') ? { ...data, ...entry } : data;
+                                return { id, qty, data: mergedData };
+                            }).filter(item => {
+                                if (item.qty <= 0) return false;
+                                if (!item.data) return false;
+                                if (item.data.type === 'QUEST') return false;
+
+                                if (sellSearchQuery) {
+                                    const searchLower = sellSearchQuery.toLowerCase();
+                                    const itemName = item.data.name?.toLowerCase() || '';
+                                    const itemId = item.id.toLowerCase();
+                                    if (!itemName.includes(searchLower) && !itemId.includes(searchLower)) return false;
+                                }
+
+                                if (sellSelectedTier !== 'ALL' && item.data.tier !== parseInt(sellSelectedTier)) return false;
+
+                                const itemQuality = item.data.quality ?? 0;
+                                if (sellSelectedQuality !== 'ALL' && itemQuality !== parseInt(sellSelectedQuality)) return false;
+
+                                if (sellSelectedCategory !== 'ALL') {
+                                    const type = item.data.type;
+                                    if (sellSelectedCategory === 'EQUIPMENT') {
+                                        if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'OFF_HAND', 'GLOVES', 'CAPE'].includes(type) && !type?.startsWith('TOOL')) return false;
+                                    } else if (sellSelectedCategory === 'RESOURCE') {
+                                        if (type !== 'RAW' && type !== 'RESOURCE') return false;
+                                        const isRefined = item.id.includes('_BAR') || item.id.includes('_PLANK') || item.id.includes('_LEATHER') || item.id.includes('_CLOTH') || item.id.includes('_EXTRACT');
+                                        if (isRefined) return false;
+                                    } else if (sellSelectedCategory === 'REFINED') {
+                                        if (type !== 'REFINED') {
+                                            const isRefined = item.id.includes('_BAR') || item.id.includes('_PLANK') || item.id.includes('_LEATHER') || item.id.includes('_CLOTH') || item.id.includes('_EXTRACT');
+                                            if (!isRefined) return false;
+                                        }
+                                    } else if (sellSelectedCategory === 'CONSUMABLE') {
+                                        if (!['FOOD', 'POTION'].includes(type)) return false;
+                                    }
+                                }
+
+                                if (sellSelectedClass !== 'ALL') {
+                                    const requiredClass = getRequiredProficiencyGroup(item.id);
+                                    if (requiredClass !== sellSelectedClass.toLowerCase()) return false;
+                                }
+
+                                return true;
+                            });
+                            return Math.ceil(inventoryItemsTotal.length / itemsPerPage);
+                        })()))}
+                        disabled={currentPage >= (() => {
+                            const inventoryItemsTotal = Object.entries(gameState?.state?.inventory || {}).map(([id, entry]) => {
+                                const qty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
+                                const data = resolveItem(id);
+                                const mergedData = (entry && typeof entry === 'object') ? { ...data, ...entry } : data;
+                                return { id, qty, data: mergedData };
+                            }).filter(item => {
+                                if (item.qty <= 0) return false;
+                                if (!item.data) return false;
+                                if (item.data.type === 'QUEST') return false;
+
+                                if (sellSearchQuery) {
+                                    const searchLower = sellSearchQuery.toLowerCase();
+                                    const itemName = item.data.name?.toLowerCase() || '';
+                                    const itemId = item.id.toLowerCase();
+                                    if (!itemName.includes(searchLower) && !itemId.includes(searchLower)) return false;
+                                }
+
+                                if (sellSelectedTier !== 'ALL' && item.data.tier !== parseInt(sellSelectedTier)) return false;
+
+                                const itemQuality = item.data.quality ?? 0;
+                                if (sellSelectedQuality !== 'ALL' && itemQuality !== parseInt(sellSelectedQuality)) return false;
+
+                                if (sellSelectedCategory !== 'ALL') {
+                                    const type = item.data.type;
+                                    if (sellSelectedCategory === 'EQUIPMENT') {
+                                        if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'OFF_HAND', 'GLOVES', 'CAPE'].includes(type) && !type?.startsWith('TOOL')) return false;
+                                    } else if (sellSelectedCategory === 'RESOURCE') {
+                                        if (type !== 'RAW' && type !== 'RESOURCE') return false;
+                                        const isRefined = item.id.includes('_BAR') || item.id.includes('_PLANK') || item.id.includes('_LEATHER') || item.id.includes('_CLOTH') || item.id.includes('_EXTRACT');
+                                        if (isRefined) return false;
+                                    } else if (sellSelectedCategory === 'REFINED') {
+                                        if (type !== 'REFINED') {
+                                            const isRefined = item.id.includes('_BAR') || item.id.includes('_PLANK') || item.id.includes('_LEATHER') || item.id.includes('_CLOTH') || item.id.includes('_EXTRACT');
+                                            if (!isRefined) return false;
+                                        }
+                                    } else if (sellSelectedCategory === 'CONSUMABLE') {
+                                        if (!['FOOD', 'POTION'].includes(type)) return false;
+                                    }
+                                }
+
+                                if (sellSelectedClass !== 'ALL') {
+                                    const requiredClass = getRequiredProficiencyGroup(item.id);
+                                    if (requiredClass !== sellSelectedClass.toLowerCase()) return false;
+                                }
+
+                                return true;
+                            });
+                            return Math.ceil(inventoryItemsTotal.length / itemsPerPage);
+                        })()}
+                        style={{
+                            padding: '8px 16px',
+                            borderRadius: '8px',
+                            background: currentPage >= (() => {
+                                const inventoryItemsTotal = Object.entries(gameState?.state?.inventory || {}).map(([id, entry]) => {
+                                    const qty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
+                                    const data = resolveItem(id);
+                                    const mergedData = (entry && typeof entry === 'object') ? { ...data, ...entry } : data;
+                                    return { id, qty, data: mergedData };
+                                }).filter(item => {
+                                    if (item.qty <= 0) return false;
+                                    if (!item.data) return false;
+                                    if (item.data.type === 'QUEST') return false;
+
+                                    if (sellSearchQuery) {
+                                        const searchLower = sellSearchQuery.toLowerCase();
+                                        const itemName = item.data.name?.toLowerCase() || '';
+                                        const itemId = item.id.toLowerCase();
+                                        if (!itemName.includes(searchLower) && !itemId.includes(searchLower)) return false;
+                                    }
+
+                                    if (sellSelectedTier !== 'ALL' && item.data.tier !== parseInt(sellSelectedTier)) return false;
+
+                                    const itemQuality = item.data.quality ?? 0;
+                                    if (sellSelectedQuality !== 'ALL' && itemQuality !== parseInt(sellSelectedQuality)) return false;
+
+                                    if (sellSelectedCategory !== 'ALL') {
+                                        const type = item.data.type;
+                                        if (sellSelectedCategory === 'EQUIPMENT') {
+                                            if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'OFF_HAND', 'GLOVES', 'CAPE'].includes(type) && !type?.startsWith('TOOL')) return false;
+                                        } else if (sellSelectedCategory === 'RESOURCE') {
+                                            if (type !== 'RAW' && type !== 'RESOURCE') return false;
+                                            const isRefined = item.id.includes('_BAR') || item.id.includes('_PLANK') || item.id.includes('_LEATHER') || item.id.includes('_CLOTH') || item.id.includes('_EXTRACT');
+                                            if (isRefined) return false;
+                                        } else if (sellSelectedCategory === 'REFINED') {
+                                            if (type !== 'REFINED') {
+                                                const isRefined = item.id.includes('_BAR') || item.id.includes('_PLANK') || item.id.includes('_LEATHER') || item.id.includes('_CLOTH') || item.id.includes('_EXTRACT');
+                                                if (!isRefined) return false;
+                                            }
+                                        } else if (sellSelectedCategory === 'CONSUMABLE') {
+                                            if (!['FOOD', 'POTION'].includes(type)) return false;
+                                        }
+                                    }
+
+                                    if (sellSelectedClass !== 'ALL') {
+                                        const requiredClass = getRequiredProficiencyGroup(item.id);
+                                        if (requiredClass !== sellSelectedClass.toLowerCase()) return false;
+                                    }
+
+                                    return true;
+                                });
+                                return Math.ceil(inventoryItemsTotal.length / itemsPerPage);
+                            })() ? 'transparent' : 'var(--accent-soft)',
+                            color: currentPage >= (() => {
+                                const inventoryItemsTotal = Object.entries(gameState?.state?.inventory || {}).map(([id, entry]) => {
+                                    const qty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
+                                    const data = resolveItem(id);
+                                    const mergedData = (entry && typeof entry === 'object') ? { ...data, ...entry } : data;
+                                    return { id, qty, data: mergedData };
+                                }).filter(item => {
+                                    if (item.qty <= 0) return false;
+                                    if (!item.data) return false;
+                                    if (item.data.type === 'QUEST') return false;
+
+                                    if (sellSearchQuery) {
+                                        const searchLower = sellSearchQuery.toLowerCase();
+                                        const itemName = item.data.name?.toLowerCase() || '';
+                                        const itemId = item.id.toLowerCase();
+                                        if (!itemName.includes(searchLower) && !itemId.includes(searchLower)) return false;
+                                    }
+
+                                    if (sellSelectedTier !== 'ALL' && item.data.tier !== parseInt(sellSelectedTier)) return false;
+
+                                    const itemQuality = item.data.quality ?? 0;
+                                    if (sellSelectedQuality !== 'ALL' && itemQuality !== parseInt(sellSelectedQuality)) return false;
+
+                                    if (sellSelectedCategory !== 'ALL') {
+                                        const type = item.data.type;
+                                        if (sellSelectedCategory === 'EQUIPMENT') {
+                                            if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'OFF_HAND', 'GLOVES', 'CAPE'].includes(type) && !type?.startsWith('TOOL')) return false;
+                                        } else if (sellSelectedCategory === 'RESOURCE') {
+                                            if (type !== 'RAW' && type !== 'RESOURCE') return false;
+                                            const isRefined = item.id.includes('_BAR') || item.id.includes('_PLANK') || item.id.includes('_LEATHER') || item.id.includes('_CLOTH') || item.id.includes('_EXTRACT');
+                                            if (isRefined) return false;
+                                        } else if (sellSelectedCategory === 'REFINED') {
+                                            if (type !== 'REFINED') {
+                                                const isRefined = item.id.includes('_BAR') || item.id.includes('_PLANK') || item.id.includes('_LEATHER') || item.id.includes('_CLOTH') || item.id.includes('_EXTRACT');
+                                                if (!isRefined) return false;
+                                            }
+                                        } else if (sellSelectedCategory === 'CONSUMABLE') {
+                                            if (!['FOOD', 'POTION'].includes(type)) return false;
+                                        }
+                                    }
+
+                                    if (sellSelectedClass !== 'ALL') {
+                                        const requiredClass = getRequiredProficiencyGroup(item.id);
+                                        if (requiredClass !== sellSelectedClass.toLowerCase()) return false;
+                                    }
+
+                                    return true;
+                                });
+                                return Math.ceil(inventoryItemsTotal.length / itemsPerPage);
+                            })() ? 'var(--text-dim)' : 'var(--accent)',
+                            border: '1px solid',
+                            borderColor: currentPage >= (() => {
+                                const inventoryItemsTotal = Object.entries(gameState?.state?.inventory || {}).map(([id, entry]) => {
+                                    const qty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
+                                    const data = resolveItem(id);
+                                    const mergedData = (entry && typeof entry === 'object') ? { ...data, ...entry } : data;
+                                    return { id, qty, data: mergedData };
+                                }).filter(item => {
+                                    if (item.qty <= 0) return false;
+                                    if (!item.data) return false;
+                                    if (item.data.type === 'QUEST') return false;
+
+                                    if (sellSearchQuery) {
+                                        const searchLower = sellSearchQuery.toLowerCase();
+                                        const itemName = item.data.name?.toLowerCase() || '';
+                                        const itemId = item.id.toLowerCase();
+                                        if (!itemName.includes(searchLower) && !itemId.includes(searchLower)) return false;
+                                    }
+
+                                    if (sellSelectedTier !== 'ALL' && item.data.tier !== parseInt(sellSelectedTier)) return false;
+
+                                    const itemQuality = item.data.quality ?? 0;
+                                    if (sellSelectedQuality !== 'ALL' && itemQuality !== parseInt(sellSelectedQuality)) return false;
+
+                                    if (sellSelectedCategory !== 'ALL') {
+                                        const type = item.data.type;
+                                        if (sellSelectedCategory === 'EQUIPMENT') {
+                                            if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'OFF_HAND', 'GLOVES', 'CAPE'].includes(type) && !type?.startsWith('TOOL')) return false;
+                                        } else if (sellSelectedCategory === 'RESOURCE') {
+                                            if (type !== 'RAW' && type !== 'RESOURCE') return false;
+                                            const isRefined = item.id.includes('_BAR') || item.id.includes('_PLANK') || item.id.includes('_LEATHER') || item.id.includes('_CLOTH') || item.id.includes('_EXTRACT');
+                                            if (isRefined) return false;
+                                        } else if (sellSelectedCategory === 'REFINED') {
+                                            if (type !== 'REFINED') {
+                                                const isRefined = item.id.includes('_BAR') || item.id.includes('_PLANK') || item.id.includes('_LEATHER') || item.id.includes('_CLOTH') || item.id.includes('_EXTRACT');
+                                                if (!isRefined) return false;
+                                            }
+                                        } else if (sellSelectedCategory === 'CONSUMABLE') {
+                                            if (!['FOOD', 'POTION'].includes(type)) return false;
+                                        }
+                                    }
+
+                                    if (sellSelectedClass !== 'ALL') {
+                                        const requiredClass = getRequiredProficiencyGroup(item.id);
+                                        if (requiredClass !== sellSelectedClass.toLowerCase()) return false;
+                                    }
+
+                                    return true;
+                                });
+                                return Math.ceil(inventoryItemsTotal.length / itemsPerPage);
+                            })() ? 'var(--border)' : 'var(--accent)',
+                            cursor: currentPage >= (() => {
+                                const inventoryItemsTotal = Object.entries(gameState?.state?.inventory || {}).map(([id, entry]) => {
+                                    const qty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
+                                    const data = resolveItem(id);
+                                    const mergedData = (entry && typeof entry === 'object') ? { ...data, ...entry } : data;
+                                    return { id, qty, data: mergedData };
+                                }).filter(item => {
+                                    if (item.qty <= 0) return false;
+                                    if (!item.data) return false;
+                                    if (item.data.type === 'QUEST') return false;
+
+                                    if (sellSearchQuery) {
+                                        const searchLower = sellSearchQuery.toLowerCase();
+                                        const itemName = item.data.name?.toLowerCase() || '';
+                                        const itemId = item.id.toLowerCase();
+                                        if (!itemName.includes(searchLower) && !itemId.includes(searchLower)) return false;
+                                    }
+
+                                    if (sellSelectedTier !== 'ALL' && item.data.tier !== parseInt(sellSelectedTier)) return false;
+
+                                    const itemQuality = item.data.quality ?? 0;
+                                    if (sellSelectedQuality !== 'ALL' && itemQuality !== parseInt(sellSelectedQuality)) return false;
+
+                                    if (sellSelectedCategory !== 'ALL') {
+                                        const type = item.data.type;
+                                        if (sellSelectedCategory === 'EQUIPMENT') {
+                                            if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'OFF_HAND', 'GLOVES', 'CAPE'].includes(type) && !type?.startsWith('TOOL')) return false;
+                                        } else if (sellSelectedCategory === 'RESOURCE') {
+                                            if (type !== 'RAW' && type !== 'RESOURCE') return false;
+                                            const isRefined = item.id.includes('_BAR') || item.id.includes('_PLANK') || item.id.includes('_LEATHER') || item.id.includes('_CLOTH') || item.id.includes('_EXTRACT');
+                                            if (isRefined) return false;
+                                        } else if (sellSelectedCategory === 'REFINED') {
+                                            if (type !== 'REFINED') {
+                                                const isRefined = item.id.includes('_BAR') || item.id.includes('_PLANK') || item.id.includes('_LEATHER') || item.id.includes('_CLOTH') || item.id.includes('_EXTRACT');
+                                                if (!isRefined) return false;
+                                            }
+                                        } else if (sellSelectedCategory === 'CONSUMABLE') {
+                                            if (!['FOOD', 'POTION'].includes(type)) return false;
+                                        }
+                                    }
+
+                                    if (sellSelectedClass !== 'ALL') {
+                                        const requiredClass = getRequiredProficiencyGroup(item.id);
+                                        if (requiredClass !== sellSelectedClass.toLowerCase()) return false;
+                                    }
+
+                                    return true;
+                                });
+                                return Math.ceil(inventoryItemsTotal.length / itemsPerPage);
+                            })() ? 'not-allowed' : 'pointer',
+                            fontWeight: 'bold',
+                            fontSize: '0.85rem'
+                        }}
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
 
             <div className="scroll-container" style={{ flex: 1, paddingRight: '5px' }}>
                 <div style={{
@@ -248,14 +672,12 @@ const MarketSellTab = ({
                         });
 
                         inventoryItems.sort((a, b) => {
-                            if (sellSelectedSortOrder === 'NEWEST') return 0;
-                            if (sellSelectedSortOrder === 'OLDEST') return 0;
                             if (sellSelectedSortOrder === 'TIER_DESC') return b.data.tier - a.data.tier;
                             if (sellSelectedSortOrder === 'TIER_ASC') return a.data.tier - b.data.tier;
                             return 0;
                         });
 
-                        return inventoryItems.map(({ id, qty, data }) => {
+                        return inventoryItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(({ id, qty, data }) => {
                             let specificBorderColor = 'var(--border)';
                             if (data.rarityColor) {
                                 specificBorderColor = data.rarityColor;

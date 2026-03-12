@@ -48,6 +48,10 @@ export const useAppStore = create((set, get) => ({
             console.error('[SOCKET] Connection error:', err.message);
         });
 
+        newSocket.on('name_availability_result', (result) => {
+            set({ nameAvailability: result });
+        });
+
         set({ socket: newSocket });
     },
     disconnectSocket: () => {
@@ -57,6 +61,12 @@ export const useAppStore = create((set, get) => ({
     },
 
     gameState: null,
+    nameAvailability: null,
+    setNameAvailability: (nameAvailability) => set({ nameAvailability }),
+    checkNameAvailability: (name) => {
+        const { socket } = get();
+        if (socket) socket.emit('check_name_availability', { name });
+    },
     selectedCharacter: localStorage.getItem('selectedCharacterId'),
     globalStats: { total_market_tax: 0 },
     setGlobalStats: (globalStats) => set({ globalStats }),
@@ -430,12 +440,16 @@ export const useAppStore = create((set, get) => ({
       if (socket) socket.emit('equip_item', { itemId, quantity });
     },
     handleUseItem: (itemId, quantity = 1) => {
-      const { socket, isPreviewActive, onPreviewActionBlocked, setActiveTab, setActiveCategory, activeCategory } = get();
+      const { socket, isPreviewActive, onPreviewActionBlocked, setActiveTab, setActiveCategory, activeCategory, setModal } = get();
       if (isPreviewActive) {
         onPreviewActionBlocked();
         return;
       }
       if (socket) socket.emit('use_item', { itemId, quantity });
+
+      if (itemId === 'NAME_CHANGE_TOKEN') {
+          setModal('rename', true);
+      }
 
       // Client-side redirection for Shards
       if (itemId?.includes('_SHARD')) {

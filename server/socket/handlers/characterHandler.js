@@ -96,6 +96,30 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
     await gameManager.acknowledgeOfflineReport(socket.data.characterId);
   });
 
+  socket.on("check_name_availability", async ({ name }) => {
+    try {
+      if (!name || name.trim().length < 3) {
+        return socket.emit("name_availability_result", { available: false, error: "Name too short" });
+      }
+
+      const { data, error } = await supabase
+        .from("characters")
+        .select("id")
+        .eq("name", name.trim())
+        .maybeSingle();
+
+      if (error) throw error;
+
+      socket.emit("name_availability_result", { 
+        available: !data, 
+        name: name.trim() 
+      });
+    } catch (err) {
+      console.error("Check Name Error:", err);
+      socket.emit("error", { message: "Error checking name availability" });
+    }
+  });
+
   socket.on("change_name", async ({ newName }) => {
     try {
       if (!socket.data.characterId || socket.data.characterId === "undefined")
@@ -134,6 +158,20 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
 
         char.name = safeName;
         char.state.pendingNameChange = false;
+
+        // Perform denormalized updates in background/parallel
+        try {
+          // Update History Tables
+          await Promise.all([
+            supabase.from("market_history").update({ seller_name: safeName }).eq("seller_id", socket.user.id),
+            supabase.from("market_history").update({ buyer_name: safeName }).eq("buyer_id", socket.user.id),
+            supabase.from("trade_history").update({ sender_name: safeName }).eq("sender_id", socket.user.id),
+            supabase.from("trade_history").update({ receiver_name: safeName }).eq("receiver_id", socket.user.id),
+            supabase.from("market_buy_orders").update({ buyer_name: safeName }).eq("buyer_id", socket.user.id)
+          ]);
+        } catch (updateErr) {
+          console.error("Denormalized name update error (non-fatal):", updateErr);
+        }
 
         await gameManager.saveState(char.id, char.state);
 

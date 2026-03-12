@@ -9,6 +9,11 @@ const MarketListingsTab = ({
     maxListings,
     onCancelItem
 }) => {
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+    const totalPages = Math.ceil(myOrders.length / itemsPerPage);
+    const paginatedOrders = myOrders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <div style={{
@@ -39,8 +44,9 @@ const MarketListingsTab = ({
                         <p>You have no active listings.</p>
                     </div>
                 ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
-                        {myOrders.map(l => (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
+                            {paginatedOrders.map(l => (
                             <div key={`my-${l.id}`} style={{
                                 background: 'var(--glass-bg)',
                                 border: '1px solid var(--border)',
@@ -152,9 +158,63 @@ const MarketListingsTab = ({
                             </div>
                         ))}
                     </div>
-                )}
-            </div>
+
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                        <div style={{ 
+                            display: 'flex', 
+                            justifyContent: 'center', 
+                            alignItems: 'center', 
+                            gap: '20px', 
+                            padding: '10px 0',
+                            borderTop: '1px solid var(--border)',
+                            marginTop: '10px'
+                        }}>
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                disabled={currentPage === 1}
+                                style={{
+                                    padding: '8px 16px',
+                                    borderRadius: '8px',
+                                    background: currentPage === 1 ? 'transparent' : 'var(--accent-soft)',
+                                    color: currentPage === 1 ? 'var(--text-dim)' : 'var(--accent)',
+                                    border: '1px solid',
+                                    borderColor: currentPage === 1 ? 'var(--border)' : 'var(--accent)',
+                                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.85rem'
+                                }}
+                            >
+                                Previous
+                            </button>
+                            
+                            <span style={{ color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: '500' }}>
+                                Page {currentPage} of {totalPages}
+                            </span>
+
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                disabled={currentPage === totalPages}
+                                style={{
+                                    padding: '8px 16px',
+                                    borderRadius: '8px',
+                                    background: currentPage === totalPages ? 'transparent' : 'var(--accent-soft)',
+                                    color: currentPage === totalPages ? 'var(--text-dim)' : 'var(--accent)',
+                                    border: '1px solid',
+                                    borderColor: currentPage === totalPages ? 'var(--border)' : 'var(--accent)',
+                                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.85rem'
+                                }}
+                            >
+                                Next
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
+    </div>
     );
 };
 

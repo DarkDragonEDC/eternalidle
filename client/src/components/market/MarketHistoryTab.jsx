@@ -12,6 +12,13 @@ const MarketHistoryTab = ({
     setHistorySubTab,
     onInspect
 }) => {
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+    // Reset page on sub-tab change
+    React.useEffect(() => {
+        setCurrentPage(1);
+    }, [historySubTab]);
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {/* Sub-tabs: Global / My History */}
@@ -79,7 +86,7 @@ const MarketHistoryTab = ({
                         </div>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            {marketHistory.map((tx, idx) => {
+                            {marketHistory.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((tx, idx) => {
                                 const itemInfo = tx.item_data || resolveItem(tx.item_id, tx.quality) || {};
                                 const tierColor = getTierColor(itemInfo.tier || 1);
                                 const timeAgo = getTimeAgo(tx.created_at);
@@ -178,7 +185,7 @@ const MarketHistoryTab = ({
                         </div>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            {myMarketHistory.map((tx, idx) => {
+                            {myMarketHistory.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((tx, idx) => {
                                 const itemInfo = tx.item_data || resolveItem(tx.item_id, tx.quality) || {};
                                 const tierColor = getTierColor(itemInfo.tier || 1);
                                 const timeAgo = getTimeAgo(tx.created_at);
@@ -268,6 +275,65 @@ const MarketHistoryTab = ({
                     )}
                 </>
             )}
+
+            {/* Pagination Controls */}
+            {(() => {
+                const currentList = historySubTab === 'GLOBAL' ? marketHistory : myMarketHistory;
+                const totalPages = Math.ceil(currentList.length / itemsPerPage);
+                if (totalPages <= 1 || isLoadingHistory) return null;
+
+                return (
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        gap: '20px', 
+                        padding: '10px 0',
+                        borderTop: '1px solid var(--border)',
+                        marginTop: '10px'
+                    }}>
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            disabled={currentPage === 1}
+                            style={{
+                                padding: '8px 16px',
+                                borderRadius: '8px',
+                                background: currentPage === 1 ? 'transparent' : 'var(--accent-soft)',
+                                color: currentPage === 1 ? 'var(--text-dim)' : 'var(--accent)',
+                                border: '1px solid',
+                                borderColor: currentPage === 1 ? 'var(--border)' : 'var(--accent)',
+                                cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                                fontWeight: 'bold',
+                                fontSize: '0.85rem'
+                            }}
+                        >
+                            Previous
+                        </button>
+                        
+                        <span style={{ color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: '500' }}>
+                            Page {currentPage} of {totalPages}
+                        </span>
+
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                            disabled={currentPage === totalPages}
+                            style={{
+                                padding: '8px 16px',
+                                borderRadius: '8px',
+                                background: currentPage === totalPages ? 'transparent' : 'var(--accent-soft)',
+                                color: currentPage === totalPages ? 'var(--text-dim)' : 'var(--accent)',
+                                border: '1px solid',
+                                borderColor: currentPage === totalPages ? 'var(--border)' : 'var(--accent)',
+                                cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                                fontWeight: 'bold',
+                                fontSize: '0.85rem'
+                            }}
+                        >
+                            Next
+                        </button>
+                    </div>
+                );
+            })()}
         </div>
     );
 };

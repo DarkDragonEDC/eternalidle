@@ -24,7 +24,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
 
     // Filtering and Sorting State
     const [search, setSearch] = useState('');
-    const [categoryFilter, setCategoryFilter] = useState('GATHERING');
+    const [categoryFilter, setCategoryFilter] = useState('ALL');
     const [activityFilter, setActivityFilter] = useState('ALL');
     const [effectFilter, setEffectFilter] = useState('ALL');
     const [tierFilter, setTierFilter] = useState('ALL');

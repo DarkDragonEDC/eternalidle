@@ -12,6 +12,10 @@ const OrbShop = ({ socket, gameState, onClose, isPreviewActive, onPreviewActionB
 
     const [purchasing, setPurchasing] = useState(null);
     const [quantityModal, setQuantityModal] = useState(null); // { item, quantity }
+    const [showMSInfo, setShowMSInfo] = useState(false);
+
+    const orbs = gameState?.state?.orbs || 0;
+    const isBR = navigator.language === 'pt-BR' || navigator.language === 'pt';
 
     useEffect(() => {
         if (socket) {

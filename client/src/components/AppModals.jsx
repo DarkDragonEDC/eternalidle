@@ -86,7 +86,7 @@ export const AppModals = ({
                     item={modalItem}
                     type={modalType}
                     gameState={displayedGameState}
-                    onStart={useAppStore.getState().startActivity}
+                    onStart={startActivity}
                     onNavigate={handleNavigate}
                     onSearchInMarket={handleSearchInMarket}
                 />

@@ -2463,7 +2463,8 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                         statType={breakdownModal.type}
                         value={typeof breakdownModal.value === 'object' ? breakdownModal.value.total : breakdownModal.value}
                         statId={typeof breakdownModal.value === 'object' ? breakdownModal.value.id : null}
-                        stats={{ ...stats, skills, guild_bonuses: gameState?.guild_bonuses }} // Pass skills and guild_bonuses for efficiency breakdown
+                        stats={{ ...stats, skills }} 
+                        guildBonuses={gameState?.guild_bonuses}
                         equipment={gameState?.state?.equipment || {}}
                         membership={gameState?.state?.membership}
                         onClose={() => setBreakdownModal(null)}

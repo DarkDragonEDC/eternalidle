@@ -216,12 +216,15 @@ export class ActivityManager {
         const baseXp = item.xp || 5;
 
         // Multipliers (Now Additive)
-        const yieldBonus = (stats.globals?.xpYield || 0); // e.g. 15 for 15%
-        const specificBonus = (stats.xpBonus?.GATHERING || 0);
-        const runeSkillBonus = (actKey ? (stats.xpBonus?.[actKey] || 0) : 0);
+        // stats.globals.xpYield: Global XP buffs/membership
+        // stats.xpBonus.GATHERING: Specific category bonus (e.g. from Guild Station)
+        // stats.xpBonus[actKey]: Activity-specific bonus (e.g. from Runes or specific Guild upgrades)
+        const yieldBonus = (stats.globals?.xpYield || 0); 
+        const categoryBonus = (stats.xpBonus?.GATHERING || 0);
+        const specificBonus = (actKey ? (stats.xpBonus?.[actKey] || 0) : 0);
 
-        // FORMULA: Base * (1 + (Global + Specific + Rune)/100)
-        let totalBonusPc = yieldBonus + specificBonus + runeSkillBonus;
+        // FORMULA: Base * (1 + (Global + Category + Specific)/100)
+        let totalBonusPc = yieldBonus + categoryBonus + specificBonus;
         let xpAmount = baseXp * (1 + totalBonusPc / 100);
 
         if (xpAmount > MAX_ACTIVITY_XP) xpAmount = MAX_ACTIVITY_XP;
@@ -308,11 +311,11 @@ export class ActivityManager {
 
         // Multipliers (Now Additive)
         const yieldBonus = (stats.globals?.xpYield || 0);
-        const specificBonus = (stats.xpBonus?.REFINING || 0);
-        const runeSkillBonus = (actKey ? (stats.xpBonus?.[actKey] || 0) : 0);
+        const categoryBonus = (stats.xpBonus?.REFINING || 0);
+        const specificBonus = (actKey ? (stats.xpBonus?.[actKey] || 0) : 0);
 
-        // FORMULA: Base * (1 + (Global + Specific + Rune)/100)
-        let totalBonusPc = yieldBonus + specificBonus + runeSkillBonus;
+        // FORMULA: Base * (1 + (Global + Category + Specific)/100)
+        let totalBonusPc = yieldBonus + categoryBonus + specificBonus;
         let xpAmount = baseXp * (1 + totalBonusPc / 100);
 
 
@@ -423,11 +426,11 @@ export class ActivityManager {
 
         // Multipliers (Now Additive)
         const yieldBonus = (stats.globals?.xpYield || 0);
-        const specificBonus = (stats.xpBonus?.CRAFTING || 0);
-        const runeSkillBonus = (actKey ? (stats.xpBonus?.[actKey] || 0) : 0);
+        const categoryBonus = (stats.xpBonus?.CRAFTING || 0);
+        const specificBonus = (actKey ? (stats.xpBonus?.[actKey] || 0) : 0);
 
-        // FORMULA: Base * (1 + (Global + Specific + Rune)/100)
-        let totalBonusPc = yieldBonus + specificBonus + runeSkillBonus;
+        // FORMULA: Base * (1 + (Global + Category + Specific)/100)
+        let totalBonusPc = yieldBonus + categoryBonus + specificBonus;
         let xpAmount = baseXp * (1 + totalBonusPc / 100);
 
         if (xpAmount > MAX_ACTIVITY_XP) xpAmount = MAX_ACTIVITY_XP;

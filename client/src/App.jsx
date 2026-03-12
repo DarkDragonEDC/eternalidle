@@ -72,7 +72,10 @@ function App() {
         isWorldBossFight, setIsWorldBossFight,
         connectSocket, disconnectSocket,
         settings, updateSettings,
-        previewThemeId, setPreviewThemeId
+        previewThemeId, setPreviewThemeId,
+        tradeInvites, activeTrade, canSpin,
+        isPreviewActive, onPreviewActionBlocked,
+        startActivity
     } = useAppStore();
 
     const clockOffset = useRef(0);
@@ -133,7 +136,7 @@ function App() {
     }, [socket]);
 
     const handleStartWorldBoss = useCallback(() => {
-        if (useAppStore.getState().isPreviewActive) {
+        if (isPreviewActive) {
             setModal('confirm', {
                 message: "Preview Mode is active! World Boss challenges are disabled.",
                 onConfirm: () => setModal('confirm', null)
@@ -141,7 +144,7 @@ function App() {
             return;
         }
         if (socket) socket.emit('start_world_boss_fight');
-    }, [socket, setModal]);
+    }, [socket, setModal, isPreviewActive]);
 
 
     // Cleanup Effect
@@ -236,9 +239,9 @@ function App() {
                     onClose={() => setSidebarOpen(false)}
                     onSwitchCharacter={handleSwitchCharacter}
                     socket={socket}
-                    canSpin={useAppStore.getState().canSpin}
+                    canSpin={canSpin}
                     onOpenDailySpin={() => setModal('dailySpin', true)}
-                    hasActiveTrade={useAppStore.getState().tradeInvites?.length > 0 || !!useAppStore.getState().activeTrade}
+                    hasActiveTrade={tradeInvites?.length > 0 || !!activeTrade}
                     isAnonymous={session?.user?.is_anonymous}
                     onShowGuestModal={() => setModal('guest', true)}
                     onTutorialComplete={handleTutorialStepComplete}
@@ -249,8 +252,8 @@ function App() {
                 gameState={displayedGameState}
                 activeTab={activeTab} setActiveTab={handleSetActiveTab}
                 onNavigate={handleNavigate}
-                canSpin={useAppStore.getState().canSpin}
-                hasActiveTrade={useAppStore.getState().tradeInvites?.length > 0 || !!useAppStore.getState().activeTrade}
+                canSpin={canSpin}
+                hasActiveTrade={tradeInvites?.length > 0 || !!activeTrade}
                 isAnonymous={session?.user?.is_anonymous}
                 onShowGuestModal={() => setModal('guest', true)}
                 onTutorialComplete={handleTutorialStepComplete}

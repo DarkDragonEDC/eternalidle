@@ -756,7 +756,7 @@ const InspectModal = React.memo(({ data, theme: propTheme, onClose, onItemClick,
                         <StatBreakdownModal
                             statType={breakdownModal.type}
                             value={breakdownModal.value}
-                            stats={stats}
+                            stats={{ ...stats, guild_bonuses: data.guild_bonuses }}
                             equipment={equipment}
                             membership={data.membership}
                             onClose={() => setBreakdownModal(null)}

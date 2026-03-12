@@ -21,13 +21,21 @@ const MarketBrowseTab = ({
     const [selectedClass, setSelectedClass] = useState('ALL');
     const [selectedSortOrder, setSelectedSortOrder] = useState('PRICE_ASC');
     const [selectedCategory, setSelectedCategory] = useState('ALL');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     useEffect(() => {
         if (initialSearch) {
             setSearchQuery(initialSearch);
             setSelectedCategory('ALL');
+            setCurrentPage(1);
         }
     }, [initialSearch]);
+
+    // Reset page on filter changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, selectedTier, selectedQuality, selectedClass, selectedSortOrder, selectedCategory]);
 
     const isOwnListing = (l) => {
         const sellerId = l.seller_character_id || l.item_data?.seller_character_id;
@@ -127,6 +135,13 @@ const MarketBrowseTab = ({
     } else if (selectedSortOrder === 'NEWEST') {
         activeBuyListings.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     }
+
+    // Pagination Logic
+    const totalPages = Math.ceil(activeBuyListings.length / itemsPerPage);
+    const paginatedListings = activeBuyListings.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', height: '100%' }}>
@@ -279,8 +294,9 @@ const MarketBrowseTab = ({
                         <p>No listings found matching your criteria.</p>
                     </div>
                 ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
-                        {activeBuyListings.map(l => (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
+                            {paginatedListings.map(l => (
                             <div key={`buy-${l.id}`} style={{
                                 background: 'var(--glass-bg)',
                                 border: '1px solid var(--border)',
@@ -444,9 +460,63 @@ const MarketBrowseTab = ({
                             </div>
                         ))}
                     </div>
-                )}
-            </div>
+
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                        <div style={{ 
+                            display: 'flex', 
+                            justifyContent: 'center', 
+                            alignItems: 'center', 
+                            gap: '20px', 
+                            padding: '10px 0',
+                            borderTop: '1px solid var(--border)',
+                            marginTop: '10px'
+                        }}>
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                disabled={currentPage === 1}
+                                style={{
+                                    padding: '8px 16px',
+                                    borderRadius: '8px',
+                                    background: currentPage === 1 ? 'transparent' : 'var(--accent-soft)',
+                                    color: currentPage === 1 ? 'var(--text-dim)' : 'var(--accent)',
+                                    border: '1px solid',
+                                    borderColor: currentPage === 1 ? 'var(--border)' : 'var(--accent)',
+                                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.85rem'
+                                }}
+                            >
+                                Previous
+                            </button>
+                            
+                            <span style={{ color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: '500' }}>
+                                Page {currentPage} of {totalPages}
+                            </span>
+
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                disabled={currentPage === totalPages}
+                                style={{
+                                    padding: '8px 16px',
+                                    borderRadius: '8px',
+                                    background: currentPage === totalPages ? 'transparent' : 'var(--accent-soft)',
+                                    color: currentPage === totalPages ? 'var(--text-dim)' : 'var(--accent)',
+                                    border: '1px solid',
+                                    borderColor: currentPage === totalPages ? 'var(--border)' : 'var(--accent)',
+                                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.85rem'
+                                }}
+                            >
+                                Next
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
+    </div>
     );
 };
 

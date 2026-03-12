@@ -29,13 +29,21 @@ const MarketBuyOrdersTab = ({
     createBuyOrderModal
 }) => {
     const [buyOrdersSubTab, setBuyOrdersSubTab] = useState('BROWSE'); // BROWSE, MY_ORDERS
+
     const [buyOrdersSearchQuery, setBuyOrdersSearchQuery] = useState('');
     const [buyOrdersSelectedTier, setBuyOrdersSelectedTier] = useState('ALL');
     const [buyOrdersSelectedQuality, setBuyOrdersSelectedQuality] = useState('ALL');
     const [buyOrdersSelectedClass, setBuyOrdersSelectedClass] = useState('ALL');
     const [buyOrdersSelectedCategory, setBuyOrdersSelectedCategory] = useState('ALL');
-    const [buyOrdersSelectedSortOrder, setBuyOrdersSelectedSortOrder] = useState('NEWEST');
+    const [buyOrdersSelectedSortOrder, setBuyOrdersSelectedSortOrder] = useState('PRICE_DESC');
     const [buyOrdersFilterInventory, setBuyOrdersFilterInventory] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+    // Reset page on sub-tab or filter changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [buyOrdersSubTab, buyOrdersSearchQuery, buyOrdersSelectedTier, buyOrdersSelectedQuality, buyOrdersSelectedClass, buyOrdersSelectedCategory, buyOrdersSelectedSortOrder, buyOrdersFilterInventory]);
 
     const isMyOrder = (o) => {
         if (!o || !gameState) return false;
@@ -580,7 +588,7 @@ const MarketBuyOrdersTab = ({
                                 <p>No active buy orders found.</p>
                             </div>
                         ) : (
-                            otherOrders.map(order => renderBuyOrderRow(order))
+                            otherOrders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(order => renderBuyOrderRow(order))
                         )}
                     </div>
                 ) : (
@@ -591,11 +599,70 @@ const MarketBuyOrdersTab = ({
                                 <p>You have no active buy orders.</p>
                             </div>
                         ) : (
-                            myOrders.map(order => renderBuyOrderRow(order, true))
+                            myOrders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(order => renderBuyOrderRow(order, true))
                         )}
                     </div>
                 )}
             </div>
+
+            {/* Pagination Logic */}
+            {(() => {
+                const currentList = buyOrdersSubTab === 'BROWSE' ? otherOrders : myOrders;
+                const totalPages = Math.ceil(currentList.length / itemsPerPage);
+                if (totalPages <= 1) return null;
+
+                return (
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        gap: '20px', 
+                        padding: '10px 0',
+                        borderTop: '1px solid var(--border)',
+                        marginTop: 'auto'
+                    }}>
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            disabled={currentPage === 1}
+                            style={{
+                                padding: '8px 16px',
+                                borderRadius: '8px',
+                                background: currentPage === 1 ? 'transparent' : 'var(--accent-soft)',
+                                color: currentPage === 1 ? 'var(--text-dim)' : 'var(--accent)',
+                                border: '1px solid',
+                                borderColor: currentPage === 1 ? 'var(--border)' : 'var(--accent)',
+                                cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                                fontWeight: 'bold',
+                                fontSize: '0.85rem'
+                            }}
+                        >
+                            Previous
+                        </button>
+                        
+                        <span style={{ color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: '500' }}>
+                            Page {currentPage} of {totalPages}
+                        </span>
+
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                            disabled={currentPage === totalPages}
+                            style={{
+                                padding: '8px 16px',
+                                borderRadius: '8px',
+                                background: currentPage === totalPages ? 'transparent' : 'var(--accent-soft)',
+                                color: currentPage === totalPages ? 'var(--text-dim)' : 'var(--accent)',
+                                border: '1px solid',
+                                borderColor: currentPage === totalPages ? 'var(--border)' : 'var(--accent)',
+                                cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                                fontWeight: 'bold',
+                                fontSize: '0.85rem'
+                            }}
+                        >
+                            Next
+                        </button>
+                    </div>
+                );
+            })()}
 
             {/* CREATE BUY ORDER MODAL */}
             {createBuyOrderModal && (

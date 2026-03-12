@@ -345,13 +345,19 @@ export class SocialManager {
             .eq('character_id', charData.id)
             .maybeSingle();
 
-        // 3. Calculate Stats using InventoryManager
+        // 3. Calculate Guild Bonuses
+        const guild_bonuses = guildMember?.guild_id ? await this.gameManager.getGuildBonuses(guildMember.guild_id) : null;
+        if (guild_bonuses) {
+            charData.guild_bonuses = guild_bonuses;
+        }
+
+        // 4. Calculate Stats using InventoryManager
         const calculatedStats = this.gameManager.inventoryManager.calculateStats(charData);
 
-        // 4. Determine total level
+        // 5. Determine total level
         const totalLevel = Object.values(skills).reduce((acc, s) => acc + (Number(s.level) || 0), 0);
 
-        // 5. Structure data for InspectModal
+        // 6. Structure data for InspectModal
         return {
             id: charData.id,
             name: charData.name,
@@ -361,6 +367,7 @@ export class SocialManager {
             equipment: state.equipment || {},
             skills: skills,
             runes: state.runes || {},
+            guild_bonuses: guild_bonuses,
             stats: {
                 ...calculatedStats,
                 warriorProf: skills.WARRIOR_PROFICIENCY?.level || 1,
