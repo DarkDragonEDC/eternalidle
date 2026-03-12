@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useAppStore } from '../store/useAppStore';
 import { formatNumber, formatSilver } from '@utils/format';
 import { Package, X, Star, Zap } from 'lucide-react';
 import { resolveItem, getTierColor, formatItemId, calculateItemSellPrice } from '@shared/items';
 
 const MarketListingModal = ({ listingItem, onClose, socket }) => {
+    const store = useAppStore();
+    const { marketPriceUpdate, setMarketPriceUpdate } = store;
+
     const [amount, setAmount] = useState('1');
     const [unitPrice, setUnitPrice] = useState('');
     const [currentMarketPrice, setCurrentMarketPrice] = useState(null);
@@ -27,21 +31,17 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
         }
     }, [listingItem, socket]);
 
-    // Listen for market price response
+    // React to store updates
     useEffect(() => {
-        if (!socket) return;
+        if (!marketPriceUpdate) return;
 
-        const handlePriceResponse = (response) => {
-            if (response.itemId === listingItem?.itemId) {
-                setCurrentMarketPrice(response.lowestPrice);
-                setHighestBuyOrder(response.highestBuyOrder);
-                setLoadingPrice(false);
-            }
-        };
-
-        socket.on('item_market_price', handlePriceResponse);
-        return () => socket.off('item_market_price', handlePriceResponse);
-    }, [socket, listingItem?.itemId]);
+        if (marketPriceUpdate.itemId === listingItem?.itemId) {
+            setCurrentMarketPrice(marketPriceUpdate.lowestPrice);
+            setHighestBuyOrder(marketPriceUpdate.highestBuyOrder);
+            setLoadingPrice(false);
+            setMarketPriceUpdate(null); // Clear once consumed
+        }
+    }, [marketPriceUpdate, listingItem?.itemId, setMarketPriceUpdate]);
 
     if (!listingItem) return null;
 

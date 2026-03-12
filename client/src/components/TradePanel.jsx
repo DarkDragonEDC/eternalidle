@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Package, Coins, CheckCircle, Clock, X, ArrowLeftRight, ChevronRight, Search, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { resolveItem, calculateItemSellPrice, formatItemId } from '@shared/items';
+import { useAppStore } from '../store/useAppStore';
 
 
 const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, onInspect, isMobile, isPreviewActive, onPreviewActionBlocked }) => {
+    const store = useAppStore();
+    const { isTradeAccepting: isAccepting, setIsTradeAccepting } = store;
     const [localOffer, setLocalOffer] = useState({ items: [], silver: 0 });
-    const [isAccepting, setIsAccepting] = useState(false);
     const [filterText, setFilterText] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('ALL');
     const [quantityModal, setQuantityModal] = useState({ isOpen: false, item: null, itemId: null, max: 0 });
@@ -79,6 +80,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
 
     const handleAccept = () => {
         if (isPreviewActive) return onPreviewActionBlocked();
+        setIsTradeAccepting(true);
         socket.emit('trade_accept', { tradeId: trade.id });
     };
 

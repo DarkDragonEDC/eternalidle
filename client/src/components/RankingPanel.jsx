@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAppStore } from '../store/useAppStore';
 import GuildProfileModal from './GuildProfileModal';
 import { resolveItem, formatItemId } from '@shared/items';
 import { XP_TABLE } from '@shared/skills.js';
@@ -100,6 +101,9 @@ const GUILD_ICONS = {
 };
 
 const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
+    const store = useAppStore();
+    const { leaderboardData, setLeaderboardData } = store;
+
     const [characters, setCharacters] = useState([]);
     const [userRankData, setUserRankData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -108,28 +112,26 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
     const [rankMode, setRankMode] = useState(gameState?.state?.isIronman ? 'IRONMAN' : 'NORMAL');
     const [selectedGuildId, setSelectedGuildId] = useState(null);
 
+    // Initial load and category changes
     useEffect(() => {
         if (!socket || !gameState) return;
 
-        // Use subCategory as the primary sort key (e.g., 'FISHING', 'COMBAT', 'SILVER')
-        // mainCategory is just for UI grouping now
         const type = rankMode === 'GUILDS' ? 'GUILDS' : subCategory;
         const mode = rankMode === 'GUILDS' ? 'NORMAL' : rankMode;
 
         setLoading(true);
-        // Pass object with type and mode
         socket.emit('get_leaderboard', { type, mode });
+    }, [socket, subCategory, rankMode, gameState]);
 
-        const handleLeaderboard = (response) => {
-            const data = response.top100 || [];
-            setCharacters(data);
-            setUserRankData(response.userRank || null);
-            setLoading(false);
-        };
-
-        socket.on('leaderboard_update', handleLeaderboard);
-        return () => socket.off('leaderboard_update', handleLeaderboard);
-    }, [socket, mainCategory, subCategory, rankMode]);
+    // React to store updates
+    useEffect(() => {
+        if (!leaderboardData) return;
+        
+        const data = leaderboardData.top100 || [];
+        setCharacters(data);
+        setUserRankData(leaderboardData.userRank || null);
+        setLoading(false);
+    }, [leaderboardData]);
 
     const handleMainCategoryChange = (key) => {
         setMainCategory(key);

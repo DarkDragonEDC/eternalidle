@@ -1072,7 +1072,11 @@ const indexItems = (obj) => {
 indexItems(ITEMS); // Populate ITEM_LOOKUP so resolveItem works
 
 
-export const resolveItem = (itemId, overrideQuality = null) => {
+export const resolveItem = (itemOrId, overrideQuality = null) => {
+    if (!itemOrId) return null;
+    
+    // Handle object input
+    const itemId = typeof itemOrId === 'object' ? (itemOrId.id || itemOrId.item_id) : itemOrId;
     if (!itemId) return null;
 
     // Normalize ID
@@ -1464,6 +1468,8 @@ export const getLevelRequirement = (tier) => {
     return (t - 1) * 10;
 };
 
+
+
 /**
  * Returns the proficiency group ('warrior', 'hunter', 'mage') required for an item.
  */
@@ -1770,9 +1776,14 @@ for (const t of TIERS) {
 indexItems(ITEMS);
 
 // Format item ID for display (replace underscores with spaces and capitalize)
-export const formatItemId = (itemId, options = {}) => {
-    if (!itemId) return '';
+export const formatItemId = (itemOrId, options = {}) => {
+    if (!itemOrId) return '';
     const { nameOnly = false } = options;
+    
+    // Handle object input
+    const itemId = typeof itemOrId === 'object' ? (itemOrId.id || itemOrId.item_id) : itemOrId;
+    if (!itemId || typeof itemId !== 'string') return String(itemId || '');
+
     const baseId = itemId.split('::')[0];
     let formatted = baseId
         .replace(/_/g, ' ')

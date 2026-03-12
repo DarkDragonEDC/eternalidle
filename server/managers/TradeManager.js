@@ -346,13 +346,10 @@ export class TradeManager {
 
                 if (updateError) throw updateError;
 
-                // Persist both
-                await this.gameManager.saveState(sender.id, sender.state);
-                await this.gameManager.saveState(receiver.id, receiver.state);
-
-                this.gameManager.markDirty(sender.id);
-                this.gameManager.markDirty(receiver.id);
-
+                // Persist both immediately
+                await this.gameManager.saveStateCritical(sender.id, sender.state);
+                await this.gameManager.saveStateCritical(receiver.id, receiver.state);
+ 
                 // --- Record Trade History ---
                 try {
                     // Sanitize items: only store essential fields, not full metadata blobs

@@ -138,6 +138,86 @@ export const useAppStore = create((set, get) => ({
         set({ selectedCharacter: id });
     },
 
+    // --- MARKET STATE ---
+    marketListings: [],
+    setMarketListings: (marketListings) => set({ marketListings }),
+    marketHistory: [],
+    setMarketHistory: (marketHistory) => set({ marketHistory }),
+    myMarketHistory: [],
+    setMyMarketHistory: (myMarketHistory) => set({ myMarketHistory }),
+    buyOrders: [],
+    setBuyOrders: (buyOrders) => set({ buyOrders }),
+    lowestSellPrice: null,
+    setLowestSellPrice: (lowestSellPrice) => set({ lowestSellPrice }),
+    marketNotification: null,
+    setMarketNotification: (marketNotification) => set({ marketNotification }),
+    isLoadingMarketHistory: false,
+    setIsLoadingMarketHistory: (isLoadingMarketHistory) => set({ isLoadingMarketHistory }),
+
+    // --- GUILD MODULE STATE ---
+    guildSearchResults: [],
+    setGuildSearchResults: (guildSearchResults) => set({ guildSearchResults }),
+    isSearchingGuilds: false,
+    setIsSearchingGuilds: (isSearchingGuilds) => set({ isSearchingGuilds }),
+    guildRequests: [],
+    setGuildRequests: (guildRequests) => set({ guildRequests }),
+    isLoadingGuildRequests: false,
+    setIsLoadingGuildRequests: (isLoadingGuildRequests) => set({ isLoadingGuildRequests }),
+    guildTasks: [],
+    setGuildTasks: (guildTasks) => set({ guildTasks }),
+    isLoadingGuildTasks: false,
+    setIsLoadingGuildTasks: (isLoadingGuildTasks) => set({ isLoadingGuildTasks }),
+    guildStatusMessage: null,
+    setGuildStatusMessage: (guildStatusMessage) => set({ guildStatusMessage }),
+    guildTimeUntilReset: "",
+    setGuildTimeUntilReset: (guildTimeUntilReset) => set({ guildTimeUntilReset }),
+
+    // --- SOCIAL STATE ---
+    friends: [],
+    setFriends: (friends) => set({ friends }),
+    isLoadingFriends: false,
+    setIsLoadingFriends: (isLoadingFriends) => set({ isLoadingFriends }),
+    playerSearchResults: [],
+    setPlayerSearchResults: (playerSearchResults) => set({ playerSearchResults }),
+    isSearchingPlayers: false,
+    setIsSearchingPlayers: (isSearchingPlayers) => set({ isSearchingPlayers }),
+    tradeHistory: [],
+    setTradeHistory: (tradeHistory) => set({ tradeHistory }),
+    isLoadingTradeHistory: false,
+    setIsLoadingTradeHistory: (isLoadingTradeHistory) => set({ isLoadingTradeHistory }),
+    socialError: null,
+    setSocialError: (socialError) => set({ socialError }),
+
+    // --- WORLD BOSS STATE ---
+    wbStatus: null,
+    setWbStatus: (wbStatus) => set({ wbStatus }),
+    isLoadingWb: true,
+    setIsLoadingWb: (isLoadingWb) => set({ isLoadingWb }),
+    wbHistoryRankings: [],
+    setWbHistoryRankings: (wbHistoryRankings) => set({ wbHistoryRankings }),
+    isLoadingWbHistory: false,
+    setIsLoadingWbHistory: (isLoadingWbHistory) => set({ isLoadingWbHistory }),
+
+    // --- DUNGEON STATE ---
+    dungeonHistory: [],
+    setDungeonHistory: (dungeonHistory) => set({ dungeonHistory }),
+    isLoadingDungeonHistory: false,
+    setIsLoadingDungeonHistory: (isLoadingDungeonHistory) => set({ isLoadingDungeonHistory }),
+
+    // --- LEADERBOARD STATE ---
+    leaderboardRankings: [],
+    setLeaderboardRankings: (leaderboardRankings) => set({ leaderboardRankings }),
+    isLoadingLeaderboard: false,
+    setIsLoadingLeaderboard: (isLoadingLeaderboard) => set({ isLoadingLeaderboard }),
+
+    // --- ORB SHOP STATE ---
+    orbStoreItems: [],
+    setOrbStoreItems: (orbStoreItems) => set({ orbStoreItems }),
+    isLoadingOrbStore: false,
+    setIsLoadingOrbStore: (isLoadingOrbStore) => set({ isLoadingOrbStore }),
+    orbShopStatusMessage: null,
+    setOrbShopStatusMessage: (orbShopStatusMessage) => set({ orbShopStatusMessage }),
+
     // --- UI STATE ---
     activeTab: localStorage.getItem('activeTab') || 'inventory',
     activeCategory: localStorage.getItem('activeCategory') || 'WOOD',
@@ -221,6 +301,22 @@ export const useAppStore = create((set, get) => ({
     setVersionMismatch: (versionMismatch) => set({ versionMismatch }),
     lootModalData: null,
     setLootModalData: (lootModalData) => set({ lootModalData }),
+    combatActionResult: null,
+    setCombatActionResult: (combatActionResult) => set({ combatActionResult }),
+    worldBossUpdate: null,
+    setWorldBossUpdate: (worldBossUpdate) => set({ worldBossUpdate }),
+    dailySpinResult: null,
+    setDailySpinResult: (dailySpinResult) => set({ dailySpinResult }),
+    lastActionResult: null,
+    setLastActionResult: (lastActionResult) => set({ lastActionResult }),
+    tradeSuccess: null,
+    setTradeSuccess: (tradeSuccess) => set({ tradeSuccess }),
+    craftRuneSuccess: null,
+    setCraftRuneSuccess: (craftRuneSuccess) => set({ craftRuneSuccess }),
+    leaderboardData: { top100: [], userRank: null },
+    setLeaderboardData: (leaderboardData) => set({ leaderboardData }),
+    marketPriceUpdate: null,
+    setMarketPriceUpdate: (marketPriceUpdate) => set({ marketPriceUpdate }),
     inspectGuildId: null,
     setInspectGuildId: (inspectGuildId) => set({ inspectGuildId }),
     pendingPotion: null,
@@ -231,6 +327,38 @@ export const useAppStore = create((set, get) => ({
     setShowCombatHistory: (showCombatHistory) => set({ showCombatHistory }),
     showLeaderboard: false,
     setShowLeaderboard: (showLeaderboard) => set({ showLeaderboard }),
+
+    // --- GUILD PENDING STATES ---
+    isSubmittingGuild: false,
+    setIsSubmittingGuild: (isSubmittingGuild) => set({ isSubmittingGuild }),
+    isApplyingToGuild: false,
+    setIsApplyingToGuild: (isApplyingToGuild) => set({ isApplyingToGuild }),
+    isUpdatingGuild: false,
+    setIsUpdatingGuild: (isUpdatingGuild) => set({ isUpdatingGuild }),
+    isDonatingToGuild: false,
+    setIsDonatingToGuild: (isDonatingToGuild) => set({ isDonatingToGuild }),
+    isContributingToTask: false,
+    setIsContributingToTask: (isContributingToTask) => set({ isContributingToTask }),
+
+    // --- TRADE PENDING STATES ---
+    isTradeAccepting: false,
+    setIsTradeAccepting: (isTradeAccepting) => set({ isTradeAccepting }),
+    isInvitePending: false,
+    setIsInvitePending: (isInvitePending) => set({ isInvitePending }),
+
+    handleTradeInvite: (partnerId) => {
+        const { socket, isPreviewActive, onPreviewActionBlocked } = get();
+        if (isPreviewActive) return onPreviewActionBlocked();
+        if (socket) {
+            set({ isInvitePending: true });
+            socket.emit('trade_invite', { receiverId: partnerId });
+        }
+    },
+    handleOpenTrade: (tradeId) => {
+        const { socket, isPreviewActive, onPreviewActionBlocked } = get();
+        if (isPreviewActive) return onPreviewActionBlocked();
+        if (socket) socket.emit('trade_join', { tradeId });
+    },
 
     // --- FINAL UI STATE ---
     modalItem: null,

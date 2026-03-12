@@ -6,6 +6,7 @@ export class PushManager {
     constructor(gameManager) {
         this.gameManager = gameManager;
         this.supabase = gameManager.supabase;
+        this.scheduledPushes = new Map(); // charId -> TimeoutID
 
         const publicKey = process.env.VAPID_PUBLIC_KEY;
         const privateKey = process.env.VAPID_PRIVATE_KEY;
@@ -122,5 +123,35 @@ export class PushManager {
             return { success: false, error: error.message };
         }
         return { success: true };
+    }
+
+    scheduleActivityNotification(char, delayInMs) {
+        if (!char || !char.id || !char.user_id || delayInMs <= 0) return;
+
+        // Cancel existing one first if any
+        this.cancelActivityNotification(char.id);
+
+        const timeoutId = setTimeout(async () => {
+            console.log(`[PUSH-SCHEDULED] Activity finished for ${char.name}. Sending notification...`);
+            await this.notifyUser(
+                char.user_id,
+                'push_activity_finished',
+                'Activity Finished! ✅',
+                `Your activity is complete. Tap to start a new one!`,
+                '/activities'
+            );
+            this.scheduledPushes.delete(char.id);
+        }, delayInMs);
+
+        this.scheduledPushes.set(char.id, timeoutId);
+        console.log(`[PUSH-SCHEDULED] Notification scheduled for ${char.name} in ${Math.floor(delayInMs / 1000)}s`);
+    }
+
+    cancelActivityNotification(charId) {
+        if (this.scheduledPushes.has(charId)) {
+            clearTimeout(this.scheduledPushes.get(charId));
+            this.scheduledPushes.delete(charId);
+            console.log(`[PUSH-SCHEDULED] Notification cancelled for character ${charId}`);
+        }
     }
 }

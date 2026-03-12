@@ -25,11 +25,17 @@ const CATEGORIES = [
     { id: 'HUNTER_CRAFTER', name: 'Leatherwork', icon: Target, color: '#c9a84c' },
 ];
 
+import { useAppStore } from '../store/useAppStore';
+
 const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPublic = false }) => {
+    const store = useAppStore();
+    const {
+        leaderboardRankings: data, setLeaderboardRankings: setData,
+        isLoadingLeaderboard: loading, setIsLoadingLeaderboard: setLoading
+    } = store;
+
     const [activeTab, setActiveTab] = useState('COMBAT');
     const [mode, setMode] = useState('NORMAL'); // NORMAL | IRONMAN
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(false);
     const [showSelector, setShowSelector] = useState(false);
 
     const fetchData = useCallback(async () => {
@@ -41,35 +47,23 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
                 if (res.ok) {
                     const json = await res.json();
                     setData(json.data || []);
+                    setLoading(false);
                 }
             } catch (err) {
                 console.error("Public Leaderboard Error:", err);
-            } finally {
                 setLoading(false);
             }
         } else if (socket) {
             socket.emit('get_leaderboard', { type: activeTab, mode });
         }
-    }, [activeTab, mode, isPublic, socket]);
+    }, [activeTab, mode, isPublic, socket, setData, setLoading]);
 
     useEffect(() => {
         if (!isOpen) return;
         fetchData();
     }, [isOpen, fetchData]);
 
-    useEffect(() => {
-        if (isPublic || !socket || !isOpen) return;
-
-        const handleUpdate = ({ type, mode: respMode, top100 }) => {
-            if (type === activeTab && respMode === mode) {
-                setData(top100 || []);
-                setLoading(false);
-            }
-        };
-
-        socket.on('leaderboard_update', handleUpdate);
-        return () => socket.off('leaderboard_update', handleUpdate);
-    }, [isOpen, activeTab, mode, socket, isPublic]);
+    // Socket listeners are now centralized in useSocketEvents.js
 
     if (!isOpen) return null;
 

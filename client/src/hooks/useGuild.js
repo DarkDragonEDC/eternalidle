@@ -1,30 +1,32 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useAppStore } from '../store/useAppStore';
 
 export function useGuild(socket, activeTab, playerHasPermission, gameState) {
-    const [isLoadingRequests, setIsLoadingRequests] = useState(false);
-    const [requests, setRequests] = useState([]);
-    const [guildTasks, setGuildTasks] = useState([]);
-    const [isLoadingTasks, setIsLoadingTasks] = useState(false);
-    const [taskPending, setTaskPending] = useState(false);
-    const [timeUntilReset, setTimeUntilReset] = useState("");
+    const store = useAppStore();
+    const {
+        guildSearchResults: searchResults, setGuildSearchResults: setSearchResults,
+        isSearchingGuilds: isSearching, setIsSearchingGuilds: setIsSearching,
+        guildRequests: requests, setGuildRequests: setRequests,
+        isLoadingGuildRequests: isLoadingRequests, setIsLoadingGuildRequests: setIsLoadingRequests,
+        guildTasks, setGuildTasks,
+        isLoadingGuildTasks: isLoadingTasks, setIsLoadingGuildTasks: setIsLoadingTasks,
+        guildStatusMessage: statusMessage, setGuildStatusMessage: setStatusMessage,
+        guildTimeUntilReset: timeUntilReset, setGuildTimeUntilReset: setTimeUntilReset,
+        isSubmittingGuild: isSubmitting, setIsSubmittingGuild: setIsSubmitting,
+        isApplyingToGuild: isApplying, setIsApplyingToGuild: setIsApplying,
+        isUpdatingGuild: isUpdating, setIsUpdatingGuild: setIsUpdating,
+        isDonatingToGuild: donationPending, setIsDonatingToGuild: setDonationPending,
+        isContributingToTask: taskPending, setIsContributingToTask: setTaskPending,
+    } = store;
 
-    // Search & Create states
-    const [searchResults, setSearchResults] = useState([]);
-    const [isSearching, setIsSearching] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [statusMessage, setStatusMessage] = useState(null);
-    const [isApplying, setIsApplying] = useState(false);
-    const [isUpdating, setIsUpdating] = useState(false);
-    const [settingsPending, setSettingsPending] = useState(false);
     const [expandedTasks, setExpandedTasks] = useState(new Set());
 
     // Donation states
     const [donationSilver, setDonationSilver] = useState('');
     const [selectedDonationItem, setSelectedDonationItem] = useState(null);
     const [donationItemAmount, setDonationItemAmount] = useState('');
-    const [donationPending, setDonationPending] = useState(false);
 
-    // Timer for task reset
+    // Timer for task reset (moved to store logic if desired, but here is fine for now if it's UI only)
     useEffect(() => {
         const updateTimer = () => {
             const now = new Date();
@@ -42,102 +44,19 @@ export function useGuild(socket, activeTab, playerHasPermission, gameState) {
         const timer = setInterval(updateTimer, 1000);
         updateTimer();
         return () => clearInterval(timer);
-    }, []);
+    }, [setTimeUntilReset]);
 
-    // Socket listeners for Search, Create, Applications, and Updates
-    useEffect(() => {
-        if (!socket) return;
-
-        const handleSearchResults = (results) => {
-            setSearchResults(results || []);
-            setIsSearching(false);
-        };
-
-        const handleGuildCreated = (result) => {
-            setIsSubmitting(false);
-            if (result.success) {
-                setStatusMessage({ type: 'success', text: 'Guild created successfully!' });
-            } else {
-                setStatusMessage({ type: 'error', text: result.message || 'Failed to create guild.' });
-            }
-        };
-
-        const handleApplicationSent = (result) => {
-            setIsApplying(false);
-            if (result.success) {
-                setStatusMessage({ type: 'success', text: 'Application sent successfully!' });
-            } else {
-                setStatusMessage({ type: result.type || 'error', text: result.message || 'Failed to send application.' });
-            }
-        };
-
-        const handleCustomizationUpdated = (result) => {
-            setIsUpdating(false);
-            if (result.success) {
-                setStatusMessage({ type: 'success', text: 'Guild updated successfully!' });
-            } else {
-                setStatusMessage({ type: 'error', text: result.message || 'Failed to update guild.' });
-            }
-        };
-
-        const handleDonationResult = (result) => {
-            setDonationPending(false);
-            if (result.success) {
-                setStatusMessage({ type: 'success', text: result.message || 'Donation successful!' });
-                // Clear donation inputs on success
-                setDonationSilver('');
-                setSelectedDonationItem(null);
-                setDonationItemAmount('');
-            } else {
-                setStatusMessage({ type: 'error', text: result.message || 'Donation failed.' });
-            }
-        };
-
-        const handleSettingsUpdated = (result) => {
-            setSettingsPending(false);
-            if (result.success) {
-                setStatusMessage({ type: 'success', text: 'Guild settings updated!' });
-            } else {
-                setStatusMessage({ type: 'error', text: result.message || 'Failed to update settings.' });
-            }
-        };
-
-        socket.on('guild_search_results', handleSearchResults);
-        socket.on('guild_created', handleGuildCreated);
-        socket.on('guild_application_sent', handleApplicationSent);
-        socket.on('guild_customization_updated', handleCustomizationUpdated);
-        socket.on('guild_donation_result', handleDonationResult);
-        socket.on('guild_settings_updated', handleSettingsUpdated);
-
-        return () => {
-            socket.off('guild_search_results', handleSearchResults);
-            socket.off('guild_created', handleGuildCreated);
-            socket.off('guild_application_sent', handleApplicationSent);
-            socket.off('guild_customization_updated', handleCustomizationUpdated);
-            socket.off('guild_donation_result', handleDonationResult);
-            socket.off('guild_settings_updated', handleSettingsUpdated);
-        };
-    }, [socket]);
+    // Socket listeners are now centralized in useSocketEvents.js
 
     // Request logic (Aba REQUESTS)
     useEffect(() => {
         if (!socket) return;
 
-        const handleRequestsData = (data) => {
-            setRequests(data);
-            setIsLoadingRequests(false);
-        };
-
         if (playerHasPermission && playerHasPermission('manage_requests')) {
             if (activeTab === 'REQUESTS') setIsLoadingRequests(true);
             socket.emit('get_guild_requests');
-            socket.on('guild_requests_data', handleRequestsData);
         }
-
-        return () => {
-            socket.off('guild_requests_data', handleRequestsData);
-        };
-    }, [socket, activeTab, playerHasPermission]);
+    }, [socket, activeTab, playerHasPermission, setIsLoadingRequests]);
 
     // Tasks logic
     useEffect(() => {
@@ -145,29 +64,7 @@ export function useGuild(socket, activeTab, playerHasPermission, gameState) {
             setIsLoadingTasks(true);
             socket?.emit('get_guild_tasks');
         }
-    }, [socket, activeTab]);
-
-    useEffect(() => {
-        if (!socket) return;
-        const handleTasksData = (data) => {
-            setGuildTasks(data || []);
-            setIsLoadingTasks(false);
-            setTaskPending(false);
-        };
-        const handleContributeResult = (result) => {
-            if (result.success) {
-                setGuildTasks(result.tasks || []);
-            }
-            setTaskPending(false);
-        };
-        socket.on('guild_tasks_data', handleTasksData);
-        socket.on('guild_task_contribute_result', handleContributeResult);
-
-        return () => {
-            socket.off('guild_tasks_data', handleTasksData);
-            socket.off('guild_task_contribute_result', handleContributeResult);
-        };
-    }, [socket]);
+    }, [socket, activeTab, setIsLoadingTasks]);
 
     const searchGuilds = useCallback((query, countryCode) => {
         if (!socket) return;
@@ -203,9 +100,9 @@ export function useGuild(socket, activeTab, playerHasPermission, gameState) {
 
     const updateGuildSettings = useCallback((settings) => {
         if (!socket) return;
-        setSettingsPending(true);
+        setIsUpdating(true);
         socket.emit('update_guild_settings', settings);
-    }, [socket]);
+    }, [socket, setIsUpdating]);
 
     const createRole = useCallback((name, color) => {
         if (!socket) return;
@@ -273,7 +170,7 @@ export function useGuild(socket, activeTab, playerHasPermission, gameState) {
         updateCustomization,
         donateToGuild,
         updateGuildSettings,
-        settingsPending,
+        settingsPending: isUpdating,
         // Roles
         createRole,
         updateRole,

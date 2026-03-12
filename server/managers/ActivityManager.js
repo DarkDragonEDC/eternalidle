@@ -113,6 +113,11 @@ export class ActivityManager {
         char.activity_started_at = new Date().toISOString();
         char.last_saved = new Date().toISOString();
 
+        // PUSH NOTIFICATION: Schedule for offline delivery
+        if (this.gameManager.pushManager) {
+            this.gameManager.pushManager.scheduleActivityNotification(char, totalDuration * 1000);
+        }
+
         // Mark for persistence
         await this.gameManager.saveState(char.id, char.state);
 
@@ -143,6 +148,11 @@ export class ActivityManager {
         // Update Character Object (Cache)
         char.current_activity = null;
         char.activity_started_at = null;
+
+        // PUSH NOTIFICATION: Cancel any scheduled push
+        if (this.gameManager.pushManager) {
+            this.gameManager.pushManager.cancelActivityNotification(char.id);
+        }
 
         // Mark for persistence
         await this.gameManager.saveState(char.id, char.state);

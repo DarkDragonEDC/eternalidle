@@ -55,10 +55,10 @@ export class PersistenceService {
     }
 
     async persistCharacter(charId) {
-        if (!charId || charId === 'undefined' || charId === 'null') return;
-        if (!this.dirty.has(charId)) return;
+        if (!charId || charId === 'undefined' || charId === 'null') return false;
+        if (!this.dirty.has(charId)) return true; // Already saved
         const char = this.cache.get(charId);
-        if (!char) return;
+        if (!char) return false;
 
         const stateToPrune = JSON.parse(JSON.stringify(char.state));
         const prunedState = pruneState(stateToPrune);
@@ -138,9 +138,26 @@ export class PersistenceService {
             char.last_saved = saveTime;
             char.dbHash = this.calculateHash(char.state);
             this.dirty.delete(charId);
+            return true;
         } else {
             console.error(`[DB] Error persisting ${char.name}:`, error);
+            return false;
         }
+    }
+
+    /**
+     * Forces an immediate save of the character's state.
+     * Unlike periodic flushes, this is intended to be called during critical transactions (Market, Trades).
+     */
+    async persistCharacterImmediate(charId) {
+        this.markDirty(charId);
+        const success = await this.persistCharacter(charId);
+        if (!success) {
+            // Optional: Implement a one-kick retry or specific logging for critical fails
+            console.warn(`[DB-CRITICAL] Immediate save failed for ${charId}. Retrying once...`);
+            return await this.persistCharacter(charId);
+        }
+        return success;
     }
 
     async flushDirtyCharacters() {

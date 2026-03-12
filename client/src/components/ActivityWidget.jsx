@@ -1,19 +1,22 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Play, CheckCircle, Clock, Square, Zap, Hammer, Pickaxe, Box, Loader, Hourglass, Sword, Skull, Heart, Apple, X, Flame, Coins } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Sword, Shield, Activity, Clock, Package, Zap, ChevronRight, Map, Info, User, Timer, Trophy, Star, ChevronDown, ChevronUp, ExternalLink, Calendar, Menu, Target, Coins, TrendingUp, Heart, Pickaxe, Box, Hammer, Skull, Flame, Hourglass, Square, X, Apple } from 'lucide-react';
 import { resolveItem, formatItemId } from '@shared/items';
+import { formatNumber } from '@utils/format';
 import { MONSTERS } from '@shared/monsters';
-import { formatNumber, formatCompactNumber } from '@utils/format';
-import { calculateSurvivalTime } from '../utils/combat';
+import { calculateSurvivalTime } from '@utils/combat';
+import { useAppStore } from '../store/useAppStore';
 
 const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serverTimeOffset = 0, skillProgress = 0, onOpenWorldBoss }) => { // Added onOpenWorldBoss prop
+    const store = useAppStore();
+    const { worldBossUpdate: worldBossData, setWorldBossUpdate } = store;
+
     const [isOpen, setIsOpen] = useState(false);
     const [elapsed, setElapsed] = useState(0);
     const [combatElapsed, setCombatElapsed] = useState(0);
     const [dungeonElapsed, setDungeonElapsed] = useState(0);
     const [syncedElapsed, setSyncedElapsed] = useState(0);
     const [smoothProgress, setSmoothProgress] = useState(0);
-    const [worldBossData, setWorldBossData] = useState(null);
     const [showDungeonAbandonConfirm, setShowDungeonAbandonConfirm] = useState(false);
     const [currentTime, setCurrentTime] = useState(Date.now() - serverTimeOffset);
 
@@ -136,31 +139,21 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
         return () => cancelAnimationFrame(animationFrameId);
     }, [activity?.next_action_at, activity?.time_per_action, serverTimeOffset]);
 
-    // World Boss Listener
-    useEffect(() => {
-        if (!socket) return;
-        const handleUpdate = (result) => {
-            if (result.worldBossUpdate && result.worldBossUpdate.status) {
-                setWorldBossData(result.worldBossUpdate);
-            }
-        };
-        socket.on('action_result', handleUpdate);
-        return () => socket.off('action_result', handleUpdate);
-    }, [socket]);
+    // World Boss cleanup is now reactive to store changes
 
     // Auto-cleanup for World Boss when finished or state is cleared
     useEffect(() => {
         // If server says fight is over OR state is gone, clear locally
         if (worldBossData?.status === 'FINISHED') {
-            const timer = setTimeout(() => setWorldBossData(null), 3000); // reduced to 3s
+            const timer = setTimeout(() => setWorldBossUpdate(null), 3000); // reduced to 3s
             return () => clearTimeout(timer);
         }
         
-        // If the main game state no longer shows an active WB fight, we should eventually clear the widget too
+        // If the main game state no longer shows an active World Boss fight, clear eventually
         if (!gameState?.state?.activeWorldBossFight && worldBossData && worldBossData.status !== 'FINISHED') {
-            setWorldBossData(null);
+            setWorldBossUpdate(null);
         }
-    }, [worldBossData?.status, !!gameState?.state?.activeWorldBossFight]);
+    }, [worldBossData?.status, !!gameState?.state?.activeWorldBossFight, setWorldBossUpdate]);
 
     // ... keydown handler ...
 

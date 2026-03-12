@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { formatNumber, formatSilver, formatCompactNumber } from '@utils/format';
-import { Sword, Shield, Skull, Coins, Zap, Clock, Trophy, ChevronRight, User, Terminal, Activity, TrendingUp, Star, Apple, Heart, Target, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MONSTERS } from '@shared/monsters';
+import { Sword, Shield, Activity, User, Skull, Clock, Target, Zap, TrendingUp, Coins, Package, History, ChevronLeft, ChevronRight, Heart, Trophy, Terminal, Star } from 'lucide-react';
 import { resolveItem, formatItemId } from '@shared/items';
-import { calculateSurvivalTime } from '../utils/combat';
+import { formatNumber, formatCompactNumber, formatSilver } from '@utils/format';
+import { MONSTERS } from '@shared/monsters';
+import { calculateSurvivalTime } from '@utils/combat';
+import { useAppStore } from '../store/useAppStore';
 
 const AnimatedCounter = ({ value, maxValue, triggerKey }) => {
     const [displayValue, setDisplayValue] = useState(value);
@@ -35,6 +36,9 @@ const AnimatedCounter = ({ value, maxValue, triggerKey }) => {
 };
 
 const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOffset = 0, isPreviewActive, onPreviewActionBlocked }) => {
+    const store = useAppStore();
+    const { combatActionResult: actionResult, setCombatActionResult: setActionResult } = store;
+
     const [activeTier, setActiveTier] = useState(1);
     const [battleLogs, setBattleLogs] = useState([]);
     const [sessionLoot, setSessionLoot] = useState(gameState?.state?.combat?.sessionLoot || {});
@@ -182,11 +186,11 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
         return `${Date.now()}-${logIdRef.current}`;
     };
 
-    // Listen for real-time battle events
+    // React to centralized battle events from store
     useEffect(() => {
-        if (!socket) return;
+        if (!actionResult) return;
 
-        const handleActionResult = (result) => {
+        const handleResult = (result) => {
             const newLogs = [];
 
             if (result.healingUpdate && result.healingUpdate.amount > 0) {
@@ -276,21 +280,31 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
                     }
 
                     if (details.lootGained?.length > 0) {
+                        // Update session total loot for this encounter/round
                         setSessionLoot(prev => {
                             const newLoot = { ...prev };
                             details.lootGained.forEach(item => {
-                                newLoot[item] = (newLoot[item] || 0) + 1;
+                                const itemId = typeof item === 'object' ? item.id : item;
+                                const amount = typeof item === 'object' ? (item.amount || 1) : 1;
+                                newLoot[itemId] = (newLoot[itemId] || 0) + amount;
                             });
                             return newLoot;
                         });
+
+                        // Add specialized log entry for each item found
                         details.lootGained.forEach(item => {
-                            const itemData = resolveItem(item);
+                            const itemId = typeof item === 'object' ? item.id : item;
+                            const amount = typeof item === 'object' ? (item.amount || 1) : 1;
+                            const itemData = resolveItem(itemId);
+                            const itemName = itemData ? (itemData.tier ? `T${itemData.tier} ${formatItemId(itemId)}` : formatItemId(itemId)) : formatItemId(itemId);
+                            const detailTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                            
                             newLogs.push({
                                 id: generateLogId(),
                                 type: 'loot',
-                                content: `Item found: ${itemData ? (itemData.tier ? `T${itemData.tier} ${formatItemId(item)}` : formatItemId(item)) : formatItemId(item)}!`,
+                                content: `Item found: ${amount > 1 ? `${amount}x ` : ''}${itemName}!`,
                                 color: '#ae00ff',
-                                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+                                timestamp: detailTime
                             });
                         });
                     }
@@ -326,7 +340,6 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
 
                         // Aggregate Heals
                         if (newLog.type === 'heal' && lastLog && lastLog.type === 'heal') {
-                            // Extract numeric amount from previous log content
                             const prevAmountMatch = lastLog.content.match(/healed for (\d+) HP/);
                             const newAmountMatch = newLog.content.match(/healed for (\d+) HP/);
 
@@ -335,12 +348,11 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
                                 const newAmount = parseInt(newAmountMatch[1]);
                                 const total = prevAmount + newAmount;
 
-                                // Update last log instead of adding new one
                                 updated[updated.length - 1] = {
                                     ...lastLog,
                                     content: `You healed for ${total} HP.`,
                                     count: (lastLog.count || 1) + 1,
-                                    id: newLog.id // Refresh ID to trigger animation if needed, or keep old? separate ID usually better for keys
+                                    id: newLog.id
                                 };
                                 return;
                             }
@@ -357,9 +369,10 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
             }
         };
 
-        socket.on('action_result', handleActionResult);
-        return () => socket.off('action_result', handleActionResult);
-    }, [socket]);
+        handleResult(actionResult);
+        // Clear result after processing so it doesn't re-trigger
+        setActionResult(null);
+    }, [actionResult, setActionResult]);
 
     // Auto-scroll logs (só se estiver perto do fundo)
     useEffect(() => {

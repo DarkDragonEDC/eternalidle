@@ -475,7 +475,7 @@ export class InventoryManager {
             }
         }
 
-        await this.gameManager.saveState(char.id, state);
+        await this.gameManager.saveStateCritical(char.id, state);
         return { success: true };
     }
 
@@ -526,7 +526,7 @@ export class InventoryManager {
             state.equipment_sets[activeSet] = combatGear;
         }
 
-        await this.gameManager.saveState(char.id, state);
+        await this.gameManager.saveStateCritical(char.id, state);
         return { success: true, state };
     }
 
@@ -572,7 +572,7 @@ export class InventoryManager {
         // 2. Load new combat slots
         Object.assign(state.equipment, newCombat);
 
-        await this.gameManager.saveState(char.id, state);
+        await this.gameManager.saveStateCritical(char.id, state);
         return { success: true, activeSet: setIndex, equipment: state.equipment };
     }
 
@@ -618,7 +618,7 @@ export class InventoryManager {
             }
         }
 
-        await this.gameManager.saveState(char.id, state);
+        await this.gameManager.saveStateCritical(char.id, state);
         return { success: true, unlockedSets: state.unlocked_sets, silver: state.silver, orbs: state.orbs };
     }
 

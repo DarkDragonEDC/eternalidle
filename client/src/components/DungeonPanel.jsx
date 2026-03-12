@@ -8,12 +8,16 @@ import DungeonHistoryModal from './DungeonHistoryModal';
 import ItemInfoModal from './ItemInfoModal';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { useAppStore } from '../store/useAppStore';
+
 const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPreviewActive, onPreviewActionBlocked }) => {
+    const store = useAppStore();
+    const { dungeonHistory: history, setIsLoadingDungeonHistory: setLoading } = store;
+
     const [selectedTier, setSelectedTier] = useState(1);
     const [showModal, setShowModal] = useState(false);
     const [pendingTier, setPendingTier] = useState(null);
     const [repeatCount, setRepeatCount] = useState(1);
-    const [history, setHistory] = useState([]);
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
     const [showAbandonModal, setShowAbandonModal] = useState(false);
     const [selectedLootItem, setSelectedLootItem] = useState(null);
@@ -45,18 +49,10 @@ const DungeonPanel = ({ gameState, socket, isMobile, serverTimeOffset = 0, isPre
 
     React.useEffect(() => {
         if (socket) {
-            socket.on('dungeon_history_update', (data) => {
-                setHistory(data);
-            });
-            // Initial fetch
+            setLoading(true);
             socket.emit('get_dungeon_history');
         }
-        return () => {
-            if (socket) {
-                socket.off('dungeon_history_update');
-            }
-        };
-    }, [socket]);
+    }, [socket, setLoading]);
 
     const handleEnterClick = (tier) => {
         if (isPreviewActive) {

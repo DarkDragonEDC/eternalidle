@@ -309,6 +309,11 @@ export class GameManager {
             }
         }
 
+        // PUSH NOTIFICATION: Cancel scheduled push on login
+        if (this.pushManager) {
+            this.pushManager.cancelActivityNotification(data.id);
+        }
+
         return data;
     }
 
@@ -1066,6 +1071,11 @@ export class GameManager {
                                 );
                             }
 
+                            // PUSH NOTIFICATION: Cancel scheduled push (finished while online)
+                            if (this.pushManager) {
+                                this.pushManager.cancelActivityNotification(char.id);
+                            }
+
                             char.current_activity = null;
                             char.activity_started_at = null;
                         } else {
@@ -1306,6 +1316,14 @@ export class GameManager {
     async saveState(charId, state) {
         this.markDirty(charId);
         await this.persistCharacter(charId);
+    }
+
+    /**
+     * Immediate save wrapper for critical transactions.
+     * Guaranteed to attempt a database write and wait for completion.
+     */
+    async saveStateCritical(charId, state) {
+        return await this.persistence.persistCharacterImmediate(charId);
     }
 
     addNotification(char, type, message) {

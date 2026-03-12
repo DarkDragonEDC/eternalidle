@@ -94,9 +94,8 @@ export class GuildManager {
 
         // 7. Update Character cache and persist
         char.state.guild_id = guild.id; // Optional: back-reference in state for fast checks
-        this.gameManager.markDirty(char.id);
-        await this.gameManager.persistCharacter(char.id);
-
+        await this.gameManager.saveStateCritical(char.id, char.state);
+ 
         console.log(`[GUILD] Guild Created: ${cleanName} [${cleanTag}] by ${char.name}`);
 
         return {
@@ -157,8 +156,8 @@ export class GuildManager {
                 timestamp: Date.now(),
                 balanceAfter: char.state.orbs
             });
-
-            this.gameManager.markDirty(char.id);
+ 
+            await this.gameManager.saveStateCritical(char.id, char.state);
         }
 
         // 6. Validate new Name and Tag if changed
@@ -448,8 +447,8 @@ export class GuildManager {
         // 3. Clear guild reference from character state and cache
         delete char.state.guild_id;
         delete char.guild_bonuses;
-        this.gameManager.markDirty(char.id);
-
+        await this.gameManager.saveStateCritical(char.id, char.state);
+ 
         return { success: true };
     }
 
@@ -511,8 +510,7 @@ export class GuildManager {
             // Update character state immediately for the online character
             if (char.state) {
                 char.state.guild_id = guildId;
-                this.gameManager.markDirty(char.id);
-                this.gameManager.persistCharacter(char.id).catch(e => console.error("[GUILD-JOIN] Persist error:", e));
+                await this.gameManager.saveStateCritical(char.id, char.state);
             }
 
             return { success: true, joined: true };
@@ -681,7 +679,7 @@ export class GuildManager {
             targetCharCache.state.guild_id = member.guild_id;
             // Fetch initial guild bonuses for the new online member
             targetCharCache.guild_bonuses = await this.gameManager.getGuildBonuses(member.guild_id);
-            this.gameManager.markDirty(request.character_id);
+            await this.gameManager.saveStateCritical(request.character_id, targetCharCache.state);
         }
 
         // Push Notification: New Member
@@ -1446,9 +1444,8 @@ export class GuildManager {
         }
 
         // 9. Persist Character state (for the one who performed the upgrade)
-        this.gameManager.markDirty(char.id);
-        await this.gameManager.persistCharacter(char.id);
-
+        await this.gameManager.saveStateCritical(char.id, char.state);
+ 
         console.log(`[GUILD-UPGRADE] Guild ${guild.name} upgraded ${config.name} ${bPath || ''} to Level ${nextLevel} by ${char.name}`);
 
         return { success: true, nextLevel, buildingType: bType, path: bPath };
@@ -1591,9 +1588,8 @@ export class GuildManager {
         }
 
         // 8. Persist Character state
-        this.gameManager.markDirty(char.id);
-        await this.gameManager.persistCharacter(char.id);
-
+        await this.gameManager.saveStateCritical(char.id, char.state);
+ 
         console.log(`[GUILD-BANK] ${char.name} donated ${silverToDonate} silver and items to ${guild.name}`);
 
         return { success: true };

@@ -37,14 +37,21 @@ const getTimeAgo = (dateStr) => {
     return `${days}d ago`;
 };
 
-const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket, onInspect, isMobile, initialSearch = '', isAnonymous, isPreviewActive, onPreviewActionBlocked }) => {
-    const [activeTab, setActiveTab] = useState('BUY');
+import { useAppStore } from '../store/useAppStore';
 
-    const [marketListings, setMarketListings] = useState([]);
-    const [notification, setNotification] = useState(null);
-    const [marketHistory, setMarketHistory] = useState([]);
-    const [myMarketHistory, setMyMarketHistory] = useState([]);
-    const [buyOrders, setBuyOrders] = useState([]);
+const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket, onInspect, isMobile, initialSearch = '', isAnonymous, isPreviewActive, onPreviewActionBlocked }) => {
+    const store = useAppStore();
+    const {
+        marketListings, setMarketListings,
+        marketNotification: notification, setMarketNotification: setNotification,
+        marketHistory, setMarketHistory,
+        myMarketHistory, setMyMarketHistory,
+        buyOrders, setBuyOrders,
+        lowestSellPrice, setLowestSellPrice,
+        isLoadingMarketHistory: isLoadingHistory, setIsLoadingMarketHistory: setIsLoadingHistory
+    } = store;
+
+    const [activeTab, setActiveTab] = useState('BUY');
 
     const [buyModal, setBuyModal] = useState(null);
     const [confirmModal, setConfirmModal] = useState(null);
@@ -53,9 +60,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
     const [fillQuantity, setFillQuantity] = useState(1);
     const [itemSuggestions, setItemSuggestions] = useState([]);
-    const [lowestSellPrice, setLowestSellPrice] = useState(null);
     const [loadingPrice, setLoadingPrice] = useState(false);
-    const [isLoadingHistory, setIsLoadingHistory] = useState(false);
     const [historySubTab, setHistorySubTab] = useState('GLOBAL');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('ALL');
@@ -138,63 +143,22 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
         }).filter(Boolean);
     }, []);
 
-
     useEffect(() => {
         if (notification) {
             const timer = setTimeout(() => setNotification(null), 3000);
             return () => clearTimeout(timer);
         }
-    }, [notification]);
+    }, [notification, setNotification]);
 
     useEffect(() => {
+        if (!socket) return;
+        
         socket.emit('get_market_listings');
-
-        const handleUpdate = (newListings) => setMarketListings(newListings || []);
-        const handleSuccess = (result) => {
-            setNotification({ type: 'success', message: result.message || 'Action completed successfully!' });
-            socket.emit('get_market_listings');
-            setConfirmModal(null);
-            setBuyModal(null);
-        };
-        const handleError = (err) => setNotification({ type: 'error', message: err.message || 'An error occurred.' });
-        const handleMarketHistory = (history) => {
-            setMarketHistory(history || []);
-            setIsLoadingHistory(false);
-        };
-        const handleMyMarketHistory = (history) => {
-            setMyMarketHistory(history || []);
-            setIsLoadingHistory(false);
-        };
-        const handleBuyOrdersUpdate = (newOrders) => setBuyOrders(newOrders || []);
-        const handleMarketPrice = (data) => {
-            setLoadingPrice(false);
-            const price = data.price || data.lowestPrice || null;
-            setLowestSellPrice(price);
-            if (price) {
-                setCreateBuyOrderModal(prev => prev ? ({ ...prev, pricePerUnit: price }) : prev);
-            }
-        };
-
-        socket.on('market_listings_update', handleUpdate);
-        socket.on('market_action_success', handleSuccess);
-        socket.on('market_history_update', handleMarketHistory);
-        socket.on('my_market_history_update', handleMyMarketHistory);
-        socket.on('buy_orders_update', handleBuyOrdersUpdate);
-        socket.on('item_market_price', handleMarketPrice);
-        socket.on('error', handleError);
-
-        return () => {
-            socket.off('market_listings_update', handleUpdate);
-            socket.off('market_action_success', handleSuccess);
-            socket.off('market_history_update', handleMarketHistory);
-            socket.off('my_market_history_update', handleMyMarketHistory);
-            socket.off('buy_orders_update', handleBuyOrdersUpdate);
-            socket.off('item_market_price', handleMarketPrice);
-            socket.off('error', handleError);
-        };
     }, [socket]);
 
     useEffect(() => {
+        if (!socket) return;
+
         if (activeTab === 'HISTORY') {
             setIsLoadingHistory(true);
             if (historySubTab === 'GLOBAL') {
@@ -206,7 +170,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
         if (activeTab === 'BUY_ORDERS') {
             socket.emit('get_buy_orders');
         }
-    }, [activeTab, historySubTab, socket]);
+    }, [activeTab, historySubTab, socket, setIsLoadingHistory]);
 
     useEffect(() => {
         if (initialSearch) {
@@ -515,6 +479,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                                     const qtyToSend = Number(buyModal.quantity) || 1;
                                     if (silver >= Math.floor(buyModal.pricePerUnit * qtyToSend)) {
                                         socket.emit('buy_market_item', { listingId: buyModal.listing.id, quantity: qtyToSend });
+                                        setBuyModal(null);
                                     }
                                 }} disabled={silver < Math.floor(buyModal.pricePerUnit * (Number(buyModal.quantity) || 1))} style={{ padding: '12px 24px', borderRadius: '10px', border: 'none', background: silver < Math.floor(buyModal.pricePerUnit * (Number(buyModal.quantity) || 1)) ? 'rgba(255,255,255,0.05)' : 'var(--accent)', color: silver < Math.floor(buyModal.pricePerUnit * (Number(buyModal.quantity) || 1)) ? 'var(--text-dim)' : '#000', cursor: silver < Math.floor(buyModal.pricePerUnit * (Number(buyModal.quantity) || 1)) ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}>Confirm Buy</button>
                             </div>

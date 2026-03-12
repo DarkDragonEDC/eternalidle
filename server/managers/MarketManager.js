@@ -62,7 +62,7 @@ export class MarketManager {
 
         char.state.silver = (char.state.silver || 0) + totalSilver;
 
-        await this.gameManager.saveState(char.id, char.state);
+        await this.gameManager.saveStateCritical(char.id, char.state);
         return { success: true, message: `Sold ${quantity}x ${itemData.name} for ${totalSilver} Silver`, unitPrice: pricePerUnit, total: totalSilver };
     }
 
@@ -215,7 +215,7 @@ export class MarketManager {
                                 '/market'
                             );
                         }
-                        await this.gameManager.saveState(buyer.id, buyer.state);
+                        await this.gameManager.saveStateCritical(buyer.id, buyer.state);
                     }
 
                     // Update Buy Order
@@ -266,7 +266,7 @@ export class MarketManager {
             inventory[itemId] -= parsedAmount;
             if (inventory[itemId] <= 0) delete inventory[itemId];
         }
-        await this.gameManager.saveState(char.id, char.state);
+        await this.gameManager.saveStateCritical(char.id, char.state);
 
         if (remainingAmount > 0) {
             // Clean metadata from server's entry
@@ -524,7 +524,7 @@ export class MarketManager {
             timestamp: Date.now()
         });
 
-        await this.gameManager.saveState(char.id, char.state);
+        await this.gameManager.saveStateCritical(char.id, char.state);
         return { success: true, message: `Listing cancelled. Item sent to Claim tab.${feeMsg}` };
     }
 
@@ -557,7 +557,7 @@ export class MarketManager {
         }
 
         char.state.claims.splice(claimIndex, 1);
-        await this.gameManager.saveState(char.id, char.state);
+        await this.gameManager.saveStateCritical(char.id, char.state);
         return { success: true, message: "Claimed successfully!" };
     }
 
@@ -716,7 +716,7 @@ export class MarketManager {
                             orderType: 'AUTO_MATCH_SELL'
                         });
                         this.gameManager.addNotification(seller, 'SUCCESS', `Your item ${itemData.name} (x${fillQty}) was sold! +${sellerProfit} Silver.`);
-                        await this.gameManager.saveState(seller.id, seller.state);
+                        await this.gameManager.saveStateCritical(seller.id, seller.state);
                     }
 
                     // Update Listing
@@ -785,7 +785,7 @@ export class MarketManager {
             }
         }
 
-        await this.gameManager.saveState(char.id, char.state);
+        await this.gameManager.saveStateCritical(char.id, char.state);
 
         const msg = itemsBought > 0
             ? `Instantly bought ${itemsBought} units. ${remainingToBuy > 0 ? `Remaining ${remainingToBuy} units placed as Buy Order.` : 'All units bought!'}${totalRefund > 0 ? ` Refunded ${totalRefund} Silver change.` : ''}`
@@ -931,7 +931,7 @@ export class MarketManager {
                 orderType: 'BUY_ORDER'
             });
             this.gameManager.addNotification(buyer, 'SUCCESS', `Your buy order for ${order.item_data.name} was partially filled (x${qtyNum}).`);
-            await this.gameManager.saveState(buyer.id, buyer.state);
+            await this.gameManager.saveStateCritical(buyer.id, buyer.state);
         }
 
         const newFilled = Number(order.filled) + qtyNum;
@@ -973,7 +973,7 @@ export class MarketManager {
             console.error("History recording failed", e);
         }
 
-        await this.gameManager.saveState(seller.id, seller.state);
+        await this.gameManager.saveStateCritical(seller.id, seller.state);
         return { success: true, message: `Successfully filled ${qtyNum}x of the buy order!` };
     }
 
@@ -1020,7 +1020,7 @@ export class MarketManager {
             timestamp: Date.now()
         });
 
-        await this.gameManager.saveState(char.id, char.state);
+        await this.gameManager.saveStateCritical(char.id, char.state);
         return { success: true, message: `Buy order cancelled. ${refund.toLocaleString()} Silver returned to Claims.${fee > 0 ? ` (Fee: ${fee.toLocaleString()} Silver)` : ''}` };
     }
 

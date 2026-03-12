@@ -8,11 +8,11 @@ export class WorldBossManager {
         this.rankings = []; // Last 24h ranking cache from DB
         this.liveRankings = { NORMAL: [], IRONMAN: [], ALL: [] }; // Initialized as object
         this.activeFights = new Map(); // characterId -> { startedAt, damage, lastLog }
+        this.lastNotifiedDate = null;
     }
 
     async initialize() {
         console.log('[WORLD_BOSS] Initializing manager...');
-        this.lastBossName = null;
         await this.checkBossCycle();
         await this.refreshRankings();
 
@@ -100,15 +100,13 @@ export class WorldBossManager {
         const now = new Date();
         const hours = now.getUTCHours();
         const minutes = now.getUTCMinutes();
+        const todayStr = now.toISOString().split('T')[0];
 
         const isAlive = (hours < 23) || (hours === 23 && minutes < 50);
 
         if (isAlive) {
             const endsAt = new Date(now);
             endsAt.setUTCHours(23, 50, 0, 0);
-
-            // If already passed 23:50 UTC today, it's actually "tomorrow" or logic error for same day
-            // But getUTCHours < 23 handles most cases.
 
             this.currentBoss = {
                 id: 'THE_ANCIENT_DRAGON',
@@ -118,13 +116,37 @@ export class WorldBossManager {
             };
         } else {
             this.currentBoss = null;
+            this.lastNotifiedDate = null; // Reset local cache when boss is gone
         }
 
-        // Push Notification: World Boss Spawn
-        if (this.currentBoss && this.currentBoss.name !== this.lastBossName) {
-            this.lastBossName = this.currentBoss.name;
-            console.log(`[PUSH] World Boss Spawned: ${this.lastBossName}. Sending notifications...`);
+        // Persistent notification check
+        if (this.currentBoss && this.lastNotifiedDate !== todayStr) {
+            // Check DB to ensure it wasn't already sent today by another process/restart
+            const { data: lastNotif } = await this.gameManager.supabase
+                .from('global_stats')
+                .select('updated_at')
+                .eq('id', 'wb_notification')
+                .maybeSingle();
             
+            const lastDbDate = lastNotif?.updated_at?.split('T')[0];
+            
+            if (lastDbDate === todayStr) {
+                this.lastNotifiedDate = todayStr;
+                return;
+            }
+
+            console.log(`[PUSH] World Boss Spawned: ${this.currentBoss.name}. Sending persistent daily notification...`);
+            
+            // Mark as notified in DB immediately to prevent race conditions
+            await this.gameManager.supabase
+                .from('global_stats')
+                .upsert({ 
+                    id: 'wb_notification', 
+                    updated_at: now.toISOString() 
+                });
+            
+            this.lastNotifiedDate = todayStr;
+
             // Broadcast to all users with world_boss enabled
             const { data: subs } = await this.gameManager.supabase
                 .from('push_subscriptions')
@@ -140,13 +162,11 @@ export class WorldBossManager {
                         userId,
                         'push_world_boss',
                         'World Boss Spawned! 🐉',
-                        `${this.lastBossName} is terrorizing the world. Join the fight!`,
+                        `${this.currentBoss.name} is terrorizing the world. Join the fight!`,
                         '/world_boss'
                     );
                 }
             }
-        } else if (!this.currentBoss) {
-            this.lastBossName = null;
         }
     }
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAppStore } from '../store/useAppStore';
 import { formatNumber } from '@utils/format';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Timer, TrendingUp, Trophy, Swords, Minimize2 } from 'lucide-react';
@@ -38,41 +39,39 @@ const WorldBossFight = ({ gameState, socket, onFinish, onMinimize }) => {
     const [logs, setLogs] = useState([]);
     const logsEndRef = React.useRef(null);
 
+    const store = useAppStore();
+    const { worldBossUpdate } = store;
+
     useEffect(() => {
-        if (!socket) return;
-        const handleUpdate = (result) => {
-            if (result.worldBossUpdate) {
-                const update = result.worldBossUpdate;
-                setFightData(prev => ({
-                    ...prev,
-                    damage: update.damage !== undefined ? update.damage : prev.damage,
-                    elapsed: update.elapsed !== undefined ? update.elapsed : prev.elapsed,
-                    rankingPos: update.rankingPos !== undefined ? update.rankingPos : prev.rankingPos,
-                    status: update.status || prev.status
-                }));
+        if (!worldBossUpdate) return;
 
-                // Process Hits for Log
-                if (update.hits && update.hits.length > 0) {
-                    const newLogs = update.hits.map(hit => ({
-                        id: Date.now() + Math.random(),
-                        damage: hit.damage,
-                        crit: hit.crit
-                    }));
+        const update = worldBossUpdate;
+        setFightData(prev => ({
+            ...prev,
+            damage: update.damage !== undefined ? update.damage : prev.damage,
+            elapsed: update.elapsed !== undefined ? update.elapsed : prev.elapsed,
+            rankingPos: update.rankingPos !== undefined ? update.rankingPos : prev.rankingPos,
+            status: update.status || prev.status
+        }));
 
-                    setLogs(prev => {
-                        const updated = [...prev, ...newLogs];
-                        return updated.slice(-20); // Keep last 20
-                    });
-                }
+        // Process Hits for Log
+        if (update.hits && update.hits.length > 0) {
+            const newLogs = update.hits.map(hit => ({
+                id: Date.now() + Math.random(),
+                damage: hit.damage,
+                crit: hit.crit
+            }));
 
-                if (update.status === 'FINISHED') {
-                    setTimeout(() => onFinish(update), 3000);
-                }
-            }
-        };
-        socket.on('action_result', handleUpdate);
-        return () => socket.off('action_result', handleUpdate);
-    }, [socket]);
+            setLogs(prev => {
+                const updated = [...prev, ...newLogs];
+                return updated.slice(-20); // Keep last 20
+            });
+        }
+
+        if (update.status === 'FINISHED') {
+            setTimeout(() => onFinish(update), 3000);
+        }
+    }, [worldBossUpdate, onFinish]);
 
     useEffect(() => {
         logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
