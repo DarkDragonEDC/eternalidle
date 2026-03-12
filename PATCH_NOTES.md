@@ -32,13 +32,11 @@ Esta é a lista definitiva e minuciosa de todas as alterações existentes na br
 - **Correções de Layout**: Ajustadas vírgulas e fechamentos de tags JSX em todos os componentes de mercado para evitar erros de renderização.
 
 ### 🛡️ Guildas e Social
-- **Persistência de Bônus**: Correção no servidor (`GameManager.js`) para garantir que `guild_bonuses` sejam calculados e enviados corretamente no login.
 - **Interface de Membros**: Refatoração da lista de membros para suportar scrolls longos e carregamento estável.
 - **Badges Reativos**: O ponto vermelho de notificação de trocas agora é removido instantaneamente via socket `trade_success`.
 
 ### ⚡ UI, UX e Polimento (Ajustes Meticulosos)
 - **Rune Merge**: Ajustado o estado inicial do `categoryFilter` para **'ALL'**, removendo o filtro padrão de Gathering que ocultava runas.
-- **Offline Report**: Implementado o sistema de `acknowledge`. O relatório de ganhos offline agora é persistente até que o usuário clique em "Lido/Confirmar".
 - **Orb Shop**: Correções de tratamento de erro em falhas de conexão com o banco de dados durante a compra de orbs.
 - **Estilo Visual**:
     - Ajustes de `padding` e `gap` em modais para evitar cortes de texto.
