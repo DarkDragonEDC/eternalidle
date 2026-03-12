@@ -17,8 +17,27 @@ export const initSocket = (io, gameManager, serverVersion) => {
     if (!token) return next(new Error("Authentication error: No token provided"));
 
     try {
+      console.log(`[SOCKET] Verifying token: ${token?.substring(0, 15)}...`);
+      
+      try {
+        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+        console.log(`[SOCKET] Token payload:`, {
+          iss: payload.iss,
+          sub: payload.sub,
+          role: payload.role,
+          email: payload.email,
+          aud: payload.aud,
+          exp: payload.exp
+        });
+      } catch (e) {
+        console.log(`[SOCKET] Error decoding token payload:`, e.message);
+      }
+
       const { data: { user }, error } = await supabase.auth.getUser(token);
-      if (error || !user) return next(new Error("Authentication error: Invalid token"));
+      if (error || !user) {
+        console.log(`[SOCKET] Auth error detail:`, JSON.stringify(error, null, 2));
+        return next(new Error("Authentication error: Invalid token"));
+      }
       socket.user = user;
       socket.data.user = user;
       next();

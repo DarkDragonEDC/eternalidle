@@ -852,6 +852,31 @@ export class GameManager {
         }
     }
 
+    async runTaskWithRollback(char, taskName, task) {
+        // Deep clone state for rollback
+        const originalState = JSON.parse(JSON.stringify(char.state));
+        try {
+            return await task();
+        } catch (err) {
+            console.error(`[ROLLBACK] Critical error in ${taskName} for ${char.name}:`, err);
+            
+            // Restore state
+            char.state = originalState;
+            this.markDirty(char.id);
+
+            // Notify user
+            this.notifications.addNotification(char, 'SYSTEM', 
+                `⚠️ Um erro interno ocorreu durante ${taskName}. Seu progresso imediato foi restaurado para garantir a consistência dos dados.`
+            );
+
+            // Log detailed error for developers
+            const logMsg = `[${new Date().toISOString()}] ROLLBACK (${taskName}) for ${char.name} (${char.id}): ${err.message}\n${err.stack}\n---\n`;
+            fs.appendFileSync('rollback_errors.log', logMsg);
+
+            return { error: err.message, rolledBack: true };
+        }
+    }
+
     async processTick(userId, characterId) {
         const char = await this.getCharacter(userId, characterId);
         if (!char) return null;
@@ -961,23 +986,22 @@ export class GameManager {
 
                 if (actions_remaining > 0) {
                     let result = null;
-                    try {
-                        const normalizedType = type.toUpperCase();
+                    const normalizedType = type.toUpperCase();
+                    const activityResult = await this.runTaskWithRollback(char, `Activity (${normalizedType})`, async () => {
+                        let result = null;
                         switch (normalizedType) {
                             case 'GATHERING': result = await this.activityManager.processGathering(char, item); break;
                             case 'REFINING': result = await this.activityManager.processRefining(char, item); break;
                             case 'CRAFTING': result = await this.activityManager.processCrafting(char, item); break;
                         }
-                        if (result && result.error) {
-                            // console.log(`[ProcessTick] Activity Failed for ${char.name}: ${result.error}`);
-                        } else if (result) {
-                            // console.log(`[ProcessTick] Activity Success for ${char.name}: ${item.name} (${result.skillKey})`);
-                        }
-                    } catch (err) {
-                        console.error(`[ProcessTick] Activity Error for ${char.name} (${type}, ${item_id}):`, err);
-                        char.current_activity = null;
-                        return { success: false, message: "Activity crashed: " + err.message };
+                        return result;
+                    });
+
+                    if (activityResult && activityResult.rolledBack) {
+                        char.current_activity = null; // Kill the activity on crash
+                        return { success: false, message: "Activity failed and state was restored." };
                     }
+                    result = activityResult;
 
                     char.current_activity.next_action_at = targetTime + (time_per_action * 1000);
                     if (now - char.current_activity.next_action_at > 5000) {
@@ -1108,40 +1132,36 @@ export class GameManager {
             const combatRounds = [];
 
             while (now >= combat.next_attack_at && roundsThisTick < MAX_ROUNDS && char.state.combat) {
-                try {
-                    const roundResult = await this.combatManager.processCombatRound(char, combat.next_attack_at);
-                    roundsThisTick++;
+                const roundResult = await this.runTaskWithRollback(char, `Combat Round ${roundsThisTick + 1}`, async () => {
+                    return await this.combatManager.processCombatRound(char, combat.next_attack_at);
+                });
+                roundsThisTick++;
 
-                    if (roundResult) {
-                        combatRounds.push(roundResult);
-                        // We take the last one as the primary combatResult for basic compatibility
-                        combatResult = roundResult;
-
-                        // Food is already consumed reactively inside CombatManager.processCombatRound
-                        // No additional processFood call needed here
-                    }
-
-                    // Advance the timer by exactly one interval
-                    combat.next_attack_at += atkSpeed;
-                    stateChanged = true;
-
-                    // If character died or combat stopped, break the loop
-                    if (!char.state.combat) break;
-
-                    // If Mob Died (Victory), apply delay and break loop
-                    if (roundResult && roundResult.details && roundResult.details.victory) {
-                        combat.next_attack_at += 1000; // Add 1s delay penalty
-                        combat.respawn_at = now + 1000; // Set visual/logic blocker
-                        stateChanged = true;
-                        break; // Stop multiple kills in one tick
-                    }
-
-                } catch (e) {
-                    console.error(`[COMBAT_ERROR] Error in processCombatRound for ${char.name}:`, e);
-                    // Write to file for debug
-                    const fs = require('fs');
-                    fs.appendFileSync('server_combat_errors.log', `[${new Date().toISOString()}] ${e.message}\n${e.stack}\n---\n`);
+                if (roundResult && roundResult.rolledBack) {
+                    // Critical failure in specific round, stop combat
+                    delete char.state.combat;
+                    this.markDirty(char.id);
                     break;
+                }
+
+                if (roundResult) {
+                    combatRounds.push(roundResult);
+                    combatResult = roundResult;
+                }
+
+                // Advance the timer by exactly one interval
+                combat.next_attack_at += atkSpeed;
+                stateChanged = true;
+
+                // If character died or combat stopped, break the loop
+                if (!char.state.combat) break;
+
+                // If Mob Died (Victory), apply delay and break loop
+                if (roundResult && roundResult.details && roundResult.details.victory) {
+                    combat.next_attack_at += 1000; // Add 1s delay penalty
+                    combat.respawn_at = now + 1000; // Set visual/logic blocker
+                    stateChanged = true;
+                    break; // Stop multiple kills in one tick
                 }
             }
 
