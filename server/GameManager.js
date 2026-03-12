@@ -1646,6 +1646,7 @@ export class GameManager {
         return this.marketManager.cancelMarketListing(u, c, l);
     }
     async claimMarketItem(u, c, cl) { return this.marketManager.claimMarketItem(u, c, cl); }
+    async savePushSubscription(u, s) { return this.pushManager.saveSubscription(u, s); }
 
     async startResting(userId, characterId, percent = 100) {
         const char = await this.getCharacter(userId, characterId);

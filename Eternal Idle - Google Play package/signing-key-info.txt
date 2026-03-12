@@ -1,0 +1,10 @@
+Keep this file and signing.keystore in a safe place. You'll need these files if you want to upload future versions of your PWA to the Google Play Store.
+
+Key store file: signing.keystore
+Key store password: ftrTqOnlsw3z
+Key alias: my-key-alias
+Key password: ftrTqOnlsw3z
+Signer's full name: Eternal Idle Admin
+Signer's organization: Eternal Idle - Online RPG
+Signer's organizational unit: Engineering
+Signer's country code: US
