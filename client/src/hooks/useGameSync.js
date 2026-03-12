@@ -11,6 +11,7 @@ export const useGameSync = () => {
         gameState,
         theme,
         setTheme,
+        lastThemeChangeRef,
         settings,
         updateSettings,
         activeTab,
@@ -28,7 +29,6 @@ export const useGameSync = () => {
     const location = useLocation();
     const settingsInitializedRef = useRef(false);
     const settingsFromSyncRef = useRef(null);
-    const lastThemeChangeRef = useRef(0);
     const prevTabRef = useRef(activeTab);
 
     // Load settings from Supabase user_metadata on login

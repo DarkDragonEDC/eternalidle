@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+﻿import { create } from 'zustand';
 import { io } from 'socket.io-client';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -265,9 +265,6 @@ export const useAppStore = create((set, get) => ({
     setPreviewBannerData: (previewBannerData) => set({ previewBannerData }),
     confirmModal: null,
     setConfirmModal: (confirmModal) => set({ confirmModal }),
-    showGuildXPInfo: false,
-    setShowGuildXPInfo: (show) => set({ showGuildXPInfo: show }),
-    lastThemeChangeRef: { current: 0 },
     
     // --- SETTINGS ---
     settings: {
@@ -286,10 +283,7 @@ export const useAppStore = create((set, get) => ({
     theme: localStorage.getItem('theme') || 'medieval',
     setTheme: (theme) => {
       localStorage.setItem('theme', theme);
-      set((state) => {
-        state.lastThemeChangeRef.current = Date.now();
-        return { theme };
-      });
+      set({ theme });
     },
 
     // --- GAME ACTIONS ---

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import GuildProfileModal from './GuildProfileModal';
 import { resolveItem, formatItemId } from '@shared/items';
-import { XP_TABLE } from '../../../shared/skills.js';
-import { GUILD_XP_TABLE } from '../../../shared/guilds.js';
+import { XP_TABLE } from '@shared/skills.js';
+import { GUILD_XP_TABLE } from '@shared/guilds.js';
 import { formatNumber, formatSilver } from '@utils/format';
 import { motion, AnimatePresence } from 'framer-motion';
-import { COUNTRIES } from '../../../shared/countries';
+import { COUNTRIES } from '@shared/countries';
 import { Trophy, Users, Star, Coins, Circle, ChevronDown, Sword, Shield, Swords, Sparkles, Settings, Plus, Info, Check, X, Tag, User, Zap, Landmark, ClipboardList, Pickaxe, FlaskConical, Hammer, Lock, Dices, Library } from 'lucide-react';
 
 const CountryFlag = ({ code, name, size = '1.2rem', style = {} }) => {
@@ -183,16 +183,26 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                 const hasWeapon = !!equipment.mainHand;
                 const combatSlots = ['helmet', 'chest', 'boots', 'gloves', 'cape', 'mainHand', 'offHand'];
                 let totalIP = 0;
+                let topItem = null;
+                let maxIP = -1;
+
                 combatSlots.forEach(slot => {
                     const rawItem = equipment[slot];
                     if (rawItem) {
                         if (!hasWeapon && slot !== 'mainHand') return;
                         const resolved = resolveItem(rawItem.id || rawItem.item_id);
-                        if (resolved) totalIP += resolved.ip || 0;
+                        if (resolved) {
+                            const ip = resolved.ip || 0;
+                            totalIP += ip;
+                            if (ip > maxIP) {
+                                maxIP = ip;
+                                topItem = rawItem.id || rawItem.item_id;
+                            }
+                        }
                     }
                 });
                 value = Math.floor(totalIP / 7);
-                subValue = 0;
+                subValue = topItem ? formatItemId(topItem) : '';
                 label = 'ITEM POWER';
             } else {
                 // Generic Skill Handler
@@ -497,9 +507,11 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                             <div style={{ fontSize: '1.1rem', fontWeight: '900', color: index === 0 ? 'var(--accent)' : 'var(--text-main)', lineHeight: 1 }}>
                                                 {formatNumber(char.value)}
                                             </div>
-                                            {rankMode !== 'GUILDS' && subCategory !== 'ITEM_POWER' ? (
+                                            {rankMode !== 'GUILDS' ? (
                                                 <div style={{ fontSize: '0.65rem', color: index === 0 ? 'var(--accent)' : 'var(--text-dim)', fontWeight: 'bold', opacity: 0.8, marginTop: '2px' }}>
-                                                    {subCategory === 'TOTAL_XP' ? `LVL ${formatNumber(char.subValue)}` : `${formatNumber(char.subValue)} XP`}
+                                                    {subCategory === 'TOTAL_XP' ? `LVL ${formatNumber(char.subValue)}` : 
+                                                     subCategory === 'ITEM_POWER' ? char.subValue :
+                                                     `${formatNumber(char.subValue)} XP`}
                                                 </div>
                                             ) : rankMode === 'GUILDS' && (
                                                 <div style={{ fontSize: '0.65rem', color: index === 0 ? 'var(--accent)' : 'var(--text-dim)', fontWeight: 'bold', opacity: 0.8, marginTop: '2px' }}>

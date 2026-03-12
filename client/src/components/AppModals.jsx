@@ -20,6 +20,7 @@ import OrbShop from './OrbShop';
 import SettingsModal from './SettingsModal';
 import TradePanel from './TradePanel';
 import { GuestRestrictionModal } from './AppOverlays';
+import GuildXPInfoModal from './guild/GuildXPInfoModal';
 
 export const AppModals = ({ 
     displayedGameState, 
@@ -70,6 +71,8 @@ export const AppModals = ({
         isMobile,
         isPreviewActive,
         onPreviewActionBlocked,
+        showGuildXPInfo,
+        setShowGuildXPInfo,
         serverError,
         setServerError
     } = useAppStore();
@@ -314,6 +317,10 @@ export const AppModals = ({
                     </div>
                 )}
             </AnimatePresence>
+            <GuildXPInfoModal 
+                isOpen={showGuildXPInfo} 
+                onClose={() => setShowGuildXPInfo(false)} 
+            />
         </>
     );
 };

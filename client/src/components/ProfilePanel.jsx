@@ -572,7 +572,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                         WebkitBoxOrient: 'vertical',
                         overflow: 'hidden'
                     }}>
-                        {formatItemId(item.id || item.name, { nameOnly: true })}
+                        {formatItemId(item.id || item.name)}
                     </span>
                 )}
             </div>
@@ -2487,7 +2487,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        zIndex: 10000
+                        zIndex: 100000
                     }} onClick={() => setConfirmModal(null)}>
                         <div style={{
                             background: 'linear-gradient(145deg, rgba(20, 25, 40, 0.95) 0%, rgba(10, 12, 18, 0.98) 100%)',

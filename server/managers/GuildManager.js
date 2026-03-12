@@ -771,7 +771,7 @@ export class GuildManager {
         }
 
         const guildId = member.guild_id;
-        const roles = member.guilds.roles || {};
+        let roles = this._normalizeRoles(member.guilds.roles || {});
 
         if (!roles[roleId]) {
             // Create new role
@@ -793,6 +793,43 @@ export class GuildManager {
         return { success: true, roles };
     }
 
+    async createGuildRole(char, { name, color }) {
+        if (!char) throw new Error("Character not found");
+
+        const { data: member, error: memberError } = await this.supabase
+            .from('guild_members')
+            .select('guild_id, role, guilds(roles)')
+            .eq('character_id', char.id)
+            .maybeSingle();
+
+        if (memberError || !member) throw new Error("Character is not in a guild");
+
+        // Check permission
+        if (member.role !== 'LEADER' && !await this.hasPermission(char.id, 'manage_roles')) {
+            throw new Error("No permission to manage roles");
+        }
+
+        const guildId = member.guild_id;
+        let roles = this._normalizeRoles(member.guilds.roles || {});
+
+        const roleId = `ROLE_${Date.now()}`;
+        roles[roleId] = {
+            name: name || "New Role",
+            color: color || "#ffffff",
+            permissions: [],
+            order: Object.keys(roles).length
+        };
+
+        const { error: updateError } = await this.supabase
+            .from('guilds')
+            .update({ roles })
+            .eq('id', guildId);
+
+        if (updateError) throw new Error("Failed to create guild role");
+
+        return { success: true, roles };
+    }
+
     async reorderGuildRoles(char, { roles }) {
         if (!char) throw new Error("Character not found");
 
@@ -810,15 +847,19 @@ export class GuildManager {
         }
 
         const guildId = member.guild_id;
+        const normalizedRoles = this._normalizeRoles(roles);
 
         const { error: updateError } = await this.supabase
             .from('guilds')
-            .update({ roles })
+            .update({ roles: normalizedRoles })
             .eq('id', guildId);
 
-        if (updateError) throw new Error("Failed to reorder guild roles");
+        if (updateError) {
+            console.error("[GUILD] Error reordering roles:", updateError);
+            throw new Error("Failed to reorder guild roles");
+        }
 
-        return { success: true, roles };
+        return { success: true, roles: normalizedRoles };
     }
 
     async deleteGuildRole(char, { roleId }) {
@@ -838,7 +879,7 @@ export class GuildManager {
         }
 
         const guildId = member.guild_id;
-        const roles = { ...(member.guilds.roles || {}) };
+        let roles = this._normalizeRoles(member.guilds.roles || {});
 
         if (!roles[roleId]) throw new Error("Role not found");
 
@@ -857,6 +898,71 @@ export class GuildManager {
             .eq('id', guildId);
 
         if (updateError) throw new Error("Failed to delete role");
+
+        return { success: true, roles };
+    }
+
+    _normalizeRoles(roles) {
+        if (!roles) return {};
+        
+        // If it's an array (which caused the break), convert it back to an object
+        if (Array.isArray(roles)) {
+            console.log("[GUILD] Normalizing roles array back to object");
+            const newRoles = {
+                "LEADER": { "name": "Leader", "color": "#d4af37", "order": 0, "permissions": ["edit_appearance", "manage_roles", "kick_members", "manage_requests", "change_member_roles", "manage_upgrades", "manage_guild"] },
+                "OFFICER": { "name": "Co-Leader", "color": "#c0c0c0", "order": 1, "permissions": ["kick_members", "manage_requests", "manage_upgrades", "change_member_roles"] },
+                "MEMBER": { "name": "Member", "color": "#808080", "order": 2, "permissions": [] }
+            };
+            
+            // Try to preserve ids from the array as keys if they don't exist
+            roles.forEach((id, idx) => {
+                if (typeof id === 'string' && !newRoles[id]) {
+                    newRoles[id] = { name: "Restored Role", color: "#ffffff", permissions: [], order: idx + 3 };
+                }
+            });
+            return newRoles;
+        }
+        
+        return roles;
+    }
+
+    async changeMemberRole(char, { memberId, newRole }) {
+        if (!char) throw new Error("Character not found");
+
+        const { data: leaderMember, error: leaderError } = await this.supabase
+            .from('guild_members')
+            .select('guild_id, role')
+            .eq('character_id', char.id)
+            .maybeSingle();
+
+        if (leaderError || !leaderMember) throw new Error("You are not in a guild");
+
+        // Check permission
+        if (leaderMember.role !== 'LEADER' && !await this.hasPermission(char.id, 'change_member_roles')) {
+            throw new Error("No permission to change member roles");
+        }
+
+        const { data: target, error: targetError } = await this.supabase
+            .from('guild_members')
+            .select('guild_id, role')
+            .eq('character_id', memberId)
+            .eq('guild_id', leaderMember.guild_id)
+            .maybeSingle();
+
+        if (targetError || !target) throw new Error("Member not found in your guild");
+        if (target.role === 'LEADER') throw new Error("Cannot change the leader's role");
+        if (char.id === memberId) throw new Error("Cannot change your own role");
+
+        const { error: updateErr } = await this.supabase
+            .from('guild_members')
+            .update({ role: newRole })
+            .eq('guild_id', leaderMember.guild_id)
+            .eq('character_id', memberId);
+
+        if (updateErr) {
+            console.error("[GUILD] Error updating member role:", updateErr);
+            throw new Error("Failed to update role");
+        }
 
         return { success: true };
     }
@@ -1739,5 +1845,63 @@ export class GuildManager {
         await this.gameManager.persistCharacter(char.id);
 
         return { tasks, contributed: contributeAmount };
+    }
+
+    _normalizeRoles(roles) {
+        let normalized = roles;
+
+        // 1. Handle null/undefined
+        if (!normalized) {
+            return {
+                "LEADER": { "name": "Leader", "color": "#d4af37", "order": 0, "permissions": ["edit_appearance", "manage_roles", "kick_members", "manage_requests", "change_member_roles", "manage_upgrades", "manage_guild"] },
+                "OFFICER": { "name": "Co-Leader", "color": "#c0c0c0", "order": 1, "permissions": ["kick_members", "manage_requests", "manage_upgrades", "change_member_roles"] },
+                "MEMBER": { "name": "Member", "color": "#808080", "order": 2, "permissions": [] }
+            };
+        }
+
+        // 2. Handle array corruption (caused by previous bugs)
+        if (Array.isArray(normalized)) {
+            console.log("[GUILD] Normalizing roles array back to object");
+            const rolesObj = {
+                "LEADER": { "name": "Leader", "color": "#d4af37", "order": 0, "permissions": ["edit_appearance", "manage_roles", "kick_members", "manage_requests", "change_member_roles", "manage_upgrades", "manage_guild"] },
+                "OFFICER": { "name": "Co-Leader", "color": "#c0c0c0", "order": 1, "permissions": ["kick_members", "manage_requests", "manage_upgrades", "change_member_roles"] },
+                "MEMBER": { "name": "Member", "color": "#808080", "order": 2, "permissions": [] }
+            };
+            
+            normalized.forEach((val, idx) => {
+                const id = typeof val === 'string' ? val : (val?.id || `ROLE_${idx}`);
+                if (!rolesObj[id]) {
+                    rolesObj[id] = { 
+                        name: val?.name || "Restored Role", 
+                        color: val?.color || "#ffffff", 
+                        permissions: val?.permissions || [], 
+                        order: idx 
+                    };
+                } else {
+                    rolesObj[id].order = idx;
+                }
+            });
+            return rolesObj;
+        }
+
+        // 3. Ensure it's a valid object
+        if (typeof normalized !== 'object') return this._normalizeRoles(null);
+
+        // 4. Ensure system roles exist and have correct permissions/order
+        const systemRoles = ["LEADER", "OFFICER", "MEMBER"];
+        systemRoles.forEach((id, idx) => {
+            if (!normalized[id]) {
+                if (id === "LEADER") normalized[id] = { "name": "Leader", "color": "#d4af37", "order": 0, "permissions": ["edit_appearance", "manage_roles", "kick_members", "manage_requests", "change_member_roles", "manage_upgrades", "manage_guild"] };
+                if (id === "OFFICER") normalized[id] = { "name": "Co-Leader", "color": "#c0c0c0", "order": 1, "permissions": ["kick_members", "manage_requests", "manage_upgrades", "change_member_roles"] };
+                if (id === "MEMBER") normalized[id] = { "name": "Member", "color": "#808080", "order": 2, "permissions": [] };
+            } else {
+                // Fix order if it's missing or badly formatted
+                if (typeof normalized[id].order !== 'number') {
+                    normalized[id].order = idx;
+                }
+            }
+        });
+        
+        return normalized;
     }
 }

@@ -95,18 +95,37 @@ export const registerGuildHandlers = (socket, gameManager, io) => {
     }
   });
 
-  socket.on("change_member_role", async ({ memberId, newRole }) => {
+  socket.on("change_member_role", async ({ memberId, targetMemberId, newRole, newRoleId }) => {
     try {
       if (!socket.data.characterId || socket.data.characterId === "undefined") return;
       await gameManager.executeLocked(socket.user.id, async () => {
         const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
-        const result = await gameManager.guildManager.changeMemberRole(char, { memberId, newRole });
+        const result = await gameManager.guildManager.changeMemberRole(char, { 
+          memberId: memberId || targetMemberId, 
+          newRole: newRole || newRoleId 
+        });
         if (result.success) {
           socket.emit("status_update", await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
         }
       });
     } catch (err) {
       console.error("[GUILD] Error in change_member_role socket:", err);
+      socket.emit("error", { message: err.message });
+    }
+  });
+
+  socket.on("create_guild_role", async (data) => {
+    try {
+      if (!socket.data.characterId || socket.data.characterId === "undefined") return;
+      await gameManager.executeLocked(socket.user.id, async () => {
+        const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+        const result = await gameManager.guildManager.createGuildRole(char, data);
+        if (result.success) {
+          socket.emit("status_update", await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+        }
+      });
+    } catch (err) {
+      console.error("[GUILD] Error in create_guild_role socket:", err);
       socket.emit("error", { message: err.message });
     }
   });
@@ -202,12 +221,14 @@ export const registerGuildHandlers = (socket, gameManager, io) => {
     }
   });
 
-  socket.on("kick_guild_member", async ({ memberId }) => {
+  socket.on("kick_guild_member", async ({ memberId, targetMemberId }) => {
     try {
       if (!socket.data.characterId || socket.data.characterId === "undefined") return;
       await gameManager.executeLocked(socket.user.id, async () => {
         const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
-        const result = await gameManager.guildManager.kickMember(char, { memberId });
+        const result = await gameManager.guildManager.kickMember(char, { 
+          memberId: memberId || targetMemberId 
+        });
         if (result.success) {
           socket.emit("status_update", await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
         }
@@ -239,14 +260,21 @@ export const registerGuildHandlers = (socket, gameManager, io) => {
       if (!socket.data.characterId || socket.data.characterId === "undefined") return;
       await gameManager.executeLocked(socket.user.id, async () => {
         const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
-        const result = await gameManager.guildManager.donateToBank(char, { silver, items });
-        if (result.success) {
-          socket.emit("status_update", await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+        try {
+          const result = await gameManager.guildManager.donateToBank(char, { silver, items });
+          if (result.success) {
+            socket.emit("status_update", await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+            socket.emit("guild_donation_result", { success: true, message: "Donation successful!" });
+          } else {
+            socket.emit("guild_donation_result", { success: false, message: result.message || "Donation failed." });
+          }
+        } catch (innerErr) {
+          socket.emit("guild_donation_result", { success: false, message: innerErr.message });
         }
       });
     } catch (err) {
       console.error("[GUILD] Error in donate_to_guild_bank socket:", err);
-      socket.emit("error", { message: err.message });
+      socket.emit("guild_donation_result", { success: false, message: err.message });
     }
   });
   

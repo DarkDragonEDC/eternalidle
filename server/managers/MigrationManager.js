@@ -14,7 +14,6 @@ export class MigrationManager {
 
         this.migrateRunes(char);
         this.migrateTitles(char);
-        this.migrateShieldToSheath(char);
         this.unifiedMigrationAndCleanup(char);
         this.automatedTitleGrant(char);
     }
@@ -164,64 +163,6 @@ export class MigrationManager {
 
         const after = JSON.stringify(state.unlockedTitles);
         if (before !== after) {
-            this.gm.markDirty(char.id);
-        }
-    }
-
-    migrateShieldToSheath(char) {
-        if (!char || !char.state) return;
-        const state = char.state;
-        let changed = false;
-
-        // 1. Migrate Inventory
-        if (state.inventory) {
-            const inv = state.inventory;
-            for (const key of Object.keys(inv)) {
-                if (key.includes('SHIELD')) {
-                    const newKey = key.replace('SHIELD', 'SHEATH');
-                    console.log(`[MIGRATION-ITEM] Converting Inventory Item: ${key} -> ${newKey} for ${char.name}`);
-
-                    if (inv[newKey]) {
-                        // Merge quantities
-                        const oldVal = inv[key];
-                        const newVal = inv[newKey];
-                        const oldQty = (typeof oldVal === 'object' && oldVal !== null) ? (Number(oldVal.amount) || 0) : (Number(oldVal) || 0);
-
-                        if (typeof newVal === 'object' && newVal !== null) {
-                            newVal.amount = (Number(newVal.amount) || 0) + oldQty;
-                        } else {
-                            inv[newKey] = (Number(newVal) || 0) + oldQty;
-                        }
-                    } else {
-                        inv[newKey] = inv[key];
-                    }
-                    delete inv[key];
-                    changed = true;
-                }
-            }
-        }
-
-        // 2. Migrate Equipment
-        const migrateEq = (eq) => {
-            if (!eq) return;
-            for (const slot of Object.keys(eq)) {
-                const item = eq[slot];
-                if (item && item.id && item.id.includes('SHIELD')) {
-                    const oldId = item.id;
-                    item.id = item.id.replace('SHIELD', 'SHEATH');
-                    if (item.name) item.name = item.name.replace('Shield', 'Sheath');
-                    console.log(`[MIGRATION-ITEM] Converting Equipped Item in slot ${slot}: ${oldId} -> ${item.id} for ${char.name}`);
-                    changed = true;
-                }
-            }
-        };
-
-        migrateEq(state.equipment);
-        if (state.equipment_sets) {
-            state.equipment_sets.forEach(set => migrateEq(set));
-        }
-
-        if (changed) {
             this.gm.markDirty(char.id);
         }
     }

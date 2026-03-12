@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ShoppingBag, Shield, Zap, Apple, Box, Info, User, Clock, Hammer, Coins, Star, Package, Tag } from 'lucide-react';
+import { Search, ShoppingBag, Shield, Zap, Apple, Box, Info, User, Clock, Hammer, Coins, Star, Package, Tag, Gem } from 'lucide-react';
 import { resolveItem, formatItemId, getRequiredProficiencyGroup } from '@shared/items';
 import { formatSilver, formatNumber } from '@utils/format';
 
@@ -99,6 +99,9 @@ const MarketBrowseTab = ({
                 return false;
             } else if (selectedCategory === 'CONSUMABLE') {
                 if (!['FOOD', 'POTION'].includes(l.item_data?.type)) return false;
+            } else if (selectedCategory === 'RUNES') {
+                const itemId = l.item_id.toUpperCase();
+                if (!itemId.includes('_RUNE_') && !itemId.includes('_SHARD')) return false;
             }
         }
 
@@ -242,7 +245,8 @@ const MarketBrowseTab = ({
                     { id: 'EQUIPMENT', label: 'Equipment', icon: <Shield size={14} /> },
                     { id: 'RESOURCE', label: 'Resources', icon: <Package size={14} /> },
                     { id: 'REFINED', label: 'Refined', icon: <Zap size={14} /> },
-                    { id: 'CONSUMABLE', label: 'Consumables', icon: <Apple size={14} /> }
+                    { id: 'CONSUMABLE', label: 'Consumables', icon: <Apple size={14} /> },
+                    { id: 'RUNES', label: 'Runes', icon: <Gem size={14} /> }
                 ].map(cat => (
                     <button
                         key={cat.id}
