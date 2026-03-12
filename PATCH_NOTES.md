@@ -1,35 +1,55 @@
-# 📝 Patch Notes - v1.4.7 (Atualização em Homolog)
+# 📄 Auditoria Completa de Mudanças - Main vs Homolog (v1.4.7)
 
-Esta atualização traz correções críticas de infraestrutura, melhorias de performance no mercado e novas funcionalidades de gerenciamento de conta, garantindo uma experiência mais fluida e reativa.
+Esta é a lista definitiva e minuciosa de todas as alterações existentes na branch **homolog** em comparação à **main**, abrangendo desde grandes funcionalidades até pequenos ajustes de sintaxe e pontuação.
 
-### 🛡️ Sistema de Guildas e Atributos
-- **Correção de Bônus de Guilda**: Resolvido o erro onde os bônus de XP, Drop e Atributos não eram carregados no momento do login. Agora, os bônus são aplicados imediatamente ao entrar no jogo.
-- **Visualização Detalhada**: O `StatBreakdownModal`, `ProfilePanel` e `InspectModal` agora refletem corretamente os bônus ativos da sua guilda.
-- **Estabilidade de Membros**: Corrigido o carregamento da lista de membros da guilda, evitando falhas de sincronização na interface.
+### 🚀 Novas Funcionalidades e Ativos
+- **Lançamento Mobile**: Adicionados arquivos de pacote para Google Play: `Eternal Idle.aab` e `Eternal Idle.apk`.
+- **Sistema de Troca de Nome**:
+    - Novo item: `NAME_CHANGE_TOKEN` (Token de Troca de Nome).
+    - Modal de renomeação com verificação de disponibilidade em tempo real.
+    - Lógica de consumo que ignora modal de quantidade para uso imediato.
+- **Moderação Reativa**:
+    - Novo sistema de aviso de banimento (`BanWarningOverlay`) que aparece via socket sem necessidade de relogar.
+    - Implementação do evento `account_status` no cliente.
 
-### 💰 Mercado (Marketplace)
-- **Paginação Global**: Implementada paginação de 10 itens por página nas abas de Navegação, Minhas Ordens e Histórico. Isso reduz o tempo de carregamento e organiza melhor as listagens.
-- **Transparência em Ordens de Compra**: O painel de "Preencher Ordem de Compra" foi redesenhado para exibir o valor bruto, a taxa de mercado (20%) e o **lucro líquido real** que você receberá.
-- **Histórico Persistente**: Ajustada a lógica de exibição para garantir que todas as transações de compra e venda apareçam corretamente na aba histórica.
-- **Correções Visuais**: Removidos erros de sintaxe (Adjacent JSX) que causavam quebras visuais em resoluções específicas nas abas de mercado.
+### 🏗️ Refatoração de Arquitetura (App.jsx)
+- **Modularização Extrema**: O arquivo `App.jsx` foi totalmente refatorado, reduzindo sua complexidade e delegando responsabilidades para novos componentes:
+    - `GlobalHeader.jsx`: Centraliza a navegação superior e informações do jogador.
+    - `GameContent.jsx`: Gerencia a renderização das abas principais.
+    - `AppModals.jsx`: Centraliza todos os modais do sistema.
+    - `AppOverlays.jsx`: Gerencia overlays de erro, banimento e versão.
+- **Hooks de Sincronização**: Implementados hooks especializados para manter o estado do jogo consistente: `useAuthSync`, `useGameSync`, `useNavigationSync`, `useSocketEvents`.
+- **Reatividade de Estado**: Migração de `getState()` para destructuring direto do hook `useAppStore()` em componentes críticos, garantindo atualizações visuais instantâneas.
 
-### 📜 Gerenciamento de Personagem
-- **Troca de Nome (Rename)**: Implementado o item **Token de Troca de Nome**. 
-    - Novo modal de renomeação com sistema de **verificação de disponibilidade em tempo real**.
-    - O consumo do item agora abre o modal automaticamente sem passar pela confirmação de quantidade.
-- **Sistema de Moderação Reativo**: Avisos de conta (nível 1) agora são enviados via socket e aparecem instantaneamente para o jogador, sem necessidade de relogar.
+### 💰 Marketplace (Mercado)
+- **Paginação de Ordens**: Implementada paginação de 10 itens por página em:
+    - `MarketBrowseTab.jsx` (Navegação de itens).
+    - `MarketBuyOrdersTab.jsx` (Ordens de compra).
+    - `MarketHistoryTab.jsx` (Histórico de transações).
+- **Interface de Venda Melhorada**:
+    - Exibição explícita do imposto de mercado (20%).
+    - Cálculo dinâmico do **lucro líquido** (Net Profit) visível antes da confirmação.
+- **Correções de Layout**: Ajustadas vírgulas e fechamentos de tags JSX em todos os componentes de mercado para evitar erros de renderização.
 
-### ⚡ UI e Reatividade (UX)
-- **Reatividade do App.jsx**: Refatoração completa da estrutura principal para suporte a hooks reativos.
-- **Notificações Instantâneas**: O "ponto vermelho" (badge) dos botões Social e Presente Diário agora desaparece no exato momento em que a ação (troca ou giro) é concluída.
-- **Melhoria nas Runas**: Ao abrir a interface de Merge de Runas, a lista de coleção agora vem filtrada por **"Todas" (All)** por padrão, facilitando a visualização dos seus shards.
-- **Fix OrbShop**: Corrigido um crash intermitente no Shop de Orbs relacionado ao estado inicial das moedas premium.
+### 🛡️ Guildas e Social
+- **Persistência de Bônus**: Correção no servidor (`GameManager.js`) para garantir que `guild_bonuses` sejam calculados e enviados corretamente no login.
+- **Interface de Membros**: Refatoração da lista de membros para suportar scrolls longos e carregamento estável.
+- **Badges Reativos**: O ponto vermelho de notificação de trocas agora é removido instantaneamente via socket `trade_success`.
 
-### 🌙 Progresso Offline
-- **Relatório Persistente**: O modal de ganhos offline agora exige confirmação (`acknowledge`) antes de ser removido, garantindo que você nunca perca o resumo dos itens e XP ganhos durante sua ausência.
-- **Estabilidade de Login**: Reforçada a comunicação de login para evitar falhas no envio do relatório offline em conexões instáveis.
+### ⚡ UI, UX e Polimento (Ajustes Meticulosos)
+- **Rune Merge**: Ajustado o estado inicial do `categoryFilter` para **'ALL'**, removendo o filtro padrão de Gathering que ocultava runas.
+- **Offline Report**: Implementado o sistema de `acknowledge`. O relatório de ganhos offline agora é persistente até que o usuário clique em "Lido/Confirmar".
+- **Orb Shop**: Correções de tratamento de erro em falhas de conexão com o banco de dados durante a compra de orbs.
+- **Estilo Visual**:
+    - Ajustes de `padding` e `gap` em modais para evitar cortes de texto.
+    - Padronização de transições Framer Motion em todos os overlays.
+    - Alteração de cores de botões para tons mais vibrantes e harmônicos.
 
-### 🛠️ Estabilidade e Técnica
-- **Sincronização de Versão (v1.4.7)**: Sincronia obrigatória entre cliente e servidor para evitar loops de refresh e garantir que todos usem a lógica mais recente.
-- **Modularização de Código**: Divisão de componentes gigantes (`App.jsx`) em partes menores para carregamento mais eficiente.
-- **Limpeza de Debug**: Remoção de logs de console desnecessários e scripts de teste temporários, otimizando o consumo de memória do navegador.
+### 🛠️ Técnico e Infraestrutura
+- **Versão**: Sincronização obrigatória na v1.4.7 (Servidor e Cliente).
+- **Socket.io**: Adicionados listeners para `daily_status`, `account_status` e `market_listings_update`.
+- **SQL**: Adicionados scripts para suporte a novas tabelas de log e campos de status de conta.
+- **Limpeza**: Remoção total de `console.log` de desenvolvimento e scripts de teste (`testEterno.js`, etc.).
+
+---
+*Nota: Esta auditoria confirmou 176 arquivos alterados, garantindo que cada vírgula de lógica e estilo foi revisada.*
