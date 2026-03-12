@@ -9,7 +9,7 @@ import { useAuthSync } from './hooks/useAuthSync';
 import { useNavigationSync } from './hooks/useNavigationSync';
 
 // Versioning
-const CLIENT_VERSION = '1.4.6';
+const CLIENT_VERSION = '1.4.7';
 
 // Components
 import Auth from './components/Auth';

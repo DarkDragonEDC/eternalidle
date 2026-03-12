@@ -34,7 +34,6 @@ export const useSocketEvents = () => {
         socket.on('version_mismatch', () => store.setVersionMismatch(true));
         socket.on('public_profile_data', store.setInspectData);
         socket.on('offline_report', (data) => {
-            console.log('[SOCKET] Received offline_report:', data);
             store.setOfflineGains(data);
         });
         socket.on('item_used', (result) => {
