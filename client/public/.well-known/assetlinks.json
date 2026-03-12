@@ -1,0 +1,11 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.eternalidle.www.twa",
+      "sha256_cert_fingerprints":
+        ["5A:52:AF:DF:4C:59:1D:B3:76:BD:92:6B:33:8D:35:16:AF:4B:23:96:EB:1D:86:D5:81:FE:54:46:65:65:32:A5"]
+    }
+  }
+]

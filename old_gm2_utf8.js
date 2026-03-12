@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+﻿import crypto from 'crypto';
 import fs from 'fs';
 import { ITEMS, ALL_RUNE_TYPES, RUNES_BY_CATEGORY, ITEM_LOOKUP, resolveItem } from '../shared/items.js';
 import { CHEST_DROP_TABLE, WORLDBOSS_DROP_TABLE, getChestRuneShardRange } from '../shared/chest_drops.js';
@@ -784,7 +784,7 @@ export class GameManager {
             const toCleanup = allActive.filter(char => {
                 const limitMs = this.getMaxIdleTime(char);
 
-                // Check each activity independently — if ANY exceeds the limit, the char needs cleanup
+                // Check each activity independently ÔÇö if ANY exceeds the limit, the char needs cleanup
                 const combatStart = char.state.combat?.started_at ? new Date(char.state.combat.started_at).getTime() : null;
                 const dungeonStart = char.state.dungeon?.started_at ? new Date(char.state.dungeon.started_at).getTime() : null;
                 const activityStart = (char.current_activity && char.activity_started_at) ? new Date(char.activity_started_at).getTime() : null;
@@ -849,31 +849,6 @@ export class GameManager {
             console.log("[MAINTENANCE] Background cleanup finished.");
         } catch (err) {
             console.error("[MAINTENANCE] Error during background cleanup:", err);
-        }
-    }
-
-    async runTaskWithRollback(char, taskName, task) {
-        // Deep clone state for rollback
-        const originalState = JSON.parse(JSON.stringify(char.state));
-        try {
-            return await task();
-        } catch (err) {
-            console.error(`[ROLLBACK] Critical error in ${taskName} for ${char.name}:`, err);
-            
-            // Restore state
-            char.state = originalState;
-            this.markDirty(char.id);
-
-            // Notify user
-            this.notifications.addNotification(char, 'SYSTEM', 
-                `⚠️ Um erro interno ocorreu durante ${taskName}. Seu progresso imediato foi restaurado para garantir a consistência dos dados.`
-            );
-
-            // Log detailed error for developers
-            const logMsg = `[${new Date().toISOString()}] ROLLBACK (${taskName}) for ${char.name} (${char.id}): ${err.message}\n${err.stack}\n---\n`;
-            fs.appendFileSync('rollback_errors.log', logMsg);
-
-            return { error: err.message, rolledBack: true };
         }
     }
 
@@ -986,22 +961,23 @@ export class GameManager {
 
                 if (actions_remaining > 0) {
                     let result = null;
-                    const normalizedType = type.toUpperCase();
-                    const activityResult = await this.runTaskWithRollback(char, `Activity (${normalizedType})`, async () => {
-                        let result = null;
+                    try {
+                        const normalizedType = type.toUpperCase();
                         switch (normalizedType) {
                             case 'GATHERING': result = await this.activityManager.processGathering(char, item); break;
                             case 'REFINING': result = await this.activityManager.processRefining(char, item); break;
                             case 'CRAFTING': result = await this.activityManager.processCrafting(char, item); break;
                         }
-                        return result;
-                    });
-
-                    if (activityResult && activityResult.rolledBack) {
-                        char.current_activity = null; // Kill the activity on crash
-                        return { success: false, message: "Activity failed and state was restored." };
+                        if (result && result.error) {
+                            // console.log(`[ProcessTick] Activity Failed for ${char.name}: ${result.error}`);
+                        } else if (result) {
+                            // console.log(`[ProcessTick] Activity Success for ${char.name}: ${item.name} (${result.skillKey})`);
+                        }
+                    } catch (err) {
+                        console.error(`[ProcessTick] Activity Error for ${char.name} (${type}, ${item_id}):`, err);
+                        char.current_activity = null;
+                        return { success: false, message: "Activity crashed: " + err.message };
                     }
-                    result = activityResult;
 
                     char.current_activity.next_action_at = targetTime + (time_per_action * 1000);
                     if (now - char.current_activity.next_action_at > 5000) {
@@ -1060,7 +1036,7 @@ export class GameManager {
                                 this.pushManager.notifyUser(
                                     char.user_id,
                                     'push_activity_finished',
-                                    'Activity Finished! ✅',
+                                    'Activity Finished! Ô£à',
                                     `Your ${activity.type.toLowerCase().replace('_', ' ')} activity is complete. Tap to start a new one!`,
                                     '/activities'
                                 );
@@ -1132,36 +1108,40 @@ export class GameManager {
             const combatRounds = [];
 
             while (now >= combat.next_attack_at && roundsThisTick < MAX_ROUNDS && char.state.combat) {
-                const roundResult = await this.runTaskWithRollback(char, `Combat Round ${roundsThisTick + 1}`, async () => {
-                    return await this.combatManager.processCombatRound(char, combat.next_attack_at);
-                });
-                roundsThisTick++;
+                try {
+                    const roundResult = await this.combatManager.processCombatRound(char, combat.next_attack_at);
+                    roundsThisTick++;
 
-                if (roundResult && roundResult.rolledBack) {
-                    // Critical failure in specific round, stop combat
-                    delete char.state.combat;
-                    this.markDirty(char.id);
-                    break;
-                }
+                    if (roundResult) {
+                        combatRounds.push(roundResult);
+                        // We take the last one as the primary combatResult for basic compatibility
+                        combatResult = roundResult;
 
-                if (roundResult) {
-                    combatRounds.push(roundResult);
-                    combatResult = roundResult;
-                }
+                        // Food is already consumed reactively inside CombatManager.processCombatRound
+                        // No additional processFood call needed here
+                    }
 
-                // Advance the timer by exactly one interval
-                combat.next_attack_at += atkSpeed;
-                stateChanged = true;
-
-                // If character died or combat stopped, break the loop
-                if (!char.state.combat) break;
-
-                // If Mob Died (Victory), apply delay and break loop
-                if (roundResult && roundResult.details && roundResult.details.victory) {
-                    combat.next_attack_at += 1000; // Add 1s delay penalty
-                    combat.respawn_at = now + 1000; // Set visual/logic blocker
+                    // Advance the timer by exactly one interval
+                    combat.next_attack_at += atkSpeed;
                     stateChanged = true;
-                    break; // Stop multiple kills in one tick
+
+                    // If character died or combat stopped, break the loop
+                    if (!char.state.combat) break;
+
+                    // If Mob Died (Victory), apply delay and break loop
+                    if (roundResult && roundResult.details && roundResult.details.victory) {
+                        combat.next_attack_at += 1000; // Add 1s delay penalty
+                        combat.respawn_at = now + 1000; // Set visual/logic blocker
+                        stateChanged = true;
+                        break; // Stop multiple kills in one tick
+                    }
+
+                } catch (e) {
+                    console.error(`[COMBAT_ERROR] Error in processCombatRound for ${char.name}:`, e);
+                    // Write to file for debug
+                    const fs = require('fs');
+                    fs.appendFileSync('server_combat_errors.log', `[${new Date().toISOString()}] ${e.message}\n${e.stack}\n---\n`);
+                    break;
                 }
             }
 
@@ -1401,7 +1381,7 @@ export class GameManager {
                 this.pushManager.notifyUser(
                     char.user_id,
                     'push_hp_recovered',
-                    'HP Fully Recovered! ❤️',
+                    'HP Fully Recovered! ÔØñ´©Å',
                     'You are back to full health and ready for battle!',
                     '/combat'
                 );
@@ -1647,63 +1627,6 @@ export class GameManager {
     }
     async claimMarketItem(u, c, cl) { return this.marketManager.claimMarketItem(u, c, cl); }
 
-    async startResting(userId, characterId, percent = 100) {
-        const char = await this.getCharacter(userId, characterId);
-        if (!char) throw new Error("Character not found");
-
-        if (char.state.combat) throw new Error("Cannot rest while in combat");
-        if (char.state.dungeon) throw new Error("Cannot rest while in a dungeon");
-        if (char.state.resting) throw new Error("Already resting");
-
-        const stats = this.inventoryManager.calculateStats(char);
-        const maxHp = stats.maxHP || 100;
-        const currentHp = char.state.health || 0;
-        
-        if (currentHp >= maxHp) throw new Error("You are already at full health");
-
-        // Use the selected percent or default to 100
-        const targetPercent = Math.min(100, Math.max(1, parseInt(percent) || 100));
-        const targetHp = Math.floor(maxHp * (targetPercent / 100));
-        const healAmount = Math.max(0, targetHp - currentHp);
-
-        if (healAmount <= 0) throw new Error("No healing required for this amount");
-
-        const cost = healAmount * 3;
-        if ((char.state.silver || 0) < cost) throw new Error("Not enough silver");
-
-        // Duration calculation matching RestPanel.jsx
-        // Math.max(1, Math.ceil((healAmount / maxHp) * 100)) * 3 (seconds)
-        const durationSeconds = Math.max(1, Math.ceil((healAmount / maxHp) * 100)) * 3;
-        const now = Date.now();
-
-        char.state.silver -= cost;
-        char.state.resting = {
-            startedAt: now,
-            endsAt: now + (durationSeconds * 1000),
-            healAmount: healAmount,
-            cost: cost,
-            percent: targetPercent
-        };
-
-        this.markDirty(char.id);
-        return { success: true, message: `Started resting for ${durationSeconds}s` };
-    }
-
-    async stopResting(userId, characterId) {
-        const char = await this.getCharacter(userId, characterId);
-        if (!char) throw new Error("Character not found");
-        if (!char.state.resting) return { success: false, message: "Not resting" };
-
-        // Refund silver
-        const refund = char.state.resting.cost || 0;
-        char.state.silver = (char.state.silver || 0) + refund;
-        
-        delete char.state.resting;
-        this.markDirty(char.id);
-        
-        return { success: true, message: "Resting cancelled and silver refunded" };
-    }
-
     async startDungeon(u, c, d, r) { return this.dungeonManager.startDungeon(u, c, d, r); }
     async stopDungeon(u, c) { return this.dungeonManager.stopDungeon(u, c); }
     async stopDungeonQueue(u, c) { return this.dungeonManager.stopQueue(u, c); }
@@ -1808,7 +1731,7 @@ export class GameManager {
                 // Consume Chest
                 this.inventoryManager.consumeItems(char, { [itemId]: safeQty });
 
-                const message = "You opened the Noob Chest!\nReceived:\n• 5.000 Silver\n• 200x Food\n• 1x Sword\n• 1x Bow\n• 1x Fire Staff\n• 100x Rune Shards";
+                const message = "You opened the Noob Chest!\nReceived:\nÔÇó 5.000 Silver\nÔÇó 200x Food\nÔÇó 1x Sword\nÔÇó 1x Bow\nÔÇó 1x Fire Staff\nÔÇó 100x Rune Shards";
 
                 await this.saveState(char.id, char.state);
                 return { success: true, message, itemId, rewards: { items: rewards, silver: addedSilver } };

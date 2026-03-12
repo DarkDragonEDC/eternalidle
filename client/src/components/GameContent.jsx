@@ -96,7 +96,7 @@ export const GameContent = ({
                 socket={socket}
             />;
         case 'combat_overview':
-            return <CombatOverview gameState={displayedGameState} onNavigate={(tab) => setActiveTab(tab)} />;
+            return <CombatOverview gameState={displayedGameState} onNavigate={handleNavigate} />;
         case 'gathering':
         case 'refining':
             return <GatheringPage />;

@@ -286,18 +286,56 @@ export class CombatManager {
         combat.foodEatenInRound = 0;
 
         let message = `Dmg: ${mitigatedPlayerDmg}${isBurst ? ' (BURST!)' : ''} | Recv: ${mitigatedMobDmg}`;
-        let leveledUp = false;
-
+        let leveledUp = null;
         if (combat.mobHealth <= 0) {
             roundDetails.victory = true;
             message = `Defeated ${combat.mobName}!`;
 
-                // Accumulate Session Stats
-                combat.sessionXp = (combat.sessionXp || 0) + finalXp;
-                combat.sessionSilver = (combat.sessionSilver || 0) + (finalSilver || 0);
+            // 1. Calculate Rewards
+            const globals = playerStats.globals || {};
+            const xpBonusMultiplier = 1 + (globals.xpYield || 0) / 100;
+            const silverBonusMultiplier = 1 + (globals.silverYield || 0) / 100;
+            const dropRateMultiplier = 1 + (globals.dropRate || 0) / 100;
 
+            const baseMobXp = mobData ? (mobData.xp || 0) : 0;
+            const finalXp = Math.floor(baseMobXp * xpBonusMultiplier);
+
+            let finalSilver = 0;
+            if (mobData && mobData.silver) {
+                const [min, max] = mobData.silver;
+                const baseSilver = Math.floor(Math.random() * (max - min + 1)) + min;
+                finalSilver = Math.floor(baseSilver * silverBonusMultiplier);
+            }
+
+            // 2. Process Loot
+            const lootGained = [];
+            if (mobData && mobData.loot) {
+                for (const [itemId, chance] of Object.entries(mobData.loot)) {
+                    const finalChance = chance * dropRateMultiplier;
+                    if (Math.random() < finalChance) {
+                        const amount = 1;
+                        const added = this.gameManager.inventoryManager.addItemToInventory(char, itemId, amount);
+                        if (added) {
+                            lootGained.push({ id: itemId, amount });
+                            combat.sessionLoot[itemId] = (combat.sessionLoot[itemId] || 0) + amount;
+                        }
+                    }
+                }
+            }
+
+            // 3. Apply Rewards
+            char.state.silver = (char.state.silver || 0) + finalSilver;
+            const levelUp = this.gameManager.addXP(char, 'COMBAT', finalXp);
+            if (levelUp) leveledUp = levelUp;
+
+            // Accumulate Session Stats
+            combat.sessionXp = (combat.sessionXp || 0) + finalXp;
+            combat.sessionSilver = (combat.sessionSilver || 0) + finalSilver;
             combat.kills = (combat.kills || 0) + 1;
-            // combat.mobHealth = combat.mobMaxHealth; // REMOVED: Managed by GameManager with delay
+
+            roundDetails.silverGained = finalSilver;
+            roundDetails.xpGained = finalXp;
+            roundDetails.lootGained = lootGained;
         }
 
         if (combat.playerHealth <= 0) {

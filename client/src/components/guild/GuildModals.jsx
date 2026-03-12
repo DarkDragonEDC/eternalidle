@@ -385,7 +385,7 @@ export const GuildModals = ({
                     <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '15px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
                         <div style={{ fontSize: '0.65rem', color: 'rgba(255, 255, 255, 0.4)', fontWeight: 'bold', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Donate Silver</div>
                         <div style={{ display: 'flex', gap: '10px' }}>
-                            <div style={{ position: 'relative', flex: 1 }}>
+                            <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
                                 <input
                                     type="number"
                                     value={donationSilver}
@@ -397,7 +397,7 @@ export const GuildModals = ({
                             </div>
                             <button 
                                 onClick={() => setDonationSilver(gameState?.state?.silver?.toString())} 
-                                style={{ padding: '0 15px', background: 'rgba(212, 175, 55, 0.1)', border: '1px solid rgba(212, 175, 55, 0.3)', borderRadius: '12px', color: 'var(--accent)', fontSize: '0.7rem', fontWeight: '900', cursor: 'pointer' }}
+                                style={{ padding: '0 15px', background: 'rgba(212, 175, 55, 0.1)', border: '1px solid rgba(212, 175, 55, 0.3)', borderRadius: '12px', color: 'var(--accent)', fontSize: '0.7rem', fontWeight: '900', cursor: 'pointer', flexShrink: 0 }}
                             >
                                 MAX
                             </button>
@@ -512,7 +512,7 @@ export const GuildModals = ({
                                 marginTop: '10px',
                                 animation: 'fadeIn 0.2s ease-out'
                             }}>
-                                <div style={{ position: 'relative', flex: 1 }}>
+                                <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
                                     <input
                                         type="number"
                                         value={donationItemAmount}
@@ -534,7 +534,7 @@ export const GuildModals = ({
                                         const remainingNeed = Math.max(0, needed - inBank);
                                         setDonationItemAmount(Math.min(has, remainingNeed).toString());
                                     }} 
-                                    style={{ padding: '0 15px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', color: 'rgba(255, 255, 255, 0.4)', fontSize: '0.7rem', fontWeight: '900', cursor: 'pointer' }}
+                                    style={{ padding: '0 15px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', color: 'rgba(255, 255, 255, 0.4)', fontSize: '0.7rem', fontWeight: '900', cursor: 'pointer', flexShrink: 0 }}
                                 >
                                     MAX
                                 </button>
@@ -687,21 +687,23 @@ export const TaskContributeModal = ({
                         <div style={{ fontSize: '0.65rem', fontWeight: '900', color: 'rgba(255,255,255,0.4)' }}>Remaining: {needed.toLocaleString()}</div>
                     </div>
                     <div style={{ display: 'flex', gap: '10px' }}>
-                        <input 
-                            type="number"
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            placeholder="Enter amount..."
-                            style={{ 
-                                flex: 1, padding: '15px', background: '#000', border: '1px solid rgba(255,255,255,0.1)', 
-                                borderRadius: '12px', color: '#fff', fontSize: '1rem', fontWeight: 'bold'
-                            }}
-                        />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <input 
+                                type="number"
+                                value={amount}
+                                onChange={(e) => setAmount(e.target.value)}
+                                placeholder="Enter amount..."
+                                style={{ 
+                                    width: '100%', padding: '15px', background: '#000', border: '1px solid rgba(255,255,255,0.1)', 
+                                    borderRadius: '12px', color: '#fff', fontSize: '1rem', fontWeight: 'bold', outline: 'none'
+                                }}
+                            />
+                        </div>
                         <button 
-                            onClick={() => setAmount(Math.min(has, needed).toString())}
+                            onClick={() => setAmount(Math.min(has, parseInt(needed) || 0).toString())}
                             style={{ 
                                 padding: '0 20px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', 
-                                borderRadius: '12px', color: '#44aaff', fontWeight: '900', cursor: 'pointer'
+                                borderRadius: '12px', color: '#44aaff', fontWeight: '900', cursor: 'pointer', flexShrink: 0
                             }}
                         >
                             MAX

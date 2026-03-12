@@ -7,10 +7,10 @@ export const registerMiscHandlers = (socket, gameManager, io) => {
     } catch (err) { console.error("Error saving push subscription:", err); }
   });
 
-  socket.on("rest_heal", async () => {
+  socket.on("rest_heal", async ({ percent }) => {
     try {
       await gameManager.executeLocked(socket.user.id, async () => {
-        const result = await gameManager.startResting(socket.user.id, socket.data.characterId);
+        const result = await gameManager.startResting(socket.user.id, socket.data.characterId, percent);
         socket.emit("action_result", result);
         socket.emit("status_update", await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
       });
@@ -25,6 +25,14 @@ export const registerMiscHandlers = (socket, gameManager, io) => {
         socket.emit("status_update", await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
       });
     } catch (err) { socket.emit("error", { message: err.message }); }
+  });
+
+  socket.on("rest_check", async () => {
+    try {
+      // getStatus(..., true, ...) with catchup=true will trigger the check in getStatus lines 695-707
+      const status = await gameManager.getStatus(socket.user.id, true, socket.data.characterId);
+      socket.emit("status_update", status);
+    } catch (err) { console.error("Error in rest_check:", err); }
   });
 
   socket.on("acknowledge_offline_report", async () => {
