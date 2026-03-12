@@ -22,6 +22,7 @@ import BuffsDrawer from './components/BuffsDrawer';
 import ToastContainer from './components/ToastContainer';
 import TutorialOverlay from './components/TutorialOverlay';
 import WorldBossFight from './components/WorldBossFight';
+import PrivacyPolicy from './components/PrivacyPolicy';
 
 // New Modular Components
 import { GlobalHeader } from './components/GlobalHeader';
@@ -188,6 +189,11 @@ function App() {
 
     if (versionMismatch) return <VersionMismatchOverlay />;
     if (banModalData) return <BannedOverlay banModalData={banModalData} />;
+
+    // Privacy Policy route check
+    if (location.pathname === '/privacy') {
+        return <PrivacyPolicy />;
+    }
 
     if (!session || initialAuthView === 'RESET') {
         return (
