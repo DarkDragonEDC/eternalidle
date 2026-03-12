@@ -17,6 +17,7 @@ export function useNavigationSync(
     // Unified Navigation Synchronization
     useEffect(() => {
         if (!selectedCharacter) return;
+        if (location.pathname.startsWith('/privacy')) return;
 
         const urlTab = location.pathname.substring(1);
         const storeTab = activeTab;
