@@ -1,8 +1,15 @@
 
 import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const URL = 'https://rozwhqxbpsxlxbkfzvce.supabase.co';
-const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvendocXhicHN4bHhia2Z6dmNlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2OTcyMjQxMCwiZXhwIjoyMDg1Mjk4NDEwfQ.xLoD96rYvto8JnrhvTxJfwmTxLHANcnbQQyrIc5gJ2I';
+const URL = process.env.SUPABASE_URL;
+const KEY = process.env.SUPABASE_KEY;
+
+if (!URL || !KEY) {
+    console.error("ERRO: Credenciais do Supabase não encontradas no .env");
+    process.exit(1);
+}
 
 const supabase = createClient(URL, KEY);
 
@@ -41,6 +48,11 @@ async function fixRankings() {
     }
 
     console.log(`Processing ${characters.length} characters...`);
+
+    // Detect existing columns in the database to avoid errors (Production might be missing columns)
+    const { data: firstChar } = await supabase.from('characters').select('*').limit(1);
+    const existingColumns = firstChar && firstChar.length > 0 ? Object.keys(firstChar[0]) : [];
+    console.log("Detected columns in DB:", existingColumns);
 
     for (const char of characters) {
         let totalLevel = 0;
@@ -90,13 +102,26 @@ async function fixRankings() {
         const ranking_total_xp = Math.floor(totalXp);
         const ranking_item_power = ipCount > 0 ? Math.floor(totalIp / ipCount) : 0;
 
-        const { error: updateErr } = await supabase
-            .from('characters')
-            .update({
+        if (char.name === "Roflelf") {
+            console.log("DEBUG Roflelf:", {
                 ranking_total_level,
                 ranking_total_xp,
-                ranking_item_power
-            })
+                skillsSample: skillsToUpdate.MAGE_CRAFTER || skillsToUpdate.MAGE_PROFICIENCY
+            });
+        }
+
+        const updatePayload = {
+            skills: skillsToUpdate
+        };
+
+        // Only include columns that exist in the DB schema
+        if (existingColumns.includes('ranking_total_level')) updatePayload.ranking_total_level = ranking_total_level;
+        if (existingColumns.includes('ranking_total_xp')) updatePayload.ranking_total_xp = ranking_total_xp;
+        if (existingColumns.includes('ranking_item_power')) updatePayload.ranking_item_power = ranking_item_power;
+
+        const { error: updateErr } = await supabase
+            .from('characters')
+            .update(updatePayload)
             .eq('id', char.id);
 
         if (updateErr) {
