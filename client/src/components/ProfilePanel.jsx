@@ -7,13 +7,9 @@ import {
     Heart, Shield, Sword, Zap,
     User, Target, Star, Layers,
     Axe, Pickaxe, Scissors, Anchor, Apple, Info, ShoppingBag, Edit, Droplets,
-    Hammer, Zap as EfficiencyIcon, Trash2, AlertTriangle, Lock
+    Hammer, Zap as EfficiencyIcon, Trash2, AlertTriangle, Lock,
+    X, Eye, ChevronUp, ChevronDown
 } from 'lucide-react';
-import { calculateNextLevelXP } from '../utils/xpTable';
-import { resolveItem, getTierColor, calculateRuneBonus, getRequiredProficiencyGroup, formatItemId } from '@shared/items';
-import { getProficiencyStats } from '@shared/proficiency_stats';
-import { getBestItemForSlot, isBetterItem } from '../utils/equipment';
-import { ChevronUp, ChevronDown } from 'lucide-react';
 import StatBreakdownModal from './StatBreakdownModal';
 import { supabase } from '../supabase';
 import ProficiencyDetailsModal from './ProficiencyDetailsModal';
@@ -23,7 +19,7 @@ import TitleSelector from './TitleSelector';
 
 
 
-const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobile, onOpenRenameModal, onOpenShop, theme, setTheme, onPreviewTheme, onPreviewAvatar, previewAvatarData, previewBannerData, onPreviewBanner, isPreviewActive, onPreviewActionBlocked, onTutorialComplete, clearPreview }) => {
+const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobile, onOpenRenameModal, onOpenShop, theme, setTheme, onPreviewTheme, previewThemeId, onPreviewAvatar, previewAvatarData, previewBannerData, onPreviewBanner, isPreviewActive, onPreviewActionBlocked, onTutorialComplete, clearPreview }) => {
     const isPremium = gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > (gameState?._clientTime || Date.now());
     const [selectedSlot, setSelectedSlot] = useState(null);
     const [infoModal, setInfoModal] = useState(null);
@@ -2790,8 +2786,10 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                             </button>
                             <button
                                 onClick={() => {
-                                    socket.emit('unlock_avatar', { avatarName: previewAvatarData.filename });
-                                    onPreviewAvatar(null);
+                                    if (previewAvatarData?.filename) {
+                                        socket.emit('unlock_avatar', { avatarName: previewAvatarData.filename });
+                                        onPreviewAvatar(null);
+                                    }
                                 }}
                                 disabled={(gameState?.state?.orbs || 0) < (previewAvatarData?.name?.includes('5 -') ? 250 : 200)}
                                 style={{
@@ -2819,6 +2817,103 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                                     style={{ width: '16px', height: '16px', filter: 'drop-shadow(0 0 3px rgba(129, 212, 250, 0.8))' }}
                                 />
                                 BUY FOR {previewAvatarData?.name?.includes('5 -') ? 250 : 200} ORBS
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Theme Preview Confirmation Bar */}
+            <AnimatePresence>
+                {previewThemeId && (
+                    <motion.div
+                        initial={{ x: '-50%', y: 100, opacity: 0 }}
+                        animate={{ x: '-50%', y: 0, opacity: 1 }}
+                        exit={{ x: '-50%', y: 100, opacity: 0 }}
+                        style={{
+                            position: 'fixed',
+                            bottom: isMobile ? '80px' : '20px',
+                            left: '50%',
+                            zIndex: 10000,
+                            background: 'var(--panel-bg)',
+                            border: '1px solid var(--accent)',
+                            borderRadius: '16px',
+                            padding: isMobile ? '8px 12px' : '15px 25px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: isMobile ? '10px' : '20px',
+                            backdropFilter: 'blur(10px)',
+                            width: isMobile ? '95%' : 'auto',
+                            justifyContent: 'space-between',
+                            flexWrap: isMobile ? 'wrap' : 'nowrap'
+                        }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                            <div style={{
+                                width: '45px',
+                                height: '45px',
+                                borderRadius: '10px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                background: 'var(--accent-soft)',
+                                color: 'var(--accent)'
+                            }}>
+                                <Zap size={24} />
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px' }}>PREVIEWING THEME</div>
+                                <div style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 'bold' }}>{previewThemeId.charAt(0).toUpperCase() + previewThemeId.slice(1)}</div>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button
+                                onClick={() => onPreviewTheme(null)}
+                                style={{
+                                    background: 'transparent',
+                                    border: '1px solid rgba(255,255,255,0.2)',
+                                    color: '#ccc',
+                                    padding: '8px 16px',
+                                    borderRadius: '8px',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    transition: '0.2s'
+                                }}
+                            >
+                                CANCEL
+                            </button>
+                            <button
+                                onClick={() => {
+                                    handleUnlockTheme(previewThemeId);
+                                }}
+                                disabled={(gameState?.state?.orbs || 0) < 50}
+                                style={{
+                                    background: 'linear-gradient(135deg, #FFD700 0%, #FFA000 100%)',
+                                    border: '1px solid #FFECB3',
+                                    color: '#000',
+                                    padding: '8px 20px',
+                                    borderRadius: '8px',
+                                    fontSize: '0.75rem',
+                                    fontWeight: '900',
+                                    cursor: (gameState?.state?.orbs || 0) >= 50 ? 'pointer' : 'not-allowed',
+                                    transition: '0.2s',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '1px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    opacity: (gameState?.state?.orbs || 0) >= 50 ? 1 : 0.5,
+                                    boxShadow: '0 4px 10px rgba(0,0,0,0.5)'
+                                }}
+                            >
+                                <img
+                                    src="/items/ORB.webp"
+                                    alt="Orb"
+                                    style={{ width: '16px', height: '16px', filter: 'drop-shadow(0 0 3px rgba(129, 212, 250, 0.8))' }}
+                                />
+                                BUY FOR 50 ORBS
                             </button>
                         </div>
                     </motion.div>
@@ -2862,7 +2957,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                             </div>
                             <div>
                                 <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px' }}>PREVIEWING</div>
-                                <div style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 'bold' }}>{previewBannerData.split('/').pop().replace(/\.[^/.]+$/, "")}</div>
+                                <div style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 'bold' }}>{previewBannerData?.split('/').pop().replace(/\.[^/.]+$/, "") || "Banner"}</div>
                             </div>
                         </div>
 
@@ -2889,8 +2984,10 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                             </button>
                             <button
                                 onClick={() => {
-                                    socket.emit('unlock_banner', { bannerName: previewBannerData.split('/').pop() });
-                                    onPreviewBanner(null);
+                                    if (previewBannerData) {
+                                        socket.emit('unlock_banner', { bannerName: previewBannerData.split('/').pop() });
+                                        onPreviewBanner(null);
+                                    }
                                 }}
                                 disabled={(gameState?.state?.orbs || 0) < 200}
                                 style={{

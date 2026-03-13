@@ -73,6 +73,7 @@ export const GameContent = ({
                 theme={theme}
                 setTheme={handleSetTheme}
                 onPreviewTheme={(id) => setPreviewThemeId(id)}
+                previewThemeId={previewThemeId}
                 previewAvatarData={previewAvatarData}
                 onPreviewAvatar={setPreviewAvatarData}
                 previewBannerData={previewBannerData}
