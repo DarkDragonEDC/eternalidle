@@ -120,4 +120,45 @@ export const registerMiscHandlers = (socket, gameManager, io) => {
       socket.emit("error", { message: "Error fetching leaderboard" });
     }
   });
+  socket.on("spin_daily", async () => {
+    try {
+      if (!socket.data.characterId) return;
+      await gameManager.executeLocked(socket.user.id, async () => {
+        const char = await gameManager.getCharacter(
+          socket.user.id,
+          socket.data.characterId,
+        );
+        if (!char) return;
+
+        if (char.state?.isIronman) {
+          return socket.emit("daily_spin_result", {
+            success: false,
+            error: "Ironman characters cannot spin the wheel!",
+          });
+        }
+
+        const result = await gameManager.dailyRewardManager.spin(char);
+        socket.emit("daily_spin_result", result);
+
+        if (result.success) {
+          socket.emit("daily_status", { canSpin: false });
+          // Sync inventory/orbs
+          socket.emit(
+            "status_update",
+            await gameManager.getStatus(
+              socket.user.id,
+              true,
+              socket.data.characterId,
+            ),
+          );
+        }
+      });
+    } catch (err) {
+      console.error("[DAILY] Error processing spin:", err);
+      socket.emit("daily_spin_result", {
+        success: false,
+        error: "Internal server error during spin.",
+      });
+    }
+  });
 };

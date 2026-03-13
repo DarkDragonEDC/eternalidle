@@ -61,6 +61,14 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
 
         socket.emit("game_status", status);
         
+        // --- DAILY SPIN STATUS ---
+        try {
+          const canSpin = await gameManager.dailyRewardManager.canSpin(char);
+          socket.emit("daily_status", { canSpin });
+        } catch (dailyErr) {
+          console.error("[JOIN] Error checking daily spin status:", dailyErr);
+        }
+        
         // Also trigger trade list refresh on join
         // (Moved from index.js inline logic)
         try {

@@ -1,3 +1,9 @@
+# 📄 Auditoria Completa de Mudanças - Daily Spin Fix (v1.5.4)
+
+### 🎡 Daily Spin
+- **Correção da Roleta**: Corrigido um problema onde o botão de girar não realizava nenhuma ação.
+- **Handlers de Servidor**: Implementados os handlers de socket ausentes para processamento de recompensas e status de disponibilidade diária.
+
 # 📄 Auditoria Completa de Mudanças - Preview Consistency Fix (v1.5.3)
 
 ### 🎨 Customização e UI
