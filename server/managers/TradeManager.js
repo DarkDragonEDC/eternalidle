@@ -119,8 +119,10 @@ export class TradeManager {
         return await this.getTrade(data.id);
     }
 
-    async getTrade(tradeId) {
+    async getTrade(tradeId, options = {}) {
+        const { skipTax = false, skipNames = false } = options;
         if (!tradeId || tradeId === 'undefined' || tradeId === 'null') throw new Error("Invalid Trade ID");
+        
         const { data, error } = await this.supabase
             .from('trade_sessions')
             .select('*')
@@ -129,32 +131,36 @@ export class TradeManager {
         if (error) throw error;
 
         // Inject tax rate for the client
-        data.tax_rate = await this._getTradeTaxRate(data.sender_id, data.receiver_id);
+        if (!skipTax) {
+            data.tax_rate = await this._getTradeTaxRate(data.sender_id, data.receiver_id);
+        }
 
         // Refresh Names (In case they changed or were 'Unknown')
-        const { data: chars } = await this.supabase
-            .from('characters')
-            .select('id, name')
-            .in('id', [data.sender_id, data.receiver_id]);
+        if (!skipNames) {
+            const { data: chars } = await this.supabase
+                .from('characters')
+                .select('id, name')
+                .in('id', [data.sender_id, data.receiver_id]);
 
-        if (chars) {
-            const sMap = new Map(chars.map(c => [c.id, c.name]));
-            if (sMap.has(data.sender_id)) data.sender_name = sMap.get(data.sender_id);
-            if (sMap.has(data.receiver_id)) data.receiver_name = sMap.get(data.receiver_id);
+            if (chars) {
+                const sMap = new Map(chars.map(c => [c.id, c.name]));
+                if (sMap.has(data.sender_id)) data.sender_name = sMap.get(data.sender_id);
+                if (sMap.has(data.receiver_id)) data.receiver_name = sMap.get(data.receiver_id);
+            }
         }
 
         return data;
     }
 
     async updateOffer(char, tradeId, items, silver) {
-        const trade = await this.getTrade(tradeId);
-        if (trade.status !== 'PENDING') throw new Error("Trade is no longer active.");
+        // Fetch full trade data to broadcast (including names and tax for UI consistency)
+        const updatedTrade = await this.getTrade(tradeId, { skipTax: false, skipNames: false });
+        if (updatedTrade.status !== 'PENDING') throw new Error("Trade is no longer active.");
 
-        const isSender = trade.sender_id === char.id;
-        const isReceiver = trade.receiver_id === char.id;
+        const isSender = updatedTrade.sender_id === char.id;
+        const isReceiver = updatedTrade.receiver_id === char.id;
         if (!isSender && !isReceiver) throw new Error("Not authorized.");
 
-        // Validate items and silver in player's inventory
         // Validate items and silver in player's inventory
         if (silver > (char.state.silver || 0)) throw new Error("Insufficient silver.");
 
@@ -165,21 +171,14 @@ export class TradeManager {
                 const baseId = it.id.split('::')[0];
                 req[baseId] = (req[baseId] || 0) + it.amount;
 
-                // Enrich with Metadata from Inventory
-                // The client sends { id, amount }, but we want { id, amount, craftedAt, ... }
-                // We trust the client's ID to find the inventory slot.
                 let merged = { ...it };
-                const inventoryItem = char.state.inventory[it.id]; // We assume check happening before or here
+                const inventoryItem = char.state.inventory[it.id];
 
                 if (inventoryItem && typeof inventoryItem === 'object') {
-                    // It's a metadata object in inventory. Merge it.
-                    // We must preserve the transaction amount, but take other metadata.
-                    // Avoid overwriting 'amount' from the trade offer with 'amount' from inventory (total stock).
                     const { amount: stockAmount, ...metadata } = inventoryItem;
                     merged = { ...metadata, ...it };
                 }
 
-                // Ensure name exists if possible
                 if (!merged.name) {
                     const def = ITEMS[baseId] || resolveItem(baseId);
                     if (def) merged.name = def.name;
@@ -191,20 +190,16 @@ export class TradeManager {
             if (!this.gameManager.inventoryManager.hasItems(char, req)) {
                 throw new Error("Insufficient items in inventory.");
             }
-        } else {
-            enrichedItems = [];
         }
 
         const updateData = {};
         if (isSender) {
             updateData.sender_offer = { items: enrichedItems, silver };
-            updateData.sender_accepted = false;
-            updateData.receiver_accepted = false; // Reset both as requested
         } else {
             updateData.receiver_offer = { items: enrichedItems, silver };
-            updateData.sender_accepted = false;
-            updateData.receiver_accepted = false; // Reset both as requested
         }
+        updateData.sender_accepted = false;
+        updateData.receiver_accepted = false;
         updateData.updated_at = new Date().toISOString();
 
         const { data, error } = await this.supabase
@@ -215,7 +210,14 @@ export class TradeManager {
             .single();
 
         if (error) throw error;
-        return await this.getTrade(data.id);
+        
+        // Enrich the updated data with tax (avoiding extra db calls where possible)
+        data.tax_rate = updatedTrade.tax_rate;
+        // Names are already in updateData or known from previous fetch
+        data.sender_name = updatedTrade.sender_name;
+        data.receiver_name = updatedTrade.receiver_name;
+        
+        return data;
     }
 
     async acceptTrade(char, tradeId) {

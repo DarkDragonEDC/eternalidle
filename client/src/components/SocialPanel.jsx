@@ -72,7 +72,7 @@ const getTimeAgo = (dateStr) => {
 
 import { useAppStore } from '../store/useAppStore';
 
-const SocialPanel = ({ socket, isOpen, onClose, onInvite, onOpenTrade, tradeInvites, gameState, onInspect, isPreviewActive, onPreviewActionBlocked }) => {
+const SocialPanel = ({ socket, isOpen, onClose, onInvite, onOpenTrade, tradeInvites, gameState, charId, onInspect, isPreviewActive, onPreviewActionBlocked }) => {
     const store = useAppStore();
     const {
         friends, setFriends,
@@ -1153,7 +1153,7 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, onOpenTrade, tradeInvi
                                         ) : (
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '250px', overflowY: 'auto', paddingRight: '4px' }}>
                                                 {tradeInvites.map(trade => {
-                                                    const isSender = trade.sender_id === gameState?.id;
+                                                    const isSender = trade.sender_id === charId;
                                                     const partnerName = trade.partner_name || (isSender ? trade.receiver_name : trade.sender_name) || 'Unknown';
 
                                                     return (

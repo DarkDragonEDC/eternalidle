@@ -74,7 +74,8 @@ export const AppModals = ({
         setShowGuildXPInfo,
         serverError,
         setServerError,
-        startActivity
+        startActivity,
+        selectedCharacter
     } = useAppStore();
 
     const isGoogleLinked = session?.user?.app_metadata?.providers?.includes('google') ||
@@ -152,6 +153,7 @@ export const AppModals = ({
                 onOpenTrade={handleOpenTrade}
                 tradeInvites={tradeInvites}
                 gameState={displayedGameState}
+                charId={selectedCharacter}
                 isPreviewActive={isPreviewActive}
                 onPreviewActionBlocked={onPreviewActionBlocked}
             />
@@ -260,7 +262,7 @@ export const AppModals = ({
                     <TradePanel
                         socket={socket}
                         trade={activeTrade}
-                        charId={useAppStore.getState().selectedCharacter}
+                        charId={selectedCharacter}
                         inventory={displayedGameState?.state?.inventory}
                         currentSilver={displayedGameState?.state?.silver}
                         onClose={() => setActiveTrade(null)}

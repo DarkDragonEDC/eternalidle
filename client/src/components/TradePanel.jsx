@@ -137,6 +137,70 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
         setSilverInput('');
     };
 
+    // Memoize filtered inventory
+    const filteredInventory = React.useMemo(() => {
+        return Object.entries(inventory || {})
+            .map(([id, entry]) => {
+                const item = resolveItem(id);
+                if (!item) return null;
+                const totalAmount = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
+
+                const offeredItem = myOffer.items.find(it => it.id === id);
+                const offeredAmount = offeredItem ? offeredItem.amount : 0;
+                const amount = totalAmount - offeredAmount;
+
+                if (amount <= 0) return null;
+
+                // Category Filter
+                if (selectedCategory !== 'ALL') {
+                    const type = item.type;
+                    const name = (item.name || '').toUpperCase();
+                    const isRuneRelated = type === 'RUNE' || id.includes('RUNE') || name.includes('RUNE');
+
+                    switch (selectedCategory) {
+                        case 'MAT':
+                            if (isRuneRelated) return null;
+                            if (!['RAW', 'REFINED', 'CRAFTING_MATERIAL', 'RESOURCE'].includes(type)) return null;
+                            break;
+                        case 'CRAFT':
+                            if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFF_HAND', 'SHEATH'].includes(type) && !type.startsWith('TOOL')) return null;
+                            break;
+                        case 'CONS':
+                            if (!['CONSUMABLE', 'FOOD', 'POTION', 'CHEST', 'MAP'].includes(type) && !id.includes('CHEST')) return null;
+                            break;
+                        case 'RUNE':
+                            if (!isRuneRelated) return null;
+                            break;
+                    }
+                }
+
+                // Search Filter
+                if (filterText.trim()) {
+                    const words = filterText.trim().toLowerCase().split(/\s+/);
+                    const itemName = (item.name || '').toLowerCase();
+                    const itemId = (item.id || id).toLowerCase();
+
+                    const matches = words.every(word => {
+                        if (word.includes(':')) {
+                            const [key, value] = word.split(':');
+                            if (!value) return true;
+                            if (key === 't' || key === 'tier') return item.tier === parseInt(value);
+                            if (key === 'c' || key === 'cat' || key === 'type') return item.type?.toLowerCase().includes(value);
+                            if (key === 'r' || key === 'rarity') return item.rarity?.toLowerCase().includes(value);
+                            if (key === 'q' || key === 'quality') return (item.quality || 0) === parseInt(value);
+                            if (key === 'id') return itemId.includes(value);
+                            return true;
+                        }
+                        return itemName.includes(word) || itemId.includes(word) || `t${item.tier}` === word;
+                    });
+                    if (!matches) return null;
+                }
+
+                return { id, item, amount };
+            })
+            .filter(Boolean);
+    }, [inventory, myOffer.items, selectedCategory, filterText]);
+
     return (
         <>
             <div style={{ position: 'fixed', inset: 0, zIndex: 11999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }} onClick={handleExplicitClose} />
@@ -398,120 +462,57 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                     gap: isMobile ? '6px' : '10px', 
                                     paddingRight: '5px' 
                                 }}>
-                                    {Object.entries(inventory || {})
-                                        .filter(([id, entry]) => {
-                                            const item = resolveItem(id);
-                                            if (!item) return false;
+                                    {filteredInventory.map(({ id, item, amount }) => {
+                                        return (() => {
+                                            // Extract stars from rune ID (e.g., T1_RUNE_MINING_XP_2STAR)
+                                            const starsMatch = id.match(/_(\d+)STAR$/);
+                                            const stars = starsMatch ? parseInt(starsMatch[1]) : 0;
+                                            const isRune = id.includes('_RUNE_') && !id.includes('SHARD');
 
-                                            // Category Filter
-                                            if (selectedCategory !== 'ALL') {
-                                                const type = item.type;
-                                                const name = (item.name || '').toUpperCase();
-                                                const isRuneRelated = type === 'RUNE' || id.includes('RUNE') || name.includes('RUNE');
+                                            return (
+                                                <div
+                                                    key={id}
+                                                    onClick={() => handleItemClick(id, item, amount)}
+                                                    style={{
+                                                        aspectRatio: '1', background: 'var(--slot-bg)', borderRadius: '8px',
+                                                        border: `1px solid ${item.rarityColor || 'var(--border)'}`,
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        cursor: 'pointer', transition: '0.2s', position: 'relative', overflow: 'hidden',
+                                                        flexDirection: 'column', padding: '4px'
+                                                    }}
+                                                    title={`${item.tier ? `T${item.tier} ` : ''}${item.name}${stars ? ` (${stars}★)` : ''}`}
+                                                >
+                                                    {/* Tier Badge */}
+                                                    {item.tier && <div style={{ position: 'absolute', top: '2px', left: '4px', fontSize: '0.5rem', fontWeight: '900', color: '#fff', textShadow: '0 0 3px #000', zIndex: 10 }}>T{item.tier}</div>}
 
-                                                switch (selectedCategory) {
-                                                    case 'MAT':
-                                                        if (isRuneRelated) return false;
-                                                        if (!['RAW', 'REFINED', 'CRAFTING_MATERIAL', 'RESOURCE'].includes(type)) return false;
-                                                        break;
-                                                    case 'CRAFT':
-                                                        if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFF_HAND', 'SHEATH'].includes(type) && !type.startsWith('TOOL')) return false;
-                                                        break;
-                                                    case 'CONS':
-                                                        if (!['CONSUMABLE', 'FOOD', 'POTION', 'CHEST', 'MAP'].includes(type) && !id.includes('CHEST')) return false;
-                                                        break;
-                                                    case 'RUNE':
-                                                        if (!isRuneRelated) return false;
-                                                        break;
-                                                }
-                                            }
-
-                                            // Search Filter
-                                            if (!filterText.trim()) return true;
-
-                                            const words = filterText.trim().toLowerCase().split(/\s+/);
-                                            const itemName = (item.name || '').toLowerCase();
-                                            const itemId = (item.id || id).toLowerCase();
-
-                                            return words.every(word => {
-                                                if (word.includes(':')) {
-                                                    const [key, value] = word.split(':');
-                                                    if (!value) return true;
-                                                    if (key === 't' || key === 'tier') return item.tier === parseInt(value);
-                                                    if (key === 'c' || key === 'cat' || key === 'type') return item.type?.toLowerCase().includes(value);
-                                                    if (key === 'r' || key === 'rarity') return item.rarity?.toLowerCase().includes(value);
-                                                    if (key === 'q' || key === 'quality') return (item.quality || 0) === parseInt(value);
-                                                    if (key === 'id') return itemId.includes(value);
-                                                    return true;
-                                                }
-                                                return itemName.includes(word) || itemId.includes(word) || `t${item.tier}` === word;
-                                            });
-                                        })
-                                        .map(([id, entry]) => {
-                                            const item = resolveItem(id);
-                                            if (!item) return null;
-                                            const totalAmount = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
-
-                                            const offeredItem = myOffer.items.find(it => it.id === id);
-                                            const offeredAmount = offeredItem ? offeredItem.amount : 0;
-                                            const amount = totalAmount - offeredAmount;
-
-                                            if (amount <= 0) return null;
-
-                                            return (() => {
-                                                // Extract stars from rune ID (e.g., T1_RUNE_MINING_XP_2STAR)
-                                                const starsMatch = id.match(/_(\d+)STAR$/);
-                                                const stars = starsMatch ? parseInt(starsMatch[1]) : 0;
-                                                const isRune = id.includes('_RUNE_') && !id.includes('SHARD');
-
-                                                return (
-                                                    <div
-                                                        key={id}
-                                                        onClick={() => handleItemClick(id, item, amount)}
-                                                        style={{
-                                                            aspectRatio: '1', background: 'var(--slot-bg)', borderRadius: '8px',
-                                                            border: `1px solid ${item.rarityColor || 'var(--border)'}`,
-                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                            cursor: 'pointer', transition: '0.2s', position: 'relative', overflow: 'hidden',
-                                                            flexDirection: 'column', padding: '4px'
-                                                        }}
-                                                        title={`${item.tier ? `T${item.tier} ` : ''}${item.name}${stars ? ` (${stars}★)` : ''}`}
-                                                    >
-                                                        {/* Tier Badge */}
-                                                        {item.tier && <div style={{ position: 'absolute', top: '2px', left: '4px', fontSize: '0.5rem', fontWeight: '900', color: '#fff', textShadow: '0 0 3px #000', zIndex: 10 }}>T{item.tier}</div>}
-
-                                                        {/* Star Rating for Runes */}
-                                                        {isRune && stars > 0 && (
-                                                            <div style={{ position: 'absolute', top: '2px', right: '4px', display: 'flex', gap: '0px' }}>
-                                                                {Array.from({ length: stars }).map((_, i) => (
-                                                                    <Star key={i} size={6} fill="#FFD700" color="#FFD700" style={{ filter: 'drop-shadow(0 0 1px #000)' }} />
-                                                                ))}
-                                                            </div>
-                                                        )}
-
-                                                        {/* Icon */}
-                                                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', minHeight: 0, overflow: 'hidden' }}>
-                                                            {item.icon ? (
-                                                                typeof item.icon === 'string' ? <img src={item.icon} alt={item.name} style={{ width: item.scale || '70%', height: item.scale || '70%', objectFit: 'contain' }} /> : <item.icon size={20} color={item.rarityColor || "var(--text-dim)"} />
-                                                            ) : <Package size={20} color="var(--text-dim)" />}
+                                                    {/* Star Rating for Runes */}
+                                                    {isRune && stars > 0 && (
+                                                        <div style={{ position: 'absolute', top: '2px', right: '4px', display: 'flex', gap: '0px' }}>
+                                                            {Array.from({ length: stars }).map((_, i) => (
+                                                                <Star key={i} size={6} fill="#FFD700" color="#FFD700" style={{ filter: 'drop-shadow(0 0 1px #000)' }} />
+                                                            ))}
                                                         </div>
+                                                    )}
 
-                                                        {/* Quantity */}
-                                                        <div style={{ position: 'absolute', top: '2px', right: '4px', fontSize: '0.6rem', fontWeight: 'bold', color: 'var(--accent)', textShadow: '0 0 3px #000', zIndex: 10 }}>{amount}</div>
-
-                                                        {/* Item Name */}                                                        <div style={{ fontSize: '0.65rem', color: 'var(--text-main)', textAlign: 'center', width: '100%', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', fontWeight: 'bold', lineHeight: '1.1', flexShrink: 0, padding: '2px 0' }}>
-                                                            {(() => {
-                                                                return item.name || (() => {
-                                                                    let cleanId = id.replace(/_Q\d+$/, '').replace(/_\d+STAR$/, '');
-                                                                    return formatItemId(cleanId);
-                                                                })();
-                                                            })()}
-                                                        </div>
-
+                                                    {/* Icon */}
+                                                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', minHeight: 0, overflow: 'hidden' }}>
+                                                        {item.icon ? (
+                                                            typeof item.icon === 'string' ? <img src={item.icon} alt={item.name} style={{ width: item.scale || '70%', height: item.scale || '70%', objectFit: 'contain' }} /> : <item.icon size={20} color={item.rarityColor || "var(--text-dim)"} />
+                                                        ) : <Package size={20} color="var(--text-dim)" />}
                                                     </div>
-                                                )
-                                            })();
-                                        })}
+
+                                                    {/* Quantity */}
+                                                    <div style={{ position: 'absolute', top: '2px', right: '4px', fontSize: '0.6rem', fontWeight: 'bold', color: 'var(--accent)', textShadow: '0 0 3px #000', zIndex: 10 }}>{amount}</div>
+
+                                                    {/* Item Name */}
+                                                    <div style={{ fontSize: '0.65rem', color: 'var(--text-main)', textAlign: 'center', width: '100%', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', fontWeight: 'bold', lineHeight: '1.1', flexShrink: 0, padding: '2px 0' }}>
+                                                        {item.name || formatItemId(id.replace(/_Q\d+$/, '').replace(/_\d+STAR$/, ''))}
+                                                    </div>
+
+                                                </div>
+                                            )
+                                        })();
+                                    })}
                                 </div>
                             </div>
                         </div>
