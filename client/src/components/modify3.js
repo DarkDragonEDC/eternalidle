@@ -199,7 +199,7 @@ const donateModalCode = `
 
                                 {/* Item Donation */}
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                    <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem', fontWeight: 'bold' }}>ITEM DONATION (RAW)</div>
+                                    <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem', fontWeight: 'bold' }}>ITEM DONATION</div>
                                     
                                     <div style={{
                                         display: 'grid',
@@ -248,7 +248,7 @@ const donateModalCode = `
                                                         </div>
                                                         <div style={{ textAlign: 'center' }}>
                                                             <div style={{ color: '#fff', fontSize: '0.8rem', fontWeight: 'bold' }}>{amount.toLocaleString()}</div>
-                                                            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.55rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '90px' }}>{id.replace(/_/g, ' ')}</div>
+                                                            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.55rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '90px' }}>{formatItemId(id)}</div>
                                                         </div>
                                                     </div>
                                                 );
@@ -367,6 +367,16 @@ const lucideImportMatch = code.match(/import\s+\{([^}]+)\}\s+from\s+['"]lucide-r
 if (lucideImportMatch && !lucideImportMatch[1].includes("PackagePlus")) {
     let newImports = lucideImportMatch[1] + ", PackagePlus";
     code = code.replace(lucideImportMatch[0], "import {" + newImports + "} from 'lucide-react';");
+}
+
+const itemsImportMatch = code.match(/import\s+\{([^}]+)\}\s+from\s+['"]@shared\/items['"];/);
+if (itemsImportMatch) {
+    if (!itemsImportMatch[1].includes("formatItemId")) {
+        let newItemsImports = itemsImportMatch[1] + ", formatItemId";
+        code = code.replace(itemsImportMatch[0], "import {" + newItemsImports + "} from '@shared/items';");
+    }
+} else {
+    code = "import { formatItemId } from '@shared/items';\n" + code;
 }
 
 fs.writeFileSync(path, code);

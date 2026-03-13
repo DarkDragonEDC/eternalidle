@@ -1,55 +1,77 @@
 import React, { useState, useEffect } from 'react';
+import { useAppStore } from '../store/useAppStore';
 import { formatNumber } from '@utils/format';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Timer, TrendingUp, Trophy, Swords } from 'lucide-react';
+import { Timer, TrendingUp, Trophy, Swords, Minimize2 } from 'lucide-react';
 import ResponsiveText from './ResponsiveText';
 
-const WorldBossFight = ({ gameState, socket, onFinish }) => {
-    const [fightData, setFightData] = useState({
-        damage: 0,
-        elapsed: 0,
-        rankingPos: '--',
-        status: 'ACTIVE'
+const WorldBossFight = ({ gameState, socket, onFinish, onMinimize }) => {
+    const [fightData, setFightData] = useState(() => {
+        const persisted = gameState?.state?.activeWorldBossFight;
+        if (persisted) {
+            return {
+                damage: persisted.damage || 0,
+                elapsed: Math.max(0, Date.now() - persisted.startedAt),
+                rankingPos: persisted.lastBroadcastPos || '--',
+                status: 'ACTIVE'
+            };
+        }
+        return {
+            damage: 0,
+            elapsed: 0,
+            rankingPos: '--',
+            status: 'ACTIVE'
+        };
     });
+
+    // Re-sync if gameState updates and damage changes significantly
+    useEffect(() => {
+        const persisted = gameState?.state?.activeWorldBossFight;
+        if (persisted) {
+            setFightData(prev => ({
+                ...prev,
+                damage: persisted.damage,
+                rankingPos: persisted.lastBroadcastPos || prev.rankingPos
+            }));
+        }
+    }, [gameState?.state?.activeWorldBossFight?.damage]);
 
     const [logs, setLogs] = useState([]);
     const logsEndRef = React.useRef(null);
 
+    const store = useAppStore();
+    const { worldBossUpdate } = store;
+
     useEffect(() => {
-        if (!socket) return;
-        const handleUpdate = (result) => {
-            if (result.worldBossUpdate) {
-                const update = result.worldBossUpdate;
-                setFightData(prev => ({
-                    ...prev,
-                    damage: update.damage !== undefined ? update.damage : prev.damage,
-                    elapsed: update.elapsed !== undefined ? update.elapsed : prev.elapsed,
-                    rankingPos: update.rankingPos !== undefined ? update.rankingPos : prev.rankingPos,
-                    status: update.status || prev.status
-                }));
+        if (!worldBossUpdate) return;
 
-                // Process Hits for Log
-                if (update.hits && update.hits.length > 0) {
-                    const newLogs = update.hits.map(hit => ({
-                        id: Date.now() + Math.random(),
-                        damage: hit.damage,
-                        crit: hit.crit
-                    }));
+        const update = worldBossUpdate;
+        setFightData(prev => ({
+            ...prev,
+            damage: update.damage !== undefined ? update.damage : prev.damage,
+            elapsed: update.elapsed !== undefined ? update.elapsed : prev.elapsed,
+            rankingPos: update.rankingPos !== undefined ? update.rankingPos : prev.rankingPos,
+            status: update.status || prev.status
+        }));
 
-                    setLogs(prev => {
-                        const updated = [...prev, ...newLogs];
-                        return updated.slice(-20); // Keep last 20
-                    });
-                }
+        // Process Hits for Log
+        if (update.hits && update.hits.length > 0) {
+            const newLogs = update.hits.map(hit => ({
+                id: Date.now() + Math.random(),
+                damage: hit.damage,
+                crit: hit.crit
+            }));
 
-                if (update.status === 'FINISHED') {
-                    setTimeout(() => onFinish(update), 3000);
-                }
-            }
-        };
-        socket.on('action_result', handleUpdate);
-        return () => socket.off('action_result', handleUpdate);
-    }, [socket]);
+            setLogs(prev => {
+                const updated = [...prev, ...newLogs];
+                return updated.slice(-20); // Keep last 20
+            });
+        }
+
+        if (update.status === 'FINISHED') {
+            setTimeout(() => onFinish(update), 3000);
+        }
+    }, [worldBossUpdate, onFinish]);
 
     useEffect(() => {
         logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -59,6 +81,13 @@ const WorldBossFight = ({ gameState, socket, onFinish }) => {
     const progress = Math.min(100, (fightData.elapsed / 60000) * 100);
     const isFinished = fightData.status === 'FINISHED';
     const isLowTime = timeLeft <= 10;
+
+    // Auto-finish if time expired and we are still "ACTIVE"
+    useEffect(() => {
+        if (timeLeft <= 0 && !isFinished) {
+            onFinish();
+        }
+    }, [timeLeft, isFinished, onFinish]);
 
     return (
         <motion.div
@@ -109,8 +138,34 @@ const WorldBossFight = ({ gameState, socket, onFinish }) => {
             <div style={{
                 width: '100%',
                 padding: '20px 24px 16px',
-                maxWidth: '700px'
+                maxWidth: '700px',
+                position: 'relative'
             }}>
+                {/* Minimize Button */}
+                <button 
+                    onClick={onMinimize}
+                    style={{
+                        position: 'absolute',
+                        right: '10px',
+                        top: '10px',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '8px',
+                        padding: '8px',
+                        color: 'rgba(255,255,255,0.6)',
+                        cursor: 'pointer',
+                        zIndex: 10,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.2s'
+                    }}
+                    onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'white'; }}
+                    onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}
+                    title="Minimize"
+                >
+                    <Minimize2 size={18} />
+                </button>
                 {/* Stats Row */}
                 <div style={{
                     display: 'flex',

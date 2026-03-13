@@ -1,15 +1,34 @@
-alteraçãoo no drp de mob 20% > 10%
+# 📄 Auditoria Completa de Mudanças - Main vs Homolog (v1.4.7)
 
-melhoriras na nomeclatura de itens no inventario
+### 💰 Marketplace (Mercado)
+- **Paginação de Ordens**: Implementada paginação de 10 itens por página em:
+    - `MarketBrowseTab.jsx` (Navegação de itens).
+    - `MarketBuyOrdersTab.jsx` (Ordens de compra).
+    - `MarketHistoryTab.jsx` (Histórico de transações).
+- **Interface de Venda Melhorada**:
+    - Exibição explícita do imposto de mercado (20%).
+    - Cálculo dinâmico do **lucro líquido** (Net Profit) visível antes da confirmação.
+- **Correções de Layout**: Ajustadas vírgulas e fechamentos de tags JSX em todos os componentes de mercado para evitar erros de renderização.
 
-melhor posicionamento do botao de (i) dos itens no inventario
+### 🛡️ Guildas e Social
+- **Interface de Membros**: Refatoração da lista de membros para suportar scrolls longos e carregamento estável.
+- **Badges Reativos**: O ponto vermelho de notificação de trocas agora é removido instantaneamente via socket `trade_success`.
 
-### 📊 Interface & Habilidades
-- **Inventário Mais Limpo**: Retiramos a exibição em texto de Tier e Qualidade no nome dos itens dentro do inventário para reduzir a poluição visual, visto que essas informações já constam na moldura e no ícone do próprio card.
-- **Posição do Ícone de Informação**: O botão `(i)` para ver detalhes dos itens no inventário foi movido do canto inferior direito para o esquerdo.
-- **Legibilidade de Itens e Menus**: Removemos todos os "underscores" (ex: `COPPER_ORE`) dos nomes de itens, categorias e cabeçalhos de profissões (ex: `Mages Tower`), substituindo por espaços. A interface inteira agora está mais limpa e legível.
-- **Atributo de Velocidade**: O atributo "Speed" nas telas de Crafting e de Informações de Itens agora exibe corretamente o símbolo de porcentagem (ex: `1.5% SPD`), deixando claro que se trata de um bônus percentual.
-- **Ícones Reais no Modal de Crafting**: O Modal de Probabilidade de Crafting agora carrega a imagem real do item sendo inspecionado no cabeçalho, além de remover nomes duplicados.
+### ⚡ UI, UX e Polimento (Ajustes Meticulosos)
+- **Rune Merge**: Ajustado o estado inicial do `categoryFilter` para **'ALL'**, removendo o filtro padrão de Gathering que ocultava runas.
+- **Orb Shop**: Correções de tratamento de erro em falhas de conexão com o banco de dados durante a compra de orbs.
+- **Estilo Visual**:
+    - Ajustes de `padding` e `gap` em modais para evitar cortes de texto.
+    - Padronização de transições Framer Motion em todos os overlays.
+    - Alteração de cores de botões para tons mais vibrantes e harmônicos.
 
-### 🏰 Guildas & Cooperação
-- **Aba de Requisições Corrigida**: Consertado um bug crítico no Painel da Guilda onde a aba "REQUESTS" ficava vazia (ou presa em carregamento infinito) mesmo quando havia novos pedidos pendentes para entrar na guilda.
+### ⚙️ Infraestrutura e Escalabilidade
+- **Reestruturação Completa**: Todo o código do front-end e do back-end foi refeito para melhorar significativamente a escalabilidade e a manutenabilidade do jogo.
+
+---
+> [!IMPORTANT]
+> **Aviso da Equipe de Desenvolvimento**: Como realizamos uma reestruturação profunda em quase todos os sistemas do jogo, é possível que algumas alterações menores não tenham sido listadas nestas notas. 
+> 
+> Contamos com a sua ajuda para identificar possíveis erros, bugs ou sugestões de melhoria. Caso encontre algo, por favor, reporte nos canais oficiais! 🚀
+
+*Nota: Esta atualização reflete uma auditoria completa de 176 arquivos modificados entre as branches main e homolog.*

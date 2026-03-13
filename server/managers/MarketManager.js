@@ -23,18 +23,9 @@ export class MarketManager {
 
         // Map data to ensure seller_character_id is available even if column is missing
         return (data || []).map(l => {
-            let itemId = l.item_id;
-            if (itemId && itemId.includes('SHIELD')) {
-                itemId = itemId.replace('SHIELD', 'SHEATH');
-                if (l.item_data) {
-                    if (l.item_data.id) l.item_data.id = l.item_data.id.replace('SHIELD', 'SHEATH');
-                    if (l.item_data.name) l.item_data.name = l.item_data.name.replace('Shield', 'Sheath');
-                }
-            }
-
             return {
                 ...l,
-                item_id: itemId,
+                item_id: l.item_id,
                 seller_character_id: l.seller_character_id || l.item_data?.seller_character_id
             };
         });
@@ -71,7 +62,7 @@ export class MarketManager {
 
         char.state.silver = (char.state.silver || 0) + totalSilver;
 
-        await this.gameManager.saveState(char.id, char.state);
+        await this.gameManager.saveStateCritical(char.id, char.state);
         return { success: true, message: `Sold ${quantity}x ${itemData.name} for ${totalSilver} Silver`, unitPrice: pricePerUnit, total: totalSilver };
     }
 
@@ -224,7 +215,7 @@ export class MarketManager {
                                 '/market'
                             );
                         }
-                        await this.gameManager.saveState(buyer.id, buyer.state);
+                        await this.gameManager.saveStateCritical(buyer.id, buyer.state);
                     }
 
                     // Update Buy Order
@@ -238,7 +229,9 @@ export class MarketManager {
                         .eq('id', order.id);
 
                     // Record History
+                    console.log(`[AUTO-MATCH] Recording history: item=${itemId}, seller=${userId}, buyer=${order.buyer_id}`);
                     await this.gameManager.supabase.from('market_history').insert([{
+                        id: Math.floor(Date.now() * 100) + Math.floor(Math.random() * 100),
                         item_id: itemId,
                         item_data: { ...itemData, quality, stars },
                         seller_id: userId,
@@ -273,7 +266,7 @@ export class MarketManager {
             inventory[itemId] -= parsedAmount;
             if (inventory[itemId] <= 0) delete inventory[itemId];
         }
-        await this.gameManager.saveState(char.id, char.state);
+        await this.gameManager.saveStateCritical(char.id, char.state);
 
         if (remainingAmount > 0) {
             // Clean metadata from server's entry
@@ -320,15 +313,6 @@ export class MarketManager {
             .single();
 
         if (fetchError || !listing) throw new Error("Listing not found or expired");
-
-        // ITEM MIGRATION: Shield -> Sheath
-        if (listing.item_id && listing.item_id.includes('SHIELD')) {
-            listing.item_id = listing.item_id.replace('SHIELD', 'SHEATH');
-            if (listing.item_data) {
-                if (listing.item_data.id) listing.item_data.id = listing.item_data.id.replace('SHIELD', 'SHEATH');
-                if (listing.item_data.name) listing.item_data.name = listing.item_data.name.replace('Shield', 'Sheath');
-            }
-        }
 
         const sellerCharId = listing.seller_character_id || listing.item_data?.seller_character_id;
         if (sellerCharId === buyer.id) throw new Error("Current character cannot buy its own item");
@@ -448,9 +432,11 @@ export class MarketManager {
                 .eq('id', sellerCharId)
                 .single()).data?.name || 'Unknown';
 
-            await this.gameManager.supabase
+            console.log(`[MarketManager] Recording history for buyer=${buyerId}, seller=${listing.seller_id}, itemId=${listing.item_id}`);
+            const { error: historyError } = await this.gameManager.supabase
                 .from('market_history')
                 .insert([{
+                    id: Math.floor(Date.now() * 100) + Math.floor(Math.random() * 100),
                     item_id: listing.item_id,
                     item_data: listing.item_data,
                     seller_id: listing.seller_id,
@@ -463,6 +449,11 @@ export class MarketManager {
                     tax_paid: tax,
                     created_at: new Date().toISOString()
                 }]);
+            
+            if (historyError) {
+                console.error('[MarketManager] Supabase insert returning error for history:', historyError);
+                throw historyError;
+            }
             console.log(`[MarketManager] Recorded history for ${qtyNum}x ${listing.item_id}`);
         } catch (historyErr) {
             console.error('[MarketManager] Error recording history:', historyErr);
@@ -533,7 +524,7 @@ export class MarketManager {
             timestamp: Date.now()
         });
 
-        await this.gameManager.saveState(char.id, char.state);
+        await this.gameManager.saveStateCritical(char.id, char.state);
         return { success: true, message: `Listing cancelled. Item sent to Claim tab.${feeMsg}` };
     }
 
@@ -566,7 +557,7 @@ export class MarketManager {
         }
 
         char.state.claims.splice(claimIndex, 1);
-        await this.gameManager.saveState(char.id, char.state);
+        await this.gameManager.saveStateCritical(char.id, char.state);
         return { success: true, message: "Claimed successfully!" };
     }
 
@@ -725,7 +716,7 @@ export class MarketManager {
                             orderType: 'AUTO_MATCH_SELL'
                         });
                         this.gameManager.addNotification(seller, 'SUCCESS', `Your item ${itemData.name} (x${fillQty}) was sold! +${sellerProfit} Silver.`);
-                        await this.gameManager.saveState(seller.id, seller.state);
+                        await this.gameManager.saveStateCritical(seller.id, seller.state);
                     }
 
                     // Update Listing
@@ -739,6 +730,7 @@ export class MarketManager {
                     }
 
                     // Record History
+                    console.log(`[AUTO-MATCH BUY] Recording history: item=${baseItemId}, seller=${listing.seller_id}, buyer=${userId}`);
                     await this.gameManager.supabase.from('market_history').insert([{
                         item_id: baseItemId,
                         item_data: listing.item_data,
@@ -793,7 +785,7 @@ export class MarketManager {
             }
         }
 
-        await this.gameManager.saveState(char.id, char.state);
+        await this.gameManager.saveStateCritical(char.id, char.state);
 
         const msg = itemsBought > 0
             ? `Instantly bought ${itemsBought} units. ${remainingToBuy > 0 ? `Remaining ${remainingToBuy} units placed as Buy Order.` : 'All units bought!'}${totalRefund > 0 ? ` Refunded ${totalRefund} Silver change.` : ''}`
@@ -939,7 +931,7 @@ export class MarketManager {
                 orderType: 'BUY_ORDER'
             });
             this.gameManager.addNotification(buyer, 'SUCCESS', `Your buy order for ${order.item_data.name} was partially filled (x${qtyNum}).`);
-            await this.gameManager.saveState(buyer.id, buyer.state);
+            await this.gameManager.saveStateCritical(buyer.id, buyer.state);
         }
 
         const newFilled = Number(order.filled) + qtyNum;
@@ -956,9 +948,11 @@ export class MarketManager {
         if (updateError) throw updateError;
 
         try {
-            await this.gameManager.supabase
+            console.log(`[MarketManager] fillBuyOrder recording history: buyer=${order.buyer_id}, seller=${sellerId}, itemId=${lookupId}`);
+            const { error: historyError } = await this.gameManager.supabase
                 .from('market_history')
                 .insert([{
+                    id: Math.floor(Date.now() * 100) + Math.floor(Math.random() * 100),
                     item_id: lookupId,
                     item_data: order.item_data,
                     seller_id: sellerId,
@@ -969,12 +963,17 @@ export class MarketManager {
                     price_total: totalPrice,
                     price_per_unit: order.price_per_unit,
                     tax_paid: tax,
-                    order_type: 'BUY_ORDER',
                     created_at: new Date().toISOString()
                 }]);
-        } catch (e) { console.error("History recording failed", e); }
+            
+            if (historyError) {
+                console.error('[MarketManager] fillBuyOrder history insert error:', historyError);
+            }
+        } catch (e) {
+            console.error("History recording failed", e);
+        }
 
-        await this.gameManager.saveState(seller.id, seller.state);
+        await this.gameManager.saveStateCritical(seller.id, seller.state);
         return { success: true, message: `Successfully filled ${qtyNum}x of the buy order!` };
     }
 
@@ -1021,7 +1020,7 @@ export class MarketManager {
             timestamp: Date.now()
         });
 
-        await this.gameManager.saveState(char.id, char.state);
+        await this.gameManager.saveStateCritical(char.id, char.state);
         return { success: true, message: `Buy order cancelled. ${refund.toLocaleString()} Silver returned to Claims.${fee > 0 ? ` (Fee: ${fee.toLocaleString()} Silver)` : ''}` };
     }
 

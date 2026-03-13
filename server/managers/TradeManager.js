@@ -126,20 +126,6 @@ export class TradeManager {
             .single();
         if (error) throw error;
 
-        // ITEM MIGRATION: Shield -> Sheath
-        const migrateOffer = (offer) => {
-            if (offer && offer.items) {
-                offer.items.forEach(it => {
-                    if (it.id && it.id.includes('SHIELD')) {
-                        it.id = it.id.replace('SHIELD', 'SHEATH');
-                        if (it.name) it.name = it.name.replace('Shield', 'Sheath');
-                    }
-                });
-            }
-        };
-        migrateOffer(data.sender_offer);
-        migrateOffer(data.receiver_offer);
-
         // Inject tax rate for the client
         data.tax_rate = await this._getTradeTaxRate(data.sender_id, data.receiver_id);
 
@@ -360,13 +346,10 @@ export class TradeManager {
 
                 if (updateError) throw updateError;
 
-                // Persist both
-                await this.gameManager.saveState(sender.id, sender.state);
-                await this.gameManager.saveState(receiver.id, receiver.state);
-
-                this.gameManager.markDirty(sender.id);
-                this.gameManager.markDirty(receiver.id);
-
+                // Persist both immediately
+                await this.gameManager.saveStateCritical(sender.id, sender.state);
+                await this.gameManager.saveStateCritical(receiver.id, receiver.state);
+ 
                 // --- Record Trade History ---
                 try {
                     // Sanitize items: only store essential fields, not full metadata blobs

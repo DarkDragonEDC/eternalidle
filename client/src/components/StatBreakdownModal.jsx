@@ -3,7 +3,7 @@ import { X, Sword, Shield, Zap, Heart, Star } from 'lucide-react';
 import { resolveItem, calculateRuneBonus } from '@shared/items';
 import { getProficiencyStats } from '@shared/proficiency_stats';
 
-const StatBreakdownModal = ({ statType, statId, value, stats, equipment, membership, onClose }) => {
+const StatBreakdownModal = ({ statType, statId, value, stats, equipment, membership, guildBonuses, onClose }) => {
     // Rounding helper to avoid 0.9999999999995 artifacts
     const fmt = (val) => {
         if (typeof val !== 'number') return val;
@@ -60,7 +60,7 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                 breakdown.push({ label: 'Rune Bonus', value: `+${fmt(damageRuneBonus)}`, sub: '(Flat Damage)' });
             }
             if (potionDmgBonus > 0) {
-                breakdown.push({ label: 'Potion Bonus', value: `+${fmt(potionDmgBonus * 100)}`, sub: '(Flat Damage)' });
+                breakdown.push({ label: 'Potion Bonus', value: `+${fmt(potionDmgBonus * 100)}%`, sub: '(Multiplier)' });
             }
         } else if (statType === 'DEFENSE') {
             const activeProf = stats.activeProf;
@@ -217,7 +217,7 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                 if (isPremium) breakdown.push({ label: 'Premium Membership', value: '+10%' });
 
                 // Guild Bonus
-                const guildBuffs = stats.guild_bonuses || {};
+                const guildBuffs = guildBonuses || stats.guild_bonuses || {};
                 const gatheringSkills = ['WOOD', 'ORE', 'HIDE', 'FIBER', 'FISH', 'HERB'];
                 const refiningSkills = ['PLANK', 'METAL', 'LEATHER', 'CLOTH', 'EXTRACT'];
                 const craftingSkills = ['WARRIOR', 'HUNTER', 'MAGE', 'ALCHEMY', 'TOOLS', 'COOKING'];

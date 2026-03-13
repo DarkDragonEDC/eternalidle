@@ -118,7 +118,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                         </div>
 
                         <div style={{ textAlign: 'center' }}>
-                            <h2 style={{ fontSize: '1.4rem', fontWeight: '900', color: tierColor, letterSpacing: '-0.5px', marginBottom: '4px' }}>{formatItemId(item.id || item.name)}</h2>
+                            <h2 style={{ fontSize: '1.4rem', fontWeight: '900', color: tierColor, letterSpacing: '-0.5px', marginBottom: '4px' }}>{formatItemId(item.id || item.name, { nameOnly: true })}</h2>
                             <div style={{ display: 'center', justifyContent: 'center', gap: '4px', marginBottom: '8px' }}>
                                 {item.stars > 0 && Array.from({ length: item.stars }).map((_, i) => (
                                     <Star key={i} size={14} color="#fbbf24" fill="#fbbf24" strokeWidth={3} />

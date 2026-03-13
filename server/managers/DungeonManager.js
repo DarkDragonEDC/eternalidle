@@ -164,8 +164,8 @@ export class DungeonManager {
                     }
                 };
             }
-        } catch (error) {
-            console.error(`[DUNGEON] Error in processDungeonTick:`, error);
+        } catch (err) {
+            console.error(`[DUNGEON] Error in processDungeonTick for ${char.name}:`, err);
         }
     }
 

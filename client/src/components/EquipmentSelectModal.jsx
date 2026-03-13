@@ -85,9 +85,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onEquipFood
                 return (b.tier || 0) - (a.tier || 0);
             }
 
-            if ((b.tier || 0) !== (a.tier || 0)) return (b.tier || 0) - (a.tier || 0);
-
-            // Tool Efficiency Priority
+            // 1. Tool Efficiency Priority
             const isTool = (type) => type?.startsWith('TOOL_') || type === 'TOOL';
             if (isTool(a.type) && isTool(b.type)) {
                 const bEff = b.stats?.efficiency || 0;
@@ -95,7 +93,12 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onEquipFood
                 if (bEff !== aEff) return bEff - aEff;
             }
 
+            // 2. IP Priority
             if ((b.ip || 0) !== (a.ip || 0)) return (b.ip || 0) - (a.ip || 0);
+
+            // 3. Tier Priority (Fallback)
+            if ((b.tier || 0) !== (a.tier || 0)) return (b.tier || 0) - (a.tier || 0);
+
             const bQual = b.quality || b.stars || 0;
             const aQual = a.quality || a.stars || 0;
             return bQual - aQual;

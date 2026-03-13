@@ -15,7 +15,14 @@ const EquipmentSlot = ({ slot, icon, label, item: rawItem, delay = 0, onItemClic
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay }}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}
+            onClick={() => item && onItemClick(item)}
+            style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                gap: '2px',
+                cursor: item ? 'pointer' : 'default'
+            }}
         >
             <div style={{
                 width: '54px',
@@ -101,7 +108,7 @@ const EquipmentSlot = ({ slot, icon, label, item: rawItem, delay = 0, onItemClic
                     overflow: 'hidden',
                     marginTop: '2px'
                 }}>
-                    {formatItemId(item.id || item.name, { nameOnly: true })}
+                    {formatItemId(item.id || item.name)}
                 </span>
             ) : (
                 <span style={{ fontSize: '0.45rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.5px', opacity: 0.6 }}>
@@ -689,7 +696,7 @@ const InspectModal = React.memo(({ data, theme: propTheme, onClose, onItemClick,
                         )}
 
                         {activeTab === 'RUNES' && (
-                            <RunesTabView equipment={equipment} />
+                            <RunesTabView equipment={equipment} onItemClick={onItemClick} />
                         )}
                     </div>
 
@@ -749,7 +756,7 @@ const InspectModal = React.memo(({ data, theme: propTheme, onClose, onItemClick,
                         <StatBreakdownModal
                             statType={breakdownModal.type}
                             value={breakdownModal.value}
-                            stats={stats}
+                            stats={{ ...stats, guild_bonuses: data.guild_bonuses }}
                             equipment={equipment}
                             membership={data.membership}
                             onClose={() => setBreakdownModal(null)}
@@ -874,13 +881,14 @@ const RunesTabView = ({ equipment, onItemClick }) => {
                                 {cat.icon} {cat.label}
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-                                <RuneSlot slot={`rune_${cat.id}_XP`} label="XP" icon={<Award size={18} />} item={equipment[`rune_${cat.id}_XP`]} />
-                                <RuneSlot slot={`rune_${cat.id}_DUPLIC`} label="DUPL" icon={<Layers size={18} />} item={equipment[`rune_${cat.id}_DUPLIC`]} />
+                                <RuneSlot slot={`rune_${cat.id}_XP`} label="XP" icon={<Award size={18} />} item={equipment[`rune_${cat.id}_XP`]} onItemClick={onItemClick} />
+                                <RuneSlot slot={`rune_${cat.id}_DUPLIC`} label="DUPL" icon={<Layers size={18} />} item={equipment[`rune_${cat.id}_DUPLIC`]} onItemClick={onItemClick} />
                                 <RuneSlot
                                     slot={activeRuneTab === 'GATHERING' ? `rune_${cat.id}_AUTO` : `rune_${cat.id}_EFF`}
                                     label={activeRuneTab === 'GATHERING' ? "AUTO" : "EFF"}
                                     icon={<Zap size={18} />}
                                     item={equipment[activeRuneTab === 'GATHERING' ? `rune_${cat.id}_AUTO` : `rune_${cat.id}_EFF`]}
+                                    onItemClick={onItemClick}
                                 />
                             </div>
                         </div>

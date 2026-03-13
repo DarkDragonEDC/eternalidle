@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, Shield, Sword, Swords, Trophy, Sparkles, Users, Settings, Coins, Crown, Star, Plus, Info, Check, Tag, User, Zap, Landmark, ClipboardList, Pickaxe, FlaskConical, Hammer, Lock, Dices, Library } from 'lucide-react';
-import { COUNTRIES } from '../../../shared/countries';
-import { GUILD_XP_TABLE } from '../../../shared/guilds.js';
+import { COUNTRIES } from '@shared/countries';
+import { GUILD_XP_TABLE } from '@shared/guilds.js';
 import { formatNumber } from '@utils/format';
 import { motion, AnimatePresence } from 'framer-motion';
 

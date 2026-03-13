@@ -70,20 +70,27 @@ const getTimeAgo = (dateStr) => {
     return `${days}d ago`;
 };
 
-const SocialPanel = ({ socket, isOpen, onClose, onInvite, onOpenTrade, tradeInvites, gameState, onInspect, isPreviewActive, onPreviewActionBlocked }) => {
-    const [searchNick, setSearchNick] = useState('');
-    const [searchResults, setSearchResults] = useState([]);
-    const [searching, setSearching] = useState(false);
-    const [error, setError] = useState('');
+import { useAppStore } from '../store/useAppStore';
 
+const SocialPanel = ({ socket, isOpen, onClose, onInvite, onOpenTrade, tradeInvites, gameState, onInspect, isPreviewActive, onPreviewActionBlocked }) => {
+    const store = useAppStore();
+    const {
+        friends, setFriends,
+        isLoadingFriends, setIsLoadingFriends,
+        playerSearchResults, setPlayerSearchResults,
+        isSearchingPlayers: searching, setIsSearchingPlayers: setSearching,
+        tradeHistory, setTradeHistory,
+        isLoadingTradeHistory: isLoadingHistory, setIsLoadingTradeHistory: setIsLoadingHistory,
+        socialError: error, setSocialError: setError
+    } = store;
+
+    const [searchNick, setSearchNick] = useState('');
+    // Removed duplicate search results, using playerSearchResults for both
     const [friendSearchNick, setFriendSearchNick] = useState('');
-    const [friendSearchResults, setFriendSearchResults] = useState([]);
-    const [isSearchingFriends, setIsSearchingFriends] = useState(false);
-    const [friendSearchError, setFriendSearchError] = useState('');
-    const [tradeHistory, setTradeHistory] = useState([]);
-    const [isLoadingHistory, setIsLoadingHistory] = useState(false);
-    const [friends, setFriends] = useState([]);
-    const [isLoadingFriends, setIsLoadingFriends] = useState(false);
+    const friendSearchResults = playerSearchResults;
+    const isSearchingFriends = searching;
+    const friendSearchError = error;
+
     const [socialTab, setSocialTab] = useState('FRIENDS'); // FRIENDS, TRADE
     const [friendsSubTab, setFriendsSubTab] = useState('LIST'); // LIST, REQUESTS
     const [tradeSubTab, setTradeSubTab] = useState('ACTIVE'); // ACTIVE, HISTORY
@@ -92,64 +99,7 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, onOpenTrade, tradeInvi
     const [bestFriendToConfirm, setBestFriendToConfirm] = useState(null);
     const [bestFriendToRemove, setBestFriendToRemove] = useState(null);
 
-    useEffect(() => {
-        if (!socket) return;
-
-        const handleResult = (results) => {
-            if (searching) {
-                setSearchResults(results || []);
-                setSearching(false);
-                setError('');
-            } else if (isSearchingFriends) {
-                setFriendSearchResults(results || []);
-                setIsSearchingFriends(false);
-                setFriendSearchError('');
-            }
-        };
-
-        const handleError = (err) => {
-            if (searching) {
-                setError(err.message);
-                setSearching(false);
-                setSearchResults([]);
-            } else if (isSearchingFriends) {
-                setFriendSearchError(err.message);
-                setIsSearchingFriends(false);
-                setFriendSearchResults([]);
-            }
-        };
-
-        socket.on('trade_search_result', handleResult);
-        socket.on('trade_search_error', handleError);
-        socket.on('error', handleError);
-
-        const handleTradeHistory = (history) => {
-            setTradeHistory(history || []);
-            setIsLoadingHistory(false);
-        };
-        socket.on('my_trade_history_update', handleTradeHistory);
-
-        const handleFriendsUpdate = (list) => {
-            setFriends(list || []);
-            setIsLoadingFriends(false);
-        };
-        socket.on('friends_list_update', handleFriendsUpdate);
-
-        const handleSocialSuccess = (res) => {
-            // Re-fetch friends on any success action (add, respond, remove)
-            socket.emit('get_friends');
-        };
-        socket.on('friend_action_success', handleSocialSuccess);
-
-        return () => {
-            socket.off('trade_search_result', handleResult);
-            socket.off('trade_search_error', handleError);
-            socket.off('error', handleError);
-            socket.off('my_trade_history_update', handleTradeHistory);
-            socket.off('friends_list_update', handleFriendsUpdate);
-            socket.off('friend_action_success', handleSocialSuccess);
-        };
-    }, [socket, searching, isSearchingFriends]);
+    // Socket listeners are now centralized in useSocketEvents.js
 
     // Fetch trade history when History tab is active
     useEffect(() => {

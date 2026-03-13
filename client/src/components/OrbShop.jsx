@@ -1,61 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { X, Circle, Zap, Package, Sparkles, Star, ShoppingBag, Check, Trophy, Info } from 'lucide-react';
 
-const OrbShop = ({ socket, gameState, onClose, isPreviewActive, onPreviewActionBlocked }) => {
-    const [storeItems, setStoreItems] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [purchasing, setPurchasing] = useState(null);
-    const [purchaseResult, setPurchaseResult] = useState(null);
-    const [quantityModal, setQuantityModal] = useState(null); // { item, quantity }
+import { useAppStore } from '../store/useAppStore';
 
+const OrbShop = ({ socket, gameState, onClose, isPreviewActive, onPreviewActionBlocked }) => {
+    const store = useAppStore();
+    const {
+        orbStoreItems: storeItems, isLoadingOrbStore: loading,
+        orbShopStatusMessage: purchaseResult, setOrbShopStatusMessage: setPurchaseResult
+    } = store;
+
+    const [purchasing, setPurchasing] = useState(null);
+    const [quantityModal, setQuantityModal] = useState(null); // { item, quantity }
     const [showMSInfo, setShowMSInfo] = useState(false);
 
     const orbs = gameState?.state?.orbs || 0;
-    const isBR = (navigator.language || '').toLowerCase().startsWith('pt');
+    const isBR = navigator.language === 'pt-BR' || navigator.language === 'pt';
 
     useEffect(() => {
-        const handleStoreUpdate = (items) => {
-            setStoreItems(items);
-            setLoading(false);
-        };
-
-        const handlePurchaseSuccess = (result) => {
-            setPurchasing(null);
-            setPurchaseResult({ success: true, message: result.message || 'Purchase successful!' });
-            setTimeout(() => setPurchaseResult(null), 3000);
-        };
-
-        const handlePurchaseError = (result) => {
-            setPurchasing(null);
-            setPurchaseResult({ success: false, message: result.error || 'Purchase failed' });
-            setTimeout(() => setPurchaseResult(null), 3000);
-        };
-
-        const handleStripeSession = (result) => {
-            if (result.url) {
-                setPurchaseResult({ success: true, message: 'Redirecting to Stripe...' });
-                window.location.href = result.url;
-            } else {
-                setPurchasing(null);
-                setPurchaseResult({ success: false, message: 'Failed to create payment session' });
-            }
-        };
-
-        socket.on('orb_store_update', handleStoreUpdate);
-        socket.on('orb_purchase_success', handlePurchaseSuccess);
-        socket.on('orb_purchase_error', handlePurchaseError);
-        socket.on('stripe_checkout_session', handleStripeSession);
-
-        // Request store items AFTER registering listeners
-        socket.emit('get_orb_store');
-
-        return () => {
-            socket.off('orb_store_update', handleStoreUpdate);
-            socket.off('orb_purchase_success', handlePurchaseSuccess);
-            socket.off('orb_purchase_error', handlePurchaseError);
-            socket.off('stripe_checkout_session', handleStripeSession);
-        };
+        if (socket) {
+            socket.emit('get_orb_store');
+        }
     }, [socket]);
+
+    // Socket listeners are now centralized in useSocketEvents.js
+    // which updates store.orbStoreItems and setOrbShopStatusMessage
+    
+    // Clear status message when it changes
+    useEffect(() => {
+        if (purchaseResult) {
+            setPurchasing(null);
+            const timer = setTimeout(() => {
+                setPurchaseResult(null);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [purchaseResult, setPurchaseResult]);
 
     const handlePurchase = (item) => {
         if (isPreviewActive) return onPreviewActionBlocked();

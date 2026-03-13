@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { ITEMS, getSkillForItem, getLevelRequirement, ITEM_LOOKUP, QUALITIES, resolveItem, BASE_QUALITY_CHANCES } from '../../shared/items.js';
 
 // === STARTUP DIAGNOSTIC ===
@@ -29,7 +30,6 @@ export class ActivityManager {
             const diagMsg = `[${new Date().toISOString()}] ACTIVITY-ERROR: itemId='${itemId}', ITEM_LOOKUP size=${Object.keys(ITEM_LOOKUP).length}, T1_POTION_DAMAGE=${ITEM_LOOKUP['T1_POTION_DAMAGE'] ? 'YES' : 'NO'}, T1_POTION_GATHER=${ITEM_LOOKUP['T1_POTION_GATHER'] ? 'YES' : 'NO'}, charCodes=[${[...String(itemId)].map(c => c.charCodeAt(0)).join(',')}]\n`;
             console.error(diagMsg);
             try {
-                const fs = await import('fs');
                 fs.appendFileSync('activity_debug.log', diagMsg);
             } catch (e) {
                 console.error("FAILED TO WRITE DEBUG LOG", e);
@@ -113,6 +113,11 @@ export class ActivityManager {
         char.activity_started_at = new Date().toISOString();
         char.last_saved = new Date().toISOString();
 
+        // PUSH NOTIFICATION: Schedule for offline delivery
+        if (this.gameManager.pushManager) {
+            this.gameManager.pushManager.scheduleActivityNotification(char, totalDuration * 1000);
+        }
+
         // Mark for persistence
         await this.gameManager.saveState(char.id, char.state);
 
@@ -143,6 +148,11 @@ export class ActivityManager {
         // Update Character Object (Cache)
         char.current_activity = null;
         char.activity_started_at = null;
+
+        // PUSH NOTIFICATION: Cancel any scheduled push
+        if (this.gameManager.pushManager) {
+            this.gameManager.pushManager.cancelActivityNotification(char.id);
+        }
 
         // Mark for persistence
         await this.gameManager.saveState(char.id, char.state);
@@ -206,12 +216,15 @@ export class ActivityManager {
         const baseXp = item.xp || 5;
 
         // Multipliers (Now Additive)
-        const yieldBonus = (stats.globals?.xpYield || 0); // e.g. 15 for 15%
-        const specificBonus = (stats.xpBonus?.GATHERING || 0);
-        const runeSkillBonus = (actKey ? (stats.xpBonus?.[actKey] || 0) : 0);
+        // stats.globals.xpYield: Global XP buffs/membership
+        // stats.xpBonus.GATHERING: Specific category bonus (e.g. from Guild Station)
+        // stats.xpBonus[actKey]: Activity-specific bonus (e.g. from Runes or specific Guild upgrades)
+        const yieldBonus = (stats.globals?.xpYield || 0); 
+        const categoryBonus = (stats.xpBonus?.GATHERING || 0);
+        const specificBonus = (actKey ? (stats.xpBonus?.[actKey] || 0) : 0);
 
-        // FORMULA: Base * (1 + (Global + Specific + Rune)/100)
-        let totalBonusPc = yieldBonus + specificBonus + runeSkillBonus;
+        // FORMULA: Base * (1 + (Global + Category + Specific)/100)
+        let totalBonusPc = yieldBonus + categoryBonus + specificBonus;
         let xpAmount = baseXp * (1 + totalBonusPc / 100);
 
         if (xpAmount > MAX_ACTIVITY_XP) xpAmount = MAX_ACTIVITY_XP;
@@ -298,11 +311,11 @@ export class ActivityManager {
 
         // Multipliers (Now Additive)
         const yieldBonus = (stats.globals?.xpYield || 0);
-        const specificBonus = (stats.xpBonus?.REFINING || 0);
-        const runeSkillBonus = (actKey ? (stats.xpBonus?.[actKey] || 0) : 0);
+        const categoryBonus = (stats.xpBonus?.REFINING || 0);
+        const specificBonus = (actKey ? (stats.xpBonus?.[actKey] || 0) : 0);
 
-        // FORMULA: Base * (1 + (Global + Specific + Rune)/100)
-        let totalBonusPc = yieldBonus + specificBonus + runeSkillBonus;
+        // FORMULA: Base * (1 + (Global + Category + Specific)/100)
+        let totalBonusPc = yieldBonus + categoryBonus + specificBonus;
         let xpAmount = baseXp * (1 + totalBonusPc / 100);
 
 
@@ -413,11 +426,11 @@ export class ActivityManager {
 
         // Multipliers (Now Additive)
         const yieldBonus = (stats.globals?.xpYield || 0);
-        const specificBonus = (stats.xpBonus?.CRAFTING || 0);
-        const runeSkillBonus = (actKey ? (stats.xpBonus?.[actKey] || 0) : 0);
+        const categoryBonus = (stats.xpBonus?.CRAFTING || 0);
+        const specificBonus = (actKey ? (stats.xpBonus?.[actKey] || 0) : 0);
 
-        // FORMULA: Base * (1 + (Global + Specific + Rune)/100)
-        let totalBonusPc = yieldBonus + specificBonus + runeSkillBonus;
+        // FORMULA: Base * (1 + (Global + Category + Specific)/100)
+        let totalBonusPc = yieldBonus + categoryBonus + specificBonus;
         let xpAmount = baseXp * (1 + totalBonusPc / 100);
 
         if (xpAmount > MAX_ACTIVITY_XP) xpAmount = MAX_ACTIVITY_XP;

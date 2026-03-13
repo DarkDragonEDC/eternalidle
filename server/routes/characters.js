@@ -18,7 +18,7 @@ export const characterRoutes = (gameManager) => {
             if (error) throw error;
 
             // Rehydrate state for frontend compatibility (matches GameManager logic)
-            const processedData = data.map(char => {
+            const processedData = (data || []).map(char => {
                 if (!char.state) char.state = {};
 
                 // Normalize state (Handle potential double nesting)

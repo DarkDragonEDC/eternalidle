@@ -619,7 +619,7 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                             onUse={isInventory ? (id) => {
                                 setSelectedItemForModal(null);
                                 const item = resolveItem(id);
-                                if (id === 'NOOB_CHEST') {
+                                if (id === 'NOOB_CHEST' || id === 'NAME_CHANGE_TOKEN') {
                                     onUse(id);
                                     return;
                                 }

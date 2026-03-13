@@ -1,64 +1,60 @@
 import React, { useState, useEffect } from 'react';
+import { useAppStore } from '../store/useAppStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, AlertCircle, Info, X } from 'lucide-react';
 
 const ToastContainer = ({ socket, settings }) => {
+    const store = useAppStore();
+    const { 
+        lastActionResult, setLastActionResult,
+        tradeSuccess, setTradeSuccess,
+        serverError, setServerError
+    } = store;
+
     const [toasts, setToasts] = useState([]);
 
+    // Action Result Toast
     useEffect(() => {
-        if (!socket) return;
+        if (!lastActionResult) return;
 
-        const handleActionResult = (result) => {
-            // Filter out Combat messages based on content strings
-            const msg = result.message;
-            if (!msg) return;
+        const result = lastActionResult;
+        const msg = result.message;
+        if (!msg) return;
 
-            if (msg.startsWith('Dmg:') ||
-                msg.startsWith('Defeated') ||
-                msg.startsWith('You were defeated')) {
+        // Filters preserved
+        if (msg.startsWith('Dmg:') ||
+            msg.startsWith('Defeated') ||
+            msg.startsWith('You were defeated')) {
+            return;
+        }
+
+        if (msg.startsWith('Exploring') || msg.startsWith('Starting repeat run') || msg.startsWith('Dungeon run is finished')) {
+            return;
+        }
+
+        if (settings?.hideCollectionPopups) {
+            if (msg.includes('+') || msg.toLowerCase().includes('gathered') || msg.toLowerCase().includes('mined') || msg.toLowerCase().includes('caught') || msg.toLowerCase().includes('harvested') || Boolean(result.items_gained)) {
                 return;
             }
+        }
 
-            // Hide Dungeon activity toasts
-            if (msg.startsWith('Exploring') || msg.startsWith('Starting repeat run') || msg.startsWith('Dungeon run is finished')) {
-                return;
-            }
+        addToast(msg, result.success ? 'success' : 'error');
+        setLastActionResult(null);
+    }, [lastActionResult, setLastActionResult, settings]);
 
-            // Hide Settings
-            if (settings?.hideCollectionPopups) {
-                // If the message is a typical gathering success message like (+1 Wood, Gained X XP)
-                if (msg.includes('+') || msg.toLowerCase().includes('gathered') || msg.toLowerCase().includes('mined') || msg.toLowerCase().includes('caught') || msg.toLowerCase().includes('harvested') || Boolean(result.items_gained)) {
-                    return;
-                }
-            }
+    // Trade Success Toast
+    useEffect(() => {
+        if (!tradeSuccess) return;
+        addToast(tradeSuccess.message || 'Trade completed!', 'success');
+        setTradeSuccess(null);
+    }, [tradeSuccess, setTradeSuccess]);
 
-            addToast(msg, result.success ? 'success' : 'error');
-        };
-
-        const handleError = (error) => {
-            addToast(error.message || "An error occurred", 'error');
-        };
-
-        const handleStatus = (status) => {
-            // Optional: level up toast? 
-            // Usually handled by level up modal, but maybe small toast too?
-            // For now, stick to action_result
-        };
-
-        const handleTradeSuccess = (data) => {
-            addToast(data.message || 'Trade completed!', 'success');
-        };
-
-        socket.on('action_result', handleActionResult);
-        socket.on('error', handleError);
-        socket.on('trade_success', handleTradeSuccess);
-
-        return () => {
-            socket.off('action_result', handleActionResult);
-            socket.off('error', handleError);
-            socket.off('trade_success', handleTradeSuccess);
-        };
-    }, [socket]);
+    // Error Toast
+    useEffect(() => {
+        if (!serverError) return;
+        addToast(serverError, 'error');
+        setServerError(null);
+    }, [serverError, setServerError]);
 
     const addToast = (message, type = 'info') => {
         const id = Date.now() + Math.random();

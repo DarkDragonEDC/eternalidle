@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useAppStore } from '../store/useAppStore';
 import { createPortal } from 'react-dom';
 import { resolveItem, calculateItemSellPrice, RUNE_GATHER_ACTIVITIES, RUNE_REFINE_ACTIVITIES, RUNE_CRAFT_ACTIVITIES, RUNES_BY_CATEGORY, formatItemId } from '@shared/items';
 import { formatNumber } from '@utils/format';
@@ -23,7 +24,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
 
     // Filtering and Sorting State
     const [search, setSearch] = useState('');
-    const [categoryFilter, setCategoryFilter] = useState('GATHERING');
+    const [categoryFilter, setCategoryFilter] = useState('ALL');
     const [activityFilter, setActivityFilter] = useState('ALL');
     const [effectFilter, setEffectFilter] = useState('ALL');
     const [tierFilter, setTierFilter] = useState('ALL');
@@ -126,146 +127,109 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
         }, 1500);
     };
 
-    // Listen for craft success/error
+    const store = useAppStore();
+    const { craftRuneSuccess, setCraftRuneSuccess, serverError, setServerError } = store;
+
+    // Listen for craft success/error via centralized store
     useEffect(() => {
-        if (!socket) return;
+        if (!craftRuneSuccess) return;
 
-        const onCraftSuccess = (result) => {
-            setIsCrafting(false);
+        const result = craftRuneSuccess;
+        setIsCrafting(false);
 
-            if (result.items && result.items.length > 1) {
-                // Bulk results - Aggregate by item ID
+        if (result.items && result.items.length > 1) {
+            // Bulk results logic... (same as before)
+            const aggregated = result.items.reduce((acc, r) => {
+                const key = r.item;
+                if (!acc[key]) {
+                    acc[key] = { id: key, ...resolveItem(key), ...r, qty: 0 };
+                }
+                acc[key].qty += (r.qty || 1);
+                return acc;
+            }, {});
 
-                const aggregated = result.items.reduce((acc, r) => {
-                    const key = r.item;
-                    if (!acc[key]) {
-                        acc[key] = { id: key, ...resolveItem(key), ...r, qty: 0 };
-                    }
-                    acc[key].qty += (r.qty || 1);
-                    return acc;
-                }, {});
+            const processingList = Object.values(aggregated);
+            processingList.forEach(item => { item.originalQty = item.qty; });
 
-                // Filter out intermediate items (consumed to create higher tiers)
-                const processingList = Object.values(aggregated);
+            const familyMap = {};
+            processingList.forEach(item => {
+                const match = item.id.match(/^T(\d+)_RUNE_(.+)_(\d+)STAR$/);
+                if (match) {
+                    const tier = parseInt(match[1]);
+                    const type = match[2];
+                    const stars = parseInt(match[3]);
+                    if (!familyMap[type]) familyMap[type] = [];
+                    const rank = (tier - 1) * 3 + (stars - 1);
+                    familyMap[type].push({ rank, item });
+                } else {
+                    if (!familyMap['MISC']) familyMap['MISC'] = [];
+                    familyMap['MISC'].push({ rank: 0, item });
+                }
+            });
 
-                // Store original quantities for calculation
-                processingList.forEach(item => {
-                    item.originalQty = item.qty;
-                });
-
-                const familyMap = {};
-
-                // 1. Group by "Family" using strict ID parsing
-                // Rank = (Tier-1)*3 + (Stars-1)
-                processingList.forEach(item => {
-                    const match = item.id.match(/^T(\d+)_RUNE_(.+)_(\d+)STAR$/);
-                    if (match) {
-                        const tier = parseInt(match[1]);
-                        const type = match[2]; // e.g. MINING_XP
-                        const stars = parseInt(match[3]);
-
-                        if (!familyMap[type]) familyMap[type] = [];
-
-                        // Calculate sequential rank
-                        // T1_1* -> 0, T1_2* -> 1, T1_3* -> 2, T2_1* -> 3...
-                        const rank = (tier - 1) * 3 + (stars - 1);
-
-                        familyMap[type].push({ rank, item });
-                    } else {
-                        // Fallback for non-standard items (shouldn't happen in auto-merge)
-                        if (!familyMap['MISC']) familyMap['MISC'] = [];
-                        familyMap['MISC'].push({ rank: 0, item });
-                    }
-                });
-
-                // 2. Calculate net quantities
-                Object.values(familyMap).forEach(familyItems => {
-                    if (familyItems[0] && familyItems[0].item.id.includes('MISC')) return;
-
-                    // Sort by Rank descending (Highest first)
-                    familyItems.sort((a, b) => b.rank - a.rank);
-
-                    for (let i = 0; i < familyItems.length; i++) {
-                        const current = familyItems[i]; // Higher Rank
-
-                        // Find the item strictly one rank below
-                        // This handles T2_1* (Rank 3) looking for T1_3* (Rank 2) correctly
-                        const lowerRankItem = familyItems.find(f => f.rank === current.rank - 1);
-
-                        if (lowerRankItem) {
-                            // Use ORIGINAL quantity to calculate consumption
-                            // because "Total Created" determines "Total Consumed"
-                            const createdAmount = current.item.originalQty;
-
-                            if (createdAmount > 0) {
-                                const consumedAmount = createdAmount * 2;
-                                lowerRankItem.item.qty -= consumedAmount;
-                            }
+            Object.values(familyMap).forEach(familyItems => {
+                if (familyItems[0] && familyItems[0].item.id.includes('MISC')) return;
+                familyItems.sort((a, b) => b.rank - a.rank);
+                for (let i = 0; i < familyItems.length; i++) {
+                    const current = familyItems[i];
+                    const lowerRankItem = familyItems.find(f => f.rank === current.rank - 1);
+                    if (lowerRankItem) {
+                        const createdAmount = current.item.originalQty;
+                        if (createdAmount > 0) {
+                            lowerRankItem.item.qty -= (createdAmount * 2);
                         }
                     }
-                });
-
-                // 3. Filter positive quantities and sort
-                const sortedResults = processingList
-                    .filter(item => item.qty > 0)
-                    .sort((a, b) => {
-                        const tierDiff = (b.tier || 0) - (a.tier || 0);
-                        if (tierDiff !== 0) return tierDiff;
-                        return (b.stars || 0) - (a.stars || 0);
-                    });
-
-                setResultsModal({
-                    items: sortedResults,
-                    count: result.count
-                });
-                setCraftResult(null); // Clear craft result
-
-                // Auto-select for next merge if in runes tab
-                if (activeTab === 'runes' && sortedResults.length > 0) {
-                    setSelectedShard(sortedResults[0]);
                 }
+            });
+
+            const sortedResults = processingList
+                .filter(item => item.qty > 0)
+                .sort((a, b) => {
+                    const tierDiff = (b.tier || 0) - (a.tier || 0);
+                    if (tierDiff !== 0) return tierDiff;
+                    return (b.stars || 0) - (a.stars || 0);
+                });
+
+            setResultsModal({ items: sortedResults, count: result.count });
+            setCraftResult(null);
+
+            if (activeTab === 'runes' && sortedResults.length > 0) {
+                setSelectedShard(sortedResults[0]);
+            }
+        } else {
+            // Single result
+            const item = resolveItem(result.item);
+            setCraftResult(item);
+
+            if (gameState?.state?.tutorialStep === 'FORGE_CONFIRM' || gameState?.state?.tutorialStep === 'FINAL_MERGE_CLICK') {
+                setResultsModal({ items: [{ ...item, id: result.item, qty: result.qty || 1 }] });
             } else {
-                // Single result
-                const item = resolveItem(result.item);
-                setCraftResult(item);
-
-                // For tutorial, we MUST use resultsModal to show the highlight on the item
-                if (gameState?.state?.tutorialStep === 'FORGE_CONFIRM' || gameState?.state?.tutorialStep === 'FINAL_MERGE_CLICK') {
-                    setResultsModal({
-                        items: [{ ...item, id: result.item, qty: result.qty || 1 }]
-                    });
-                } else {
-                    setResultsModal(null);
-                }
-
-                // Auto-select for next merge if in runes tab
-                if (activeTab === 'runes' && item) {
-                    setSelectedShard({ ...item, id: result.item });
-                }
+                setResultsModal(null);
             }
 
-            // Tutorial Advance Fallback: Ensure the step moves forward when the results appear
-            if (gameState?.state?.tutorialStep === 'FORGE_CONFIRM') {
-                onTutorialComplete?.('CLAIM_FORGE_RESULTS');
-            } else if (gameState?.state?.tutorialStep === 'FINAL_MERGE_CLICK') {
-                onTutorialComplete?.('VIEW_MERGE_RESULTS');
+            if (activeTab === 'runes' && item) {
+                setSelectedShard({ ...item, id: result.item });
             }
-        };
+        }
 
-        const onError = (err) => {
-            if (isCrafting) {
-                setIsCrafting(false);
-            }
-        };
+        // Tutorial Advance
+        if (gameState?.state?.tutorialStep === 'FORGE_CONFIRM') {
+            onTutorialComplete?.('CLAIM_FORGE_RESULTS');
+        } else if (gameState?.state?.tutorialStep === 'FINAL_MERGE_CLICK') {
+            onTutorialComplete?.('VIEW_MERGE_RESULTS');
+        }
 
-        socket.on('craft_rune_success', onCraftSuccess);
-        socket.on('error', onError);
+        setCraftRuneSuccess(null);
+    }, [craftRuneSuccess, setCraftRuneSuccess, activeTab, gameState?.state?.tutorialStep, onTutorialComplete]);
 
-        return () => {
-            socket.off('craft_rune_success', onCraftSuccess);
-            socket.off('error', onError);
-        };
-    }, [socket, isCrafting]);
+    // Handle errors from store
+    useEffect(() => {
+        if (!serverError) return;
+        if (isCrafting) {
+            setIsCrafting(false);
+            // setServerError(null); // Optional: if we want to consume it here
+        }
+    }, [serverError]);
 
     // Filter items based on active tab and search/filters
     const filteredItems = Object.entries(inventory)
@@ -292,8 +256,8 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                 }
                 if (activityFilter !== 'ALL' && !id.includes(`_RUNE_${activityFilter}_`)) return null;
                 if (effectFilter !== 'ALL' && !id.includes(`_${effectFilter}_`)) return null;
-                if (tierFilter !== 'ALL' && item.tier !== parseInt(tierFilter)) return null;
-                if (starsFilter !== 'ALL' && item.stars !== parseInt(starsFilter)) return null;
+                if (tierFilter !== 'ALL' && item.tier < parseInt(tierFilter)) return null;
+                if (starsFilter !== 'ALL' && item.stars < parseInt(starsFilter)) return null;
                 if (showThreePlus && qty < 2) return null;
 
                 return { ...item, id, qty };
@@ -354,8 +318,8 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                 }
                 if (activityFilter !== 'ALL' && !itemId.includes(`_RUNE_${activityFilter}_`)) continue;
                 if (effectFilter !== 'ALL' && !itemId.includes(`_${effectFilter}_`)) continue;
-                if (tierFilter !== 'ALL' && tier !== parseInt(tierFilter)) continue;
-                if (starsFilter !== 'ALL' && stars !== parseInt(starsFilter)) continue;
+                if (tierFilter !== 'ALL' && tier < parseInt(tierFilter)) continue;
+                if (starsFilter !== 'ALL' && stars < parseInt(starsFilter)) continue;
 
                 const pairs = Math.floor(qty / 2);
                 if (pairs > 0) {
@@ -382,7 +346,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
     }, [inventory, activeTab, categoryFilter, activityFilter, effectFilter, tierFilter, starsFilter, search]);
 
     return (
-        <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px', padding: isMobile ? '10px' : '20px', borderRadius: '16px', overflow: 'hidden' }}>
+        <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px', padding: isMobile ? '10px' : '20px', borderRadius: '16px' }}>
 
             {/* Tab Selection */}
             <div style={{ display: 'flex', gap: '10px' }}>
@@ -518,6 +482,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                 style={{
                                     background: 'var(--bg-dark)', borderRadius: '10px', padding: '15px',
                                     border: '1px solid var(--border)', display: 'grid',
+                                    overflow: 'hidden',
                                     gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '15px'
                                 }}
                             >
@@ -555,6 +520,10 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                         <option value="DUPLIC">Duplication</option>
                                         <option value="AUTO">Auto-Refine / Cooking</option>
                                         <option value="EFF">Efficiency</option>
+                                        <option value="ATTACK">Attack Damage</option>
+                                        <option value="ATTACK_SPEED">Attack Speed</option>
+                                        <option value="SAVE_FOOD">Food Saving</option>
+                                        <option value="BURST">Burst / Crit</option>
                                     </select>
                                 </div>
 
@@ -580,7 +549,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                         style={{ background: 'var(--panel-bg)', color: 'var(--text-main)', border: '1px solid var(--border)', padding: '5px', borderRadius: '4px' }}
                                     >
                                         <option value="ALL">All Stars</option>
-                                        {[1, 2, 3, 4, 5].map(s => <option key={s} value={s}>{s} Stars</option>)}
+                                        {[1, 2, 3].map(s => <option key={s} value={s}>{s} Stars</option>)}
                                     </select>
                                 </div>
 

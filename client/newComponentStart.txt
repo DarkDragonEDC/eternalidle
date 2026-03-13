@@ -1,0 +1,217 @@
+const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket, onInspect, isMobile, initialSearch = '', isAnonymous, isPreviewActive, onPreviewActionBlocked }) => {
+    const [activeTab, setActiveTab] = useState('BUY');
+
+    const [marketListings, setMarketListings] = useState([]);
+    const [notification, setNotification] = useState(null);
+    const [marketHistory, setMarketHistory] = useState([]);
+    const [myMarketHistory, setMyMarketHistory] = useState([]);
+    const [buyOrders, setBuyOrders] = useState([]);
+
+    const [buyModal, setBuyModal] = useState(null);
+    const [confirmModal, setConfirmModal] = useState(null);
+    const [createBuyOrderModal, setCreateBuyOrderModal] = useState(null);
+    const [fillOrderModal, setFillOrderModal] = useState(null);
+
+    const [fillQuantity, setFillQuantity] = useState(1);
+    const [itemSuggestions, setItemSuggestions] = useState([]);
+    const [lowestSellPrice, setLowestSellPrice] = useState(null);
+    const [loadingPrice, setLoadingPrice] = useState(false);
+
+    const searchableItems = React.useMemo(() => {
+        const list = [];
+        const tiers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        const raw = ['WOOD', 'ORE', 'HIDE', 'FIBER', 'FISH', 'HERB'];
+        const refined = ['PLANK', 'BAR', 'LEATHER', 'CLOTH', 'EXTRACT'];
+        const gear = [
+            'SWORD', 'SHEATH', 'PLATE_ARMOR', 'PLATE_HELMET', 'PLATE_BOOTS', 'PLATE_GLOVES', 'PLATE_CAPE',
+            'BOW', 'TORCH', 'LEATHER_ARMOR', 'LEATHER_HELMET', 'LEATHER_BOOTS', 'LEATHER_GLOVES', 'LEATHER_CAPE',
+            'FIRE_STAFF', 'TOME', 'CLOTH_ARMOR', 'CLOTH_HELMET', 'CLOTH_BOOTS', 'CLOTH_GLOVES', 'CLOTH_CAPE',
+            'PICKAXE', 'AXE', 'SKINNING_KNIFE', 'SICKLE', 'FISHING_ROD'
+        ];
+        const special = [
+            'DUNGEON_MAP', 'CREST', 'SHARD', 'DUNGEON_CHEST', 'FOOD',
+            'POTION_GATHER', 'POTION_REFINE', 'POTION_CRAFT', 'POTION_SILVER', 'POTION_QUALITY', 'POTION_LUCK', 'POTION_XP',
+            'POTION_CRIT', 'POTION_DAMAGE'
+        ];
+
+        const chestQualities = ['NORMAL', 'GOOD', 'OUTSTANDING', 'EXCELLENT', 'MASTERPIECE', 'COMMON', 'RARE', 'GOLD', 'MYTHIC'];
+        const wbQualities = ['NORMAL', 'GOOD', 'OUTSTANDING', 'EXCELLENT', 'MASTERPIECE'];
+
+        const gearTypes = ['WEAPON', 'OFF_HAND', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'TOOL', 'TOOL_AXE', 'TOOL_PICKAXE', 'TOOL_KNIFE', 'TOOL_SICKLE', 'TOOL_ROD', 'TOOL_POUCH'];
+
+        const runeActs = [
+            'WOOD', 'ORE', 'HIDE', 'FIBER', 'HERB', 'FISH',
+            'METAL', 'PLANK', 'LEATHER', 'CLOTH', 'EXTRACT',
+            'WARRIOR', 'HUNTER', 'MAGE', 'TOOLS', 'COOKING', 'ALCHEMY',
+            'ATTACK'
+        ];
+        const runeEffs = ['XP', 'COPY', 'SPEED', 'EFF', 'ATTACK', 'SAVE_FOOD', 'BURST', 'ATTACK_SPEED'];
+
+        tiers.forEach(t => {
+            raw.forEach(r => list.push(`T${t}_${r}`));
+            refined.forEach(r => list.push(`T${t}_${r}`));
+            gear.forEach(g => list.push(`T${t}_${g}`));
+            special.forEach(s => list.push(`T${t}_${s}`));
+
+            chestQualities.forEach(q => list.push(`T${t}_CHEST_${q}`));
+            wbQualities.forEach(q => list.push(`T${t}_WORLDBOSS_CHEST_${q}`));
+
+            if (t === 1) {
+                list.push('T1_RUNE_SHARD');
+                list.push('T1_BATTLE_RUNE_SHARD');
+            }
+
+            runeActs.forEach(act => {
+                runeEffs.forEach(eff => {
+                    list.push(`T${t}_RUNE_${act}_${eff}`);
+                });
+            });
+        });
+
+        return list.map(id => {
+            const resolved = resolveItem(id);
+            if (!resolved) return null;
+
+            let itemClass = '';
+            if (id.includes('PLATE_') || id.includes('SWORD') || id.includes('SHEATH')) itemClass = 'warrior';
+            else if (id.includes('LEATHER_') || id.includes('BOW') || id.includes('TORCH')) itemClass = 'hunter';
+            else if (id.includes('CLOTH_') || id.includes('STAFF') || id.includes('TOME')) itemClass = 'mage';
+
+            const isArmor = id.includes('_ARMOR') || id.includes('_HELMET') || id.includes('_BOOTS') || id.includes('_GLOVES') || id.includes('_CAPE');
+            const canHaveQuality = gearTypes.includes(resolved.type);
+            const canHaveStars = id.includes('_RUNE_') && !id.includes('_SHARD');
+
+            return {
+                id,
+                name: resolved.name,
+                tier: resolved.tier,
+                icon: resolved.icon,
+                type: resolved.type?.toLowerCase(),
+                rarity: resolved.rarity?.toLowerCase(),
+                class: itemClass,
+                isArmor,
+                canHaveQuality,
+                canHaveStars
+            };
+        }).filter(Boolean);
+    }, []);
+
+    useEffect(() => {
+        if (notification) {
+            const timer = setTimeout(() => setNotification(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [notification]);
+
+    useEffect(() => {
+        socket.emit('get_market_listings');
+
+        const handleUpdate = (newListings) => setMarketListings(newListings || []);
+        const handleSuccess = (result) => {
+            setNotification({ type: 'success', message: result.message || 'Action completed successfully!' });
+            socket.emit('get_market_listings');
+            setConfirmModal(null);
+            setBuyModal(null);
+        };
+        const handleError = (err) => setNotification({ type: 'error', message: err.message || 'An error occurred.' });
+        const handleMarketHistory = (history) => setMarketHistory(history || []);
+        const handleMyMarketHistory = (history) => setMyMarketHistory(history || []);
+        const handleBuyOrdersUpdate = (newOrders) => setBuyOrders(newOrders || []);
+        const handleMarketPrice = (data) => {
+            setLoadingPrice(false);
+            const price = data.lowestPrice || null;
+            setLowestSellPrice(price);
+            if (price) {
+                setCreateBuyOrderModal(prev => prev ? ({ ...prev, pricePerUnit: price }) : prev);
+            } else {
+                setCreateBuyOrderModal(prev => prev ? ({ ...prev, pricePerUnit: prev.minPrice || 1 }) : prev);
+            }
+        };
+
+        socket.on('market_listings_update', handleUpdate);
+        socket.on('market_action_success', handleSuccess);
+        socket.on('market_history_update', handleMarketHistory);
+        socket.on('my_market_history_update', handleMyMarketHistory);
+        socket.on('buy_orders_update', handleBuyOrdersUpdate);
+        socket.on('item_market_price', handleMarketPrice);
+        socket.on('error', handleError);
+
+        return () => {
+            socket.off('market_listings_update', handleUpdate);
+            socket.off('market_action_success', handleSuccess);
+            socket.off('market_history_update', handleMarketHistory);
+            socket.off('my_market_history_update', handleMyMarketHistory);
+            socket.off('buy_orders_update', handleBuyOrdersUpdate);
+            socket.off('item_market_price', handleMarketPrice);
+            socket.off('error', handleError);
+        };
+    }, [socket]);
+
+    const handleBuy = (listing) => {
+        if (isPreviewActive) return onPreviewActionBlocked();
+
+        if (listing.amount === 1) {
+            setConfirmModal({
+                message: 'Are you sure you want to buy this item?',
+                subtext: 'Silver will be deducted immediately.',
+                onConfirm: () => {
+                    socket.emit('buy_market_item', { listingId: listing.id, quantity: 1 });
+                    setConfirmModal(null);
+                }
+            });
+        } else {
+            const numericAmount = (typeof listing.amount === 'object' && listing.amount !== null)
+                ? (listing.amount.amount || 0)
+                : (Number(listing.amount) || 0);
+
+            setBuyModal({
+                listing: listing,
+                quantity: 1,
+                max: numericAmount,
+                pricePerUnit: listing.price / numericAmount
+            });
+        }
+    };
+
+    const handleCancel = (listing) => {
+        if (isPreviewActive) return onPreviewActionBlocked();
+
+        const createdAt = new Date(listing.created_at).getTime();
+        const elapsedMs = Date.now() - createdAt;
+        const ONE_HOUR_MS = 3600 * 1000;
+        const needsFee = elapsedMs < ONE_HOUR_MS;
+        const fee = Math.floor(listing.price * 0.10);
+
+        setConfirmModal({
+            message: 'Cancel this listing?',
+            subtext: needsFee
+                ? `A 10% cancellation fee (${formatSilver(fee)}) will be charged because the listing is less than 1 hour old.`
+                : 'The item will be returned to your Claim tab.',
+            onConfirm: () => {
+                socket.emit('cancel_listing', { listingId: listing.id });
+                setConfirmModal(null);
+            }
+        });
+    };
+
+    const handleClaim = (claimId) => {
+        if (isPreviewActive) return onPreviewActionBlocked();
+        socket.emit('claim_market_item', { claimId });
+    };
+
+    const isOwnListing = (l) => {
+        const sellerId = l.seller_character_id || l.item_data?.seller_character_id;
+        if (sellerId && gameState.id) {
+            return String(sellerId) === String(gameState.id);
+        }
+        if (l.seller_name && gameState.name && l.seller_id && gameState.user_id) {
+            return l.seller_name === gameState.name && l.seller_id === gameState.user_id;
+        }
+        return false;
+    };
+
+    const myActiveListings = marketListings.filter(l => isOwnListing(l));
+    const isPremium = gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > Date.now();
+    const maxListings = isPremium ? 50 : 30;
+    const currentListingsCount = myActiveListings.length;
+    const isIronman = gameState?.state?.isIronman;

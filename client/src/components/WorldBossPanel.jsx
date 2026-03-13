@@ -167,46 +167,28 @@ const WorldBossInfoModal = ({ onClose }) => {
     );
 };
 
+import { useAppStore } from '../store/useAppStore';
+
 const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge, onInspect, onShowInfo, isPreviewActive, onPreviewActionBlocked }) => {
-    const [wbStatus, setWbStatus] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const store = useAppStore();
+    const {
+        wbStatus, setWbStatus,
+        isLoadingWb: loading, setIsLoadingWb: setLoading,
+        wbHistoryRankings: historyRankings, setWbHistoryRankings: setHistoryRankings,
+        isLoadingWbHistory: loadingHistory, setIsLoadingWbHistory: setLoadingHistory
+    } = store;
+
     const [activeTab, setActiveTab] = useState('BOSS'); // 'BOSS' | 'RANKING'
     const [showInfo, setShowInfo] = useState(false);
 
-    // History State
+    // History Toggle State
     const [viewingHistory, setViewingHistory] = useState(false);
-    const [historyRankings, setHistoryRankings] = useState([]);
-    const [loadingHistory, setLoadingHistory] = useState(false);
 
     // Ranking Sub-tabs
     const [rankingType, setRankingType] = useState(gameState?.state?.isIronman ? 'IRONMAN' : 'NORMAL'); // 'ALL' | 'NORMAL' | 'IRONMAN'
 
     useEffect(() => {
         if (!socket) return;
-        const handleStatus = (status) => {
-            setWbStatus(status);
-            setLoading(false);
-        };
-        const handleHistory = ({ date, rankings }) => {
-            setHistoryRankings(rankings);
-            setLoadingHistory(false);
-        };
-
-        socket.on('world_boss_status', handleStatus);
-        socket.on('world_boss_ranking_history', handleHistory);
-
-        // Listen for reward claim updates to refresh UI immediately
-        const handleRewardClaimed = (result) => {
-            if (result.success) {
-                setWbStatus(prev => ({
-                    ...prev,
-                    pendingReward: null // clear reward locally
-                }));
-                // Also fetch fresh status to be sure
-                socket.emit('get_world_boss_status');
-            }
-        };
-        socket.on('world_boss_reward_claimed', handleRewardClaimed);
 
         // Initial fetch
         socket.emit('get_world_boss_status');
@@ -219,9 +201,6 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge, onInspect, o
         }, 5000);
 
         return () => {
-            socket.off('world_boss_status', handleStatus);
-            socket.off('world_boss_ranking_history', handleHistory);
-            socket.off('world_boss_reward_claimed', handleRewardClaimed);
             clearInterval(interval);
         };
     }, [socket, activeTab, viewingHistory]);

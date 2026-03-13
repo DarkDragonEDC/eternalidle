@@ -4,26 +4,27 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sword, Skull, Shield, Coins, Star } from 'lucide-react';
 import { resolveItem } from '@shared/items';
 
+import { useAppStore } from '../store/useAppStore';
+
 const CombatHistoryModal = ({ isOpen, onClose, socket }) => {
-    const [history, setHistory] = useState([]);
+    const store = useAppStore();
+    const { combatHistory: history } = store;
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (isOpen && socket) {
             setLoading(true);
             socket.emit('get_combat_history');
-
-            const handleUpdate = (data) => {
-                setHistory(data);
-                setLoading(false);
-            };
-
-            socket.on('combat_history_update', handleUpdate);
-            return () => {
-                socket.off('combat_history_update', handleUpdate);
-            };
+            // Listeners are centralized in useSocketEvents.js which updates store.combatHistory
+            // We'll use a local loading state for the initial fetch experience
         }
     }, [isOpen, socket]);
+
+    useEffect(() => {
+        if (history && history.length > 0) {
+            setLoading(false);
+        }
+    }, [history]);
 
     if (!isOpen) return null;
 

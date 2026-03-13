@@ -1,0 +1,3470 @@
+﻿import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+
+import { io } from 'socket.io-client';
+import { supabase } from './supabase';
+import Auth from './components/Auth';
+import CharacterSelection from './components/CharacterSelection';
+import ChatWidget from './components/ChatWidget';
+import Sidebar from './components/Sidebar';
+import InventoryPanel from './components/InventoryPanel';
+import ActivityWidget from './components/ActivityWidget';
+import ProfilePanel from './components/ProfilePanel';
+import ItemInfoModal from './components/ItemInfoModal';
+import MarketPanel from './components/MarketPanel';
+import ActivityModal from './components/ActivityModal';
+import RankingPanel from './components/RankingPanel';
+import RestPanel from './components/RestPanel';
+import DungeonPanel from './components/DungeonPanel';
+import RenameModal from './components/RenameModal';
+import BottomNav from './components/BottomNav';
+import { SkillsOverview, TownOverview, CombatOverview } from './components/MobileHubs';
+import WorldBossPanel from './components/WorldBossPanel';
+import WorldBossFight from './components/WorldBossFight';
+import InspectModal from './components/InspectModal';
+import GuildProfileModal from './components/GuildProfileModal';
+import LeaderboardModal from './components/LeaderboardModal';
+import TutorialOverlay from './components/TutorialOverlay';
+
+import CombatPanel from './components/CombatPanel';
+import RunePanel from './components/RunePanel';
+import OfflineGainsModal from './components/OfflineGainsModal';
+import MarketListingModal from './components/MarketListingModal';
+import CombatHistoryModal from './components/CombatHistoryModal';
+import LootModal from './components/LootModal';
+import BuffsDrawer from './components/BuffsDrawer';
+import NotificationCenter from './components/NotificationCenter';
+import ToastContainer from './components/ToastContainer';
+import OrbShop from './components/OrbShop';
+import DailySpinModal from './components/DailySpinModal';
+import SocialPanel from './components/SocialPanel';
+import TradePanel from './components/TradePanel';
+import SettingsModal from './components/SettingsModal';
+import { PushService } from './services/PushService';
+import GuildPanel from './components/GuildPanel';
+import AnnouncementModal, { shouldShowAnnouncement } from './components/AnnouncementModal';
+import {
+  Zap, Package, User, Trophy, Coins,
+  Axe, Pickaxe, Target, Shield, Sword, Skull,
+  Star, Layers, Box, Castle, Lock, Menu, X, Tag, Clock, Heart, LogOut, ChevronDown, Circle, Users, Gift, TrendingUp, AlertTriangle, ShieldAlert, Sparkles, Settings
+} from 'lucide-react';
+import { ITEMS, resolveItem, getSkillForItem, getLevelRequirement, formatItemId } from '@shared/items';
+import { calculateNextLevelXP, XP_TABLE } from '@shared/skills';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useOptimisticState } from './hooks/useOptimisticState';
+import ResponsiveText from './components/ResponsiveText';
+import { useNavigate, useLocation } from 'react-router-dom';
+
+
+
+const mapTabCategoryToSkill = (tab, category) => {
+  const maps = {
+    gathering: {
+      WOOD: 'LUMBERJACK',
+      ORE: 'ORE_MINER',
+      HIDE: 'ANIMAL_SKINNER',
+      FIBER: 'FIBER_HARVESTER',
+      FISH: 'FISHING',
+      HERB: 'HERBALISM'
+    },
+    refining: {
+      PLANK: 'PLANK_REFINER',
+      BAR: 'METAL_BAR_REFINER',
+      LEATHER: 'LEATHER_REFINER',
+      CLOTH: 'CLOTH_REFINER',
+      EXTRACT: 'DISTILLATION'
+    },
+    crafting: {
+      WARRIORS_FORGE: 'WARRIOR_CRAFTER',
+      HUNTERS_LODGE: 'HUNTER_CRAFTER',
+      MAGES_TOWER: 'MAGE_CRAFTER',
+      COOKING_STATION: 'COOKING',
+      ALCHEMY_LAB: 'ALCHEMY',
+      TOOLMAKER: 'TOOL_CRAFTER'
+    },
+    combat: {
+      COMBAT: 'COMBAT'
+    },
+    merging: {
+      RUNE: 'RUNE'
+    },
+    dungeon: {
+      DUNGEONEERING: 'DUNGEONEERING'
+    }
+  };
+  return maps[tab.toLowerCase()]?.[category.toUpperCase()];
+};
+
+import { formatNumber, formatSilver } from '@utils/format';
+
+const TaxHistoryChart = ({ history = [], totalTax, tax_24h_ago, isMobile }) => {
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+
+  // Get dates for mock data
+
+  const formatDayDate = (dateStr) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}`;
+  };
+
+
+  const displayData = useMemo(() => {
+    const todayIncrease = Math.max(0, totalTax - (tax_24h_ago || 0));
+
+    const data = [];
+    for (let i = 6; i >= 1; i--) {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+
+      // Find real history item from server
+      const historyItem = history.find(h => {
+        const hDate = new Date(h.date).toISOString().split('T')[0];
+        return hDate === dateStr;
+      });
+
+      data.push({
+        amount: historyItem ? historyItem.amount : 0,
+        label: formatDayDate(d)
+      });
+    }
+
+    data.push({
+      amount: todayIncrease,
+      label: 'TODAY'
+    });
+
+    return data;
+  }, [totalTax, tax_24h_ago, history]);
+
+  const maxVal = Math.max(...displayData.map(h => h.amount), 1000);
+  const chartHeight = 50;
+  const barWidth = isMobile ? 25 : 35;
+  const gap = 8;
+  const totalWidth = (barWidth + gap) * displayData.length - gap;
+
+  return (
+    <div style={{
+      marginTop: '5px',
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      background: 'var(--slot-bg)',
+      padding: '15px 10px',
+      borderRadius: '12px',
+      border: '1px solid var(--border)',
+      position: 'relative'
+    }}>
+      <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', marginBottom: '12px', fontWeight: 'bold', letterSpacing: '1px' }}>DAILY TAX INCREASE (LAST 7 DAYS)</div>
+
+      <div style={{ height: '15px', marginBottom: '5px' }}>
+        <AnimatePresence>
+          {hoveredIndex !== null && (
+            <motion.div
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 5 }}
+              style={{
+                fontSize: '0.7rem',
+                color: 'var(--accent)',
+                fontWeight: '900',
+                fontFamily: 'monospace'
+              }}
+            >
+              +{formatNumber(displayData[hoveredIndex].amount)}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <svg width={totalWidth} height={chartHeight + 20} style={{ overflow: 'visible' }}>
+        {displayData.map((day, i) => {
+          const h = Math.max(4, (day.amount / maxVal) * chartHeight);
+          return (
+            <g key={i}>
+              <motion.rect
+                initial={{ height: 0, y: chartHeight }}
+                animate={{
+                  height: h,
+                  y: chartHeight - h,
+                  fillOpacity: hoveredIndex === i ? 1 : 0.4 + (i * 0.08)
+                }}
+                onMouseEnter={() => setHoveredIndex(i)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                transition={{
+                  height: { delay: i * 0.05, duration: 0.5 },
+                  fillOpacity: { duration: 0.2 }
+                }}
+                x={i * (barWidth + gap)}
+                width={barWidth}
+                fill="var(--accent)"
+                rx="3"
+                style={{ cursor: 'pointer' }}
+              />
+              <text
+                x={i * (barWidth + gap) + barWidth / 2}
+                y={chartHeight + 15}
+                textAnchor="middle"
+                style={{
+                  fontSize: '0.55rem',
+                  fill: hoveredIndex === i ? 'var(--text-main)' : 'var(--text-dim)',
+                  fontWeight: hoveredIndex === i ? 'bold' : 'normal',
+                  transition: 'all 0.2s',
+                  fontFamily: 'monospace'
+                }}
+              >
+                {day.label}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+};
+
+const StatCard = ({ label, value, icon, color }) => (
+  <div className="glass-panel" style={{
+    padding: '15px',
+    borderRadius: '12px',
+    background: 'var(--accent-soft)',
+    border: '1px solid var(--border)',
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '8px'
+  }}>
+    <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>{label}</div>
+    <div style={{ fontSize: '1.2rem', color: color || 'var(--text-main)', fontWeight: '900', fontFamily: 'monospace' }}>
+      {formatNumber(value)}
+    </div>
+  </div>
+);
+
+const CLIENT_VERSION = '1.4.5';
+
+function App() {
+  const [session, setSession] = useState(null);
+  const [socket, setSocket] = useState(null);
+  const [gameState, setGameState] = useState(null);
+  const [connectionError, setConnectionError] = useState(null);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const clockOffset = useRef(0);
+  const lastThemeChangeRef = useRef(0);
+  const displayedGameState = useOptimisticState(gameState);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [error, setError] = useState('');
+  const [initialAuthView, setInitialAuthView] = useState('LOGIN');
+  const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settings, setSettings] = useState(() => {
+    const defaults = {
+      autoSortInventory: 'off',
+      disableOfflineModal: false,
+      hideCollectionPopups: false,
+      hideAvatarBg: false,
+      textSize: 'medium'
+    };
+    try {
+      const saved = JSON.parse(localStorage.getItem('eternalidle_settings')) || {};
+      return { ...defaults, ...saved };
+    } catch {
+      return defaults;
+    }
+  });
+  const settingsInitializedRef = useRef(false);
+  const settingsFromSyncRef = useRef(null);
+
+  const isGoogleLinked = useMemo(() => {
+    return session?.user?.app_metadata?.providers?.includes('google');
+  }, [session]);
+
+  // Load settings from Supabase user_metadata on login
+  useEffect(() => {
+    if (session?.user?.user_metadata?.game_settings && !settingsInitializedRef.current) {
+      settingsInitializedRef.current = true;
+      const serverSettings = session.user.user_metadata.game_settings;
+      setSettings(prev => {
+        // Local settings (from current session/refresh) take priority over (potentially stale) server metadata
+        // This prevents stale JWT metadata from reverting recent changes upon refresh.
+        const merged = { ...serverSettings, ...prev };
+        localStorage.setItem('eternalidle_settings', JSON.stringify(merged));
+        settingsFromSyncRef.current = JSON.stringify(merged);
+        return merged;
+      });
+    }
+  }, [session]);
+
+  // Sync settings from character state (Supabase column) when it arrives
+  useEffect(() => {
+    if (gameState?.state?.settings) {
+      const serverSettings = gameState.state.settings;
+      const serverSettingsStr = JSON.stringify(serverSettings);
+
+      // Only update if it's different from current local settings
+      if (JSON.stringify(settings) !== serverSettingsStr) {
+        console.log("[SETTINGS] Syncing from game state...");
+        settingsFromSyncRef.current = serverSettingsStr;
+        setSettings(prev => ({ ...prev, ...serverSettings }));
+      }
+    }
+  }, [gameState]);
+
+  useEffect(() => {
+    localStorage.setItem('eternalidle_settings', JSON.stringify(settings));
+    // Apply Text Size Scaling
+    let fontSize = '16px'; // medium
+    if (settings.textSize === 'small') fontSize = '14px';
+    if (settings.textSize === 'large') fontSize = '18px';
+    document.documentElement.style.fontSize = fontSize;
+
+    // Sync settings to server for cross-device persistence
+    const settingsStr = JSON.stringify(settings);
+    if (socket && Object.keys(settings).length > 0 && settingsFromSyncRef.current !== settingsStr) {
+      socket.emit('set_settings', { settings });
+
+      // Also sync push settings if enabled
+      if (settings.pushEnabled) {
+        socket.emit('push_update_settings', { settings });
+      }
+    }
+  }, [settings, socket, session]);
+
+  // Push Subscription Effect
+  useEffect(() => {
+    if (socket && settings.pushEnabled) {
+      const syncPush = async () => {
+        try {
+          const sub = await PushService.getSubscription();
+          if (sub) {
+            socket.emit('push_subscribe', { subscription: sub });
+          }
+        } catch (e) {
+          console.error('[PUSH] Failed to sync subscription:', e);
+        }
+      };
+      syncPush();
+    }
+  }, [socket, settings.pushEnabled]);
+
+  // Register SW on mount
+  useEffect(() => {
+    PushService.registerServiceWorker();
+  }, []);
+
+  // characterSelected is no longer needed, we use selectedCharacter (charId) as the source of truth
+
+  // Navigation State
+  const [activeTab, setActiveTabState] = useState(() => {
+    const path = window.location.pathname.substring(1);
+    const validTabs = [
+      'inventory', 'profile', 'combat', 'gathering', 'refining', 'crafting',
+      'town_overview', 'skills_overview', 'combat_overview', 'market',
+      'dungeon', 'merging', 'rest_camp', 'world_boss', 'taxometer', 'ranking', 'guild'
+    ];
+    if (validTabs.includes(path)) return path;
+    return localStorage.getItem('activeTab') || 'inventory';
+  });
+
+  const setActiveTab = (newTab) => {
+    setActiveTabState(newTab);
+    navigate('/' + newTab);
+  };
+
+  // Sync tab with URL on manual path changes (e.g. browser back/forward)
+  useEffect(() => {
+    const path = location.pathname.substring(1);
+    if (path && path !== activeTab) {
+      setActiveTabState(path);
+    }
+  }, [location.pathname]);
+
+  const prevTabRef = React.useRef(activeTab);
+  const [activeCategory, setActiveCategory] = useState(() => localStorage.getItem('activeCategory') || 'WOOD');
+
+  // Helper for safe inventory access
+  const getSafeAmount = (entry) => {
+    if (!entry) return 0;
+    if (typeof entry === 'number') return entry;
+    if (typeof entry === 'object') return entry.amount || 0;
+    return 0;
+  };
+  const [activeTier, setActiveTier] = useState(() => parseInt(localStorage.getItem('activeTier')) || 1);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [modalItem, setModalItem] = useState(null);
+  const [infoItem, setInfoItem] = useState(null);
+  const [modalType, setModalType] = useState(null);
+  const [offlineGains, setOfflineGains] = useState(null);
+  const [marketSellItem, setMarketSellItem] = useState(null);
+  const [marketFilter, setMarketFilter] = useState('');
+  const [notifications, setNotifications] = useState([]);
+  const [globalStats, setGlobalStats] = useState({ total_market_tax: 0 });
+
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showCombatHistory, setShowCombatHistory] = useState(false);
+  const [combatHistory, setCombatHistory] = useState([]);
+  const [showFullNumbers, setShowFullNumbers] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'medieval');
+  const [previewThemeId, setPreviewThemeId] = useState(null);
+  const [previewAvatarData, setPreviewAvatarData] = useState(null); // { path, filename, name, preview }
+  const [previewBannerData, setPreviewBannerData] = useState(null);
+  const [confirmModal, setConfirmModal] = useState(null); // { message, onConfirm, onCancel }
+  const [versionMismatch, setVersionMismatch] = useState(false);
+
+  const isPreviewActive = !!previewThemeId || !!previewAvatarData || !!previewBannerData;
+
+  // Synchronization: When server state updates, update local theme (unless previewing)
+  useEffect(() => {
+    // If we recently changed the theme manually, ignore sync for 2 seconds to avoid flickering
+    if (Date.now() - lastThemeChangeRef.current < 2000) return;
+
+    if (gameState?.state) {
+      const charTheme = gameState.state.theme;
+      if (charTheme) {
+        if (charTheme !== theme && !previewThemeId) {
+          setTheme(charTheme);
+        }
+      } else if (!previewThemeId) {
+        // If character has no theme set, ensure current global theme is actually unlocked
+        const unlocked = gameState.state.unlockedThemes || ['medieval', 'dark', 'light'];
+        if (!unlocked.includes(theme)) {
+          setTheme('medieval');
+        }
+      }
+    }
+  }, [gameState?.state, previewThemeId, theme]);
+
+  // Global Sync: Fetch theme from Supabase user metadata on login
+  useEffect(() => {
+    // If we recently changed the theme manually, ignore sync for 2 seconds to avoid flickering
+    if (Date.now() - lastThemeChangeRef.current < 2000) return;
+
+    // We only use global sync BEFORE a character is selected.
+    // Once in-game, the character the server state (gameState) is the source of truth.
+    if (session?.user?.user_metadata?.theme && !previewThemeId && !gameState) {
+      const serverTheme = session.user.user_metadata.theme;
+      if (serverTheme !== theme) {
+        setTheme(serverTheme);
+      }
+    }
+  }, [session, previewThemeId, theme, gameState]);
+
+  // Handle changing theme with server persistence
+  const handleSetTheme = useCallback((newTheme) => {
+    lastThemeChangeRef.current = Date.now();
+    setTheme(newTheme);
+
+    // 1. Save to character state if socket is connected
+    if (socket) {
+      socket.emit('set_theme', { themeId: newTheme });
+    }
+  }, [socket, session]);
+
+  const onPreviewActionBlocked = useCallback(() => {
+    setConfirmModal({
+      message: "Preview Mode is active! Actions are disabled. Exit preview to play.",
+      onConfirm: () => setConfirmModal(null)
+    });
+  }, []);
+
+  useEffect(() => {
+    const activeTheme = previewThemeId || theme;
+    document.body.className = `theme-${activeTheme}`;
+    if (!previewThemeId) {
+      localStorage.setItem('theme', theme);
+    }
+  }, [theme, previewThemeId]);
+
+
+  const [lootModalData, setLootModalData] = useState(null);
+  const [showOrbShop, setShowOrbShop] = useState(false);
+  const [showDailySpin, setShowDailySpin] = useState(false);
+  const [isWorldBossFight, setIsWorldBossFight] = useState(false);
+  const [showAnnouncement, setShowAnnouncement] = useState(false);
+
+  // Show announcement on login if not already read
+  useEffect(() => {
+    if (gameState && session?.user?.id) {
+      if (shouldShowAnnouncement(session.user.id)) {
+        setShowAnnouncement(true);
+      }
+    }
+  }, [gameState?.name, session?.user?.id]);
+
+  const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [pendingPotion, setPendingPotion] = useState(null);
+
+  const [dailySpinOpen, setDailySpinOpen] = useState(false);
+  const [canSpin, setCanSpin] = useState(false);
+  const [showGuestModal, setShowGuestModal] = useState(false);
+
+  // Trade State
+  const [activeTrade, setActiveTrade] = useState(null);
+  const [tradeInvites, setTradeInvites] = useState([]);
+  const pendingTradeOpenRef = React.useRef(false);
+  const [showSocialModal, setShowSocialModal] = useState(false);
+  const [inspectData, setInspectData] = useState(null);
+  const [inspectGuildId, setInspectGuildId] = useState(null);
+  const [banModalData, setBanModalData] = useState(null);
+  const [banWarning, setBanWarning] = useState(null);
+  const [lastWarningSeen, setLastWarningSeen] = useState(null);
+  const [banWarningRead, setBanWarningRead] = useState(false);
+
+  const handleInspectPlayer = useCallback((name) => {
+    if (socket && name) {
+      socket.emit('get_public_profile', { characterName: name });
+    }
+  }, [socket]);
+
+  const handleCloseInspect = useCallback(() => setInspectData(null), []);
+
+  const handleInspectMessage = useCallback((name) => {
+    handleCloseInspect();
+    // Logic to open chat with user could go here
+  }, [handleCloseInspect]);
+
+  const handleTradeInvite = useCallback((receiverName) => {
+    if (socket) {
+      pendingTradeOpenRef.current = true;
+      socket.emit('trade_create', { receiverName });
+      setShowSocialModal(false);
+    }
+  }, [socket]);
+
+  const handleOpenTrade = useCallback((tradeId) => {
+    const trade = tradeInvites.find(t => t.id === tradeId);
+    if (trade) {
+      setActiveTrade(trade);
+      setShowSocialModal(false);
+    }
+  }, [tradeInvites]);
+
+  const handleItemClick = useCallback((item) => setInfoItem(item), []);
+
+  const handleRenameSubmit = (newName) => {
+    if (isPreviewActive) {
+      setConfirmModal({
+        message: "Preview Mode is active! Renaming is disabled. Exit preview to play.",
+        onConfirm: () => setConfirmModal(null)
+      });
+      return;
+    }
+    socket.emit('change_name', { newName });
+    setIsRenameModalOpen(false);
+  };
+
+  useEffect(() => {
+    if (gameState?.state?.notifications) {
+      setNotifications(gameState.state.notifications);
+    }
+  }, [gameState]);
+
+  const addNotification = (notif) => {
+    setNotifications(prev => [{
+      id: Date.now() + Math.random(),
+      timestamp: Date.now(),
+      read: false,
+      ...notif
+    }, ...prev].slice(0, 10));
+  };
+
+  const markAsRead = (id) => {
+    // Optimistic UI update
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    socket?.emit('mark_notification_read', { notificationId: id });
+  };
+
+  const clearAllNotifications = () => {
+    // Optimistic UI update
+    setNotifications([]);
+    socket?.emit('clear_notifications');
+  };
+
+  const markAllAsRead = () => {
+    // Optimistic UI update
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    socket?.emit('mark_all_notifications_read');
+  };
+
+  const handleListOnMarket = (id, item) => {
+    if (isPreviewActive) {
+      setConfirmModal({
+        message: "Preview Mode is active! You cannot list items on the market now. Exit preview to play.",
+        onConfirm: () => setConfirmModal(null)
+      });
+      return;
+    }
+    if (item && typeof item === 'object') {
+      setMarketSellItem({ ...item, itemId: id });
+    } else if (typeof id === 'object') {
+      setMarketSellItem({ ...id, itemId: id.itemId || id.id });
+    } else {
+      setMarketSellItem({ itemId: id });
+    }
+  };
+
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setModalItem(null);
+        setInfoItem(null);
+        setMarketSellItem(null);
+        setOfflineGains(null);
+        setSidebarOpen(false);
+        setShowNotifications(false);
+        setShowCombatHistory(false);
+        setShowLeaderboard(false);
+        setShowCurrencyDropdown(false);
+        setInspectData(mockData);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Close currency dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (showCurrencyDropdown && !e.target.closest('[data-currency-dropdown]')) {
+        setShowCurrencyDropdown(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showCurrencyDropdown]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (!mobile) setSidebarOpen(false);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Persist navigation
+  useEffect(() => {
+    localStorage.setItem('activeTab', activeTab);
+    localStorage.setItem('activeCategory', activeCategory);
+    localStorage.setItem('activeTier', activeTier);
+
+    if (activeTab === 'trade') {
+      setShowSocialModal(true);
+      // Refresh trade list when opening
+      if (socket) socket.emit('trade_get_active');
+      // Restore to previous tab instead of forcing inventory
+      setActiveTab(prevTabRef.current || 'inventory');
+    } else {
+      // Track the previous tab (only if not 'trade')
+      prevTabRef.current = activeTab;
+    }
+  }, [activeTab, activeCategory, activeTier]);
+
+
+
+  // Update Last Active on Unload
+  useEffect(() => {
+    const handleUnload = () => {
+      if (session?.access_token) {
+        const url = `${import.meta.env.VITE_API_URL}/api/update_last_active`;
+
+        // Use sendBeacon for reliable unload requests (no CORS preflight if simple content type)
+        if (navigator.sendBeacon) {
+          const blob = new Blob([new URLSearchParams({ token: session.access_token }).toString()], { type: 'application/x-www-form-urlencoded' });
+          navigator.sendBeacon(url, blob);
+        } else {
+          // Fallback
+          fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session.access_token}`
+            },
+            keepalive: true
+          }).catch(err => console.error("Failed to update last active:", err));
+        }
+      }
+    };
+    window.addEventListener('beforeunload', handleUnload);
+    return () => window.removeEventListener('beforeunload', handleUnload);
+  }, [session]);
+
+  const [selectedCharacter, setSelectedCharacter] = useState(() => localStorage.getItem('selectedCharacterId'));
+  const [serverError, setServerError] = useState(null);
+  const [activePlayers, setActivePlayers] = useState(0);
+
+  // Fetch Active Players for Header (and mobile profile)
+  useEffect(() => {
+    const fetchActivePlayers = async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${apiUrl}/api/active_players`);
+        if (res.ok) {
+          const data = await res.json();
+          setActivePlayers(data.count || 0);
+        }
+      } catch (err) {
+        console.warn('Could not fetch active players count');
+      }
+    };
+
+    fetchActivePlayers();
+    const interval = setInterval(fetchActivePlayers, 60000); // 1 min refresh
+    return () => clearInterval(interval);
+  }, []);
+
+  // Auto-connect if session exists
+  useEffect(() => {
+    if (session?.access_token && !socket) {
+      setIsConnecting(true);
+      connectSocket(session.access_token, selectedCharacter);
+    }
+  }, [session, socket]);
+
+  // Auth Handling
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      // If we landed with an access token in the hash, clean it up
+      if (window.location.hash && (window.location.hash.includes('access_token') || window.location.hash.includes('error'))) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+      if (event === 'SIGNED_IN') {
+        // Clear hash after successful OAuth/OTP landing
+        if (window.location.hash && (window.location.hash.includes('access_token') || window.location.hash.includes('error'))) {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+      }
+      if (event === 'PASSWORD_RECOVERY') {
+        setInitialAuthView('RESET');
+      }
+      if (!session) {
+        if (socket) socket.disconnect();
+        setGameState(null);
+        setSelectedCharacter(null);
+        localStorage.removeItem('selectedCharacterId');
+        setSocket(null);
+        setInitialAuthView('LOGIN');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [socket]);
+
+  // Socket Connection Function
+  const connectSocket = (token, characterId) => {
+    if (socket?.connected) return;
+
+    const socketUrl = import.meta.env.VITE_API_URL;
+
+    const newSocket = io(socketUrl, {
+      auth: { token },
+      transports: ['websocket']
+    });
+
+    newSocket.on('connect', () => {
+      setConnectionError(null);
+      setIsConnecting(false);
+      if (characterId) {
+        newSocket.emit('join_character', { characterId });
+      }
+    });
+
+    newSocket.on('daily_status', ({ canSpin }) => {
+      setCanSpin(canSpin);
+    });
+
+    newSocket.on('disconnect', () => {
+      setIsConnecting(true);
+    });
+
+
+
+    newSocket.on('connect_error', async (err) => {
+      console.error('Connection error:', err);
+
+      // If it's an auth error, try to refresh the session
+      if (err.message?.includes('Authentication error') || err.message?.includes('Invalid token')) {
+        // Prevent infinite fast loops by checking if we just tried this
+        const lastAttempt = newSocket._lastAuthRetry || 0;
+        const now = Date.now();
+        if (now - lastAttempt < 2000) {
+          console.warn('Auth retry too fast, waiting for standard timeout...');
+        } else {
+
+          newSocket._lastAuthRetry = now;
+
+          // Force a session refresh
+          const { data: { session: refreshedSession }, error } = await supabase.auth.refreshSession();
+
+          if (refreshedSession && !error) {
+
+            setSession(refreshedSession);
+            newSocket.auth.token = refreshedSession.access_token;
+            newSocket.connect();
+            return;
+          } else {
+            console.error('Failed to auto-refresh session:', error);
+
+            // Critical Fix: If Refresh Token is invalid/missing, we MUST log out to break the loop.
+            const isFatalAuthError =
+              error?.message?.includes('Refresh Token Not Found') ||
+              error?.message?.includes('Invalid Refresh Token') ||
+              error?.code === '400';
+
+            if (isFatalAuthError || err.message?.includes('Invalid token')) {
+              console.warn('Fatal Auth Error detected. Clearing storage and logging out...');
+
+              // Prevent loop for auth reloads
+              const authReloads = parseInt(sessionStorage.getItem('fatal_auth_reloads') || '0');
+              if (authReloads > 2) {
+                console.error('Too many auth reloads. Stopping to avoid loop.');
+                setServerError('Critical authentication error. Please try logging in manually.');
+                setIsConnecting(false);
+                return;
+              }
+              sessionStorage.setItem('fatal_auth_reloads', (authReloads + 1).toString());
+
+              await supabase.auth.signOut();
+              localStorage.clear();
+              sessionStorage.removeItem('selectedCharacterId'); // Specific cleanup
+
+              setSession(null);
+              setGameState(null);
+              setSelectedCharacter(null);
+              setSocket(null);
+
+              window.location.reload();
+              return;
+            }
+          }
+        }
+      }
+
+      setConnectionError('Connection failed. Retrying in 5s...');
+      setIsConnecting(true);
+      setTimeout(() => {
+        if (newSocket.disconnected) newSocket.connect();
+      }, 5000);
+    });
+
+    newSocket.on('status_update', (status) => {
+      // console.log('[DEBUG-CLIENT] status_update received. Notifications:', status.state?.notifications?.length);
+      const now = Date.now();
+      const serverTime = new Date(status.serverTime || now).getTime();
+      clockOffset.current = now - serverTime;
+
+      // Show offline report ONCE per page load (window global survives all React/closure issues)
+      if (status.offlineReport) {
+        if (!window.__offlineReportShown) {
+          if (settings?.disableOfflineModal) {
+            // Bypass modal and acknowledge immediately
+            console.log('[DEBUG-CLIENT] Bypassing offline report modal due to settings.');
+            window.__offlineReportShown = true;
+            if (newSocket) {
+              newSocket.emit('acknowledge_offline_report');
+            }
+          } else {
+            window.__offlineReportShown = true;
+            setOfflineGains(status.offlineReport);
+          }
+        }
+        delete status.offlineReport; // Don't let it persist into gameState
+      }
+
+      if (status.noCharacter) {
+        console.warn("Character ID not found on server (Migration mismatch). Resetting selection.");
+        localStorage.removeItem('selectedCharacterId');
+        setSelectedCharacter(null);
+        setGameState(null);
+        return;
+      }
+
+      if (status.globalStats) {
+        setGlobalStats(status.globalStats);
+      }
+
+      // --- BANDWIDTH OPTIMIZATION: Handle lightweight partial updates ---
+      if (status._lightweight) {
+        setGameState(prev => {
+          if (!prev) return prev; // Can't merge without a base
+          const merged = { ...prev, serverTime: status.serverTime };
+
+          // Deep merge state (combat, health, food, dungeon, notifications)
+          if (status.state) {
+            merged.state = { ...prev.state };
+            if (status.state.health !== undefined) merged.state.health = status.state.health;
+            if (status.state.lastFoodAt !== undefined) merged.state.lastFoodAt = status.state.lastFoodAt;
+            if (status.state.combat !== undefined) merged.state.combat = status.state.combat;
+            if (status.state.dungeon !== undefined) merged.state.dungeon = status.state.dungeon;
+            if (status.state.notifications) merged.state.notifications = status.state.notifications;
+
+            // Merge equipment.food without replacing full equipment
+            if (status.state.equipment?.food) {
+              merged.state.equipment = { ...prev.state.equipment, food: status.state.equipment.food };
+            }
+            if (status.state.inventory !== undefined) merged.state.inventory = status.state.inventory;
+            if (status.state.bank !== undefined) merged.state.bank = status.state.bank;
+          }
+
+          // Merge activity
+          if (status.current_activity !== undefined) merged.current_activity = status.current_activity;
+          if (status.activity_started_at !== undefined) merged.activity_started_at = status.activity_started_at;
+
+          return merged;
+        });
+      } else {
+        // FULL STATUS: replace everything (like before)
+        setGameState(status);
+      }
+
+      setIsConnecting(false);
+
+      if (status.banWarning && status.banWarning !== lastWarningSeen) {
+        setBanWarning(status.banWarning);
+      }
+    });
+
+    newSocket.on('global_stats_update', (stats) => {
+      console.log('[DEBUG-CLIENT] global_stats_update received:', stats);
+      setGlobalStats(stats);
+    });
+
+
+    newSocket.on('account_status', ({ banWarning: reason }) => {
+      if (reason && reason !== lastWarningSeen) {
+        setBanWarning(reason);
+      }
+    });
+
+    newSocket.on('server_version', async ({ version, vapidPublicKey }) => {
+      if (vapidPublicKey) {
+        window.VAPID_PUBLIC_KEY = vapidPublicKey;
+      }
+      const serverVersion = (version || '').trim();
+      const clientVersion = CLIENT_VERSION.trim();
+
+      if (serverVersion && serverVersion !== clientVersion) {
+        console.warn(`[VERSION] Mismatch! Server: "${serverVersion}", Client: "${clientVersion}"`);
+
+        // Prevent loop if server is stuck on old version or cache is stubborn
+        const reloadCount = parseInt(sessionStorage.getItem('version_reload_count') || '0');
+        const lastReloadAt = parseInt(sessionStorage.getItem('last_version_reload') || '0');
+        const now = Date.now();
+
+        // If we reloaded more than 3 times in the last 5 minutes, stop and show error
+        if (reloadCount >= 3 && (now - lastReloadAt) < 300000) {
+          console.error('[VERSION] Persistent version mismatch. Showing update required overlay.');
+          setVersionMismatch(true);
+          return;
+        }
+
+        sessionStorage.setItem('version_reload_count', (reloadCount + 1).toString());
+        sessionStorage.setItem('last_version_reload', now.toString());
+
+        // Try to unregister service worker to break cache
+        try {
+          if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (let registration of registrations) {
+              await registration.unregister();
+            }
+            console.log('[VERSION] Unregistered service workers before reload.');
+          }
+        } catch (swErr) {
+          console.error('[VERSION] SW unregister failed:', swErr);
+        }
+
+        setTimeout(() => {
+          window.location.reload(true);
+        }, 1500);
+      } else {
+        // Versions match - reset reload count
+        sessionStorage.setItem('version_reload_count', '0');
+      }
+    });
+
+
+
+    newSocket.on('ban_error', (err) => {
+      console.error('[BAN-ERROR]', err);
+      setBanModalData(err);
+    });
+
+    newSocket.on('error', (err) => {
+      console.error('[SERVER-ERROR]', err);
+      if (err.type === 'BANNED') {
+        setBanModalData(err);
+        return;
+      }
+
+      // Ignore minor gameplay/trade errors so they don't block the screen
+      // ToastContainer will still catch and display them as temporary toasts.
+      const minorErrors = [
+        'Ironman characters cannot trade',
+        'No players found matching that name',
+        'Trading is locked for Guest accounts',
+        'Player is offline or does not exist',
+        'You cannot trade with yourself'
+      ];
+
+      if (minorErrors.some(msg => err.message?.includes(msg))) {
+        return;
+      }
+
+      setServerError(err.message || 'An error occurred');
+    });
+
+    newSocket.on('item_used', (result) => {
+      if (!result) return;
+      if (result.requiresConfirmation) {
+        setPendingPotion(result.pendingItem);
+        return;
+      }
+
+      if (result.rewards) {
+        setLootModalData(result.rewards);
+      }
+
+      // Separate check for special token handling
+      if (result.itemId === 'NAME_CHANGE_TOKEN') {
+        setIsRenameModalOpen(true);
+      }
+
+      if (result.message) {
+        addNotification({
+          type: 'SYSTEM',
+          message: result.message
+        });
+      }
+    });
+
+    newSocket.on('global_stats_update', (stats) => {
+      setGlobalStats(stats);
+    });
+
+    newSocket.on('trade_invite', (trade) => {
+      setTradeInvites(prev => [...prev, trade]);
+    });
+
+    newSocket.on('world_boss_started', (res) => {
+      if (res.success) {
+        setIsWorldBossFight(true);
+        setActiveTab('inventory'); // Clean UI backdrop
+      }
+    });
+
+    newSocket.on('world_boss_reward_claimed', (res) => {
+      if (res.success) {
+        setNotifications(prev => [{
+          id: Date.now(),
+          type: 'SUCCESS',
+          message: res.message,
+          timestamp: Date.now()
+        }, ...prev]);
+      }
+    });
+
+    newSocket.on('trade_update', (trade) => {
+      // 1. Update Active Trade (the floating panel)
+      if (trade.status === 'COMPLETED' || trade.status === 'CANCELLED') {
+        setActiveTrade(null);
+      } else {
+        setActiveTrade(prev => {
+          if (prev?.id === trade.id) return trade;
+          if (!prev && pendingTradeOpenRef.current) {
+            pendingTradeOpenRef.current = false;
+            return trade;
+          }
+          return prev;
+        });
+      }
+
+      // 2. Update Trade Invites List (used by SocialPanel)
+      setTradeInvites(prev => {
+        if (trade.status === 'COMPLETED' || trade.status === 'CANCELLED') {
+          // Remove from list
+          return prev.filter(t => t.id !== trade.id);
+        } else {
+          // Add or Update in list
+          const exists = prev.find(t => t.id === trade.id);
+          if (exists) {
+            return prev.map(t => t.id === trade.id ? trade : t);
+          } else {
+            return [...prev, trade];
+          }
+        }
+      });
+    });
+
+    newSocket.on('trade_list', (list) => {
+      setTradeInvites(list);
+
+      // Auto-resume trade if we have a persisted ID
+      const lastId = localStorage.getItem('lastActiveTradeId');
+      if (lastId) {
+        const found = list.find(t => t.id === lastId);
+        if (found) {
+          console.log("Resuming trade:", found.id);
+          setActiveTrade(found);
+        } else {
+          // Trade no longer exists or is not pending
+          localStorage.removeItem('lastActiveTradeId');
+        }
+      }
+    });
+
+    newSocket.on('trade_success', (data) => {
+      addNotification({ type: 'SYSTEM', message: data.message });
+      setActiveTrade(null);
+    });
+
+    newSocket.on('public_profile_data', (data) => {
+      // Capture snapshot - only update if not already inspecting this player
+      setInspectData(prev => {
+        if (!prev || prev.name !== data.name) return data;
+        return prev;
+      });
+    });
+
+    newSocket.on('combat_history', (history) => {
+      setCombatHistory(history || []);
+    });
+
+    setSocket(newSocket);
+  };
+
+  // Cleanup Socket on Unmount
+  useEffect(() => {
+    return () => {
+      if (socket) socket.disconnect();
+    }
+  }, [socket]);
+
+  // ΓöÇΓöÇ Background/Foreground Reconnection (Mobile & Tab Switch) ΓöÇΓöÇ
+  const backgroundTimestampRef = useRef(null);
+
+  useEffect(() => {
+    if (!socket || !session?.access_token) return;
+
+    const STALE_THRESHOLD_MS = 10_000; // 10s in background = request full refresh
+
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'hidden') {
+        // User left the tab ΓÇö record when they left
+        backgroundTimestampRef.current = Date.now();
+        return;
+      }
+
+      // User came back to the tab
+      const wentBackgroundAt = backgroundTimestampRef.current;
+      backgroundTimestampRef.current = null;
+      const elapsedMs = wentBackgroundAt ? Date.now() - wentBackgroundAt : 0;
+
+      console.log(`[VISIBILITY] Tab resumed after ${Math.round(elapsedMs / 1000)}s`);
+
+      if (!socket.connected) {
+        // Socket disconnected while in background ΓÇö reconnect
+        console.log('[VISIBILITY] Socket disconnected. Refreshing token and reconnecting...');
+        setIsConnecting(true);
+        setConnectionError(null);
+
+        try {
+          const { data: { session: refreshedSession }, error } = await supabase.auth.refreshSession();
+          if (refreshedSession && !error) {
+            setSession(refreshedSession);
+            socket.auth.token = refreshedSession.access_token;
+            socket.connect();
+          } else {
+            console.error('[VISIBILITY] Token refresh failed:', error);
+            // Fallback: try connecting with current token anyway
+            socket.connect();
+          }
+        } catch (err) {
+          console.error('[VISIBILITY] Error during reconnection:', err);
+          socket.connect();
+        }
+      } else if (elapsedMs >= STALE_THRESHOLD_MS) {
+        // Socket still connected but state is likely stale ΓÇö request full refresh
+        console.log('[VISIBILITY] Requesting full state refresh...');
+        socket.emit('get_status');
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [socket, session]);
+
+  const handleCharacterSelect = (charId) => {
+    setCanSpin(false); // Reset to false while loading new char
+    setSelectedCharacter(charId);
+    localStorage.setItem('selectedCharacterId', charId);
+    window.__offlineReportShown = false; // Allow offline report for this new character
+    window.__dailySpinShown = false; // Reset daily spin tracking for this session
+    if (session?.access_token) {
+      if (socket?.connected) {
+        setIsConnecting(true);
+        socket.emit('join_character', { characterId: charId });
+      } else {
+        setIsConnecting(true); // Show loading
+        connectSocket(session.access_token, charId);
+      }
+    }
+  };
+
+
+  const handleSwitchCharacter = () => {
+    if (socket) socket.disconnect();
+    setCanSpin(false); // Reset state
+    setSelectedCharacter(null);
+    localStorage.removeItem('selectedCharacterId');
+    setGameState(null);
+    setSocket(null);
+  };
+
+  const handleLogout = async () => {
+    // For anonymous/guest users, we don't necessarily want to wipe the session
+    // because once they sign out, they lose access to that account forever.
+    // Instead, we just clear the local state to take them back to the Auth screen.
+    if (session?.user?.is_anonymous) {
+      // Just clear React state, but keep the session in Supabase storage
+      setSession(null);
+    } else {
+      await supabase.auth.signOut();
+      setSession(null);
+    }
+
+    localStorage.removeItem('selectedCharacterId');
+    setGameState(null);
+    setSelectedCharacter(null);
+  };
+
+  const handleTutorialStepComplete = useCallback((step) => {
+    if (socket) {
+      socket.emit('complete_tutorial_step', { step });
+    }
+  }, [socket]);
+
+  // Automated Tutorial Advancement Logic
+  useEffect(() => {
+    const step = gameState?.state?.tutorialStep;
+    if (!step) return;
+
+    if (step === 'OPEN_INVENTORY' && activeTab === 'inventory') {
+      handleTutorialStepComplete('SELECT_CHEST');
+    }
+
+    if (step === 'SELECT_CHEST' && infoItem?.id === 'NOOB_CHEST') {
+      handleTutorialStepComplete('OPEN_CHEST');
+    }
+
+    if (step === 'OPEN_CHEST' && lootModalData) {
+      handleTutorialStepComplete('CLAIM_LOOT');
+    }
+
+    if (step === 'CLAIM_LOOT' && !lootModalData) {
+      handleTutorialStepComplete('OPEN_PROFILE');
+    }
+
+    if (step === 'OPEN_PROFILE' && activeTab === 'profile') {
+      handleTutorialStepComplete('EQUIP_WEAPON');
+    }
+
+    // Automated skip: if we have rewards but are stuck on earlier steps
+    const inventory = gameState?.state?.inventory || {};
+    const hasSword = inventory['T1_SWORD_Q0'] || inventory['T1_SWORD'];
+    const hasBow = inventory['T1_BOW_Q0'] || inventory['T1_BOW'];
+
+    const isStuckBeforeClaim = step === 'SELECT_CHEST' || step === 'OPEN_INVENTORY';
+
+    if ((hasSword || hasBow) && isStuckBeforeClaim) {
+      if (lootModalData) {
+        handleTutorialStepComplete('CLAIM_LOOT');
+      } else {
+        handleTutorialStepComplete('OPEN_PROFILE');
+      }
+    }
+
+    if (step === 'SELECT_WEAPON' && gameState?.state?.equipment?.mainHand) {
+      handleTutorialStepComplete('EQUIP_FOOD');
+    }
+
+    if (step === 'SELECT_FOOD' && gameState?.state?.equipment?.food) {
+      handleTutorialStepComplete('MERGE_RUNES_1');
+    }
+
+    if (step === 'MERGE_RUNES_1' && activeTab === 'skills_overview') {
+      handleTutorialStepComplete('OPEN_RUNE_FORGE');
+    }
+
+    if (step === 'OPEN_RUNE_FORGE' && activeTab === 'merging') {
+      handleTutorialStepComplete('CREATE_RUNE');
+    }
+
+    if (step === 'CONFIRM_EQUIP_RUNE' && Object.keys(gameState?.state?.equipment || {}).some(k => k.startsWith('rune_') && gameState.state.equipment[k])) {
+      handleTutorialStepComplete('GO_TO_COMBAT');
+    }
+
+    if (step === 'GO_TO_COMBAT' && activeTab === 'combat_overview') {
+      handleTutorialStepComplete('SELECT_COMBAT_CATEGORY');
+    }
+
+    // Skip combat category selection on desktop
+    if (step === 'GO_TO_COMBAT' && activeTab === 'combat') {
+      handleTutorialStepComplete('START_FIRST_MOB');
+    }
+
+    if (step === 'SELECT_COMBAT_CATEGORY' && activeTab === 'combat') {
+      handleTutorialStepComplete('START_FIRST_MOB');
+    }
+
+    if (step === 'START_FIRST_MOB' && gameState?.state?.combat?.mobId) {
+      handleTutorialStepComplete('TUTORIAL_FINAL_MESSAGE');
+    }
+  }, [gameState?.state?.tutorialStep, activeTab, infoItem, gameState?.state?.inventory, lootModalData, gameState?.state?.equipment, gameState?.state?.combat]);
+
+  const handleEquip = (itemId, quantity = null) => {
+    if (isPreviewActive) {
+      setConfirmModal({
+        message: "Preview Mode is active! Equipping items is disabled. Exit preview to play.",
+        onConfirm: () => setConfirmModal(null)
+      });
+      return;
+    }
+    if (socket) {
+      socket.emit('equip_item', { itemId, quantity });
+    }
+  };
+
+  const handleUseItem = (itemId, quantity = 1) => {
+    if (isPreviewActive) {
+      setConfirmModal({
+        message: "Preview Mode is active! Using items is disabled. Exit preview to play.",
+        onConfirm: () => setConfirmModal(null)
+      });
+      return;
+    }
+    if (socket) {
+      socket.emit('use_item', { itemId, quantity });
+    }
+
+    // Client-side redirection for Battle Rune Shards
+    if (itemId === 'T1_BATTLE_RUNE_SHARD' || (itemId && itemId.includes('BATTLE') && itemId.includes('SHARD'))) {
+      setActiveTab('merging');
+      setActiveCategory('COMBAT');
+    } else if (itemId && itemId.includes('_SHARD') && itemId.includes('RUNE')) {
+      setActiveTab('merging');
+      // Default to GATHERING if not already set, or keep current
+      if (activeCategory === 'COMBAT') setActiveCategory('GATHERING');
+    }
+  };
+
+  const handleUnequip = (slot) => {
+    if (isPreviewActive) {
+      setConfirmModal({
+        message: "Preview Mode is active! Unequipping items is disabled. Exit preview to play.",
+        onConfirm: () => setConfirmModal(null)
+      });
+      return;
+    }
+    if (socket) {
+      socket.emit('unequip_item', { slot });
+    }
+  };
+
+  const startActivity = (type, itemId, quantity = 1) => {
+    if (isPreviewActive) {
+      setConfirmModal({
+        message: "Preview Mode is active! Actions are disabled. Exit preview to play.",
+        onConfirm: () => setConfirmModal(null)
+      });
+      return;
+    }
+    socket.emit('start_activity', { actionType: type, itemId, quantity });
+    setModalItem(null);
+  };
+
+  const claimReward = () => {
+    socket.emit('claim_reward');
+  };
+
+  const isLocked = (type, item) => {
+    if (!displayedGameState?.state || !item) return false;
+    const tier = Number(item.tier) || 1;
+    const skillKey = getSkillForItem(item.id, type);
+    const userLevel = displayedGameState.state.skills?.[skillKey]?.level || 1;
+    const requiredLevel = getLevelRequirement(tier);
+
+    if (tier > 1) {
+      // console.log(`[DEBUG-LOCK-LIST] ${item.id}: Tier=${tier}, Skill=${skillKey}, UserLv=${userLevel}, ReqLv=${requiredLevel}, LOCKED=${userLevel < requiredLevel}`);
+    }
+
+    return userLevel < requiredLevel;
+  };
+
+  const SkillProgressHeader = ({ tab, category }) => {
+    if (!displayedGameState?.state?.skills) return null;
+
+    const skillKey = mapTabCategoryToSkill(tab, category);
+    const skill = displayedGameState.state.skills[skillKey] || { level: 1, xp: 0 };
+
+    if (skillKey === 'RUNE') {
+      return (
+        <div className="glass-panel" style={{
+          padding: '12px 20px',
+          marginBottom: '15px',
+          background: 'var(--accent-soft)',
+          border: '1px solid var(--border-active)',
+          borderRadius: '10px'
+        }}>
+          <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)', letterSpacing: '1px', textTransform: 'uppercase' }}>
+            {formatItemId(category)}
+          </div>
+        </div>
+      );
+    }
+
+    const nextXP = calculateNextLevelXP(skill.level);
+    const progress = Math.min(100, (skill.xp / nextXP) * 100);
+    const remainingXP = nextXP - skill.xp;
+
+    return (
+      <div className="glass-panel" style={{
+        padding: '12px 20px',
+        marginBottom: '15px',
+        background: 'var(--accent-soft)',
+        border: '1px solid var(--border-active)',
+        borderRadius: '10px'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)', letterSpacing: '1px', textTransform: 'uppercase' }}>
+              {formatItemId(category)}
+            </div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: '900', color: 'var(--text-main)' }}>
+              Lv {skill.level} <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: 'normal' }}>({Math.floor(progress)}%)</span>
+            </div>
+            <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: 'bold' }}>
+              {formatNumber((XP_TABLE[skill.level - 1] || 0) + skill.xp)} / {XP_TABLE[skill.level] ? formatNumber(XP_TABLE[skill.level]) : 'MAX'} XP
+            </div>
+          </div>
+        </div>
+        <div style={{ height: '3px', background: 'var(--slot-bg)', borderRadius: '2px', overflow: 'hidden', marginTop: '10px' }}>
+          <div
+            style={{
+              width: `${progress}%`,
+              height: '100%',
+              background: 'var(--accent)',
+              boxShadow: '0 0 8px var(--accent-soft)',
+              transition: 'width 0.2s ease-out'
+            }}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  const renderTierFilter = () => {
+    const tiersList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    return (
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(5, 1fr)',
+        gap: '10px',
+        marginBottom: '20px',
+        background: 'var(--accent-soft)',
+        padding: '15px',
+        borderRadius: '12px',
+        border: '1px solid var(--border)'
+      }}>
+        {tiersList.map(t => (
+          <button
+            key={t}
+            onClick={() => setActiveTier(t)}
+            style={{
+              background: activeTier === t ? 'var(--accent)' : 'var(--glass-bg)',
+              border: '1px solid',
+              borderColor: activeTier === t ? 'var(--accent)' : 'var(--border)',
+              color: activeTier === t ? 'var(--panel-bg)' : 'var(--text-dim)',
+              padding: '12px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontWeight: '900',
+              transition: '0.2s',
+              fontSize: '0.7rem',
+              textAlign: 'center',
+              letterSpacing: '1px'
+            }}
+          >
+            TIER {t}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
+  const renderActionButton = (type, item, extraStyles = {}) => {
+    const locked = isLocked(type, item);
+    const req = getLevelRequirement(item.tier);
+
+    const label = type === 'GATHERING' ? 'GATHER'
+      : type === 'REFINING' ? 'REFINE'
+        : type === 'CRAFTING' ? 'CRAFT'
+          : 'ACTION';
+
+    return (
+      <button
+        key={item.id}
+        onClick={() => {
+          if (isPreviewActive) {
+            setConfirmModal({
+              message: "Preview Mode is active! Actions are disabled. Exit preview to play.",
+              onConfirm: () => setConfirmModal(null)
+            });
+            return;
+          }
+          if (!locked) {
+            setModalItem(item);
+            setModalType(type);
+          }
+        }}
+        disabled={locked}
+        style={{
+          ...actionBtnStyle,
+          ...extraStyles,
+          opacity: locked ? 0.5 : 1,
+          cursor: locked ? 'not-allowed' : 'pointer',
+          borderRadius: '8px',
+          padding: '8px 20px',
+          background: locked ? 'var(--accent-soft)' : 'rgba(76, 175, 80, 0.12)', // Greenish for action
+          border: '1px solid',
+          borderColor: locked ? 'var(--border)' : 'rgba(76, 175, 80, 0.4)',
+          color: locked ? 'var(--text-dim)' : '#2e7d32',
+          fontWeight: '900',
+          fontSize: '0.75rem',
+          letterSpacing: '1px',
+          height: 'fit-content'
+        }}
+      >
+        {locked ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Lock size={12} />
+            LV {req}
+          </div>
+        ) : (
+          label
+        )}
+      </button>
+    );
+  };
+
+
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'profile':
+        return <ProfilePanel
+          gameState={displayedGameState}
+          session={session}
+          socket={socket}
+          settings={settings}
+          onShowInfo={setInfoItem}
+          isMobile={isMobile}
+          theme={theme}
+          setTheme={handleSetTheme}
+          onPreviewTheme={(id) => setPreviewThemeId(id)}
+          previewAvatarData={previewAvatarData}
+          onPreviewAvatar={setPreviewAvatarData}
+          previewBannerData={previewBannerData}
+          onPreviewBanner={(banner) => setPreviewBannerData(banner)}
+          isPreviewActive={isPreviewActive}
+          onPreviewActionBlocked={onPreviewActionBlocked}
+          onTutorialComplete={handleTutorialStepComplete}
+          onOpenRenameModal={() => {
+            setIsRenameModalOpen(true);
+          }} />;
+
+
+      case 'skills_overview':
+        return <SkillsOverview gameState={displayedGameState} onNavigate={(tab, cat) => { setActiveTab(tab); if (cat) setActiveCategory(cat); }} />;
+      case 'town_overview':
+        return <TownOverview
+          onNavigate={(tab) => setActiveTab(tab)}
+          gameState={displayedGameState}
+          canSpin={canSpin}
+          onOpenDailySpin={() => setDailySpinOpen(true)}
+          hasActiveTrade={tradeInvites?.length > 0 || !!activeTrade}
+          isAnonymous={session?.user?.is_anonymous}
+          onShowGuestModal={() => setShowGuestModal(true)}
+          socket={socket}
+        />;
+      case 'combat_overview':
+        return <CombatOverview gameState={displayedGameState} onNavigate={(tab) => setActiveTab(tab)} />;
+      case 'gathering':
+      case 'refining': {
+        const isGathering = activeTab === 'gathering';
+        const activeCategoryData = isGathering ? ITEMS.RAW[activeCategory] : ITEMS.REFINED[activeCategory];
+        const itemsToRender = Object.values(activeCategoryData || {}).filter(item => item.tier === activeTier);
+
+        if (!activeCategoryData || Object.keys(activeCategoryData).length === 0) {
+          return (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              <SkillProgressHeader tab={activeTab} category={activeCategory} />
+              <div className="glass-panel" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '16px', background: 'rgba(15, 20, 30, 0.4)' }}>
+                <div style={{ textAlign: 'center', opacity: 0.5 }}>
+                  <div style={{ fontSize: '3rem', marginBottom: '10px' }}>≡ƒº¬</div>
+                  <h2 style={{ color: 'var(--accent)', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '2px' }}>COMING SOON</h2>
+                  <p style={{ color: '#888' }}>Alchemy system in development.</p>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <SkillProgressHeader tab={activeTab} category={activeCategory} />
+            <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRadius: '16px', background: 'var(--panel-bg)' }}>
+              <div style={{ padding: isMobile ? '20px' : '30px 40px', borderBottom: '1px solid var(--border)' }}>
+                <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '2px' }}>
+                  {activeCategory.replace(/_/g, ' ')} {isGathering ? 'GATHERING' : 'REFINING'}
+                </h2>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', marginTop: '15px' }}>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(t => (
+                    <button key={t} onClick={() => setActiveTier(t)} style={{ padding: '6px', background: activeTier === t ? 'var(--accent-soft)' : 'rgba(255,255,255,0.02)', border: '1px solid', borderColor: activeTier === t ? 'var(--border-active)' : 'rgba(255,255,255,0.05)', borderRadius: '4px', color: activeTier === t ? 'var(--accent)' : '#555', fontSize: '0.65rem', fontWeight: '900' }}>T{t}</button>
+                  ))}
+                </div>
+              </div>
+              <div className="scroll-container" style={{ padding: isMobile ? '20px' : '30px 40px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  {itemsToRender.map(item => {
+                    const locked = isLocked(isGathering ? 'GATHERING' : 'REFINING', item);
+                    const reqLevel = getLevelRequirement(item.tier);
+                    const reqs = item.req || {}; // For refining
+
+                    const isActive = displayedGameState?.current_activity?.item_id === item.id;
+                    const duration = (item.time || (isGathering ? 3.0 : 1.5)) * 1000;
+
+                    const skillKey = mapTabCategoryToSkill(activeTab, activeCategory);
+                    const skill = displayedGameState?.state?.skills?.[skillKey] || { level: 1, xp: 0 };
+                    const nextXP = calculateNextLevelXP(skill.level);
+                    const skillProgress = (skill.xp / nextXP) * 100;
+
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          setModalItem(item);
+                          setModalType(isGathering ? 'GATHERING' : 'REFINING');
+                        }}
+                        disabled={false}
+                        className="resource-card"
+                        style={{
+                          borderLeft: isActive ? '4px solid var(--accent)' : 'none',
+                          display: 'flex',
+                          gap: '12px',
+                          alignItems: 'center',
+                          padding: '12px',
+                          opacity: locked ? 0.7 : 1,
+                          cursor: 'pointer',
+                          filter: 'none',
+                          background: isActive ? 'var(--accent-soft)' : 'var(--slot-bg)',
+                          width: '100%',
+                          textAlign: 'left',
+                          border: isActive ? '1px solid var(--accent)' : '1px solid var(--border)',
+                          borderRadius: '8px',
+                          marginBottom: '10px',
+                          transition: 'all 0.2s ease',
+                          position: 'relative',
+                          overflow: 'hidden'
+                        }}
+                        onMouseEnter={(e) => { if (!locked && !isActive) e.currentTarget.style.background = 'var(--accent-soft)'; }}
+                        onMouseLeave={(e) => { if (!locked && !isActive) e.currentTarget.style.background = 'var(--slot-bg)'; }}
+                      >
+                        {/* Icon Container */}
+                        <div style={{
+                          width: '48px',
+                          height: '48px',
+                          background: 'var(--panel-bg)',
+                          borderRadius: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          border: '1px solid var(--border)',
+                          flexShrink: 0,
+                          overflow: 'hidden'
+                        }}>
+                          {item.icon ? (
+                            <img
+                              src={item.icon}
+                              alt={item.name}
+                              style={{
+                                width: item.scale || '100%',
+                                height: item.scale || '100%',
+                                objectFit: 'contain',
+                                filter: locked ? 'grayscale(100%) opacity(0.5)' : 'none'
+                              }}
+                            />
+                          ) : (
+                            isGathering ? (
+                              <Pickaxe size={24} style={{ opacity: 0.7 }} color={locked ? '#555' : 'var(--accent)'} />
+                            ) : (
+                              <Box size={24} style={{ opacity: 0.7 }} color={locked ? '#555' : 'var(--accent)'} />
+                            )
+                          )}
+                        </div>
+
+                        {/* Content */}
+                        <div style={{ flex: '1 1 0%' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                            <span style={{ fontWeight: 'bold', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px', color: locked ? 'var(--text-dim)' : (isActive ? 'var(--accent)' : 'var(--text-main)') }}>
+                              {item.name}
+                              {locked && <Lock size={14} color="#f87171" />}
+                              {isActive && <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 2 }} style={{ fontSize: '0.6rem', background: 'var(--accent)', color: 'var(--bg-dark)', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>ACTIVE</motion.span>}
+                            </span>
+                          </div>
+
+                          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                            {/* Tier Badge */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--badge-bg)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--accent)', border: '1px solid var(--border)' }}>
+                              <span>T{item.tier}</span>
+                            </div>
+
+                            {/* Time Badge */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--badge-bg)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--text-dim)', border: '1px solid var(--border)' }}>
+                              <Clock size={12} color="var(--text-dim)" />
+                              <span>{item.time || (isGathering ? '3.0' : '1.5')}s</span>
+                            </div>
+
+                            {/* XP Badge */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--badge-bg)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--text-dim)', border: '1px solid var(--border)' }}>
+                              <Star size={12} color="var(--text-dim)" />
+                              <span>{item.xp} XP</span>
+                            </div>
+
+                            {/* Req Level Badge (Locked only) */}
+                            {locked && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255, 68, 68, 0.1)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: '#ff4444', border: '1px solid rgba(255, 68, 68, 0.2)' }}>
+                                <span>Req Lv {reqLevel}</span>
+                              </div>
+                            )}
+
+
+
+                            {/* Ingredients Badge (Refining only) */}
+                            {!isGathering && reqs && Object.entries(reqs).map(([reqId, reqQty]) => {
+                              const entry = displayedGameState?.state?.inventory?.[reqId];
+                              const userQty = getSafeAmount(entry);
+                              const hasEnough = userQty >= reqQty;
+                              return (
+                                <div key={reqId} style={{
+                                  display: 'flex', alignItems: 'center', gap: '4px',
+                                  background: hasEnough ? 'rgba(76, 175, 80, 0.1)' : 'rgba(255, 68, 68, 0.1)',
+                                  padding: '2px 8px',
+                                  borderRadius: '4px',
+                                  fontSize: '0.7rem',
+                                  color: hasEnough ? '#4caf50' : '#ff4444',
+                                  border: `1px solid ${hasEnough ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255, 68, 68, 0.2)'}`
+                                }}>
+                                  <span>{userQty}/{reqQty} {reqId}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          {isActive && (
+                            <ActivityProgressBar
+                              activity={displayedGameState.current_activity}
+                              serverTimeOffset={clockOffset.current}
+                            />
+                          )}
+                          {isActive && (
+                            <div style={{ fontSize: '0.6rem', color: 'var(--accent)', marginTop: '4px', textAlign: 'right', fontWeight: 'bold' }}>
+                              {displayedGameState.current_activity.initial_quantity - displayedGameState.current_activity.actions_remaining}/{displayedGameState.current_activity.initial_quantity}
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      case 'crafting': {
+        const craftingItems = ITEMS.GEAR[activeCategory] || {};
+        const allItemsInCategory = [];
+        Object.values(craftingItems).forEach(itemTypeGroup => {
+          Object.values(itemTypeGroup).forEach(item => {
+            allItemsInCategory.push(item);
+          });
+        });
+
+        const itemsToRender = allItemsInCategory.filter(i => i.tier === activeTier);
+
+        if (!craftingItems || Object.keys(craftingItems).length === 0) {
+          return (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              <SkillProgressHeader tab={activeTab} category={activeCategory} />
+              <div className="glass-panel" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '16px', background: 'var(--panel-bg)' }}>
+                <div style={{ textAlign: 'center', opacity: 0.5 }}>
+                  <div style={{ fontSize: '3rem', marginBottom: '10px' }}>ΓÜù∩╕Å</div>
+                  <h2 style={{ color: 'var(--accent)', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '2px' }}>COMING SOON</h2>
+                  <p style={{ color: 'var(--text-dim)' }}>Alchemy Lab under construction.</p>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <SkillProgressHeader tab={activeTab} category={activeCategory} />
+            <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRadius: '16px', background: 'var(--panel-bg)' }}>
+              <div style={{ padding: isMobile ? '20px' : '30px 40px', borderBottom: '1px solid var(--border)' }}>
+                <h2 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: '900', letterSpacing: '2px' }}>
+                  {activeCategory.replace(/_/g, ' ')} CRAFTING
+                </h2>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', marginTop: '15px' }}>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(t => (
+                    <button key={t} onClick={() => setActiveTier(t)} style={{ padding: '6px', background: activeTier === t ? 'var(--accent-soft)' : 'rgba(255,255,255,0.02)', border: '1px solid', borderColor: activeTier === t ? 'var(--border-active)' : 'rgba(255,255,255,0.05)', borderRadius: '4px', color: activeTier === t ? 'var(--accent)' : '#555', fontSize: '0.65rem', fontWeight: '900' }}>T{t}</button>
+                  ))}
+                </div>
+              </div>
+              <div className="scroll-container" style={{ padding: isMobile ? '20px' : '30px 40px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  {itemsToRender.map(item => {
+                    // Resolve item to ensure we show the correct "in-game" stats (especially for Mage lookup)
+                    const resolved = resolveItem(item.id) || item;
+                    const reqs = resolved.req || item.req || {};
+                    const stats = resolved.stats || item.stats || {};
+
+                    const statsList = [];
+                    if (resolved.heal) statsList.push({ icon: <Heart size={12} />, val: `${resolved.heal} Heal`, color: '#4caf50' });
+                    if (stats.damage) statsList.push({ icon: <Sword size={12} />, val: `${stats.damage} Dmg`, color: '#ff4444' });
+                    if (stats.defense) statsList.push({ icon: <Shield size={12} />, val: `${stats.defense} Def`, color: '#4caf50' });
+                    if (stats.hp) statsList.push({ icon: <Heart size={12} />, val: `${stats.hp} HP`, color: '#ff4d4d' });
+                    if (stats.speed) statsList.push({ icon: <Zap size={12} />, val: `${stats.speed}% Spd`, color: 'var(--accent)' });
+                    if (stats.attackSpeed) statsList.push({ icon: <Zap size={12} />, val: `${(1000 / stats.attackSpeed).toFixed(2)}/s`, color: 'var(--accent)' });
+                    if (stats.efficiency) {
+                      if (typeof stats.efficiency === 'number') {
+                        statsList.push({ icon: <TrendingUp size={12} />, val: `${stats.efficiency}% Eff`, color: '#90d5ff' });
+                      } else if (typeof stats.efficiency === 'object' && stats.efficiency.GLOBAL) {
+                        statsList.push({ icon: <TrendingUp size={12} />, val: `${stats.efficiency.GLOBAL}% Global`, color: '#90d5ff' });
+                      }
+                    }
+
+                    // Main stat for sorting/highlighting if needed, but we render the list now
+                    const mainStat = statsList[0] || null;
+
+                    const type = activeTab.toUpperCase();
+                    const locked = isLocked(type, item);
+                    const reqLevel = getLevelRequirement(item.tier);
+                    const isActive = displayedGameState?.current_activity?.item_id === item.id;
+
+                    const skillKey = mapTabCategoryToSkill(activeTab, activeCategory);
+                    const skill = displayedGameState?.state?.skills?.[skillKey] || { level: 1, xp: 0 };
+                    const nextXP = calculateNextLevelXP(skill.level);
+
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          setModalItem(item);
+                          setModalType('CRAFTING');
+                        }}
+                        className="resource-card"
+                        style={{
+                          borderLeft: isActive ? '4px solid var(--accent)' : 'none',
+                          display: 'flex',
+                          gap: '12px',
+                          alignItems: 'center',
+                          padding: '12px',
+                          opacity: locked ? 0.7 : 1,
+                          cursor: 'pointer',
+                          background: isActive ? 'var(--accent-soft)' : 'var(--slot-bg)',
+                          width: '100%',
+                          textAlign: 'left',
+                          border: isActive ? '1px solid var(--accent)' : '1px solid var(--border)',
+                          borderRadius: '8px',
+                          marginBottom: '10px',
+                          transition: 'all 0.2s ease',
+                          position: 'relative',
+                          overflow: 'hidden'
+                        }}
+                      >
+                        {/* Icon Container */}
+                        <div style={{
+                          width: '48px',
+                          height: '48px',
+                          background: 'var(--panel-bg)',
+                          borderRadius: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          border: '1px solid var(--border)',
+                          flexShrink: 0,
+                          overflow: 'hidden'
+                        }}>
+                          {item.icon ? (
+                            <img src={item.icon} alt={item.name} style={{ width: item.scale || '130%', height: item.scale || '130%', objectFit: 'contain', filter: locked ? 'grayscale(100%) opacity(0.5)' : 'none' }} />
+                          ) : (
+                            locked ? <Lock size={20} color="#555" /> : <Layers size={20} style={{ opacity: 0.7 }} color="var(--accent)" />
+                          )}
+                        </div>
+
+                        {/* Content */}
+                        <div style={{ flex: '1 1 0%' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                            <span style={{ fontWeight: 'bold', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px', color: locked ? 'var(--text-dim)' : (isActive ? 'var(--accent)' : 'var(--text-main)') }}>
+                              {item.name}
+                              {isActive && <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 2 }} style={{ fontSize: '0.6rem', background: 'var(--accent)', color: 'var(--bg-dark)', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>ACTIVE</motion.span>}
+                            </span>
+                          </div>
+                          {(resolved.desc || resolved.description) && (
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '8px', fontStyle: 'italic' }}>
+                              {resolved.desc || resolved.description}
+                            </div>
+                          )}
+
+                          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--badge-bg)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--accent)', border: '1px solid var(--border)' }}>
+                              <span>T{item.tier}</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--badge-bg)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--text-main)', border: '1px solid var(--border)' }}>
+                              <Clock size={12} color="var(--text-dim)" />
+                              <span>{item.time || 3.0}s</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--badge-bg)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--text-main)', border: '1px solid var(--border)' }}>
+                              <Star size={12} color="var(--text-dim)" />
+                              <span>{item.xp} XP</span>
+                            </div>
+                            {statsList.map((stat, idx) => (
+                              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--badge-bg)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', color: locked ? '#555' : stat.color, border: '1px solid var(--border)' }}>
+                                {React.cloneElement(stat.icon, { size: 12, color: locked ? '#555' : stat.color })}
+                                <span>{stat.val}</span>
+                              </div>
+                            ))}
+                            {Object.entries(reqs).map(([reqId, reqQty]) => {
+                              const entry = displayedGameState?.state?.inventory?.[reqId];
+                              const userQty = getSafeAmount(entry);
+                              const hasEnough = userQty >= reqQty;
+                              return (
+                                <div key={reqId} style={{
+                                  display: 'flex', alignItems: 'center', gap: '4px',
+                                  background: hasEnough ? 'rgba(76, 175, 80, 0.1)' : 'rgba(255, 68, 68, 0.1)',
+                                  padding: '2px 8px',
+                                  borderRadius: '4px',
+                                  fontSize: '0.7rem',
+                                  color: hasEnough ? '#4caf50' : '#ff4444',
+                                  border: `1px solid ${hasEnough ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255, 68, 68, 0.2)'}`
+                                }}>
+                                  <span>{userQty}/{reqQty} {formatItemId(reqId)}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          {isActive && (
+                            <ActivityProgressBar activity={displayedGameState.current_activity} serverTimeOffset={clockOffset.current} />
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+      case 'inventory':
+        return <InventoryPanel
+          gameState={displayedGameState}
+          socket={socket}
+          settings={settings}
+          onEquip={handleEquip}
+          onShowInfo={setInfoItem}
+          onListOnMarket={handleListOnMarket}
+          onUse={(item, qty) => {
+            if (isPreviewActive) {
+              setConfirmModal({
+                message: "Preview Mode is active! You cannot use items now. Exit preview to play.",
+                onConfirm: () => setConfirmModal(null)
+              });
+              return;
+            }
+            handleUseItem(item, qty);
+          }}
+          isMobile={isMobile}
+          onSelectItem={(item) => {
+            if (gameState?.state?.tutorialStep === 'SELECT_CHEST' && item?.id === 'NOOB_CHEST') {
+              handleTutorialStepComplete('OPEN_CHEST');
+            }
+          }}
+          isPreviewActive={isPreviewActive}
+          onPreviewActionBlocked={onPreviewActionBlocked}
+        />;
+      case 'ranking':
+        return <RankingPanel gameState={displayedGameState} isMobile={isMobile} socket={socket} onInspect={handleInspectPlayer} />;
+      case 'rest_camp':
+        return <RestPanel gameState={displayedGameState} isMobile={isMobile} socket={socket} />;
+      case 'world_boss':
+        return (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <WorldBossPanel
+              socket={socket}
+              gameState={displayedGameState}
+              isMobile={isMobile}
+              onChallenge={handleStartWorldBoss}
+              onInspect={handleInspectPlayer}
+              onShowInfo={setInfoItem}
+              isPreviewActive={isPreviewActive}
+              onPreviewActionBlocked={onPreviewActionBlocked}
+            />
+          </div>
+        );
+      case 'market':
+        return (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <MarketPanel
+              socket={socket}
+              gameState={displayedGameState}
+              silver={displayedGameState?.state?.silver || 0}
+              onShowInfo={setInfoItem}
+              onListOnMarket={handleListOnMarket}
+              isMobile={isMobile}
+              isAnonymous={session?.user?.is_anonymous}
+              filter={marketFilter}
+              onClearFilter={() => setMarketFilter(null)}
+              isPreviewActive={isPreviewActive}
+              onPreviewActionBlocked={onPreviewActionBlocked}
+            />
+          </div>
+        );
+      case 'trade':
+        return null; // TradePanel is a modal, handled separately
+      case 'taxometer': {
+        const marketTax = globalStats?.market_tax_total || 0;
+        const tradeTax = globalStats?.trade_tax_total || 0;
+        const totalTax = globalStats?.total_market_tax || 0;
+        const taxHistory = globalStats?.history || [];
+
+        return (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: isMobile ? '10px' : '20px', justifyContent: 'center', height: '100%', overflowY: 'auto' }}>
+            <div className="glass-panel" style={{
+              padding: isMobile ? '20px' : '30px',
+              borderRadius: '16px',
+              background: 'var(--panel-bg)',
+              border: '1px solid var(--border)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: isMobile ? '15px' : '20px',
+              maxWidth: '600px',
+              margin: '0 auto',
+              width: '100%'
+            }}>
+              <div>
+                <div style={{ color: 'var(--accent)', fontSize: '0.65rem', fontWeight: '900', letterSpacing: '3px', marginBottom: '8px' }}>GLOBAL ECONOMY</div>
+                <h2 style={{ color: 'var(--text-main)', fontSize: isMobile ? '1.4rem' : '1.8rem', fontWeight: '900', letterSpacing: '2px', margin: 0 }}>
+                  TAXOMETER
+                </h2>
+                <div style={{ color: 'var(--text-dim)', fontSize: '0.6rem', marginTop: '8px', opacity: 0.7 }}>
+                  * Updates periodically (every 30 minutes)
+                </div>
+              </div>
+
+              <div style={{
+                background: 'rgba(0,0,0,0.2)',
+                padding: isMobile ? '20px 10px' : '30px 20px',
+                borderRadius: '12px',
+                border: '1px solid rgba(255, 215, 0, 0.1)',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '10px', fontWeight: 'bold' }}>TOTAL TAXES COLLECTED</div>
+
+                {/* Odometer-style Animation */}
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '4px', marginBottom: '5px' }}>
+                  <motion.div
+                    key={totalTax}
+                    initial={{ scale: 1.1, color: '#fff' }}
+                    animate={{ scale: 1, color: 'var(--accent)' }}
+                    transition={{ duration: 0.5 }}
+                    style={{
+                      fontSize: isMobile ? '2rem' : '2.5rem',
+                      fontWeight: '900',
+                      fontFamily: 'monospace',
+                      textShadow: '0 0 20px rgba(212, 175, 55, 0.3)'
+                    }}
+                  >
+                    {formatNumber(totalTax)}
+                  </motion.div>
+                </div>
+
+                <div style={{ marginTop: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'rgba(74, 222, 128, 0.6)', fontSize: '0.65rem', fontWeight: 'bold' }}>
+                  <div style={{ width: '6px', height: '6px', background: '#4ade80', borderRadius: '50%', boxShadow: '0 0 8px #4ade80' }}></div>
+                  LIVE COUNTER
+                </div>
+              </div>
+
+              {/* Breakdown Cards */}
+              <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
+                <StatCard label="Marketplace" value={marketTax} color="var(--t5)" />
+                <StatCard label="Player Trades" value={tradeTax} color="var(--t3)" />
+              </div>
+
+              <TaxHistoryChart
+                history={taxHistory}
+                totalTax={totalTax}
+                tax_24h_ago={globalStats?.tax_24h_ago}
+                isMobile={isMobile}
+              />
+
+              <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: isMobile ? '0.7rem' : '0.8rem', lineHeight: '1.5', maxWidth: '450px', margin: '0 auto' }}>
+                <p style={{ margin: 0 }}>
+                  Monitoring the global flow of Silver.
+                  <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}> 20% </span> from Market and
+                  <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}> 15% </span> from Trades are collected to maintain a healthy economy.
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+      }
+      case 'combat':
+        return (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <SkillProgressHeader tab="combat" category="COMBAT" />
+            <CombatPanel
+              socket={socket}
+              gameState={displayedGameState}
+              isMobile={isMobile}
+              onShowHistory={() => {
+                if (socket) socket.emit('get_combat_history');
+                setShowCombatHistory(true);
+              }}
+              serverTimeOffset={clockOffset.current}
+              isPreviewActive={isPreviewActive}
+              onPreviewActionBlocked={onPreviewActionBlocked}
+            />
+          </div>
+        );
+      case 'dungeon':
+        return (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <SkillProgressHeader tab="dungeon" category="DUNGEONEERING" />
+            <DungeonPanel
+              socket={socket}
+              gameState={displayedGameState}
+              isMobile={isMobile}
+              serverTimeOffset={clockOffset.current}
+              isPreviewActive={isPreviewActive}
+              onPreviewActionBlocked={onPreviewActionBlocked}
+            />
+          </div>
+        );
+      case 'merging':
+        return (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <SkillProgressHeader tab="merging" category={activeCategory} />
+            <div className="scroll-container" style={{ flex: 1, overflowY: 'auto' }}>
+              <RunePanel
+                gameState={displayedGameState}
+                onShowInfo={setInfoItem}
+                isMobile={isMobile}
+                socket={socket}
+                onListOnMarket={handleListOnMarket}
+                onOpenShop={() => setShowOrbShop(true)}
+                activeCategory={activeCategory}
+                onTutorialComplete={handleTutorialStepComplete}
+                isPreviewActive={isPreviewActive}
+                onPreviewActionBlocked={onPreviewActionBlocked}
+              />
+            </div>
+          </div>
+        );
+      case 'guild':
+        return (
+          <GuildPanel
+            gameState={displayedGameState}
+            socket={socket}
+            isMobile={isMobile}
+            onInspect={handleInspectPlayer}
+          />
+        );
+      default:
+        return <div style={{ padding: 20, textAlign: 'center', color: '#555' }}>Select a category</div>;
+    }
+  };
+
+  const handleNavigate = (itemId) => {
+    if (itemId === 'world_boss') {
+      setActiveTab('world_boss');
+      return;
+    }
+    if (itemId === 'combat') {
+      setActiveTab('combat');
+      return;
+    }
+    if (itemId === 'trade') {
+      setShowSocialModal(true);
+      return;
+    }
+    if (itemId === 'dungeon') {
+      setActiveTab('dungeon');
+      return;
+    }
+    // Procurar em Gathering
+    for (const [category, tiers] of Object.entries(ITEMS.RAW)) {
+      for (const [t, item] of Object.entries(tiers)) {
+        if (item.id === itemId) {
+          setActiveTab('gathering');
+          setActiveCategory(category);
+          setActiveTier(Number(t));
+          setModalItem(null);
+          return;
+        }
+      }
+    }
+    // Procurar em Refining
+    for (const [category, tiers] of Object.entries(ITEMS.REFINED)) {
+      for (const [t, item] of Object.entries(tiers)) {
+        if (item.id === itemId) {
+          setActiveTab('refining');
+          setActiveCategory(category);
+          setActiveTier(Number(t));
+          setModalItem(null);
+          return;
+        }
+      }
+    }
+
+    // Procurar em Crafting/Gear
+    for (const [stationKey, itemTypes] of Object.entries(ITEMS.GEAR)) {
+      for (const [itemType, tiers] of Object.entries(itemTypes)) {
+        for (const [t, item] of Object.entries(tiers)) {
+          if (item.id === itemId) {
+            setActiveTab('crafting');
+            setActiveCategory(stationKey); // stationKey ex: WARRIORS_FORGE
+            setActiveTier(Number(t));
+            setModalItem(null);
+            return;
+          }
+        }
+      }
+    }
+  };
+
+  const handleSearchInMarket = (itemName) => {
+    setMarketFilter(itemName);
+    setActiveTab('market');
+    setModalItem(null);
+  };
+
+  const handleStartWorldBoss = () => {
+    if (isPreviewActive) {
+      setConfirmModal({
+        message: "Preview Mode is active! World Boss challenges are disabled. Exit preview to play.",
+        onConfirm: () => setConfirmModal(null)
+      });
+      return;
+    }
+    if (socket) {
+      socket.emit('start_world_boss_fight');
+    }
+  };
+
+
+
+  if (versionMismatch) {
+    return (
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        background: 'rgba(0,0,0,0.95)', zIndex: 999999,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        padding: '20px', textAlign: 'center'
+      }}>
+        <div style={{
+          background: 'var(--panel-bg)', padding: '40px', borderRadius: '20px',
+          border: '2px solid var(--accent)', boxShadow: '0 0 30px var(--accent-soft)',
+          maxWidth: '500px'
+        }}>
+          <h1 style={{ color: 'var(--accent)', marginBottom: '20px' }}>UPDATE REQUIRED</h1>
+          <p style={{ color: 'var(--text-main)', fontSize: '1.1rem', marginBottom: '30px' }}>
+            A new version of Eternal Idle is available, but your browser is struggling to update.
+          </p>
+          <p style={{ color: 'var(--text-dim)', marginBottom: '30px' }}>
+            Please close all game tabs and try clearing your browser cache if this persists.
+          </p>
+          <button
+            onClick={() => {
+              sessionStorage.setItem('version_reload_count', '0');
+              window.location.reload(true);
+            }}
+            style={{
+              background: 'var(--accent)', color: 'black', padding: '15px 40px',
+              borderRadius: '10px', fontSize: '1.2rem', fontWeight: '900',
+              border: 'none', cursor: 'pointer', transition: '0.2s'
+            }}
+          >
+            TRY AGAIN
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (banModalData) {
+    return (
+      <div key="ban-block-modal" style={{
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(10px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        zIndex: 99999, padding: '20px'
+      }}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 50 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          style={{
+            background: 'var(--panel-bg)', border: '1px solid #ff4444',
+            borderRadius: '24px', padding: '30px', maxWidth: '400px', width: '100%',
+            textAlign: 'center', boxShadow: '0 20px 60px rgba(255, 68, 68, 0.1)'
+          }}
+        >
+          <div style={{
+            width: '60px', height: '60px', borderRadius: '50%',
+            background: 'rgba(255, 68, 68, 0.1)', display: 'flex',
+            alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px'
+          }}>
+            <ShieldAlert size={30} color="#ff4444" />
+          </div>
+          <h2 style={{ color: '#ff4444', fontSize: '1.4rem', fontWeight: '800', margin: '0 0 12px' }}>
+            ACCESS RESTRICTED
+          </h2>
+          <p style={{ color: 'var(--text-main)', fontSize: '1rem', lineHeight: '1.6', margin: '0 0 24px' }}>
+            Your account has been {banModalData.level === 3 ? 'permanently' : 'temporarily'} restricted.
+            <br />
+            Reason: <strong style={{ color: '#ffaa00' }}>"{banModalData.reason || (banModalData.message && banModalData.message.split('Reason: ')[1]?.split('.')[0]) || 'Account Violation'}"</strong>
+            {banModalData.level === 2 && (
+              <>
+                <br />
+                Remaining: <strong style={{ color: 'var(--text-main)' }}>{banModalData.remaining || (banModalData.message && banModalData.message.split('Remaining: ')[1]) || '24h'}</strong>
+              </>
+            )}
+          </p>
+          <button
+            onClick={async () => {
+              await supabase.auth.signOut();
+              localStorage.clear();
+              window.location.reload();
+            }}
+            style={{
+              width: '100%', padding: '14px', borderRadius: '12px',
+              background: 'rgba(52, 73, 94, 0.4)', color: 'white', fontWeight: '700',
+              border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', display: 'flex',
+              alignItems: 'center', justifyContent: 'center', gap: '8px',
+              marginTop: '10px'
+            }}
+          >
+            <LogOut size={18} />
+            LOGOUT
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Helper for Warning modal
+  const renderBanWarning = () => {
+    return (
+      <AnimatePresence>
+        {banWarning && (
+          <div key="ban-warning-modal" style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(5px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 99998, padding: '20px'
+          }}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 30 }}
+              style={{
+                background: 'var(--panel-bg)', border: '1px solid #ffaa00',
+                borderRadius: '24px', padding: '30px', maxWidth: '400px', width: '100%',
+                textAlign: 'center', boxShadow: '0 20px 50px rgba(255, 170, 0, 0.1)'
+              }}
+            >
+              <div style={{
+                width: '60px', height: '60px', borderRadius: '50%',
+                background: 'rgba(255, 170, 0, 0.1)', display: 'flex',
+                alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px'
+              }}>
+                <AlertTriangle size={30} color="#ffaa00" />
+              </div>
+              <h3 style={{ color: '#ffaa00', fontSize: '1.4rem', fontWeight: '800', margin: '0 0 12px' }}>
+                Behavioral Warning
+              </h3>
+              <p style={{ color: 'var(--text-main)', fontSize: '0.95rem', lineHeight: '1.6', margin: '0 0 24px' }}>
+                This is a formal warning regarding your account:
+                <br />
+                <strong style={{ color: '#ffaa00' }}>"{banWarning}"</strong>
+                <br /><br />
+                Please follow the game rules to avoid 24h or permanent bans.
+              </p>
+
+              <div
+                onClick={() => setBanWarningRead(!banWarningRead)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '10px',
+                  justifyContent: 'center', marginBottom: '24px', cursor: 'pointer',
+                  padding: '10px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.05)'
+                }}
+              >
+                <div style={{
+                  width: '20px', height: '20px', borderRadius: '6px',
+                  border: `2px solid ${banWarningRead ? '#ffaa00' : 'rgba(255,255,255,0.2)'}`,
+                  background: banWarningRead ? '#ffaa00' : 'transparent',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'all 0.2s'
+                }}>
+                  {banWarningRead && <Zap size={14} color="#000" />}
+                </div>
+                <span style={{ fontSize: '0.9rem', color: banWarningRead ? 'var(--text-main)' : 'var(--text-dim)' }}>
+                  I have read and understood
+                </span>
+              </div>
+
+              <button
+                disabled={!banWarningRead}
+                onClick={() => {
+                  socket?.emit('acknowledge_ban_warning');
+                  setLastWarningSeen(banWarning);
+                  setBanWarning(null);
+                  setBanWarningRead(false);
+                }}
+                style={{
+                  width: '100%', padding: '14px', borderRadius: '12px',
+                  background: banWarningRead ? '#ffaa00' : 'rgba(255,255,255,0.05)',
+                  color: banWarningRead ? '#000' : 'rgba(255,255,255,0.2)',
+                  fontWeight: '800', border: 'none', cursor: banWarningRead ? 'pointer' : 'not-allowed',
+                  transition: 'all 0.2s', fontSize: '0.95rem', letterSpacing: '1px'
+                }}
+              >
+                CONFIRM
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    );
+  };
+
+  if (!session || initialAuthView === 'RESET') {
+    return (
+      <>
+        <Auth onLogin={setSession} initialView={initialAuthView} theme={theme} setTheme={handleSetTheme} isMobile={isMobile} onPreviewTheme={(id) => setPreviewThemeId(id)} />
+        {renderBanWarning()}
+      </>
+    );
+  }
+
+  if (!selectedCharacter) {
+    return (
+      <>
+        <CharacterSelection onSelectCharacter={handleCharacterSelect} theme={theme} setTheme={handleSetTheme} isMobile={isMobile} onPreviewTheme={(id) => setPreviewThemeId(id)} />
+        {renderBanWarning()}
+      </>
+    );
+  }
+
+  // Loading state while connecting
+  if (!gameState && isConnecting) {
+    return (
+      <>
+        <div className="loading-screen"><div className="spinner"></div>Connecting to World...</div>
+        {renderBanWarning()}
+      </>
+    );
+  }
+
+  // Guard: if invalid state
+  if (!gameState || !gameState.state) {
+    return (
+      <>
+        <div className="loading-screen"><div className="spinner"></div>Loading Game State...</div>
+        {renderBanWarning()}
+      </>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'transparent', color: 'var(--text-main)', fontFamily: "'Inter', sans-serif", position: 'relative', paddingBottom: isMobile ? '70px' : '0' }}>
+      {!isMobile && (
+        <Sidebar
+          gameState={displayedGameState}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          activeCategory={activeCategory}
+          setActiveCategory={setActiveCategory}
+          activeTier={activeTier}
+          setActiveTier={setActiveTier}
+          onNavigate={handleNavigate}
+          isMobile={isMobile}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          onSwitchCharacter={handleSwitchCharacter}
+          socket={socket}
+          canSpin={canSpin}
+          onOpenDailySpin={() => setDailySpinOpen(true)}
+          hasActiveTrade={tradeInvites?.length > 0 || !!activeTrade}
+          isAnonymous={session?.user?.is_anonymous}
+          onShowGuestModal={() => setShowGuestModal(true)}
+          onTutorialComplete={handleTutorialStepComplete}
+        />
+      )}
+
+      {isMobile && <BottomNav
+        gameState={displayedGameState}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onNavigate={handleNavigate}
+        canSpin={canSpin}
+        hasActiveTrade={tradeInvites?.length > 0 || !!activeTrade}
+        isAnonymous={session?.user?.is_anonymous}
+        onShowGuestModal={() => setShowGuestModal(true)}
+        onTutorialComplete={handleTutorialStepComplete}
+      />}
+
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', minHeight: 0 }}>
+        <header style={{
+          position: 'sticky',
+          top: 0,
+          background: 'var(--glass-bg)',
+          backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid var(--glass-border)',
+          padding: isMobile ? '12px 15px' : '15px 40px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          zIndex: (isHeaderMenuOpen || showCurrencyDropdown) ? 5001 : 100,
+          flexWrap: 'nowrap',
+          gap: '10px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : 20, minWidth: 0 }}>
+            {/* Active Players Indicator - Header Left - Mobile Only */}
+            {isMobile && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                background: 'rgba(74, 222, 128, 0.05)', padding: '6px 12px',
+                borderRadius: '8px', border: '1px solid rgba(74, 222, 128, 0.15)',
+                marginRight: '12px',
+                cursor: 'help'
+              }} title="Players Online">
+                <span style={{ width: '8px', height: '8px', background: '#4ade80', borderRadius: '50%', boxShadow: '0 0 8px #4ade80' }}></span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4ade80', fontFamily: 'monospace' }}>{activePlayers}</span>
+              </div>
+            )}
+
+
+            {!isMobile && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+                <div style={{
+                  width: 40,
+                  height: 40,
+                  background: 'rgba(0,0,0,0.3)',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  overflow: 'hidden',
+                  border: '1px solid rgba(255,255,255,0.1)'
+                }}>
+                  {displayedGameState?.state?.avatar ? (
+                    <img
+                      src={displayedGameState.state.avatar.replace(/\.(png|jpg|jpeg)$/, '.webp')}
+                      alt=""
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%', display: 'block' }}
+                    />
+                  ) : (
+                    <User color="rgba(255,255,255,0.4)" size={20} />
+                  )}
+                </div>
+                <div style={{ fontWeight: '900', fontSize: '1rem', color: 'var(--text-main)', letterSpacing: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>{displayedGameState?.name?.toUpperCase() || 'ADVENTURER'}</div>
+              </div>
+            )}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 12 : 20 }}>
+            {/* Currency Display with Dropdown */}
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }} data-currency-dropdown>
+              <button
+                onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
+                style={{
+                  background: 'var(--accent-soft)',
+                  border: '1px solid var(--border-active)',
+                  borderRadius: '8px',
+                  padding: '6px 12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  cursor: 'pointer',
+                  transition: '0.2s',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(144, 213, 255, 0.25)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent-soft)'}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Coins size={16} color="var(--accent)" />
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--accent)', fontFamily: 'monospace' }}>
+                    {formatSilver(displayedGameState?.state?.silver || 0, true)}
+                  </span>
+                </div>
+                <ChevronDown
+                  size={14}
+                  color="var(--accent)"
+                  style={{
+                    transition: '0.2s',
+                    transform: showCurrencyDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                    opacity: 0.6
+                  }}
+                />
+              </button>
+
+              <AnimatePresence>
+                {showCurrencyDropdown && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      right: 0,
+                      marginTop: '8px',
+                      background: 'var(--panel-bg)',
+                      border: '1px solid var(--border-active)',
+                      borderRadius: '12px',
+                      padding: '12px',
+                      minWidth: '200px',
+                      zIndex: 4999,
+                      boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                      backdropFilter: 'blur(10px)'
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Silver Row - Display Only */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '10px 12px',
+                        background: 'var(--accent-soft)',
+                        borderRadius: '8px',
+                        marginBottom: '8px',
+                        border: '1px solid var(--border-active)',
+                        transition: '0.2s'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <Coins size={20} color="var(--accent)" />
+                        <div>
+                          <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>SILVER</div>
+                          <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--accent)', fontFamily: 'monospace' }}>
+                            {formatSilver(displayedGameState?.state?.silver || 0, false)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Orbs/Crowns Row - Opens Shop */}
+                    <div
+                      onClick={() => {
+                        setShowCurrencyDropdown(false);
+                        setShowOrbShop(true);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '10px 12px',
+                        background: 'var(--accent-soft)',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        border: '1px solid var(--border-active)',
+                        transition: '0.2s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(144, 213, 255, 0.25)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent-soft)'}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <Circle size={20} color="var(--accent)" />
+                        <div>
+                          <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>ORBS</div>
+                          <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--accent)', fontFamily: 'monospace' }}>
+                            {formatNumber(displayedGameState?.state?.orbs || 0)}
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: '0.6rem', color: 'var(--accent)', fontWeight: 'bold', opacity: 0.7 }}>SHOP ΓåÆ</div>
+                    </div>
+                  </div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <NotificationCenter
+              notifications={notifications}
+              isOpen={showNotifications}
+              onClose={() => setShowNotifications(false)}
+              onMarkAsRead={markAsRead}
+              onMarkAllAsRead={markAllAsRead}
+              onClearAll={clearAllNotifications}
+              onClickTrigger={() => setShowNotifications(!showNotifications)}
+            />
+
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setIsHeaderMenuOpen(!isHeaderMenuOpen)}
+                style={{
+                  color: 'var(--text-main)',
+                  fontSize: '0.65rem',
+                  fontWeight: '900',
+                  padding: '8px',
+                  background: 'var(--slot-bg)',
+                  borderRadius: '6px',
+                  border: '1px solid var(--border)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: 0.8,
+                  transition: '0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.8'}
+                title="Menu"
+              >
+                <ChevronDown size={16} style={{ transform: isHeaderMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+              </button>
+
+              <AnimatePresence>
+                {isHeaderMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                      position: 'absolute', top: '120%', right: 0,
+                      background: 'var(--panel-bg)', border: '1px solid var(--border)',
+                      borderRadius: '12px', padding: '8px', zIndex: 5001,
+                      minWidth: '180px', boxShadow: '0 10px 30px rgba(0,0,0,0.8)',
+                      backdropFilter: 'blur(10px)'
+                    }}
+                  >
+                    <button
+                      style={{ width: '100%', padding: '10px 12px', textAlign: 'left', background: 'transparent', border: 'none', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '8px', transition: '0.2s', fontSize: '0.75rem', fontWeight: 'bold' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsHeaderMenuOpen(false);
+                        setIsSettingsOpen(true);
+                      }}
+                    >
+                      <Settings size={14} /> Settings
+                    </button>
+                    <button
+                      style={{ width: '100%', padding: '10px 12px', textAlign: 'left', background: 'transparent', border: 'none', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '8px', transition: '0.2s', fontSize: '0.75rem', fontWeight: 'bold' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      onClick={() => {
+                        setIsHeaderMenuOpen(false);
+                        handleSwitchCharacter();
+                      }}
+                    >
+                      <Users size={14} /> Switch Character
+                    </button>
+                    <button
+                      style={{ width: '100%', padding: '10px 12px', textAlign: 'left', background: 'transparent', border: 'none', color: '#f87171', cursor: 'pointer', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '8px', transition: '0.2s', fontSize: '0.75rem', fontWeight: 'bold' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(248,113,113,0.1)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      onClick={() => {
+                        setIsHeaderMenuOpen(false);
+                        handleLogout();
+                      }}
+                    >
+                      <LogOut size={14} /> Logout
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </header>
+
+        <main style={{
+          flex: 1,
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          padding: isMobile ? '10px' : '20px 30px',
+          position: 'relative',
+          minHeight: 0,
+          maxWidth: isMobile ? '100vw' : '1440px',
+          margin: '0 auto',
+          width: '100%'
+        }}>
+          {/* Guest Account Warning Banner */}
+          {session?.user?.is_anonymous && (
+            <div style={{
+              background: 'rgba(212, 175, 55, 0.1)',
+              border: '1px solid rgba(212, 175, 55, 0.3)',
+              borderRadius: '10px',
+              padding: '10px 20px',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '15px',
+              backdropFilter: 'blur(10px)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Users size={18} color="#d4af37" />
+                <span style={{ fontSize: '0.85rem', color: '#d4af37', fontWeight: '500' }}>
+                  {isMobile ? "Guest Account: Save progress!" : "You are playing as a Guest. Save your progress by linking your account!"}
+                </span>
+              </div>
+              <button
+                onClick={() => setActiveTab('profile')} // Redirect to profile to see link button
+                style={{
+                  background: '#d4af37',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '5px 12px',
+                  color: '#000',
+                  fontSize: '0.75rem',
+                  fontWeight: '900',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                SAVE PROGRESS
+              </button>
+            </div>
+          )}
+
+          {error && <div style={{ background: 'rgba(255, 68, 68, 0.05)', color: '#ff4444', padding: '12px 20px', marginBottom: 25, borderRadius: 8, border: '1px solid rgba(255, 68, 68, 0.1)', fontSize: '0.8rem' }}>{error}</div>}
+
+          {renderContent()}
+        </main>
+
+        <ChatWidget socket={socket} user={session.user} characterName={displayedGameState?.name} isMobile={isMobile} onInspect={handleInspectPlayer} />
+        <BuffsDrawer gameState={displayedGameState} isMobile={isMobile} />
+        <ActivityWidget
+          gameState={displayedGameState}
+          onStop={() => socket.emit('stop_activity')}
+          socket={socket}
+          onNavigate={handleNavigate}
+          isMobile={isMobile}
+          serverTimeOffset={clockOffset.current}
+          skillProgress={gameState?.current_activity && displayedGameState?.state?.skills ? (() => {
+            const s = displayedGameState.state.skills[getSkillForItem(gameState.current_activity.item_id, gameState.current_activity.type)];
+            if (!s) return 0;
+            if (s.level >= 100) return 100;
+            return (s.xp / calculateNextLevelXP(s.level || 1)) * 100;
+          })() : 0}
+        />
+        <ToastContainer socket={socket} settings={settings} />
+
+        {/* Theme Preview Bar */}
+        <AnimatePresence>
+          {previewThemeId && (
+            <motion.div
+              initial={{ x: '-50%', y: 100, opacity: 0 }}
+              animate={{ x: '-50%', y: 0, opacity: 1 }}
+              exit={{ x: '-50%', y: 100, opacity: 0 }}
+              style={{
+                position: 'fixed',
+                bottom: isMobile ? '80px' : '20px',
+                left: '50%',
+                zIndex: 9999,
+                background: 'var(--panel-bg)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid var(--accent)',
+                borderRadius: '16px',
+                padding: '12px 20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '20px',
+                boxShadow: '0 0 30px rgba(212, 175, 55, 0.2), 0 10px 40px rgba(0,0,0,0.5)',
+                width: isMobile ? '90%' : 'auto',
+                justifyContent: 'space-between'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '10px', height: '10px', borderRadius: '50%',
+                  background: 'var(--accent)', boxShadow: '0 0 10px var(--accent)',
+                }} />
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)', letterSpacing: '1px', textTransform: 'uppercase' }}>Previewing Theme</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: '900', color: '#fff', textTransform: 'capitalize' }}>{previewThemeId} Mode</span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  onClick={() => setPreviewThemeId(null)}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    background: 'transparent',
+                    color: '#ccc',
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    transition: '0.2s',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  CANCEL
+                </button>
+                <button
+                  onClick={() => {
+                    setConfirmModal({
+                      message: `Unlock the ${previewThemeId} theme permanently for 50 Orbs?`,
+                      onConfirm: () => {
+                        socket.emit('unlock_theme', { themeId: previewThemeId });
+                        setPreviewThemeId(null);
+                        setConfirmModal(null);
+                      },
+                      onCancel: () => setConfirmModal(null)
+                    });
+                  }}
+                  disabled={(gameState?.state?.orbs || 0) < 50}
+                  style={{
+                    padding: '8px 20px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, var(--accent) 0%, #2196f3 100%)',
+                    color: '#000',
+                    fontSize: '0.75rem',
+                    fontWeight: '900',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    cursor: (gameState?.state?.orbs || 0) >= 50 ? 'pointer' : 'not-allowed',
+                    transition: '0.2s',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    opacity: (gameState?.state?.orbs || 0) >= 50 ? 1 : 0.5,
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  <img src="/items/ORB.webp" style={{ width: 14, height: 14 }} alt="Orb" />
+                  BUY FOR 50 ORBS
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {
+          isWorldBossFight && (
+            <WorldBossFight
+              gameState={displayedGameState}
+              socket={socket}
+              onFinish={() => {
+                setIsWorldBossFight(false);
+                setActiveTab('world_boss'); // Return to boss panel
+              }}
+            />
+          )
+        }
+
+        {
+          modalItem && (
+            <ActivityModal
+              isOpen={!!modalItem}
+              onClose={() => setModalItem(null)}
+              item={modalItem}
+              type={modalType}
+              gameState={displayedGameState}
+              onStart={startActivity}
+              onNavigate={handleNavigate}
+              onSearchInMarket={handleSearchInMarket}
+            />
+          )
+        }
+
+        <ItemInfoModal item={infoItem} onClose={() => setInfoItem(null)} />
+        {
+          marketSellItem && (
+            <MarketListingModal
+              listingItem={marketSellItem}
+              onClose={() => setMarketSellItem(null)}
+              socket={socket}
+            />
+          )
+        }
+
+        <CombatHistoryModal
+          isOpen={showCombatHistory}
+          onClose={() => setShowCombatHistory(false)}
+          socket={socket}
+        />
+
+        <AnimatePresence>
+          {lootModalData && (
+            <LootModal
+              isOpen={!!lootModalData}
+              rewards={lootModalData}
+              onClose={() => setLootModalData(null)}
+            />
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {offlineGains && (
+            <OfflineGainsModal
+              isOpen={!!offlineGains}
+              data={offlineGains}
+              onClose={() => setOfflineGains(null)}
+            />
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {dailySpinOpen && (
+            <DailySpinModal
+              isOpen={dailySpinOpen}
+              onClose={() => setDailySpinOpen(false)}
+              socket={socket}
+              gameState={displayedGameState}
+            />
+          )}
+        </AnimatePresence>
+
+        <SocialPanel
+          isOpen={showSocialModal}
+          onClose={() => setShowSocialModal(false)}
+          session={session}
+          socket={socket}
+          onInspect={handleInspectPlayer}
+          onInvite={handleTradeInvite}
+          onOpenTrade={handleOpenTrade}
+          tradeInvites={tradeInvites}
+        />
+
+        {inspectData && (
+          <InspectModal
+            data={inspectData}
+            onClose={handleCloseInspect}
+            onMessage={handleInspectMessage}
+            onItemClick={handleItemClick}
+            onInspectGuild={(id) => {
+              setInspectGuildId(id);
+            }}
+          />
+        )}
+
+        <GuildProfileModal
+          isOpen={!!inspectGuildId}
+          onClose={() => setInspectGuildId(null)}
+          guildId={inspectGuildId}
+          socket={socket}
+          onInspect={handleInspectPlayer}
+          isMobile={isMobile}
+        />
+
+        <LeaderboardModal
+          isOpen={showLeaderboard}
+          onClose={() => setShowLeaderboard(false)}
+          socket={socket}
+        />
+
+        <AnimatePresence>
+          {confirmModal && (
+            <div style={{
+              position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+              background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              zIndex: 10000, padding: '20px'
+            }} onClick={confirmModal.onCancel || (() => setConfirmModal(null))}>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                onClick={e => e.stopPropagation()}
+                style={{
+                  background: 'var(--panel-bg)', border: '1px solid var(--border-active)',
+                  borderRadius: '16px', padding: '25px', maxWidth: '400px', width: '100%',
+                  textAlign: 'center', boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+                }}
+              >
+                <h3 style={{ margin: '0 0 15px', color: 'var(--text-main)' }}>Confirm Action</h3>
+                <p style={{ color: 'var(--text-dim)', marginBottom: '25px', lineHeight: '1.5' }}>{confirmModal.message}</p>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button onClick={confirmModal.onCancel || (() => setConfirmModal(null))} style={{ flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-dim)', cursor: 'pointer', fontWeight: 'bold' }}>Cancel</button>
+                  <button onClick={() => { confirmModal.onConfirm(); setConfirmModal(null); }} style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', background: 'var(--accent)', color: '#000', cursor: 'pointer', fontWeight: 'bold' }}>Confirm</button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {isRenameModalOpen && (
+            <RenameModal
+              isOpen={isRenameModalOpen}
+              onClose={() => setIsRenameModalOpen(false)}
+              onSubmit={handleRenameSubmit}
+              currentName={displayedGameState?.name}
+            />
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {showGuestModal && (
+            <GuestRestrictionModal onClose={() => setShowGuestModal(false)} />
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {showOrbShop && (
+            <OrbShop
+              isOpen={showOrbShop}
+              onClose={() => setShowOrbShop(false)}
+              socket={socket}
+              gameState={displayedGameState}
+              serverTimeOffset={clockOffset.current}
+              isPreviewActive={isPreviewActive}
+              onPreviewActionBlocked={onPreviewActionBlocked}
+              isMobile={isMobile}
+              isAnonymous={session?.user?.is_anonymous}
+              onShowGuestModal={() => setShowGuestModal(true)}
+            />
+          )}
+        </AnimatePresence>
+
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          settings={settings}
+          setSettings={setSettings}
+          session={session}
+          isGoogleLinked={isGoogleLinked}
+          socket={socket}
+        />
+
+        {/* Global Overlays for Header Menus (Moved here to bypass header backdrop-filter clip) */}
+        <AnimatePresence>
+          {activeTrade && (
+            <TradePanel
+              socket={socket}
+              trade={activeTrade}
+              charId={selectedCharacter}
+              inventory={gameState?.state?.inventory}
+              currentSilver={gameState?.state?.silver}
+              onClose={() => setActiveTrade(null)}
+              isMobile={isMobile}
+              isPreviewActive={isPreviewActive}
+              onPreviewActionBlocked={onPreviewActionBlocked}
+            />
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {isHeaderMenuOpen && (
+            <div
+              onClick={() => setIsHeaderMenuOpen(false)}
+              style={{ position: 'fixed', inset: 0, zIndex: 5000, background: 'rgba(0,0,0,0)' }}
+            />
+          )}
+        </AnimatePresence>
+        <AnimatePresence>
+          {showCurrencyDropdown && (
+            <div
+              onClick={() => setShowCurrencyDropdown(false)}
+              style={{ position: 'fixed', inset: 0, zIndex: 4998, background: 'rgba(0,0,0,0)' }}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Server Error Modal */}
+        <AnimatePresence>
+          {serverError && (
+            <div key="server-error-backdrop" style={{
+              position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+              zIndex: 10000, display: 'flex', alignItems: 'center',
+              justifyContent: 'center', background: 'rgba(0,0,0,0.8)',
+              backdropFilter: 'blur(5px)'
+            }}>
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                style={{
+                  background: 'var(--panel-bg)',
+                  border: '1px solid #ff4444',
+                  borderRadius: '16px',
+                  padding: '30px',
+                  width: '90%',
+                  maxWidth: '400px',
+                  textAlign: 'center',
+                  boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+                  position: 'relative'
+                }}
+              >
+                <div style={{
+                  width: '60px', height: '60px',
+                  background: 'rgba(255, 68, 68, 0.1)',
+                  borderRadius: '50%', display: 'flex',
+                  alignItems: 'center', justifyContent: 'center',
+                  margin: '0 auto 20px', border: '1px solid rgba(255, 68, 68, 0.2)'
+                }}>
+                  <X color="#ff4444" size={32} />
+                </div>
+                <h2 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '900', marginBottom: '10px' }}>SYSTEM ERROR</h2>
+                <p style={{ color: '#aaa', fontSize: '0.9rem', lineHeight: '1.6', marginBottom: '25px' }}>
+                  {serverError}
+                </p>
+                <button
+                  onClick={() => setServerError(null)}
+                  style={{
+                    width: '100%', padding: '12px', background: '#ff4444',
+                    border: 'none', borderRadius: '8px', color: '#fff',
+                    fontWeight: 'bold', cursor: 'pointer'
+                  }}
+                >
+                  CLOSE
+                </button>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+
+const actionBtnStyle = {
+  background: 'rgba(0, 0, 0, 0.2)',
+  border: '1px solid rgba(255, 255, 255, 0.02)',
+  padding: '18px 25px',
+  borderRadius: '10px',
+  color: '#fff',
+  cursor: 'pointer',
+  transition: '0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+  textAlign: 'left',
+  outline: 'none',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '6px'
+};
+
+const ActivityProgressBar = ({ activity, serverTimeOffset = 0 }) => {
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    if (!activity) return;
+
+    const update = () => {
+      const now = Date.now() + serverTimeOffset;
+      const initialQty = activity.initial_quantity || 1;
+      const remainingQty = activity.actions_remaining;
+      const doneQty = initialQty - remainingQty;
+      const timePerAction = activity.time_per_action || 3;
+
+      let currentItemProgressPercent = 0;
+
+      // Calculate progress of current item
+      if (activity.next_action_at) {
+        const endTime = new Date(activity.next_action_at).getTime();
+        const timeRemaining = endTime - now;
+        const totalActionTime = timePerAction * 1000;
+
+        // Invert: 0 remaining = 100% done
+        const timeDone = totalActionTime - timeRemaining;
+
+        // Clamp between 0 and 1
+        const rawProgress = Math.max(0, Math.min(1, timeDone / totalActionTime));
+        currentItemProgressPercent = rawProgress;
+      }
+
+      const realTotalProgress = ((doneQty + currentItemProgressPercent) / initialQty) * 100;
+      setProgress(Math.min(100, Math.max(0, realTotalProgress)));
+    };
+
+    const interval = setInterval(update, 50);
+    update();
+
+    return () => clearInterval(interval);
+  }, [activity, serverTimeOffset]);
+
+  return (
+    <div style={{ marginTop: '10px', height: '6px', background: 'var(--slot-bg)', borderRadius: '3px', overflow: 'hidden' }}>
+      <div style={{
+        width: `${progress}%`,
+        height: '100%',
+        background: 'var(--accent)',
+        transition: 'width 0.1s linear',
+        boxShadow: '0 0 8px var(--accent-soft)'
+      }}></div>
+      <div style={{ fontSize: '0.6rem', textAlign: 'right', color: 'var(--text-dim)', marginTop: '2px' }}>
+        {progress.toFixed(1)}%
+      </div>
+      <style>{`
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translate(-50%, 20px); }
+          to { opacity: 1; transform: translate(-50%, 0); }
+        }
+        @keyframes pulse {
+          0% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.2); opacity: 0.7; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+const GuestRestrictionModal = ({ onClose }) => {
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+      background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      zIndex: 11000, padding: '20px'
+    }} onClick={onClose}>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: 'var(--panel-bg)',
+          border: '1px solid var(--border-active)',
+          borderRadius: '24px',
+          padding: '40px',
+          maxWidth: '450px',
+          width: '100%',
+          textAlign: 'center',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}
+      >
+        <div style={{
+          position: 'absolute', top: '-50px', right: '-50px',
+          width: '150px', height: '150px', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(255,107,107,0.1) 0%, transparent 70%)',
+          zIndex: 0
+        }} />
+
+        <div style={{
+          width: '80px', height: '80px', borderRadius: '20px',
+          background: 'rgba(255, 107, 107, 0.1)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto 25px',
+          border: '1px solid rgba(255, 107, 107, 0.2)',
+          boxShadow: '0 10px 20px rgba(255, 107, 107, 0.1)',
+          position: 'relative', zIndex: 1
+        }}>
+          <Lock size={40} color="#ff6b6b" />
+        </div>
+
+        <h2 style={{
+          margin: '0 0 15px',
+          color: 'var(--text-main)',
+          fontSize: '1.8rem',
+          fontWeight: '900',
+          letterSpacing: '1px',
+          position: 'relative', zIndex: 1
+        }}>
+          FEATURE LOCKED
+        </h2>
+
+        <p style={{
+          color: 'var(--text-dim)',
+          fontSize: '1rem',
+          lineHeight: '1.6',
+          margin: '0 0 30px',
+          position: 'relative', zIndex: 1
+        }}>
+          Marketplace, Trading and Daily Spin are premium features reserved for permanent accounts.
+          <br /><br />
+          <strong style={{ color: 'var(--text-main)' }}>Link your account now</strong> to protect your progress and join the player economy!
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative', zIndex: 1 }}>
+          <button
+            onClick={onClose}
+            style={{
+              width: '100%',
+              padding: '16px',
+              borderRadius: '14px',
+              border: 'none',
+              background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5253 100%)',
+              color: '#fff',
+              fontSize: '1rem',
+              fontWeight: '800',
+              cursor: 'pointer',
+              boxShadow: '0 4px 15px rgba(238, 82, 83, 0.4)',
+              transition: 'transform 0.2s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+          >
+            GOT IT
+          </button>
+
+          <button
+            onClick={() => {
+              onClose();
+              document.querySelector('[data-tab="profile"]')?.click();
+            }}
+            style={{
+              width: '100%',
+              padding: '14px',
+              borderRadius: '14px',
+              border: '1px solid var(--border)',
+              background: 'rgba(255,255,255,0.03)',
+              color: 'var(--text-main)',
+              fontSize: '0.9rem',
+              fontWeight: '700',
+              cursor: 'pointer',
+              transition: 'background 0.2s'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+          >
+            GO TO PROFILE
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+export default App;

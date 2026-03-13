@@ -376,7 +376,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
         return {
             hp: health !== undefined ? health : (100 + activeHP + gearHP),
             maxHp: 100 + activeHP + gearHP,
-            damage: Math.floor(activeProfDmg + gearDamage + damageRuneBonus + (potionDmgBonus * 100)),
+            damage: Math.floor((activeProfDmg + gearDamage + damageRuneBonus) * (1 + potionDmgBonus)),
             defense: gearDefense + activeProfDefense,
             attackSpeed: finalAttackSpeed,
             warriorProf: calculatedStats.warriorProf,
@@ -1264,18 +1264,76 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                             {activeProfileTab === 'EQUIPMENT' ? (
                                 <>
 
-                                    {/* Barra de Vida - Sophisticated */}
+                                    {/* Barra de Vida - Sophisticated & Premium */}
                                     <div style={{ marginBottom: '35px' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', marginBottom: '8px', fontWeight: '900', letterSpacing: '1px', color: 'var(--text-dim)' }}>
-                                            <span>VITALITY</span>
-                                            <span style={{ color: 'var(--text-main)' }}>{Math.floor(stats.hp)} / {Math.floor(stats.maxHp)} HP</span>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '10px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <div style={{ 
+                                                    background: 'rgba(255, 77, 77, 0.15)', 
+                                                    padding: '6px', 
+                                                    borderRadius: '8px',
+                                                    display: 'flex',
+                                                    border: '1px solid rgba(255, 77, 77, 0.2)'
+                                                }}>
+                                                    <Heart size={14} color="#ff4d4d" fill="#ff4d4d" />
+                                                </div>
+                                                <span style={{ 
+                                                    fontSize: '0.7rem', 
+                                                    fontWeight: '900', 
+                                                    letterSpacing: '1.5px', 
+                                                    color: '#ff4d4d',
+                                                    textTransform: 'uppercase'
+                                                }}>Vitality</span>
+                                            </div>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <span style={{ 
+                                                    fontSize: '0.9rem', 
+                                                    fontWeight: '900', 
+                                                    color: 'var(--text-main)',
+                                                    textShadow: '0 0 10px rgba(255, 77, 77, 0.3)'
+                                                }}>{Math.floor(stats.hp).toLocaleString()}</span>
+                                                <span style={{ 
+                                                    fontSize: '0.7rem', 
+                                                    fontWeight: '700', 
+                                                    color: 'var(--text-dim)',
+                                                    marginLeft: '4px'
+                                                }}>/ {Math.floor(stats.maxHp).toLocaleString()} HP</span>
+                                            </div>
                                         </div>
-                                        <div style={{ background: 'rgba(255, 0, 0, 0.05)', height: '6px', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255, 0, 0, 0.1)' }}>
+                                        
+                                        <div style={{ 
+                                            background: 'rgba(0, 0, 0, 0.3)', 
+                                            height: '12px', 
+                                            borderRadius: '20px', 
+                                            overflow: 'hidden', 
+                                            border: '1px solid rgba(255, 255, 255, 0.05)',
+                                            boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.5)',
+                                            position: 'relative'
+                                        }}>
+                                            {/* Fill with Gradient and Glow */}
                                             <motion.div
                                                 initial={{ width: 0 }}
                                                 animate={{ width: `${(stats.hp / stats.maxHp) * 100}%` }}
-                                                style={{ height: '100%', background: 'linear-gradient(90deg, #ff4d4d, #b30000)' }}
-                                            />
+                                                transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+                                                style={{ 
+                                                    height: '100%', 
+                                                    background: 'linear-gradient(90deg, #800000 0%, #ff1a1a 50%, #ff4d4d 100%)',
+                                                    boxShadow: '0 0 15px rgba(255, 26, 26, 0.4)',
+                                                    position: 'relative',
+                                                    borderRadius: '20px'
+                                                }}
+                                            >
+                                                {/* Shine/Reflection effect */}
+                                                <div style={{
+                                                    position: 'absolute',
+                                                    top: 0,
+                                                    left: 0,
+                                                    right: 0,
+                                                    height: '50%',
+                                                    background: 'linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%)',
+                                                    pointerEvents: 'none'
+                                                }} />
+                                            </motion.div>
                                         </div>
                                     </div>
 
@@ -2337,7 +2395,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                             <div style={{ width: '60px', height: '60px', margin: '0 auto 12px', background: 'var(--slot-bg)', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <img src={foodEquipModal.item.icon} alt="" style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
                             </div>
-                            <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '900', color: 'var(--accent)', textTransform: 'uppercase' }}>Equip {formatItemId(foodEquipModal.item.id || foodEquipModal.item.name)}</h3>
+                            <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '900', color: 'var(--accent)', textTransform: 'uppercase' }}>Equip {formatItemId(foodEquipModal.item.id || foodEquipModal.item.name, { nameOnly: true })}</h3>
                         </div>
 
                         <div style={{ marginBottom: '25px' }}>
@@ -2405,7 +2463,8 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                         statType={breakdownModal.type}
                         value={typeof breakdownModal.value === 'object' ? breakdownModal.value.total : breakdownModal.value}
                         statId={typeof breakdownModal.value === 'object' ? breakdownModal.value.id : null}
-                        stats={{ ...stats, skills, guild_bonuses: gameState?.guild_bonuses }} // Pass skills and guild_bonuses for efficiency breakdown
+                        stats={{ ...stats, skills }} 
+                        guildBonuses={gameState?.guild_bonuses}
                         equipment={gameState?.state?.equipment || {}}
                         membership={gameState?.state?.membership}
                         onClose={() => setBreakdownModal(null)}
@@ -2487,7 +2546,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        zIndex: 10000
+                        zIndex: 100000
                     }} onClick={() => setConfirmModal(null)}>
                         <div style={{
                             background: 'linear-gradient(145deg, rgba(20, 25, 40, 0.95) 0%, rgba(10, 12, 18, 0.98) 100%)',

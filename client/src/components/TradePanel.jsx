@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Package, Coins, CheckCircle, Clock, X, ArrowLeftRight, ChevronRight, Search, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { resolveItem, calculateItemSellPrice, formatItemId } from '@shared/items';
+import { useAppStore } from '../store/useAppStore';
 
 
-const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, isMobile, isPreviewActive, onPreviewActionBlocked }) => {
+const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, onInspect, isMobile, isPreviewActive, onPreviewActionBlocked }) => {
+    const store = useAppStore();
+    const { isTradeAccepting: isAccepting, setIsTradeAccepting } = store;
     const [localOffer, setLocalOffer] = useState({ items: [], silver: 0 });
-    const [isAccepting, setIsAccepting] = useState(false);
     const [filterText, setFilterText] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('ALL');
     const [quantityModal, setQuantityModal] = useState({ isOpen: false, item: null, itemId: null, max: 0 });
@@ -79,6 +80,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
 
     const handleAccept = () => {
         if (isPreviewActive) return onPreviewActionBlocked();
+        setIsTradeAccepting(true);
         socket.emit('trade_accept', { tradeId: trade.id });
     };
 
@@ -399,7 +401,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                                         if (!['RAW', 'REFINED', 'CRAFTING_MATERIAL', 'RESOURCE'].includes(type)) return false;
                                                         break;
                                                     case 'CRAFT':
-                                                        if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFF_HAND', 'SHIELD'].includes(type) && !type.startsWith('TOOL')) return false;
+                                                        if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE', 'OFF_HAND', 'SHEATH'].includes(type) && !type.startsWith('TOOL')) return false;
                                                         break;
                                                     case 'CONS':
                                                         if (!['CONSUMABLE', 'FOOD', 'POTION', 'CHEST', 'MAP'].includes(type) && !id.includes('CHEST')) return false;
@@ -512,7 +514,13 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                     {(!isMobile || mobileTab === 'OFFER') && (
                         <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', background: 'rgba(144,213,255,0.02)', padding: isMobile ? '10px' : '15px', borderRadius: '16px', border: '1px solid rgba(144,213,255,0.1)', height: '100%', overflow: 'hidden' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? '10px' : '15px' }}>
-                                <h3 style={{ margin: 0, fontSize: isMobile ? '0.9rem' : '0.9rem', fontWeight: '900', color: '#90d5ff', letterSpacing: '1px' }}>
+                                <h3 
+                                    onClick={() => {
+                                        const partnerName = trade.partner_name || (isSender ? trade.receiver_name : trade.sender_name);
+                                        if (onInspect && partnerName) onInspect(partnerName);
+                                    }}
+                                    style={{ margin: 0, fontSize: isMobile ? '0.9rem' : '0.9rem', fontWeight: '900', color: '#90d5ff', letterSpacing: '1px', cursor: onInspect ? 'pointer' : 'default' }}
+                                >
                                     {trade.partner_name || (isSender ? trade.receiver_name : trade.sender_name) || 'THEIR OFFER'}
                                 </h3>
                                 {partnerAccepted ? (

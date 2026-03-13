@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useAppStore } from '../store/useAppStore';
 import { Gift, X, Loader, Star, Zap } from 'lucide-react';
 import { resolveItem, formatItemId } from '@shared/items'; // Ensure correct path
 
@@ -17,6 +18,9 @@ const SEGMENTS = [
 const SEGMENT_ANGLE = 360 / SEGMENTS.length;
 
 const DailySpinModal = ({ isOpen, onClose, socket, isPreviewActive, onPreviewActionBlocked, gameState }) => {
+    const store = useAppStore();
+    const { dailySpinResult, setDailySpinResult } = store;
+
     const [spinning, setSpinning] = useState(false);
     const [reward, setReward] = useState(null);
     const [rotation, setRotation] = useState(0);
@@ -33,56 +37,28 @@ const DailySpinModal = ({ isOpen, onClose, socket, isPreviewActive, onPreviewAct
     }, [isOpen]);
 
     useEffect(() => {
-        if (!socket) return;
+        if (!dailySpinResult) return;
 
-        const handleResult = (data) => {
-            // data.rewardIndex tells us where to stop
-            // Wheel stops at top (0 deg).
-            // If index 0 is at 0-45 deg (or centered), we calculate target.
-            // Let's assume index 0 is at Top.
-            // To land on index I, we need to rotate:
-            // Total Rotation = (Min Spins * 360) + (360 - (I * SegmentAngle))
+        const data = dailySpinResult; // Use dailySpinResult directly
+        const index = data.rewardIndex !== undefined ? data.rewardIndex : 0;
+        const spins = 5;
+        const baseAngle = 360 * spins;
+        const segmentCenterAngle = index * SEGMENT_ANGLE + (SEGMENT_ANGLE / 2);
+        const stopAngle = -segmentCenterAngle;
+        const fuzz = Math.floor(Math.random() * 30) - 15;
+        const finalRotation = baseAngle + stopAngle + fuzz;
 
-            // Adding fuzziness to center the landing
-            const index = data.rewardIndex !== undefined ? data.rewardIndex : 0;
-            const spins = 5; // Minimum full spins
-            const baseAngle = 360 * spins;
+        setRotation(finalRotation);
 
-            // Calculate rotation to bring segment CENTER to top (pointer at 0 deg)
-            // Segments are rendered starting at index 0 at top (0 deg), going clockwise
-            // Segment 0: 0-45 deg (center at 22.5)
-            // Segment 1: 45-90 deg (center at 67.5)
-            // etc.
-            // To bring segment center to top, we need to SUBTRACT its angle
-            const segmentCenterAngle = index * SEGMENT_ANGLE + (SEGMENT_ANGLE / 2);
+        setTimeout(() => {
+            setSpinning(false);
+            setReward(data.reward);
+            setShowRewardModal(true);
+        }, 5500);
 
-            // We rotate BACKWARDS (negative) to bring the segment to top
-            // But Convert to positive rotation for CSS
-            const stopAngle = -segmentCenterAngle;
-
-            // Add randomness within segment (+/- 15 degrees)
-            const fuzz = Math.floor(Math.random() * 30) - 15;
-
-            // Final rotation = base spins - segment angle + fuzz
-            // Convert negative to positive by adding 360
-            const finalRotation = baseAngle + stopAngle + fuzz;
-
-            setRotation(finalRotation);
-
-            // Wait for animation (4s) + Pause to celebrate (1.5s)
-            setTimeout(() => {
-                setSpinning(false);
-                setReward(data.reward);
-                setShowRewardModal(true);
-            }, 5500); // 4s spin + 1.5s delay
-        };
-
-        socket.on('daily_spin_result', handleResult);
-
-        return () => {
-            socket.off('daily_spin_result', handleResult);
-        };
-    }, [socket]);
+        // Clear result after processing
+        setDailySpinResult(null);
+    }, [dailySpinResult, setDailySpinResult]);
 
     const inventory = gameState?.state?.inventory || {};
     const membership = gameState?.state?.membership;

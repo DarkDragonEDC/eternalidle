@@ -331,8 +331,15 @@ const Auth = ({ onLogin, initialView = 'LOGIN', theme, setTheme, isMobile, onPre
                                         } else {
                                             // Only create new if no existing anonymous session
                                             const { data, error: guestError } = await supabase.auth.signInAnonymously();
-                                            if (guestError) setError(guestError.message);
-                                            else onLogin(data.session);
+                                            if (guestError) {
+                                                if (guestError.status === 422 || guestError.message.toLowerCase().includes('disabled')) {
+                                                    setError("Guest login is currently disabled in the backend. Please use Email/Password or ask the admin to enable 'Anonymous Auth' in Supabase.");
+                                                } else {
+                                                    setError(guestError.message);
+                                                }
+                                            } else {
+                                                onLogin(data.session);
+                                            }
                                         }
                                         setIsLoading(false);
                                     }}

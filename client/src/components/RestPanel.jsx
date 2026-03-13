@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useAppStore } from '../store/useAppStore';
 import { Flame, Heart, Coins, Shield, AlertTriangle, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatNumber } from '@utils/format';
@@ -68,18 +69,21 @@ const RestPanel = ({ gameState, isMobile, socket }) => {
         if (!resting) completedRef.current = false;
     }, [resting, restProgress, socket]);
 
-    // Listen for server errors
+    const store = useAppStore();
+    const { lastActionResult, setLastActionResult } = store;
+
+    // Listen for server errors via centralized store
     useEffect(() => {
-        if (!socket) return;
-        const handleResult = (data) => {
-            if (data.restHealError) {
-                setHealResult({ error: data.restHealError });
-                setTimeout(() => setHealResult(null), 3000);
-            }
-        };
-        socket.on('action_result', handleResult);
-        return () => socket.off('action_result', handleResult);
-    }, [socket]);
+        if (!lastActionResult) return;
+
+        const data = lastActionResult;
+        if (data.restHealError) {
+            setHealResult({ error: data.restHealError });
+            setTimeout(() => setHealResult(null), 3000);
+            // Clear result after processing
+            setLastActionResult(null);
+        }
+    }, [lastActionResult, setLastActionResult]);
 
     const hpBarColor = hpPercent > 60 ? '#4caf50' : hpPercent > 30 ? '#ff9800' : '#f44336';
 

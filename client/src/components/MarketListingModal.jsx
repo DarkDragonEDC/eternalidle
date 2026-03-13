@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useAppStore } from '../store/useAppStore';
 import { formatNumber, formatSilver } from '@utils/format';
 import { Package, X, Star, Zap } from 'lucide-react';
 import { resolveItem, getTierColor, formatItemId, calculateItemSellPrice } from '@shared/items';
 
 const MarketListingModal = ({ listingItem, onClose, socket }) => {
+    const store = useAppStore();
+    const { marketPriceUpdate, setMarketPriceUpdate } = store;
+
     const [amount, setAmount] = useState('1');
     const [unitPrice, setUnitPrice] = useState('');
     const [currentMarketPrice, setCurrentMarketPrice] = useState(null);
@@ -27,21 +31,17 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
         }
     }, [listingItem, socket]);
 
-    // Listen for market price response
+    // React to store updates
     useEffect(() => {
-        if (!socket) return;
+        if (!marketPriceUpdate) return;
 
-        const handlePriceResponse = (response) => {
-            if (response.itemId === listingItem?.itemId) {
-                setCurrentMarketPrice(response.lowestPrice);
-                setHighestBuyOrder(response.highestBuyOrder);
-                setLoadingPrice(false);
-            }
-        };
-
-        socket.on('item_market_price', handlePriceResponse);
-        return () => socket.off('item_market_price', handlePriceResponse);
-    }, [socket, listingItem?.itemId]);
+        if (marketPriceUpdate.itemId === listingItem?.itemId) {
+            setCurrentMarketPrice(marketPriceUpdate.lowestPrice);
+            setHighestBuyOrder(marketPriceUpdate.highestBuyOrder);
+            setLoadingPrice(false);
+            setMarketPriceUpdate(null); // Clear once consumed
+        }
+    }, [marketPriceUpdate, listingItem?.itemId, setMarketPriceUpdate]);
 
     if (!listingItem) return null;
 
@@ -120,56 +120,52 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                 </div>
 
                 {/* Item Info */}
-                <div style={{ display: 'flex', gap: '15px', alignItems: 'center', background: 'var(--slot-bg)', padding: '15px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', gap: '15px', alignItems: 'center', background: 'var(--glass-bg)', padding: '15px', borderRadius: '12px', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)' }}>
                     <div style={{
-                        width: '40px',
-                        height: '40px',
-                        background: 'rgba(0, 0, 0, 0.4)',
+                        width: '48px',
+                        height: '48px',
+                        background: 'var(--slot-bg)',
                         borderRadius: '8px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        border: `1px solid ${itemData?.rarityColor || (() => {
-                            switch (itemData?.rarity) {
-                                case 'COMMON': return '#9CA3AF';
-                                case 'UNCOMMON': return '#10B981';
-                                case 'RARE': return '#3B82F6';
-                                case 'EPIC': return '#F59E0B';
-                                case 'LEGENDARY': return '#EF4444';
-                                case 'MYTHIC': return '#A855F7';
-                                default: return tierColor;
-                            }
-                        })()}`,
-                        position: 'relative' // relative for absolute stars
+                        border: `1px solid ${itemData?.rarityColor || tierColor || 'var(--border)'}`,
+                        position: 'relative',
+                        boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.3)'
                     }}>
-                        {itemData?.icon ? (
-                            <img src={itemData.icon} alt={itemData.name} style={{ width: itemData.scale || '100%', height: itemData.scale || '100%', objectFit: 'contain' }} />
-                        ) : (
-                            <span style={{ color: tierColor, fontWeight: 'bold' }}>T{itemData?.tier}</span>
-                        )}
+                        {(() => {
+                            const icon = itemData?.icon;
+                            const normalizedIcon = typeof icon === 'string' ? icon.replace(/\.(png|jpg|jpeg)$/, '.webp') : icon;
+                            return normalizedIcon ? (
+                                <img src={normalizedIcon} alt={itemData.name} style={{ width: '130%', height: '130%', objectFit: 'contain' }} />
+                            ) : (
+                                <span style={{ color: tierColor, fontWeight: 'bold' }}>T{itemData?.tier}</span>
+                            );
+                        })()}
                         {/* Rune Stars Overlay */}
                         {itemData?.stars > 0 && (
                             <div style={{
                                 position: 'absolute',
-                                bottom: '-6px',
+                                bottom: '1px',
                                 left: '50%',
                                 transform: 'translateX(-50%)',
                                 display: 'flex',
-                                gap: '1px',
-                                background: 'rgba(0,0,0,0.8)',
-                                padding: '2px 4px',
+                                gap: '0px',
+                                background: 'rgba(0,0,0,0.6)',
+                                padding: '1px 3px',
                                 borderRadius: '4px',
-                                border: '1px solid rgba(255,215,0,0.3)'
+                                border: '1px solid rgba(255,215,0,0.3)',
+                                zIndex: 10
                             }}>
                                 {Array.from({ length: itemData.stars }).map((_, i) => (
-                                    <Star key={i} size={8} fill="#FFD700" color="#FFD700" />
+                                    <Star key={i} size={7} fill="#FFD700" color="#FFD700" />
                                 ))}
                             </div>
                         )}
                     </div>
                     <div>
-                        <div style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>{itemData?.name || formatItemId(listingItem.itemId)}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Owned: {maxQty}</div>
+                        <div style={{ fontWeight: 'bold', color: 'var(--text-main)', fontSize: '1rem' }}>{itemData?.name || formatItemId(listingItem.itemId)}</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '2px' }}>Owned: <b style={{ color: 'var(--text-main)' }}>{maxQty}</b></div>
                     </div>
                 </div>
 
