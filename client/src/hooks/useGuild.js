@@ -145,6 +145,18 @@ export function useGuild(socket, activeTab, playerHasPermission, gameState) {
         socket.emit('contribute_to_guild_task', { taskId, amount: Number(amount) });
     }, [socket]);
 
+    const leaveGuild = useCallback(() => {
+        if (!socket) return;
+        setIsUpdating(true);
+        socket.emit('leave_guild');
+    }, [socket, setIsUpdating]);
+
+    const disbandGuild = useCallback(() => {
+        if (!socket) return;
+        setIsUpdating(true);
+        socket.emit('disband_guild');
+    }, [socket, setIsUpdating]);
+
     const toggleTaskExpanded = useCallback((taskId) => {
         setExpandedTasks(prev => {
             const next = new Set(prev);
@@ -190,6 +202,8 @@ export function useGuild(socket, activeTab, playerHasPermission, gameState) {
         toggleTaskExpanded,
         timeUntilReset,
         contributeToTask,
+        leaveGuild,
+        disbandGuild,
         // Donation
         donationSilver, setDonationSilver,
         selectedDonationItem, setSelectedDonationItem,

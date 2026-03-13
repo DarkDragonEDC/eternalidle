@@ -80,6 +80,8 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
         timeUntilReset, 
         contributeToTask,
         donateToGuild,
+        leaveGuild,
+        disbandGuild,
         updateCustomization,
         createRole,
         updateRole,
@@ -263,8 +265,8 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                 showDisbandConfirm={showDisbandConfirm} setShowDisbandConfirm={setShowDisbandConfirm}
                 showEditCustomization={showEditCustomization} setShowEditCustomization={setShowEditCustomization}
                 onDonate={donateToGuild}
-                onLeave={() => {}}
-                onDisband={() => {}}
+                onLeave={leaveGuild}
+                onDisband={disbandGuild}
                 onUpdateCustomization={updateCustomization}
                 guild={guild}
                 gameState={gameState}

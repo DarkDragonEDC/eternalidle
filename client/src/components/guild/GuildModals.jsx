@@ -600,6 +600,19 @@ export const GuildModals = ({
                 </div>
             </Modal>
 
+            {/* Disband Modal */}
+            <Modal isOpen={showDisbandConfirm} onClose={() => setShowDisbandConfirm(false)} title="DISBAND GUILD" maxWidth="320px" border="1px solid rgba(255, 68, 68, 0.3)">
+                <div style={{ textAlign: 'center' }}>
+                    <AlertTriangle size={32} color="#ff4444" style={{ marginBottom: '12px' }} />
+                    <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 'bold' }}>WARNING!</div>
+                    <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem', marginTop: '5px' }}>This will permanently delete the guild and remove all members. This cannot be undone.</div>
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                        <button onClick={() => setShowDisbandConfirm(false)} style={{ flex: 1, padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', color: '#fff', cursor: 'pointer' }}>Cancel</button>
+                        <button onClick={onDisband} style={{ flex: 1, padding: '10px', background: 'rgba(255, 68, 68, 0.4)', borderRadius: '10px', color: '#ff4444', fontWeight: '900', cursor: 'pointer' }}>Disband</button>
+                    </div>
+                </div>
+            </Modal>
+
             {/* Roles Modal */}
             <Modal 
                 isOpen={showRolesModal} 

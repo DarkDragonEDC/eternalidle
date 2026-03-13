@@ -408,18 +408,15 @@ export class GuildManager {
     async leaveGuild(char) {
         if (!char) throw new Error("Character not found");
 
-        // 1. Find membership
-        const { data: membership, error: memErr } = await this.supabase
+        const { data: membership } = await this.supabase
             .from('guild_members')
             .select('guild_id, role')
             .eq('character_id', char.id)
             .maybeSingle();
 
-        if (memErr || !membership) throw new Error("You are not in a guild");
-
+        if (!membership) throw new Error("You are not in a guild");
         const guildId = membership.guild_id;
 
-        // 2. If leader, check if there are other members
         if (membership.role === 'LEADER') {
             const { count } = await this.supabase
                 .from('guild_members')
@@ -430,25 +427,60 @@ export class GuildManager {
                 throw new Error("Transfer leadership before leaving! You are the leader.");
             }
 
-            // Solo leader — disband guild
-            await this.supabase.from('guild_members').delete().eq('guild_id', guildId);
-            await this.supabase.from('guilds').delete().eq('id', guildId);
-            console.log(`[GUILD] Guild ${guildId} disbanded by leader ${char.name}`);
+            await this.disbandGuild(char);
         } else {
-            // Regular member — just remove
             await this.supabase
                 .from('guild_members')
                 .delete()
                 .eq('character_id', char.id)
                 .eq('guild_id', guildId);
-            console.log(`[GUILD] ${char.name} left guild ${guildId}`);
+            
+            delete char.state.guild_id;
+            delete char.guild_bonuses;
+            await this.gameManager.saveStateCritical(char.id, char.state);
         }
 
-        // 3. Clear guild reference from character state and cache
-        delete char.state.guild_id;
-        delete char.guild_bonuses;
-        await this.gameManager.saveStateCritical(char.id, char.state);
- 
+        return { success: true };
+    }
+
+    async disbandGuild(char) {
+        if (!char) throw new Error("Character not found");
+
+        const { data: membership } = await this.supabase
+            .from('guild_members')
+            .select('guild_id, role')
+            .eq('character_id', char.id)
+            .maybeSingle();
+
+        if (!membership || membership.role !== 'LEADER') {
+            throw new Error("Only the leader can disband the guild");
+        }
+
+        const guildId = membership.guild_id;
+
+        // 1. Clear guild_id from all members' cache if online
+        const { data: members } = await this.supabase
+            .from('guild_members')
+            .select('character_id')
+            .eq('guild_id', guildId);
+
+        if (members) {
+            for (const m of members) {
+                const targetChar = this.gameManager.cache.get(m.character_id);
+                if (targetChar) {
+                    delete targetChar.state.guild_id;
+                    delete targetChar.guild_bonuses;
+                    this.gameManager.markDirty(m.character_id);
+                }
+            }
+        }
+
+        // 2. Delete all records
+        await this.supabase.from('guild_requests').delete().eq('guild_id', guildId);
+        await this.supabase.from('guild_members').delete().eq('guild_id', guildId);
+        await this.supabase.from('guilds').delete().eq('id', guildId);
+
+        console.log(`[GUILD] Guild ${guildId} disbanded by ${char.name}`);
         return { success: true };
     }
 

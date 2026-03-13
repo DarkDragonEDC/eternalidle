@@ -54,6 +54,21 @@ export const registerGuildHandlers = (socket, gameManager, io) => {
     }
   });
 
+  socket.on("disband_guild", async () => {
+    try {
+      if (!socket.data.characterId || socket.data.characterId === "undefined") return;
+      await gameManager.executeLocked(socket.user.id, async () => {
+        const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+        const result = await gameManager.guildManager.disbandGuild(char);
+        socket.emit("guild_disbanded", result);
+        socket.emit("status_update", await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+      });
+    } catch (err) {
+      console.error("[GUILD] Error in disband_guild socket:", err);
+      socket.emit("error", { message: err.message });
+    }
+  });
+
   socket.on("apply_to_guild", async ({ guildId }) => {
     try {
       if (!socket.data.characterId || socket.data.characterId === "undefined") return;

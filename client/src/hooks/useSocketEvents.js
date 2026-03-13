@@ -115,6 +115,14 @@ export const useSocketEvents = () => {
             }
             store.setIsLoadingGuildTasks(false);
         });
+        socket.on('guild_left', (result) => {
+            store.setIsUpdatingGuild(false);
+            store.setGuildStatusMessage({ type: result.success ? 'success' : 'error', text: result.success ? 'You have left the guild.' : (result.message || 'Failed to leave guild.') });
+        });
+        socket.on('guild_disbanded', (result) => {
+            store.setIsUpdatingGuild(false);
+            store.setGuildStatusMessage({ type: result.success ? 'success' : 'error', text: result.success ? 'The guild has been disbanded.' : (result.message || 'Failed to disband guild.') });
+        });
 
         // --- Social Events ---
         socket.on('trade_search_result', (results) => {
@@ -320,6 +328,8 @@ export const useSocketEvents = () => {
             socket.off('guild_requests_data');
             socket.off('guild_tasks_data');
             socket.off('guild_task_contribute_result');
+            socket.off('guild_left');
+            socket.off('guild_disbanded');
 
             socket.off('trade_search_result');
             socket.off('trade_search_error');
