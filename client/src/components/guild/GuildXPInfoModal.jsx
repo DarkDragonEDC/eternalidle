@@ -90,7 +90,7 @@ const GuildXPInfoModal = ({ isOpen, onClose }) => {
                             lineHeight: '1.5' 
                         }}>
                             <p style={{ margin: '0px 0px 10px' }}>
-                                Whenever any member of the guild performs actions that grant experience, <strong>a 10% bonus</strong> of that XP is copied and granted directly to the Guild!
+                                Whenever any member of the guild performs actions that grant experience, <strong>a 5% bonus</strong> of that XP is copied and granted directly to the Guild!
                             </p>
                             <ul style={{ paddingLeft: '20px', margin: '0px', color: 'var(--accent)', fontWeight: 'bold' }}>
                                 <li>⚔️ Combat (Killing Mobs)</li>

@@ -334,6 +334,26 @@ export class CombatManager {
             const levelUp = this.gameManager.addXP(char, 'COMBAT', finalXp);
             if (levelUp) leveledUp = levelUp;
 
+            // --- 4. Proficiency XP (5% of base XP) ---
+            if (playerStats.activeProf) {
+                const profSkillKey = `${playerStats.activeProf.toUpperCase()}_PROFICIENCY`;
+                const rawProfXp = finalXp * 0.05;
+                
+                if (!char.state.skills[profSkillKey]) {
+                    char.state.skills[profSkillKey] = { level: 1, xp: 0, nextLevelXp: 84 };
+                }
+
+                const skillObj = char.state.skills[profSkillKey];
+                skillObj.buffer = (Number(skillObj.buffer) || 0) + rawProfXp;
+
+                if (skillObj.buffer >= 1) {
+                    const wholeXp = Math.floor(skillObj.buffer);
+                    skillObj.buffer -= wholeXp;
+                    const profLevelUp = this.gameManager.addXP(char, profSkillKey, wholeXp);
+                    if (profLevelUp) leveledUp = profLevelUp;
+                }
+            }
+
             // Accumulate Session Stats
             combat.sessionXp = (combat.sessionXp || 0) + finalXp;
             combat.sessionSilver = (combat.sessionSilver || 0) + finalSilver;

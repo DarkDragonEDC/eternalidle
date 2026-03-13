@@ -1370,7 +1370,7 @@ export class GameManager {
         // --- GUILD XP INTEGRATION (5%) ---
         // If char is in a guild, route 5% of the gained XP into the guild manager's memory buffer
         if (char.state.guild_id && safeAmount > 0) {
-            const guildXpGained = safeAmount * 0.10;
+            const guildXpGained = safeAmount * 0.05;
             // The guild manager will handle adding to memory and flushing every 30m
             if (this.guildManager && this.guildManager.addPendingGuildXP) {
                 this.guildManager.addPendingGuildXP(char.state.guild_id, guildXpGained, char.id);
