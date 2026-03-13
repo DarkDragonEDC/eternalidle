@@ -1,4 +1,5 @@
 import { resolveItem } from '../../shared/items.js';
+import { DEFAULT_PLAYER_ATTACK_SPEED, RESPAWN_DELAY_MS } from '../../shared/combat.js';
 
 export class CatchupManager {
     constructor(gameManager) {
@@ -47,7 +48,7 @@ export class CatchupManager {
                 // 2. Process Combat
                 if (data.state.combat) {
                     const stats = this.gm.inventoryManager.calculateStats(data);
-                    const atkSpeed = Number(stats.attackSpeed) || 1000;
+                    const atkSpeed = Number(stats.attackSpeed) || DEFAULT_PLAYER_ATTACK_SPEED;
                     const secondsPerRound = atkSpeed / 1000;
 
                     if (elapsedSeconds >= secondsPerRound) {
@@ -235,9 +236,9 @@ export class CatchupManager {
         const endTime = startTime + (rounds * atkSpeed);
 
         while (virtualTime < endTime && char.state.combat) {
-            // Process Food
-            const foodResult = this.gm.processFood(char, virtualTime);
-            foodConsumed += foodResult.eaten || 0;
+            // Process Food - REMOVED duplicative call. CombatManager.processCombatRound handles reactive healing.
+            // const foodResult = this.gm.processFood(char, virtualTime);
+            // foodConsumed += foodResult.eaten || 0;
 
             const result = await this.gm.combatManager.processCombatRound(char, virtualTime);
             if (!result || !char.state.combat) {
@@ -253,23 +254,30 @@ export class CatchupManager {
                 silverGained += result.details.silverGained || 0;
                 if (result.details.lootGained) {
                     result.details.lootGained.forEach(lootEntry => {
-                        const match = lootEntry.match(/^(\d+)x\s+(.+)$/);
-                        if (match) {
-                            const qty = parseInt(match[1]) || 1;
-                            const actualId = match[2];
+                        // FIX: lootEntry is now an object { id, amount } from CombatManager
+                        if (typeof lootEntry === 'object' && lootEntry !== null) {
+                            const actualId = lootEntry.id;
+                            const qty = lootEntry.amount || 1;
                             itemsGained[actualId] = (itemsGained[actualId] || 0) + qty;
-                        } else {
-                            itemsGained[lootEntry] = (itemsGained[lootEntry] || 0) + 1;
+                        } else if (typeof lootEntry === 'string') {
+                            const match = lootEntry.match(/^(\d+)x\s+(.+)$/);
+                            if (match) {
+                                const qty = parseInt(match[1]) || 1;
+                                const actualId = match[2];
+                                itemsGained[actualId] = (itemsGained[actualId] || 0) + qty;
+                            } else {
+                                itemsGained[lootEntry] = (itemsGained[lootEntry] || 0) + 1;
+                            }
                         }
                     });
                 }
                 
                 // --- RESPawn Logic (Sync with Online) ---
-                virtualTime += 1000; // Respawn Delay
+                virtualTime += RESPAWN_DELAY_MS; // Respawn Delay
                 if (char.state.combat) {
                     char.state.combat.mobHealth = char.state.combat.mobMaxHealth || 100;
-                    char.state.combat.mob_next_attack_at = virtualTime;
-                    char.state.combat.player_next_attack_at = virtualTime + atkSpeed;
+                    char.state.combat.mob_next_attack_at = virtualTime; // Attack immediately on respawn
+                    // char.state.combat.player_next_attack_at = virtualTime + atkSpeed; // REMOVED: Don't reset player timer
                 }
             } else {
                 // Advance to next event

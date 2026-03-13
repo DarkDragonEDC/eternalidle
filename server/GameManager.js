@@ -4,6 +4,7 @@ import { ITEMS, ALL_RUNE_TYPES, RUNES_BY_CATEGORY, ITEM_LOOKUP, resolveItem } fr
 import { CHEST_DROP_TABLE, WORLDBOSS_DROP_TABLE, getChestRuneShardRange } from '../shared/chest_drops.js';
 import { INITIAL_SKILLS, calculateNextLevelXP, XP_TABLE } from '../shared/skills.js';
 import { STATION_BONUS_TABLE } from '../shared/guilds.js';
+import { DEFAULT_PLAYER_ATTACK_SPEED, RESPAWN_DELAY_MS } from '../shared/combat.js';
 import { InventoryManager } from './managers/InventoryManager.js';
 import { ActivityManager } from './managers/ActivityManager.js';
 import { CombatManager } from './managers/CombatManager.js';
@@ -1118,7 +1119,7 @@ export class GameManager {
             }
 
             const stats = this.inventoryManager.calculateStats(char);
-            const atkSpeed = Math.max(200, Number(stats.attackSpeed) || 1000);
+            const atkSpeed = Math.max(200, Number(stats.attackSpeed) || DEFAULT_PLAYER_ATTACK_SPEED);
 
             // Respawn Delay Check
             if (combat.respawn_at) {
@@ -1129,7 +1130,7 @@ export class GameManager {
                     // Respawn time reached!
                     combat.mobHealth = combat.mobMaxHealth;
                     combat.mob_next_attack_at = now;
-                    combat.player_next_attack_at = now + atkSpeed;
+                    // combat.player_next_attack_at = now + atkSpeed; // REMOVED: Do not reset player timer
                     combat.next_attack_at = now; // Reset trigger timer to now
                     delete combat.respawn_at;
                     stateChanged = true;
@@ -1167,8 +1168,8 @@ export class GameManager {
 
                 // If Mob Died (Victory), apply delay and break loop
                 if (roundResult && roundResult.details && roundResult.details.victory) {
-                    combat.next_attack_at += 1000; // Add 1s delay penalty
-                    combat.respawn_at = now + 1000; // Set visual/logic blocker
+                    combat.next_attack_at += RESPAWN_DELAY_MS; // Add delay penalty
+                    combat.respawn_at = now + RESPAWN_DELAY_MS; // Set visual/logic blocker
                     stateChanged = true;
                     break; // Stop multiple kills in one tick
                 }
@@ -1380,12 +1381,12 @@ export class GameManager {
         const hpPercent = (currentHp / maxHp) * 100;
 
         // NO WASTE RULE:
-        // Eat if the heal fits entirely OR if HP is dangerously low (< 40%)
-        if (food.amount > 0 && (missing >= unitHeal || hpPercent < 40)) {
+        // Eat if the heal fits entirely
+        if (food.amount > 0 && (missing >= unitHeal)) {
             const actualHeal = Math.min(unitHeal, missing);
 
             // Safety break if somehow normalized to non-positive
-            if (actualHeal <= 0 && hpPercent >= 40) return { used: false, amount: 0 };
+            if (actualHeal <= 0) return { used: false, amount: 0 };
 
             currentHp = currentHp + actualHeal;
 

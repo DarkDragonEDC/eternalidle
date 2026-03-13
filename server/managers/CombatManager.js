@@ -1,4 +1,10 @@
 import { MONSTERS } from '../../shared/monsters.js';
+import { 
+    DEFAULT_PLAYER_ATTACK_SPEED, 
+    DEFAULT_MOB_ATTACK_SPEED, 
+    MAX_MITIGATION, 
+    MITIGATION_PER_DEFENSE 
+} from '../../shared/combat.js';
 import fs from 'fs';
 
 const MAX_XP_PER_KILL = 10_000_000; // 10M
@@ -44,7 +50,7 @@ export class CombatManager {
         const mobMaxHP = customStats?.health || mobData.health;
 
         const playerStats = this.gameManager.inventoryManager.calculateStats(char);
-        const playerAtkSpeed = Math.max(200, playerStats.attackSpeed || 2000);
+        const playerAtkSpeed = Math.max(200, playerStats.attackSpeed || DEFAULT_PLAYER_ATTACK_SPEED);
 
         char.state.combat = {
             mobId: mobData.id,
@@ -54,10 +60,10 @@ export class CombatManager {
             mobHealth: mobMaxHP,
             mobDamage: customStats?.damage || mobData.damage,
             mobDefense: customStats?.defense || mobData.defense,
-            mob_next_attack_at: Date.now(),
+            mob_next_attack_at: Date.now(), // Mob attacks immediately
             player_next_attack_at: Date.now() + playerAtkSpeed,
             next_attack_at: Date.now(), // Trigger first tick immediately
-            mobAtkSpeed: 1000, // Default mob speed
+            mobAtkSpeed: DEFAULT_MOB_ATTACK_SPEED, // Standardized mob speed
             playerHealth: currentHealth,
             auto: true,
             kills: 0,
@@ -136,16 +142,16 @@ export class CombatManager {
 
 
         // Restore Mitigation Calculations
-        // NEW FORMULA: 1% Mitigation per 100 Defense (Linear). Capped at 75% (Matches UI)
-        const playerMitigation = Math.min(0.75, playerStats.defense / 10000);
+        // FORMULA: 1% Mitigation per 100 Defense (Linear). Capped at 75%
+        const playerMitigation = Math.min(MAX_MITIGATION, playerStats.defense * MITIGATION_PER_DEFENSE);
 
         let mobDef = combat.mobDefense;
         if (typeof mobDef === 'undefined') {
             mobDef = mobData ? (mobData.defense || 0) : 0;
         }
-        const mobMitigation = Math.min(0.75, mobDef / 10000);
+        const mobMitigation = Math.min(MAX_MITIGATION, mobDef * MITIGATION_PER_DEFENSE);
 
-        if (!combat.player_next_attack_at) combat.player_next_attack_at = now + (playerStats.attackSpeed || 2000);
+        if (!combat.player_next_attack_at) combat.player_next_attack_at = now + (playerStats.attackSpeed || DEFAULT_PLAYER_ATTACK_SPEED);
 
         // Player Attack Logic (Time-based / Catch-up)
         let playerAttackCount = 0;
@@ -154,7 +160,7 @@ export class CombatManager {
         let playerHitList = [];
 
         if (now >= combat.player_next_attack_at) {
-            const playerSpeed = Math.max(200, playerStats.attackSpeed || 2000); // Min 200ms cap
+            const playerSpeed = Math.max(200, playerStats.attackSpeed || DEFAULT_PLAYER_ATTACK_SPEED); // Min 200ms cap
 
             // Calculate how many attacks fit
             playerAttackCount = 1 + Math.floor((now - combat.player_next_attack_at) / playerSpeed);
@@ -217,11 +223,11 @@ export class CombatManager {
         let mobHitList = [];
 
         // Ensure initialization
-        if (!combat.mob_next_attack_at) combat.mob_next_attack_at = now + (combat.mobAtkSpeed || 1000);
+        if (!combat.mob_next_attack_at) combat.mob_next_attack_at = now + (combat.mobAtkSpeed || DEFAULT_MOB_ATTACK_SPEED);
 
         // ONLY attack if mob is still alive
         if (combat.mobHealth > 0 && now >= combat.mob_next_attack_at) {
-            const mobSpeed = combat.mobAtkSpeed || 1000;
+            const mobSpeed = combat.mobAtkSpeed || DEFAULT_MOB_ATTACK_SPEED;
 
             // Calculate how many attacks fit in the elapsed time
             // +1 because the current due attack counts
