@@ -57,7 +57,8 @@ export const GameContent = ({
         marketFilter,
         setMarketFilter,
         setModalItem,
-        setShowOrbShop
+        setShowOrbShop,
+        clearPreview
     } = useAppStore();
 
     switch (activeTab) {
@@ -76,10 +77,10 @@ export const GameContent = ({
                 onPreviewAvatar={setPreviewAvatarData}
                 previewBannerData={previewBannerData}
                 onPreviewBanner={(banner) => setPreviewBannerData(banner)}
-                isPreviewActive={isPreviewActive}
                 onPreviewActionBlocked={onPreviewActionBlocked}
                 onTutorialComplete={handleTutorialStepComplete}
                 onOpenRenameModal={() => setModal('rename', true)} 
+                clearPreview={clearPreview}
             />;
 
         case 'skills_overview':

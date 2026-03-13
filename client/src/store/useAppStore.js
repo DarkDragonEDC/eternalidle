@@ -531,16 +531,31 @@ export const useAppStore = create((set, get) => ({
       }
     },
 
+    clearPreview: () => set({ 
+      previewThemeId: null, 
+      previewAvatarData: null, 
+      previewBannerData: null 
+    }),
+
     // --- PREVIEW LOGIC ---
     get isPreviewActive() {
       const state = get();
       return !!state.previewThemeId || !!state.previewAvatarData || !!state.previewBannerData;
     },
-    onPreviewActionBlocked: () => {
-      const { setConfirmModal } = get();
+    onPreviewActionBlocked: (onConfirmAction = null) => {
+      const { setConfirmModal, clearPreview } = get();
       setConfirmModal({
         message: "Preview Mode is active! Actions are disabled. Exit preview to play.",
-        onConfirm: () => setConfirmModal(null)
+        onConfirm: () => {
+          if (onConfirmAction) onConfirmAction();
+          setConfirmModal(null);
+        },
+        onCancel: () => {
+          clearPreview();
+          setConfirmModal(null);
+        },
+        confirmLabel: onConfirmAction ? "Keep & Proceed" : "OK",
+        cancelLabel: "Exit Preview"
       });
     },
 

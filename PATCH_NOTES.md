@@ -1,9 +1,13 @@
-# 📄 Auditoria Completa de Mudanças - Guild Restoration (v1.5.0)
+# 📄 Auditoria Completa de Mudanças - Preview & Customization (v1.5.1)
 
-### 🛡️ Guildas & Sistema Social
-- **Restauração de Guildas**: Corrigido o erro crítico `createGuild is not a function`. Retornadas todas as 20 funções de delegação no servidor, permitindo novamente a criação, gerenciamento e bônus de guildas.
-- **Sincronização de Bônus**: Sistema social agora carrega corretamente os bônus de guilda ao inspecionar outros jogadores.
-- **Internacionalização**: Todos os alertas e erros críticos do sistema de guildas foram traduzidos para o Inglês para garantir consistência.
+### 🎨 Customização e UI
+- **Melhoria no Sistema de Preview**: Adicionado um botão "EXIT PREVIEW" acessível diretamente pelo painel de perfil, permitindo sair do modo de visualização de temas e avatares sem recarregar a página.
+- **Compra Durante Preview**: O bloqueio que impedia a compra de temas e avatares enquanto eles estavam sendo visualizados foi removido.
+- **Fluxo de Confirmação**: O modo de preview agora pode ser encerrado diretamente através dos modais de confirmação de ação.
+
+---
+
+# 📄 Auditoria Completa de Mudanças - Guild Restoration (v1.5.0)
 
 ---
 

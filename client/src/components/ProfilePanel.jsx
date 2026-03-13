@@ -23,7 +23,7 @@ import TitleSelector from './TitleSelector';
 
 
 
-const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobile, onOpenRenameModal, onOpenShop, theme, setTheme, onPreviewTheme, onPreviewAvatar, previewAvatarData, previewBannerData, onPreviewBanner, isPreviewActive, onPreviewActionBlocked, onTutorialComplete }) => {
+const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobile, onOpenRenameModal, onOpenShop, theme, setTheme, onPreviewTheme, onPreviewAvatar, previewAvatarData, previewBannerData, onPreviewBanner, isPreviewActive, onPreviewActionBlocked, onTutorialComplete, clearPreview }) => {
     const isPremium = gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > (gameState?._clientTime || Date.now());
     const [selectedSlot, setSelectedSlot] = useState(null);
     const [infoModal, setInfoModal] = useState(null);
@@ -88,7 +88,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
     };
 
     const handleUnlockTheme = (themeId) => {
-        if (isPreviewActive) return onPreviewActionBlocked();
+        // We allow unlocking even in preview, but we clear preview after purchase if needed
         setConfirmModal({
             message: `Unlock the ${themeId} theme for 50 Orbs?`,
             onConfirm: () => {
@@ -696,6 +696,30 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                                         <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.71,32.65-1.82,56.6.4,80.21a105.73,105.73,0,0,0,32.17,16.15,77.7,77.7,0,0,0,6.89-11.11,68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c3.39-28.32-5.42-52.09-23.75-72.13ZM42.45,65.69C36.18,65.69,31,60,31,53s5.07-12.72,11.41-12.72S54,46,53.86,53,48.81,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.72,11.44-12.72S96.11,46,96,53,91,65.69,84.69,65.69Z" />
                                     </svg>
                                 </a>
+                            )}
+
+                            {/* Exit Preview Button */}
+                            {isPreviewActive && (
+                                <button
+                                    onClick={clearPreview}
+                                    style={{
+                                        height: '40px',
+                                        padding: '0 15px',
+                                        background: '#ef4444',
+                                        borderRadius: '12px',
+                                        color: '#fff',
+                                        fontSize: '0.75rem',
+                                        fontWeight: '900',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        boxShadow: '0 0 15px rgba(239, 68, 68, 0.4)',
+                                        animation: 'pulse 2s infinite'
+                                    }}
+                                >
+                                    <X size={14} strokeWidth={3} />
+                                    EXIT PREVIEW
+                                </button>
                             )}
                         </div>
 
