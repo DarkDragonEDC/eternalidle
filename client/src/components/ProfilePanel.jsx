@@ -16,6 +16,8 @@ import ProficiencyDetailsModal from './ProficiencyDetailsModal';
 import AvatarSelectionModal from './AvatarSelectionModal';
 import BannerSelectionModal from './BannerSelectionModal';
 import TitleSelector from './TitleSelector';
+import { getProficiencyStats } from '@shared/proficiency_stats';
+import { resolveItem, formatItemId, ITEMS } from '@shared/items';
 
 
 
