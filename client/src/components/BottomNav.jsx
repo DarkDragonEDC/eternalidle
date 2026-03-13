@@ -43,7 +43,7 @@ const BottomNav = ({ gameState, activeTab, setActiveTab, onNavigate, canSpin, ha
             bottom: 0,
             left: 0,
             width: '100%',
-            background: '#161b22', // Solid background to remove transparency
+            background: 'var(--nav-bg)', // Dynamic background
             borderTop: '1px solid var(--border)',
             display: 'flex',
             justifyContent: 'space-around',
@@ -99,8 +99,9 @@ const BottomNav = ({ gameState, activeTab, setActiveTab, onNavigate, canSpin, ha
                                 top: '-11px',
                                 width: '40%',
                                 height: '2px',
-                                background: '#d4af37',
-                                borderRadius: '0 0 4px 4px'
+                                background: 'var(--accent)',
+                                borderRadius: '0 0 4px 4px',
+                                boxShadow: '0 0 10px var(--accent-soft)'
                             }} />
                         )}
                     </button>

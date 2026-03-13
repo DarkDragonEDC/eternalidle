@@ -1,3 +1,12 @@
+# 📄 Auditoria Completa de Mudanças - Theme Engine Refactor (v1.5.2)
+
+### 🎨 Customização e UI
+- **Refatoração Profunda de Temas**: Implementada uma engine de temas mais robusta onde todos os componentes majoritários (Sidebar, BottomNav, GlobalHeader) agora respondem dinamicamente às variáveis de CSS do tema selecionado.
+- **Variações de Cor**: Adicionadas variáveis de navegação (`--nav-bg`) para garantir que temas claros, escuros ou temáticos (Rose, Nature, Arcane) tenham contraste adequado em todas as barras de interface.
+- **Sincronização Visual**: Corrigido o problema onde a preview de temas não aplicava as cores de acento em tempo real em certos elementos da interface.
+
+---
+
 # 📄 Auditoria Completa de Mudanças - Preview & Customization (v1.5.1)
 
 ### 🎨 Customização e UI
