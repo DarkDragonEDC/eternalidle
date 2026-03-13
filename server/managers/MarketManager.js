@@ -35,8 +35,8 @@ export class MarketManager {
             if (filters.category === 'EQUIPMENT') {
                 query = query.or('item_data->>type.in.(WEAPON,ARMOR,HELMET,BOOTS,OFF_HAND,GLOVES,CAPE),item_data->>type.ilike.TOOL%');
             } else if (filters.category === 'RESOURCE') {
-                // Raw resources (excluding refined)
-                query = query.or('item_data->>type.eq.RAW,and(item_data->>type.eq.RESOURCE,not(item_id.ilike.%_BAR,item_id.ilike.%_PLANK,item_id.ilike.%_LEATHER,item_id.ilike.%_CLOTH,item_id.ilike.%_EXTRACT))');
+                // Raw resources (excluding refined, runes, and shards)
+                query = query.or('item_data->>type.eq.RAW,and(item_data->>type.eq.RESOURCE,item_id.not.ilike.%_BAR,item_id.not.ilike.%_PLANK,item_id.not.ilike.%_LEATHER,item_id.not.ilike.%_CLOTH,item_id.not.ilike.%_EXTRACT,item_id.not.ilike.%_SHARD%,item_id.not.ilike.%_RUNE_%)');
             } else if (filters.category === 'REFINED') {
                 query = query.or('item_data->>type.eq.REFINED,and(item_data->>type.eq.RESOURCE,or(item_id.ilike.%_BAR,item_id.ilike.%_PLANK,item_id.ilike.%_LEATHER,item_id.ilike.%_CLOTH,item_id.ilike.%_EXTRACT))');
             } else if (filters.category === 'CONSUMABLE') {
