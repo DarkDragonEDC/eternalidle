@@ -61,6 +61,42 @@ export class PersistenceService {
         const char = this.cache.get(charId);
         if (!char) return false;
 
+        // --- PRE-CALCULATE RANKING VALUES (BEFORE PRUNING) ---
+        let ranking_total_level = 0;
+        let ranking_total_xp = 0;
+        let ranking_item_power = 0;
+
+        const calculateAccumulatedXP = (level, currentXp) => {
+            const baseXP = XP_TABLE[level - 1] || 0;
+            return baseXP + currentXp;
+        };
+
+        if (char.state.skills) {
+            for (const skillKey of Object.keys(char.state.skills)) {
+                const skill = char.state.skills[skillKey];
+                const lvl = (Number(skill.level) || 1);
+                const xp = (Number(skill.xp) || 0);
+                const skillTotalXp = calculateAccumulatedXP(lvl, xp);
+                
+                // We'll update totalXp in skillsToSave later
+                ranking_total_level += lvl;
+                ranking_total_xp += skillTotalXp;
+            }
+        }
+
+        if (char.state.equipment) {
+            let totalIp = 0;
+            let count = 0;
+            for (const slot of Object.values(char.state.equipment)) {
+                if (slot && slot.ip) {
+                    totalIp += Number(slot.ip);
+                    count++;
+                }
+            }
+            ranking_item_power = count > 0 ? Math.floor(totalIp / count) : 0;
+        }
+        // -----------------------------------------------------
+
         const stateToPrune = JSON.parse(JSON.stringify(char.state));
         const prunedState = pruneState(stateToPrune);
 
@@ -68,6 +104,18 @@ export class PersistenceService {
         delete prunedState.inventory;
         const skillsToSave = prunedState.skills || {};
         delete prunedState.skills;
+
+        // Inject totalXp into skillsToSave for DB sorting persistence
+        if (skillsToSave) {
+            for (const skillKey of Object.keys(skillsToSave)) {
+                const skill = skillsToSave[skillKey];
+                const sourceSkill = char.state.skills[skillKey];
+                if (sourceSkill) {
+                    skill.totalXp = calculateAccumulatedXP(Number(sourceSkill.level) || 1, Number(sourceSkill.xp) || 0);
+                }
+            }
+        }
+
         const equipmentToSave = prunedState.equipment || {};
         delete prunedState.equipment;
 
@@ -103,45 +151,6 @@ export class PersistenceService {
         const settingsToSave = prunedState.settings || char.state.settings || {};
         delete prunedState.settings;
 
-        // --- PRE-CALCULATE RANKING VALUES ---
-        let ranking_total_level = 0;
-        let ranking_total_xp = 0;
-
-        const calculateAccumulatedXP = (level, currentXp) => {
-            const baseXP = XP_TABLE[level - 1] || 0;
-            return baseXP + currentXp;
-        };
-
-        if (skillsToSave) {
-            for (const skillKey of Object.keys(skillsToSave)) {
-                const skill = skillsToSave[skillKey];
-                const lvl = (Number(skill.level) || 1);
-                const xp = (Number(skill.xp) || 0);
-                
-                const skillTotalXp = calculateAccumulatedXP(lvl, xp);
-                
-                // Inject totalXp into skill object for DB sorting
-                skill.totalXp = skillTotalXp;
-                
-                ranking_total_level += lvl;
-                ranking_total_xp += skillTotalXp;
-            }
-        }
-
-        let ranking_item_power = 0;
-        if (equipmentToSave) {
-            let totalIp = 0;
-            let count = 0;
-            for (const slot of Object.values(equipmentToSave)) {
-                if (slot && slot.ip) {
-                    totalIp += Number(slot.ip);
-                    count++;
-                }
-            }
-            ranking_item_power = count > 0 ? Math.floor(totalIp / count) : 0;
-        }
-        // ------------------------------------
-
         const finalPrunedState = (prunedState && prunedState.state) ? prunedState.state : prunedState;
 
         const isOnline = this.gm._isCharacterOnline ? this.gm._isCharacterOnline(charId) : true;
@@ -161,8 +170,8 @@ export class PersistenceService {
                 settings: settingsToSave,
                 state: finalPrunedState,
                 ranking_total_level,
-                ranking_total_xp,
-                ranking_item_power,
+                ranking_total_xp: Math.floor(ranking_total_xp),
+                ranking_item_power: Math.floor(ranking_item_power),
                 current_activity: char.current_activity,
                 activity_started_at: char.activity_started_at,
                 last_saved: saveTime

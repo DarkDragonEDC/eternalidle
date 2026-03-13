@@ -69,21 +69,30 @@ async function fixRankings() {
         // Calculate Item Power
         if (char.equipment) {
             for (const slot of Object.values(char.equipment)) {
-                if (slot && typeof slot === 'object' && slot.ip) {
-                    totalIp += Number(slot.ip);
+                if (slot && typeof slot === 'object') {
+                    let ip = Number(slot.ip);
+                    
+                    // Fallback for pruned items: Recalculate IP from Tier and Quality
+                    if (!ip || isNaN(ip)) {
+                        const tier = Number(slot.id?.match(/T(\d+)/)?.[1]) || 1;
+                        const quality = Number(slot.quality) || 0;
+                        const qualityBonus = { 0: 0, 1: 20, 2: 50, 3: 100, 4: 200 }[quality] || 0;
+                        ip = (tier * 100) + qualityBonus;
+                    }
+
+                    totalIp += ip;
                     ipCount++;
                 }
             }
         }
 
-        const ranking_total_level = totalLevel;
-        const ranking_total_xp = totalXp;
+        const ranking_total_level = Math.floor(totalLevel);
+        const ranking_total_xp = Math.floor(totalXp);
         const ranking_item_power = ipCount > 0 ? Math.floor(totalIp / ipCount) : 0;
 
         const { error: updateErr } = await supabase
             .from('characters')
             .update({
-                skills: skillsToUpdate,
                 ranking_total_level,
                 ranking_total_xp,
                 ranking_item_power
