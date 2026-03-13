@@ -154,71 +154,7 @@ export class CombatManager {
 
         if (!combat.player_next_attack_at) combat.player_next_attack_at = now + (playerStats.attackSpeed || DEFAULT_PLAYER_ATTACK_SPEED);
 
-        // Player Attack Logic (Time-based / Catch-up)
-        let playerAttackCount = 0;
-        let mitigatedPlayerDmg = 0;
-        let isBurst = false;
-        let playerHitList = [];
-
-        if (now >= combat.player_next_attack_at) {
-            const playerSpeed = Math.max(200, playerStats.attackSpeed || DEFAULT_PLAYER_ATTACK_SPEED); // Min 200ms cap
-
-            // Calculate how many attacks fit
-            playerAttackCount = 1 + Math.floor((now - combat.player_next_attack_at) / playerSpeed);
-
-            // Cap at 50 to prevent infinite loops
-            if (playerAttackCount > 50) playerAttackCount = 50;
-
-            let singleHitDmg = playerDmg;
-
-
-
-            playerHitList = [];
-            // "mitigatedPlayerDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)))"
-            // It's linear/percent based, so (Dmg * Count) * Mitigation is same as (Dmg * Mitigation) * Count.
-
-            const singleHitMitigated = Math.max(1, Math.floor(singleHitDmg * (1 - mobMitigation)));
-
-            let currentMobHP = combat.mobHealth;
-            for (let i = 0; i < playerAttackCount; i++) {
-                let hitDmg = singleHitMitigated;
-
-                // Burst Rune Logic (Per Hit)
-                const burstChance = playerStats.burstChance || 0;
-                let hitIsBurst = false;
-                if (burstChance > 0 && Math.random() * 100 < burstChance) {
-                    hitDmg = Math.floor(hitDmg * (playerStats.burstDmg || 1.5));
-                    hitIsBurst = true;
-                    isBurst = true;
-                    combat.totalBurstDmg = (combat.totalBurstDmg || 0) + hitDmg;
-                    combat.burstCount = (combat.burstCount || 0) + 1;
-                }
-
-                mitigatedPlayerDmg += hitDmg;
-                playerHitList.push({ dmg: hitDmg, isBurst: hitIsBurst });
-
-                currentMobHP -= hitDmg;
-                if (currentMobHP <= 0) {
-                    playerAttackCount = i + 1;
-                    break;
-                }
-            }
-
-            // Apply Player Damage
-            combat.mobHealth -= mitigatedPlayerDmg;
-            if (combat.mobHealth < 0) combat.mobHealth = 0;
-            combat.totalPlayerDmg = (combat.totalPlayerDmg || 0) + mitigatedPlayerDmg;
-
-            // Advance Timer
-            combat.player_next_attack_at += (playerAttackCount * playerSpeed);
-
-            // Sync if too far behind (Prevents "burst" attacks after respawn or lag)
-            if (combat.player_next_attack_at < now - playerSpeed) {
-                combat.player_next_attack_at = now + playerSpeed;
-            }
-        }
-
-        // Mob Attack Logic (with catch-up for slow players)
+        // 1. Mob Attack Logic (with catch-up for slow players)
         let mitigatedMobDmg = 0;
         let mobAttackCount = 0;
         let mobHitList = [];
@@ -268,6 +204,66 @@ export class CombatManager {
             // Sync if too far behind (Prevents "burst" attacks after respawn or lag)
             if (combat.mob_next_attack_at < now - mobSpeed) {
                 combat.mob_next_attack_at = now + mobSpeed;
+            }
+        }
+
+        // 2. Player Attack Logic (Time-based / Catch-up)
+        let playerAttackCount = 0;
+        let mitigatedPlayerDmg = 0;
+        let isBurst = false;
+        let playerHitList = [];
+
+        // ONLY attack if player is still alive (didn't die from mob attack above)
+        if (combat.playerHealth > 0 && now >= combat.player_next_attack_at) {
+            const playerSpeed = Math.max(200, playerStats.attackSpeed || DEFAULT_PLAYER_ATTACK_SPEED); // Min 200ms cap
+
+            // Calculate how many attacks fit
+            playerAttackCount = 1 + Math.floor((now - combat.player_next_attack_at) / playerSpeed);
+
+            // Cap at 50 to prevent infinite loops
+            if (playerAttackCount > 50) playerAttackCount = 50;
+
+            let singleHitDmg = playerDmg;
+
+            playerHitList = [];
+            const singleHitMitigated = Math.max(1, Math.floor(singleHitDmg * (1 - mobMitigation)));
+
+            let currentMobHP = combat.mobHealth;
+            for (let i = 0; i < playerAttackCount; i++) {
+                let hitDmg = singleHitMitigated;
+
+                // Burst Rune Logic (Per Hit)
+                const burstChance = playerStats.burstChance || 0;
+                let hitIsBurst = false;
+                if (burstChance > 0 && Math.random() * 100 < burstChance) {
+                    hitDmg = Math.floor(hitDmg * (playerStats.burstDmg || 1.5));
+                    hitIsBurst = true;
+                    isBurst = true;
+                    combat.totalBurstDmg = (combat.totalBurstDmg || 0) + hitDmg;
+                    combat.burstCount = (combat.burstCount || 0) + 1;
+                }
+
+                mitigatedPlayerDmg += hitDmg;
+                playerHitList.push({ dmg: hitDmg, isBurst: hitIsBurst });
+
+                currentMobHP -= hitDmg;
+                if (currentMobHP <= 0) {
+                    playerAttackCount = i + 1;
+                    break;
+                }
+            }
+
+            // Apply Player Damage
+            combat.mobHealth -= mitigatedPlayerDmg;
+            if (combat.mobHealth < 0) combat.mobHealth = 0;
+            combat.totalPlayerDmg = (combat.totalPlayerDmg || 0) + mitigatedPlayerDmg;
+
+            // Advance Timer
+            combat.player_next_attack_at += (playerAttackCount * playerSpeed);
+
+            // Sync if too far behind (Prevents "burst" attacks after respawn or lag)
+            if (combat.player_next_attack_at < now - playerSpeed) {
+                combat.player_next_attack_at = now + playerSpeed;
             }
         }
 
