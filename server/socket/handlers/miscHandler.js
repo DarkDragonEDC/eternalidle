@@ -106,9 +106,9 @@ export const registerMiscHandlers = (socket, gameManager, io) => {
     } catch (err) { console.error("Error getting dungeon history:", err); }
   });
 
-  socket.on("get_leaderboard", async ({ type, mode }) => {
+  socket.on("get_leaderboard", async ({ type, mode, forceRefresh }) => {
     try {
-      const response = await gameManager.getLeaderboard(type, socket.data.characterId, mode);
+      const response = await gameManager.getLeaderboard(type, socket.data.characterId, mode, forceRefresh);
       socket.emit("leaderboard_update", {
         type: response.type,
         mode: response.mode,

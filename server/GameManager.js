@@ -763,6 +763,7 @@ export class GameManager {
             character_id: char.id,
             user_id: char.user_id,
             name: char.name,
+            isAdmin: !!char.is_admin,
             state: char.state,
             calculatedStats: stats,
             current_activity: char.current_activity,
@@ -1514,7 +1515,7 @@ export class GameManager {
         return { used: false, amount: 0 };
     }
 
-    async getLeaderboard(type = 'COMBAT', requesterId = null, mode = 'NORMAL') {
+    async getLeaderboard(type = 'COMBAT', requesterId = null, mode = 'NORMAL', forceRefresh = false) {
         const cacheKey = `${type}_${mode}`;
         const now = Date.now();
         const cached = this.leaderboardCache.get(cacheKey);
@@ -1522,7 +1523,7 @@ export class GameManager {
         // Reduced TTL to 5 minutes for a more dynamic experience with new high performance
         const TTL = 5 * 60 * 1000;
 
-        if (cached && (now - cached.timestamp) < TTL) {
+        if (!forceRefresh && cached && (now - cached.timestamp) < TTL) {
             const sorted = cached.data;
             let userRank = null;
             if (requesterId) {

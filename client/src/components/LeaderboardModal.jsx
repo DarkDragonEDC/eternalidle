@@ -4,7 +4,7 @@ import {
     Trophy, Sword, Skull, X, Pickaxe, Trees, Activity,
     Zap, Ghost, GraduationCap, ChevronDown, Filter,
     Anchor, Flame, Hammer, FlaskConical, Target, Shield,
-    User, UserCheck
+    User, UserCheck, RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -73,12 +73,12 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
     const [mode, setMode] = useState('NORMAL'); // NORMAL | IRONMAN
     const [showSelector, setShowSelector] = useState(false);
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (forceRefresh = false) => {
         setLoading(true);
         if (isPublic) {
             try {
                 const apiUrl = import.meta.env.VITE_API_URL;
-                const res = await fetch(`${apiUrl}/api/leaderboard?type=${activeSubTab}&mode=${mode}`);
+                const res = await fetch(`${apiUrl}/api/leaderboard?type=${activeSubTab}&mode=${mode}${forceRefresh ? '&forceRefresh=true' : ''}`);
                 if (res.ok) {
                     const json = await res.json();
                     setData(json.data || []);
@@ -89,9 +89,14 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
                 setLoading(false);
             }
         } else if (socket) {
-            socket.emit('get_leaderboard', { type: activeSubTab, mode });
+            socket.emit('get_leaderboard', { type: activeSubTab, mode, forceRefresh });
         }
     }, [activeSubTab, mode, isPublic, socket, setData, setLoading]);
+
+    const handleRefresh = () => {
+        if (loading) return;
+        fetchData(true);
+    };
 
     useEffect(() => {
         if (!isOpen) return;
@@ -219,6 +224,26 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
                             {mode === 'IRONMAN' ? <Shield size={16} /> : <User size={16} />}
                             {mode}
                         </button>
+
+                        {/* Admin Refresh Button */}
+                        {store.gameState?.isAdmin && (
+                            <button
+                                onClick={handleRefresh}
+                                disabled={loading}
+                                style={{
+                                    padding: '10px', borderRadius: '12px', border: '1px solid var(--border)',
+                                    background: 'rgba(255,255,255,0.05)',
+                                    color: 'var(--accent)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    transition: '0.2s', cursor: loading ? 'not-allowed' : 'pointer'
+                                }}
+                                title="Force Refresh (Admin)"
+                            >
+                                <motion.div animate={loading ? { rotate: 360 } : {}} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
+                                    <RefreshCw size={18} />
+                                </motion.div>
+                            </button>
+                        )}
                     </div>
 
                     {/* SubTabs row if more than 1 subtab */}

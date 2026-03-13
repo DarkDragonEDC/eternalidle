@@ -26,6 +26,7 @@ export class AdminManager {
                 case 'resetdaily': return await this.cmdResetDaily(socket, args);
                 case 'ban': return await this.cmdBan(socket, args);
                 case 'title': return await this.cmdTitle(socket, args);
+                case 'refresh-ranking': return await this.cmdRefreshRanking(socket);
                 case 'help': return await this.cmdHelp(socket);
                 default: return { success: false, error: "Unknown command. Type /help." };
             }
@@ -290,6 +291,12 @@ export class AdminManager {
         }
     }
 
+    async cmdRefreshRanking(socket) {
+        console.log(`[ADMIN] User ${socket.user.email} triggered a global ranking cache clear.`);
+        this.gameManager.leaderboardCache.clear();
+        return { success: true, message: "Global ranking cache cleared. Next access will fetch fresh data." };
+    }
+
     async cmdTitle(socket, args) {
         // Usage: /title [target?] [title...]
         let targetName, title;
@@ -335,7 +342,7 @@ export class AdminManager {
     async cmdHelp(socket) {
         return {
             success: true,
-            message: "Commands: /give, /heal, /add_orbs, /xp, /gxp, /gp, /title, /ban, /resetdaily. (Optional target argument supported)"
+            message: "Commands: /give, /heal, /add_orbs, /xp, /gxp, /gp, /title, /ban, /resetdaily, /refresh-ranking. (Optional target argument supported)"
         };
     }
 
