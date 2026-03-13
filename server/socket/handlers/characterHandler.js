@@ -53,6 +53,7 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
         }
 
         socket.data.characterId = characterId;
+        socket.join(`user_char:${characterId}`);
 
         if (status.offlineReport) {
           socket.emit("offline_report", status.offlineReport);

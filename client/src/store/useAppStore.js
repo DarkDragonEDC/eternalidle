@@ -150,7 +150,22 @@ export const useAppStore = create((set, get) => ({
 
     // --- MARKET STATE ---
     marketListings: [],
-    setMarketListings: (marketListings) => set({ marketListings }),
+    marketPagination: { totalCount: 0, page: 1, totalPages: 1 },
+    setMarketListings: (data) => {
+        if (data && data.listings) {
+            set({ marketListings: data.listings, marketPagination: { totalCount: data.totalCount, page: data.page, totalPages: data.totalPages } });
+        } else {
+            set({ marketListings: Array.isArray(data) ? data : [] });
+        }
+    },
+    myMarketListings: [],
+    setMyMarketListings: (data) => {
+        if (data && data.listings) {
+            set({ myMarketListings: data.listings });
+        } else {
+            set({ myMarketListings: Array.isArray(data) ? data : [] });
+        }
+    },
     marketHistory: [],
     setMarketHistory: (marketHistory) => set({ marketHistory }),
     myMarketHistory: [],

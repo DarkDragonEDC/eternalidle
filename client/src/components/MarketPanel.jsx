@@ -64,6 +64,10 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
     const [historySubTab, setHistorySubTab] = useState('GLOBAL');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('ALL');
+    const [selectedTier, setSelectedTier] = useState('ALL');
+    const [selectedQuality, setSelectedQuality] = useState('ALL');
+    const [selectedSort, setSelectedSort] = useState('NEWEST');
+    const [currentPage, setCurrentPage] = useState(1);
 
     const searchableItems = React.useMemo(() => {
         const list = [];
@@ -153,8 +157,25 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
     useEffect(() => {
         if (!socket) return;
         
-        socket.emit('get_market_listings');
-    }, [socket]);
+        socket.emit('get_market_listings', {
+            category: selectedCategory,
+            tier: selectedTier,
+            quality: selectedQuality,
+            search: searchQuery,
+            sort: selectedSort,
+            page: currentPage,
+            limit: 10
+        });
+    }, [socket, selectedCategory, selectedTier, selectedQuality, searchQuery, selectedSort, currentPage]);
+
+    useEffect(() => {
+        if (!socket || !gameState?.id) return;
+        if (activeTab === 'SELL' || activeTab === 'MY_ORDERS') {
+            socket.emit('get_market_listings', {
+                seller_id: gameState.id
+            });
+        }
+    }, [socket, activeTab, gameState?.id]);
 
     useEffect(() => {
         if (!socket) return;
@@ -171,6 +192,11 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
             socket.emit('get_buy_orders');
         }
     }, [activeTab, historySubTab, socket, setIsLoadingHistory]);
+
+    // Reset page when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [selectedCategory, selectedTier, selectedQuality, searchQuery, selectedSort]);
 
     useEffect(() => {
         if (initialSearch) {
@@ -335,18 +361,51 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
                 <div className="scroll-container" style={{ flex: '1 1 0%', display: 'flex', flexDirection: 'column', gap: '8px', paddingRight: '5px' }}>
                     {activeTab === 'BUY' && (
-                        <MarketBrowseTab marketListings={marketListings} gameState={gameState} silver={silver} onShowInfo={onShowInfo} onInspect={onInspect} initialSearch={initialSearch} onBuyItem={handleBuy} isPreviewActive={isPreviewActive} onPreviewActionBlocked={onPreviewActionBlocked} />
+                        <MarketBrowseTab
+                            marketListings={marketListings}
+                            gameState={gameState}
+                            silver={silver}
+                            onShowInfo={onShowInfo}
+                            onInspect={onInspect}
+                            initialSearch={initialSearch}
+                            onBuyItem={handleBuy}
+                            isPreviewActive={isPreviewActive}
+                            onPreviewActionBlocked={onPreviewActionBlocked}
+                            
+                            // Server-side filter/pagination props
+                            searchQuery={searchQuery}
+                            setSearchQuery={setSearchQuery}
+                            selectedCategory={selectedCategory}
+                            setSelectedCategory={setSelectedCategory}
+                            selectedTier={selectedTier}
+                            setSelectedTier={setSelectedTier}
+                            selectedQuality={selectedQuality}
+                            setSelectedQuality={setSelectedQuality}
+                            selectedSort={selectedSort}
+                            setSelectedSort={setSelectedSort}
+                            currentPage={currentPage}
+                            setCurrentPage={setCurrentPage}
+                            pagination={store.marketPagination}
+                        />
                     )}
                     {activeTab === 'SELL' && (
-                        <MarketSellTab gameState={gameState} socket={socket} onListOnMarket={onListOnMarket} maxListings={maxListings} currentListingsCount={marketListings.filter(l => isOwnListing(l) && l.status !== 'SOLD' && l.status !== 'EXPIRED').length} onShowInfo={onShowInfo} isPreviewActive={isPreviewActive} onPreviewActionBlocked={onPreviewActionBlocked} />
+                        <MarketSellTab 
+                            gameState={gameState} 
+                            socket={socket} 
+                            onListOnMarket={onListOnMarket} 
+                            maxListings={maxListings} 
+                            currentListingsCount={store.myMarketListings.length} 
+                            onShowInfo={onShowInfo} 
+                            isPreviewActive={isPreviewActive} 
+                            onPreviewActionBlocked={onPreviewActionBlocked} 
+                        />
                     )}
                     {activeTab === 'MY_ORDERS' && (
-                        <MarketListingsTab
-                            myOrders={marketListings.filter(l => isOwnListing(l) && l.status !== 'SOLD' && l.status !== 'EXPIRED')}
-                            onCancelItem={handleCancel}
-                            onShowInfo={onShowInfo}
-                            currentListingsCount={marketListings.filter(l => isOwnListing(l) && l.status !== 'SOLD' && l.status !== 'EXPIRED').length}
-                            maxListings={maxListings}
+                        <MarketListingsTab 
+                            myOrders={store.myMarketListings} 
+                            currentListingsCount={store.myMarketListings.length}
+                            maxListings={maxListings} 
+                            onCancelItem={(item) => socket.emit('cancel_market_item', { listingId: item.id })} 
                         />
                     )}
                     {activeTab === 'BUY_ORDERS' && (

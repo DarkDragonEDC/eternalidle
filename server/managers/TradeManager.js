@@ -221,33 +221,30 @@ export class TradeManager {
     }
 
     async acceptTrade(char, tradeId) {
-        const trade = await this.getTrade(tradeId);
-        if (trade.status !== 'PENDING') throw new Error("Trade is no longer active.");
-
-        const isSender = trade.sender_id === char.id;
-        const isReceiver = trade.receiver_id === char.id;
-        if (!isSender && !isReceiver) throw new Error("Not authorized.");
-
+        // 1. Update our acceptance first to ensure it's in DB
+        const isSender = (await this.getTrade(tradeId)).sender_id === char.id;
         const updateData = {};
         if (isSender) updateData.sender_accepted = true;
         else updateData.receiver_accepted = true;
+        updateData.updated_at = new Date().toISOString();
 
-        // Check if both accepted now
-        const isSelfAccepted = true;
-        const isOtherAccepted = isSender ? trade.receiver_accepted : trade.sender_accepted;
+        const { data: updated, error } = await this.supabase
+            .from('trade_sessions')
+            .update(updateData)
+            .eq('id', tradeId)
+            .select()
+            .single();
 
-        if (isSelfAccepted && isOtherAccepted) {
+        if (error) throw error;
+        if (updated.status !== 'PENDING') return await this.getTrade(tradeId);
+
+        // 2. Now check if BOTH are accepted based on the updated DB state
+        if (updated.sender_accepted && updated.receiver_accepted) {
             // EXECUTE TRADE
             return await this.executeTrade(tradeId);
         } else {
-            const { data, error } = await this.supabase
-                .from('trade_sessions')
-                .update(updateData)
-                .eq('id', tradeId)
-                .select()
-                .single();
-            if (error) throw error;
-            return await this.getTrade(data.id);
+            // Partial accept - return full trade with names/tax etc
+            return await this.getTrade(tradeId);
         }
     }
 
@@ -388,7 +385,7 @@ export class TradeManager {
                     console.error('[TradeManager] Exception recording trade history:', historyErr);
                 }
 
-                return { success: true, status: 'COMPLETED', sender_id: trade.sender_id, receiver_id: trade.receiver_id };
+                return { success: true, status: 'COMPLETED', trade_id: tradeId, sender_id: trade.sender_id, receiver_id: trade.receiver_id };
             });
         });
     }
@@ -404,7 +401,7 @@ export class TradeManager {
             .single();
 
         if (error) throw error;
-        return { success: true, status: 'CANCELLED', sender_id: data.sender_id, receiver_id: data.receiver_id };
+        return { success: true, status: 'CANCELLED', trade_id: tradeId, sender_id: data.sender_id, receiver_id: data.receiver_id };
     }
 
     async getPersonalTradeHistory(characterId) {

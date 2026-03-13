@@ -54,6 +54,7 @@ export const useSocketEvents = () => {
 
         // --- Market Events ---
         socket.on('market_listings_update', store.setMarketListings);
+        socket.on('my_market_listings_update', store.setMyMarketListings);
         socket.on('market_action_success', (result) => {
             store.setMarketNotification({ type: 'success', message: result.message || 'Action completed successfully!' });
             socket.emit('get_market_listings');
@@ -208,10 +209,12 @@ export const useSocketEvents = () => {
         socket.on('trade_success', (result) => {
             store.setTradeSuccess(result);
             store.setActiveTrade(null);
+            store.setIsTradeAccepting(false);
             // Cleanup from invites
             const current = store.tradeInvites || [];
-            if (result.trade_id) {
-                store.setTradeInvites(current.filter(i => i.id !== result.trade_id));
+            const tradeId = result.trade_id || result.id;
+            if (tradeId) {
+                store.setTradeInvites(current.filter(i => i.id !== tradeId));
             } else {
                 socket.emit('trade_get_active');
             }
@@ -301,6 +304,7 @@ export const useSocketEvents = () => {
             socket.off('trade_success');
 
             socket.off('market_listings_update');
+            socket.off('my_market_listings_update');
             socket.off('market_action_success');
             socket.off('market_history_update');
             socket.off('my_market_history_update');

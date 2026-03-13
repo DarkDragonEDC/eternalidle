@@ -12,31 +12,25 @@ const MarketBrowseTab = ({
     onBuyItem,
     isPreviewActive,
     onPreviewActionBlocked,
-    initialSearch = ''
+    
+    // Remote filter/pagination props
+    searchQuery,
+    setSearchQuery,
+    selectedCategory,
+    setSelectedCategory,
+    selectedTier,
+    setSelectedTier,
+    selectedQuality,
+    setSelectedQuality,
+    selectedSort,
+    setSelectedSort,
+    currentPage,
+    setCurrentPage,
+    pagination
 }) => {
-    // Browse Tab Filters State
-    const [searchQuery, setSearchQuery] = useState(initialSearch || '');
-    const [selectedTier, setSelectedTier] = useState('ALL');
-    const [selectedQuality, setSelectedQuality] = useState('ALL');
-    const [selectedClass, setSelectedClass] = useState('ALL');
-    const [selectedSortOrder, setSelectedSortOrder] = useState('PRICE_ASC');
-    const [selectedCategory, setSelectedCategory] = useState('ALL');
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
-
-    useEffect(() => {
-        if (initialSearch) {
-            setSearchQuery(initialSearch);
-            setSelectedCategory('ALL');
-            setCurrentPage(1);
-        }
-    }, [initialSearch]);
-
-    // Reset page on filter changes
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchQuery, selectedTier, selectedQuality, selectedClass, selectedSortOrder, selectedCategory]);
-
+    // We no longer need local filtering logic here as the server does it.
+    // We only filter out my own listings just in case they are returned (though the server should probably handle that too).
+    
     const isOwnListing = (l) => {
         const sellerId = l.seller_character_id || l.item_data?.seller_character_id;
         if (sellerId && gameState?.id) {
@@ -48,100 +42,8 @@ const MarketBrowseTab = ({
         return false;
     };
 
-    // Filter Logic
-    let activeBuyListings = marketListings.filter(l => l.status !== 'SOLD' && l.status !== 'EXPIRED');
-    activeBuyListings = activeBuyListings.filter(l => {
-        if (isOwnListing(l)) return false; 
-
-        const currentItem = resolveItem(l.item_id);
-        const itemName = (currentItem?.name || l.item_data?.name || formatItemId(l.item_id)).toLowerCase();
-        const itemTier = currentItem?.tier || l.item_data?.tier;
-        const itemQuality = currentItem?.quality ?? l.item_data?.quality ?? 0;
-
-        // 1. Keyword search (Name/ID)
-        if (searchQuery.trim() !== "") {
-            const words = searchQuery.trim().toLowerCase().split(/\s+/);
-            const itemId = l.item_id.toLowerCase();
-
-            const matchesKeywords = words.every(word => {
-                if (word.includes(':')) {
-                    const [key, value] = word.split(':');
-                    if (!value) return true;
-                    if (key === 't' || key === 'tier') return itemTier === parseInt(value);
-                    if (key === 'c' || key === 'cat' || key === 'type') return l.item_data?.type?.toLowerCase().includes(value);
-                    if (key === 'r' || key === 'rarity') return (currentItem?.rarity || l.item_data?.rarity)?.toLowerCase().includes(value);
-                    if (key === 'q' || key === 'quality') return itemQuality === parseInt(value);
-                    if (key === 'id') return itemId.includes(value);
-                    return true;
-                }
-                return itemName.includes(word) || itemId.includes(word) || `t${itemTier}` === word;
-            });
-
-            if (!matchesKeywords) return false;
-        }
-
-        // 2. Tier Filter
-        if (selectedTier !== 'ALL' && itemTier !== parseInt(selectedTier)) return false;
-
-        // 3. Quality Filter
-        if (selectedQuality !== 'ALL' && itemQuality !== parseInt(selectedQuality)) return false;
-
-        // 4. Category Filter
-        if (selectedCategory !== 'ALL') {
-             if (selectedCategory === 'EQUIPMENT') {
-                if (!['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'OFF_HAND', 'GLOVES', 'CAPE'].includes(l.item_data?.type) && !l.item_data?.type?.startsWith('TOOL')) return false;
-            } else if (selectedCategory === 'RESOURCE') {
-                if (l.item_data?.type === 'RAW') return true;
-                if (l.item_data?.type === 'RESOURCE') {
-                    const isRefined = l.item_id.includes('_BAR') || l.item_id.includes('_PLANK') || l.item_id.includes('_LEATHER') || l.item_id.includes('_CLOTH') || l.item_id.includes('_EXTRACT');
-                    if (isRefined) return false;
-                    return true;
-                }
-                return false;
-            } else if (selectedCategory === 'REFINED') {
-                if (l.item_data?.type === 'REFINED') return true;
-                if (l.item_data?.type === 'RESOURCE') {
-                    const isRefined = l.item_id.includes('_BAR') || l.item_id.includes('_PLANK') || l.item_id.includes('_LEATHER') || l.item_id.includes('_CLOTH') || l.item_id.includes('_EXTRACT');
-                    if (isRefined) return true;
-                }
-                return false;
-            } else if (selectedCategory === 'CONSUMABLE') {
-                if (!['FOOD', 'POTION'].includes(l.item_data?.type)) return false;
-            } else if (selectedCategory === 'RUNES') {
-                const itemId = l.item_id.toUpperCase();
-                if (!itemId.includes('_RUNE_') && !itemId.includes('_SHARD')) return false;
-            }
-        }
-
-        // 5. Class Filter
-        if (selectedClass !== 'ALL') {
-            const requiredClass = getRequiredProficiencyGroup(l.item_id);
-            if (requiredClass !== selectedClass.toLowerCase()) return false;
-        }
-
-        return true;
-    });
-
-    // Handle Sorting by UNIT PRICE
-    const getUnitPrice = (l) => {
-        const nAmt = ((typeof l.amount === 'object' && l.amount !== null) ? l.amount.amount : l.amount) || 1;
-        return l.price / nAmt;
-    };
-
-    if (selectedSortOrder === 'PRICE_ASC') {
-        activeBuyListings.sort((a, b) => getUnitPrice(a) - getUnitPrice(b));
-    } else if (selectedSortOrder === 'PRICE_DESC') {
-        activeBuyListings.sort((a, b) => getUnitPrice(b) - getUnitPrice(a));
-    } else if (selectedSortOrder === 'NEWEST') {
-        activeBuyListings.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    }
-
-    // Pagination Logic
-    const totalPages = Math.ceil(activeBuyListings.length / itemsPerPage);
-    const paginatedListings = activeBuyListings.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
+    const displayListings = marketListings.filter(l => !isOwnListing(l));
+    const totalPages = pagination?.totalPages || 1;
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', height: '100%' }}>
@@ -214,28 +116,8 @@ const MarketBrowseTab = ({
                 </select>
 
                 <select
-                    value={selectedClass}
-                    onChange={(e) => setSelectedClass(e.target.value)}
-                    style={{
-                        flex: '1',
-                        minWidth: '100px',
-                        background: 'rgba(0, 0, 0, 0.3)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '8px',
-                        padding: '5px 10px',
-                        color: 'var(--text-main)',
-                        fontSize: '0.8rem'
-                    }}
-                >
-                    <option value="ALL">All Classes</option>
-                    <option value="WARRIOR">Warrior</option>
-                    <option value="HUNTER">Hunter</option>
-                    <option value="MAGE">Mage</option>
-                </select>
-
-                <select
-                    value={selectedSortOrder}
-                    onChange={(e) => setSelectedSortOrder(e.target.value)}
+                    value={selectedSort}
+                    onChange={(e) => setSelectedSort(e.target.value)}
                     style={{
                         flex: '1',
                         minWidth: '120px',
@@ -288,7 +170,7 @@ const MarketBrowseTab = ({
             </div>
 
             <div className="scroll-container" style={{ flex: '1 1 0%', display: 'flex', flexDirection: 'column', gap: '8px', paddingRight: '5px' }}>
-                {activeBuyListings.length === 0 ? (
+                {displayListings.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '100px', color: 'var(--text-dim)' }}>
                         <ShoppingBag size={48} style={{ marginBottom: '15px', opacity: 0.3, margin: '0 auto' }} />
                         <p>No listings found matching your criteria.</p>
@@ -296,7 +178,7 @@ const MarketBrowseTab = ({
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
-                            {paginatedListings.map(l => (
+                            {displayListings.map(l => (
                             <div key={`buy-${l.id}`} style={{
                                 background: 'var(--glass-bg)',
                                 border: '1px solid var(--border)',
@@ -371,7 +253,7 @@ const MarketBrowseTab = ({
                                         <span>{resolveItem(l.item_id)?.name || l.item_data.name}</span>
                                         <button 
                                             onClick={() => onShowInfo && onShowInfo(l.item_data)} 
-                                            style={{ background: 'none', border: 'none', padding: '0', color: 'var(--text-dim)', cursor: 'pointer', display: 'flex', hover: { color: 'var(--accent)' } }}
+                                            style={{ background: 'none', border: 'none', padding: '0', color: 'var(--text-dim)', cursor: 'pointer', display: 'flex' }}
                                         >
                                             <Info size={14} />
                                         </button>
@@ -396,7 +278,7 @@ const MarketBrowseTab = ({
 
                                 <div style={{ flex: '1 1 0%', textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: '120px' }}>
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '4px', fontWeight: '500' }}>
-                                        {((typeof l.amount === 'object' && l.amount !== null) ? l.amount.amount : l.amount) || 0} units
+                                        {((typeof l.amount === 'object' && l.amount !== null) ? l.amount.amount : l.amount) || 0} {l.item_data.stackable ? 'units' : 'unit'}
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--accent)' }}>
                                         <Coins size={18} /> {
@@ -436,25 +318,13 @@ const MarketBrowseTab = ({
                                                 const nAmt = ((typeof l.amount === 'object' && l.amount !== null) ? l.amount.amount : l.amount) || 1;
                                                 return l.price / nAmt;
                                             })() ? 'transparent' : 'rgba(76, 175, 80, 0.2)'}`,
-                                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            if (silver >= (l.price / ((typeof l.amount === 'object' && l.amount !== null) ? l.amount.amount : l.amount || 1))) {
-                                                e.target.style.background = 'rgba(76, 175, 80, 0.2)';
-                                                e.target.style.transform = 'translateY(-1px)';
-                                            }
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            if (silver >= (l.price / ((typeof l.amount === 'object' && l.amount !== null) ? l.amount.amount : l.amount || 1))) {
-                                                e.target.style.background = 'rgba(76, 175, 80, 0.1)';
-                                                e.target.style.transform = 'translateY(0)';
-                                            }
+                                            transition: 'all 0.2s'
                                         }}
                                     >
                                         {silver < (() => {
                                             const nAmt = ((typeof l.amount === 'object' && l.amount !== null) ? l.amount.amount : l.amount) || 1;
                                             return l.price / nAmt;
-                                        })() ? 'No Funds' : 'BUY'}
+                                        })() ? 'Insufficient Silver' : 'BUY'}
                                     </button>
                                 </div>
                             </div>

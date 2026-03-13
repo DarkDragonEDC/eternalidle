@@ -9,26 +9,75 @@ export class MarketManager {
     }
 
     async getMarketListings(filters = {}) {
+        const page = parseInt(filters.page) || 1;
+        const limit = parseInt(filters.limit) || 10;
+        const start = (page - 1) * limit;
+        const end = start + limit - 1;
+
         let query = this.gameManager.supabase
             .from('market_listings')
-            .select('*')
-            .order('created_at', { ascending: false });
+            .select('*', { count: 'exact' });
 
-        if (filters.tier) query = query.eq('item_data->>tier', filters.tier.toString());
-        if (filters.type) query = query.eq('item_data->>type', filters.type.toUpperCase());
-        if (filters.search) query = query.ilike('item_id', `%${filters.search}%`);
+        // Apply filters
+        if (filters.tier && filters.tier !== 'ALL') {
+            query = query.eq('item_data->>tier', filters.tier.toString());
+        }
+        
+        if (filters.quality && filters.quality !== 'ALL') {
+            query = query.eq('item_data->>quality', filters.quality.toString());
+        }
 
-        const { data, error } = await query;
+        if (filters.seller_id) {
+            query = query.eq('seller_character_id', filters.seller_id);
+        }
+
+        if (filters.category && filters.category !== 'ALL') {
+            if (filters.category === 'EQUIPMENT') {
+                query = query.or('item_data->>type.in.(WEAPON,ARMOR,HELMET,BOOTS,OFF_HAND,GLOVES,CAPE),item_data->>type.ilike.TOOL%');
+            } else if (filters.category === 'RESOURCE') {
+                // Raw resources (excluding refined)
+                query = query.or('item_data->>type.eq.RAW,and(item_data->>type.eq.RESOURCE,not(item_id.ilike.%_BAR,item_id.ilike.%_PLANK,item_id.ilike.%_LEATHER,item_id.ilike.%_CLOTH,item_id.ilike.%_EXTRACT))');
+            } else if (filters.category === 'REFINED') {
+                query = query.or('item_data->>type.eq.REFINED,and(item_data->>type.eq.RESOURCE,or(item_id.ilike.%_BAR,item_id.ilike.%_PLANK,item_id.ilike.%_LEATHER,item_id.ilike.%_CLOTH,item_id.ilike.%_EXTRACT))');
+            } else if (filters.category === 'CONSUMABLE') {
+                query = query.in('item_data->>type', ['FOOD', 'POTION']);
+            } else if (filters.category === 'RUNES') {
+                query = query.or('item_id.ilike.%_RUNE_%,item_id.ilike.%_SHARD%');
+            }
+        }
+
+        if (filters.search && filters.search.trim() !== '') {
+            query = query.ilike('item_id', `%${filters.search.trim()}%`);
+        }
+
+        // Apply Sorting
+        const sort = filters.sort || 'PRICE_ASC';
+        if (sort === 'PRICE_ASC') {
+            query = query.order('price', { ascending: true }); // Note: This orders by TOTAL price. 
+            // If you want to order by unit price, you might need a calculated column or simpler sort.
+            // For now, let's stick to standard order.
+        } else if (sort === 'PRICE_DESC') {
+            query = query.order('price', { ascending: false });
+        } else {
+            query = query.order('created_at', { ascending: false });
+        }
+
+        // Apply Pagination
+        query = query.range(start, end);
+
+        const { data, count, error } = await query;
         if (error) throw error;
 
-        // Map data to ensure seller_character_id is available even if column is missing
-        return (data || []).map(l => {
-            return {
+        return {
+            listings: (data || []).map(l => ({
                 ...l,
                 item_id: l.item_id,
                 seller_character_id: l.seller_character_id || l.item_data?.seller_character_id
-            };
-        });
+            })),
+            totalCount: count || 0,
+            page,
+            totalPages: Math.ceil((count || 0) / limit)
+        };
     }
 
     async sellItem(userId, characterId, itemId, quantity) {

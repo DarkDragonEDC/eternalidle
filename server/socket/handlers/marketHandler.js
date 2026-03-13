@@ -3,8 +3,9 @@ import { supabase } from "../../services/supabase.js";
 export const registerMarketHandlers = (socket, gameManager, io) => {
   socket.on("get_market_listings", async (filters) => {
     try {
-      const listings = await gameManager.getMarketListings(filters);
-      socket.emit("market_listings_update", listings);
+      const result = await gameManager.marketManager.getMarketListings(filters);
+      const eventName = (filters && filters.seller_id) ? "my_market_listings_update" : "market_listings_update";
+      socket.emit(eventName, result);
     } catch (err) { socket.emit("error", { message: err.message }); }
   });
 
@@ -40,10 +41,10 @@ export const registerMarketHandlers = (socket, gameManager, io) => {
     try {
       if (socket.user.is_anonymous) throw new Error("Market is locked for Guest accounts.");
       await gameManager.executeLocked(socket.user.id, async () => {
-        const result = await gameManager.listMarketItem(socket.user.id, socket.data.characterId, itemId, amount, price, metadata);
+        const result = await gameManager.marketManager.listMarketItem(socket.user.id, socket.data.characterId, itemId, amount, price, metadata);
         socket.emit("market_action_success", result);
         socket.emit("status_update", await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
-        io.emit("market_listings_update", await gameManager.getMarketListings());
+        io.emit("market_listings_update", await gameManager.marketManager.getMarketListings());
       });
     } catch (err) { 
       socket.emit("error", { message: err.message }); 
@@ -55,10 +56,10 @@ export const registerMarketHandlers = (socket, gameManager, io) => {
     try {
       if (socket.user.is_anonymous) throw new Error("Market is locked for Guest accounts.");
       await gameManager.executeLocked(socket.user.id, async () => {
-        const result = await gameManager.buyMarketItem(socket.user.id, socket.data.characterId, listingId, quantity);
+        const result = await gameManager.marketManager.buyMarketItem(socket.user.id, socket.data.characterId, listingId, quantity);
         socket.emit("market_action_success", result);
         socket.emit("status_update", await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
-        io.emit("market_listings_update", await gameManager.getMarketListings());
+        io.emit("market_listings_update", await gameManager.marketManager.getMarketListings());
       });
     } catch (err) {
       socket.emit("error", { message: err.message });
