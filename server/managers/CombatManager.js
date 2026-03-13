@@ -6,6 +6,7 @@ import {
     MITIGATION_PER_DEFENSE 
 } from '../../shared/combat.js';
 import fs from 'fs';
+import crypto from 'crypto';
 
 const MAX_XP_PER_KILL = 10_000_000; // 10M
 const MAX_SILVER_PER_KILL = 100_000_000; // 100M
@@ -408,6 +409,7 @@ export class CombatManager {
             const mobName = combat.mobName || 'Unknown Enemy';
 
             const { error } = await this.gameManager.supabase.from('combat_history').insert({
+                id: crypto.randomUUID(),
                 character_id: char.id,
                 mob_id: mobId,
                 mob_name: mobName,
