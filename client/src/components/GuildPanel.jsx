@@ -263,7 +263,6 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                 showDisbandConfirm={showDisbandConfirm} setShowDisbandConfirm={setShowDisbandConfirm}
                 showEditCustomization={showEditCustomization} setShowEditCustomization={setShowEditCustomization}
                 onDonate={donateToGuild}
-                onKick={() => {}}
                 onLeave={() => {}}
                 onDisband={() => {}}
                 onUpdateCustomization={updateCustomization}

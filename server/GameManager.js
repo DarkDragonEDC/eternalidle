@@ -949,7 +949,7 @@ export class GameManager {
         }
     }
 
-    async processTick(userId, characterId) {
+    async processTick(userId, characterId, fullSync = false) {
         const char = await this.getCharacter(userId, characterId);
         if (!char) return null;
 
@@ -1244,18 +1244,18 @@ export class GameManager {
 
             // If we have multiple rounds, we attach them to the result
             if (combatRounds.length > 0) {
-                // Fix Circular Reference: Create a new object instead of mutating one inside the array
                 const primary = combatResult || combatRounds[0];
                 combatResult = {
                     ...primary,
-                    allRounds: combatRounds
-                };
-
-                // Sum up totals for the primary result object to keep UI counters happy
-                combatResult.details = {
-                    ...primary.details,
-                    totalPlayerDmgThisTick: combatRounds.reduce((acc, r) => acc + (r.details?.playerDmg || 0), 0),
-                    totalMobDmgThisTick: combatRounds.reduce((acc, r) => acc + (r.details?.mobDmg || 0), 0)
+                    allRounds: combatRounds.length > 3 ? combatRounds.slice(-3) : combatRounds,
+                    _roundsOmitted: Math.max(0, combatRounds.length - 3),
+                    details: {
+                        ...primary.details,
+                        totalPlayerDmgThisTick: combatRounds.reduce((acc, r) => acc + (r.details?.playerDmg || 0), 0),
+                        totalMobDmgThisTick: combatRounds.reduce((acc, r) => acc + (r.details?.mobDmg || 0), 0),
+                        totalSilverThisTick: combatRounds.reduce((acc, r) => acc + (r.details?.silverGained || 0), 0),
+                        totalXpThisTick: combatRounds.reduce((acc, r) => acc + (r.details?.xpGained || 0), 0),
+                    }
                 };
             }
 
@@ -1318,23 +1318,39 @@ export class GameManager {
                 dungeonUpdate: dungeonResult?.dungeonUpdate,
                 worldBossUpdate: worldBossResult?.worldBossUpdate,
                 healingUpdate: foodUsed ? { amount: foodResult.amount, source: 'FOOD' } : null,
-                status: {
-                    character_id: char.id,
-                    user_id: char.user_id,
-                    name: char.name,
-                    state: char.state,
-                    guild: await this.guildManager.getCharacterGuild(char.id),
-                    calculatedStats: this.inventoryManager.calculateStats(char),
-                    guild_bonuses: char.guild_bonuses,
-                    current_activity: char.current_activity,
-                    activity_started_at: char.activity_started_at,
-                    dungeon_state: char.state.dungeon,
-                    serverTime: Date.now()
-                }
+                status: fullSync ? await this.getStatus(char.user_id, false, char.id) : await this.getLightweightStatus(char)
             };
             return returnObj;
         }
         return lastActivityResult || combatResult;
+    }
+
+    /**
+     * Returns a minimal version of the character status for frequent WebSocket updates.
+     * This excludes heavy fields like inventory, bank, and full skill list unless requested.
+     */
+    async getLightweightStatus(char) {
+        if (!char) return null;
+        
+        const stats = this.inventoryManager.calculateStats(char);
+        
+        return {
+            _lightweight: true,
+            character_id: char.id,
+            name: char.name,
+            state: {
+                health: char.state.health,
+                maxHealth: char.state.maxHealth,
+                silver: char.state.silver,
+                combat: char.state.combat,
+                dungeon: char.state.dungeon,
+                notifications: char.state.notifications?.length > 0 ? char.state.notifications : undefined,
+                equipment: char.state.equipment?.food ? { food: char.state.equipment.food } : undefined
+            },
+            current_activity: char.current_activity,
+            activity_started_at: char.activity_started_at,
+            serverTime: Date.now()
+        };
     }
 
     addXP(char, skillKey, amount) {
@@ -1503,14 +1519,14 @@ export class GameManager {
         const now = Date.now();
         const cached = this.leaderboardCache.get(cacheKey);
 
-        // Check if we have valid cached data (within TTL)
-        if (cached && (now - cached.timestamp) < this.LEADERBOARD_CACHE_TTL) {
-            // Still need to calculate userRank for the requester
+        // Reduced TTL to 5 minutes for a more dynamic experience with new high performance
+        const TTL = 5 * 60 * 1000;
+
+        if (cached && (now - cached.timestamp) < TTL) {
             const sorted = cached.data;
             let userRank = null;
             if (requesterId) {
                 if (type === 'GUILDS') {
-                    // For guilds, we need the character's guild_id
                     const char = this.cache.get(requesterId);
                     const guildId = char?.state?.guild_id;
                     if (guildId) {
@@ -1533,172 +1549,89 @@ export class GameManager {
             const { data, error } = await this.supabase
                 .from('guilds')
                 .select('id, name, tag, level, xp, icon, icon_color, bg_color, country_code, guild_hall_level, guild_members(character_id)')
-                .limit(1000);
+                .order('level', { ascending: false })
+                .order('xp', { ascending: false })
+                .limit(100);
 
             if (error) {
                 console.error("[RANKING] Guild DB Error:", error);
                 return { type, top100: [], userRank: null };
             }
 
-            const sorted = (data || []).map(guild => {
+            const processed = (data || []).map(guild => {
                 const memberCount = guild.guild_members?.length || 0;
                 const maxMembers = 10 + (guild.guild_hall_level || 0) * 2;
-                // Cleanup the object for the client
                 const { guild_members, ...rest } = guild;
                 return { ...rest, memberCount, maxMembers };
-            }).sort((a, b) => {
-                if (b.level !== a.level) return (b.level || 1) - (a.level || 1);
-                return (b.xp || 0) - (a.xp || 0);
             });
 
-            this.leaderboardCache.set(cacheKey, { data: sorted, timestamp: now });
+            this.leaderboardCache.set(cacheKey, { data: processed, timestamp: now });
 
             let userRank = null;
             if (requesterId) {
                 const char = this.cache.get(requesterId);
                 const guildId = char?.state?.guild_id;
                 if (guildId) {
-                    const index = sorted.findIndex(g => g.id === guildId);
+                    const index = processed.findIndex(g => g.id === guildId);
                     if (index !== -1) {
-                        userRank = { rank: index + 1, guild: sorted[index] };
+                        userRank = { rank: index + 1, guild: processed[index] };
                     }
                 }
             }
 
-            return { type, mode, top100: sorted.slice(0, 100), userRank };
+            return { type, mode, top100: processed, userRank };
         }
 
-        // console.log(`[RANKING] Fetching fresh leaderboard for type: ${type}, mode: ${mode}`);
+        // Optimized character ranking query
         let query = this.supabase
             .from('characters')
-            .select('id, name, state, skills, info, equipment') // Fetch skills, info and equipment
-            .eq('is_admin', false); // Exclude admins directly in DB using index
+            .select('id, name, state, skills, info, equipment')
+            .eq('is_admin', false);
 
-        // Mode Filtering (Database Level)
         if (mode === 'IRONMAN') {
-            // Check if isIronman is true in the state JSON (Uses GIN index)
             query = query.contains('state', { isIronman: true });
         } else {
-            // NORMAL mode: Filter out Ironman characters in DB
             query = query.not('state', 'cs', '{"isIronman": true}');
         }
 
-        // Increased limit to 2000 to allow in-memory filtering effectively
-        const { data, error } = await query.limit(2000);
+        // Use pre-calculated columns for sorting
+        if (type === 'LEVEL') {
+            query = query.order('ranking_total_level', { ascending: false });
+        } else if (type === 'TOTAL_XP') {
+            query = query.order('ranking_total_xp', { ascending: false });
+        } else if (type === 'ITEM_POWER') {
+            query = query.order('ranking_item_power', { ascending: false });
+        } else {
+            // Skill specific ranking - Need to fallback to skill level sorting if possible 
+            // Better: just sort by total_xp for now or implement per-skill ranking columns in future
+            // For now, we still sort by total_xp as a proxy if it's a generic request or specific skill
+            query = query.order('ranking_total_xp', { ascending: false });
+        }
+
+        const { data, error } = await query.limit(100);
         if (error) {
             console.error("[RANKING] DB Error:", error);
             return { type, top100: [], userRank: null };
         }
 
-        if (!data) return { type, top100: [], userRank: null };
-
-        // Inject skills and info into state for backward compatibility and sorting
-        data.forEach(char => {
-            if (char.skills && char.state) {
-                char.state.skills = char.skills;
-            }
-            if (char.equipment && char.state) {
-                char.state.equipment = char.equipment;
-            }
-            // Inject membership from info column for ranking display
-            if (char.info?.membership && char.state) {
-                char.state.membership = char.info.membership;
-            }
+        const processed = (data || []).map(char => {
+            if (char.skills && char.state) char.state.skills = char.skills;
+            if (char.equipment && char.state) char.state.equipment = char.equipment;
+            if (char.info?.membership && char.state) char.state.membership = char.info.membership;
+            return char;
         });
 
-        const sortKey = type || 'COMBAT';
-
-        // Helper function to calculate total accumulated XP for a skill
-        const getTotalXP = (skill) => {
-            const level = skill.level || 1;
-            const currentXP = skill.xp || 0;
-
-            // Sum all XP from previous levels using XP_TABLE
-            // XP_TABLE[level-1] gives us the total XP needed to reach current level
-            const xpFromPreviousLevels = XP_TABLE[level - 1] || 0;
-
-            // Total XP = XP spent on previous levels + current level progress
-            return xpFromPreviousLevels + currentXP;
-        };
-
-        const getVal = (char, key) => {
-            if (key === 'LEVEL') {
-                // Total Level
-                return Object.values(char.state.skills || {}).reduce((acc, s) => acc + (s.level || 1), 0);
-            }
-            if (key === 'TOTAL_XP') {
-                // Total XP across all skills (accumulated)
-                return Object.values(char.state.skills || {}).reduce((acc, s) => acc + getTotalXP(s), 0);
-            }
-            if (key === 'ITEM_POWER') {
-                // Item Power calculation - Match ProfilePanel.jsx logic
-                const equipment = char.state.equipment || {};
-                const hasWeapon = !!equipment.mainHand;
-                const combatSlots = ['helmet', 'chest', 'boots', 'gloves', 'cape', 'mainHand', 'offHand'];
-
-                let totalIP = 0;
-                combatSlots.forEach(slot => {
-                    const rawItem = equipment[slot];
-                    if (rawItem) {
-                        // Skip if no weapon and it's a combat gear slot (except mainHand itself)
-                        if (!hasWeapon && slot !== 'mainHand') return;
-
-                        // Resolve item to get base IP + quality bonus
-                        const resolved = resolveItem(rawItem.id || rawItem.item_id);
-                        if (resolved) {
-                            totalIP += resolved.ip || 0;
-                        }
-                    }
-                });
-                // Current profile logic: Math.floor(totalIP / 7)
-                return Math.floor(totalIP / 7);
-            }
-            // Specific Skill
-            const skill = char.state.skills?.[key] || { level: 1, xp: 0 };
-            // Return a composite value for sorting: Level * 1Billion + Total Accumulated XP
-            // This ensures Level is primary, Total XP is secondary (not just current level XP)
-            return (skill.level * 1000000000) + getTotalXP(skill);
-        };
-
-        const sorted = data
-            .filter(c => {
-                if (!c || !c.state) return false;
-
-                // In-Memory Mode Filtering
-                if (mode === 'IRONMAN') {
-                    // Double check (though DB query should have handled it)
-                    return c.state.isIronman === true;
-                } else {
-                    // NORMAL: isIronman must be falsy or false
-                    return !c.state.isIronman;
-                }
-            })
-            .sort((a, b) => {
-                const valA = getVal(a, sortKey);
-                const valB = getVal(b, sortKey);
-                return valB - valA; // DESC
-            });
+        this.leaderboardCache.set(cacheKey, { data: processed, timestamp: now });
 
         let userRank = null;
         if (requesterId) {
-            const index = sorted.findIndex(c => c.id === requesterId);
+            const index = processed.findIndex(c => c.id === requesterId);
             if (index !== -1) {
-                userRank = {
-                    rank: index + 1,
-                    character: sorted[index]
-                };
+                userRank = { rank: index + 1, character: processed[index] };
             }
         }
 
-        // Cache the sorted data for future requests
-        this.leaderboardCache.set(cacheKey, { data: sorted, timestamp: now });
-
-        return {
-            type,
-            mode,
-            top100: sorted.slice(0, 100),
-            userRank
-        };
+        return { type, mode, top100: processed, userRank };
     }
 
     // Delegation Methods

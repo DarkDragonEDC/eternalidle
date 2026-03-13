@@ -40,11 +40,15 @@ export const startTicker = (gameManager) => {
 
               const tickInterval = (isInCombat || isInDungeon || isInWorldBoss) ? 1 : isGathering ? 3 : 5;
               
-              if (counter.count % tickInterval !== 0 && !isInCombat && !isInDungeon && !isInWorldBoss) return;
+                const needsFullSync = (counter.count - counter.lastFullSync >= 30);
 
-              const result = await gameManager.processTick(user.id, charId);
-              if (result) {
-                const needsFullSync = counter.count - counter.lastFullSync >= 10 || result.leveledUp || result.activityFinished;
+                const tickResult = await gameManager.processTick(user.id, charId, needsFullSync);
+                if (tickResult) {
+                  const result = tickResult;
+                  // If we leveled up or finished activity, force a full sync in the NEXT tick if not already synced
+                  if (result.leveledUp || result.activityFinished) {
+                    counter.lastFullSync = counter.count - 30; 
+                  }
 
                 sockets.forEach((s) => {
                   const shouldEmit = result.message || result.combatUpdate || (result.dungeonUpdate && result.dungeonUpdate.message) || result.healingUpdate || result.worldBossUpdate;
@@ -61,33 +65,8 @@ export const startTicker = (gameManager) => {
                   }
 
                   if (result.status) {
-                    if (needsFullSync) {
-                      s.emit("status_update", result.status);
-                      counter.lastFullSync = counter.count;
-                    } else {
-                      const lightStatus = {
-                        _lightweight: true,
-                        serverTime: Date.now(),
-                        state: {},
-                      };
-                      if (result.status.state) {
-                        lightStatus.state.health = result.status.state.health;
-                        lightStatus.state.lastFoodAt = result.status.state.lastFoodAt;
-                        if (result.status.state.equipment?.food) {
-                          lightStatus.state.equipment = { food: result.status.state.equipment.food };
-                        }
-                      }
-                      if (isInCombat && result.status.state?.combat) lightStatus.state.combat = result.status.state.combat;
-                      if (isInDungeon && result.status.state?.dungeon) lightStatus.state.dungeon = result.status.state.dungeon;
-                      if (isGathering) {
-                        lightStatus.current_activity = result.status.current_activity;
-                        lightStatus.activity_started_at = result.status.activity_started_at;
-                      }
-                      if (result.status.state?.notifications?.length > 0) {
-                        lightStatus.state.notifications = result.status.state.notifications;
-                      }
-                      s.emit("status_update", lightStatus);
-                    }
+                    s.emit("status_update", result.status);
+                    if (needsFullSync) counter.lastFullSync = counter.count;
                   }
 
                   if (result.leveledUp) {
@@ -127,7 +106,7 @@ export const startTicker = (gameManager) => {
   // Sync Loop (15s)
   setInterval(async () => {
     try {
-      // await gameManager.persistAllDirty();
+      await gameManager.persistAllDirty();
     } catch (err) { console.error("[SYNC-LOOP] Error:", err); }
   }, 15000);
 };

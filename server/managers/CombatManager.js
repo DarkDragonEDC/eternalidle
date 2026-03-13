@@ -278,8 +278,6 @@ export class CombatManager {
             playerHits: playerAttackCount,
             mobDmg: mitigatedMobDmg,
             mobHits: mobAttackCount,
-            playerHitList,
-            mobHitList,
             silverGained: 0,
             lootGained: [],
             xpGained: 0,
@@ -288,6 +286,21 @@ export class CombatManager {
             mobName: combat.mobName,
             foodEaten: combat.foodEatenInRound || 0
         };
+
+        // Aggressively prune hit lists if they are large or if we have many rounds
+        if (playerHitList.length > 5) {
+            roundDetails.playerHitList = playerHitList.slice(-5);
+            roundDetails._playerHitsOmitted = playerHitList.length - 5;
+        } else {
+            roundDetails.playerHitList = playerHitList;
+        }
+
+        if (mobHitList.length > 5) {
+            roundDetails.mobHitList = mobHitList.slice(-5);
+            roundDetails._mobHitsOmitted = mobHitList.length - 5;
+        } else {
+            roundDetails.mobHitList = mobHitList;
+        }
 
         // Reset the counter for next round
         combat.foodEatenInRound = 0;
