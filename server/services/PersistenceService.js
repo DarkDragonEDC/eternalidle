@@ -178,6 +178,33 @@ export class PersistenceService {
             })
             .eq('id', charId);
 
+        // --- NEW: Update Optimized Leaderboards Table ---
+        try {
+            const leaderboardEntries = [
+                { character_id: charId, ranking_type: 'LEVEL', value: ranking_total_level, character_name: char.name },
+                { character_id: charId, ranking_type: 'TOTAL_XP', value: Math.floor(ranking_total_xp), character_name: char.name },
+                { character_id: charId, ranking_type: 'ITEM_POWER', value: Math.floor(ranking_item_power), character_name: char.name }
+            ];
+
+            for (const [skillKey, skillData] of Object.entries(skillsToSave)) {
+                if (skillData && skillData.totalXp) {
+                    leaderboardEntries.push({
+                        character_id: charId,
+                        ranking_type: skillKey,
+                        value: skillData.totalXp,
+                        character_name: char.name
+                    });
+                }
+            }
+
+            await this.supabase
+                .from('leaderboards')
+                .upsert(leaderboardEntries, { onConflict: 'character_id,ranking_type' });
+        } catch (lbErr) {
+            console.error('[PersistenceService] Leaderboard Update Error:', lbErr);
+        }
+        // ------------------------------------------------
+
         if (!error) {
             char.inventory = inventoryToSave;
             char.skills = skillsToSave;

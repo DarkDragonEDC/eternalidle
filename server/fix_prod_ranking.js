@@ -119,14 +119,34 @@ async function fixRankings() {
         if (existingColumns.includes('ranking_total_xp')) updatePayload.ranking_total_xp = ranking_total_xp;
         if (existingColumns.includes('ranking_item_power')) updatePayload.ranking_item_power = ranking_item_power;
 
-        const { error: updateErr } = await supabase
+        const { error: updateError } = await supabase
             .from('characters')
             .update(updatePayload)
             .eq('id', char.id);
 
-        if (updateErr) {
-            console.error(`Failed to update ${char.name}:`, updateErr.message);
+        if (updateError) {
+            console.error(`Error updating character ${char.name}:`, updateError);
         } else {
+            // --- NEW: Sincronizar com a tabela leaderboards ---
+            const lbEntries = [
+                { character_id: char.id, ranking_type: 'LEVEL', value: ranking_total_level, character_name: char.name },
+                { character_id: char.id, ranking_type: 'TOTAL_XP', value: ranking_total_xp, character_name: char.name },
+                { character_id: char.id, ranking_type: 'ITEM_POWER', value: ranking_item_power, character_name: char.name }
+            ];
+
+            for (const [sKey, sData] of Object.entries(skillsToUpdate)) {
+                if (sData && sData.totalXp) {
+                    lbEntries.push({
+                        character_id: char.id,
+                        ranking_type: sKey,
+                        value: sData.totalXp,
+                        character_name: char.name
+                    });
+                }
+            }
+
+            await supabase.from('leaderboards').upsert(lbEntries, { onConflict: 'character_id,ranking_type' });
+            // --------------------------------------------------
             console.log(`Updated ${char.name}: Lvl=${ranking_total_level}, XP=${ranking_total_xp}, IP=${ranking_item_power}`);
         }
     }
