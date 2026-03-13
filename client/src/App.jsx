@@ -75,6 +75,7 @@ function App() {
         connectSocket, disconnectSocket,
         settings, updateSettings,
         previewThemeId, setPreviewThemeId,
+        previewAvatarData, previewBannerData,
         tradeInvites, activeTrade, canSpin,
         isPreviewActive, onPreviewActionBlocked,
         startActivity
