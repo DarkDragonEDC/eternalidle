@@ -1,3 +1,13 @@
+# 📄 Auditoria Completa de Mudanças - Hotfix (v1.4.8)
+
+### 📈 Estatísticas e Sistema
+- **Contagem de Jogadores Online**: Reformulada para mostrar todos os jogadores com atividades ativas (Coleta, Combate ou Dungeons). Agora o contador reflete o progresso real da comunidade, incluindo jogadores avançando offline.
+
+### 💰 Orb Shop & Pagamentos
+- **Correção Stripe**: Resolvido o problema de redirecionamento ao clicar em comprar. O sistema agora processa corretamente o link de checkout enviado pelo servidor.
+
+---
+
 # 📄 Auditoria Completa de Mudanças - Main vs Homolog (v1.4.7)
 
 ### 💰 Marketplace (Mercado)
