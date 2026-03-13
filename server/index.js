@@ -79,7 +79,7 @@ startTicker(gameManager);
 const shutdown = async (signal) => {
   console.log(`[SERVER] Received ${signal}. Persisting data and exiting...`);
   try {
-    // await gameManager.persistAllDirty();
+    await gameManager.persistAllDirty();
     console.log("[SERVER] All dirty data persisted.");
   } catch (err) {
     console.error("[SERVER] Error during shutdown persistence:", err);

@@ -1,9 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
-dotenv.config();
-
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_KEY;
+import { supabase } from './services/supabase.js';
 
 export const authMiddleware = async (req, res, next) => {
     const authHeader = req.headers.authorization;
@@ -20,16 +15,8 @@ export const authMiddleware = async (req, res, next) => {
         return res.status(401).json({ error: 'No authorization token provided' });
     }
 
-    // Create a temporary Supabase client with the user's token
-    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-        global: {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        },
-    });
-
-    const { data: { user }, error } = await supabase.auth.getUser();
+    // Use the shared client to verify the user
+    const { data: { user }, error } = await supabase.auth.getUser(token);
 
     if (error || !user) {
         console.error("Auth error:", error);

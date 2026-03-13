@@ -7,6 +7,8 @@ import { useSocketEvents } from './hooks/useSocketEvents';
 import { useGameSync } from './hooks/useGameSync';
 import { useAuthSync } from './hooks/useAuthSync';
 import { useNavigationSync } from './hooks/useNavigationSync';
+import { useWindowListeners } from './hooks/useWindowListeners';
+import { useAppHandlers } from './hooks/useAppHandlers';
 
 // Versioning
 const CLIENT_VERSION = '1.4.7';
@@ -86,6 +88,18 @@ function App() {
     useAuthSync();
     useSocketEvents();
     useGameSync();
+    useWindowListeners({
+        setModalItem,
+        setInfoItem,
+        setMarketSellItem,
+        setOfflineGains,
+        setSidebarOpen,
+        setModal,
+        setShowCombatHistory,
+        setShowLeaderboard,
+        setInspectData,
+        setIsMobile
+    });
 
     const { handleNavigate, handleSetActiveTab } = useNavigationSync(
         selectedCharacter,
@@ -101,82 +115,28 @@ function App() {
     const navigate = useNavigate();
 
     // Handlers
-    const handleSetTheme = useCallback((newTheme) => {
-        setTheme(newTheme);
-        if (socket) socket.emit('set_theme', { themeId: newTheme });
-    }, [socket, setTheme]);
-
-    const handleCharacterSelect = useCallback((id) => {
-        setSelectedCharacter(id);
-        if (session?.access_token) {
-            connectSocket(session.access_token, id, CLIENT_VERSION);
-        }
-    }, [session, setSelectedCharacter, connectSocket]);
-
-    const handleLogout = useCallback(async () => {
-        await supabase.auth.signOut();
-        disconnectSocket();
-        setGameState(null);
-        setSelectedCharacter(null);
-    }, [disconnectSocket, setGameState, setSelectedCharacter]);
-
-    const handleSwitchCharacter = useCallback(() => {
-        disconnectSocket();
-        setGameState(null);
-        setSelectedCharacter(null);
-        setTheme('medieval');
-    }, [disconnectSocket, setGameState, setSelectedCharacter, setTheme]);
-
-    const handleTutorialStepComplete = useCallback((step) => {
-        if (socket) socket.emit('tutorial_complete', { step });
-    }, [socket]);
-
-    const handleInspectPlayer = useCallback((name) => {
-        if (socket && name) socket.emit('get_public_profile', { characterName: name });
-    }, [socket]);
-
-    const handleStartWorldBoss = useCallback(() => {
-        if (isPreviewActive) {
-            setModal('confirm', {
-                message: "Preview Mode is active! World Boss challenges are disabled.",
-                onConfirm: () => setModal('confirm', null)
-            });
-            return;
-        }
-        if (socket) socket.emit('start_world_boss_fight');
-    }, [socket, setModal, isPreviewActive]);
+    const {
+        handleSetTheme,
+        handleCharacterSelect,
+        handleLogout,
+        handleSwitchCharacter,
+        handleTutorialStepComplete,
+        handleInspectPlayer,
+        handleStartWorldBoss
+    } = useAppHandlers({
+        socket,
+        session,
+        setTheme,
+        setSelectedCharacter,
+        setGameState,
+        setModal,
+        connectSocket,
+        disconnectSocket,
+        isPreviewActive,
+        CLIENT_VERSION
+    });
 
 
-    // Cleanup Effect
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (e.key === 'Escape') {
-                setModalItem(null);
-                setInfoItem(null);
-                setMarketSellItem(null);
-                setOfflineGains(null);
-                setSidebarOpen(false);
-                setModal('notifications', false);
-                setShowCombatHistory(false);
-                setShowLeaderboard(false);
-                setModal('currencyDropdown', false);
-                setInspectData(null);
-            }
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [setModalItem, setInfoItem, setMarketSellItem, setOfflineGains, setSidebarOpen, setModal, setShowCombatHistory, setShowLeaderboard, setInspectData]);
-
-    useEffect(() => {
-        const handleResize = () => {
-            const mobile = window.innerWidth < 768;
-            setIsMobile(mobile);
-            if (!mobile) setSidebarOpen(false);
-        };
-        handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, [setIsMobile, setSidebarOpen]);
 
     // Render Logic
     const isAuthLoading = useAppStore(state => state.isAuthLoading);

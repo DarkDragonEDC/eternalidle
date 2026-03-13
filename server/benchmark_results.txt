@@ -1,0 +1,17 @@
+﻿=== BANDWIDTH COMPARISON (Bytes per Message) ===
+
+1. Regular Status Update (Frequency: 1-5s)
+   Before: 1.167 bytes
+   After:  441 bytes
+   Reduction: 62.2%
+
+2. Combat Result Update (Frequency: 1s)
+   Before: 3.414 bytes
+   After:  1.278 bytes
+   Reduction: 62.6%
+
+3. Projected Impact
+   Estimated Original Monthly Usage: 101.2 GB
+   Projected New Monthly Usage: ~38.24 GB
+   Total Estimated Savings: ~62.96 GB / Month
+================================================

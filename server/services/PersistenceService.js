@@ -102,6 +102,30 @@ export class PersistenceService {
         const settingsToSave = prunedState.settings || char.state.settings || {};
         delete prunedState.settings;
 
+        // --- PRE-CALCULATE RANKING VALUES ---
+        let ranking_total_level = 0;
+        let ranking_total_xp = 0;
+        if (skillsToSave) {
+            for (const skill of Object.values(skillsToSave)) {
+                ranking_total_level += (Number(skill.level) || 1);
+                ranking_total_xp += (Number(skill.totalXp) || 0);
+            }
+        }
+
+        let ranking_item_power = 0;
+        if (equipmentToSave) {
+            let totalIp = 0;
+            let count = 0;
+            for (const slot of Object.values(equipmentToSave)) {
+                if (slot && slot.ip) {
+                    totalIp += Number(slot.ip);
+                    count++;
+                }
+            }
+            ranking_item_power = count > 0 ? Math.floor(totalIp / count) : 0;
+        }
+        // ------------------------------------
+
         const finalPrunedState = (prunedState && prunedState.state) ? prunedState.state : prunedState;
 
         const isOnline = this.gm._isCharacterOnline ? this.gm._isCharacterOnline(charId) : true;
@@ -120,6 +144,9 @@ export class PersistenceService {
                 bank: bankToSave,
                 settings: settingsToSave,
                 state: finalPrunedState,
+                ranking_total_level,
+                ranking_total_xp,
+                ranking_item_power,
                 current_activity: char.current_activity,
                 activity_started_at: char.activity_started_at,
                 last_saved: saveTime
