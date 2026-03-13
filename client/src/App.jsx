@@ -11,7 +11,7 @@ import { useWindowListeners } from './hooks/useWindowListeners';
 import { useAppHandlers } from './hooks/useAppHandlers';
 
 // Versioning
-const CLIENT_VERSION = '1.5.1';
+const CLIENT_VERSION = '1.5.3';
 
 // Components
 import Auth from './components/Auth';
@@ -82,7 +82,33 @@ function App() {
 
     const clockOffset = useRef(0);
     const [initialAuthView] = useState('LOGIN');
-    const displayedGameState = useOptimisticState(gameState);
+    const authoritativeGameState = useOptimisticState(gameState);
+
+    const displayedGameState = useMemo(() => {
+        if (!authoritativeGameState) return null;
+        let state = { ...authoritativeGameState };
+
+        // Handle Preview Overrides
+        if (previewThemeId) {
+            state.theme = previewThemeId;
+        }
+        
+        if (previewAvatarData) {
+            state.state = { 
+                ...state.state, 
+                avatar: previewAvatarData.path 
+            };
+        }
+
+        if (previewBannerData) {
+            state.state = { 
+                ...state.state, 
+                banner: previewBannerData 
+            };
+        }
+
+        return state;
+    }, [authoritativeGameState, previewThemeId, previewAvatarData, previewBannerData]);
 
     // Modular Hooks
     useAuthSync();

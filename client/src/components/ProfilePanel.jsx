@@ -61,7 +61,9 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
     const [selectedBanner, setSelectedBanner] = useState(getValidBanner(gameState?.state?.banner));
 
     React.useEffect(() => {
-        if (gameState?.state?.avatar && !previewAvatarData) {
+        if (previewAvatarData) {
+            setSelectedAvatar(previewAvatarData.path.replace(/\.(png|jpg|jpeg)$/, '.webp'));
+        } else if (gameState?.state?.avatar) {
             setSelectedAvatar(gameState.state.avatar.replace(/\.(png|jpg|jpeg)$/, '.webp'));
         }
     }, [gameState?.state?.avatar, previewAvatarData]);

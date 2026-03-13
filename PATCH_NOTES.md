@@ -1,3 +1,12 @@
+# 📄 Auditoria Completa de Mudanças - Preview Consistency Fix (v1.5.3)
+
+### 🎨 Customização e UI
+- **Consistência de Preview**: Corrigido um bug onde o botão "Exit Preview" não aparecia ao selecionar apenas temas de cores.
+- **Sincronização Global**: Ocultada a redeclaração de variáveis no `GameContent` e corrigido o fluxo de props para o `ProfilePanel`.
+- **Preview de Avatar**: Validado o funcionamento da visualização de avatares bloqueados em todos os componentes da interface.
+
+---
+
 # 📄 Auditoria Completa de Mudanças - Theme Engine Refactor (v1.5.2)
 
 ### 🎨 Customização e UI

@@ -81,6 +81,7 @@ export const GameContent = ({
                 onTutorialComplete={handleTutorialStepComplete}
                 onOpenRenameModal={() => setModal('rename', true)} 
                 clearPreview={clearPreview}
+                isPreviewActive={isPreviewActive}
             />;
 
         case 'skills_overview':
