@@ -1,16 +1,16 @@
 export const registerGuildHandlers = (socket, gameManager, io) => {
-  socket.on("create_guild", async ({ name, tag }) => {
+  socket.on("create_guild", async (data) => {
     try {
       if (!socket.data.characterId || socket.data.characterId === "undefined") return;
       await gameManager.executeLocked(socket.user.id, async () => {
         const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
-        const result = await gameManager.createGuild(char, name, tag);
+        const result = await gameManager.guildManager.createGuild(char, data);
         socket.emit("guild_created", result);
         socket.emit("status_update", await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
       });
     } catch (err) {
       console.error("[GUILD] Error in create_guild socket:", err);
-      socket.emit("error", { message: err.message });
+      socket.emit("guild_created", { success: false, message: err.message });
     }
   });
 

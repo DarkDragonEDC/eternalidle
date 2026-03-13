@@ -1640,12 +1640,12 @@ export class GuildManager {
             .single();
 
         if (error) {
-            console.error(`[GUILD-TASKS] Erro ao buscar guilda ${guildId}:`, error);
-            // Se for erro de coluna faltando (42703), damos um erro mais amigável
+            console.error(`[GUILD-TASKS] Error fetching guild ${guildId}:`, error);
+            // If it's a missing column error (42703), we give a more friendly error
             if (error.code === '42703') {
-                throw new Error("Configuração da guilda incompleta no banco de dados. Contate o administrador.");
+                throw new Error("Incomplete guild configuration in the database. Contact the administrator.");
             }
-            throw new Error("Erro ao acessar dados da guilda.");
+            throw new Error("Error accessing guild data.");
         }
 
         if (!guild) {
@@ -1654,7 +1654,7 @@ export class GuildManager {
                 char.state.guild_id = null;
                 this.gameManager.markDirty(char.id);
             }
-            throw new Error("Guilda não encontrada.");
+            throw new Error("Guild not found.");
         }
 
         // Check for daily reset (00:00 UTC)

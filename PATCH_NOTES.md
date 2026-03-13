@@ -1,3 +1,12 @@
+# 📄 Auditoria Completa de Mudanças - Guild Restoration (v1.5.0)
+
+### 🛡️ Guildas & Sistema Social
+- **Restauração de Guildas**: Corrigido o erro crítico `createGuild is not a function`. Retornadas todas as 20 funções de delegação no servidor, permitindo novamente a criação, gerenciamento e bônus de guildas.
+- **Sincronização de Bônus**: Sistema social agora carrega corretamente os bônus de guilda ao inspecionar outros jogadores.
+- **Internacionalização**: Todos os alertas e erros críticos do sistema de guildas foram traduzidos para o Inglês para garantir consistência.
+
+---
+
 # 📄 Auditoria Completa de Mudanças - Hotfix (v1.4.8)
 
 ### 📈 Estatísticas e Sistema
