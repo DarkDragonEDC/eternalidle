@@ -22,15 +22,12 @@ export const apiRoutes = (gameManager, isProtected = true) => {
       }
 
       try {
-        // IMPROVED: Count connected sockets (unique users) instead of just characters with activities
-        const uniqueUsers = new Set(
-          Array.from(gameManager.io.sockets.sockets.values())
-            .filter(s => s.user?.id)
-            .map(s => s.user.id)
-        ).size;
+        // IMPROVED: Count characters with active work (activities, combat, or dungeons)
+        // This reflects everyone progressing in the idle game, not just connected sockets.
+        const activeCount = await gameManager.getActivePlayersCount();
         
-        activePlayersCache = { count: uniqueUsers, timestamp: now };
-        res.json({ count: uniqueUsers });
+        activePlayersCache = { count: activeCount, timestamp: now };
+        res.json({ count: activeCount });
       } catch (err) {
         res.status(500).json({ count: activePlayersCache.count || 0, error: err.message });
       }

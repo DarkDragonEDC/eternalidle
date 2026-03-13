@@ -779,6 +779,28 @@ export class GameManager {
         return status;
     }
 
+    /**
+     * Counts the total number of characters that have an active activity, combat, or dungeon session.
+     * This is used for the "Online Players" display, reflecting anyone progressing in the idle game.
+     */
+    async getActivePlayersCount() {
+        try {
+            // We count characters with current_activity OR combat OR dungeon session
+            // Using maybeSingle or count logic depending on supabase JS client version constraints
+            // Standard approach: select id with count and filters
+            const { count, error } = await this.supabase
+                .from('characters')
+                .select('*', { count: 'exact', head: true })
+                .or('current_activity.not.is.null,combat.not.is.null,dungeon.not.is.null');
+
+            if (error) throw error;
+            return count || 0;
+        } catch (err) {
+            console.error('[SERVER] Error counting active players:', err);
+            return 0;
+        }
+    }
+
     async acknowledgeBanWarning(userId) {
         try {
             const { error } = await this.supabase
