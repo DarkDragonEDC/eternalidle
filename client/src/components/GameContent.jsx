@@ -40,6 +40,7 @@ export const GameContent = ({
         setActiveTier,
         setInfoItem,
         setPreviewThemeId,
+        previewThemeId,
         previewAvatarData,
         setPreviewAvatarData,
         previewBannerData,
