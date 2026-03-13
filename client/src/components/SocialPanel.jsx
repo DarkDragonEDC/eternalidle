@@ -1189,7 +1189,10 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, onOpenTrade, tradeInvi
                                                                 </div>
                                                             </div>
                                                             <button
-                                                                onClick={() => onOpenTrade ? onOpenTrade(trade.id) : null}
+                                                                onClick={() => {
+                                                                    if (isPreviewActive) return onPreviewActionBlocked();
+                                                                    if (onOpenTrade) onOpenTrade(trade.id);
+                                                                }}
                                                                 style={{
                                                                     padding: '10px 20px', borderRadius: '12px', background: 'var(--accent)',
                                                                     color: '#000', fontWeight: '900', fontSize: '0.75rem',

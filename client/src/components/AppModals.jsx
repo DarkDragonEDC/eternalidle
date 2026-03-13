@@ -151,6 +151,9 @@ export const AppModals = ({
                 onInvite={handleTradeInvite}
                 onOpenTrade={handleOpenTrade}
                 tradeInvites={tradeInvites}
+                gameState={displayedGameState}
+                isPreviewActive={isPreviewActive}
+                onPreviewActionBlocked={onPreviewActionBlocked}
             />
 
             {inspectData && (
