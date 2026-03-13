@@ -269,8 +269,14 @@ export const useSocketEvents = () => {
             store.setOrbShopStatusMessage({ type: 'error', text: err.message || 'Purchase failed.' });
         });
 
-        socket.on('stripe_checkout_session', (url) => {
-            window.location.href = url;
+        socket.on('stripe_checkout_session', (data) => {
+            const url = typeof data === 'string' ? data : data?.url;
+            if (url) {
+                console.log('[STRIPE] Redirecting to:', url);
+                window.location.assign(url);
+            } else {
+                console.error('[STRIPE] Received invalid checkout session data:', data);
+            }
         });
 
         return () => {
@@ -330,6 +336,15 @@ export const useSocketEvents = () => {
             socket.off('trade_accept_result');
             socket.off('trade_cancelled');
             socket.off('trade_error');
+
+            socket.off('combat_history_update');
+            socket.off('dungeon_history_update');
+            socket.off('leaderboard_update');
+            
+            socket.off('orb_store_update');
+            socket.off('orb_purchase_success');
+            socket.off('orb_purchase_error');
+            socket.off('stripe_checkout_session');
         };
     }, [socket]);
 };

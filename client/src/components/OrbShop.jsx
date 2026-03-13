@@ -357,7 +357,11 @@ const OrbShop = ({ socket, gameState, onClose, isPreviewActive, onPreviewActionB
                                                     </p>
 
                                                     <button
-                                                        onClick={() => canAfford && !isPurchasing && handlePurchase(item)}
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            if (canAfford && !isPurchasing) handlePurchase(item);
+                                                        }}
                                                         disabled={!canAfford || isPurchasing}
                                                         className="store-buy-btn"
                                                         style={{
