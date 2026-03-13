@@ -67,15 +67,18 @@ export const AppModals = ({
         setIsRenameModalOpen,
         settings,
         updateSettings,
-        isGoogleLinked,
         isMobile,
         isPreviewActive,
         onPreviewActionBlocked,
         showGuildXPInfo,
         setShowGuildXPInfo,
         serverError,
-        setServerError
+        setServerError,
+        startActivity
     } = useAppStore();
+
+    const isGoogleLinked = session?.user?.app_metadata?.providers?.includes('google') ||
+        session?.user?.identities?.some(id => id.provider === 'google');
 
     return (
         <>

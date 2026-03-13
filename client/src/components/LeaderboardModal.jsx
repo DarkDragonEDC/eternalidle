@@ -201,7 +201,7 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
                                         <div>Nenhum registro encontrado nesta categoria.</div>
                                     </div>
                                 ) : (
-                                    data.map((char, index) => {
+                                    Array.isArray(data) && data.map((char, index) => {
                                         const isTop3 = index < 3;
                                         // Specific score formatting
                                         let score = 0;

@@ -25,6 +25,13 @@
 ### ⚙️ Infraestrutura e Escalabilidade
 - **Reestruturação Completa**: Todo o código do front-end e do back-end foi refeito para melhorar significativamente a escalabilidade e a manutenabilidade do jogo.
 
+### 🐛 Correções de Bugs
+- **Erro de Referência**: Corrigido o erro `ReferenceError: startActivity is not defined` que ocorria ao tentar coletar recursos através do modal de atividade.
+- **Ranking e Estabilidade**: 
+    - Corrigido o crash no componente de ranking através da unificação do tratamento de eventos de socket.
+    - Implementada proteção contra recarregamento infinito no painel de ranking.
+    - Adicionadas verificações de segurança no modal de classificação para garantir maior estabilidade.
+
 ---
 > [!IMPORTANT]
 > **Aviso da Equipe de Desenvolvimento**: Como realizamos uma reestruturação profunda em quase todos os sistemas do jogo, é possível que algumas alterações menores não tenham sido listadas nestas notas. 
@@ -33,4 +40,4 @@
 
 *Nota: Esta atualização reflete uma auditoria completa de 176 arquivos modificados entre as branches main e homolog. [ID: 174.7-FINAL]*
 
-<!-- Audit Timestamp: 2026-03-12 21:29:56 -->
+<!-- Audit Timestamp: 2026-03-12 21:52:00 -->

@@ -13,7 +13,6 @@ export const useSocketEvents = () => {
         socket.on('game_status', store.handleStatusUpdate);
         socket.on('guild_broadcast', store.addGuildMessage);
         socket.on('craft_rune_success', store.setCraftRuneSuccess);
-        socket.on('leaderboard_update', store.setLeaderboardData);
         socket.on('item_market_price', store.setMarketPriceUpdate);
         socket.on('global_stats_update', store.setGlobalStats);
         socket.on('active_players_update', store.setActivePlayers);
@@ -209,8 +208,10 @@ export const useSocketEvents = () => {
         });
 
         // --- LEADERBOARD EVENTS ---
-        socket.on('leaderboard_update', (rankings) => {
-            store.setLeaderboardRankings(rankings || []);
+        socket.on('leaderboard_update', (data) => {
+            // Unify data handling for both RankingPanel and LeaderboardModal
+            store.setLeaderboardData(data || { top100: [], userRank: null });
+            store.setLeaderboardRankings(data?.top100 || []);
             store.setIsLoadingLeaderboard(false);
         });
 
@@ -237,7 +238,6 @@ export const useSocketEvents = () => {
             socket.off('game_status');
             socket.off('guild_broadcast');
             socket.off('craft_rune_success');
-            socket.off('leaderboard_update');
             socket.off('item_market_price');
             socket.off('global_stats_update');
             socket.off('active_players_update');

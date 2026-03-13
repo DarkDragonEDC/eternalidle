@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import GuildProfileModal from './GuildProfileModal';
 import { resolveItem, formatItemId } from '@shared/items';
@@ -111,6 +111,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
     const [subCategory, setSubCategory] = useState('LEVEL');
     const [rankMode, setRankMode] = useState(gameState?.state?.isIronman ? 'IRONMAN' : 'NORMAL');
     const [selectedGuildId, setSelectedGuildId] = useState(null);
+    const lastFetchRef = useRef(null);
 
     // Initial load and category changes
     useEffect(() => {
@@ -118,7 +119,12 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
 
         const type = rankMode === 'GUILDS' ? 'GUILDS' : subCategory;
         const mode = rankMode === 'GUILDS' ? 'NORMAL' : rankMode;
+        
+        // Prevent infinite loops by only fetching when parameters actually change
+        const fetchKey = `${type}_${mode}_${socket.id}`;
+        if (lastFetchRef.current === fetchKey) return;
 
+        lastFetchRef.current = fetchKey;
         setLoading(true);
         socket.emit('get_leaderboard', { type, mode });
     }, [socket, subCategory, rankMode, gameState]);
