@@ -1515,51 +1515,45 @@ export class GameManager {
         return { used: false, amount: 0 };
     }
 
-    async getLeaderboard(type = 'COMBAT', requesterId = null, mode = 'NORMAL', forceRefresh = false) {
+    async getLeaderboard(type = 'LEVEL', mode = 'NORMAL', requesterId = null, forceRefresh = false) {
         const cacheKey = `${type}_${mode}`;
         const now = Date.now();
-        const cached = this.leaderboardCache.get(cacheKey);
+        const cacheTime = 60 * 1000;
 
-        // Reduced TTL to 5 minutes for a more dynamic experience with new high performance
-        const TTL = 5 * 60 * 1000;
-
-        if (!forceRefresh && cached && (now - cached.timestamp) < TTL) {
-            const sorted = cached.data;
-            let userRank = null;
-            if (requesterId) {
-                if (type === 'GUILDS') {
-                    const char = this.cache.get(requesterId);
-                    const guildId = char?.state?.guild_id;
-                    if (guildId) {
-                        const index = sorted.findIndex(g => g.id === guildId);
-                        if (index !== -1) {
-                            userRank = { rank: index + 1, guild: sorted[index] };
-                        }
-                    }
-                } else {
-                    const index = sorted.findIndex(c => c.id === requesterId);
+        if (!forceRefresh && this.leaderboardCache.has(cacheKey)) {
+            const cached = this.leaderboardCache.get(cacheKey);
+            if (now - cached.timestamp < cacheTime) {
+                let userRank = null;
+                if (requesterId) {
+                    const index = cached.data.findIndex(c => c.id === requesterId);
                     if (index !== -1) {
-                        userRank = { rank: index + 1, character: sorted[index] };
+                        userRank = { rank: index + 1, character: cached.data[index] };
                     }
                 }
+                return { type, mode, top100: cached.data.slice(0, 100), userRank };
             }
-            return { type, mode, top100: sorted.slice(0, 100), userRank };
         }
 
+        let data = [];
+        let error = null;
+
         if (type === 'GUILDS') {
-            const { data, error } = await this.supabase
+            const result = await this.supabase
                 .from('guilds')
                 .select('id, name, tag, level, xp, icon, icon_color, bg_color, country_code, guild_hall_level, guild_members(character_id)')
                 .order('level', { ascending: false })
                 .order('xp', { ascending: false })
                 .limit(100);
+            
+            data = result.data || [];
+            error = result.error;
 
             if (error) {
                 console.error("[RANKING] Guild DB Error:", error);
                 return { type, top100: [], userRank: null };
             }
 
-            const processed = (data || []).map(guild => {
+            const processed = data.map(guild => {
                 const memberCount = guild.guild_members?.length || 0;
                 const maxMembers = 10 + (guild.guild_hall_level || 0) * 2;
                 const { guild_members, ...rest } = guild;
@@ -1567,54 +1561,82 @@ export class GameManager {
             });
 
             this.leaderboardCache.set(cacheKey, { data: processed, timestamp: now });
+            return { type, mode, top100: processed, userRank: null };
+        }
 
-            let userRank = null;
-            if (requesterId) {
-                const char = this.cache.get(requesterId);
-                const guildId = char?.state?.guild_id;
-                if (guildId) {
-                    const index = processed.findIndex(g => g.id === guildId);
-                    if (index !== -1) {
-                        userRank = { rank: index + 1, guild: processed[index] };
-                    }
-                }
+        const skillMapping = {
+            'PLANK_REFINER': 'PLANK_REFINING',
+            'METAL_BAR_REFINER': 'METAL_BAR_REFINING',
+            'LEATHER_REFINER': 'LEATHER_REFINING',
+            'CLOTH_REFINER': 'CLOTH_REFINING',
+            'ORE_MINER': 'MINING',
+            'LUMBERJACK': 'WOODCUTTING',
+            'ANIMAL_SKINNER': 'SKINNING',
+            'FIBER_HARVESTER': 'FIBER_HARVESTING'
+        };
+        const dbType = skillMapping[type] || type;
+
+        if (['LEVEL', 'TOTAL_XP', 'ITEM_POWER'].includes(dbType) || mode === 'IRONMAN') {
+            let query = this.supabase
+                .from('characters')
+                .select('id, name, state, skills, info, equipment')
+                .eq('is_admin', false);
+
+            if (mode === 'IRONMAN') {
+                query = query.contains('state', { isIronman: true });
+            } else {
+                query = query.not('state', 'cs', '{"isIronman": true}');
             }
 
-            return { type, mode, top100: processed, userRank };
-        }
+            if (dbType === 'LEVEL') {
+                query = query.order('ranking_total_level', { ascending: false, nullsFirst: false });
+            } else if (dbType === 'TOTAL_XP') {
+                query = query.order('ranking_total_xp', { ascending: false, nullsFirst: false });
+            } else if (dbType === 'ITEM_POWER') {
+                query = query.order('ranking_item_power', { ascending: false, nullsFirst: false });
+            } else {
+                query = query.order(`skills->${dbType}->totalXp`, { ascending: false, nullsFirst: false });
+            }
 
-        // Optimized character ranking query
-        let query = this.supabase
-            .from('characters')
-            .select('id, name, state, skills, info, equipment')
-            .eq('is_admin', false);
-
-        if (mode === 'IRONMAN') {
-            query = query.contains('state', { isIronman: true });
+            const result = await query.limit(100);
+            data = result.data || [];
+            error = result.error;
         } else {
-            query = query.not('state', 'cs', '{"isIronman": true}');
+            const { data: lbData, error: lbError } = await this.supabase
+                .from('leaderboards')
+                .select('character_id, value')
+                .eq('ranking_type', dbType)
+                .order('value', { ascending: false })
+                .limit(100);
+
+            if (lbError) {
+                console.error(`[RANKING] Leaderboards DB Error for ${dbType}:`, lbError);
+                return { type, top100: [], userRank: null };
+            }
+
+            if (lbData && lbData.length > 0) {
+                const ids = lbData.map(entry => entry.character_id);
+                const { data: chars, error: charError } = await this.supabase
+                    .from('characters')
+                    .select('id, name, state, skills, info, equipment')
+                    .in('id', ids);
+
+                if (charError) {
+                    console.error("[RANKING] Character Details DB Error:", charError);
+                    return { type, top100: [], userRank: null };
+                }
+                data = ids.map(id => chars.find(c => c.id === id)).filter(Boolean);
+            } else {
+                data = [];
+            }
         }
 
-        // Use pre-calculated columns for sorting
-        if (type === 'LEVEL') {
-            query = query.order('ranking_total_level', { ascending: false });
-        } else if (type === 'TOTAL_XP') {
-            query = query.order('ranking_total_xp', { ascending: false });
-        } else if (type === 'ITEM_POWER') {
-            query = query.order('ranking_item_power', { ascending: false });
-        } else {
-            // Specialized skill ranking (e.g., COMBAT, FISHING, LUMBERJACK)
-            // Use JSONB path sorting: skills->SKILL_NAME->totalXp
-            query = query.order(`skills->${type}->totalXp`, { ascending: false });
-        }
-
-        const { data, error } = await query.limit(100);
         if (error) {
             console.error("[RANKING] DB Error:", error);
             return { type, top100: [], userRank: null };
         }
 
-        const processed = (data || []).map(char => {
+        const processed = data.map(char => {
             if (char.skills && char.state) char.state.skills = char.skills;
             if (char.equipment && char.state) char.state.equipment = char.equipment;
             if (char.info?.membership && char.state) char.state.membership = char.info.membership;
