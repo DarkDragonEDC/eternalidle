@@ -6,19 +6,29 @@ const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZi
 
 const supabase = createClient(URL, KEY);
 
+const XP_TABLE = [
+    0, 84, 192, 324, 480, 645, 820, 1005, 1200, 1407,
+    1735, 2082, 2449, 2838, 3249, 3684, 4144, 4631, 5146, 5691,
+    6460, 7281, 8160, 9101, 10109, 11191, 12353, 13603, 14949, 16400,
+    18455, 20675, 23076, 25675, 28492, 31549, 34870, 38482, 42415, 46702,
+    52583, 58662, 64933, 71390, 78026, 84833, 91802, 98923, 106186, 114398,
+    123502, 132734, 142077, 151515, 161029, 170602, 180216, 189852, 199491, 209115,
+    220417, 232945, 246859, 262341, 279598, 298871, 320434, 344603, 371744, 402278,
+    441971, 486789, 537487, 594941, 660170, 734360, 818896, 915396, 1025752, 1152182,
+    1316749, 1492835, 1681248, 1882849, 2098562, 2329375, 2576345, 2840603, 3123359, 3425908,
+    3749636, 4269287, 4827911, 5428432, 6073992, 6767969, 7513995, 8315973, 9178099, 10104099
+];
+
 /**
  * Formula to calculate total XP based on level and current XP.
  */
 function calculateAccumulatedXP(level, currentXp) {
-    let total = 0;
-    for (let i = 1; i < level; i++) {
-        total += Math.floor(100 * Math.pow(1.15, i - 1));
-    }
-    return total + currentXp;
+    const baseXP = XP_TABLE[level - 1] || 0;
+    return baseXP + currentXp;
 }
 
 async function fixRankings() {
-    console.log("Starting enhanced production ranking fix...");
+    console.log("Starting FINAL production ranking fix...");
     
     // 1. Fetch all characters
     const { data: characters, error } = await supabase
@@ -48,7 +58,7 @@ async function fixRankings() {
                 
                 const skillTotalXp = calculateAccumulatedXP(lvl, xp);
                 
-                // Inject totalXp into the skill object for easier query sorting
+                // Inject totalXp into the skill object
                 skill.totalXp = skillTotalXp;
                 
                 totalLevel += lvl;
@@ -59,7 +69,7 @@ async function fixRankings() {
         // Calculate Item Power
         if (char.equipment) {
             for (const slot of Object.values(char.equipment)) {
-                if (slot && slot.ip) {
+                if (slot && typeof slot === 'object' && slot.ip) {
                     totalIp += Number(slot.ip);
                     ipCount++;
                 }
@@ -73,7 +83,7 @@ async function fixRankings() {
         const { error: updateErr } = await supabase
             .from('characters')
             .update({
-                skills: skillsToUpdate, // Save updated skills with totalXp
+                skills: skillsToUpdate,
                 ranking_total_level,
                 ranking_total_xp,
                 ranking_item_power
@@ -83,7 +93,7 @@ async function fixRankings() {
         if (updateErr) {
             console.error(`Failed to update ${char.name}:`, updateErr.message);
         } else {
-            console.log(`Updated ${char.name}: Lvl=${ranking_total_level}, XP=${ranking_total_xp}`);
+            console.log(`Updated ${char.name}: Lvl=${ranking_total_level}, XP=${ranking_total_xp}, IP=${ranking_item_power}`);
         }
     }
 

@@ -9,20 +9,54 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 const CATEGORIES = [
-    { id: 'COMBAT', name: 'Combat', icon: Activity, color: '#f87171' },
-    { id: 'DUNGEONEERING', name: 'Dungeoneering', icon: Skull, color: '#a855f7' },
-    { id: 'LEVEL', name: 'Total Level', icon: GraduationCap, color: '#fbbf24' },
-    { id: 'TOTAL_XP', name: 'Total XP', icon: Zap, color: '#60a5fa' },
-    { id: 'LUMBERJACK', name: 'Woodcutting', icon: Trees, color: '#4ade80' },
-    { id: 'ORE_MINER', name: 'Mining', icon: Pickaxe, color: '#a0a0a0' },
-    { id: 'ANIMAL_SKINNER', name: 'Skinning', icon: Ghost, color: '#fca5a5' },
-    { id: 'FIBER_HARVESTER', name: 'Harvesting', icon: Ghost, color: '#86efac' },
-    { id: 'FISHING', name: 'Fishing', icon: Anchor, color: '#60a5fa' },
-    { id: 'COOKING', name: 'Cooking', icon: Hammer, color: '#fbbf24' },
-    { id: 'ALCHEMY', name: 'Alchemy', icon: FlaskConical, color: '#d8b4fe' },
-    { id: 'WARRIOR_CRAFTER', name: 'Smithing', icon: Hammer, color: '#f0f0f0' },
-    { id: 'MAGE_CRAFTER', name: 'Arcane Craft', icon: Flame, color: '#d8b4fe' },
-    { id: 'HUNTER_CRAFTER', name: 'Leatherwork', icon: Target, color: '#c9a84c' },
+    { 
+        id: 'GENERAL', name: 'Geral', icon: Trophy, color: '#fbbf24',
+        subTabs: [
+            { id: 'LEVEL', name: 'Total Level', icon: GraduationCap },
+            { id: 'TOTAL_XP', name: 'Total XP', icon: Zap }
+        ]
+    },
+    {
+        id: 'PROFICIENCY', name: 'Proficiência', icon: Shield, color: '#d8b4fe',
+        subTabs: [
+            { id: 'WARRIOR_PROFICIENCY', name: 'Warrior', icon: Sword },
+            { id: 'HUNTER_PROFICIENCY', name: 'Hunter', icon: Target },
+            { id: 'MAGE_PROFICIENCY', name: 'Mage', icon: Zap }
+        ]
+    },
+    { id: 'EQUIPMENT', name: 'Equipamento', icon: Shield, color: '#60a5fa', subTabs: [{ id: 'ITEM_POWER', name: 'Item Power', icon: Zap }] },
+    { id: 'COMBAT', name: 'Combate', icon: Activity, color: '#f87171', subTabs: [{ id: 'COMBAT', name: 'Combat Lvl', icon: Activity }] },
+    { id: 'DUNGEONEERING', name: 'Dungeon', icon: Skull, color: '#a855f7', subTabs: [{ id: 'DUNGEONEERING', name: 'Dungeon Lvl', icon: Skull }] },
+    {
+        id: 'GATHERING', name: 'Coleta', icon: Trees, color: '#4ade80',
+        subTabs: [
+            { id: 'LUMBERJACK', name: 'Woodcutting', icon: Trees },
+            { id: 'ORE_MINER', name: 'Mining', icon: Pickaxe },
+            { id: 'ANIMAL_SKINNER', name: 'Skinning', icon: Ghost },
+            { id: 'FIBER_HARVESTER', name: 'Harvesting', icon: Ghost },
+            { id: 'FISHING', name: 'Fishing', icon: Anchor }
+        ]
+    },
+    {
+        id: 'REFINING', name: 'Refino', icon: Flame, color: '#fbbf24',
+        subTabs: [
+            { id: 'PLANK_REFINER', name: 'Plank', icon: Hammer },
+            { id: 'METAL_BAR_REFINER', name: 'Metal', icon: Hammer },
+            { id: 'LEATHER_REFINER', name: 'Leather', icon: Hammer },
+            { id: 'CLOTH_REFINER', name: 'Cloth', icon: Hammer }
+        ]
+    },
+    {
+        id: 'CRAFTING', name: 'Crafting', icon: Hammer, color: '#f0f0f0',
+        subTabs: [
+            { id: 'WARRIOR_CRAFTER', name: 'Blacksmith', icon: Hammer },
+            { id: 'MAGE_CRAFTER', name: 'Arcane', icon: Flame },
+            { id: 'HUNTER_CRAFTER', name: 'Leatherwork', icon: Target },
+            { id: 'TOOL_CRAFTER', name: 'Tools', icon: Hammer },
+            { id: 'ALCHEMY', name: 'Alchemy', icon: FlaskConical },
+            { id: 'COOKING', name: 'Cooking', icon: Flame }
+        ]
+    }
 ];
 
 import { useAppStore } from '../store/useAppStore';
@@ -34,7 +68,8 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
         isLoadingLeaderboard: loading, setIsLoadingLeaderboard: setLoading
     } = store;
 
-    const [activeTab, setActiveTab] = useState('COMBAT');
+    const [activeTab, setActiveTab] = useState('GENERAL');
+    const [activeSubTab, setActiveSubTab] = useState('LEVEL');
     const [mode, setMode] = useState('NORMAL'); // NORMAL | IRONMAN
     const [showSelector, setShowSelector] = useState(false);
 
@@ -43,7 +78,7 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
         if (isPublic) {
             try {
                 const apiUrl = import.meta.env.VITE_API_URL;
-                const res = await fetch(`${apiUrl}/api/leaderboard?type=${activeTab}&mode=${mode}`);
+                const res = await fetch(`${apiUrl}/api/leaderboard?type=${activeSubTab}&mode=${mode}`);
                 if (res.ok) {
                     const json = await res.json();
                     setData(json.data || []);
@@ -54,9 +89,9 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
                 setLoading(false);
             }
         } else if (socket) {
-            socket.emit('get_leaderboard', { type: activeTab, mode });
+            socket.emit('get_leaderboard', { type: activeSubTab, mode });
         }
-    }, [activeTab, mode, isPublic, socket, setData, setLoading]);
+    }, [activeSubTab, mode, isPublic, socket, setData, setLoading]);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -148,7 +183,11 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
                                     {CATEGORIES.map(cat => (
                                         <button
                                             key={cat.id}
-                                            onClick={() => { setActiveTab(cat.id); setShowSelector(false); }}
+                                            onClick={() => { 
+                                                setActiveTab(cat.id); 
+                                                setActiveSubTab(cat.subTabs[0].id);
+                                                setShowSelector(false); 
+                                            }}
                                             style={{
                                                 width: '100%', padding: '10px', borderRadius: '8px',
                                                 display: 'flex', alignItems: 'center', gap: '12px',
@@ -182,6 +221,29 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
                         </button>
                     </div>
 
+                    {/* SubTabs row if more than 1 subtab */}
+                    {activeCategory.subTabs?.length > 1 && (
+                        <div style={{ padding: '0 20px 15px 20px', display: 'flex', gap: '8px', overflowX: 'auto', background: 'rgba(0,0,0,0.2)' }}>
+                            {activeCategory.subTabs.map(sub => (
+                                <button
+                                    key={sub.id}
+                                    onClick={() => setActiveSubTab(sub.id)}
+                                    style={{
+                                        padding: '6px 12px', borderRadius: '8px', whiteSpace: 'nowrap',
+                                        background: activeSubTab === sub.id ? 'var(--accent-soft)' : 'rgba(255,255,255,0.02)',
+                                        border: `1px solid ${activeSubTab === sub.id ? 'var(--accent)' : 'var(--border)'}`,
+                                        color: activeSubTab === sub.id ? 'var(--accent)' : 'rgba(255,255,255,0.4)',
+                                        fontSize: '0.7rem', fontWeight: '800', transition: '0.2s',
+                                        display: 'flex', alignItems: 'center', gap: '6px'
+                                    }}
+                                >
+                                    <sub.icon size={12} />
+                                    {sub.name}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
                     {/* Content */}
                     <div style={{ flex: 1, overflowY: 'auto', padding: '15px' }}>
                         {loading ? (
@@ -205,13 +267,17 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
                                         const isTop3 = index < 3;
                                         // Specific score formatting
                                         let score = 0;
-                                        if (activeTab === 'LEVEL') {
+                                        if (activeSubTab === 'LEVEL') {
                                             score = Object.values(char.state?.skills || {}).reduce((acc, s) => acc + (s.level || 1), 0);
-                                        } else if (activeTab === 'TOTAL_XP') {
+                                        } else if (activeSubTab === 'TOTAL_XP') {
                                             // Approximation since we don't have cumulative total on client easily without shared constant
-                                            score = Object.values(char.state?.skills || {}).reduce((acc, s) => acc + (s.xp || 0), 0);
+                                            // But wait, the server now sends ranking_total_xp! Let's use it.
+                                            score = char.ranking_total_xp || 0;
+                                        } else if (activeSubTab === 'ITEM_POWER') {
+                                            score = char.ranking_total_level || 0; // Temp use level as proxy if IP not sent, but server should send it
+                                            if ('ranking_item_power' in char) score = char.ranking_item_power;
                                         } else {
-                                            score = char.state?.skills?.[activeTab]?.level || 1;
+                                            score = char.state?.skills?.[activeSubTab]?.level || 1;
                                         }
 
                                         return (
@@ -258,7 +324,7 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
                                                         {formatNumber(score)}
                                                     </div>
                                                     <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>
-                                                        {activeTab === 'TOTAL_XP' ? 'XP' : 'LEVEL'}
+                                                        {activeSubTab === 'TOTAL_XP' ? 'XP' : activeSubTab === 'ITEM_POWER' ? 'IP' : 'LEVEL'}
                                                     </div>
                                                 </div>
                                             </motion.div>

@@ -1,5 +1,6 @@
 import { pruneState } from '../utils/statePruner.js';
 import { hydrateState } from '../utils/statePruner.js';
+import { XP_TABLE } from '../../shared/skills.js';
 import crypto from 'crypto';
 import fs from 'fs';
 
@@ -107,11 +108,8 @@ export class PersistenceService {
         let ranking_total_xp = 0;
 
         const calculateAccumulatedXP = (level, currentXp) => {
-            let total = 0;
-            for (let i = 1; i < level; i++) {
-                total += Math.floor(100 * Math.pow(1.15, i - 1));
-            }
-            return total + currentXp;
+            const baseXP = XP_TABLE[level - 1] || 0;
+            return baseXP + currentXp;
         };
 
         if (skillsToSave) {
