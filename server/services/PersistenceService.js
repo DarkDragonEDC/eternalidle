@@ -199,6 +199,13 @@ export class PersistenceService {
                 this.gm._hydrateCharacterFromRaw(data);
             }
 
+            // --- PENDING REWARDS INTEGRATION ---
+            // Apply any pending rewards before the character becomes active/cached fully
+            if (this.gm.applyPendingRewards) {
+                await this.gm.applyPendingRewards(data);
+            }
+            // -----------------------------------
+
             // Trigger Migrations
             if (this.gm.migrationManager) {
                 this.gm.migrationManager.migrateCharacter(data);

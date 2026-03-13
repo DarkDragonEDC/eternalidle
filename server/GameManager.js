@@ -317,6 +317,44 @@ export class GameManager {
     }
 
     /**
+     * Checks for and applies any rewards from the pending_rewards table.
+     */
+    async applyPendingRewards(char) {
+        if (!char || !char.id) return;
+        try {
+            const { data: rewards, error } = await this.supabase
+                .from('pending_rewards')
+                .select('*')
+                .eq('character_id', char.id)
+                .eq('applied', false);
+
+            if (error) throw error;
+            if (!rewards || rewards.length === 0) return;
+
+            console.log(`[REWARDS] Applying ${rewards.length} pending rewards to ${char.name}...`);
+            for (const reward of rewards) {
+                if (reward.silver_gained) {
+                    char.state.silver = (char.state.silver || 0) + Number(reward.silver_gained);
+                }
+                if (reward.xp_gained) {
+                    for (const [skill, amount] of Object.entries(reward.xp_gained)) {
+                        this.addXP(char, skill.toUpperCase(), amount);
+                    }
+                }
+                if (reward.loot_gained) {
+                    for (const [itemId, qty] of Object.entries(reward.loot_gained)) {
+                        this.inventoryManager.addItemToInventory(char, itemId, qty);
+                    }
+                }
+                await this.supabase.from('pending_rewards').update({ applied: true }).eq('id', reward.id);
+            }
+            this.markDirty(char.id);
+        } catch (err) {
+            console.error(`[REWARDS-ERROR] Failed to apply rewards for ${char.name}:`, err.message);
+        }
+    }
+
+    /**
      * Convenience wrapper around getCharacter with re-ordered parameters.
      * Used by all socket handlers.
      * @param {string} userId
@@ -694,6 +732,13 @@ export class GameManager {
         // to avoid race conditions and unnecessary DB load.
         const char = await this.getCharacter(userId, characterId, catchup, bypassCache);
         if (!char) return { noCharacter: true };
+
+        // --- PENDING REWARDS CHECK ---
+        // If character is already in cache (bypassCache was false), we might need to check
+        // for rewards if they were added while the character was online.
+        // For performance, we could add a cooldown or trigger here, but getCharacter
+        // already handles it for fresh loads.
+        // -----------------------------
 
         // Check if resting heal is complete
         if (char.state?.resting) {
