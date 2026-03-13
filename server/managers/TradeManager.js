@@ -114,7 +114,9 @@ export class TradeManager {
             console.error("[TRADE-CREATE] DB Error:", error.message);
             throw error;
         }
-        return data;
+
+        // Return enriched trade data
+        return await this.getTrade(data.id);
     }
 
     async getTrade(tradeId) {

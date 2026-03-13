@@ -140,10 +140,12 @@ export const useSocketEvents = () => {
 
         // --- Trade Module ---
         socket.on('trade_invite_received', (invite) => {
-            store.setTradeInvites(prev => [...prev.filter(i => i.sender_id !== invite.sender_id), invite]);
+            const current = store.tradeInvites || [];
+            store.setTradeInvites([...current.filter(i => i.sender_id !== invite.sender_id), invite]);
         });
         socket.on('trade_invite_cancelled', (senderId) => {
-            store.setTradeInvites(prev => prev.filter(i => i.sender_id !== senderId));
+            const current = store.tradeInvites || [];
+            store.setTradeInvites(current.filter(i => i.sender_id !== senderId));
         });
         socket.on('trade_invite_result', (result) => {
             store.setIsInvitePending(false);
@@ -154,14 +156,25 @@ export const useSocketEvents = () => {
         socket.on('trade_started', (trade) => {
             store.setActiveTrade(trade);
             store.setModal('social', false);
-            store.setTradeInvites(prev => prev.filter(i => i.id !== trade.id));
+            // Remove from invitations list if present
+            const current = store.tradeInvites || [];
+            store.setTradeInvites(current.filter(i => i.id !== trade.id));
         });
         socket.on('trade_joined', (trade) => {
             store.setActiveTrade(trade);
             store.setModal('social', false);
+            // Remove from invitations list if present
+            const current = store.tradeInvites || [];
+            store.setTradeInvites(current.filter(i => i.id !== trade.id));
         });
         socket.on('trade_update', (trade) => {
             store.setActiveTrade(trade);
+            // Also update in invites list to keep names/status in sync if SocialPanel is open
+            const current = store.tradeInvites || [];
+            const exists = current.find(i => i.id === trade.id);
+            if (exists) {
+                store.setTradeInvites(current.map(i => i.id === trade.id ? trade : i));
+            }
         });
         socket.on('trade_accept_result', (result) => {
             store.setIsTradeAccepting(false);

@@ -231,14 +231,15 @@ export class CatchupManager {
         const monsterName = char.state.combat?.mobName || "Unknown Monster";
         const startTime = char.last_saved ? new Date(char.last_saved).getTime() : Date.now();
 
-        let roundsProcessed = 0;
-        for (let i = 0; i < rounds; i++) {
-            roundsProcessed = i + 1;
-            const currentTime = startTime + (i * atkSpeed);
-            const foodResult = this.gm.processFood(char, currentTime);
+        let virtualTime = startTime;
+        const endTime = startTime + (rounds * atkSpeed);
+
+        while (virtualTime < endTime && char.state.combat) {
+            // Process Food
+            const foodResult = this.gm.processFood(char, virtualTime);
             foodConsumed += foodResult.eaten || 0;
 
-            const result = await this.gm.combatManager.processCombatRound(char, currentTime);
+            const result = await this.gm.combatManager.processCombatRound(char, virtualTime);
             if (!result || !char.state.combat) {
                 if (!char.state.combat && char.state.health <= 0) died = true;
                 break;
@@ -262,21 +263,30 @@ export class CatchupManager {
                         }
                     });
                 }
-                if (char.state.combat) char.state.combat.mobHealth = char.state.combat.mobMaxHealth || 100;
-                i += Math.ceil(1000 / atkSpeed); // Respawn Delay
+                
+                // --- RESPawn Logic (Sync with Online) ---
+                virtualTime += 1000; // Respawn Delay
+                if (char.state.combat) {
+                    char.state.combat.mobHealth = char.state.combat.mobMaxHealth || 100;
+                    char.state.combat.mob_next_attack_at = virtualTime;
+                    char.state.combat.player_next_attack_at = virtualTime + atkSpeed;
+                }
+            } else {
+                // Advance to next event
+                const nextPlayer = char.state.combat.player_next_attack_at;
+                const nextMob = char.state.combat.mob_next_attack_at;
+                const nextEvent = Math.min(nextPlayer, nextMob);
+                
+                if (nextEvent > virtualTime) {
+                    virtualTime = nextEvent;
+                } else {
+                    virtualTime += 100; // Safety advancement
+                }
             }
         }
 
-        const maxIdleMs = this.gm.getMaxIdleTime(char);
-        if ((roundsProcessed * atkSpeed) > maxIdleMs) delete char.state.combat;
-
-        if (char.state.combat) {
-            const totalTimeMs = roundsProcessed * atkSpeed;
-            char.state.combat.next_attack_at = startTime + totalTimeMs;
-            if (char.state.combat.mob_next_attack_at < char.state.combat.next_attack_at) {
-                char.state.combat.mob_next_attack_at = char.state.combat.next_attack_at + 500;
-            }
-        }
+        const totalProcessedTime = virtualTime - startTime;
+        const roundsProcessed = Math.floor(totalProcessedTime / atkSpeed);
 
         return { processedRounds: roundsProcessed, kills, xpGained: { COMBAT: combatXp }, silverGained, itemsGained, died, foodConsumed, totalTime: (roundsProcessed * atkSpeed) / 1000, monsterName };
     }

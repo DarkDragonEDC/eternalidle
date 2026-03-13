@@ -26,6 +26,10 @@
 - **Reestruturação Completa**: Todo o código do front-end e do back-end foi refeito para melhorar significativamente a escalabilidade e a manutenabilidade do jogo.
 
 ### 🐛 Correções de Bugs
+- **Busca de Jogadores (Trade)**: Resolvido o erro de SQL `column characters.level does not exist`. Agora os níveis são calculados corretamente para todos os personagens encontrados.
+- **Combate Offline (Catchup)**: Corrigida a falha onde o tempo de sobrevivência e o consumo de comida não diminuíam corretamente durante o período offline. Agora o dano recebido é processado de forma consistente.
+- **Painel Social**: Resolvido o erro `ReferenceError: searchResults is not defined` e corrigidas as funções de busca de jogadores e amigos que apresentavam falhas.
+- **Convite de Troca (Trade Invite)**: Corrigida a funcionalidade do botão "INVITE" que não respondia. Implementados todos os handlers de servidor necessários para o fluxo completo de trocas (convidar, ingressar, atualizar oferta, aceitar e cancelar).
 - **Erro de Referência**: Corrigido o erro `ReferenceError: startActivity is not defined` que ocorria ao tentar coletar recursos através do modal de atividade.
 - **Ranking e Estabilidade**: 
     - Corrigido o crash no componente de ranking através da unificação do tratamento de eventos de socket.

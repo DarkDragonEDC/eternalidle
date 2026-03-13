@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Package, Coins, CheckCircle, Clock, X, ArrowLeftRight, ChevronRight, Search, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/useAppStore';
+import { resolveItem, calculateItemSellPrice } from '@shared/items';
 
 
 const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, onInspect, isMobile, isPreviewActive, onPreviewActionBlocked }) => {
@@ -250,7 +251,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                                         typeof Icon === 'string' ? <img src={Icon} alt={def?.name} style={{ width: def.scale || '100%', height: def.scale || '100%', objectFit: 'contain' }} /> : <Icon size={isMobile ? 16 : 18} color={def.rarityColor || "var(--text-dim)"} />
                                                     ) : <Package size={isMobile ? 16 : 18} color="var(--text-dim)" />}
                                                 </div>
-                                                <span style={{ color: def?.rarityColor || 'var(--text-main)', fontSize: isMobile ? '0.8rem' : '0.9rem', fontWeight: '600' }}>{item.amount}x {def?.tier ? `T${def.tier} ` : ''}{def?.name || item.name || 'Unknown Item'}</span>
+                                                <span style={{ color: def?.rarityColor || 'var(--text-main)', fontSize: isMobile ? '0.8rem' : '0.9rem', fontWeight: '600' }}>{item.amount}x {def?.name || item.name || 'Unknown Item'}</span>
                                             </div>
                                             <button onClick={() => removeItem(item.id)} style={{ color: '#ff4444', background: 'transparent', border: 'none', cursor: 'pointer' }}><X size={isMobile ? 14 : 16} /></button>
                                         </div>
@@ -383,7 +384,15 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                     ))}
                                 </div>
 
-                                <div style={{ flex: 1, overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gridAutoRows: 'min-content', gap: isMobile ? '5px' : '8px', paddingRight: '5px' }}>
+                                <div style={{ 
+                                    flex: 1, 
+                                    overflowY: 'auto', 
+                                    display: 'grid', 
+                                    gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(65px, 1fr))' : 'repeat(auto-fill, minmax(80px, 1fr))', 
+                                    gridAutoRows: 'min-content', 
+                                    gap: isMobile ? '6px' : '10px', 
+                                    paddingRight: '5px' 
+                                }}>
                                     {Object.entries(inventory || {})
                                         .filter(([id, entry]) => {
                                             const item = resolveItem(id);
@@ -483,24 +492,17 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                                         </div>
 
                                                         {/* Quantity */}
-                                                        <div style={{ position: 'absolute', bottom: '2px', right: '4px', fontSize: '0.55rem', fontWeight: 'bold', color: '#fff', textShadow: '0 0 3px #000', zIndex: 10 }}>{amount}</div>
+                                                        <div style={{ position: 'absolute', top: '2px', right: '4px', fontSize: '0.6rem', fontWeight: 'bold', color: 'var(--accent)', textShadow: '0 0 3px #000', zIndex: 10 }}>{amount}</div>
 
-                                                        {/* Item Name */}
-                                                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textAlign: 'center', width: '100%', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', fontWeight: '600', lineHeight: '1.2', flexShrink: 0 }}>
+                                                        {/* Item Name */}                                                        <div style={{ fontSize: '0.65rem', color: 'var(--text-main)', textAlign: 'center', width: '100%', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', fontWeight: 'bold', lineHeight: '1.1', flexShrink: 0, padding: '2px 0' }}>
                                                             {(() => {
-                                                                const rawName = item.name || (() => {
-                                                                    // Generate readable name from raw ID
+                                                                return item.name || (() => {
                                                                     let cleanId = id.replace(/_Q\d+$/, '').replace(/_\d+STAR$/, '');
                                                                     return formatItemId(cleanId);
                                                                 })();
-
-                                                                // Prepend tier if it's not already in the name
-                                                                if (item.tier && !rawName.startsWith(`T${item.tier}`)) {
-                                                                    return `T${item.tier} ${rawName}`;
-                                                                }
-                                                                return rawName;
                                                             })()}
                                                         </div>
+
                                                     </div>
                                                 )
                                             })();
@@ -550,7 +552,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                                     typeof Icon === 'string' ? <img src={Icon} alt={def?.name} style={{ width: def.scale || '100%', height: def.scale || '100%', objectFit: 'contain' }} /> : <Icon size={isMobile ? 16 : 18} color={def.rarityColor || "var(--text-dim)"} />
                                                 ) : <Package size={isMobile ? 16 : 18} color="var(--text-dim)" />}
                                             </div>
-                                            <span style={{ color: def?.rarityColor || '#fff', fontSize: isMobile ? '0.8rem' : '0.9rem', fontWeight: '600' }}>{item.amount}x {def?.tier ? `T${def.tier} ` : ''}{def?.name || item.name || formatItemId(item.id) || 'Unknown Item'}</span>
+                                            <span style={{ color: def?.rarityColor || '#fff', fontSize: isMobile ? '0.8rem' : '0.9rem', fontWeight: '600' }}>{item.amount}x {def?.name || item.name || formatItemId(item.id) || 'Unknown Item'}</span>
                                         </div>
                                     );
                                 })}

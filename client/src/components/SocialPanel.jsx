@@ -141,8 +141,8 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, onOpenTrade, tradeInvi
 
     const handleFriendSearch = () => {
         if (!friendSearchNick.trim()) return;
-        setIsSearchingFriends(true);
-        setFriendSearchError('');
+        setSearching(true);
+        setError('');
         socket.emit('trade_search_player', { nickname: friendSearchNick });
     };
 
@@ -845,7 +845,7 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, onOpenTrade, tradeInvi
                                                                 onClick={() => {
                                                                     if (isPreviewActive) return onPreviewActionBlocked();
                                                                     socket.emit('add_friend', { friendName: result.name });
-                                                                    setFriendSearchResults([]);
+                                                                    setPlayerSearchResults([]);
                                                                     setFriendSearchNick('');
                                                                 }}
                                                                 style={{
@@ -1078,7 +1078,7 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, onOpenTrade, tradeInvi
 
                                     {/* Search Results */}
                                     <AnimatePresence>
-                                        {searchResults.length > 0 && (
+                                        {playerSearchResults.length > 0 && (
                                             <motion.div
                                                 initial={{ opacity: 0, height: 0 }}
                                                 animate={{ opacity: 1, height: 'auto' }}
@@ -1090,7 +1090,7 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, onOpenTrade, tradeInvi
                                                 }}
                                             >
                                                 <div style={{ fontSize: '0.65rem', fontWeight: 'bold', color: 'var(--text-dim)', marginBottom: '4px' }}>MATCHING PLAYERS:</div>
-                                                {searchResults.map(result => (
+                                                {playerSearchResults.map(result => (
                                                     <motion.div
                                                         key={result.id}
                                                         whileHover={{ x: 5, background: 'rgba(255,255,255,0.05)' }}
