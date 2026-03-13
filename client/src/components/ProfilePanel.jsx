@@ -18,7 +18,7 @@ import BannerSelectionModal from './BannerSelectionModal';
 import TitleSelector from './TitleSelector';
 import { getProficiencyStats } from '@shared/proficiency_stats';
 import { resolveItem, formatItemId, ITEMS, getRequiredProficiencyGroup, calculateRuneBonus } from '@shared/items';
-import { getBestItemForSlot, isBetterItem } from '../utils/equipment';
+import { getBestItemForSlot, isBetterItem } from '@utils/equipment';
 
 
 

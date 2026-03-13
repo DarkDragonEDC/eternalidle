@@ -2,7 +2,7 @@
 import React from 'react';
 import { X, Sword, Shield, Heart, Zap, Play, Layers, User, Pickaxe, Target, Apple, Star, Info } from 'lucide-react';
 import { resolveItem, getTierColor, calculateRuneBonus, getRequiredProficiencyGroup, getLevelRequirement, formatItemId } from '@shared/items';
-import { getBestItemForSlot, isBetterItem } from '../utils/equipment';
+import { getBestItemForSlot, isBetterItem } from '@utils/equipment';
 
 const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onEquipFood, onUnequip, inventory, onShowInfo, charStats, weaponClass, onTutorialComplete, gameState }) => {
 
