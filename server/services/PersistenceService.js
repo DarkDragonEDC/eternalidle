@@ -105,10 +105,28 @@ export class PersistenceService {
         // --- PRE-CALCULATE RANKING VALUES ---
         let ranking_total_level = 0;
         let ranking_total_xp = 0;
+
+        const calculateAccumulatedXP = (level, currentXp) => {
+            let total = 0;
+            for (let i = 1; i < level; i++) {
+                total += Math.floor(100 * Math.pow(1.15, i - 1));
+            }
+            return total + currentXp;
+        };
+
         if (skillsToSave) {
-            for (const skill of Object.values(skillsToSave)) {
-                ranking_total_level += (Number(skill.level) || 1);
-                ranking_total_xp += (Number(skill.totalXp) || 0);
+            for (const skillKey of Object.keys(skillsToSave)) {
+                const skill = skillsToSave[skillKey];
+                const lvl = (Number(skill.level) || 1);
+                const xp = (Number(skill.xp) || 0);
+                
+                const skillTotalXp = calculateAccumulatedXP(lvl, xp);
+                
+                // Inject totalXp into skill object for DB sorting
+                skill.totalXp = skillTotalXp;
+                
+                ranking_total_level += lvl;
+                ranking_total_xp += skillTotalXp;
             }
         }
 

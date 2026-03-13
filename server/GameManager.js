@@ -1602,10 +1602,9 @@ export class GameManager {
         } else if (type === 'ITEM_POWER') {
             query = query.order('ranking_item_power', { ascending: false });
         } else {
-            // Skill specific ranking - Need to fallback to skill level sorting if possible 
-            // Better: just sort by total_xp for now or implement per-skill ranking columns in future
-            // For now, we still sort by total_xp as a proxy if it's a generic request or specific skill
-            query = query.order('ranking_total_xp', { ascending: false });
+            // Specialized skill ranking (e.g., COMBAT, FISHING, LUMBERJACK)
+            // Use JSONB path sorting: skills->SKILL_NAME->totalXp
+            query = query.order(`skills->${type}->totalXp`, { ascending: false });
         }
 
         const { data, error } = await query.limit(100);
