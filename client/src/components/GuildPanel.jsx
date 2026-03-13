@@ -297,22 +297,6 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                 getItemAmount={getItemAmount}
             />
 
-            {!isMobile && (
-                <motion.button
-                    whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(212, 175, 55, 0.4)' }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setShowDonateModal(true)}
-                    style={{
-                        position: 'fixed', bottom: '30px', right: '30px',
-                        width: '60px', height: '60px', borderRadius: '50%',
-                        background: 'var(--accent)', border: 'none', color: '#000',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        cursor: 'pointer', zIndex: 100, boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
-                    }}
-                >
-                    <Plus size={30} />
-                </motion.button>
-            )}
         </motion.div>
     );
 };

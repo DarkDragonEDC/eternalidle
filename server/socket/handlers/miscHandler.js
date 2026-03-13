@@ -98,13 +98,12 @@ export const registerMiscHandlers = (socket, gameManager, io) => {
     } catch (err) { console.error("Error getting dungeon history:", err); }
   });
 
-  socket.on("get_my_trade_history", async () => {
+  socket.on("get_dungeon_history", async () => {
     try {
       if (!socket.data.characterId) return;
-      const { data, error } = await gameManager.supabase.from("trade_history").select("*").or(`sender_id.eq.${socket.data.characterId},receiver_id.eq.${socket.data.characterId}`).order("created_at", { ascending: false }).limit(20);
-      if (error) throw error;
-      socket.emit("my_trade_history", data);
-    } catch (err) { console.error("Error getting trade history:", err); }
+      const history = await gameManager.combatManager.getDungeonHistory(socket.data.characterId);
+      socket.emit("dungeon_history", history);
+    } catch (err) { console.error("Error getting dungeon history:", err); }
   });
 
   socket.on("get_leaderboard", async ({ type, mode }) => {

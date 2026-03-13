@@ -153,19 +153,28 @@ export const useSocketEvents = () => {
                 store.setSocialError(result.message);
             }
         });
+        socket.on('trade_active_list', (trades) => {
+            store.setTradeInvites(trades);
+        });
         socket.on('trade_started', (trade) => {
             store.setActiveTrade(trade);
             store.setModal('social', false);
-            // Remove from invitations list if present
+            // Don't remove from invites, just ensure it's there
             const current = store.tradeInvites || [];
-            store.setTradeInvites(current.filter(i => i.id !== trade.id));
+            const exists = current.find(i => i.id === trade.id);
+            if (!exists) {
+                store.setTradeInvites([...current, trade]);
+            }
         });
         socket.on('trade_joined', (trade) => {
             store.setActiveTrade(trade);
             store.setModal('social', false);
-            // Remove from invitations list if present
+            // Don't remove from invites, just ensure it's there
             const current = store.tradeInvites || [];
-            store.setTradeInvites(current.filter(i => i.id !== trade.id));
+            const exists = current.find(i => i.id === trade.id);
+            if (!exists) {
+                store.setTradeInvites([...current, trade]);
+            }
         });
         socket.on('trade_update', (trade) => {
             store.setActiveTrade(trade);
@@ -174,6 +183,8 @@ export const useSocketEvents = () => {
             const exists = current.find(i => i.id === trade.id);
             if (exists) {
                 store.setTradeInvites(current.map(i => i.id === trade.id ? trade : i));
+            } else {
+                store.setTradeInvites([...current, trade]);
             }
         });
         socket.on('trade_accept_result', (result) => {
@@ -182,12 +193,28 @@ export const useSocketEvents = () => {
                 store.setSocialError(result.message);
             }
         });
-        socket.on('trade_cancelled', () => {
+        socket.on('trade_cancelled', (trade) => {
             store.setActiveTrade(null);
+            // Cleanup from invites
+            const id = typeof trade === 'object' ? trade.id : trade;
+            if (id) {
+                const current = store.tradeInvites || [];
+                store.setTradeInvites(current.filter(i => i.id !== id));
+            } else {
+              // Fallback: refresh list if no ID provided
+              socket.emit('trade_get_active');
+            }
         });
         socket.on('trade_success', (result) => {
             store.setTradeSuccess(result);
             store.setActiveTrade(null);
+            // Cleanup from invites
+            const current = store.tradeInvites || [];
+            if (result.trade_id) {
+                store.setTradeInvites(current.filter(i => i.id !== result.trade_id));
+            } else {
+                socket.emit('trade_get_active');
+            }
         });
         socket.on('trade_error', (err) => {
             store.setSocialError(err.message || 'Trade error');

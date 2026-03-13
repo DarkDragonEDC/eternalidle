@@ -131,4 +131,24 @@ export const registerTradeHandlers = (socket, gameManager, io) => {
       socket.emit("error", { message: err.message });
     }
   });
+
+  socket.on("trade_get_active", async () => {
+    try {
+      const charId = socket.data.characterId;
+      const trades = await gameManager.tradeManager.getActiveTrades(charId);
+      socket.emit("trade_active_list", trades);
+    } catch (err) {
+      socket.emit("error", { message: err.message });
+    }
+  });
+
+  socket.on("get_my_trade_history", async () => {
+    try {
+      const charId = socket.data.characterId;
+      const history = await gameManager.tradeManager.getPersonalTradeHistory(charId);
+      socket.emit("my_trade_history_update", history);
+    } catch (err) {
+      socket.emit("error", { message: err.message });
+    }
+  });
 };

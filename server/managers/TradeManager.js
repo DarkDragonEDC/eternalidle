@@ -215,7 +215,7 @@ export class TradeManager {
             .single();
 
         if (error) throw error;
-        return data;
+        return await this.getTrade(data.id);
     }
 
     async acceptTrade(char, tradeId) {
@@ -245,7 +245,7 @@ export class TradeManager {
                 .select()
                 .single();
             if (error) throw error;
-            return data;
+            return await this.getTrade(data.id);
         }
     }
 
@@ -418,5 +418,24 @@ export class TradeManager {
             ...tx,
             role: tx.sender_id === characterId ? 'SENDER' : 'RECEIVER'
         }));
+    }
+
+    async getActiveTrades(characterId) {
+        const { data, error } = await this.supabase
+            .from('trade_sessions')
+            .select('*')
+            .eq('status', 'PENDING')
+            .or(`sender_id.eq.${characterId},receiver_id.eq.${characterId}`)
+            .order('updated_at', { ascending: false });
+
+        if (error) throw error;
+        
+        // Enrich with tax rates for the client
+        const enriched = await Promise.all((data || []).map(async (trade) => {
+            trade.tax_rate = await this._getTradeTaxRate(trade.sender_id, trade.receiver_id);
+            return trade;
+        }));
+
+        return enriched;
     }
 }

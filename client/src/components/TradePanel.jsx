@@ -8,7 +8,6 @@ import { resolveItem, calculateItemSellPrice } from '@shared/items';
 const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, onInspect, isMobile, isPreviewActive, onPreviewActionBlocked }) => {
     const store = useAppStore();
     const { isTradeAccepting: isAccepting, setIsTradeAccepting } = store;
-    const [localOffer, setLocalOffer] = useState({ items: [], silver: 0 });
     const [filterText, setFilterText] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('ALL');
     const [quantityModal, setQuantityModal] = useState({ isOpen: false, item: null, itemId: null, max: 0 });
@@ -16,32 +15,33 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
     const [silverInput, setSilverInput] = useState('');
     const [mobileTab, setMobileTab] = useState('OFFER'); // 'OFFER' or 'INVENTORY'
 
+    const formatItemId = (id) => {
+        if (!id) return '';
+        return id.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+    };
+
     if (!trade) return null;
 
     const isSender = trade.sender_id === charId;
-    const myOffer = isSender ? trade.sender_offer : trade.receiver_offer;
-    const partnerOffer = isSender ? trade.receiver_offer : trade.sender_offer;
+    const myOfferRaw = isSender ? trade.sender_offer : trade.receiver_offer;
+    const partnerOfferRaw = isSender ? trade.receiver_offer : trade.sender_offer;
+
+    const myOffer = {
+        items: myOfferRaw?.items || [],
+        silver: myOfferRaw?.silver || 0
+    };
+    const partnerOffer = {
+        items: partnerOfferRaw?.items || [],
+        silver: partnerOfferRaw?.silver || 0
+    };
     const myAccepted = isSender ? trade.sender_accepted : trade.receiver_accepted;
     const partnerAccepted = isSender ? trade.receiver_accepted : trade.sender_accepted;
-
-    // Sync local offer with trade data when trade updates (optional, or just use trade data)
-    useEffect(() => {
-        setLocalOffer(myOffer);
-    }, [trade]);
 
     // Persist active trade ID
     useEffect(() => {
         if (trade && trade.id) {
             localStorage.setItem('lastActiveTradeId', trade.id);
         }
-        return () => {
-            // Only clear if we're actually closing/cancelling, not just unmounting due to refresh (refresh keeps LS)
-            // But React unmounts on refresh too. 
-            // Better strategy: The onClose prop usually means "user closed it".
-            // Let's rely on the onClose handler to clear it if needed, or just keep it until 
-            // App.jsx decides it's invalid.
-            // Actually, we should probably clear it when the trade is explicitly finished/cancelled/closed by user.
-        };
     }, [trade]);
 
     // Clear persistence on explicit close
@@ -51,7 +51,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
     };
 
     const calculateTax = (offer) => {
-        if (!offer) return 0;
+        if (!offer || !offer.items) return 0;
         let totalValue = offer.silver || 0;
 
         offer.items.forEach(it => {
@@ -103,37 +103,37 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
     const confirmAddItem = () => {
         if (!quantityModal.itemId) return;
         const amount = parseInt(quantityInput);
-        if (amount <= 0 || amount > quantityModal.max) return;
+        if (isNaN(amount) || amount <= 0 || amount > quantityModal.max) return;
 
         addItem(quantityModal.itemId, quantityModal.item, amount);
         setQuantityModal({ isOpen: false, item: null, itemId: null, max: 0 });
     };
 
     const addItem = (itemId, item, amountToAdd = 1) => {
-        const existing = localOffer.items.find(it => it.id === itemId);
+        const existing = myOffer.items.find(it => it.id === itemId);
         let newItems;
         if (existing) {
-            newItems = localOffer.items.map(it => it.id === itemId ? { ...it, amount: it.amount + amountToAdd } : it);
+            newItems = myOffer.items.map(it => it.id === itemId ? { ...it, amount: it.amount + amountToAdd } : it);
         } else {
-            newItems = [...localOffer.items, { id: itemId, amount: amountToAdd, name: item.name }];
+            newItems = [...myOffer.items, { id: itemId, amount: amountToAdd, name: item.name }];
         }
-        handleUpdateOffer(newItems, localOffer.silver);
+        handleUpdateOffer(newItems, myOffer.silver);
     };
 
     const removeItem = (itemId) => {
-        const newItems = localOffer.items.filter(it => it.id !== itemId);
-        handleUpdateOffer(newItems, localOffer.silver);
+        const newItems = myOffer.items.filter(it => it.id !== itemId);
+        handleUpdateOffer(newItems, myOffer.silver);
     };
 
     const handleAddSilver = () => {
         const amountToAdd = parseInt(silverInput) || 0;
         if (amountToAdd <= 0) return;
 
-        const maxAddable = Math.max(0, currentSilver - localOffer.silver);
+        const maxAddable = Math.max(0, currentSilver - myOffer.silver);
         const finalAdd = Math.min(amountToAdd, maxAddable);
 
-        const newTotal = localOffer.silver + finalAdd;
-        handleUpdateOffer(localOffer.items, newTotal);
+        const newTotal = myOffer.silver + finalAdd;
+        handleUpdateOffer(myOffer.items, newTotal);
         setSilverInput('');
     };
 
@@ -302,26 +302,31 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? '5px' : '10px' }}>
                                     <div style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--text-dim)', letterSpacing: '1px' }}>ADD SILVER</div>
                                     <div
-                                        onClick={() => setSilverInput(Math.max(0, currentSilver - localOffer.silver).toString())}
+                                        onClick={() => setSilverInput(Math.max(0, currentSilver - myOffer.silver).toString())}
                                         style={{ fontSize: '0.7rem', color: 'var(--accent)', cursor: 'pointer', fontWeight: 'bold' }}
                                     >
-                                        MAX: {Math.max(0, currentSilver - localOffer.silver).toLocaleString()}
+                                        MAX: {Math.max(0, currentSilver - myOffer.silver).toLocaleString()}
                                     </div>
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '6px' : '10px', boxSizing: 'border-box' }}>
                                     <input
                                         type="number"
                                         placeholder="0"
                                         value={silverInput}
                                         onChange={(e) => setSilverInput(e.target.value)}
-                                        style={{ flex: 1, background: 'var(--slot-bg)', border: '1px solid var(--border)', color: 'var(--accent)', padding: isMobile ? '8px' : '10px', borderRadius: '8px', fontWeight: '900', fontSize: isMobile ? '0.9rem' : '1rem' }}
+                                        style={{ 
+                                            flex: 1, minWidth: 0, background: 'var(--slot-bg)', border: '1px solid var(--border)', 
+                                            color: 'var(--accent)', padding: isMobile ? '8px' : '10px', borderRadius: '8px', 
+                                            fontWeight: '900', fontSize: isMobile ? '0.9rem' : '1rem', outline: 'none' 
+                                        }}
                                     />
                                     <button
                                         onClick={handleAddSilver}
                                         style={{
-                                            padding: isMobile ? '8px 12px' : '10px 15px', borderRadius: '8px', border: 'none',
+                                            flexShrink: 0, padding: isMobile ? '8px 12px' : '10px 18px', borderRadius: '8px', border: 'none',
                                             background: 'var(--accent)', color: '#000', fontWeight: '900', cursor: 'pointer',
-                                            fontSize: isMobile ? '0.8rem' : '1rem'
+                                            fontSize: isMobile ? '0.8rem' : '0.9rem', transition: '0.2s',
+                                            boxShadow: '0 2px 8px rgba(212,175,55,0.2)'
                                         }}
                                     >
                                         ADD
@@ -447,7 +452,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                             if (!item) return null;
                                             const totalAmount = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
 
-                                            const offeredItem = localOffer.items.find(it => it.id === id);
+                                            const offeredItem = myOffer.items.find(it => it.id === id);
                                             const offeredAmount = offeredItem ? offeredItem.amount : 0;
                                             const amount = totalAmount - offeredAmount;
 
