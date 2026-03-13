@@ -1688,6 +1688,27 @@ export class GameManager {
     async claimMarketItem(u, c, cl) { return this.marketManager.claimMarketItem(u, c, cl); }
     async savePushSubscription(u, s) { return this.pushManager.saveSubscription(u, s); }
 
+    // Guild Delegations
+    async createGuild(c, data) { return this.guildManager.createGuild(c, data); }
+    async updateCustomization(c, data) { return this.guildManager.updateCustomization(c, data); }
+    async getCharacterGuild(c) { return this.guildManager.getCharacterGuild(c); }
+    async getPublicGuildProfile(g) { return this.guildManager.getPublicGuildProfile(g); }
+    async searchGuilds(q, cc, c) { return this.guildManager.searchGuilds(q, cc, c); }
+    async leaveGuild(c) { return this.guildManager.leaveGuild(c); }
+    async disbandGuild(c) { return this.guildManager.disbandGuild(c); }
+    async applyToGuild(c, g) { return this.guildManager.applyToGuild(c, g); }
+    async getGuildRequests(c) { return this.guildManager.getGuildRequests(c); }
+    async handleGuildRequest(c, r, a) { return this.guildManager.handleGuildRequest(c, r, a); }
+    async changeMemberRole(c, data) { return this.guildManager.changeMemberRole(c, data); }
+    async updateGuildRole(c, data) { return this.guildManager.updateGuildRole(c, data); }
+    async deleteGuildRole(c, r) { return this.guildManager.deleteGuildRole(c, r); }
+    async kickMember(c, m) { return this.guildManager.kickMember(c, m); }
+    async transferLeadership(c, m) { return this.guildManager.transferLeadership(c, m); }
+    async donateSilver(c, a) { return this.guildManager.donateToBank(c, a); }
+    async getGuildTasks(c) { return this.guildManager.getGuildTasks(c); }
+    async claimGuildTask(c, t) { return this.guildManager.contributeToTask(c, t); }
+    async upgradeGuildBuilding(c, b) { return this.guildManager.upgradeBuilding(c, b); }
+
     async startResting(userId, characterId, percent = 100) {
         const char = await this.getCharacter(userId, characterId);
         if (!char) throw new Error("Character not found");
