@@ -27,8 +27,9 @@ export class MarketManager {
             query = query.eq('item_data->>quality', filters.quality.toString());
         }
 
-        if (filters.seller_id) {
-            query = query.eq('seller_character_id', filters.seller_id);
+        const sellerId = filters.seller_character_id || filters.seller_id;
+        if (sellerId) {
+            query = query.eq('seller_character_id', sellerId);
         }
 
         if (filters.category && filters.category !== 'ALL') {

@@ -172,7 +172,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
         if (!socket || !gameState?.id) return;
         if (activeTab === 'SELL' || activeTab === 'MY_ORDERS') {
             socket.emit('get_market_listings', {
-                seller_id: gameState.id
+                seller_character_id: gameState.id
             });
         }
     }, [socket, activeTab, gameState?.id]);
@@ -405,7 +405,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                             myOrders={store.myMarketListings} 
                             currentListingsCount={store.myMarketListings.length}
                             maxListings={maxListings} 
-                            onCancelItem={(item) => socket.emit('cancel_market_item', { listingId: item.id })} 
+                            onCancelItem={handleCancel} 
                         />
                     )}
                     {activeTab === 'BUY_ORDERS' && (
