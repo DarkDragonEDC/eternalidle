@@ -147,7 +147,7 @@ const CharacterSelection = ({ onSelectCharacter, theme, setTheme, isMobile, onPr
                 </div>
             )}
 
-            <h1>Select Your Character</h1>
+            <h1 className="char-select-title">Select Your Character</h1>
 
             {error && <div className="error-message">{error}</div>}
 
@@ -212,10 +212,7 @@ const CharacterSelection = ({ onSelectCharacter, theme, setTheme, isMobile, onPr
                                             )}
                                             
                                             {/* Avatar Portrait */}
-                                            <div style={{
-                                                width: '100px',
-                                                height: '100px',
-                                                margin: '10px auto',
+                                            <div className="char-avatar-circle" style={{
                                                 background: 'var(--slot-bg)',
                                                 border: '2px solid var(--accent)',
                                                 borderRadius: '50%',
@@ -347,12 +344,12 @@ const CharacterSelection = ({ onSelectCharacter, theme, setTheme, isMobile, onPr
                     color: var(--text-main);
                     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                 }
-                .char-select-container h1 {
+                .char-select-container .char-select-title {
                     font-size: 1.5rem;
                     font-weight: 700;
                     color: var(--accent);
                     text-align: center;
-                    margin-bottom: 20px;
+                    margin-bottom: 10px;
                     letter-spacing: 2px;
                 }
                 .char-list {
@@ -368,6 +365,11 @@ const CharacterSelection = ({ onSelectCharacter, theme, setTheme, isMobile, onPr
                     flex-direction: column;
                     align-items: center;
                     gap: 12px;
+                }
+                .char-avatar-circle {
+                    width: 100px;
+                    height: 100px;
+                    margin: 10px auto;
                 }
                 .slot-title {
                     font-size: 0.75rem;
@@ -539,19 +541,53 @@ const CharacterSelection = ({ onSelectCharacter, theme, setTheme, isMobile, onPr
                     margin: 5px 0;
                 }
                 
-                @media (max-width: 480px) {
-                    .char-select-container h1 {
-                        font-size: 1.25rem;
+                @media (max-width: 768px) {
+                    .char-select-container {
+                        justify-content: flex-start;
+                        padding: 10px 15px;
+                        min-height: 100dvh;
+                    }
+                    .char-select-container .char-select-title {
+                        font-size: 1.1rem;
+                        margin-bottom: 4px;
+                    }
+                    .char-list {
+                        gap: 10px;
+                        margin-top: 4px;
+                    }
+                    .slot-container {
+                        gap: 4px;
+                    }
+                    .slot-title {
+                        font-size: 0.65rem;
+                        padding: 2px 10px;
                     }
                     .char-card {
                         width: 85vw;
                         max-width: 280px;
+                        padding: 10px;
+                    }
+                    .char-avatar-circle {
+                        width: 65px;
+                        height: 65px;
+                        margin: 4px auto;
                     }
                     .char-name {
-                        font-size: 1rem;
+                        font-size: 0.95rem;
+                        margin: 2px 0 !important;
                     }
                     .char-info p {
-                        font-size: 0.8rem;
+                        font-size: 0.75rem;
+                        margin: 2px 0;
+                    }
+                    .play-btn {
+                        margin-top: 6px;
+                        padding: 6px;
+                    }
+                    .ironman-badge {
+                        top: -10px;
+                        font-size: 0.55rem;
+                        padding: 1px 8px;
                     }
                 }
                 .char-icons {
@@ -628,6 +664,13 @@ const CharacterSelection = ({ onSelectCharacter, theme, setTheme, isMobile, onPr
                     border-color: #ff5252;
                     transform: translateY(-2px);
                     box-shadow: 0 4px 12px rgba(211, 47, 47, 0.2);
+                }
+                @media (max-width: 768px) {
+                    .logout-btn {
+                        position: static;
+                        align-self: flex-end;
+                        margin-top: 10px;
+                    }
                 }
 
                 .new-char {

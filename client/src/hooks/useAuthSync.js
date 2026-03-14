@@ -14,6 +14,7 @@ export const useAuthSync = () => {
                 setSession(session);
             } catch (err) {
                 console.error('[AUTH] Session rehydration failed:', err.message);
+                setSession(null); // Clear session to force re-login
             } finally {
                 setIsAuthLoading(false);
             }

@@ -625,21 +625,22 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
                                 </motion.div>
                                 <div style={{ fontSize: isMobile ? '0.6rem' : '0.9rem', fontWeight: '900', color: 'var(--text-main)', textAlign: 'center', width: '100%' }}>{gameState?.name?.toUpperCase()}</div>
                                 <div style={{
-                                    fontSize: isMobile ? '0.9rem' : '1.3rem',
+                                    fontSize: isMobile ? '0.75rem' : '1.3rem',
                                     fontWeight: '900',
                                     color: '#4caf50',
                                     marginTop: '2px',
                                     textAlign: 'center',
                                     fontVariantNumeric: 'tabular-nums',
-                                    minWidth: isMobile ? '120px' : '200px',
+                                    minWidth: isMobile ? '80px' : '200px',
                                     display: 'flex',
+                                    flexWrap: 'wrap',
                                     justifyContent: 'center',
-                                    gap: '4px'
+                                    gap: isMobile ? '2px' : '4px'
                                 }}>
                                     <span>{formatNumber(Math.round(combat.playerHealth))}</span>
                                     <span>/</span>
                                     <span>{formatNumber(Math.round(stats.maxHP || stats.hp))}</span>
-                                    <span style={{ marginLeft: '4px' }}>HP</span>
+                                    <span style={{ marginLeft: '2px' }}>HP</span>
                                 </div>
                             </div>
 
@@ -754,21 +755,22 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
                                 </motion.div>
                                 <div style={{ fontSize: isMobile ? '0.6rem' : '0.9rem', fontWeight: '900', color: 'var(--text-main)', textAlign: 'center', width: '100%' }}>{combat.mobName.toUpperCase()}</div>
                                 <div style={{
-                                    fontSize: isMobile ? '0.9rem' : '1.3rem',
+                                    fontSize: isMobile ? '0.75rem' : '1.3rem',
                                     fontWeight: '900',
                                     color: '#ff4444',
                                     marginTop: '2px',
                                     textAlign: 'center',
                                     fontVariantNumeric: 'tabular-nums',
-                                    minWidth: isMobile ? '120px' : '200px',
+                                    minWidth: isMobile ? '80px' : '200px',
                                     display: 'flex',
+                                    flexWrap: 'wrap',
                                     justifyContent: 'center',
-                                    gap: '4px'
+                                    gap: isMobile ? '2px' : '4px'
                                 }}>
                                     <AnimatedCounter value={combat.mobHealth} maxValue={combat.mobMaxHealth} triggerKey={combat.kills} />
                                     <span>/</span>
                                     <span>{formatNumber(combat.mobMaxHealth)}</span>
-                                    <span style={{ marginLeft: '4px' }}>HP</span>
+                                    <span style={{ marginLeft: '2px' }}>HP</span>
                                 </div>
                             </div>
 
@@ -807,35 +809,35 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
                     <div className="glass-panel" style={{
                         padding: '8px',
                         display: 'grid',
-                        gridTemplateColumns: isMobile ? 'repeat(6, 1fr)' : 'repeat(3, 1fr)',
+                        gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : 'repeat(3, 1fr)',
                         gap: '5px',
                         flexShrink: 0
                     }}>
-                        <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
+                        <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)' }}>
                             <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <Activity size={10} /> DPS
                             </div>
                             <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4a90e2' }}>{formatCompactNumber(dps)}</div>
                         </div>
-                        <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
+                        <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)' }}>
                             <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <Trophy size={10} /> KILLS
                             </div>
                             <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4caf50' }}>{formatCompactNumber(kills)}</div>
                         </div>
-                        <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
+                        <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)' }}>
                             <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <Heart size={10} /> FOOD USE / SAVED
                             </div>
                             <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#ff4444' }}>{formatCompactNumber(foodConsumed)} / {formatCompactNumber(savedFoodCount)}</div>
                         </div>
-                        <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
+                        <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)' }}>
                             <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <TrendingUp size={10} /> TOTAL DAMAGE
                             </div>
                             <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{formatCompactNumber(totalDmgDealt)}</div>
                         </div>
-                        <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
+                        <div style={{ background: 'var(--slot-bg)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border)' }}>
                             <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <Zap size={10} /> DMG / CRIT
                             </div>
@@ -844,13 +846,13 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
                                 <span style={{ color: '#ff8c00', marginLeft: '4px' }}>/ {formatCompactNumber(totalBurstDmg)}</span>
                             </div>
                         </div>
-                        <div style={{ background: 'var(--accent-soft)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-active)', gridColumn: isMobile ? 'span 2' : 'span 1' }}>
+                        <div style={{ background: 'var(--accent-soft)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-active)' }}>
                             <div style={{ fontSize: '0.55rem', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <Coins size={10} /> SILVER
                             </div>
                             <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--accent)' }}>{formatCompactNumber(silverGained)}</div>
                         </div>
-                        <div style={{ background: 'rgba(76, 175, 80, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(76, 175, 80, 0.2)', gridColumn: isMobile ? 'span 3' : 'span 1' }}>
+                        <div style={{ background: 'rgba(76, 175, 80, 0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(76, 175, 80, 0.2)' }}>
                             <div style={{ fontSize: '0.55rem', color: '#4caf50', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <Star size={10} /> TOTAL XP
                             </div>

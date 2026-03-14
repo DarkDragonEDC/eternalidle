@@ -78,6 +78,19 @@ export const useAppStore = create((set, get) => ({
 
         newSocket.on('connect_error', (err) => {
             console.error('[SOCKET] Connection error:', err.message);
+            
+            // If it's an authentication error, force a logout/re-login
+            if (err.message.toLowerCase().includes('auth') || err.message.toLowerCase().includes('token')) {
+                console.warn('[SOCKET] Authentication failure detected. Clearing session.');
+                const { setSession, setSelectedCharacter, setGameState, isConnected } = get();
+                
+                // Only clear if we were previously "trying" to be connected or were connected
+                setSession(null);
+                setSelectedCharacter(null);
+                setGameState(null);
+                
+                if (newSocket) newSocket.disconnect();
+            }
         });
 
         newSocket.on('name_availability_result', (result) => {
