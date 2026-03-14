@@ -1,7 +1,7 @@
--- Query to list each player with an active activity and elapsed time
--- This includes Gathering, Refining, Crafting (current_activity), Combat, and Dungeons.
+-- Query to list unique players (accounts) with an active activity and elapsed time
+-- Shows only the longest running activity if a player has multiple characters active.
 
-SELECT 
+SELECT DISTINCT ON (user_id)
     name AS player_name,
     CASE 
         WHEN current_activity IS NOT NULL THEN (current_activity->>'type')
@@ -22,8 +22,10 @@ SELECT
 FROM 
     characters
 WHERE 
-    current_activity IS NOT NULL 
+    (current_activity IS NOT NULL 
     OR combat IS NOT NULL 
-    OR dungeon IS NOT NULL
+    OR dungeon IS NOT NULL)
+    AND is_admin = false
 ORDER BY 
+    user_id, -- Required for DISTINCT ON
     elapsed_time DESC;
