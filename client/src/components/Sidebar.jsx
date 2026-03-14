@@ -5,6 +5,7 @@ import {
     Trophy, Tag, Zap, Box, Axe, Shield, Users, MessageSquare, Sun, Moon, Gift, Skull, Lock,
     Check, Sparkles, Trees, PawPrint, Leaf, FlaskConical, Flame, Layers, Droplets, Target, CookingPot, Fish, LogOut
 } from 'lucide-react';
+import { useAppStore } from '../store/useAppStore';
 import DailySpinModal from './DailySpinModal';
 import { calculateNextLevelXP } from '@shared/skills';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -18,11 +19,14 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
         merging: false,
         combat: false
     });
-    const [activePlayers, setActivePlayers] = useState(0);
-    const [characters, setCharacters] = useState([]);
-    const [loadingChars, setLoadingChars] = useState(false);
+    const { activePlayers, characters, isCharactersLoading, fetchCharacters } = useAppStore();
+    const loadingChars = isCharactersLoading && characters.length === 0;
 
-    // Removed internal Daily Spin logic (lifted to App.jsx)
+    useEffect(() => {
+        if (!isAnonymous) {
+            fetchCharacters(supabase);
+        }
+    }, [isAnonymous, fetchCharacters]);
 
     useEffect(() => {
         if (!isAnonymous && socket?.connected) {
@@ -30,58 +34,10 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
         }
     }, [isAnonymous, socket]);
 
-    useEffect(() => {
-        const fetchCharacters = async () => {
-            if (isAnonymous) return;
-            setLoadingChars(true);
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                const token = session?.access_token;
-                const apiUrl = import.meta.env.VITE_API_URL;
-                const res = await fetch(`${apiUrl}/api/characters`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    setCharacters(data);
-                }
-            } catch (err) {
-                console.error('Error fetching characters in sidebar:', err);
-            } finally {
-                setLoadingChars(false);
-            }
-        };
-
-        fetchCharacters();
-    }, [isAnonymous]);
-
-    useEffect(() => {
-        const fetchActivePlayers = async () => {
-            try {
-                const apiUrl = import.meta.env.VITE_API_URL;
-                const res = await fetch(`${apiUrl}/api/active_players`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setActivePlayers(data.count || 0);
-                }
-            } catch (err) {
-                console.warn('Could not fetch active players count in sidebar');
-            }
-        };
-
-        fetchActivePlayers();
-        const interval = setInterval(fetchActivePlayers, 15000);
-        return () => clearInterval(interval);
-    }, []);
 
     const toggleExpand = (id) => {
         setExpanded(prev => ({
             ...prev,
-            gathering: false,
-            refining: false,
-            crafting: false,
-            merging: false,
-            combat: false,
             [id]: !prev[id]
         }));
     };
@@ -253,8 +209,20 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
                                     <User size={24} color="var(--text-dim)" />
                                 )}
                                 {char.state?.isIronman && (
-                                    <div style={{ position: 'absolute', bottom: -2, right: -2, background: '#718096', border: '1px solid #2d3748', borderRadius: '50%', width: 12, height: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <Lock size={8} color="white" />
+                                    <div style={{ 
+                                        position: 'absolute', 
+                                        bottom: -2, 
+                                        right: -2, 
+                                        background: 'var(--accent)', 
+                                        border: '1px solid var(--bg-dark)', 
+                                        borderRadius: '50%', 
+                                        width: 12, 
+                                        height: 12, 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        justifyContent: 'center' 
+                                    }}>
+                                        <Lock size={8} color="var(--bg-dark)" />
                                     </div>
                                 )}
                             </motion.div>
@@ -282,10 +250,10 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
                                     right: '8px',
                                     width: '8px',
                                     height: '8px',
-                                    background: '#ff4444',
+                                    background: '#ef4444',
                                     borderRadius: '50%',
                                     border: '1px solid var(--sidebar-bg)',
-                                    boxShadow: '0 0 5px rgba(255, 68, 68, 0.5)'
+                                    boxShadow: '0 0 5px rgba(239, 68, 68, 0.5)'
                                 }} />
                             )}
                         </motion.button>
@@ -329,9 +297,9 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 gap: '8px',
-                                background: isAnonymous ? '#1E2330' : 'linear-gradient(135deg, var(--sidebar-accent) 0%, #4338ca 100%)',
+                                background: isAnonymous ? 'var(--slot-bg)' : 'linear-gradient(135deg, var(--sidebar-accent) 0%, var(--accent-soft) 100%)',
                                 borderRadius: '8px',
-                                border: '1px solid rgba(255,255,255,0.05)',
+                                border: '1px solid var(--border)',
                                 color: 'white',
                                 fontWeight: '700',
                                 fontSize: '0.8rem',
@@ -377,10 +345,10 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
                                                             right: '-2px',
                                                             width: '8px',
                                                             height: '8px',
-                                                            background: '#ff4444',
+                                                            background: '#ef4444',
                                                             borderRadius: '50%',
                                                             border: '2px solid var(--sidebar-bg)',
-                                                            boxShadow: '0 0 5px rgba(255, 68, 68, 0.5)'
+                                                            boxShadow: '0 0 5px rgba(239, 68, 68, 0.5)'
                                                         }} />
                                                     )}
                                                 </div>
@@ -428,7 +396,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
                                                         initial={{ height: 0, opacity: 0 }}
                                                         animate={{ height: 'auto', opacity: 1 }}
                                                         exit={{ height: 0, opacity: 0 }}
-                                                        style={{ overflow: 'hidden', paddingLeft: '12px', display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '2px', borderLeft: '1px solid rgba(255,255,255,0.05)', marginLeft: '12px' }}
+                                                        style={{ overflow: 'hidden', paddingLeft: '12px', display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '2px', borderLeft: '1px solid var(--border)', marginLeft: '12px' }}
                                                     >
                                                         {item.children.map(child => {
                                                             const isChildActive = activeTab === item.id && activeCategory === child.id;

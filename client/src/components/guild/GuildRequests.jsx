@@ -50,7 +50,7 @@ export const GuildRequests = ({ requests, isLoading, onHandleRequest, isMobile }
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)'
                                 }}>
                                     {req.avatar ? (
-                                        <img src={`/avatars/${req.avatar.replace(/\.(png|jpg|jpeg)$/, '.webp')}`} alt={req.username} style={{ width: '100%', height: '100%', borderRadius: 'inherit', objectFit: 'cover' }} />
+                                        <img src={req.avatar.replace(/\.(png|jpg|jpeg)$/, '.webp')} alt={req.name} style={{ width: '100%', height: '100%', borderRadius: 'inherit', objectFit: 'cover', objectPosition: 'center 20%' }} />
                                     ) : (
                                         <Users size={20} color="var(--accent)" />
                                     )}
@@ -65,9 +65,9 @@ export const GuildRequests = ({ requests, isLoading, onHandleRequest, isMobile }
                                 )}
                             </div>
                             <div>
-                                <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '0.9rem' }}>{req.username}</div>
+                                <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '0.9rem' }}>{req.name}</div>
                                 <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                    <Shield size={10} color="var(--accent)" /> LVL {req.level || 1} • <Clock size={10} /> Applied {new Date(req.created_at).toLocaleDateString()}
+                                    <Shield size={10} color="var(--accent)" /> LVL {req.level || 1} • <Clock size={10} /> Applied {new Date(req.createdAt).toLocaleDateString()}
                                 </div>
                             </div>
                         </div>

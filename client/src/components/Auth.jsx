@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { Users, Lock, Mail, Key, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAppStore } from '../store/useAppStore';
 import LandingPage from './LandingPage';
 
 const Auth = ({ onLogin, initialView = 'LOGIN', theme, setTheme, isMobile, onPreviewTheme }) => {
@@ -18,26 +19,8 @@ const Auth = ({ onLogin, initialView = 'LOGIN', theme, setTheme, isMobile, onPre
     const [showOtpInput, setShowOtpInput] = useState(false);
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
-    const [activePlayers, setActivePlayers] = useState(0);
+    const activePlayers = useAppStore(state => state.activePlayers);
 
-    useEffect(() => {
-        const fetchActivePlayers = async () => {
-            try {
-                const apiUrl = import.meta.env.VITE_API_URL;
-                const res = await fetch(`${apiUrl}/api/active_players`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setActivePlayers(data.count || 0);
-                }
-            } catch (err) {
-                console.warn('Could not fetch active players count');
-            }
-        };
-
-        fetchActivePlayers();
-        const interval = setInterval(fetchActivePlayers, 15000);
-        return () => clearInterval(interval);
-    }, []);
 
     const handleSubmit = async (e) => {
         if (e) e.preventDefault();

@@ -213,8 +213,10 @@ function App() {
         );
     }
 
+    const currentTheme = previewThemeId || theme;
+
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', background: 'transparent', color: 'var(--text-main)', fontFamily: "'Inter', sans-serif", position: 'relative', paddingBottom: isMobile ? '70px' : '0' }}>
+        <div className={`theme-${currentTheme}`} style={{ display: 'flex', minHeight: '100vh', background: 'transparent', color: 'var(--text-main)', fontFamily: "'Inter', sans-serif", position: 'relative', paddingBottom: isMobile ? '70px' : '0' }}>
             {!isMobile && (
                 <Sidebar
                     gameState={displayedGameState}

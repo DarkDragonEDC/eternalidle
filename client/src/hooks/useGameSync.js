@@ -139,24 +139,13 @@ export const useGameSync = () => {
         return () => window.removeEventListener('beforeunload', handleUnload);
     }, [session]);
 
-    // Fetch Active Players
+    // Fetch Active Players (Every 5 minutes)
     useEffect(() => {
-        const fetchActivePlayers = async () => {
-            try {
-                const apiUrl = import.meta.env.VITE_API_URL;
-                const res = await fetch(`${apiUrl}/api/active_players`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setActivePlayers(data.count || 0);
-                }
-            } catch (err) {
-                console.warn('Could not fetch active players count');
-            }
-        };
+        const { fetchActivePlayers } = useAppStore.getState();
         fetchActivePlayers();
-        const interval = setInterval(fetchActivePlayers, 60000);
+        const interval = setInterval(fetchActivePlayers, 300000);
         return () => clearInterval(interval);
-    }, [setActivePlayers]);
+    }, []);
 
     // Auto-connect
     useEffect(() => {

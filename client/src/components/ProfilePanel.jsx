@@ -20,6 +20,7 @@ import { getProficiencyStats } from '@shared/proficiency_stats';
 import { calculateNextLevelXP } from '@shared/skills';
 import { resolveItem, formatItemId, ITEMS, getRequiredProficiencyGroup, calculateRuneBonus } from '@shared/items';
 import { getBestItemForSlot, isBetterItem } from '@utils/equipment';
+import { useAppStore } from '../store/useAppStore';
 
 
 
@@ -28,7 +29,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
     const [selectedSlot, setSelectedSlot] = useState(null);
     const [infoModal, setInfoModal] = useState(null);
     const [breakdownModal, setBreakdownModal] = useState(null);
-    const [activePlayers, setActivePlayers] = useState(0);
+    const activePlayers = useAppStore(state => state.activePlayers);
     const [activeProfileTab, setActiveProfileTab] = useState('EQUIPMENT'); // 'EQUIPMENT' or 'RUNES'
     const [selectedTitle, setSelectedTitle] = useState(gameState?.state?.selectedTitle || 'Lands Explorer');
     const [activeRuneTab, setActiveRuneTab] = useState('GATHERING'); // 'GATHERING', 'REFINING', 'CRAFTING', 'COMBAT'
@@ -104,27 +105,6 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
     const isGoogleLinked = session?.user?.app_metadata?.providers?.includes('google') ||
         session?.user?.identities?.some(id => id.provider === 'google');
 
-    // Fetch Active Players logic (duplicated from Sidebar for Mobile Profile)
-    React.useEffect(() => {
-        if (!isMobile) return; // Only needed on mobile here
-
-        const fetchActivePlayers = async () => {
-            try {
-                const apiUrl = import.meta.env.VITE_API_URL;
-                const res = await fetch(`${apiUrl}/api/active_players`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setActivePlayers(data.count || 0);
-                }
-            } catch (err) {
-                console.warn('Could not fetch active players count in profile');
-            }
-        };
-
-        fetchActivePlayers();
-        const interval = setInterval(fetchActivePlayers, 15000);
-        return () => clearInterval(interval);
-    }, [isMobile]);
 
     const handleEquip = (itemId, quantity = null) => {
         if (isPreviewActive) return onPreviewActionBlocked();

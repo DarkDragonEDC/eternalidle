@@ -11,6 +11,38 @@ export const useAppStore = create((set, get) => ({
     setSession: (session) => set({ session, user: session?.user || null }),
     setIsAuthLoading: (isAuthLoading) => set({ isAuthLoading }),
 
+    // --- CHARACTERS STATE ---
+    characters: JSON.parse(localStorage.getItem('cached_characters') || '[]'),
+    isCharactersLoading: false,
+    fetchCharacters: async (supabase) => {
+        const { characters, isCharactersLoading } = get();
+        if (isCharactersLoading) return;
+
+        set({ isCharactersLoading: true });
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) return;
+            
+            const token = session.access_token;
+            const res = await fetch(`${API_URL}/api/characters`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                set({ characters: data });
+                localStorage.setItem('cached_characters', JSON.stringify(data));
+            }
+        } catch (err) {
+            console.error('Error fetching characters:', err);
+        } finally {
+            set({ isCharactersLoading: false });
+        }
+    },
+    setCharacters: (characters) => {
+        set({ characters });
+        localStorage.setItem('cached_characters', JSON.stringify(characters));
+    },
+
     // --- SOCKET STATE ---
     socket: null,
     isConnected: false,
@@ -72,6 +104,17 @@ export const useAppStore = create((set, get) => ({
     setGlobalStats: (globalStats) => set({ globalStats }),
     activePlayers: 0,
     setActivePlayers: (activePlayers) => set({ activePlayers }),
+    fetchActivePlayers: async () => {
+        try {
+            const res = await fetch(`${API_URL}/api/active_players`);
+            if (res.ok) {
+                const data = await res.json();
+                set({ activePlayers: data.count || 0 });
+            }
+        } catch (err) {
+            console.warn('Could not fetch active players count');
+        }
+    },
     connectionError: null,
     setConnectionError: (connectionError) => set({ connectionError }),
     isConnecting: false,

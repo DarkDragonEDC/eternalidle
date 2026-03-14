@@ -6,9 +6,10 @@ import '../index.css';
 import { formatNumber, formatSilver } from '@utils/format';
 import ThemeSelector from './ThemeSelector';
 
+import { useAppStore } from '../store/useAppStore';
+
 const CharacterSelection = ({ onSelectCharacter, theme, setTheme, isMobile, onPreviewTheme }) => {
-    const [characters, setCharacters] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const { characters, isCharactersLoading: loading, fetchCharacters, setCharacters } = useAppStore();
     const [creating, setCreating] = useState(null); // 'normal' or 'ironman' or null
     const [newCharName, setNewCharName] = useState('');
     const [error, setError] = useState(null);
@@ -27,46 +28,8 @@ const CharacterSelection = ({ onSelectCharacter, theme, setTheme, isMobile, onPr
     };
 
     useEffect(() => {
-        fetchCharacters();
-    }, []);
-
-    const fetchCharacters = async () => {
-        setLoading(true);
-        try {
-            const { data: { session } } = await supabase.auth.getSession();
-            const token = session?.access_token;
-
-            const apiUrl = import.meta.env.VITE_API_URL;
-            const res = await fetch(`${apiUrl}/api/characters`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!res.ok) {
-                const errData = await res.json();
-                throw new Error(errData.error || 'Failed to fetch characters');
-            }
-
-            const data = await res.json();
-            setCharacters(data);
-        } catch (err) {
-            console.error(err);
-            setError(err.message);
-
-            // If it's an auth error, the session might be stale or from another project
-            if (err.message.includes('Invalid token') || err.message.includes('JWT')) {
-                console.warn('Authentication error detected. Clearing session...');
-                supabase.auth.signOut().then(() => {
-                    localStorage.clear();
-                    sessionStorage.clear();
-                    window.location.reload();
-                });
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
+        fetchCharacters(supabase);
+    }, [fetchCharacters]);
 
     const handleCreate = async () => {
         if (!newCharName.trim()) return;
