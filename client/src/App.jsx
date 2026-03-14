@@ -78,7 +78,8 @@ function App() {
         previewAvatarData, previewBannerData,
         tradeInvites, activeTrade, canSpin,
         isPreviewActive, onPreviewActionBlocked,
-        startActivity
+        startActivity,
+        marketNotification
     } = useAppStore();
 
     const clockOffset = useRef(0);
@@ -225,6 +226,7 @@ function App() {
                     isOpen={sidebarOpen}
                     onClose={() => setSidebarOpen(false)}
                     onSwitchCharacter={handleSwitchCharacter}
+                    onLogout={handleLogout}
                     socket={socket}
                     canSpin={canSpin}
                     onOpenDailySpin={() => setModal('dailySpin', true)}
@@ -232,6 +234,7 @@ function App() {
                     isAnonymous={session?.user?.is_anonymous}
                     onShowGuestModal={() => setModal('guest', true)}
                     onTutorialComplete={handleTutorialStepComplete}
+                    hasMarketNotification={!!marketNotification}
                 />
             )}
 

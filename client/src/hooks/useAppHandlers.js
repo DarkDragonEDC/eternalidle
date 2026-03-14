@@ -35,12 +35,16 @@ export function useAppHandlers({
         setSelectedCharacter(null);
     }, [disconnectSocket, setGameState, setSelectedCharacter]);
 
-    const handleSwitchCharacter = useCallback(() => {
+    const handleSwitchCharacter = useCallback((id) => {
         disconnectSocket();
         setGameState(null);
-        setSelectedCharacter(null);
-        setTheme('medieval');
-    }, [disconnectSocket, setGameState, setSelectedCharacter, setTheme]);
+        if (id) {
+            handleCharacterSelect(id);
+        } else {
+            setSelectedCharacter(null);
+            setTheme('medieval');
+        }
+    }, [disconnectSocket, setGameState, handleCharacterSelect, setSelectedCharacter, setTheme]);
 
     const handleTutorialStepComplete = useCallback((step) => {
         if (socket) socket.emit('tutorial_complete', { step });
