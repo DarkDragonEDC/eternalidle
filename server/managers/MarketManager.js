@@ -35,6 +35,11 @@ export class MarketManager {
             query = query.eq('item_data->>seller_character_id', filters.seller_character_id);
         }
 
+        // Exclude own listings from the browse/buy tab so pagination count is accurate
+        if (filters.exclude_seller_id) {
+            query = query.neq('seller_id', filters.exclude_seller_id);
+        }
+
         if (filters.category && filters.category !== 'ALL') {
             if (filters.category === 'EQUIPMENT') {
                 query = query.or('item_data->>type.in.(WEAPON,ARMOR,HELMET,BOOTS,OFF_HAND,GLOVES,CAPE),item_data->>type.ilike.TOOL%');

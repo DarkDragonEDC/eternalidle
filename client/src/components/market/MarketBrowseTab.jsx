@@ -28,21 +28,8 @@ const MarketBrowseTab = ({
     setCurrentPage,
     pagination
 }) => {
-    // We no longer need local filtering logic here as the server does it.
-    // We only filter out my own listings just in case they are returned (though the server should probably handle that too).
-    
-    const isOwnListing = (l) => {
-        const sellerId = l.seller_character_id || l.item_data?.seller_character_id;
-        if (sellerId && gameState?.id) {
-            return String(sellerId) === String(gameState.id);
-        }
-        if (l.seller_name && gameState?.name && l.seller_id && gameState?.user_id) {
-            return l.seller_name === gameState.name && l.seller_id === gameState.user_id;
-        }
-        return false;
-    };
-
-    const displayListings = marketListings.filter(l => !isOwnListing(l));
+    // Server now handles excluding own listings via exclude_seller_id filter
+    const displayListings = marketListings;
     const totalPages = pagination?.totalPages || 1;
 
     return (

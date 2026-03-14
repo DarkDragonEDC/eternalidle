@@ -127,7 +127,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
         lastFetchRef.current = fetchKey;
         setLoading(true);
         socket.emit('get_leaderboard', { type, mode });
-    }, [socket, subCategory, rankMode, gameState]);
+    }, [socket, subCategory, rankMode]);
 
     // React to store updates
     useEffect(() => {
@@ -515,10 +515,9 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                             <div style={{ fontSize: '1.1rem', fontWeight: '900', color: index === 0 ? 'var(--accent)' : 'var(--text-main)', lineHeight: 1 }}>
                                                 {formatNumber(char.value)}
                                             </div>
-                                            {rankMode !== 'GUILDS' ? (
+                                            {rankMode !== 'GUILDS' && subCategory !== 'ITEM_POWER' ? (
                                                 <div style={{ fontSize: '0.65rem', color: index === 0 ? 'var(--accent)' : 'var(--text-dim)', fontWeight: 'bold', opacity: 0.8, marginTop: '2px' }}>
                                                     {subCategory === 'TOTAL_XP' ? `LVL ${formatNumber(char.subValue)}` : 
-                                                     subCategory === 'ITEM_POWER' ? char.subValue :
                                                      `${formatNumber(char.subValue)} XP`}
                                                 </div>
                                             ) : rankMode === 'GUILDS' && (

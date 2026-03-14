@@ -284,7 +284,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onEquipFood
                                     </div>
                                     <div>
                                         <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>
-                                            {formatItemId(bestCandidate.id || bestCandidate.name)}
+                                            {bestCandidate.name || formatItemId(bestCandidate.id)}
                                         </div>
                                         <div style={{ fontSize: '0.8rem', color: bestCandidate.rarityColor || 'var(--accent)' }}>
                                             {bestCandidate.type === 'RUNE' ? `Tier ${bestCandidate.tier} • ${bestCandidate.stars} Stars` :

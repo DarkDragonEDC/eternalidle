@@ -108,7 +108,7 @@ export const registerMiscHandlers = (socket, gameManager, io) => {
 
   socket.on("get_leaderboard", async ({ type, mode, forceRefresh }) => {
     try {
-      const response = await gameManager.getLeaderboard(type, socket.data.characterId, mode, forceRefresh);
+      const response = await gameManager.getLeaderboard(type, mode, socket.data.characterId, forceRefresh);
       socket.emit("leaderboard_update", {
         type: response.type,
         mode: response.mode,

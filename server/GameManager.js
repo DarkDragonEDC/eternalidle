@@ -1625,7 +1625,16 @@ export class GameManager {
                     console.error("[RANKING] Character Details DB Error:", charError);
                     return { type, top100: [], userRank: null };
                 }
-                data = ids.map(id => chars.find(c => c.id === id)).filter(Boolean);
+                
+                // Apply Ironman/Normal filter for skill-based rankings
+                let filteredChars = chars || [];
+                if (mode === 'IRONMAN') {
+                    filteredChars = filteredChars.filter(c => c.state?.isIronman === true);
+                } else {
+                    filteredChars = filteredChars.filter(c => !c.state?.isIronman);
+                }
+                
+                data = ids.map(id => filteredChars.find(c => c.id === id)).filter(Boolean);
             } else {
                 data = [];
             }

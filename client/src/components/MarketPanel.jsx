@@ -172,9 +172,10 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
             search: searchQuery,
             sort: selectedSort,
             page: currentPage,
-            limit: 10
+            limit: 10,
+            exclude_seller_id: store.user?.id || undefined
         });
-    }, [socket, selectedCategory, selectedTier, selectedQuality, searchQuery, selectedSort, currentPage]);
+    }, [socket, selectedCategory, selectedTier, selectedQuality, searchQuery, selectedSort, currentPage, store.user?.id]);
 
     useEffect(() => {
         if (!socket) return;
