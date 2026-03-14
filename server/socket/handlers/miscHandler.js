@@ -120,6 +120,19 @@ export const registerMiscHandlers = (socket, gameManager, io) => {
       socket.emit("error", { message: "Error fetching leaderboard" });
     }
   });
+
+  socket.on("request_daily_status", async () => {
+    try {
+      if (!socket.data.characterId) return;
+      const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+      if (!char) return;
+      const canSpin = await gameManager.dailyRewardManager.canSpin(char);
+      socket.emit("daily_status", { canSpin });
+    } catch (err) {
+      console.error("[DAILY] Error checking daily status:", err);
+    }
+  });
+
   socket.on("spin_daily", async () => {
     try {
       if (!socket.data.characterId) return;

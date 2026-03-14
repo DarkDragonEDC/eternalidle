@@ -1564,17 +1564,8 @@ export class GameManager {
             return { type, mode, top100: processed, userRank: null };
         }
 
-        const skillMapping = {
-            'PLANK_REFINER': 'PLANK_REFINING',
-            'METAL_BAR_REFINER': 'METAL_BAR_REFINING',
-            'LEATHER_REFINER': 'LEATHER_REFINING',
-            'CLOTH_REFINER': 'CLOTH_REFINING',
-            'ORE_MINER': 'MINING',
-            'LUMBERJACK': 'WOODCUTTING',
-            'ANIMAL_SKINNER': 'SKINNING',
-            'FIBER_HARVESTER': 'FIBER_HARVESTING'
-        };
-        const dbType = skillMapping[type] || type;
+        // Use the type directly as dbType, the frontend keys now match the DB ranking_type
+        const dbType = type;
 
         if (['LEVEL', 'TOTAL_XP', 'ITEM_POWER'].includes(dbType) || mode === 'IRONMAN') {
             let query = this.supabase
@@ -1619,6 +1610,7 @@ export class GameManager {
                 const { data: chars, error: charError } = await this.supabase
                     .from('characters')
                     .select('id, name, state, skills, info, equipment')
+                    .eq('is_admin', false)
                     .in('id', ids);
 
                 if (charError) {

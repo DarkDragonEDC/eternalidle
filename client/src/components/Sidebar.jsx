@@ -249,7 +249,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
                 <motion.a
                     whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
                     whileTap={{ scale: 0.9 }}
-                    href="https://discord.gg/mMrBuBHW5q"
+                    href="https://discord.gg/uVGYW2gJtB"
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{

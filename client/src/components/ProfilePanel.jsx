@@ -689,7 +689,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
 
                             {/* Discord */}
                             {isMobile && (
-                                <a href="https://discord.gg/mMrBuBHW5q" target="_blank" rel="noopener noreferrer" style={{
+                                <a href="https://discord.gg/uVGYW2gJtB" target="_blank" rel="noopener noreferrer" style={{
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     width: '40px', height: '40px', background: '#5865F2',
                                     borderRadius: '12px', color: 'var(--text-main)'

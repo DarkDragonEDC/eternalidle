@@ -22,6 +22,8 @@ const MarketBrowseTab = ({
     setSelectedTier,
     selectedQuality,
     setSelectedQuality,
+    selectedClass,
+    setSelectedClass,
     selectedSort,
     setSelectedSort,
     currentPage,
@@ -100,6 +102,26 @@ const MarketBrowseTab = ({
                     <option value="2">Outstanding</option>
                     <option value="3">Excellent</option>
                     <option value="4">Masterpiece</option>
+                </select>
+
+                <select
+                    value={selectedClass}
+                    onChange={(e) => setSelectedClass(e.target.value)}
+                    style={{
+                        flex: '1',
+                        minWidth: '100px',
+                        background: 'rgba(0, 0, 0, 0.3)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                        padding: '5px 10px',
+                        color: 'var(--text-main)',
+                        fontSize: '0.8rem'
+                    }}
+                >
+                    <option value="ALL">All Classes</option>
+                    <option value="WARRIOR">Warrior</option>
+                    <option value="MAGE">Mage</option>
+                    <option value="HUNTER">Hunter</option>
                 </select>
 
                 <select

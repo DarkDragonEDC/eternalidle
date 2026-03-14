@@ -371,7 +371,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onEquipFood
                                     </div>
                                     <div style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                         <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
-                                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{formatItemId(currentItem.id || currentItem.name)}</span>
+                                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{resolvedCurrent?.name || formatItemId(currentItem.id || currentItem.name)}</span>
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); if (gameState?.state?.tutorialStep && gameState.state.tutorialStep !== 'COMPLETED') return; onShowInfo(currentItem); }}
                                                 style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.5, flexShrink: 0 }}
@@ -542,7 +542,7 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onEquipFood
                                                 </div>
                                                 <div>
                                                     <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                        {formatItemId(item.id || item.name)}
+                                                        {item.name || formatItemId(item.id || item.name)}
                                                         {isItemRecommended && (
                                                             <span style={{ fontSize: '0.6rem', background: 'var(--accent)', color: '#000', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>BEST</span>
                                                         )}

@@ -145,7 +145,7 @@ const LandingPage = ({ onPlay, activePlayers = 0 }) => {
                     >Leaderboards</span>
 
                     <a
-                        href="https://discord.gg/mMrBuBHW5q"
+                        href="https://discord.gg/uVGYW2gJtB"
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{

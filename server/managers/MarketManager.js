@@ -27,6 +27,17 @@ export class MarketManager {
             query = query.eq('item_data->>quality', filters.quality.toString());
         }
 
+        if (filters.itemClass && filters.itemClass !== 'ALL') {
+            const cls = filters.itemClass.toUpperCase();
+            if (cls === 'WARRIOR') {
+                 query = query.or('item_id.ilike.%SWORD%,item_id.ilike.%SHEATH%,item_id.ilike.%AXE_%,item_id.ilike.%PLATE_%');
+            } else if (cls === 'MAGE') {
+                 query = query.or('item_id.ilike.%STAFF%,item_id.ilike.%TOME%,item_id.ilike.%CLOTH_%');
+            } else if (cls === 'HUNTER') {
+                 query = query.or('item_id.ilike.%BOW%,item_id.ilike.%TORCH%,item_id.ilike.%LEATHER_%');
+            }
+        }
+
         if (filters.seller_id) {
             query = query.eq('seller_id', filters.seller_id);
         }

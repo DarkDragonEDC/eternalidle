@@ -65,6 +65,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
     const [selectedCategory, setSelectedCategory] = useState('ALL');
     const [selectedTier, setSelectedTier] = useState('ALL');
     const [selectedQuality, setSelectedQuality] = useState('ALL');
+    const [selectedClass, setSelectedClass] = useState('ALL');
     const [selectedSort, setSelectedSort] = useState('NEWEST');
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -160,6 +161,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
             category: selectedCategory,
             tier: selectedTier,
             quality: selectedQuality,
+            itemClass: selectedClass,
             search: searchQuery,
             sort: selectedSort,
             page: currentPage
@@ -169,13 +171,14 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
             category: selectedCategory,
             tier: selectedTier,
             quality: selectedQuality,
+            itemClass: selectedClass,
             search: searchQuery,
             sort: selectedSort,
             page: currentPage,
             limit: 10,
             exclude_seller_id: store.user?.id || undefined
         });
-    }, [socket, selectedCategory, selectedTier, selectedQuality, searchQuery, selectedSort, currentPage, store.user?.id]);
+    }, [socket, selectedCategory, selectedTier, selectedQuality, selectedClass, searchQuery, selectedSort, currentPage, store.user?.id]);
 
     useEffect(() => {
         if (!socket) return;
@@ -211,7 +214,7 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
     // Reset page when filters change
     useEffect(() => {
         setCurrentPage(1);
-    }, [selectedCategory, selectedTier, selectedQuality, searchQuery, selectedSort]);
+    }, [selectedCategory, selectedTier, selectedQuality, selectedClass, searchQuery, selectedSort]);
 
     useEffect(() => {
         if (initialSearch) {
@@ -396,6 +399,8 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                             setSelectedTier={setSelectedTier}
                             selectedQuality={selectedQuality}
                             setSelectedQuality={setSelectedQuality}
+                            selectedClass={selectedClass}
+                            setSelectedClass={setSelectedClass}
                             selectedSort={selectedSort}
                             setSelectedSort={setSelectedSort}
                             currentPage={currentPage}
