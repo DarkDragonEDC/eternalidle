@@ -391,63 +391,67 @@ export class WorldBossManager {
         // PERSISTENCE: Clear from state
         if (char.state) delete char.state.activeWorldBossFight;
 
-        // Save to DB
-        console.log(`[WORLD_BOSS] Attempting to save participation...`);
         try {
-            await this.saveParticipation(char.id, fight.damage, char.name);
-            console.log(`[WORLD_BOSS] Save successful.`);
-        } catch (dbErr) {
-            console.error(`[WORLD_BOSS] CRITICAL: Failed to save participation!`, dbErr);
-        }
+            const oldTop1 = this.rankings.length > 0 ? this.rankings[0] : null;
 
-        // Refresh local cache immediately
-        console.log(`[WORLD_BOSS] Refreshing rankings...`);
-        await this.refreshRankings();
-
-        const newTop1 = this.rankings.length > 0 ? this.rankings[0] : null;
-
-        // Global Announcement if Top 1 changed
-        if (newTop1 && (!oldTop1 || oldTop1.character_id !== newTop1.character_id)) {
-            const announcement = `📢 ${newTop1.name} has just taken the Top 1 spot in the World Boss Ranking with ${newTop1.damage.toLocaleString()} damage!`;
-
+            // Save to DB
+            console.log(`[WORLD_BOSS] Attempting to save participation...`);
             try {
-                // 1. Persist to DB for history
-                const { data: msgData, error: msgError } = await this.gameManager.supabase
-                    .from('messages')
-                    .insert({
-                        sender_name: '[SYSTEM]',
-                        content: announcement,
-                        channel: 'SYSTEM'
-                    })
-                    .select()
-                    .single();
+                await this.saveParticipation(char.id, fight.damage, char.name);
+                console.log(`[WORLD_BOSS] Save successful.`);
+            } catch (dbErr) {
+                console.error(`[WORLD_BOSS] CRITICAL: Failed to save participation!`, dbErr);
+            }
 
-                // 2. Broadcast to all online players
-                if (!msgError && msgData) {
-                    this.gameManager.broadcast('new_message', msgData);
-                } else {
-                    // Fallback broadcast if DB insert fails
-                    this.gameManager.broadcast('new_message', {
-                        id: 'wb-' + Date.now(),
-                        sender_name: '[SYSTEM]',
-                        content: announcement,
-                        created_at: new Date().toISOString()
-                    });
+            // Refresh local cache immediately
+            console.log(`[WORLD_BOSS] Refreshing rankings...`);
+            await this.refreshRankings();
+
+            const newTop1 = this.rankings.length > 0 ? this.rankings[0] : null;
+
+            // Global Announcement if Top 1 changed
+            if (newTop1 && (!oldTop1 || oldTop1.character_id !== newTop1.character_id) && fight.damage > 0) {
+                const announcement = `📢 ${newTop1.name} has just taken the Top 1 spot in the World Boss Ranking with ${newTop1.damage.toLocaleString()} damage!`;
+
+                try {
+                    // 1. Persist to DB for history
+                    const { data: msgData, error: msgError } = await this.gameManager.supabase
+                        .from('messages')
+                        .insert({
+                            sender_name: '[SYSTEM]',
+                            content: announcement,
+                            channel: 'SYSTEM'
+                        })
+                        .select()
+                        .single();
+
+                    // 2. Broadcast to all online players
+                    if (!msgError && msgData) {
+                        this.gameManager.broadcast('new_message', msgData);
+                    } else {
+                        // Fallback broadcast if DB insert fails
+                        this.gameManager.broadcast('new_message', {
+                            id: 'wb-' + Date.now(),
+                            sender_name: '[SYSTEM]',
+                            content: announcement,
+                            created_at: new Date().toISOString()
+                        });
+                    }
+                } catch (err) {
+                    console.error('[WORLD_BOSS] Error broadcasting Top 1 announcement:', err);
                 }
-            } catch (err) {
-                console.error('[WORLD_BOSS] Error broadcasting Top 1 announcement:', err);
             }
+
+            return {
+                worldBossUpdate: {
+                    status: 'FINISHED',
+                    finalDamage: fight.damage,
+                    rankingPos: this.predictRankingPos(char.id, fight.damage)
+                }
+            };
+        } finally {
+            this.activeFights.delete(char.id);
         }
-
-        this.activeFights.delete(char.id);
-
-        return {
-            worldBossUpdate: {
-                status: 'FINISHED',
-                finalDamage: fight.damage,
-                rankingPos: this.predictRankingPos(char.id, fight.damage)
-            }
-        };
     }
 
     async checkDailyParticipation(characterId) {
