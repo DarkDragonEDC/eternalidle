@@ -92,8 +92,9 @@ export class ActivityManager {
         const timePerAction = Math.max(0.5, baseTime * reductionFactor); // Min 0.5s per action
 
         const totalDuration = timePerAction * quantity;
-        if (totalDuration > 43200) {
-            throw new Error("Maximum duration exceeded (Limit: 12 Hours)");
+        const maxIdleSeconds = this.gameManager.getMaxIdleTime(char) / 1000;
+        if (totalDuration > maxIdleSeconds) {
+            throw new Error(`Maximum duration exceeded (Limit: ${maxIdleSeconds / 3600} Hours)`);
         }
 
         // Update Character Object (Cache)

@@ -32,14 +32,30 @@ export class CatchupManager {
                 if (data.current_activity && typeof data.current_activity === 'object' && data.activity_started_at) {
                     const timePerAction = data.current_activity.time_per_action || 3;
                     if (elapsedSeconds >= timePerAction) {
-                        const actionsPossible = Math.floor(elapsedSeconds / timePerAction);
+                        const maxIdleMs = this.gm.getMaxIdleTime(data);
+                        const maxEffectSeconds = Math.min(elapsedSeconds, maxIdleMs / 1000);
+
+                        const actionsPossible = Math.floor(maxEffectSeconds / timePerAction);
                         const actionsToProcess = Math.min(actionsPossible, data.current_activity.actions_remaining);
+
+                        if (elapsedSeconds * 1000 > maxIdleMs) {
+                            console.log(`[CATCHUP-LIMIT] ${data.name}: Activity idle limit exceeded.`);
+                            // We don't stop it here yet, we process what we can, then stop if it reached the limit
+                        }
 
                         if (actionsToProcess > 0) {
                             const activityReport = await this.processBatchActions(data, actionsToProcess);
                             if (activityReport.processed > 0) {
                                 updated = true;
                                 this._mergeActivityReport(data, activityReport, finalReport);
+
+                                // If we stopped because of a limit (not just running out of actions)
+                                if (elapsedSeconds * 1000 > maxIdleMs && !data.current_activity) {
+                                    // Activity already cleared by processBatchActions if it ran out, 
+                                    // but we need to ensure it's null if we capped it here.
+                                    data.current_activity = null;
+                                    data.activity_started_at = null;
+                                }
                             }
                         }
                     }

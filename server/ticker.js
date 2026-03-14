@@ -99,7 +99,7 @@ export const startTicker = (gameManager) => {
   // Maintenance Loop (10 mins)
   setInterval(async () => {
     try {
-      // await gameManager.runMaintenance();
+      await gameManager.runMaintenance();
     } catch (err) { console.error("[MAINTENANCE-LOOP] Error:", err); }
   }, 600000);
 

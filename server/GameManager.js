@@ -786,16 +786,18 @@ export class GameManager {
      */
     async getActivePlayersCount() {
         try {
-            // We count characters with current_activity OR combat OR dungeon session
-            // Using maybeSingle or count logic depending on supabase JS client version constraints
-            // Standard approach: select id with count and filters
-            const { count, error } = await this.supabase
+            // Count unique user_ids instead of total characters.
+            // This ensures one "player" is counted even if they have 2 active characters.
+            const { data, error } = await this.supabase
                 .from('characters')
-                .select('*', { count: 'exact', head: true })
+                .select('user_id')
                 .or('current_activity.not.is.null,combat.not.is.null,dungeon.not.is.null');
 
             if (error) throw error;
-            return count || 0;
+            if (!data) return 0;
+
+            const uniquePlayers = new Set(data.map(char => char.user_id));
+            return uniquePlayers.size;
         } catch (err) {
             console.error('[SERVER] Error counting active players:', err);
             return 0;
@@ -975,8 +977,7 @@ export class GameManager {
         if (char.current_activity && char.activity_started_at) {
             if (now - new Date(char.activity_started_at).getTime() > IDLE_LIMIT_MS) {
                 console.log(`[LIMIT] ${limitHours}h activity limit reached for ${char.name}. Stopping activity.`);
-                char.current_activity = null;
-                char.activity_started_at = null;
+                await this.activityManager.stopActivity(char.user_id, char.id);
                 hasChanges = true;
             }
         }
