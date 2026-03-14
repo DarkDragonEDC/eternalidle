@@ -3,10 +3,15 @@ import { supabase } from "../../services/supabase.js";
 export const registerMarketHandlers = (socket, gameManager, io) => {
   socket.on("get_market_listings", async (filters) => {
     try {
+      console.log(`[MARKET] Request received from ${socket.user?.id}. Filters:`, filters);
       const result = await gameManager.marketManager.getMarketListings(filters);
-      const eventName = (filters && filters.seller_id) ? "my_market_listings_update" : "market_listings_update";
+      const eventName = (filters && (filters.seller_id || filters.seller_character_id)) ? "my_market_listings_update" : "market_listings_update";
+      console.log(`[MARKET] Sending ${eventName} to user. Listings count: ${result.listings?.length}`);
       socket.emit(eventName, result);
-    } catch (err) { socket.emit("error", { message: err.message }); }
+    } catch (err) { 
+      console.error("[MARKET] Error getting listings:", err);
+      socket.emit("error", { message: err.message }); 
+    }
   });
 
   socket.on("get_item_market_price", async ({ itemId }) => {

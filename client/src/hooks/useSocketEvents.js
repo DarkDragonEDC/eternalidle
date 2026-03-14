@@ -53,9 +53,14 @@ export const useSocketEvents = () => {
         socket.on('trade_success', store.setTradeSuccess);
 
         // --- Market Events ---
-        socket.on('market_listings_update', store.setMarketListings);
-        socket.on('my_market_listings_update', store.setMyMarketListings);
+        socket.on('market_listings_update', (data) => {
+            store.setMarketListings(data); // store.setMarketListings handles the object with listings and pagination
+        });
+        socket.on('my_market_listings_update', (data) => {
+            store.setMyMarketListings(data?.listings || []);
+        });
         socket.on('market_action_success', (result) => {
+            console.log('[MARKET-SYNC] market_action_success:', result);
             store.setMarketNotification({ type: 'success', message: result.message || 'Action completed successfully!' });
             socket.emit('get_market_listings');
         });

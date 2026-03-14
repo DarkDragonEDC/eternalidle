@@ -27,9 +27,12 @@ export class MarketManager {
             query = query.eq('item_data->>quality', filters.quality.toString());
         }
 
-        const sellerId = filters.seller_character_id || filters.seller_id;
-        if (sellerId) {
-            query = query.eq('seller_character_id', sellerId);
+        if (filters.seller_id) {
+            query = query.eq('seller_id', filters.seller_id);
+        }
+        
+        if (filters.seller_character_id) {
+            query = query.eq('item_data->>seller_character_id', filters.seller_character_id);
         }
 
         if (filters.category && filters.category !== 'ALL') {
@@ -73,7 +76,7 @@ export class MarketManager {
             listings: (data || []).map(l => ({
                 ...l,
                 item_id: l.item_id,
-                seller_character_id: l.seller_character_id || l.item_data?.seller_character_id
+                seller_character_id: l.item_data?.seller_character_id // Correctly map from item_data
             })),
             totalCount: count || 0,
             page,

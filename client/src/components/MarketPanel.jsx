@@ -41,6 +41,7 @@ import { useAppStore } from '../store/useAppStore';
 
 const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket, onInspect, isMobile, initialSearch = '', isAnonymous, isPreviewActive, onPreviewActionBlocked }) => {
     const store = useAppStore();
+    const [activeTab, setActiveTab] = useState('BUY');
     const {
         marketListings, setMarketListings,
         marketNotification: notification, setMarketNotification: setNotification,
@@ -50,8 +51,6 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
         lowestSellPrice, setLowestSellPrice,
         isLoadingMarketHistory: isLoadingHistory, setIsLoadingMarketHistory: setIsLoadingHistory
     } = store;
-
-    const [activeTab, setActiveTab] = useState('BUY');
 
     const [buyModal, setBuyModal] = useState(null);
     const [confirmModal, setConfirmModal] = useState(null);
@@ -157,6 +156,15 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
     useEffect(() => {
         if (!socket) return;
         
+        console.log('[MARKET] Fetching listings with filters:', {
+            category: selectedCategory,
+            tier: selectedTier,
+            quality: selectedQuality,
+            search: searchQuery,
+            sort: selectedSort,
+            page: currentPage
+        });
+
         socket.emit('get_market_listings', {
             category: selectedCategory,
             tier: selectedTier,
@@ -169,13 +177,19 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
     }, [socket, selectedCategory, selectedTier, selectedQuality, searchQuery, selectedSort, currentPage]);
 
     useEffect(() => {
-        if (!socket || !gameState?.id) return;
+        if (!socket) return;
+        const charId = gameState?.id || store.selectedCharacter;
+        if (!charId) {
+            console.warn('[MARKET] No character ID available for fetching user listings');
+            return;
+        }
+
         if (activeTab === 'SELL' || activeTab === 'MY_ORDERS') {
             socket.emit('get_market_listings', {
-                seller_character_id: gameState.id
+                seller_character_id: charId
             });
         }
-    }, [socket, activeTab, gameState?.id]);
+    }, [activeTab, gameState?.id, store.selectedCharacter, socket]);
 
     useEffect(() => {
         if (!socket) return;
