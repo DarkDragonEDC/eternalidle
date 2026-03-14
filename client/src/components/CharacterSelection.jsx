@@ -201,7 +201,7 @@ const CharacterSelection = ({ onSelectCharacter, theme, setTheme, isMobile, onPr
 
                                 {char ? (
                                     <div className="char-card" onClick={() => onSelectCharacter(char.id)}>
-                                        <div style={{ position: 'relative' }}>
+                                        <div style={{ position: 'relative', width: '100%' }}>
                                             {char.state?.isIronman && (
                                                 <div className="ironman-badge">IRONMAN</div>
                                             )}
@@ -210,7 +210,43 @@ const CharacterSelection = ({ onSelectCharacter, theme, setTheme, isMobile, onPr
                                                     WRONG SLOT
                                                 </div>
                                             )}
-                                            <h3 className="char-name">{char.name}</h3>
+                                            
+                                            {/* Avatar Portrait */}
+                                            <div style={{
+                                                width: '100px',
+                                                height: '100px',
+                                                margin: '10px auto',
+                                                background: 'var(--slot-bg)',
+                                                border: '2px solid var(--accent)',
+                                                borderRadius: '50%',
+                                                overflow: 'hidden',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                                                position: 'relative'
+                                            }}>
+                                                {(() => {
+                                                    let avatarPath = char.avatar || char.state?.avatar;
+                                                    if (!avatarPath && char.state?.state?.avatar) {
+                                                        avatarPath = char.state.state.avatar;
+                                                    }
+                                                    
+                                                    const cleanPath = avatarPath 
+                                                        ? (avatarPath.startsWith('/profile/') ? avatarPath : `/profile/${avatarPath}`)
+                                                        : '/profile/1 - male.webp';
+                                                    const webpPath = cleanPath.replace(/\.(png|jpg|jpeg)$/i, '.webp');
+                                                    
+                                                    return <img 
+                                                        src={webpPath} 
+                                                        alt={char.name} 
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%' }} 
+                                                    />;
+                                                })()}
+                                            </div>
+
+                                            <h3 className="char-name" style={{ margin: '5px 0' }}>{char.name}</h3>
+                                            
                                             <button
                                                 className="delete-btn"
                                                 onClick={(e) => {

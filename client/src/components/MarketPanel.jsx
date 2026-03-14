@@ -190,7 +190,8 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
         if (activeTab === 'SELL' || activeTab === 'MY_ORDERS') {
             socket.emit('get_market_listings', {
-                seller_character_id: charId
+                seller_character_id: charId,
+                limit: 100
             });
         }
     }, [activeTab, gameState?.id, store.selectedCharacter, socket]);

@@ -203,11 +203,21 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
                                 onClick={() => onSwitchCharacter(char.id)}
                                 title={char.name}
                             >
-                                {char.avatar ? (
-                                    <img src={char.avatar} alt={char.name} />
-                                ) : (
-                                    <User size={24} color="var(--text-dim)" />
-                                )}
+                                {(() => {
+                                    let avatarPath = char.avatar || char.state?.avatar;
+                                    
+                                    // Handle double-nested state if necessary
+                                    if (!avatarPath && char.state?.state?.avatar) {
+                                        avatarPath = char.state.state.avatar;
+                                    }
+
+                                    if (avatarPath) {
+                                        const cleanPath = avatarPath.startsWith('/profile/') ? avatarPath : `/profile/${avatarPath}`;
+                                        const webpPath = cleanPath.replace(/\.(png|jpg|jpeg)$/i, '.webp');
+                                        return <img src={webpPath} alt={char.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%' }} />;
+                                    }
+                                    return <User size={24} color="var(--text-dim)" />;
+                                })()}
                                 {char.state?.isIronman && (
                                     <div style={{ 
                                         position: 'absolute', 
