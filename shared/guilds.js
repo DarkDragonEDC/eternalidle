@@ -10,16 +10,16 @@ export const calculateGuildNextLevelXP = (level) => {
 
 export const UPGRADE_COSTS = {
     // Level corresponds to the NEXT level (the level you are upgrading TO)
-    1: { silver: 200000, gp: 225, mats: 2000 },
-    2: { silver: 500000, gp: 1800, mats: 5000 },
-    3: { silver: 750000, gp: 3000, mats: 7500 },
-    4: { silver: 1000000, gp: 4500, mats: 10000 },
-    5: { silver: 1500000, gp: 6000, mats: 15000 },
-    6: { silver: 2000000, gp: 7500, mats: 20000 },
-    7: { silver: 2500000, gp: 8000, mats: 25000 },
-    8: { silver: 5000000, gp: 10000, mats: 30000 },
-    9: { silver: 7500000, gp: 13000, mats: 40000 },
-    10: { silver: 10000000, gp: 19000, mats: 50000 }
+    1: { silver: 200000, gp: 220, mats: 2000 },
+    2: { silver: 500000, gp: 750, mats: 5000 },
+    3: { silver: 750000, gp: 1550, mats: 7500 },
+    4: { silver: 1000000, gp: 2800, mats: 10000 },
+    5: { silver: 1500000, gp: 4100, mats: 15000 },
+    6: { silver: 2000000, gp: 6350, mats: 20000 },
+    7: { silver: 2500000, gp: 10800, mats: 25000 },
+    8: { silver: 5000000, gp: 17500, mats: 30000 },
+    9: { silver: 7500000, gp: 16000, mats: 40000 },
+    10: { silver: 10000000, gp: 40000, mats: 50000 }
 };
 
 export const GUILD_BUILDING_COLUMNS = [

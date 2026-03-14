@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Check, X, Shield, Clock } from 'lucide-react';
 
-export const GuildRequests = ({ requests, isLoading, onHandleRequest, isMobile }) => {
+export const GuildRequests = ({ requests, isLoading, onHandleRequest, isMobile, onInspect }) => {
     if (isLoading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
@@ -44,7 +44,10 @@ export const GuildRequests = ({ requests, isLoading, onHandleRequest, isMobile }
                         }}
                     >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px', width: isMobile ? '100%' : 'auto' }}>
-                            <div style={{ position: 'relative' }}>
+                            <div 
+                                style={{ position: 'relative', cursor: 'pointer' }}
+                                onClick={() => onInspect && onInspect(req.name)}
+                            >
                                 <div style={{
                                     width: '46px', height: '46px', background: 'rgba(0,0,0,0.3)', borderRadius: '12px',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)'
@@ -64,8 +67,16 @@ export const GuildRequests = ({ requests, isLoading, onHandleRequest, isMobile }
                                     </div>
                                 )}
                             </div>
-                            <div>
-                                <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '0.9rem' }}>{req.name}</div>
+                            <div 
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => onInspect && onInspect(req.name)}
+                            >
+                                <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '0.9rem', transition: 'color 0.2s' }}
+                                     onMouseEnter={(e) => e.target.style.color = 'var(--accent)'}
+                                     onMouseLeave={(e) => e.target.style.color = '#fff'}
+                                >
+                                    {req.name}
+                                </div>
                                 <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '5px' }}>
                                     <Shield size={10} color="var(--accent)" /> LVL {req.level || 1} • <Clock size={10} /> Applied {new Date(req.createdAt).toLocaleDateString()}
                                 </div>

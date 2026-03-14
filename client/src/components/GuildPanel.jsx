@@ -223,6 +223,7 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
                                 isLoading={isLoadingRequests}
                                 onHandleRequest={handleRequest}
                                 isMobile={isMobile}
+                                onInspect={onInspect}
                             />
                         )}
 

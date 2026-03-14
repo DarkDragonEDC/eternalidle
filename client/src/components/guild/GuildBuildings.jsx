@@ -162,7 +162,7 @@ export const GuildBuildings = ({
 
         return (
             <div>
-                <div style={{ fontSize: '0.75rem', fontWeight: '900', color: 'rgba(255,255,255,0.3)', letterSpacing: '1px', marginBottom: '15px' }}>UPGRADE TO LVL {nextLvl} (+5 Slots)</div>
+                <div style={{ fontSize: '0.75rem', fontWeight: '900', color: 'rgba(255,255,255,0.3)', letterSpacing: '1px', marginBottom: '15px' }}>UPGRADE TO LVL {nextLvl} (+2 Slots)</div>
                 <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '10px' }}>
                     {renderUpgradeRequirement('SILVER', silverCost, guild.bank_silver || 0, 'Bank Silver', Coins, '#ffd700')}
                     {renderUpgradeRequirement('GP', gpCost, guild.guild_points || 0, 'Guild Points', ClipboardList, 'var(--accent)')}

@@ -631,6 +631,7 @@ export class GuildManager {
 
     async handleGuildRequest(char, requestId, action) {
         if (!char) throw new Error("Character not found");
+        action = action?.toUpperCase();
         if (action !== 'ACCEPT' && action !== 'REJECT') throw new Error("Invalid action");
 
         const { data: member } = await this.supabase
