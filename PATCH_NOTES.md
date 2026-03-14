@@ -24,6 +24,10 @@
 - **Visualização de Preview (Cosméticos)**: Adicionado um botão persistente para sair do modo Preview (Visualização de Temas/Avatares), permitindo confirmar suas customizações sem recarregar o jogo em navegadores mobile ou PC.
 - **Compensação Retroativa**: Foi efetuado com sucesso o Script de Compensação automático devolvendo até 9hrs de recompensas (e +10% de bônus) para os jogadores afetados pela falha de conexão do banco de dados na noite passada.
 
+### 🖼️ Interface e Qualidade de Vida (QoL)
+- **Avatares Reais**: Chega de ícones genéricos! A barra lateral de troca de personagens e a tela de seleção agora exibem a foto de perfil real que você escolheu para cada explorador.
+- **Mercado (My Listings)**: Corrigimos o bug na aba "Meus Anúncios" que limitava a visualização a apenas 10 itens. Agora você pode ver todos os seus anúncios ativos e navegar entre as páginas sem erros.
+
 ---
 
 ⚠️ **Aviso de Atualização**
