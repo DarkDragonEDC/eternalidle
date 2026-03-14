@@ -1,4 +1,71 @@
-# 📄 Auditoria Completa de Mudanças - Daily Spin Fix (v1.5.4)
+# 🔍 AUDITORIA EXTREMA: RELATÓRIO LINHA A LINHA (Últimas 26h)
+
+> Atendendo à solicitação de auditoria completa de "todas as pastas, arquivos, linhas, vírgulas e pontos-e-vírgulas" desde ontem às 21:00.
+
+## 🛠️ v1.5.5 - Correções Críticas de UI e Sincronização
+- **`server/package.json`**: Incrementada versão de `"1.5.4"` para `"1.5.5"`.
+- **`client/src/App.jsx`**: Atualizada a constante `CLIENT_VERSION` de `'1.5.4'` para `'1.5.5'` (garante refresh forçado).
+- **`server/socket/handlers/miscHandler.js`**: 
+  - (Linha 122) Adicionado bloco completo de handler `socket.on("request_daily_status", async () => {...})`.
+  - Tratamento de erro `try/catch` adicionado especificamente para recuperar o status da roleta de personagens ativos sem necessidade de relogar.
+- **`client/src/components/EquipmentSelectModal.jsx`**:
+  - (Linha 374): Removida chamada direta `formatItemId(currentItem.id || currentItem.name)` (que mostrava "T5 Cloth Boots Q2").
+  - Substituído por sintaxe de bypass limpa: `{resolvedCurrent?.name || formatItemId(...)}`.
+  - (Linha 545): Refatoração idêntica para o mapa iterativo de inventário `{item.name || formatItemId(...)}`.
+- **`client/src/components/RankingPanel.jsx`**:
+  - (Linha 130): Removida variável `gameState` do *dependency array* `[socket, subCategory, rankMode, gameState]` do `useEffect`. Isso eliminou o loop infinito de re-renders no frontend.
+  - (Linha 518): Adicionada condicional booleana rigorosa `&& subCategory !== 'ITEM_POWER'` para remover o nome do equipamento subjacente nos rankings de IP.
+- **Link do Discord Atualizado** (`https://discord.gg/uVGYW2gJtB`) nas seguintes views:
+  - `client/src/components/Sidebar.jsx` (Linha 252)
+  - `client/src/components/ProfilePanel.jsx` (Linha 692)
+  - `client/src/components/LandingPage.jsx` (Linha 148)
+  - `client/src/components/AnnouncementModal.jsx` (Linha 200)
+
+## ⚖️ v1.5.4 - Fix Leaderboard Ironman e Otimização de Event Loop
+- **`server/GameManager.js`**:
+  - (Linha 1617-1629): Implementada ramificação lógica condicional para filtragem Ironman em rankings de skills diretos da tabela de DB.
+  - O código agora verifica `if (mode === 'IRONMAN') { char = {...} }`.
+  - Removido processamento bruto no JS (`getLevel()`) e modificado o cache key para `${type}_${mode}_${socket.id}` provisoriamente.
+- **`server/socket/handlers/miscHandler.js`**:
+  - Correção crassa de ordem de argumentos na linha 111. 
+  - **De:** `gameManager.getLeaderboard(type, socket.data.characterId, mode)`
+  - **Para:** `gameManager.getLeaderboard(type, mode, socket.data.characterId)`.
+  - Isso impedia o servidor de injetar 'IRONMAN' no SQL.
+- **Script de Performance DB** (`server/sql/019_add_ranking_columns.sql`):
+  - Adicionado script inteiro para popular as colunas `level` e `total_xp` fisicamente na tabela `characters`.
+  - Adicionadas *Triggers* em SQL para auto-soma sem lockar o Event Loop do Node.js.
+
+## 🎨 v1.5.3 a v1.5.1 - Engine de Preview, Z-Index e UI
+- **`client/src/components/AppModals.jsx`** e relacionados:
+  - Consertado bug de Z-Index de modais sobrepostos em preview.
+  - O botão "Max" no modal de guilda teve seu overflow hidden substituído por shrink para resizer adaptativo em telas de iPhone/Android (`flex-shrink: 0`).
+  - Remoção das linhas mortas (dead code) e redeclarações redundantes de variáveis de estado que poluíam o memory heap em `GameContent` e repassadas de forma reativa (`React.memo`).
+- **`client/src/store/useAppStore.js`**:
+  - Novas flags de estado injetadas silenciosamente: `previewThemeId`, `previewAvatarData`, `previewBannerData`.
+
+## 🗡️ v1.5.0 - Trade System Restoration e Correção Crítica de Modal
+- **`client/src/components/TradeModal.jsx`**:
+  - Adicionado listener explícito no ciclo de vida React: `socket.on('trade_success', () => onClose())`.
+  - Antes, a *promise* de fechamento era abortada pelo re-render agressivo do painel secundário.
+  - Inserido verificação de segurança `if (!activeTrade) return null;` para evitar crash fatal na DOM.
+- **`server/managers/GuildManager.js`**:
+  - Alteração na query do Supabase para injetar `guild_level` ao cobrar a taxa de 150.000 de Prata.
+  - Correção do UUID mismatch na criação de guild que impedia qualquer pessoa de criar uma.
+
+## 🔔 Sistemas Base Desenvolvidos nas Últimas 24h
+- **World Boss Anti-Spam (v1.4.8 a v1.4.9)**:
+  - Adicionada tabela relacional no PGAdmin: `world_boss_notifications (boss_id, date, sent_at)`.
+  - Alterado o Event Emissor (socket) global para realizar uma checagem restrita de `COUNT(*)` antes de emitir a notificação com som; preveniu loops de 15+ alertas ao reiniciar o servidor (pm2/Node).
+- **Stripe Pagamentos**:
+  - No `frontend/OrbShop.jsx`, removido o antipadrão `try { axios... } catch { window.location.reload() }`.
+  - A vírgula errada e o recarregamento na promise cancelavam a navegação nativa do Stripe Checkout! Reescrito para usar redirecionamento limpo `window.location.href = session.url`.
+- **Script de Compensação (Produção)**:
+  - Criação do `combat_compensation_script.js` de cabo a rabo na raiz do servidor.
+  - Loop assíncrono projetado para devolver 9h de farming retroativo + 10% aos jogadores cujos consumos de comida falharam via DB connection pool limits no dia anterior.
+
+---
+
+# 📄 Auditoria Arquitetural Anterior (v1.4.7)
 
 ### 🎡 Daily Spin
 - **Correção da Roleta**: Corrigido um problema onde o botão de girar não realizava nenhuma ação.
