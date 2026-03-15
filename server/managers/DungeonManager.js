@@ -427,4 +427,20 @@ export class DungeonManager {
             console.error("Error saving dungeon history log:", err);
         }
     }
+    async getDungeonHistory(characterId) {
+        try {
+            const { data, error } = await this.gameManager.supabase
+                .from('dungeon_history')
+                .select('*')
+                .eq('character_id', characterId)
+                .order('occurred_at', { ascending: false })
+                .limit(50);
+
+            if (error) throw error;
+            return data || [];
+        } catch (err) {
+            console.error("[DUNGEON-HISTORY] Error fetching history:", err);
+            return [];
+        }
+    }
 }

@@ -6,7 +6,7 @@ import { resolveItem, formatItemId } from '@shared/items'; // Ensure correct pat
 // Matches Server LOOT_TABLE
 const SEGMENTS = [
     { id: 'T3_POTION_SILVER', label: '2x Silver Pot', color: '#cbd5e0', icon: '🧪' },       // Index 0 (Common)
-    { id: 'T3_POTION_XP', label: '2x XP Pot', color: '#9f7aea', icon: '✨' },                // Index 1 (Common)
+    { id: 'T3_POTION_XP', label: '2x Knowledge Pot', color: '#9f7aea', icon: '✨' },                // Index 1 (Common)
     { id: 'T1_RUNE_SHARD', label: '500 Shards', color: '#a0aec0', icon: '💎' },              // Index 2 (Uncommon)
     { id: 'T5_FOOD', label: '100 Food', color: '#48bb78', icon: '🍖' },                      // Index 3 (Uncommon)
     { id: 'ORBS_25', label: '25 Orbs', color: '#ecc94b', icon: '🔮' },                       // Index 4 (Rare)

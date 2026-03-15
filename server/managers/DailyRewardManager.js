@@ -3,7 +3,7 @@ import { getStoreItem } from '../../shared/orbStore.js';
 
 const LOOT_TABLE = [
     { id: 'T3_POTION_SILVER', qty: 2, chance: 0.3015, type: 'ITEM' },       // Index 0: 2x Silver Potion (Common)
-    { id: 'T3_POTION_XP', qty: 2, chance: 0.3015, type: 'ITEM' },           // Index 1: 2x XP Potion (Common)
+    { id: 'T3_POTION_XP', qty: 2, chance: 0.3015, type: 'ITEM' },           // Index 1: 2x Knowledge Potion (Common)
     { id: 'T1_RUNE_SHARD', qty: 500, chance: 0.17, type: 'ITEM' },          // Index 2: 500 Rune Shards (Uncommon)
     { id: 'T5_FOOD', qty: 100, chance: 0.17, type: 'ITEM' },                // Index 3: 100 Food (Uncommon)
     { id: 'ORBS', qty: 25, chance: 0.05, type: 'CURRENCY' },                // Index 4: 25 Orbs (Rare)
@@ -79,7 +79,7 @@ export class DailyRewardManager {
             else if (reward.id === 'T1_BATTLE_RUNE_SHARD') friendlyName = 'Combat Shards';
             else if (reward.id === 'T5_FOOD') friendlyName = 'Food';
             else if (reward.id === 'T3_POTION_SILVER') friendlyName = 'Silver Potion';
-            else if (reward.id === 'T3_POTION_XP') friendlyName = 'XP Potion';
+            else if (reward.id === 'T3_POTION_XP') friendlyName = 'Knowledge Potion';
             else {
                 friendlyName = reward.id
                     .replace(/^T\d+_/, '') // Remove T1_

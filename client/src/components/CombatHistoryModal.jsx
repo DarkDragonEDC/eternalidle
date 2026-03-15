@@ -21,7 +21,7 @@ const CombatHistoryModal = ({ isOpen, onClose, socket }) => {
     }, [isOpen, socket]);
 
     useEffect(() => {
-        if (history && history.length > 0) {
+        if (history) {
             setLoading(false);
         }
     }, [history]);
@@ -79,7 +79,7 @@ const CombatHistoryModal = ({ isOpen, onClose, socket }) => {
 
                         {loading ? (
                             <div style={{ color: '#888', textAlign: 'center', padding: '20px' }}>Loading...</div>
-                        ) : history.length === 0 ? (
+                        ) : (!history || history.length === 0) ? (
                             <div style={{ color: '#888', textAlign: 'center', padding: '20px' }}>No combat history recorded yet.</div>
                         ) : (
                             history.map((log) => {

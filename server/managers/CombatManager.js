@@ -451,4 +451,20 @@ export class CombatManager {
             console.error("Error saving combat history log:", err);
         }
     }
+    async getCombatHistory(characterId) {
+        try {
+            const { data, error } = await this.gameManager.supabase
+                .from('combat_history')
+                .select('*')
+                .eq('character_id', characterId)
+                .order('occurred_at', { ascending: false })
+                .limit(50);
+
+            if (error) throw error;
+            return data || [];
+        } catch (err) {
+            console.error("[COMBAT-HISTORY] Error fetching history:", err);
+            return [];
+        }
+    }
 }

@@ -321,17 +321,24 @@ export class SocialManager {
         return { success: true };
     }
 
-    async getPublicProfile(characterName) {
-        if (!characterName) throw new Error("Character name is required");
+    async getPublicProfile(identifier) {
+        if (!identifier) throw new Error("Character identifier is required");
 
-        // 1. Fetch character from DB
-        const { data: charData, error: charError } = await this.supabase
-            .from('characters')
-            .select('*')
-            .ilike('name', characterName)
-            .maybeSingle();
+        // 1. Detect if identifier is a UUID
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
 
-        if (charError || !charData) throw new Error(`Player '${characterName}' not found.`);
+        // 2. Fetch character from DB
+        let query = this.supabase.from('characters').select('*');
+        
+        if (isUUID) {
+            query = query.eq('id', identifier);
+        } else {
+            query = query.ilike('name', identifier);
+        }
+
+        const { data: charData, error: charError } = await query.maybeSingle();
+
+        if (charError || !charData) throw new Error(`Player '${identifier}' not found.`);
 
         // Hydrate state and skills from raw columns
         this.gameManager._hydrateCharacterFromRaw(charData);

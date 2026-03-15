@@ -86,23 +86,15 @@ export const registerMiscHandlers = (socket, gameManager, io) => {
     try {
       if (!socket.data.characterId) return;
       const history = await gameManager.combatManager.getCombatHistory(socket.data.characterId);
-      socket.emit("combat_history", history);
+      socket.emit("combat_history_update", history);
     } catch (err) { console.error("Error getting combat history:", err); }
   });
 
   socket.on("get_dungeon_history", async () => {
     try {
       if (!socket.data.characterId) return;
-      const history = await gameManager.combatManager.getDungeonHistory(socket.data.characterId);
-      socket.emit("dungeon_history", history);
-    } catch (err) { console.error("Error getting dungeon history:", err); }
-  });
-
-  socket.on("get_dungeon_history", async () => {
-    try {
-      if (!socket.data.characterId) return;
-      const history = await gameManager.combatManager.getDungeonHistory(socket.data.characterId);
-      socket.emit("dungeon_history", history);
+      const history = await gameManager.dungeonManager.getDungeonHistory(socket.data.characterId);
+      socket.emit("dungeon_history_update", history);
     } catch (err) { console.error("Error getting dungeon history:", err); }
   });
 

@@ -280,7 +280,7 @@ export const useAppStore = create((set, get) => ({
     setIsLoadingWbHistory: (isLoadingWbHistory) => set({ isLoadingWbHistory }),
 
     // --- DUNGEON STATE ---
-    dungeonHistory: [],
+    dungeonHistory: null,
     setDungeonHistory: (dungeonHistory) => set({ dungeonHistory }),
     isLoadingDungeonHistory: false,
     setIsLoadingDungeonHistory: (isLoadingDungeonHistory) => set({ isLoadingDungeonHistory }),
@@ -374,7 +374,7 @@ export const useAppStore = create((set, get) => ({
     setActiveTrade: (activeTrade) => set({ activeTrade }),
     inspectData: null,
     setInspectData: (inspectData) => set({ inspectData }),
-    combatHistory: [],
+    combatHistory: null,
     setCombatHistory: (combatHistory) => set({ combatHistory }),
     isWorldBossFight: false,
     setIsWorldBossFight: (isWorldBossFight) => set({ isWorldBossFight }),
