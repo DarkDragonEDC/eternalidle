@@ -1,3 +1,15 @@
+# 📄 Patch Notes — Updates v1.5.7
+@everyone
+
+### 🛡️ Guildas e Progressão
+- **Correção Guild Tasks**: Resolvemos o erro que travava a página de tarefas da guilda. Além disso, adicionamos uma mensagem clara de "Bloqueado" caso sua guilda ainda não tenha construído a Biblioteca.
+- **Custo Zero**: O custo de **Guild Points (GP)** para o nível 1 de todas as construções da guilda (incluindo a Biblioteca) agora é **ZERO!** Queremos que novas guildas possam começar sua jornada sem barreiras.
+
+### ⚙️ Estabilidade e Segurança
+- **Verificações Extras**: Adicionamos proteções internas no World Boss e na Loja de Orbes para evitar fechamentos inesperados durante o carregamento de itens.
+
+---
+
 # 📄 Patch Notes — Updates v1.5.6
 @everyone
 
