@@ -20,6 +20,7 @@ import { getProficiencyStats } from '@shared/proficiency_stats';
 import { calculateNextLevelXP } from '@shared/skills';
 import { resolveItem, formatItemId, ITEMS, getRequiredProficiencyGroup, calculateRuneBonus } from '@shared/items';
 import { getBestItemForSlot, isBetterItem } from '@utils/equipment';
+import { formatSkillName } from '@utils/format';
 import { useAppStore } from '../store/useAppStore';
 
 
