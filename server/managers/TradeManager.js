@@ -186,8 +186,10 @@ export class TradeManager {
                 return merged;
             });
 
-            if (!this.gameManager.inventoryManager.hasItems(char, req)) {
-                throw new Error("Insufficient items in inventory.");
+            const missing = this.gameManager.inventoryManager.getMissingItems(char, req);
+            if (missing.length > 0) {
+                const m = missing[0];
+                throw new Error(`Insufficient items: ${m.amountNeeded}x ${m.name} (You have: ${m.amountOwned})`);
             }
         }
 
@@ -283,14 +285,22 @@ export class TradeManager {
                     const baseId = it.id.split('::')[0];
                     sItemsReq[baseId] = (sItemsReq[baseId] || 0) + it.amount;
                 });
-                if (!this.gameManager.inventoryManager.hasItems(sender, sItemsReq)) throw new Error(`${sender.name} has insufficient items.`);
+                const sMissing = this.gameManager.inventoryManager.getMissingItems(sender, sItemsReq);
+                if (sMissing.length > 0) {
+                    const m = sMissing[0];
+                    throw new Error(`${sender.name} has insufficient items: ${m.amountNeeded}x ${m.name} (Has: ${m.amountOwned})`);
+                }
 
                 const rItemsReq = {};
                 rOffer.items.forEach(it => {
                     const baseId = it.id.split('::')[0];
                     rItemsReq[baseId] = (rItemsReq[baseId] || 0) + it.amount;
                 });
-                if (!this.gameManager.inventoryManager.hasItems(receiver, rItemsReq)) throw new Error(`${receiver.name} has insufficient items.`);
+                const rMissing = this.gameManager.inventoryManager.getMissingItems(receiver, rItemsReq);
+                if (rMissing.length > 0) {
+                    const m = rMissing[0];
+                    throw new Error(`${receiver.name} has insufficient items: ${m.amountNeeded}x ${m.name} (Has: ${m.amountOwned})`);
+                }
 
                 // TRANSFER SILVER & CHARGE TAX
                 sender.state.silver = (sender.state.silver || 0) - (sOffer.silver + sTax) + rOffer.silver;

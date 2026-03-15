@@ -174,6 +174,33 @@ export class InventoryManager {
         });
     }
 
+    getMissingItems(char, req) {
+        if (!req) return [];
+        const inv = char.state.inventory || {};
+        
+        const totals = {};
+        Object.entries(inv).forEach(([key, entry]) => {
+            const baseId = key.split('::')[0];
+            const qty = typeof entry === 'object' ? (entry?.amount || 0) : (Number(entry) || 0);
+            totals[baseId] = (totals[baseId] || 0) + qty;
+        });
+
+        const missing = [];
+        Object.entries(req).forEach(([id, amountNeeded]) => {
+            const amountOwned = totals[id] || 0;
+            if (amountOwned < amountNeeded) {
+                const def = this.resolveItem(id);
+                missing.push({
+                    id,
+                    name: def?.name || id,
+                    amountNeeded,
+                    amountOwned
+                });
+            }
+        });
+        return missing;
+    }
+
     consumeItems(char, req) {
         if (!req) return;
         const inv = char.state.inventory;

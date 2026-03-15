@@ -310,8 +310,9 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                     return (
                                         <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: isMobile ? '8px' : '12px', background: 'var(--slot-bg)', borderRadius: '10px', border: `1px solid ${def?.rarityColor || 'var(--border)'}` }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '6px' : '10px' }}>
-                                                <div style={{ width: isMobile ? '28px' : '32px', height: isMobile ? '28px' : '32px', background: 'var(--accent-soft)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                                                    {Icon ? (
+                                                 <div style={{ width: isMobile ? '28px' : '32px', height: isMobile ? '28px' : '32px', background: 'var(--accent-soft)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
+                                                    {def?.tier && <div style={{ position: 'absolute', top: '1px', left: '2px', fontSize: '0.45rem', fontWeight: '900', color: '#fff', textShadow: '0 0 3px #000', zIndex: 10 }}>T{def.tier}</div>}
+                                                     {Icon ? (
                                                         typeof Icon === 'string' ? <img src={Icon} alt={def?.name} style={{ width: def.scale || '100%', height: def.scale || '100%', objectFit: 'contain' }} /> : <Icon size={isMobile ? 16 : 18} color={def.rarityColor || "var(--text-dim)"} />
                                                     ) : <Package size={isMobile ? 16 : 18} color="var(--text-dim)" />}
                                                 </div>
@@ -553,8 +554,9 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                     const Icon = def?.icon;
                                     return (
                                         <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '6px' : '10px', padding: isMobile ? '8px' : '12px', background: 'var(--slot-bg)', borderRadius: '10px', border: `1px solid ${def?.rarityColor || 'var(--border)'}` }}>
-                                            <div style={{ width: isMobile ? '28px' : '32px', height: isMobile ? '28px' : '32px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                                                {Icon ? (
+                                             <div style={{ width: isMobile ? '28px' : '32px', height: isMobile ? '28px' : '32px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
+                                                {def?.tier && <div style={{ position: 'absolute', top: '1px', left: '2px', fontSize: '0.45rem', fontWeight: '900', color: '#fff', textShadow: '0 0 3px #000', zIndex: 10 }}>T{def.tier}</div>}
+                                                 {Icon ? (
                                                     typeof Icon === 'string' ? <img src={Icon} alt={def?.name} style={{ width: def.scale || '100%', height: def.scale || '100%', objectFit: 'contain' }} /> : <Icon size={isMobile ? 16 : 18} color={def.rarityColor || "var(--text-dim)"} />
                                                 ) : <Package size={isMobile ? 16 : 18} color="var(--text-dim)" />}
                                             </div>
