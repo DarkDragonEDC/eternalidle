@@ -164,13 +164,15 @@ export const GuildMembers = ({
                                 <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>
                                     {membersSortBy === 'DATE' && member.joinedAt ?
                                         formatRelativeTime(member.joinedAt) :
-                                        membersSortBy === 'TOTAL_XP' ?
-                                            `Total XP: ${formatNumber(member.donatedXP || 0)}` :
-                                            membersSortBy === 'TOTAL_SILVER' ?
-                                                `Silver ${formatNumber(member.donatedSilver || 0)} + Items ${formatNumber(member.donatedItemsValue || 0)} = ${formatNumber((member.donatedSilver || 0) + (member.donatedItemsValue || 0))} Total` :
-                                                membersSortBy === 'DAILY_XP' ?
-                                                    `${formatNumber(Math.floor((member.donatedXP || 0) / Math.max(1, Math.floor((new Date() - new Date(member.joinedAt || Date.now())) / (1000 * 60 * 60 * 24)))))} XP/day` :
-                                                    `LVL ${member.level}`}
+                                        membersSortBy === 'LAST_ACTIVE' && member.lastActiveAt ?
+                                            formatRelativeTime(member.lastActiveAt) :
+                                            membersSortBy === 'TOTAL_XP' ?
+                                                `Total XP: ${formatNumber(member.donatedXP || 0)}` :
+                                                membersSortBy === 'TOTAL_SILVER' ?
+                                                    `Silver ${formatNumber(member.donatedSilver || 0)} + Items ${formatNumber(member.donatedItemsValue || 0)} = ${formatNumber((member.donatedSilver || 0) + (member.donatedItemsValue || 0))} Total` :
+                                                    membersSortBy === 'DAILY_XP' ?
+                                                        `${formatNumber(Math.floor((member.donatedXP || 0) / Math.max(1, Math.floor((new Date() - new Date(member.joinedAt || Date.now())) / (1000 * 60 * 60 * 24)))))} XP/day` :
+                                                        `LVL ${member.level}`}
                                 </div>
                             </div>
                         </div>

@@ -144,7 +144,8 @@ export const GuildNavigation = ({
                             {membersSortBy === 'DATE' ? 'DATE' :
                                 membersSortBy === 'TOTAL_XP' ? 'TOTAL XP' :
                                     membersSortBy === 'DAILY_XP' ? 'DAILY XP' :
-                                        membersSortBy === 'TOTAL_SILVER' ? 'TOTAL SILVER' : 'MEMBERS'}
+                                        membersSortBy === 'LAST_ACTIVE' ? 'LAST ACTIVE' :
+                                            membersSortBy === 'TOTAL_SILVER' ? 'TOTAL SILVER' : 'MEMBERS'}
                             {activeTab === 'MEMBERS' && (
                                 <ChevronDown size={12} style={{ opacity: 0.7, transform: showMembersDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                             )}
@@ -178,6 +179,7 @@ export const GuildNavigation = ({
                                         {[
                                             { id: 'DEFAULT', label: 'Members' },
                                             { id: 'DATE', label: 'Date' },
+                                            { id: 'LAST_ACTIVE', label: 'Last Active' },
                                             { id: 'TOTAL_XP', label: 'Total XP' },
                                             { id: 'DAILY_XP', label: 'Daily XP' },
                                             { id: 'TOTAL_SILVER', label: 'Total Silver' }

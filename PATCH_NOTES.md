@@ -1,3 +1,13 @@
+# 📄 Patch Notes — Updates v1.5.9
+@everyone
+
+### 🛡️ Guildas e Ranking
+- **Ordenação por Senioridade**: Corrigimos a ordenação por **Date** na lista de membros da guilda. Agora, ao selecionar esta opção, os membros são exibidos do mais antigo para o mais novo, respeitando a hierarquia de entrada.
+- **Novo Ranking de Atividade**: Adicionamos a opção **Last Active**! Agora você pode ver quem entrou no jogo mais recentemente, facilitando a gestão de membros ativos na sua guilda.
+- **Sincronização em Tempo Real**: O servidor agora monitora e envia a data de última atividade de todos os membros de forma otimizada.
+
+---
+
 # 📄 Patch Notes — Updates v1.5.8
 @everyone
 

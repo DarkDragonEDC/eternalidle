@@ -126,7 +126,9 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
         
         // Sorting logic
         if (membersSortBy === 'DATE') {
-            membersList.sort((a, b) => new Date(b.joinedAt || 0) - new Date(a.joinedAt || 0));
+            membersList.sort((a, b) => new Date(a.joinedAt || 0) - new Date(b.joinedAt || 0));
+        } else if (membersSortBy === 'LAST_ACTIVE') {
+            membersList.sort((a, b) => new Date(b.lastActiveAt || 0) - new Date(a.lastActiveAt || 0));
         } else if (membersSortBy === 'TOTAL_XP') {
             membersList.sort((a, b) => (b.donatedXP || 0) - (a.donatedXP || 0));
         } else if (membersSortBy === 'DAILY_XP') {

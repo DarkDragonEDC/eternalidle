@@ -269,7 +269,8 @@ export class GuildManager {
                     id,
                     name,
                     state,
-                    skills
+                    skills,
+                    last_saved
                 )
             `)
             .eq('guild_id', guild.id);
@@ -297,7 +298,8 @@ export class GuildManager {
                     donatedItemsValue: Number(m.donated_items_value || 0),
                     level: this._calculateCharLevel(state),
                     avatar: state.avatar || dbChar.avatar || '/profile/1 - male.png',
-                    isIronman: !!state.isIronman
+                    isIronman: !!state.isIronman,
+                    lastActiveAt: dbChar.last_saved
                 };
             }),
             nextLevelXP: calculateGuildNextLevelXP(guild.level || 1)

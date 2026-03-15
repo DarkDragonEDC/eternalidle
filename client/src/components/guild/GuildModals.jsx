@@ -12,6 +12,23 @@ import { COUNTRIES } from '@shared/countries';
 import { GuildRoles } from './GuildRoles';
 import { GuildRoleEditor } from './GuildRoleEditor';
 
+const getItemIcon = (itemId) => {
+    if (!itemId) return '/items/placeholder.webp';
+    const baseId = itemId.split('::')[0];
+    if (baseId.includes('_POTION_')) {
+        const parts = baseId.split('_');
+        const tier = parts[0];
+        const type = parts[parts.length - 1];
+        const potionMap = {
+            'GATHER': 'GATHERING', 'REFINE': 'REFINING', 'CRAFT': 'CRAFTING',
+            'SILVER': 'SILVER', 'QUALITY': 'QUALITY', 'LUCK': 'LUCK',
+            'XP': 'KNOWLEDGE', 'CRIT': 'CRITICAL', 'DAMAGE': 'DAMAGE'
+        };
+        return `/items/${tier}_${potionMap[type] || type}_POTION.webp`;
+    }
+    return `/items/${baseId}.webp`;
+};
+
 // Reusable Modal Wrapper
 const Modal = ({ isOpen, onClose, children, title, maxWidth = '450px', border = '1px solid rgba(255,255,255,0.08)', hideHeader = false }) => {
     if (!isOpen) return null;
@@ -484,7 +501,7 @@ export const GuildModals = ({
                                                 overflow: 'hidden',
                                                 boxShadow: isSelected ? '0 0 10px var(--accent)' : 'none'
                                             }}>
-                                                <img src={`/items/${m.id}.webp`} style={{ width: '32px', height: '32px' }} alt={m.id} />
+                                                <img src={getItemIcon(m.id)} style={{ width: '32px', height: '32px' }} alt={m.id} />
                                                 <div style={{ 
                                                     position: 'absolute', bottom: '-1px', right: '-1px', 
                                                     background: 'rgba(0, 0, 0, 0.8)', padding: '1px 4px', 
@@ -529,7 +546,7 @@ export const GuildModals = ({
                                         style={{ width: '100%', padding: '12px 12px 12px 40px', background: 'rgba(0, 0, 0, 0.3)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', color: '#fff', fontSize: '1rem', outline: 'none' }}
                                     />
                                     <img 
-                                        src={`/items/${selectedDonationItem}.webp`} 
+                                        src={getItemIcon(selectedDonationItem)} 
                                         style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: '20px', height: '20px' }} 
                                         alt="item"
                                     />
@@ -693,7 +710,7 @@ export const TaskContributeModal = ({
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         border: '1px solid rgba(255,255,255,0.1)'
                     }}>
-                        <img src={`/items/${itemId}.webp`} style={{ width: '30px', height: '30px' }} />
+                        <img src={getItemIcon(itemId)} style={{ width: '30px', height: '30px' }} />
                     </div>
                     <div>
                         <div style={{ fontSize: '0.65rem', fontWeight: '900', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>YOUR INVENTORY</div>
