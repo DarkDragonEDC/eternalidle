@@ -477,6 +477,17 @@ export const useAppStore = create((set, get) => ({
     showGuildXPInfo: false,
     setShowGuildXPInfo: (show) => set({ showGuildXPInfo: show }),
     lastThemeChangeRef: { current: 0 },
+    pushSubscriptionActive: false,
+    setPushSubscriptionActive: (active) => set({ pushSubscriptionActive: active }),
+    checkPushSubscription: async () => {
+        try {
+            const { PushService } = await import('../services/PushService');
+            const sub = await PushService.getSubscription();
+            set({ pushSubscriptionActive: !!sub });
+        } catch (e) {
+            console.error('[PUSH] Failed to check subscription:', e);
+        }
+    },
     
     // --- SETTINGS ---
     settings: {
@@ -490,6 +501,11 @@ export const useAppStore = create((set, get) => ({
     updateSettings: (newSettings) => set((state) => {
         const updated = { ...state.settings, ...newSettings };
         localStorage.setItem('eternalidle_settings', JSON.stringify(updated));
+        
+        if (state.socket) {
+            state.socket.emit('set_settings', { settings: updated });
+        }
+        
         return { settings: updated };
     }),
     theme: localStorage.getItem('theme') || 'medieval',

@@ -35,48 +35,49 @@ export const AppModals = ({
     handleRenameSubmit,
     clockOffset
 }) => {
-    const {
-        socket,
-        session,
-        modals,
-        setModal,
-        modalItem,
-        setModalItem,
-        modalType,
-        infoItem,
-        setInfoItem,
-        marketSellItem,
-        setMarketSellItem,
-        showCombatHistory,
-        setShowCombatHistory,
-        lootModalData,
-        setLootModalData,
-        offlineGains,
-        setOfflineGains,
-        acknowledgeOfflineReport,
-        tradeInvites,
-        activeTrade,
-        setActiveTrade,
-        inspectData,
-        inspectGuildId,
-        setInspectGuildId,
-        showLeaderboard,
-        setShowLeaderboard,
-        confirmModal,
-        setConfirmModal,
-        setIsRenameModalOpen,
-        settings,
-        updateSettings,
-        isMobile,
-        isPreviewActive,
-        onPreviewActionBlocked,
-        showGuildXPInfo,
-        setShowGuildXPInfo,
-        serverError,
-        setServerError,
-        startActivity,
-        selectedCharacter
-    } = useAppStore();
+    const socket = useAppStore(s => s.socket);
+    const session = useAppStore(s => s.session);
+    const modals = useAppStore(s => s.modals);
+    const setModal = useAppStore(s => s.setModal);
+    const modalItem = useAppStore(s => s.modalItem);
+    const setModalItem = useAppStore(s => s.setModalItem);
+    const modalType = useAppStore(s => s.modalType);
+    const infoItem = useAppStore(s => s.infoItem);
+    const setInfoItem = useAppStore(s => s.setInfoItem);
+    const marketSellItem = useAppStore(s => s.marketSellItem);
+    const setMarketSellItem = useAppStore(s => s.setMarketSellItem);
+    const showCombatHistory = useAppStore(s => s.showCombatHistory);
+    const setShowCombatHistory = useAppStore(s => s.setShowCombatHistory);
+    const lootModalData = useAppStore(s => s.lootModalData);
+    const setLootModalData = useAppStore(s => s.setLootModalData);
+    const offlineGains = useAppStore(s => s.offlineGains);
+    const setOfflineGains = useAppStore(s => s.setOfflineGains);
+    const acknowledgeOfflineReport = useAppStore(s => s.acknowledgeOfflineReport);
+    const tradeInvites = useAppStore(s => s.tradeInvites);
+    const activeTrade = useAppStore(s => s.activeTrade);
+    const setActiveTrade = useAppStore(s => s.setActiveTrade);
+    const inspectData = useAppStore(s => s.inspectData);
+    const inspectGuildId = useAppStore(s => s.inspectGuildId);
+    const setInspectGuildId = useAppStore(s => s.setInspectGuildId);
+    const showLeaderboard = useAppStore(s => s.showLeaderboard);
+    const setShowLeaderboard = useAppStore(s => s.setShowLeaderboard);
+    const confirmModal = useAppStore(s => s.confirmModal);
+    const setConfirmModal = useAppStore(s => s.setConfirmModal);
+    const setIsRenameModalOpen = useAppStore(s => s.setIsRenameModalOpen);
+    const settings = useAppStore(s => s.settings);
+    const updateSettings = useAppStore(s => s.updateSettings);
+    const isMobile = useAppStore(s => s.isMobile);
+    const isPreviewActive = useAppStore(s => s.isPreviewActive);
+    const onPreviewActionBlocked = useAppStore(s => s.onPreviewActionBlocked);
+    const showGuildXPInfo = useAppStore(s => s.showGuildXPInfo);
+    const setShowGuildXPInfo = useAppStore(s => s.setShowGuildXPInfo);
+    const serverError = useAppStore(s => s.serverError);
+    const setServerError = useAppStore(s => s.setServerError);
+    const startActivity = useAppStore(s => s.startActivity);
+    const selectedCharacter = useAppStore(s => s.selectedCharacter);
+    const pushSubscriptionActive = useAppStore(s => s.pushSubscriptionActive);
+    const setPushSubscriptionActive = useAppStore(s => s.setPushSubscriptionActive);
+    const checkPushSubscription = useAppStore(s => s.checkPushSubscription);
 
     const isGoogleLinked = session?.user?.app_metadata?.providers?.includes('google') ||
         session?.user?.identities?.some(id => id.provider === 'google');
@@ -123,7 +124,7 @@ export const AppModals = ({
             </AnimatePresence>
 
             <AnimatePresence>
-                {(offlineGains || displayedGameState?.offlineReport) && (
+                {!settings.disableOfflineModal && (offlineGains || displayedGameState?.offlineReport) && (
                     <OfflineGainsModal
                         isOpen={!!(offlineGains || displayedGameState?.offlineReport)}
                         data={offlineGains || displayedGameState?.offlineReport}
@@ -255,6 +256,9 @@ export const AppModals = ({
                 session={session}
                 isGoogleLinked={isGoogleLinked}
                 socket={socket}
+                pushSubscriptionActive={pushSubscriptionActive}
+                setPushSubscriptionActive={setPushSubscriptionActive}
+                checkPushSubscription={checkPushSubscription}
             />
 
             <AnimatePresence>

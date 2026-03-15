@@ -3,48 +3,48 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Settings, X, LogOut, Link2, Monitor, Backpack, BellOff, Bell, ImageOff, Image } from 'lucide-react';
 import { supabase } from '../supabase';
 
-const SettingsModal = ({
+const SettingsModal = React.memo(({
     isOpen,
     onClose,
     settings,
     setSettings,
     session,
     isGoogleLinked,
-    socket
+    socket,
+    pushSubscriptionActive,
+    setPushSubscriptionActive,
+    checkPushSubscription
 }) => {
     const handleSettingChange = (key, value) => {
-        setSettings(prev => ({ ...prev, [key]: value }));
+        setSettings({ [key]: value });
     };
 
-    const [hasRealSubscription, setHasRealSubscription] = useState(false);
-
     useEffect(() => {
-        const checkSubscription = async () => {
-            try {
-                const { PushService } = await import('../services/PushService');
-                const sub = await PushService.getSubscription();
-                setHasRealSubscription(!!sub);
-            } catch (e) {
-                console.error('[PUSH] Failed to check subscription:', e);
-            }
-        };
         if (isOpen) {
-            checkSubscription();
+            checkPushSubscription();
         }
-    }, [isOpen]);
+    }, [isOpen, checkPushSubscription]);
 
     return (
         <AnimatePresence>
             {isOpen && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 50000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={onClose}
-                        style={{ position: 'absolute', inset: 0, background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)' }}
-                    />
-
+                <div 
+                    id="settings-modal-overlay"
+                    onClick={(e) => {
+                        if (e.target.id === 'settings-modal-overlay') onClose();
+                    }}
+                    style={{ 
+                        position: 'fixed', 
+                        inset: 0, 
+                        zIndex: 50000, 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        padding: '20px',
+                        background: 'rgba(0,0,0,0.5)',
+                        backdropFilter: 'blur(10px)'
+                    }}
+                >
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -59,8 +59,8 @@ const SettingsModal = ({
                             overflow: 'hidden',
                             display: 'flex',
                             flexDirection: 'column',
-                            backdropFilter: 'blur(20px)',
-                            maxHeight: '90vh'
+                            maxHeight: '90vh',
+                            pointerEvents: 'auto'
                         }}
                     >
                         {/* Header */}
@@ -105,7 +105,9 @@ const SettingsModal = ({
                                     </select>
                                 </div>
 
-                                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '15px', borderRadius: '12px', border: '1px solid var(--border)', cursor: 'pointer' }}>
+                                <label 
+                                    onClick={() => handleSettingChange('hideAvatarBg', !settings.hideAvatarBg)}
+                                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '15px', borderRadius: '12px', border: '1px solid var(--border)', cursor: 'pointer' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                         {settings.hideAvatarBg ? <ImageOff size={18} color="#f87171" /> : <Image size={18} color="var(--accent)" />}
                                         <div>
@@ -116,7 +118,7 @@ const SettingsModal = ({
                                     <input
                                         type="checkbox"
                                         checked={settings.hideAvatarBg || false}
-                                        onChange={(e) => handleSettingChange('hideAvatarBg', e.target.checked)}
+                                        readOnly
                                         style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--accent)' }}
                                     />
                                 </label>
@@ -155,7 +157,9 @@ const SettingsModal = ({
                                     </select>
                                 </div>
 
-                                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '15px', borderRadius: '12px', border: '1px solid var(--border)', cursor: 'pointer' }}>
+                                <label 
+                                    onClick={() => handleSettingChange('hideCollectionPopups', !settings.hideCollectionPopups)}
+                                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '15px', borderRadius: '12px', border: '1px solid var(--border)', cursor: 'pointer' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                         {settings.hideCollectionPopups ? <BellOff size={18} color="#f87171" /> : <Bell size={18} color="var(--accent)" />}
                                         <div>
@@ -166,12 +170,14 @@ const SettingsModal = ({
                                     <input
                                         type="checkbox"
                                         checked={settings.hideCollectionPopups || false}
-                                        onChange={(e) => handleSettingChange('hideCollectionPopups', e.target.checked)}
+                                        readOnly
                                         style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--accent)' }}
                                     />
                                 </label>
 
-                                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '15px', borderRadius: '12px', border: '1px solid var(--border)', cursor: 'pointer' }}>
+                                <label 
+                                    onClick={() => handleSettingChange('disableOfflineModal', !settings.disableOfflineModal)}
+                                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '15px', borderRadius: '12px', border: '1px solid var(--border)', cursor: 'pointer' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                         <BellOff size={18} color={settings.disableOfflineModal ? "#f87171" : "var(--accent)"} />
                                         <div>
@@ -182,7 +188,7 @@ const SettingsModal = ({
                                     <input
                                         type="checkbox"
                                         checked={settings.disableOfflineModal || false}
-                                        onChange={(e) => handleSettingChange('disableOfflineModal', e.target.checked)}
+                                        readOnly
                                         style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--accent)' }}
                                     />
                                 </label>
@@ -267,7 +273,7 @@ const SettingsModal = ({
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', paddingBottom: '20px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <h3 style={{ color: 'var(--text-dim)', fontSize: '0.75rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>Push Notifications</h3>
-                                    {!hasRealSubscription && (
+                                    {!pushSubscriptionActive && (
                                         <button 
                                             onClick={async () => {
                                                 try {
@@ -279,11 +285,15 @@ const SettingsModal = ({
                                                             socket.emit('save_push_subscription', { subscription: subJSON, settings });
                                                         }
                                                         handleSettingChange('pushEnabled', true);
-                                                        setHasRealSubscription(true);
+                                                        setPushSubscriptionActive(true);
                                                     }
                                                 } catch (e) {
                                                     console.error('[PUSH] Subscribe error:', e);
-                                                    alert("Failed to enable notifications. Please check browser permissions.");
+                                                    if (e.name === 'AbortError') {
+                                                        alert("Push registration was aborted. This usually means permissions were denied or the push service is unreachable in your current environment.");
+                                                    } else {
+                                                        alert("Failed to enable notifications. Please check browser permissions and VAPID keys.");
+                                                    }
                                                 }
                                             }}
                                             style={{
@@ -302,8 +312,8 @@ const SettingsModal = ({
                                     )}
                                 </div>
 
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', opacity: hasRealSubscription ? 1 : 0.5, pointerEvents: hasRealSubscription ? 'all' : 'none' }}>
-                                    {[
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', opacity: pushSubscriptionActive ? 1 : 0.5, pointerEvents: pushSubscriptionActive ? 'all' : 'none' }}>
+                                    { [
                                         { key: 'push_daily_spin', label: 'Daily Spin Available', desc: 'At 00:00 UTC' },
                                         { key: 'push_character_death', label: 'Character Death', desc: 'When you die in combat' },
                                         { key: 'push_world_boss', label: 'World Boss', desc: 'Spawn announcements' },
@@ -316,7 +326,10 @@ const SettingsModal = ({
                                         { key: 'push_inventory_full', label: 'Inventory Full', desc: 'Stop wasting time!' },
                                         { key: 'push_hp_recovered', label: 'HP Fully Recovered', desc: 'Ready to fight again' }
                                     ].map(item => (
-                                        <label key={item.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '12px 15px', borderRadius: '12px', border: '1px solid var(--border)', cursor: 'pointer' }}>
+                                        <label 
+                                            key={item.key} 
+                                            onClick={() => handleSettingChange(item.key, settings[item.key] === false)}
+                                            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '12px 15px', borderRadius: '12px', border: '1px solid var(--border)', cursor: 'pointer' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                 <div style={{ background: settings[item.key] !== false ? 'var(--accent)' : 'var(--text-dim)', width: '8px', height: '8px', borderRadius: '50%' }} />
                                                 <div>
@@ -327,7 +340,7 @@ const SettingsModal = ({
                                             <input
                                                 type="checkbox"
                                                 checked={settings[item.key] !== false}
-                                                onChange={(e) => handleSettingChange(item.key, e.target.checked)}
+                                                readOnly
                                                 style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--accent)' }}
                                             />
                                         </label>
@@ -340,6 +353,6 @@ const SettingsModal = ({
             )}
         </AnimatePresence>
     );
-};
+});
 
 export default SettingsModal;

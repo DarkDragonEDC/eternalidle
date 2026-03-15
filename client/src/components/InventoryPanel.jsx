@@ -23,6 +23,14 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
     const [withdrawModal, setWithdrawModal] = useState(null);
     const [buySlotModal, setBuySlotModal] = useState(null);
     const [foodEquipModal, setFoodEquipModal] = useState(null);
+    
+    // Sync sortBy with settings for auto-sort reactivity
+    React.useEffect(() => {
+        const auto = settings?.autoSortInventory;
+        if (auto && auto !== 'off') {
+            setSortBy(auto.toUpperCase());
+        }
+    }, [settings?.autoSortInventory]);
 
     const handleEquipFood = (item) => {
         setFoodEquipModal({

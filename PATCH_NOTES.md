@@ -1,3 +1,17 @@
+# 📄 Patch Notes — Updates v1.5.6
+@everyone
+
+### ⚔️ Histórico de Combate e Consumo
+- **Correção Crítica**: O histórico de combate, que estava travado desde o dia 13/03, foi restaurado! Todas as suas novas sessões de treino agora serão gravadas e exibidas corretamente.
+- **Detalhamento de Comida**: Adicionamos uma nova seção no histórico chamada **"Resources Consumed"**. Agora você pode ver exatamente quanta comida foi gasta em cada sessão e qual o Tier do item utilizado. Chega de dúvidas sobre o custo das suas caçadas!
+- **Ordenação Inteligente**: As sessões de combate agora são exibidas sempre das mais recentes para as mais antigas, facilitando o acompanhamento do seu progresso diário.
+
+### 🎨 Interface e Padronização
+- **Nomes de Habilidades**: Fizemos uma limpeza visual em todo o jogo! IDs técnicos como `FIBER_HARVESTER` agora aparecem formatados corretamente como **Fiber Harvester**.
+- **Consistência Visual**: Essa padronização foi aplicada em modais de ganhos offline, perfis, ranking e detalhamento de status, garantindo uma experiência mais polida e profissional.
+
+---
+
 # 📄 Patch Notes — Updates v1.5.5+
 @everyone
 
