@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ClipboardList, Users, Coins, Zap, Clock, ChevronDown, Plus, Trophy, Menu } from 'lucide-react';
+import { ClipboardList, Users, Coins, Zap, Clock, ChevronDown, Plus, Trophy, Menu, Lock as LockIcon } from 'lucide-react';
 import { GUILD_TASKS_CONFIG } from '@shared/guilds.js';
 
 const getItemIcon = (itemId) => {
@@ -45,7 +45,7 @@ export const GuildTasks = ({
 
     if (tasks?.locked) return (
         <div style={{ padding: '40px 20px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <Lock size={48} color="rgba(255,255,255,0.1)" style={{ marginBottom: '15px' }} />
+            <LockIcon size={48} color="rgba(255,255,255,0.1)" style={{ marginBottom: '15px' }} />
             <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', fontWeight: 'bold' }}>{tasks.message || "TASKS LOCKED"}</div>
         </div>
     );
