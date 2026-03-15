@@ -7,7 +7,7 @@ import { resolveItem, calculateItemSellPrice } from '@shared/items';
 
 const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, onInspect, isMobile, isPreviewActive, onPreviewActionBlocked }) => {
     const store = useAppStore();
-    const { isTradeAccepting: isAccepting, setIsTradeAccepting } = store;
+    const { isTradeAccepting: isAccepting, setIsTradeAccepting, socialError, setSocialError } = store;
     const [filterText, setFilterText] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('ALL');
     const [quantityModal, setQuantityModal] = useState({ isOpen: false, item: null, itemId: null, max: 0 });
@@ -82,6 +82,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
     const handleAccept = () => {
         if (isPreviewActive) return onPreviewActionBlocked();
         setIsTradeAccepting(true);
+        setSocialError(null); // Clear previous errors
         socket.emit('trade_accept', { tradeId: trade.id });
     };
 
@@ -342,19 +343,42 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                             </div>
 
                             <div style={{ marginTop: isMobile ? '10px' : '20px', paddingTop: isMobile ? '10px' : '20px', borderTop: '1px solid var(--border)' }}>
+                                <AnimatePresence>
+                                    {socialError && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            style={{
+                                                padding: '10px',
+                                                background: 'rgba(255, 68, 68, 0.1)',
+                                                border: '1px solid rgba(255, 68, 68, 0.3)',
+                                                borderRadius: '8px',
+                                                color: '#ff4444',
+                                                fontSize: '0.8rem',
+                                                fontWeight: 'bold',
+                                                marginBottom: '15px',
+                                                textAlign: 'center'
+                                            }}
+                                        >
+                                            {socialError}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                                 <button
                                     onClick={handleAccept}
-                                    disabled={myAccepted}
+                                    disabled={myAccepted || isAccepting}
                                     style={{
                                         width: '100%', padding: isMobile ? '10px' : '15px', borderRadius: '12px',
                                         background: myAccepted ? 'rgba(68,255,68,0.2)' : 'var(--accent)',
                                         color: myAccepted ? '#44ff44' : '#000',
-                                        fontWeight: '900', border: 'none', cursor: myAccepted ? 'default' : 'pointer',
+                                        fontWeight: '900', border: 'none', cursor: (myAccepted || isAccepting) ? 'default' : 'pointer',
                                         transition: '0.2s', boxShadow: myAccepted ? 'none' : '0 4px 15px rgba(212,175,55,0.3)',
-                                        fontSize: isMobile ? '0.9rem' : '1rem'
+                                        fontSize: isMobile ? '0.9rem' : '1rem',
+                                        opacity: isAccepting ? 0.7 : 1
                                     }}
                                 >
-                                    {myAccepted ? 'WAITING FOR PARTNER...' : 'ACCEPT OFFER'}
+                                    {isAccepting ? 'PROCESSING...' : (myAccepted ? 'WAITING FOR PARTNER...' : 'ACCEPT OFFER')}
                                 </button>
                             </div>
                         </div>
