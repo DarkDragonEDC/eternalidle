@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ClipboardList, Users, Coins, Zap, Clock, ChevronDown, Plus, Trophy, Menu } from 'lucide-react';
+import { ClipboardList, Users, Coins, Zap, Clock, ChevronDown, Plus, Trophy, Menu, Lock } from 'lucide-react';
 import { GUILD_TASKS_CONFIG } from '@shared/guilds.js';
 
 const getItemIcon = (itemId) => {
