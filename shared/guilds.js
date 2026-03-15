@@ -160,7 +160,9 @@ export const GUILD_TASKS_CONFIG = {
     MAX_TASKS: 13,
     POOLS: {
         RAW: ['WOOD', 'ORE', 'HIDE', 'FIBER', 'FISH', 'HERB'],
-        REFINED: ['PLANK', 'BAR', 'LEATHER', 'CLOTH', 'EXTRACT']
+        REFINED: ['PLANK', 'BAR', 'LEATHER', 'CLOTH', 'EXTRACT'],
+        POTION: ['GATHER', 'REFINE', 'CRAFT', 'SILVER', 'QUALITY', 'LUCK', 'XP', 'CRIT', 'DAMAGE'],
+        FOOD: ['FOOD']
     },
     REQUIREMENTS: {
         RAW: {

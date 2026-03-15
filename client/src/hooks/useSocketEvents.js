@@ -7,6 +7,11 @@ export const useSocketEvents = () => {
 
     useEffect(() => {
         if (!socket) return;
+        
+        // Initial fetches to ensure indicators are correct from the start
+        if (store.selectedCharacter) {
+            socket.emit('trade_get_active');
+        }
 
         // --- Core Events ---
         socket.on('status_update', store.handleStatusUpdate);
@@ -67,6 +72,15 @@ export const useSocketEvents = () => {
             console.log('[MARKET-SYNC] market_action_success:', result);
             store.setMarketNotification({ type: 'success', message: result.message || 'Action completed successfully!' });
             socket.emit('get_market_listings');
+
+            // Refetch personal listings to ensure "My Listings" tab stays in sync
+            const charId = store.selectedCharacter;
+            if (charId) {
+                socket.emit('get_market_listings', {
+                    seller_character_id: charId,
+                    limit: 100
+                });
+            }
         });
         socket.on('market_history_update', (history) => {
             store.setMarketHistory(history || []);
@@ -369,5 +383,5 @@ export const useSocketEvents = () => {
             socket.off('orb_purchase_error');
             socket.off('stripe_checkout_session');
         };
-    }, [socket]);
+    }, [socket, store.selectedCharacter]);
 };

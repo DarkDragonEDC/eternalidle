@@ -5,8 +5,11 @@ import { GUILD_TASKS_CONFIG } from '@shared/guilds.js';
 
 const getItemIcon = (itemId) => {
     if (!itemId) return '/items/placeholder.webp';
-    if (itemId.includes('_POTION_')) {
-        const parts = itemId.split('_');
+    // Normalize ID (remove signature) for icon lookup
+    const baseId = itemId.split('::')[0];
+    
+    if (baseId.includes('_POTION_')) {
+        const parts = baseId.split('_');
         const tier = parts[0];
         const type = parts[parts.length - 1];
         const potionMap = {
@@ -16,18 +19,35 @@ const getItemIcon = (itemId) => {
         };
         return `/items/${tier}_${potionMap[type] || type}_POTION.webp`;
     }
-    return `/items/${itemId}.webp`;
+    return `/items/${baseId}.webp`;
 };
 
 const formatItemName = (itemId, type) => {
     if (!itemId) return type || 'Unknown';
-    const match = itemId.match(/^T(\d+)_(.+)$/);
+    // Use the comprehensive formatter from items.js if available, or a fallback
+    // We can't easily import it here if it's not already, but we can replicate/standardize
+    const baseId = itemId.split('::')[0];
+    
+    if (baseId.includes('_POTION_')) {
+        const parts = baseId.split('_');
+        const tier = parts[0];
+        const pType = parts[parts.length - 1];
+        const potionMap = {
+            'GATHER': 'Gathering', 'REFINE': 'Refining', 'CRAFT': 'Crafting',
+            'SILVER': 'Silver', 'QUALITY': 'Quality', 'LUCK': 'Luck',
+            'XP': 'Knowledge', 'CRIT': 'Critical', 'DAMAGE': 'Damage'
+        };
+        const pName = potionMap[pType] || (pType.charAt(0).toUpperCase() + pType.slice(1).toLowerCase());
+        return `${tier} ${pName} Potion`;
+    }
+
+    const match = baseId.match(/^T(\d+)_(.+)$/);
     if (match) {
         const tier = match[1];
         const name = match[2].replace(/_/g, ' ');
         return `T${tier} ${name}`;
     }
-    return itemId.replace(/_/g, ' ');
+    return baseId.replace(/_/g, ' ');
 };
 
 export const GuildTasks = ({ 

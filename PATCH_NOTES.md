@@ -1,3 +1,17 @@
+# 📄 Patch Notes — Updates v1.5.8
+@everyone
+
+### 🛡️ Guildas e Poções
+- **Tarefas Dinâmicas**: O sistema de tarefas da guilda agora é totalmente dinâmico! Adicionamos novos pools de **Poções** e **Comidas** às tarefas diárias, garantindo mais variedade e utilidade para os itens que você fabrica.
+- **Identidade Visual**: Corrigimos os nomes das poções nas tarefas! Agora você verá nomes como **Knowledge Potion** em vez de códigos técnicos. Além disso, os ícones foram atualizados para serem consistentes com o Laboratório de Alquimia.
+- **Contribuição Inteligente**: Corrigimos um bug onde o jogo não reconhecia poções fabricadas por jogadores (itens com "assinatura"). Agora você pode contribuir com qualquer poção do seu inventário para as tarefas da guilda sem problemas.
+- **Correção Geral**: Ajustamos a contagem de itens em todos os painéis da guilda para garantir que você sempre saiba exatamente quanto material possui disponível.
+
+### 🌐 Social e Correções
+- **Estabilidade no Login**: Corrigimos um erro técnico de UUID que ocorria ao abrir o Centro Social logo após entrar no jogo. Agora o carregamento de amigos e trocas está mais robusto e seguro.
+
+---
+
 # 📄 Patch Notes — Updates v1.5.7
 @everyone
 

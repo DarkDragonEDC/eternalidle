@@ -133,7 +133,7 @@ export const registerSocialHandlers = (socket, gameManager, io) => {
   socket.on("get_friends", async () => {
     try {
       const charId = socket.data.characterId;
-      if (!charId) return;
+      if (!charId || charId === 'undefined') return socket.emit("friends_list_update", []);
       const friends = await gameManager.socialManager.getFriends(charId);
       socket.emit("friends_list_update", friends);
     } catch (err) { socket.emit("error", { message: err.message }); }
@@ -141,8 +141,10 @@ export const registerSocialHandlers = (socket, gameManager, io) => {
 
   socket.on("add_friend", async ({ friendName }) => {
     try {
+      const charId = socket.data.characterId;
+      if (!charId || charId === 'undefined') throw new Error("Please wait for the game to load.");
       await gameManager.executeLocked(socket.user.id, async () => {
-        const char = await gameManager.getCharacter(socket.user.id, socket.data.characterId);
+        const char = await gameManager.getCharacter(socket.user.id, charId);
         await gameManager.socialManager.sendFriendRequest(char, friendName);
         socket.emit("friend_action_success", { message: `Request sent to ${friendName}!` });
       });
@@ -151,8 +153,9 @@ export const registerSocialHandlers = (socket, gameManager, io) => {
 
   socket.on("respond_friend_request", async ({ requestId, accept }) => {
     try {
+      const charId = socket.data.characterId;
+      if (!charId || charId === 'undefined') throw new Error("Please wait for the game to load.");
       await gameManager.executeLocked(socket.user.id, async () => {
-        const charId = socket.data.characterId;
         await gameManager.socialManager.respondToRequest(charId, requestId, accept);
         socket.emit("friend_action_success", { message: accept ? "Request accepted!" : "Request rejected." });
         socket.emit("friends_list_update", await gameManager.socialManager.getFriends(charId));
@@ -162,8 +165,9 @@ export const registerSocialHandlers = (socket, gameManager, io) => {
 
   socket.on("remove_friend", async ({ friendId }) => {
     try {
+      const charId = socket.data.characterId;
+      if (!charId || charId === 'undefined') throw new Error("Please wait for the game to load.");
       await gameManager.executeLocked(socket.user.id, async () => {
-        const charId = socket.data.characterId;
         await gameManager.socialManager.removeFriend(charId, friendId);
         socket.emit("friend_action_success", { message: "Friend removed." });
         socket.emit("friends_list_update", await gameManager.socialManager.getFriends(charId));
@@ -173,8 +177,9 @@ export const registerSocialHandlers = (socket, gameManager, io) => {
 
   socket.on("cancel_friend_request", async ({ requestId }) => {
     try {
+      const charId = socket.data.characterId;
+      if (!charId || charId === 'undefined') throw new Error("Please wait for the game to load.");
       await gameManager.executeLocked(socket.user.id, async () => {
-        const charId = socket.data.characterId;
         await gameManager.socialManager.cancelFriendRequest(charId, requestId);
         socket.emit("friend_action_success", { message: "Request cancelled." });
         socket.emit("friends_list_update", await gameManager.socialManager.getFriends(charId));
@@ -184,8 +189,9 @@ export const registerSocialHandlers = (socket, gameManager, io) => {
 
   socket.on("request_best_friend", async ({ friendId }) => {
     try {
+      const charId = socket.data.characterId;
+      if (!charId || charId === 'undefined') throw new Error("Please wait for the game to load.");
       await gameManager.executeLocked(socket.user.id, async () => {
-        const charId = socket.data.characterId;
         await gameManager.socialManager.requestBestFriend(charId, friendId);
         socket.emit("friend_action_success", { message: "Best Friend Request Sent!" });
         socket.emit("friends_list_update", await gameManager.socialManager.getFriends(charId));
@@ -198,8 +204,9 @@ export const registerSocialHandlers = (socket, gameManager, io) => {
 
   socket.on("respond_best_friend", async ({ friendId, accept }) => {
     try {
+      const charId = socket.data.characterId;
+      if (!charId || charId === 'undefined') throw new Error("Please wait for the game to load.");
       await gameManager.executeLocked(socket.user.id, async () => {
-        const charId = socket.data.characterId;
         await gameManager.socialManager.respondBestFriend(charId, friendId, accept);
         socket.emit("friend_action_success", { message: accept ? "Best Friend Accepted!" : "Request Declined." });
         socket.emit("friends_list_update", await gameManager.socialManager.getFriends(charId));
@@ -212,8 +219,9 @@ export const registerSocialHandlers = (socket, gameManager, io) => {
 
   socket.on("remove_best_friend", async ({ friendId }) => {
     try {
+      const charId = socket.data.characterId;
+      if (!charId || charId === 'undefined') throw new Error("Please wait for the game to load.");
       await gameManager.executeLocked(socket.user.id, async () => {
-        const charId = socket.data.characterId;
         await gameManager.socialManager.removeBestFriend(charId, friendId);
         socket.emit("friend_action_success", { message: "Best Friend removed." });
         socket.emit("friends_list_update", await gameManager.socialManager.getFriends(charId));

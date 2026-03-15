@@ -7,6 +7,7 @@ export class TradeManager {
     }
 
     async _getTradeTaxRate(senderId, receiverId) {
+        if (!senderId || !receiverId || senderId === 'undefined' || receiverId === 'undefined') return 0.15;
         // Default tax is 15%
         const BASE_TAX = 0.15;
 
@@ -56,7 +57,6 @@ export class TradeManager {
         }
 
         const tax = Math.floor(totalValue * rate);
-        console.log(`[TRADE-TAX] Calculated tax for offer at ${rate * 100}% rate: ${tax} (Value: ${totalValue})`);
         return tax;
     }
 
@@ -96,7 +96,6 @@ export class TradeManager {
         const sName = sender.name || (sender.state ? sender.state.name : null) || 'Unknown';
         const rName = receiverData.name || (receiverData.state ? receiverData.state.name : null) || 'Unknown';
 
-        console.log(`[TRADE-CREATE] ${sName} (${sender.id}) inviting ${rName} (${receiverData.id})`);
 
         const { data, error } = await this.supabase
             .from('trade_sessions')
@@ -273,8 +272,6 @@ export class TradeManager {
                 const sTax = this.calculateOfferTax(sOffer, taxRate);
                 const rTax = this.calculateOfferTax(rOffer, taxRate);
 
-                console.log(`[TRADE-EXECUTE] ${sender.name} offer: ${sOffer.silver} silver, ${sOffer.items.length} items. Tax Rate: ${taxRate * 100}%, Tax: ${sTax}`);
-                console.log(`[TRADE-EXECUTE] ${receiver.name} offer: ${rOffer.silver} silver, ${rOffer.items.length} items. Tax Rate: ${taxRate * 100}%, Tax: ${rTax}`);
 
                 // Validate Silver (Price + Tax)
                 if ((sOffer.silver + sTax) > (sender.state.silver || 0)) throw new Error(`${sender.name} has insufficient silver to cover offer + ${taxRate * 100}% tax (${sTax.toLocaleString()} Silver tax).`);
@@ -296,17 +293,12 @@ export class TradeManager {
                 if (!this.gameManager.inventoryManager.hasItems(receiver, rItemsReq)) throw new Error(`${receiver.name} has insufficient items.`);
 
                 // TRANSFER SILVER & CHARGE TAX
-                console.log(`[TRADE-SILVER] Before - ${sender.name}: ${sender.state.silver}, ${receiver.name}: ${receiver.state.silver}`);
                 sender.state.silver = (sender.state.silver || 0) - (sOffer.silver + sTax) + rOffer.silver;
                 receiver.state.silver = (receiver.state.silver || 0) - (rOffer.silver + rTax) + sOffer.silver;
-                console.log(`[TRADE-SILVER] After - ${sender.name}: ${sender.state.silver}, ${receiver.name}: ${receiver.state.silver}`);
 
                 // Update Global Taxometer
                 if (sTax + rTax > 0) {
-                    console.log(`[TRADE-TAX] Updating global tax with: ${sTax + rTax}`);
                     this.gameManager.updateGlobalTax(sTax + rTax, 'TRADE');
-                } else {
-                    console.log(`[TRADE-TAX] No tax to update (sTax: ${sTax}, rTax: ${rTax})`);
                 }
 
                 // CONSUME ITEMS
@@ -315,12 +307,9 @@ export class TradeManager {
 
                 // ADD ITEMS (Safety via Claims if inventory full)
                 const deliver = (targetChar, items, fromName) => {
-                    console.log(`[TRADE-DEBUG] Delivering items to ${targetChar.name} from ${fromName}`);
                     items.forEach(it => {
-                        console.log(`[TRADE-DEBUG] Processing item:`, JSON.stringify(it));
                         // Pass the full item object to preserve metadata like craftedBy
                         const added = this.gameManager.inventoryManager.addItemToInventory(targetChar, it.id, it.amount, it);
-                        console.log(`[TRADE-DEBUG] Added to inventory? ${added}`);
 
                         if (!added) {
                             // Inventory Full - Send to Claims
@@ -405,6 +394,7 @@ export class TradeManager {
     }
 
     async getPersonalTradeHistory(characterId) {
+        if (!characterId || characterId === 'undefined') return [];
         const { data, error } = await this.supabase
             .from('trade_history')
             .select('*')
@@ -420,6 +410,7 @@ export class TradeManager {
     }
 
     async getActiveTrades(characterId) {
+        if (!characterId || characterId === 'undefined') return [];
         const { data, error } = await this.supabase
             .from('trade_sessions')
             .select('*')

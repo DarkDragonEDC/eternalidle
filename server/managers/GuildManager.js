@@ -1700,47 +1700,51 @@ export class GuildManager {
         // Library level scales tier
         const tier = Math.min(10, Math.max(1, libraryLevel));
 
-        // 13 Fixed Daily Tasks defined by the user
-        // We will randomize the tier (T1-T3) for each, but keep the item types fixed.
-        const taskDefinitions = [
-            { type: 'RAW', mat: 'WOOD' },         // 1: Wood
-            { type: 'RAW', mat: 'ORE' },          // 2: Ore
-            { type: 'RAW', mat: 'HIDE' },         // 3: Hide
-            { type: 'RAW', mat: 'FIBER' },        // 4: Fiber
-            { type: 'RAW', mat: 'HERB' },         // 5: Herb
-            { type: 'RAW', mat: 'FISH' },         // 6: Fish
-            { type: 'REFINED', mat: 'PLANK' },    // 7: Plank
-            { type: 'REFINED', mat: 'BAR' },      // 8: Bar
-            { type: 'REFINED', mat: 'LEATHER' },  // 9: Leather
-            { type: 'REFINED', mat: 'CLOTH' },    // 10: Cloth
-            { type: 'REFINED', mat: 'EXTRACT' },  // 11: Extract
-            { type: 'POTION', mat: 'POTION' },    // 12: Random Potion
-            { type: 'FOOD', mat: 'FOOD' }         // 13: Food
+        // Potion suffixes mapping
+        const potionSuffixMap = {
+            'GATHER': '_POTION_GATHER',
+            'REFINE': '_POTION_REFINE',
+            'CRAFT': '_POTION_CRAFT',
+            'SILVER': '_POTION_SILVER',
+            'QUALITY': '_POTION_QUALITY',
+            'LUCK': '_POTION_LUCK',
+            'XP': '_POTION_XP',
+            'CRIT': '_POTION_CRIT',
+            'DAMAGE': '_POTION_DAMAGE'
+        };
+
+        // Distribution of task types
+        const typeDistribution = [
+            ...Array(6).fill('RAW'),
+            ...Array(5).fill('REFINED'),
+            'POTION',
+            'FOOD'
         ];
 
-        // Potion suffixes from shared/items.js
-        const potionSuffixes = [
-            '_POTION_GATHER', '_POTION_REFINE', '_POTION_CRAFT', '_POTION_SILVER',
-            '_POTION_QUALITY', '_POTION_LUCK', '_POTION_XP', '_POTION_CRIT', '_POTION_DAMAGE'
-        ];
+        for (let i = 0; i < config.MAX_TASKS; i++) {
+            const type = typeDistribution[i] || 'RAW';
+            const pool = config.POOLS[type];
+            if (!pool || pool.length === 0) continue;
 
-        for (let i = 0; i < taskDefinitions.length && i < config.MAX_TASKS; i++) {
-            const def = taskDefinitions[i];
-            let itemId = `T${tier}_${def.mat}`;
-
-            if (def.type === 'POTION') {
-                const randomPotionSuffix = potionSuffixes[Math.floor(Math.random() * potionSuffixes.length)];
-                itemId = `T${tier}${randomPotionSuffix}`;
-            } else if (def.type === 'FOOD') {
+            // Pick a random material from the pool for this type
+            // (In the future we could ensure uniqueness if needed, but for now simple random is fine)
+            const mat = pool[Math.floor(Math.random() * pool.length)];
+            
+            let itemId;
+            if (type === 'POTION') {
+                const suffix = potionSuffixMap[mat] || `_POTION_${mat}`;
+                itemId = `T${tier}${suffix}`;
+            } else if (type === 'FOOD') {
                 itemId = `T${tier}_FOOD`;
+            } else {
+                itemId = `T${tier}_${mat}`;
             }
 
-            // Look up specific required amount from config
-            const requiredAmount = config.REQUIREMENTS[def.type]?.[tier] || 100;
+            const requiredAmount = config.REQUIREMENTS[type]?.[tier] || 100;
 
             tasks.push({
                 id: i,
-                type: def.type,
+                type: type,
                 itemId: itemId,
                 required: requiredAmount,
                 progress: 0,

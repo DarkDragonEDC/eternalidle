@@ -89,7 +89,7 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
               return { ...trade, partner_name: partnerData?.name || "Unknown" };
             })
           );
-          socket.emit("trade_list", enrichedTrades);
+          socket.emit("trade_active_list", enrichedTrades);
         } catch (err) {
           console.error("[TRADE] Error fetching active trades on join:", err);
         }

@@ -113,8 +113,16 @@ export const GuildModals = ({
     const [isCreatingRole, setIsCreatingRole] = useState(false);
 
     const getItemAmount = (itemId) => {
-        const item = gameState?.state?.inventory?.[itemId];
-        return typeof item === 'object' ? item.amount : (item || 0);
+        if (!itemId) return 0;
+        const baseId = itemId.split('::')[0];
+        let total = 0;
+        const inventory = gameState?.state?.inventory || {};
+        Object.entries(inventory).forEach(([invId, data]) => {
+            if (invId.split('::')[0] === baseId) {
+                total += typeof data === 'object' ? data.amount : (data || 0);
+            }
+        });
+        return total;
     };
 
     const sortedMaterials = useMemo(() => {

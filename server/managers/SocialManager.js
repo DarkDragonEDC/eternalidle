@@ -5,7 +5,7 @@ export class SocialManager {
     }
 
     async getFriends(characterId) {
-        if (!characterId) return [];
+        if (!characterId || characterId === 'undefined') return [];
 
         // Fetch friendships where user is either sender or receiver
         const { data, error } = await this.supabase
@@ -108,6 +108,7 @@ export class SocialManager {
     }
 
     async _getFriendCount(characterId) {
+        if (!characterId || characterId === 'undefined') return 0;
         const { count, error } = await this.supabase
             .from('friends')
             .select('*', { count: 'exact', head: true })
@@ -119,6 +120,7 @@ export class SocialManager {
     }
 
     async _getBestFriendCount(characterId) {
+        if (!characterId || characterId === 'undefined') return 0;
         const { count, error } = await this.supabase
             .from('friends')
             .select('*', { count: 'exact', head: true })
@@ -226,6 +228,7 @@ export class SocialManager {
     }
 
     async removeFriend(characterId, friendId) {
+        if (!characterId || characterId === 'undefined' || !friendId || friendId === 'undefined') return { success: false };
         const { error } = await this.supabase
             .from('friends')
             .delete()
@@ -248,6 +251,7 @@ export class SocialManager {
     }
 
     async requestBestFriend(senderId, friendId) {
+        if (!senderId || senderId === 'undefined' || !friendId || friendId === 'undefined') throw new Error("Invalid IDs");
         // Find friendship
         const { data, error } = await this.supabase
             .from('friends')
@@ -274,6 +278,7 @@ export class SocialManager {
     }
 
     async respondBestFriend(userId, friendId, accept) {
+        if (!userId || userId === 'undefined' || !friendId || friendId === 'undefined') throw new Error("Invalid IDs");
         // Find friendship
         const { data, error } = await this.supabase
             .from('friends')
@@ -312,6 +317,7 @@ export class SocialManager {
     }
 
     async removeBestFriend(userId, friendId) {
+        if (!userId || userId === 'undefined' || !friendId || friendId === 'undefined') return { success: false };
         const { error } = await this.supabase
             .from('friends')
             .update({ is_best_friend: false, best_friend_request_sender: null })

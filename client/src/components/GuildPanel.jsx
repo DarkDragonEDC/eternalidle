@@ -101,10 +101,22 @@ const GuildDashboard = ({ guild, socket, isMobile, onInspect, gameState }) => {
         donationPending
     } = useGuild(socket, activeTab, playerHasPermission, gameState);
 
-    // Inventory helper
+    // Inventory helper - correctly handles item signatures (e.g. T1_AXE::Player)
     const getItemAmount = (itemId) => {
-        const item = gameState?.state?.inventory?.[itemId];
-        return typeof item === 'object' ? item.amount : (item || 0);
+        if (!itemId) return 0;
+        const baseId = itemId.split('::')[0];
+        
+        let total = 0;
+        const inventory = gameState?.state?.inventory || {};
+        
+        // Sum all items that start with the same baseId (e.g. signatures)
+        Object.entries(inventory).forEach(([invId, data]) => {
+            if (invId.split('::')[0] === baseId) {
+                total += typeof data === 'object' ? data.amount : (data || 0);
+            }
+        });
+        
+        return total;
     };
 
     // Sorted Members

@@ -135,6 +135,7 @@ export const registerTradeHandlers = (socket, gameManager, io) => {
   socket.on("trade_get_active", async () => {
     try {
       const charId = socket.data.characterId;
+      if (!charId || charId === 'undefined') return socket.emit("trade_active_list", []);
       const trades = await gameManager.tradeManager.getActiveTrades(charId);
       socket.emit("trade_active_list", trades);
     } catch (err) {
@@ -145,6 +146,7 @@ export const registerTradeHandlers = (socket, gameManager, io) => {
   socket.on("get_my_trade_history", async () => {
     try {
       const charId = socket.data.characterId;
+      if (!charId || charId === 'undefined') return socket.emit("my_trade_history_update", []);
       const history = await gameManager.tradeManager.getPersonalTradeHistory(charId);
       socket.emit("my_trade_history_update", history);
     } catch (err) {

@@ -1785,6 +1785,23 @@ export const formatItemId = (itemOrId, options = {}) => {
     if (!itemId || typeof itemId !== 'string') return String(itemId || '');
 
     const baseId = itemId.split('::')[0];
+
+    // Special handling for Potions: T1_POTION_GATHER -> T1 Gathering Potion
+    if (baseId.includes('_POTION_')) {
+        const parts = baseId.split('_');
+        const tier = parts[0];
+        const type = parts[parts.length - 1];
+        const potionMap = {
+            'GATHER': 'Gathering', 'REFINE': 'Refining', 'CRAFT': 'Crafting',
+            'SILVER': 'Silver', 'QUALITY': 'Quality', 'LUCK': 'Luck',
+            'XP': 'Knowledge', 'CRIT': 'Critical', 'DAMAGE': 'Damage'
+        };
+        const potionName = potionMap[type] || (type.charAt(0).toUpperCase() + type.slice(1).toLowerCase());
+        let formatted = `${tier} ${potionName} Potion`;
+        if (nameOnly) formatted = `${potionName} Potion`;
+        return formatted;
+    }
+
     let formatted = baseId
         .split('_')
         .map(word => word.toUpperCase() === 'XP' ? 'XP' : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
