@@ -55,7 +55,7 @@ const WorldBossFight = ({ gameState, socket, onFinish, onMinimize }) => {
         }));
 
         // Process Hits for Log
-        if (update.hits && update.hits.length > 0) {
+        if (update.hits && Array.isArray(update.hits) && update.hits.length > 0) {
             const newLogs = update.hits.map(hit => ({
                 id: Date.now() + Math.random(),
                 damage: hit.damage,

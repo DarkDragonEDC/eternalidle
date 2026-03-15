@@ -80,7 +80,7 @@ const OrbShop = ({ socket, gameState, onClose, isPreviewActive, onPreviewActionB
     };
 
     // Group items by category
-    const groupedItems = storeItems.reduce((acc, item) => {
+    const groupedItems = (Array.isArray(storeItems) ? storeItems : []).reduce((acc, item) => {
         const cat = item.category || 'OTHER';
         if (!acc[cat]) acc[cat] = [];
         acc[cat].push(item);

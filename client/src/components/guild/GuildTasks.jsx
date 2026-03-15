@@ -43,11 +43,18 @@ export const GuildTasks = ({
 }) => {
     if (isLoading) return <div style={{ textAlign: 'center', padding: '40px', color: 'var(--accent)' }}>LOADING TASKS...</div>;
 
+    if (tasks?.locked) return (
+        <div style={{ padding: '40px 20px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <Lock size={48} color="rgba(255,255,255,0.1)" style={{ marginBottom: '15px' }} />
+            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', fontWeight: 'bold' }}>{tasks.message || "TASKS LOCKED"}</div>
+        </div>
+    );
+
     const libraryLevel = guild?.library_level || 1;
     const xpReward = GUILD_TASKS_CONFIG.REWARDS?.XP_TABLE?.[libraryLevel] || 0;
     const gpReward = GUILD_TASKS_CONFIG.REWARDS?.GP_TABLE?.[libraryLevel] || 0;
 
-    if (!tasks || tasks.length === 0) return (
+    if (!Array.isArray(tasks) || tasks.length === 0) return (
         <div style={{ padding: '40px 20px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
             <ClipboardList size={48} color="rgba(255,255,255,0.1)" style={{ marginBottom: '15px' }} />
             <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', fontWeight: 'bold' }}>No tasks available.</div>
