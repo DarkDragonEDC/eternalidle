@@ -1786,9 +1786,9 @@ export const formatItemId = (itemOrId, options = {}) => {
 
     const baseId = itemId.split('::')[0];
     let formatted = baseId
-        .replace(/_/g, ' ')
-        .toLowerCase()
-        .replace(/\b\w/g, char => char.toUpperCase());
+        .split('_')
+        .map(word => word.toUpperCase() === 'XP' ? 'XP' : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
 
     // Remove "T1 ", "T2 " etc from Rune Shards since only one tier exists
     if (formatted.includes('Rune Shard')) {

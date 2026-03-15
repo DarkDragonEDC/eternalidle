@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Bell, X, Star, Info, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { formatSkillName } from '../utils/format';
 
 const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onMarkAllAsRead, onClearAll, onClickTrigger }) => {
     const [activeTab, setActiveTab] = React.useState('LEVEL_UP');
@@ -150,7 +151,7 @@ const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onMa
                                                 gap: '6px'
                                             }}
                                         >
-                                            {tab.replace('_', ' ')}
+                                            {formatSkillName(tab)}
                                             {count > 0 && (
                                                 <span style={{
                                                     background: 'var(--accent)',

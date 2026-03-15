@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { formatNumber, formatSilver } from '@utils/format';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sword, Skull, Shield, Coins, Star } from 'lucide-react';
+import { X, Sword, Skull, Shield, Coins, Star, Utensils } from 'lucide-react';
 import { resolveItem } from '@shared/items';
 
 import { useAppStore } from '../store/useAppStore';
@@ -138,7 +138,7 @@ const CombatHistoryModal = ({ isOpen, onClose, socket }) => {
 
                                         {/* Rewards Footer */}
                                         {(log.xp_gained > 0 || log.silver_gained > 0 || (log.loot_gained && log.loot_gained.length > 0)) && (
-                                            <div style={{ padding: '12px', background: 'var(--slot-bg)' }}>
+                                            <div style={{ padding: '12px', background: 'var(--slot-bg)', borderBottom: log.food_consumed > 0 ? '1px solid var(--border)' : 'none' }}>
                                                 <div style={{ fontSize: '0.7rem', color: '#888', marginBottom: '8px', fontWeight: 'bold', textTransform: 'uppercase' }}>Session Rewards</div>
                                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                                                     {log.xp_gained > 0 && (
@@ -150,6 +150,21 @@ const CombatHistoryModal = ({ isOpen, onClose, socket }) => {
                                                     {log.loot_gained && log.loot_gained.map((item, idx) => (
                                                         <RewardBadge key={idx} text={item} color="#ae00ff" bg="rgba(174, 0, 255, 0.1)" />
                                                     ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Consumption Footer */}
+                                        {log.food_consumed > 0 && (
+                                            <div style={{ padding: '12px', background: 'rgba(255, 87, 34, 0.05)' }}>
+                                                <div style={{ fontSize: '0.7rem', color: '#888', marginBottom: '8px', fontWeight: 'bold', textTransform: 'uppercase' }}>Resources Consumed</div>
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                                    <RewardBadge 
+                                                        icon={<Utensils size={12} />} 
+                                                        text={`${log.food_consumed}x T${log.food_tier || 1} Food`} 
+                                                        color="#ff5722" 
+                                                        bg="rgba(255, 87, 34, 0.1)" 
+                                                    />
                                                 </div>
                                             </div>
                                         )}

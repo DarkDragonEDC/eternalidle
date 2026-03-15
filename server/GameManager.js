@@ -1490,6 +1490,7 @@ export class GameManager {
             if (inCombat) {
                 char.state.combat.playerHealth = currentHp;
                 char.state.combat.foodConsumed = (char.state.combat.foodConsumed || 0) + 1;
+                char.state.combat.foodTier = food.tier || 0;
                 char.state.combat.savedFoodCount = (char.state.combat.savedFoodCount || 0) + savedCount;
                 char._stateChanged = true;
             }

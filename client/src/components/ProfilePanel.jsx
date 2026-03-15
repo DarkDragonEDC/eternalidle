@@ -3142,24 +3142,22 @@ const RuneBuffSummary = ({ activeRuneBuffs }) => {
                             marginBottom: '8px',
                             textTransform: 'uppercase'
                         }}>
-                            {act.replace('HERB', 'Herbalism')
-                                .replace('HIDE', 'Skinning')
-                                .replace('WOOD', 'Wood')
-                                .replace('ORE', 'Ore')
-                                .replace('FIBER', 'Fiber')
-                                .replace('FISH', 'Fish')
-                                .replace('METAL', 'Bars')
-                                .replace('PLANK', 'Planks')
-                                .replace('LEATHER', 'Leather')
-                                .replace('CLOTH', 'Cloth')
-                                .replace('EXTRACT', 'Extracts')
-                                .replace('WARRIOR', 'Warrior Gear')
-                                .replace('HUNTER', 'Hunter Gear')
-                                .replace('MAGE', 'Mage Gear')
-                                .replace('TOOLS', 'Tools')
-                                .replace('COOKING', 'Cooking')
-                                .replace('ALCHEMY', 'Alchemy')
-                                .replace('ATTACK', 'Combat')}
+                            {(() => {
+                                const labels = {
+                                    HERB: 'Herbalism',
+                                    HIDE: 'Skinning',
+                                    METAL: 'Bars',
+                                    PLANK: 'Planks',
+                                    LEATHER: 'Leather',
+                                    CLOTH: 'Cloth',
+                                    EXTRACT: 'Extracts',
+                                    WARRIOR: 'Warrior Gear',
+                                    HUNTER: 'Hunter Gear',
+                                    MAGE: 'Mage Gear',
+                                    ATTACK: 'Combat'
+                                };
+                                return labels[act] || formatSkillName(act);
+                            })()}
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                             {buffs.XP && (

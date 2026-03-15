@@ -75,6 +75,7 @@ export class CombatManager {
             sessionLoot: {},
             savedFoodCount: 0,
             foodConsumed: 0,
+            foodTier: 0,
             started_at: new Date().toISOString()
         };
         char.last_saved = new Date().toISOString();
@@ -418,7 +419,6 @@ export class CombatManager {
             const mobName = combat.mobName || 'Unknown Enemy';
 
             const { error } = await this.gameManager.supabase.from('combat_history').insert({
-                id: crypto.randomUUID(),
                 character_id: char.id,
                 mob_id: mobId,
                 mob_name: mobName,
@@ -429,7 +429,10 @@ export class CombatManager {
                 loot_gained: formattedLoot,
                 damage_dealt: Math.floor(combat.totalPlayerDmg || 0),
                 damage_taken: Math.floor(combat.totalMobDmg || 0),
-                kills: combat.kills || 0
+                kills: combat.kills || 0,
+                food_consumed: combat.foodConsumed || 0,
+                food_tier: combat.foodTier || 0,
+                occurred_at: new Date().toISOString()
             });
 
             if (error) {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { formatNumber, formatSilver } from '@utils/format';
+import { formatNumber, formatSilver, formatSkillName } from '@utils/format';
 import { Package, Star, Clock, X, AlertCircle, Sword, Coins, Zap, Shield, Heart, Axe, Pickaxe, Scissors, Anchor, Apple, Box, Trophy, Hammer, Utensils, Anvil } from 'lucide-react';
 import { resolveItem, getTierColor, formatItemId } from '@shared/items';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -323,7 +323,7 @@ const OfflineGainsModal = ({ isOpen, data, onClose }) => {
                                                         overflow: 'hidden',
                                                         textOverflow: 'ellipsis'
                                                     }}>
-                                                        {SKILL_NAMES[skill] || skill}
+                                                        {SKILL_NAMES[skill] || formatSkillName(skill)}
                                                     </span>
                                                 </div>
                                                 <div style={{

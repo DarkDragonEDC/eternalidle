@@ -2,6 +2,7 @@ import React from 'react';
 import { X, Sword, Shield, Zap, Heart, Star } from 'lucide-react';
 import { resolveItem, calculateRuneBonus } from '@shared/items';
 import { getProficiencyStats } from '@shared/proficiency_stats';
+import { formatSkillName } from '@utils/format';
 
 const StatBreakdownModal = ({ statType, statId, value, stats, equipment, membership, guildBonuses, onClose }) => {
     // Rounding helper to avoid 0.9999999999995 artifacts
@@ -190,7 +191,7 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                 const skillName = skillsMap[effId];
                 if (skillName) {
                     const skillLvl = stats.skills?.[skillName]?.level || 1;
-                    breakdown.push({ label: 'Skill Level Bonus', value: `+${(skillLvl * 0.2).toFixed(1)}%`, sub: `(0.2% per Lv)` });
+                    breakdown.push({ label: `${formatSkillName(skillName)} Level Bonus`, value: `+${(skillLvl * 0.2).toFixed(1)}%`, sub: `(0.2% per Lv)` });
                 }
 
                 const toolMap = { WOOD: 'tool_axe', ORE: 'tool_pickaxe', HIDE: 'tool_knife', FIBER: 'tool_sickle', FISH: 'tool_rod', HERB: 'tool_pouch' };
@@ -367,15 +368,17 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                             {statType === 'EFFICIENCY' && <Zap size={20} color="#8b5cf6" />}
                         </div>
                         {statType === 'EFFICIENCY' ? (
-                            statId === 'GLOBAL' ? 'GLOBAL EFFICIENCY' : (
-                                {
-                                    WOOD: 'WOODCUTTING', ORE: 'MINING', HIDE: 'SKINNING', FIBER: 'FIBER', FISH: 'FISHING', HERB: 'HERBALISM',
-                                    PLANK: 'PLANKS', METAL: 'BARS', LEATHER: 'LEATHERS', CLOTH: 'CLOTH', EXTRACT: 'DISTILLATION',
-                                    WARRIOR: 'WARRIOR GEAR', MAGE: 'MAGE GEAR', COOKING: 'COOKING',
-                                    ALCHEMY: 'ALCHEMY', TOOLS: 'TOOLS'
-                                }[statId] || statId
+                            statId === 'GLOBAL' ? 'Global Efficiency' : (
+                                (() => {
+                                    const labels = {
+                                        WOOD: 'Woodcutting', ORE: 'Mining', HIDE: 'Skinning', FISH: 'Fishing', HERB: 'Herbalism',
+                                        PLANK: 'Planks', METAL: 'Bars', LEATHER: 'Leathers', EXTRACT: 'Distillation',
+                                        WARRIOR: 'Warrior Gear', HUNTER: 'Hunter Gear', MAGE: 'Mage Gear'
+                                    };
+                                    return labels[statId] || formatSkillName(statId);
+                                })()
                             )
-                        ) : `${statType} SOURCE`}
+                        ) : `${formatSkillName(statType)} Source`}
                     </h3>
                     <button
                         onClick={onClose}

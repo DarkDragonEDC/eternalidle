@@ -24,3 +24,15 @@ export const formatSilver = (num, abbreviate = false) => {
     return formatCompactNumber(num);
 };
 
+export const formatSkillName = (skillId) => {
+    if (!skillId) return '';
+    return skillId
+        .split('_')
+        .map(word => {
+            if (word.toUpperCase() === 'XP') return 'XP';
+            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        })
+        .join(' ');
+};
+
+

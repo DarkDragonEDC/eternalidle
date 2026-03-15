@@ -411,7 +411,8 @@ export class DungeonManager {
                 silver_gained: 0,
                 loot_gained: formattedLoot,
                 runs_completed: runs_completed,
-                total_runs: total_runs
+                total_runs: total_runs,
+                occurred_at: new Date().toISOString()
             });
 
             if (error) {
