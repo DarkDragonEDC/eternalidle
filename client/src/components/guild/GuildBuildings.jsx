@@ -148,7 +148,7 @@ export const GuildBuildings = ({
         if (nextLvl > 10) return <div style={{ textAlign: 'center', padding: '20px', color: '#44ff44', fontWeight: 'bold' }}>MAX LEVEL REACHED</div>;
         const costs = UPGRADE_COSTS[nextLvl];
         const silverCost = costs?.silver || 0;
-        const gpCost = costs?.gp || 0;
+        const gpCost = (selectedBuilding === "LIBRARY" && nextLevel === 1) ? 0 : (costs?.gp || 0);
         const matAmount = costs?.mats || 0;
         const reqGuildLevel = Math.max(1, (nextLvl - 1) * 10);
         const tier = Math.min(10, nextLvl);
@@ -202,7 +202,7 @@ export const GuildBuildings = ({
         if (nextLvl > 10) return <div style={{ textAlign: 'center', padding: '20px', color: '#44ff44', fontWeight: 'bold' }}>MAX LEVEL REACHED</div>;
         const costs = UPGRADE_COSTS[nextLvl];
         const silverCost = costs?.silver || 0;
-        const gpCost = costs?.gp || 0;
+        const gpCost = (nextLvl === 1) ? 0 : (costs?.gp || 0);
         const matAmount = costs?.mats || 0;
         const reqGuildLevel = Math.max(1, (nextLvl - 1) * 10);
         const tier = Math.min(10, nextLvl);
@@ -493,7 +493,7 @@ export const GuildBuildings = ({
                                         const costs = UPGRADE_COSTS[nextLevel];
 
                                         const silverCost = costs?.silver || 0;
-                                        const gpCost = costs?.gp || 0;
+                                        const gpCost = (selectedBuilding === "LIBRARY" && nextLevel === 1) ? 0 : (costs?.gp || 0);
                                         const matAmount = costs?.mats || 0;
                                         const tier = Math.min(10, nextLevel);
                                         const reqGuildLevel = Math.max(1, (nextLevel - 1) * 10);
