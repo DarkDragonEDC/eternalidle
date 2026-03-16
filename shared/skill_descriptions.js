@@ -3,30 +3,31 @@ export const SKILL_DESCRIPTIONS = {
         "Chop trees to gain Wood and Lumberjack XP.",
         "Wood is used in Refining to create Planks.",
         "Better Axes increase gathering efficiency.",
-        "Higher level trees are more efficiently gathered with better Axes."
+        "Higher Lumberjack levels are required for more advanced trees."
     ],
     ORE_MINER: [
         "Mine rocks to gain Ore and Ore Miner XP.",
         "Ore is used in Refining to create Metal Bars.",
         "Better Pickaxes increase gathering efficiency.",
-        "Higher level nodes are more efficiently gathered with better Pickaxes."
+        "Higher Ore Miner levels are required for more advanced nodes."
     ],
     ANIMAL_SKINNER: [
         "Skin defeated animals to gain Hide and Animal Skinner XP.",
         "Hide is used in Refining to create Leather.",
         "Better Skinning Knives increase gathering efficiency.",
-        "Better Skinning Knives significantly speed up skinning of powerful animals."
+        "Higher Animal Skinner levels are required for more advanced animals."
     ],
     FIBER_HARVESTER: [
         "Harvest plants to gain Fiber and Fiber Harvester XP.",
         "Fiber is used in Refining to create Cloth.",
         "Better Sickles increase gathering efficiency.",
-        "Better Sickles allow for much faster harvesting of high-tier plants."
+        "Higher Fiber Harvester levels are required for more advanced plants."
     ],
     HERBALISM: [
         "Gather rare herbs to gain Herbal XP.",
         "Herbs are used in Alchemy to create powerful potions.",
-        "Better tools are highly recommended for higher level herbs to maximize efficiency."
+        "Better tools increase gathering efficiency.",
+        "Higher Herbalism levels are required for more advanced herbs."
     ],
     FISHING: [
         "Fish for Fishing XP and Strength.",
