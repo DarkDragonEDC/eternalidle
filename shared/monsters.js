@@ -13,7 +13,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                30
+                15
             ],
             "tier": 1,
             "image": "rabbit.webp",
@@ -35,7 +35,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                30
+                15
             ],
             "tier": 1,
             "image": "goblin_scout.webp",
@@ -55,7 +55,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                30
+                15
             ],
             "tier": 1,
             "image": "wild_hog.webp",
@@ -75,7 +75,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                30
+                15
             ],
             "tier": 1,
             "image": "fox.webp",
@@ -95,7 +95,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                30
+                15
             ],
             "tier": 1,
             "image": "snake.webp",
@@ -117,7 +117,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                50
+                25
             ],
             "tier": 2,
             "image": "wolf.webp",
@@ -137,7 +137,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                50
+                25
             ],
             "tier": 2,
             "image": "dire_rat.webp",
@@ -157,7 +157,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                50
+                25
             ],
             "tier": 2,
             "image": "stag.webp",
@@ -177,7 +177,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                50
+                25
             ],
             "tier": 2,
             "image": "mountain_goat.webp",
@@ -197,7 +197,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                50
+                25
             ],
             "tier": 2,
             "image": "bandit_thug.webp",
@@ -219,7 +219,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                70
+                35
             ],
             "tier": 3,
             "image": "bear.webp",
@@ -239,7 +239,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                70
+                35
             ],
             "tier": 3,
             "image": "mountain_goblin.webp",
@@ -259,7 +259,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                70
+                35
             ],
             "tier": 3,
             "image": "highland_cow.webp",
@@ -279,7 +279,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                70
+                35
             ],
             "tier": 3,
             "image": "harpy.webp",
@@ -299,7 +299,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                70
+                35
             ],
             "tier": 3,
             "image": "rogue_knight.webp",
@@ -321,7 +321,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                90
+                45
             ],
             "tier": 4,
             "image": "dire_wolf.webp",
@@ -341,7 +341,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                90
+                45
             ],
             "tier": 4,
             "image": "ghost_knight.webp",
@@ -361,7 +361,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                90
+                45
             ],
             "tier": 4,
             "image": "snow_leopard.webp",
@@ -381,7 +381,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                90
+                45
             ],
             "tier": 4,
             "image": "giant_eagle.webp",
@@ -401,7 +401,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                90
+                45
             ],
             "tier": 4,
             "image": "ash_ghoul.webp",
@@ -423,7 +423,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                110
+                55
             ],
             "tier": 5,
             "image": "ogre.webp",
@@ -443,7 +443,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                110
+                55
             ],
             "tier": 5,
             "image": "war_ogre.webp",
@@ -463,7 +463,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                110
+                55
             ],
             "tier": 5,
             "image": "swamp_troc.webp",
@@ -483,7 +483,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                110
+                55
             ],
             "tier": 5,
             "image": "crimson_bat.webp",
@@ -503,7 +503,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                110
+                55
             ],
             "tier": 5,
             "image": "corrupted_paladin.webp",
@@ -525,7 +525,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                130
+                65
             ],
             "tier": 6,
             "image": "troll.webp",
@@ -545,7 +545,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                130
+                65
             ],
             "tier": 6,
             "image": "armored_troll.webp",
@@ -565,7 +565,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                130
+                65
             ],
             "tier": 6,
             "image": "tundra_bear.webp",
@@ -585,7 +585,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                130
+                65
             ],
             "tier": 6,
             "image": "sky_stalker.webp",
@@ -605,7 +605,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                130
+                65
             ],
             "tier": 6,
             "image": "executioner.webp",
@@ -627,7 +627,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                150
+                75
             ],
             "tier": 7,
             "image": "dragon_whelp.webp",
@@ -647,7 +647,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                150
+                75
             ],
             "tier": 7,
             "image": "fire_drake.webp",
@@ -667,7 +667,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                150
+                75
             ],
             "tier": 7,
             "image": "lava_hound.webp",
@@ -687,7 +687,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                150
+                75
             ],
             "tier": 7,
             "image": "storm_wraith.webp",
@@ -707,7 +707,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                150
+                75
             ],
             "tier": 7,
             "image": "rune_guardian.webp",
@@ -729,7 +729,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                170
+                85
             ],
             "tier": 8,
             "image": "ancient_golem.webp",
@@ -749,7 +749,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                170
+                85
             ],
             "tier": 8,
             "image": "obsidian_golem.webp",
@@ -769,7 +769,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                170
+                85
             ],
             "tier": 8,
             "image": "glacier_giant.webp",
@@ -789,7 +789,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                170
+                85
             ],
             "tier": 8,
             "image": "void_stalker.webp",
@@ -809,7 +809,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                170
+                85
             ],
             "tier": 8,
             "image": "abyssal_knight.webp",
@@ -831,7 +831,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                190
+                95
             ],
             "tier": 9,
             "image": "elder_dragon.webp",
@@ -851,7 +851,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                190
+                95
             ],
             "tier": 9,
             "image": "void_dragon.webp",
@@ -871,7 +871,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                190
+                95
             ],
             "tier": 9,
             "image": "nebula_serpent.webp",
@@ -891,7 +891,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                190
+                95
             ],
             "tier": 9,
             "image": "star_devourer.webp",
@@ -911,7 +911,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                190
+                95
             ],
             "tier": 9,
             "image": "cosmic_horror.webp",
@@ -933,7 +933,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                210
+                105
             ],
             "tier": 10,
             "image": "ancient_dragon.webp",
@@ -953,7 +953,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                210
+                105
             ],
             "tier": 10,
             "image": "void_dragon_lord.webp",
@@ -973,7 +973,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                210
+                105
             ],
             "tier": 10,
             "image": "galaxy_eater.webp",
@@ -993,7 +993,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                210
+                105
             ],
             "tier": 10,
             "image": "void_reaper.webp",
@@ -1013,7 +1013,7 @@ export const MONSTERS = {
             },
             "silver": [
                 1,
-                210
+                105
             ],
             "tier": 10,
             "image": "eternal_watcher.webp",
