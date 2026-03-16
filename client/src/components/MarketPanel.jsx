@@ -477,12 +477,17 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
                         <MarketClaimTab
                             claims={gameState?.state?.claims || []}
                             onClaim={handleClaim}
+                            onClaimAll={() => {
+                                if (isPreviewActive) return onPreviewActionBlocked();
+                                socket.emit('claim_all_market_items');
+                            }}
                             onShowInfo={onShowInfo}
                             onInspect={onInspect}
                             isPreviewActive={isPreviewActive}
                             onPreviewActionBlocked={onPreviewActionBlocked}
                         />
                     )}
+
                     {activeTab === 'HISTORY' && (
                         <MarketHistoryTab
                             isLoadingHistory={isLoadingHistory}

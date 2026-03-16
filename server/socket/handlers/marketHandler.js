@@ -153,6 +153,21 @@ export const registerMarketHandlers = (socket, gameManager, io) => {
     }
   });
 
+  socket.on("claim_all_market_items", async () => {
+    try {
+      if (socket.user.is_anonymous) throw new Error("Market is locked for Guest accounts.");
+      await gameManager.executeLocked(socket.user.id, async () => {
+        const result = await gameManager.marketManager.claimAllMarketItems(socket.user.id, socket.data.characterId);
+        socket.emit("market_action_success", result);
+        socket.emit("status_update", await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+      });
+    } catch (err) {
+      socket.emit("error", { message: err.message });
+      try { socket.emit("status_update", await gameManager.getStatus(socket.user.id, true, socket.data.characterId)); } catch (e) {}
+    }
+  });
+
+
   socket.on("get_market_history", async () => {
     try {
       const history = await gameManager.marketManager.getGlobalHistory();

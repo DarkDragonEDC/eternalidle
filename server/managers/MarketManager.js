@@ -631,6 +631,72 @@ export class MarketManager {
         return { success: true, message: "Claimed successfully!" };
     }
 
+    async claimAllMarketItems(userId, characterId) {
+        const char = await this.gameManager.getCharacter(userId, characterId);
+        if (!char || !char.state.claims || char.state.claims.length === 0) {
+            return { success: false, message: "No items to claim." };
+        }
+
+        // Sort claims: Silver or non-item claims first (they don't take inventory space)
+        // This ensures the player gets their money even if inventory is full
+        const sortedClaims = [...char.state.claims].sort((a, b) => {
+            const aIsItem = a.itemId && a.type !== 'SOLD_ITEM';
+            const bIsItem = b.itemId && b.type !== 'SOLD_ITEM';
+            if (aIsItem && !bIsItem) return 1;
+            if (!aIsItem && bIsItem) return -1;
+            return 0;
+        });
+
+        let silverClaimed = 0;
+        let itemsClaimed = 0;
+        let remainingItems = 0;
+        let claimsToRemove = [];
+
+        for (const claim of sortedClaims) {
+            let processed = false;
+            let inventoryError = false;
+
+            if (claim.itemId && claim.type !== 'SOLD_ITEM') {
+                const success = this.gameManager.inventoryManager.addItemToInventory(char, claim.itemId, claim.amount, claim.metadata || null);
+                if (success) {
+                    itemsClaimed++;
+                    processed = true;
+                } else {
+                    remainingItems++;
+                    inventoryError = true;
+                }
+            } else {
+                // Silver or SOLD_ITEM (which gives silver)
+                processed = true;
+            }
+
+            if (processed) {
+                if (claim.silver) {
+                    silverClaimed += claim.silver;
+                    char.state.silver = (char.state.silver || 0) + claim.silver;
+                }
+                claimsToRemove.push(claim.id);
+            }
+        }
+
+        // Remove processed claims
+        char.state.claims = char.state.claims.filter(c => !claimsToRemove.includes(c.id));
+
+        await this.gameManager.saveStateCritical(char.id, char.state);
+
+        let message = `Claimed ${itemsClaimed} item types and ${silverClaimed.toLocaleString()} Silver!`;
+        if (remainingItems > 0) {
+            message += ` Inventory full! ${remainingItems} items remain.`;
+        }
+
+        return { 
+            success: true, 
+            message, 
+            details: { silverClaimed, itemsClaimed, remainingItems } 
+        };
+    }
+
+
     async getBuyOrders(filters = {}) {
         let query = this.gameManager.supabase
             .from('market_buy_orders')

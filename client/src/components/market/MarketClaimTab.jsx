@@ -6,7 +6,8 @@ import { formatSilver } from '@utils/format';
 const MarketClaimTab = ({
     claims = [],
     onInspect,
-    onClaim
+    onClaim,
+    onClaimAll
 }) => {
     const [currentPage, setCurrentPage] = React.useState(1);
     const itemsPerPage = 10;
@@ -23,7 +24,43 @@ const MarketClaimTab = ({
                 </div>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
+                    {claims.length > 1 && (
+                        <div style={{ padding: '0 0 10px 0', borderBottom: '1px solid var(--border)', marginBottom: '10px', display: 'flex', justifyContent: 'flex-end' }}>
+                            <button
+                                onClick={onClaimAll}
+                                style={{
+                                    padding: '12px 24px',
+                                    borderRadius: '12px',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    background: 'var(--accent)',
+                                    color: '#000',
+                                    fontWeight: '900',
+                                    fontSize: '0.9rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '10px',
+                                    boxShadow: '0 4px 15px rgba(212, 175, 55, 0.3)',
+                                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    letterSpacing: '1px'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+                                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(212, 175, 55, 0.4)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(212, 175, 55, 0.3)';
+                                }}
+                            >
+                                <ShoppingBag size={18} /> CLAIM ALL
+                            </button>
+                        </div>
+                    )}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
+
                         {paginatedClaims.map(c => {
                             let isItem = c.type === 'BOUGHT_ITEM' || c.type === 'CANCELLED_LISTING' || c.type === 'SOLD_ITEM';
                             let name = c.type === 'MARKET_REFUND' ? (c.message || 'Market Refund') : (c.name || 'Item');
@@ -189,8 +226,9 @@ const MarketClaimTab = ({
                             );
                         })}
                     </div>
+                </div>
 
-                    {/* Pagination Controls */}
+                {/* Pagination Controls */}
                     {totalPages > 1 && (
                         <div style={{ 
                             display: 'flex', 
