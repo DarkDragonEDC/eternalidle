@@ -8,12 +8,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 5,
             "loot": {
-                "T1_DUNGEON_MAP": 0.03,
-                "T1_WOOD": 0.1
+                "T1_DUNGEON_MAP": 0.01,
+                "T1_WOOD": 0.05
             },
             "silver": [
                 1,
-                30
+                15
             ],
             "tier": 1,
             "image": "rabbit.webp",
@@ -30,12 +30,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 5,
             "loot": {
-                "T1_DUNGEON_MAP": 0.03,
-                "T1_ORE": 0.1
+                "T1_DUNGEON_MAP": 0.01,
+                "T1_ORE": 0.05
             },
             "silver": [
                 1,
-                30
+                15
             ],
             "tier": 1,
             "image": "goblin_scout.webp",
@@ -50,12 +50,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 5,
             "loot": {
-                "T1_DUNGEON_MAP": 0.03,
-                "T1_HIDE": 0.1
+                "T1_DUNGEON_MAP": 0.01,
+                "T1_HIDE": 0.05
             },
             "silver": [
                 1,
-                30
+                15
             ],
             "tier": 1,
             "image": "wild_hog.webp",
@@ -70,12 +70,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 5,
             "loot": {
-                "T1_DUNGEON_MAP": 0.03,
-                "T1_FIBER": 0.1
+                "T1_DUNGEON_MAP": 0.01,
+                "T1_FIBER": 0.05
             },
             "silver": [
                 1,
-                30
+                15
             ],
             "tier": 1,
             "image": "fox.webp",
@@ -90,12 +90,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 5,
             "loot": {
-                "T1_DUNGEON_MAP": 0.03,
-                "T1_HERB": 0.1
+                "T1_DUNGEON_MAP": 0.01,
+                "T1_HERB": 0.05
             },
             "silver": [
                 1,
-                30
+                15
             ],
             "tier": 1,
             "image": "snake.webp",
@@ -112,12 +112,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 8,
             "loot": {
-                "T2_DUNGEON_MAP": 0.03,
-                "T2_WOOD": 0.1
+                "T2_DUNGEON_MAP": 0.01,
+                "T2_WOOD": 0.05
             },
             "silver": [
                 1,
-                50
+                25
             ],
             "tier": 2,
             "image": "wolf.webp",
@@ -132,12 +132,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 8,
             "loot": {
-                "T2_DUNGEON_MAP": 0.03,
-                "T2_ORE": 0.1
+                "T2_DUNGEON_MAP": 0.01,
+                "T2_ORE": 0.05
             },
             "silver": [
                 1,
-                50
+                25
             ],
             "tier": 2,
             "image": "dire_rat.webp",
@@ -152,12 +152,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 8,
             "loot": {
-                "T2_DUNGEON_MAP": 0.03,
-                "T2_HIDE": 0.1
+                "T2_DUNGEON_MAP": 0.01,
+                "T2_HIDE": 0.05
             },
             "silver": [
                 1,
-                50
+                25
             ],
             "tier": 2,
             "image": "stag.webp",
@@ -172,12 +172,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 8,
             "loot": {
-                "T2_DUNGEON_MAP": 0.03,
-                "T2_FIBER": 0.1
+                "T2_DUNGEON_MAP": 0.01,
+                "T2_FIBER": 0.05
             },
             "silver": [
                 1,
-                50
+                25
             ],
             "tier": 2,
             "image": "mountain_goat.webp",
@@ -192,12 +192,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 8,
             "loot": {
-                "T2_DUNGEON_MAP": 0.03,
-                "T2_HERB": 0.1
+                "T2_DUNGEON_MAP": 0.01,
+                "T2_HERB": 0.05
             },
             "silver": [
                 1,
-                50
+                25
             ],
             "tier": 2,
             "image": "bandit_thug.webp",
@@ -214,12 +214,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 14,
             "loot": {
-                "T3_DUNGEON_MAP": 0.03,
-                "T3_WOOD": 0.1
+                "T3_DUNGEON_MAP": 0.01,
+                "T3_WOOD": 0.05
             },
             "silver": [
                 1,
-                70
+                35
             ],
             "tier": 3,
             "image": "bear.webp",
@@ -234,12 +234,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 14,
             "loot": {
-                "T3_DUNGEON_MAP": 0.03,
-                "T3_ORE": 0.1
+                "T3_DUNGEON_MAP": 0.01,
+                "T3_ORE": 0.05
             },
             "silver": [
                 1,
-                70
+                35
             ],
             "tier": 3,
             "image": "mountain_goblin.webp",
@@ -254,12 +254,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 14,
             "loot": {
-                "T3_DUNGEON_MAP": 0.03,
-                "T3_HIDE": 0.1
+                "T3_DUNGEON_MAP": 0.01,
+                "T3_HIDE": 0.05
             },
             "silver": [
                 1,
-                70
+                35
             ],
             "tier": 3,
             "image": "highland_cow.webp",
@@ -274,12 +274,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 14,
             "loot": {
-                "T3_DUNGEON_MAP": 0.03,
-                "T3_FIBER": 0.1
+                "T3_DUNGEON_MAP": 0.01,
+                "T3_FIBER": 0.05
             },
             "silver": [
                 1,
-                70
+                35
             ],
             "tier": 3,
             "image": "harpy.webp",
@@ -294,12 +294,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 14,
             "loot": {
-                "T3_DUNGEON_MAP": 0.03,
-                "T3_HERB": 0.1
+                "T3_DUNGEON_MAP": 0.01,
+                "T3_HERB": 0.05
             },
             "silver": [
                 1,
-                70
+                35
             ],
             "tier": 3,
             "image": "rogue_knight.webp",
@@ -316,12 +316,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 20,
             "loot": {
-                "T4_DUNGEON_MAP": 0.03,
-                "T4_WOOD": 0.1
+                "T4_DUNGEON_MAP": 0.01,
+                "T4_WOOD": 0.05
             },
             "silver": [
                 1,
-                90
+                45
             ],
             "tier": 4,
             "image": "dire_wolf.webp",
@@ -336,12 +336,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 20,
             "loot": {
-                "T4_DUNGEON_MAP": 0.03,
-                "T4_ORE": 0.1
+                "T4_DUNGEON_MAP": 0.01,
+                "T4_ORE": 0.05
             },
             "silver": [
                 1,
-                90
+                45
             ],
             "tier": 4,
             "image": "ghost_knight.webp",
@@ -356,12 +356,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 20,
             "loot": {
-                "T4_DUNGEON_MAP": 0.03,
-                "T4_HIDE": 0.1
+                "T4_DUNGEON_MAP": 0.01,
+                "T4_HIDE": 0.05
             },
             "silver": [
                 1,
-                90
+                45
             ],
             "tier": 4,
             "image": "snow_leopard.webp",
@@ -376,12 +376,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 20,
             "loot": {
-                "T4_DUNGEON_MAP": 0.03,
-                "T4_FIBER": 0.1
+                "T4_DUNGEON_MAP": 0.01,
+                "T4_FIBER": 0.05
             },
             "silver": [
                 1,
-                90
+                45
             ],
             "tier": 4,
             "image": "giant_eagle.webp",
@@ -396,12 +396,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 20,
             "loot": {
-                "T4_DUNGEON_MAP": 0.03,
-                "T4_HERB": 0.1
+                "T4_DUNGEON_MAP": 0.01,
+                "T4_HERB": 0.05
             },
             "silver": [
                 1,
-                90
+                45
             ],
             "tier": 4,
             "image": "ash_ghoul.webp",
@@ -418,12 +418,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 28,
             "loot": {
-                "T5_DUNGEON_MAP": 0.03,
-                "T5_WOOD": 0.1
+                "T5_DUNGEON_MAP": 0.01,
+                "T5_WOOD": 0.05
             },
             "silver": [
                 1,
-                110
+                55
             ],
             "tier": 5,
             "image": "ogre.webp",
@@ -438,12 +438,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 28,
             "loot": {
-                "T5_DUNGEON_MAP": 0.03,
-                "T5_ORE": 0.1
+                "T5_DUNGEON_MAP": 0.01,
+                "T5_ORE": 0.05
             },
             "silver": [
                 1,
-                110
+                55
             ],
             "tier": 5,
             "image": "war_ogre.webp",
@@ -458,12 +458,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 28,
             "loot": {
-                "T5_DUNGEON_MAP": 0.03,
-                "T5_HIDE": 0.1
+                "T5_DUNGEON_MAP": 0.01,
+                "T5_HIDE": 0.05
             },
             "silver": [
                 1,
-                110
+                55
             ],
             "tier": 5,
             "image": "swamp_troc.webp",
@@ -478,12 +478,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 28,
             "loot": {
-                "T5_DUNGEON_MAP": 0.03,
-                "T5_FIBER": 0.1
+                "T5_DUNGEON_MAP": 0.01,
+                "T5_FIBER": 0.05
             },
             "silver": [
                 1,
-                110
+                55
             ],
             "tier": 5,
             "image": "crimson_bat.webp",
@@ -498,12 +498,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 28,
             "loot": {
-                "T5_DUNGEON_MAP": 0.03,
-                "T5_HERB": 0.1
+                "T5_DUNGEON_MAP": 0.01,
+                "T5_HERB": 0.05
             },
             "silver": [
                 1,
-                110
+                55
             ],
             "tier": 5,
             "image": "corrupted_paladin.webp",
@@ -520,12 +520,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 35,
             "loot": {
-                "T6_DUNGEON_MAP": 0.03,
-                "T6_WOOD": 0.1
+                "T6_DUNGEON_MAP": 0.01,
+                "T6_WOOD": 0.05
             },
             "silver": [
                 1,
-                130
+                65
             ],
             "tier": 6,
             "image": "troll.webp",
@@ -540,12 +540,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 35,
             "loot": {
-                "T6_DUNGEON_MAP": 0.03,
-                "T6_ORE": 0.1
+                "T6_DUNGEON_MAP": 0.01,
+                "T6_ORE": 0.05
             },
             "silver": [
                 1,
-                130
+                65
             ],
             "tier": 6,
             "image": "armored_troll.webp",
@@ -560,12 +560,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 35,
             "loot": {
-                "T6_DUNGEON_MAP": 0.03,
-                "T6_HIDE": 0.1
+                "T6_DUNGEON_MAP": 0.01,
+                "T6_HIDE": 0.05
             },
             "silver": [
                 1,
-                130
+                65
             ],
             "tier": 6,
             "image": "tundra_bear.webp",
@@ -580,12 +580,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 35,
             "loot": {
-                "T6_DUNGEON_MAP": 0.03,
-                "T6_FIBER": 0.1
+                "T6_DUNGEON_MAP": 0.01,
+                "T6_FIBER": 0.05
             },
             "silver": [
                 1,
-                130
+                65
             ],
             "tier": 6,
             "image": "sky_stalker.webp",
@@ -600,12 +600,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 35,
             "loot": {
-                "T6_DUNGEON_MAP": 0.03,
-                "T6_HERB": 0.1
+                "T6_DUNGEON_MAP": 0.01,
+                "T6_HERB": 0.05
             },
             "silver": [
                 1,
-                130
+                65
             ],
             "tier": 6,
             "image": "executioner.webp",
@@ -622,12 +622,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 50,
             "loot": {
-                "T7_DUNGEON_MAP": 0.03,
-                "T7_WOOD": 0.1
+                "T7_DUNGEON_MAP": 0.01,
+                "T7_WOOD": 0.05
             },
             "silver": [
                 1,
-                150
+                75
             ],
             "tier": 7,
             "image": "dragon_whelp.webp",
@@ -642,12 +642,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 50,
             "loot": {
-                "T7_DUNGEON_MAP": 0.03,
-                "T7_ORE": 0.1
+                "T7_DUNGEON_MAP": 0.01,
+                "T7_ORE": 0.05
             },
             "silver": [
                 1,
-                150
+                75
             ],
             "tier": 7,
             "image": "fire_drake.webp",
@@ -662,12 +662,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 50,
             "loot": {
-                "T7_DUNGEON_MAP": 0.03,
-                "T7_HIDE": 0.1
+                "T7_DUNGEON_MAP": 0.01,
+                "T7_HIDE": 0.05
             },
             "silver": [
                 1,
-                150
+                75
             ],
             "tier": 7,
             "image": "lava_hound.webp",
@@ -682,12 +682,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 50,
             "loot": {
-                "T7_DUNGEON_MAP": 0.03,
-                "T7_FIBER": 0.1
+                "T7_DUNGEON_MAP": 0.01,
+                "T7_FIBER": 0.05
             },
             "silver": [
                 1,
-                150
+                75
             ],
             "tier": 7,
             "image": "storm_wraith.webp",
@@ -702,12 +702,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 50,
             "loot": {
-                "T7_DUNGEON_MAP": 0.03,
-                "T7_HERB": 0.1
+                "T7_DUNGEON_MAP": 0.01,
+                "T7_HERB": 0.05
             },
             "silver": [
                 1,
-                150
+                75
             ],
             "tier": 7,
             "image": "rune_guardian.webp",
@@ -724,12 +724,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 65,
             "loot": {
-                "T8_DUNGEON_MAP": 0.03,
-                "T8_WOOD": 0.1
+                "T8_DUNGEON_MAP": 0.01,
+                "T8_WOOD": 0.05
             },
             "silver": [
                 1,
-                170
+                85
             ],
             "tier": 8,
             "image": "ancient_golem.webp",
@@ -744,12 +744,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 65,
             "loot": {
-                "T8_DUNGEON_MAP": 0.03,
-                "T8_ORE": 0.1
+                "T8_DUNGEON_MAP": 0.01,
+                "T8_ORE": 0.05
             },
             "silver": [
                 1,
-                170
+                85
             ],
             "tier": 8,
             "image": "obsidian_golem.webp",
@@ -764,12 +764,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 65,
             "loot": {
-                "T8_DUNGEON_MAP": 0.03,
-                "T8_HIDE": 0.1
+                "T8_DUNGEON_MAP": 0.01,
+                "T8_HIDE": 0.05
             },
             "silver": [
                 1,
-                170
+                85
             ],
             "tier": 8,
             "image": "glacier_giant.webp",
@@ -784,12 +784,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 65,
             "loot": {
-                "T8_DUNGEON_MAP": 0.03,
-                "T8_FIBER": 0.1
+                "T8_DUNGEON_MAP": 0.01,
+                "T8_FIBER": 0.05
             },
             "silver": [
                 1,
-                170
+                85
             ],
             "tier": 8,
             "image": "void_stalker.webp",
@@ -804,12 +804,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 65,
             "loot": {
-                "T8_DUNGEON_MAP": 0.03,
-                "T8_HERB": 0.1
+                "T8_DUNGEON_MAP": 0.01,
+                "T8_HERB": 0.05
             },
             "silver": [
                 1,
-                170
+                85
             ],
             "tier": 8,
             "image": "abyssal_knight.webp",
@@ -826,12 +826,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 105,
             "loot": {
-                "T9_DUNGEON_MAP": 0.03,
-                "T9_WOOD": 0.1
+                "T9_DUNGEON_MAP": 0.01,
+                "T9_WOOD": 0.05
             },
             "silver": [
                 1,
-                190
+                95
             ],
             "tier": 9,
             "image": "elder_dragon.webp",
@@ -846,12 +846,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 105,
             "loot": {
-                "T9_DUNGEON_MAP": 0.03,
-                "T9_ORE": 0.1
+                "T9_DUNGEON_MAP": 0.01,
+                "T9_ORE": 0.05
             },
             "silver": [
                 1,
-                190
+                95
             ],
             "tier": 9,
             "image": "void_dragon.webp",
@@ -866,12 +866,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 105,
             "loot": {
-                "T9_DUNGEON_MAP": 0.03,
-                "T9_HIDE": 0.1
+                "T9_DUNGEON_MAP": 0.01,
+                "T9_HIDE": 0.05
             },
             "silver": [
                 1,
-                190
+                95
             ],
             "tier": 9,
             "image": "nebula_serpent.webp",
@@ -886,12 +886,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 105,
             "loot": {
-                "T9_DUNGEON_MAP": 0.03,
-                "T9_FIBER": 0.1
+                "T9_DUNGEON_MAP": 0.01,
+                "T9_FIBER": 0.05
             },
             "silver": [
                 1,
-                190
+                95
             ],
             "tier": 9,
             "image": "star_devourer.webp",
@@ -906,12 +906,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 105,
             "loot": {
-                "T9_DUNGEON_MAP": 0.03,
-                "T9_HERB": 0.1
+                "T9_DUNGEON_MAP": 0.01,
+                "T9_HERB": 0.05
             },
             "silver": [
                 1,
-                190
+                95
             ],
             "tier": 9,
             "image": "cosmic_horror.webp",
@@ -928,12 +928,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 170,
             "loot": {
-                "T10_DUNGEON_MAP": 0.03,
-                "T10_WOOD": 0.1
+                "T10_DUNGEON_MAP": 0.01,
+                "T10_WOOD": 0.05
             },
             "silver": [
                 1,
-                210
+                105
             ],
             "tier": 10,
             "image": "ancient_dragon.webp",
@@ -948,12 +948,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 170,
             "loot": {
-                "T10_DUNGEON_MAP": 0.03,
-                "T10_ORE": 0.1
+                "T10_DUNGEON_MAP": 0.01,
+                "T10_ORE": 0.05
             },
             "silver": [
                 1,
-                210
+                105
             ],
             "tier": 10,
             "image": "void_dragon_lord.webp",
@@ -968,12 +968,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 170,
             "loot": {
-                "T10_DUNGEON_MAP": 0.03,
-                "T10_HIDE": 0.1
+                "T10_DUNGEON_MAP": 0.01,
+                "T10_HIDE": 0.05
             },
             "silver": [
                 1,
-                210
+                105
             ],
             "tier": 10,
             "image": "galaxy_eater.webp",
@@ -988,12 +988,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 170,
             "loot": {
-                "T10_DUNGEON_MAP": 0.03,
-                "T10_FIBER": 0.1
+                "T10_DUNGEON_MAP": 0.01,
+                "T10_FIBER": 0.05
             },
             "silver": [
                 1,
-                210
+                105
             ],
             "tier": 10,
             "image": "void_reaper.webp",
@@ -1008,12 +1008,12 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 125,
             "loot": {
-                "T10_DUNGEON_MAP": 0.03,
-                "T10_HERB": 0.1
+                "T10_DUNGEON_MAP": 0.01,
+                "T10_HERB": 0.05
             },
             "silver": [
                 1,
-                210
+                105
             ],
             "tier": 10,
             "image": "eternal_watcher.webp",
