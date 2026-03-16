@@ -159,4 +159,30 @@ export const useGameSync = () => {
         document.body.className = `theme-${activeTheme}`;
         if (!previewThemeId) localStorage.setItem('theme', theme);
     }, [theme, previewThemeId]);
+
+    // Background Sync Logic
+    useEffect(() => {
+        const { requestSync } = useAppStore.getState();
+        let lastSync = 0;
+        const SYNC_COOLDOWN = 5000; // 5 seconds
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                const now = Date.now();
+                if (now - lastSync > SYNC_COOLDOWN) {
+                    console.log('[SYNC] Page became visible, triggering sync...');
+                    requestSync();
+                    lastSync = now;
+                }
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('focus', handleVisibilityChange); // Extra safety for some browsers
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('focus', handleVisibilityChange);
+        };
+    }, []);
 };
