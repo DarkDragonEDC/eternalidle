@@ -321,6 +321,7 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
                             ...rawMsg,
                             content: rawMsg.content || rawMsg.message || '',
                             sender_name: rawMsg.sender_name || rawMsg.sender || 'Unknown',
+                            sender_guild_tag: rawMsg.sender_guild_tag || null,
                             created_at: rawMsg.created_at || rawMsg.timestamp || new Date().toISOString()
                         };
 
@@ -343,6 +344,7 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
                                     style={{ cursor: 'pointer', textDecoration: 'underline' }}
                                     onClick={() => onInspect && onInspect(msg.sender_name)}
                                 >
+                                    {msg.sender_guild_tag && <span style={{ color: 'var(--accent)', opacity: 0.8, fontSize: '0.85em', marginRight: '4px', textDecoration: 'none', display: 'inline-block' }}>[{msg.sender_guild_tag}]</span>}
                                     {msg.sender_name}
                                 </span>
                                 <span style={{ opacity: 0.4 }}>{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>

@@ -138,13 +138,21 @@ export class TradeManager {
         if (!skipNames) {
             const { data: chars } = await this.supabase
                 .from('characters')
-                .select('id, name')
+                .select('id, name, guild_members(guilds(tag))')
                 .in('id', [data.sender_id, data.receiver_id]);
 
             if (chars) {
                 const sMap = new Map(chars.map(c => [c.id, c.name]));
+                const tagMap = new Map(chars.map(c => {
+                    const gm = Array.isArray(c.guild_members) ? c.guild_members[0] : c.guild_members;
+                    return [c.id, gm?.guilds?.tag || null];
+                }));
+                
                 if (sMap.has(data.sender_id)) data.sender_name = sMap.get(data.sender_id);
                 if (sMap.has(data.receiver_id)) data.receiver_name = sMap.get(data.receiver_id);
+
+                if (tagMap.has(data.sender_id)) data.sender_guild_tag = tagMap.get(data.sender_id);
+                if (tagMap.has(data.receiver_id)) data.receiver_guild_tag = tagMap.get(data.receiver_id);
             }
         }
 

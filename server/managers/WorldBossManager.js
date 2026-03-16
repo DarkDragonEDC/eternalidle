@@ -29,7 +29,7 @@ export class WorldBossManager {
 
             const { data, error } = await this.gameManager.supabase
                 .from('world_boss_attempts')
-                .select('character_id, damage, characters(name, state)')
+                .select('character_id, damage, characters(name, state, guild_members(guilds(tag)))')
                 .eq('date', dateStr)
                 .order('damage', { ascending: false });
 
@@ -37,12 +37,18 @@ export class WorldBossManager {
 
             this.rankings = data.map((r, index) => {
                 const isIronman = r.characters?.state?.isIronman === true;
+                let guildTag = null;
+                if (r.characters?.guild_members) {
+                    const gm = Array.isArray(r.characters.guild_members) ? r.characters.guild_members[0] : r.characters.guild_members;
+                    guildTag = gm?.guilds?.tag || null;
+                }
                 return {
-                    pos: 0, // Posição será calculada após o split ou dinamicamente
+                    pos: 0,
                     character_id: r.character_id,
                     name: r.characters?.name || 'Unknown',
                     damage: parseInt(r.damage),
-                    isIronman: isIronman
+                    isIronman: isIronman,
+                    guild_tag: guildTag
                 };
             });
 
@@ -625,20 +631,28 @@ export class WorldBossManager {
         try {
             const { data, error } = await this.gameManager.supabase
                 .from('world_boss_attempts')
-                .select('character_id, damage, characters(name, state)')
+                .select('character_id, damage, characters(name, state, guild_members(guilds(tag)))')
                 .eq('date', dateStr)
                 .order('damage', { ascending: false })
                 .limit(50);
 
             if (error) throw error;
 
-            return data.map((r, index) => ({
-                pos: 0, // calculated later
-                character_id: r.character_id,
-                name: r.characters?.name || 'Unknown',
-                damage: parseInt(r.damage),
-                isIronman: r.characters?.state?.isIronman === true
-            }));
+            return data.map((r, index) => {
+                let guildTag = null;
+                if (r.characters?.guild_members) {
+                    const gm = Array.isArray(r.characters.guild_members) ? r.characters.guild_members[0] : r.characters.guild_members;
+                    guildTag = gm?.guilds?.tag || null;
+                }
+                return {
+                    pos: 0,
+                    character_id: r.character_id,
+                    name: r.characters?.name || 'Unknown',
+                    damage: parseInt(r.damage),
+                    isIronman: r.characters?.state?.isIronman === true,
+                    guild_tag: guildTag
+                };
+            });
         } catch (err) {
             console.error('[WORLD_BOSS] Error fetching ranking history:', err);
             return [];

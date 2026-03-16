@@ -57,6 +57,7 @@ export const registerSocialHandlers = (socket, gameManager, io) => {
       const { data, error } = await supabase.from("messages").insert({
         user_id: socket.user.id,
         sender_name: char.name,
+        sender_guild_tag: char.guild_tag || null,
         content,
         channel: targetChannel,
       }).select().single();
@@ -66,6 +67,7 @@ export const registerSocialHandlers = (socket, gameManager, io) => {
           const { data: retryData } = await supabase.from("messages").insert({
             user_id: socket.user.id,
             sender_name: char.name,
+            sender_guild_tag: char.guild_tag || null,
             content,
           }).select().single();
           

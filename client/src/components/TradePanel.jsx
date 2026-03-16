@@ -554,7 +554,16 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                     }}
                                     style={{ margin: 0, fontSize: isMobile ? '0.9rem' : '0.9rem', fontWeight: '900', color: '#90d5ff', letterSpacing: '1px', cursor: onInspect ? 'pointer' : 'default' }}
                                 >
-                                    {trade.partner_name || (isSender ? trade.receiver_name : trade.sender_name) || 'THEIR OFFER'}
+                                    {(() => {
+                                        const partnerName = trade.partner_name || (isSender ? trade.receiver_name : trade.sender_name);
+                                        const partnerTag = isSender ? trade.receiver_guild_tag : trade.sender_guild_tag;
+                                        return (
+                                            <>
+                                                {partnerTag && <span style={{ color: 'var(--accent)', opacity: 0.8, fontSize: '0.85em', marginRight: '4px' }}>[{partnerTag}]</span>}
+                                                {partnerName || 'THEIR OFFER'}
+                                            </>
+                                        );
+                                    })()}
                                 </h3>
                                 {partnerAccepted ? (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#44ff44', fontSize: '0.8rem', fontWeight: 'bold' }}>

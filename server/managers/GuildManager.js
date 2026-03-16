@@ -94,6 +94,7 @@ export class GuildManager {
 
         // 7. Update Character cache and persist
         char.state.guild_id = guild.id; // Optional: back-reference in state for fast checks
+        char.guild_tag = cleanTag; // Propagate guild tag to cache for display
         await this.gameManager.saveStateCritical(char.id, char.state);
  
         console.log(`[GUILD] Guild Created: ${cleanName} [${cleanTag}] by ${char.name}`);
@@ -250,6 +251,7 @@ export class GuildManager {
         if (char && char.state && char.state.guild_id !== member.guild_id) {
             console.log(`[GUILD-SYNC] Updating missing/wrong guild_id in state for ${char.name}`);
             char.state.guild_id = member.guild_id;
+            char.guild_tag = guild.tag || null; // Sync guild tag in cache
             this.gameManager.markDirty(char.id);
             // Do not block - let it save in background
             this.gameManager.persistCharacter(char.id).catch(e => console.error("[GUILD-SYNC] Persist error:", e));
@@ -438,6 +440,7 @@ export class GuildManager {
                 .eq('guild_id', guildId);
             
             delete char.state.guild_id;
+            char.guild_tag = null; // Clear guild tag from cache
             delete char.guild_bonuses;
             await this.gameManager.saveStateCritical(char.id, char.state);
         }
@@ -471,6 +474,7 @@ export class GuildManager {
                 const targetChar = this.gameManager.cache.get(m.character_id);
                 if (targetChar) {
                     delete targetChar.state.guild_id;
+                    targetChar.guild_tag = null; // Clear guild tag from cache
                     delete targetChar.guild_bonuses;
                     this.gameManager.markDirty(m.character_id);
                 }
@@ -501,7 +505,7 @@ export class GuildManager {
         // Check if guild exists and is not full
         const { data: guild, error: guildErr } = await this.supabase
             .from('guilds')
-            .select('id, min_level, join_mode, guild_hall_level')
+            .select('id, tag, min_level, join_mode, guild_hall_level')
             .eq('id', guildId)
             .maybeSingle();
 
@@ -544,6 +548,7 @@ export class GuildManager {
             // Update character state immediately for the online character
             if (char.state) {
                 char.state.guild_id = guildId;
+                char.guild_tag = guild.tag || null; // Propagate guild tag to cache
                 await this.gameManager.saveStateCritical(char.id, char.state);
             }
 
@@ -680,7 +685,7 @@ export class GuildManager {
         // Count members (dynamic max based on Guild Hall level)
         const { data: guildData } = await this.supabase
             .from('guilds')
-            .select('guild_hall_level')
+            .select('tag, guild_hall_level')
             .eq('id', member.guild_id)
             .single();
 
@@ -712,6 +717,7 @@ export class GuildManager {
         const targetCharCache = this.gameManager.cache.get(request.character_id);
         if (targetCharCache) {
             targetCharCache.state.guild_id = member.guild_id;
+            targetCharCache.guild_tag = guildData?.tag || null; // Propagate guild tag to cache
             // Fetch initial guild bonuses for the new online member
             targetCharCache.guild_bonuses = await this.gameManager.getGuildBonuses(member.guild_id);
             await this.gameManager.saveStateCritical(request.character_id, targetCharCache.state);
@@ -1038,6 +1044,7 @@ export class GuildManager {
         const targetCharCache = this.gameManager.cache.get(memberId);
         if (targetCharCache) {
             delete targetCharCache.state.guild_id;
+            targetCharCache.guild_tag = null; // Clear guild tag from cache
             delete targetCharCache.guild_bonuses;
             this.gameManager.markDirty(memberId);
         }
@@ -1507,6 +1514,7 @@ export class GuildManager {
             if (char.state.guild_id) {
                 console.warn(`[GUILD] Clearing stale guild_id for character ${char.name} (membership not found)`);
                 char.state.guild_id = null;
+                char.guild_tag = null; // Clear stale guild tag
                 this.gameManager.markDirty(char.id);
             }
             throw new Error("Character is not in a guild");
@@ -1655,6 +1663,7 @@ export class GuildManager {
             if (char.state.guild_id) {
                 console.warn(`[GUILD] Clearing stale guild_id for character ${char.name} (guild ${guildId} not found)`);
                 char.state.guild_id = null;
+                char.guild_tag = null; // Clear stale guild tag
                 this.gameManager.markDirty(char.id);
             }
             throw new Error("Guild not found.");

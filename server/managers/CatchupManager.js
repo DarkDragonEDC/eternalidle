@@ -265,9 +265,9 @@ export class CatchupManager {
                     // Se terminar a atividade atual no lote
                     if (char.current_activity.actions_remaining <= 0) {
                          const elapsed = processed * timePerAction;
-                         this.gm.addActionSummaryNotification(char, actType, {
+                         /* this.gm.addActionSummaryNotification(char, actType, {
                              itemsGained, xpGained, totalTime: elapsed, duplicationCount, autoRefineCount
-                         }, 'Summary (Batch)');
+                         }, 'Summary (Batch)'); */
 
                          char.current_activity = null;
                          char.activity_started_at = null;
@@ -319,9 +319,9 @@ export class CatchupManager {
                 if (char.current_activity.actions_remaining <= 0) {
                     // Report summary for the finished activity
                     const elapsed = processed * timePerAction;
-                    this.gm.addActionSummaryNotification(char, char.current_activity.type, {
+                    /* this.gm.addActionSummaryNotification(char, char.current_activity.type, {
                         itemsGained, xpGained, totalTime: elapsed, duplicationCount, autoRefineCount
-                    }, 'Summary');
+                    }, 'Summary'); */
 
                     char.current_activity = null;
                     char.activity_started_at = null;

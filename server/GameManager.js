@@ -1087,7 +1087,6 @@ export class GameManager {
                         if (result.leveledUp) leveledUp = result.leveledUp;
                         lastActivityResult = result;
 
-                        // Track session stats
                         const activity = char.current_activity;
                         if (activity) {
                             if (!activity.sessionItems) activity.sessionItems = {};
@@ -1105,73 +1104,33 @@ export class GameManager {
                                 const finalXp = Math.floor(result.xpGained * (1 + xpBonus / 100));
                                 activity.sessionXp = (activity.sessionXp || 0) + finalXp;
                             }
+
+                            if (result.isDuplication) {
+                                activity.duplicationCount = (activity.duplicationCount || 0) + 1;
+                            }
+                            if (result.isAutoRefine || result.refinedItemGained) {
+                                activity.autoRefineCount = (activity.autoRefineCount || 0) + 1;
+                            }
                         }
 
                         const newActionsRemaining = actions_remaining - 1;
-                        // activity is already declared above
-                        if (result.isDuplication) {
-                            if (activity) activity.duplicationCount = (activity.duplicationCount || 0) + 1;
-                            console.log(`[ACTIVITY-LOG] Duplication Hit! User=${char.name}, Item=${result.itemGained}, RemBefore=${actions_remaining}, RemAfter=${newActionsRemaining}`);
-                        }
-                        if (result.isAutoRefine || result.refinedItemGained) {
-                            if (activity) activity.autoRefineCount = (activity.autoRefineCount || 0) + 1;
-                        }
-
-                        activityFinished = newActionsRemaining <= 0;
-                        if (activityFinished) {
-                            // Generate final report before clearing
-                            const elapsedSeconds = char.activity_started_at ? (Date.now() - new Date(char.activity_started_at).getTime()) / 1000 : 0;
-                            this.addActionSummaryNotification(char, activity.type, {
-                                itemsGained: activity.sessionItems,
-                                xpGained: { [result.skillKey]: activity.sessionXp },
-                                totalTime: elapsedSeconds,
-                                duplicationCount: activity.duplicationCount,
-                                autoRefineCount: activity.autoRefineCount
-                            }, 'Summary');
-
-                            // PUSH NOTIFICATION: Activity Finished
+                        if (newActionsRemaining <= 0) {
+                            await this.activityManager.stopActivity(char.user_id, char.id, true);
                             if (char.user_id) {
                                 this.pushManager.notifyUser(
                                     char.user_id,
                                     'push_activity_finished',
                                     'Activity Finished! ✅',
-                                    `Your ${activity.type.toLowerCase().replace('_', ' ')} activity is complete. Tap to start a new one!`,
+                                    `Your activity is complete. Tap to start a new one!`,
                                     '/activities'
                                 );
                             }
-
-                            // PUSH NOTIFICATION: Cancel scheduled push (finished while online)
-                            if (this.pushManager) {
-                                this.pushManager.cancelActivityNotification(char.id);
-                            }
-
-                            char.current_activity = null;
-                            char.activity_started_at = null;
-
-                            // CHECK ACTION QUEUE: Start next activity if available
-                            await this.activityManager.checkQueueAndStartNext(char);
                         } else {
                             char.current_activity.actions_remaining = newActionsRemaining;
                         }
                     } else {
-                        lastActivityResult = result;
-                        // For failure (e.g. no ingredients), also notify if we had progress
-                        const activity = char.current_activity;
-                        if (activity && (activity.sessionXp > 0 || Object.keys(activity.sessionItems).length > 0)) {
-                            const elapsedSeconds = char.activity_started_at ? (Date.now() - new Date(char.activity_started_at).getTime()) / 1000 : 0;
-                            this.addActionSummaryNotification(char, activity.type, {
-                                itemsGained: activity.sessionItems,
-                                xpGained: { [activity.type]: activity.sessionXp }, // Simplified key
-                                totalTime: elapsedSeconds,
-                                duplicationCount: activity.duplicationCount,
-                                autoRefineCount: activity.autoRefineCount
-                            }, 'Stopped');
-                        }
-                        char.current_activity = null;
-                        char.activity_started_at = null;
-                        
-                        // Try next activity if this one failed (e.g. out of resources)
-                        await this.activityManager.checkQueueAndStartNext(char);
+                        // For failure (e.g. no ingredients), handle transition to next queued item
+                        await this.activityManager.stopActivity(char.user_id, char.id, true);
                     }
                 }
             }
@@ -1579,7 +1538,7 @@ export class GameManager {
         if (['LEVEL', 'TOTAL_XP', 'ITEM_POWER'].includes(dbType) || mode === 'IRONMAN') {
             let query = this.supabase
                 .from('characters')
-                .select('id, name, state, skills, info, equipment')
+                .select('id, name, state, skills, info, equipment, guild_members(guilds(tag))')
                 .eq('is_admin', false);
 
             if (mode === 'IRONMAN') {
@@ -1618,7 +1577,7 @@ export class GameManager {
                 const ids = lbData.map(entry => entry.character_id);
                 const { data: chars, error: charError } = await this.supabase
                     .from('characters')
-                    .select('id, name, state, skills, info, equipment')
+                    .select('id, name, state, skills, info, equipment, guild_members(guilds(tag))')
                     .eq('is_admin', false)
                     .in('id', ids);
 
@@ -1647,11 +1606,23 @@ export class GameManager {
         }
 
         const processed = data.map(char => {
+            if (!char) return null;
             if (char.skills && char.state) char.state.skills = char.skills;
             if (char.equipment && char.state) char.state.equipment = char.equipment;
             if (char.info?.membership && char.state) char.state.membership = char.info.membership;
+            
+            // Flatten guild tag if present (Supabase may return object or array)
+            if (char.guild_members) {
+                const gm = Array.isArray(char.guild_members) ? char.guild_members[0] : char.guild_members;
+                char.guild_tag = gm?.guilds?.tag || null;
+            } else {
+                char.guild_tag = null;
+            }
+            if (char.state) char.state.guild_tag = char.guild_tag;
+            delete char.guild_members;
+            
             return char;
-        });
+        }).filter(Boolean);
 
         this.leaderboardCache.set(cacheKey, { data: processed, timestamp: now });
 
@@ -2417,6 +2388,11 @@ export class GameManager {
     _hydrateCharacterFromRaw(data) {
         if (!data) return null;
         if (!data.state) data.state = {};
+
+        // Propagate guild_tag to state for UI convenience
+        if (data.guild_tag) {
+            data.state.guild_tag = data.guild_tag;
+        }
 
         // INVENTORY MIGRATION: Inject the separate inventory column back into state for runtime
         if (data.inventory) {

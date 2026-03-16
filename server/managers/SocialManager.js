@@ -12,8 +12,8 @@ export class SocialManager {
             .from('friends')
             .select(`
                 *,
-                sender:sender_id (id, name, state, skills, equipment, info, current_activity, combat, dungeon),
-                receiver:receiver_id (id, name, state, skills, equipment, info, current_activity, combat, dungeon)
+                sender:sender_id (id, name, state, skills, equipment, info, current_activity, combat, dungeon, guild_members(guilds(tag))),
+                receiver:receiver_id (id, name, state, skills, equipment, info, current_activity, combat, dungeon, guild_members(guilds(tag)))
             `)
             .or(`sender_id.eq.${characterId},receiver_id.eq.${characterId}`);
 
@@ -102,7 +102,8 @@ export class SocialManager {
                 currentActivity: activities.length > 0 ? activities[0] : null,
                 isBestFriend: f.is_best_friend || false,
                 bestFriendRequestSender: f.best_friend_request_sender,
-                isIronman: cachedChar?.state?.isIronman || friend.state?.isIronman || false
+                isIronman: cachedChar?.state?.isIronman || friend.state?.isIronman || false,
+                guildTag: friend.state?.guild_tag || friend.guild_tag || null
             };
         }));
     }
@@ -354,7 +355,7 @@ export class SocialManager {
         // 2. Fetch Guild Info
         const { data: guildMember } = await this.supabase
             .from('guild_members')
-            .select('guild_id, guilds(name)')
+            .select('guild_id, guilds(name, tag)')
             .eq('character_id', charData.id)
             .maybeSingle();
 
@@ -389,6 +390,7 @@ export class SocialManager {
             },
             isPremium: !!(state.isPremium || state.membership?.active),
             guildName: guildMember?.guilds?.name || null,
+            guildTag: guildMember?.guilds?.tag || null,
             guildId: guildMember?.guild_id || null,
             selectedBanner: state.selectedBanner || null,
             avatar: state.avatar || null,

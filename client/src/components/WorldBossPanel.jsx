@@ -775,6 +775,7 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge, onInspect, o
                                                             onClick={() => onInspect && onInspect(rank.name)}
                                                             className={`ranking-name ${isMe ? 'me' : ''}`}
                                                         >
+                                                            {rank.guild_tag && <span style={{ color: 'var(--accent)', opacity: 0.8, fontSize: '0.8rem', marginRight: '4px' }}>[{rank.guild_tag}]</span>}
                                                             {rank.isIronman && <span title="Ironman" style={{ fontSize: '0.8rem' }}>🛡️</span>}
                                                             {rank.name}
                                                         </span>

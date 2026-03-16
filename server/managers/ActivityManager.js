@@ -150,23 +150,51 @@ export class ActivityManager {
             time_per_action: timePerAction
         });
 
+        if (this.gameManager.notifications) {
+            this.gameManager.notifications.addNotification(char, 'SYSTEM', `Queued: ${quantity}x ${item.name || itemId}`);
+        }
+
         await this.gameManager.saveState(char.id, char.state);
         return { success: true, queued: true, queueLength: char.state.actionQueue.length };
     }
 
-    async stopActivity(userId, characterId) {
+    async stopActivity(userId, characterId, isQueueTransition = false) {
         const char = await this.gameManager.getCharacter(userId, characterId);
+        if (!char) return { success: false };
 
         if (char.current_activity) {
             const activity = char.current_activity;
             const elapsedSeconds = char.activity_started_at ? (Date.now() - new Date(char.activity_started_at).getTime()) / 1000 : 0;
-            this.gameManager.addActionSummaryNotification(char, activity.type, {
-                itemsGained: activity.sessionItems || {},
-                xpGained: { [activity.type]: activity.sessionXp || 0 },
-                totalTime: elapsedSeconds,
-                duplicationCount: activity.duplicationCount || 0,
-                autoRefineCount: activity.autoRefineCount || 0
-            }, 'Stopped');
+            
+            // Accumulate results into queueSummary instead of immediate notification
+            if (!char.state.queueSummary) {
+                char.state.queueSummary = { 
+                    itemsGained: {}, 
+                    xpGained: {}, 
+                    totalTime: 0, 
+                    duplicationCount: 0, 
+                    autoRefineCount: 0,
+                    activities: []
+                };
+            }
+
+            const summary = char.state.queueSummary;
+            summary.totalTime += elapsedSeconds;
+            summary.duplicationCount += (activity.duplicationCount || 0);
+            summary.autoRefineCount += (activity.autoRefineCount || 0);
+            
+            // Merge items
+            for (const [id, qty] of Object.entries(activity.sessionItems || {})) {
+                summary.itemsGained[id] = (summary.itemsGained[id] || 0) + qty;
+            }
+
+            // Merge XP
+            summary.xpGained[activity.type] = (summary.xpGained[activity.type] || 0) + (activity.sessionXp || 0);
+            
+            // Add activity name if not present
+            if (!summary.activities.includes(activity.type)) summary.activities.push(activity.type);
+
+            // If it's a manual STOP (not a queue transition), or if the queue is empty next, we'll notify soon
         }
 
         char.current_activity = null;
@@ -176,22 +204,57 @@ export class ActivityManager {
             this.gameManager.pushManager.cancelActivityNotification(char.id);
         }
 
-        // Check Queue for auto-start
+        // If NOT a queue transition (manual stop), show what we have so far
+        if (!isQueueTransition) {
+            await this.finalizeQueueSummary(char);
+        } else {
+            // Check Queue for auto-start
+            await this.checkQueueAndStartNext(char);
+        }
+
+        await this.gameManager.saveState(char.id, char.state);
+        return { success: true, message: "Activity stopped" };
+    }
+
+    async checkQueueAndStartNext(char) {
         if (char.state.actionQueue && char.state.actionQueue.length > 0) {
             const next = char.state.actionQueue.shift();
             try {
-                await this.startActivity(userId, characterId, next.type, next.item_id, next.quantity);
+                await this.startActivity(char.user_id, char.id, next.type, next.item_id, next.quantity);
                 console.log(`[QUEUE] Auto-started next action for ${char.name}: ${next.item_id}`);
+                
+                if (this.gameManager.notifications) {
+                    const itemName = resolveItem(next.item_id)?.name || next.item_id;
+                    this.gameManager.notifications.addNotification(char, 'SYSTEM', `Starting queued task: ${next.quantity}x ${itemName}`);
+                }
             } catch (err) {
                 console.error(`[QUEUE] Failed to auto-start next action: ${err.message}`);
                 if (this.gameManager.notifications) {
                     this.gameManager.notifications.addNotification(char, 'ERROR', `Failed to start queued action: ${err.message}`);
                 }
+                await this.finalizeQueueSummary(char);
             }
+        } else {
+            // Queue truly finished
+            await this.finalizeQueueSummary(char);
         }
+    }
 
-        await this.gameManager.saveState(char.id, char.state);
-        return { success: true, message: "Activity stopped" };
+    async finalizeQueueSummary(char) {
+        if (char.state.queueSummary && (char.state.queueSummary.totalTime > 0 || Object.keys(char.state.queueSummary.itemsGained).length > 0)) {
+            const summary = char.state.queueSummary;
+            const title = summary.activities.length > 1 ? "Queue Finished" : summary.activities[0] || "Activity";
+            
+            this.gameManager.notifications.addActionSummaryNotification(char, title, {
+                itemsGained: summary.itemsGained,
+                xpGained: summary.xpGained,
+                totalTime: summary.totalTime,
+                duplicationCount: summary.duplicationCount,
+                autoRefineCount: summary.autoRefineCount
+            }, summary.activities.length > 1 ? "" : "Summary");
+
+            char.state.queueSummary = null; // Clear it
+        }
     }
 
     async reorderQueue(userId, characterId, indexOrNewQueue, direction) {
@@ -226,6 +289,9 @@ export class ActivityManager {
     async clearQueue(userId, characterId) {
         const char = await this.gameManager.getCharacter(userId, characterId);
         char.state.actionQueue = [];
+        if (this.gameManager.notifications) {
+            this.gameManager.notifications.addNotification(char, 'SYSTEM', `Action Queue cleared.`);
+        }
         await this.gameManager.saveState(char.id, char.state);
         return { success: true };
     }

@@ -458,7 +458,11 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                                         ? 'var(--accent)'
                                                         : (index < 3 ? 'var(--text-main)' : 'var(--text-dim)')
                                                 }}>
-                                                    {rankMode === 'GUILDS' && <span style={{ color: 'var(--accent)', opacity: 0.8 }}>[{char.tag}]</span>}
+                                                    {rankMode === 'GUILDS' ? (
+                                                        <span style={{ color: 'var(--accent)', opacity: 0.8 }}>[{char.tag}]</span>
+                                                    ) : (
+                                                        char.guild_tag && <span style={{ color: 'var(--accent)', opacity: 0.8, fontSize: '0.8em' }}>[{char.guild_tag}] </span>
+                                                    )}
                                                     {char.name}
                                                     {rankMode === 'GUILDS' && (
                                                         <span style={{
@@ -576,7 +580,10 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                                             </span>
                                                         </div>
                                                     ) : (
-                                                        <>{userRankData.character?.name} (YOU)</>
+                                                        <>
+                                                            {userRankData.character?.guild_tag && <span style={{ color: 'var(--accent)', opacity: 0.8, fontSize: '0.8em' }}>[{userRankData.character.guild_tag}] </span>}
+                                                            {userRankData.character?.name} (YOU)
+                                                        </>
                                                     )}
                                                 </div>
                                                 {rankMode !== 'GUILDS' && userRankData.character?.state?.selectedTitle && (

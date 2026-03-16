@@ -245,7 +245,7 @@ const InspectModal = React.memo(({ data, theme: propTheme, onClose, onItemClick,
     const [expandedCategory, setExpandedCategory] = useState(null);
     const [breakdownModal, setBreakdownModal] = useState(null);
 
-    const { name, level, selectedTitle, health = 0, equipment = {}, skills = {}, runes = {}, stats = {}, isPremium, guildName, guildId, selectedBanner } = data;
+    const { name, level, selectedTitle, health = 0, equipment = {}, skills = {}, runes = {}, stats = {}, isPremium, guildName, guildTag, guildId, selectedBanner } = data;
 
     // Use propTheme or fallback to data.theme, then to global default
     const activeTheme = propTheme || data.theme || 'dark';
@@ -501,6 +501,7 @@ const InspectModal = React.memo(({ data, theme: propTheme, onClose, onItemClick,
                                 }}
                             >
                                 <span style={{ opacity: 0.4 }}>‹</span>
+                                {guildTag && <span style={{ color: 'var(--accent)', opacity: 0.8, marginRight: '4px' }}>[{guildTag}]</span>}
                                 {guildName}
                                 <span style={{ opacity: 0.4 }}>›</span>
                             </div>

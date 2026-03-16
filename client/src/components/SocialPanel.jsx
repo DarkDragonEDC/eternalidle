@@ -385,6 +385,7 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, onOpenTrade, tradeInvi
                                                                             }}
                                                                             onClick={() => onInspect && onInspect(friend.friendName)}
                                                                         >
+                                                                             {friend.guildTag && <span style={{ color: 'var(--accent)', opacity: 0.8, fontSize: '0.85em', marginRight: '4px' }}>[{friend.guildTag}]</span>}
                                                                             {friend.friendName}
                                                                         </span>
                                                                         <span style={{ fontSize: '0.75rem', color: 'rgba(255,215,0,0.6)', fontWeight: 'bold', flexShrink: 0 }}>Lv.{friend.level}</span>
@@ -614,6 +615,7 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, onOpenTrade, tradeInvi
                                                                     }}
                                                                     onClick={() => onInspect && onInspect(friend.friendName)}
                                                                 >
+                                                                    {friend.guildTag && <span style={{ color: 'var(--accent)', opacity: 0.8, fontSize: '0.85em', marginRight: '4px' }}>[{friend.guildTag}]</span>}
                                                                     {friend.friendName}
                                                                 </span>
                                                                 <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 'bold', flexShrink: 0 }}>Lv.{friend.level}</span>

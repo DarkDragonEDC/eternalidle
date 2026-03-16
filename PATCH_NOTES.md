@@ -1,20 +1,13 @@
-# 📄 Patch Notes — Atualizações v1.6.1
+# 📄 Patch Notes — Atualização de Guildas
 
-### 🔄 Fila de Ações Inteligente
-- **Multitarefa Liberada**: Agora você pode iniciar atividades de **Coleta**, **Refino** e **Crafting**.
-- **Merge de Runas para Todos**: O sistema de **Merge Automático de Runas** não exige mais Membership ativo. Agora está acessível para todos os jogadores!
-### 🔮 Loja de Orbes e Utilidades
-Novos itens para aumentar seu Inventário e sua Fila de Ações permanentemente.
+### 🛡️ Tags de Guilda
+Chegou a hora de mostrar a força da sua aliança para todo o reino! Agora, a **Tag da sua Guilda** é exibida orgulhosamente ao lado do seu nome.
 
-### ⚙️ Performance e Estabilidade
-- **Jogo mais Leve**: Fizemos uma limpeza geral nos "bastidores" do servidor para que o jogo rode de forma mais fluida e rápida em todos os dispositivos.
-- **Altamente Testado**: O sistema de filas passou por testes intensivos de estresse e foi verificado para garantir estabilidade total em todas as situações.
-- **Proteção de Progresso**: Melhoramos o sistema de salvamento para garantir que seu farm continue exatamente de onde parou, mesmo se sua internet oscilar por um momento.
+**Onde você verá as Tags:**
+- **Chat do Jogo**: Mostre a presença da sua guilda nas conversas globais, de troca e chats PT-BR.
+- **Rankings Globais (Hall of Fame)**: Veja quais guildas estão dominando o topo do servidor.
+- **Rankings de World Boss**: Descubra de onde vêm os jogadores que causam mais dano aos chefes!
+- **Perfil e Lista de Amigos**: Saiba instantaneamente em qual guilda seus amigos ou outros jogadores estão.
+- **Mercado e Trocas**: Facilita a identificação de quem é o seu parceiro comercial.
 
-- **Mercado**:
-    - **Categoria de Ferramentas**: Criamos um espaço exclusivo para Machados, Picaretas e outros equipamentos de farm.
-    - **Melhor Preço**: O sistema agora mostra os itens mais baratos com base no **valor unitário**, ajudando você a economizar em pilhas de recursos.
-- **Navegação Inteligente**: Seus filtros e a página atual não resetam mais ao comprar ou vender algo. Negociar ficou muito mais prático!
-
-### 🛠️ Melhorias Gerais
-- **Conectividade Total**: O motor do jogo foi otimizado para garantir que as transações no mercado e o movimento de itens no inventário sejam sempre seguros e livres de erros.
+Essa novidade traz mais visibilidade para as guildas ativas, ajuda no recrutamento orgânico e fomenta a competitividade. Reúna seus aliados, escolha uma Tag de respeito e deixe sua marca no mundo de Eternal Idle!

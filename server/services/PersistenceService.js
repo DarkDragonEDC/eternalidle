@@ -255,7 +255,8 @@ export class PersistenceService {
         let fromCache = !!data;
 
         if (!data || bypassCache) {
-            let query = this.supabase.from('characters').select('*');
+            // Updated to fetch guild tag via join
+            let query = this.supabase.from('characters').select('*, guild_members(guilds(tag))');
             if (characterId) {
                 query = query.eq('id', characterId);
                 if (userId) query = query.eq('user_id', userId);
@@ -268,6 +269,15 @@ export class PersistenceService {
             if (error && error.code !== 'PGRST116') throw error;
             data = dbData;
             fromCache = false;
+
+            // Flatten guild tag if present (Supabase may return object or array)
+            if (data && data.guild_members) {
+                const gm = Array.isArray(data.guild_members) ? data.guild_members[0] : data.guild_members;
+                data.guild_tag = gm?.guilds?.tag || null;
+                delete data.guild_members;
+            } else if (data) {
+                data.guild_tag = null;
+            }
         }
 
         if (data && !fromCache) {
