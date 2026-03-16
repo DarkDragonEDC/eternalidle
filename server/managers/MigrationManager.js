@@ -205,14 +205,19 @@ export class MigrationManager {
                 delete char.state.stats.agi;
                 delete char.state.stats.int;
                 changed = true;
-                console.log(`[MIGRATION-CLEANUP] Removed legacy stats fields for ${char.name}`);
             }
         } else {
             char.state.stats = {}; // Ensure stats object exists
             changed = true;
         }
 
-        // 5. Migrate Chests
+        // 5. Ensure `actionQueue` exists
+        if (!char.state.actionQueue) {
+            char.state.actionQueue = [];
+            changed = true;
+        }
+
+        // 6. Migrate Chests
         if (char.state.inventory) {
             const inv = char.state.inventory;
             for (const key of Object.keys(inv)) {

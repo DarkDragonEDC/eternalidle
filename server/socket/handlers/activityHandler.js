@@ -48,8 +48,7 @@ export const registerActivityHandlers = (socket, gameManager, io) => {
 
   socket.on("enqueue_activity", async ({ actionType, itemId, quantity }) => {
     try {
-      if (!socket.data.characterId || socket.data.characterId === "undefined")
-        return;
+      if (!socket.data.characterId || socket.data.characterId === "undefined") return;
       await gameManager.executeLocked(socket.user.id, async () => {
         const result = await gameManager.activityManager.enqueueActivity(
           socket.user.id,
