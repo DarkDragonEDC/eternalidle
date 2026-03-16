@@ -7,7 +7,7 @@ export class CatchupManager {
     constructor(gameManager) {
         this.gm = gameManager;
         this.supabase = gameManager.supabase;
-        this.useBatchCatchup = true; // Feature Toggle para otimização
+        this.useBatchCatchup = false; // Feature Toggle para otimização (Desativado via modo Legacy)
     }
 
     /**
