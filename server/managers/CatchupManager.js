@@ -1,6 +1,7 @@
 import { resolveItem } from '../../shared/items.js';
 import { DEFAULT_PLAYER_ATTACK_SPEED, RESPAWN_DELAY_MS } from '../../shared/combat.js';
 import { calculateNextLevelXP } from '../../shared/skills.js';
+import { MONSTERS } from '../../shared/monsters.js';
 
 export class CatchupManager {
     constructor(gameManager) {
@@ -395,35 +396,80 @@ export class CatchupManager {
                 
                 // Simulação simplificada de N rounds
                 // Se o player é muito mais forte (não perde HP significativo), processamos o lote
-                const stats = this.gameManager.inventoryManager.calculateStats(char);
+                const stats = this.gm.inventoryManager.calculateStats(char);
                 const mobDmg = char.state.combat.mobDamage || 10;
+                const playerDmg = stats.damage || 10;
                 const playerDef = stats.defense || 0;
-                const playerMitigation = Math.min(0.75, playerDef * 0.001); // 1% per 100 def
+                const playerMitigation = Math.min(0.75, playerDef * 0.001);
                 const damagePerMobHit = Math.max(1, Math.floor(mobDmg * (1 - playerMitigation)));
                 
-                // Se o dano do mob for baixo o suficiente para não morrer no lote
-                if (char.state.health > (damagePerMobHit * batchRounds * 2)) {
-                    // Executa o round completo (com drops e XP) uma vez para pegar os valores base
-                    const result = await this.gameManager.combatManager.processCombatRound(char, virtualTime);
-                    if (!result || !char.state.combat) break;
-                    
-                    // Multiplica os ganhos do round para o restante do lote (batchRounds - 1)
-                    const multiplier = batchRounds - 1;
-                    if (multiplier > 0) {
-                        kills += (result.details?.victory ? multiplier : 0);
-                        const xpAdded = (result.details?.xpGained || 0) * multiplier;
-                        combatXp += xpAdded;
-                        silverGained += (result.details?.silverGained || 0) * multiplier;
-                        
-                        // Nota: Drops raros não são multiplicados por segurança/raridade, 
-                        // apenas o XP e Silver que são constantes.
-                        
-                        virtualTime += (multiplier * atkSpeed);
-                        // Consumo de HP do lote
-                        char.state.health = Math.max(1, char.state.health - (damagePerMobHit * multiplier));
+                // Executa um round real para ver o impacto base
+                const result = await this.gm.combatManager.processCombatRound(char, virtualTime);
+                if (!result || !char.state.combat) break;
+                
+                // Se o round base resultou em vitória, avançamos o tempo (com respawn) e continuamos no while normal
+                // Isso evita multiplicar loot de forma errada no lote.
+                if (result.details?.victory) {
+                    kills++;
+                    combatXp += (result.details.xpGained || 0);
+                    silverGained += (result.details.silverGained || 0);
+                    if (result.details.lootGained) {
+                        result.details.lootGained.forEach(lootEntry => {
+                            const actualId = lootEntry.id;
+                            const qty = lootEntry.amount || 1;
+                            itemsGained[actualId] = (itemsGained[actualId] || 0) + qty;
+                        });
                     }
+                    virtualTime += (atkSpeed + RESPAWN_DELAY_MS);
                     continue;
                 }
+
+                // Se NÃO houve vitória, podemos tentar o lote para o RESTANTE do HP desse mesmo mob
+                const remainingMobHp = char.state.combat.mobHealth || 0;
+                const roundsToKill = Math.floor(remainingMobHp / Math.max(1, playerDmg));
+                const remainingTimeRounds = Math.floor((endTime - virtualTime) / atkSpeed);
+                
+                // Lote Seguro: rounds até o monstro quase morrer ou tempo acabar (limitado a 100)
+                const safeMultiplier = Math.min(100, roundsToKill, remainingTimeRounds);
+
+                if (safeMultiplier > 10) {
+                    for (let k = 0; k < safeMultiplier; k++) {
+                        virtualTime += atkSpeed;
+                        
+                        // Dano no player
+                        char.state.health -= damagePerMobHit;
+                        if (char.state.combat) char.state.combat.playerHealth = char.state.health;
+
+                        // Tentar curar (ProcessFood checa cooldown de 5s e regra de HP)
+                        const foodResult = this.gm.processFood(char, virtualTime);
+                        if (foodResult && foodResult.used) {
+                            foodConsumed += (foodResult.amount || 1);
+                        }
+
+                        // Se o player morreu na simulação
+                        if (char.state.health <= 0) {
+                            if (char.state.combat) delete char.state.combat;
+                            died = true;
+                            break;
+                        }
+
+                        // Dano no mob (aprox)
+                        if (char.state.combat) {
+                            char.state.combat.mobHealth -= playerDmg;
+                        }
+
+                        // XP passivo ou outro ganho contínuo do round base (se o mob ainda está vivo)
+                        combatXp += (result.details.xpGained || 0);
+                        silverGained += (result.details.silverGained || 0);
+                    }
+                    
+                    if (died) break;
+                    continue; // Volta para o while principal para processar o próximo round/mob
+                } else {
+                    // Se o lote seguro for pequeno demais (monstro quase morrendo), avançamos um round por vez
+                    virtualTime += atkSpeed;
+                }
+                continue;
             }
 
             const result = await this.gm.combatManager.processCombatRound(char, virtualTime);

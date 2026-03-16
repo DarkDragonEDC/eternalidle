@@ -1538,7 +1538,7 @@ export class GameManager {
         if (['LEVEL', 'TOTAL_XP', 'ITEM_POWER'].includes(dbType) || mode === 'IRONMAN') {
             let query = this.supabase
                 .from('characters')
-                .select('id, name, state, skills, info, equipment, guild_members(guilds(tag))')
+                .select('id, name, state, skills, info, ranking_total_level, ranking_total_xp, ranking_item_power, guild_members(guilds(tag))')
                 .eq('is_admin', false);
 
             if (mode === 'IRONMAN') {
@@ -1577,7 +1577,7 @@ export class GameManager {
                 const ids = lbData.map(entry => entry.character_id);
                 const { data: chars, error: charError } = await this.supabase
                     .from('characters')
-                    .select('id, name, state, skills, info, equipment, guild_members(guilds(tag))')
+                    .select('id, name, state, skills, info, ranking_total_level, ranking_total_xp, ranking_item_power, guild_members(guilds(tag))')
                     .eq('is_admin', false)
                     .in('id', ids);
 
@@ -1621,7 +1621,25 @@ export class GameManager {
             if (char.state) char.state.guild_tag = char.guild_tag;
             delete char.guild_members;
             
-            return char;
+            // OPTIMIZATION: Prune heavy JSON payloads from memory and socket traffic
+            // We only need basic visuals/numbers for the Ranking UI, not their entire inventory/setup
+            return {
+                id: char.id,
+                name: char.name,
+                guild_tag: char.guild_tag,
+                state: {
+                    isIronman: char.state?.isIronman,
+                    skills: char.state?.skills, // Keep for combat level/type sub-rankings
+                    selectedTitle: char.state?.selectedTitle
+                },
+                ranking_total_level: char.ranking_total_level,
+                ranking_total_xp: char.ranking_total_xp,
+                ranking_item_power: char.ranking_item_power,
+                info: {
+                    membership: char.info?.membership,
+                    active_title: char.info?.active_title
+                }
+            };
         }).filter(Boolean);
 
         this.leaderboardCache.set(cacheKey, { data: processed, timestamp: now });
