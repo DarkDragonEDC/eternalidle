@@ -8,8 +8,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 5,
             "loot": {
-                "T1_DUNGEON_MAP": 0.03,
-                "T1_WOOD": 0.1
+                "T1_DUNGEON_MAP": 0.01,
+                "T1_WOOD": 0.05
             },
             "silver": [
                 1,
@@ -30,8 +30,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 5,
             "loot": {
-                "T1_DUNGEON_MAP": 0.03,
-                "T1_ORE": 0.1
+                "T1_DUNGEON_MAP": 0.01,
+                "T1_ORE": 0.05
             },
             "silver": [
                 1,
@@ -50,8 +50,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 5,
             "loot": {
-                "T1_DUNGEON_MAP": 0.03,
-                "T1_HIDE": 0.1
+                "T1_DUNGEON_MAP": 0.01,
+                "T1_HIDE": 0.05
             },
             "silver": [
                 1,
@@ -70,8 +70,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 5,
             "loot": {
-                "T1_DUNGEON_MAP": 0.03,
-                "T1_FIBER": 0.1
+                "T1_DUNGEON_MAP": 0.01,
+                "T1_FIBER": 0.05
             },
             "silver": [
                 1,
@@ -90,8 +90,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 5,
             "loot": {
-                "T1_DUNGEON_MAP": 0.03,
-                "T1_HERB": 0.1
+                "T1_DUNGEON_MAP": 0.01,
+                "T1_HERB": 0.05
             },
             "silver": [
                 1,
@@ -112,8 +112,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 8,
             "loot": {
-                "T2_DUNGEON_MAP": 0.03,
-                "T2_WOOD": 0.1
+                "T2_DUNGEON_MAP": 0.01,
+                "T2_WOOD": 0.05
             },
             "silver": [
                 1,
@@ -132,8 +132,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 8,
             "loot": {
-                "T2_DUNGEON_MAP": 0.03,
-                "T2_ORE": 0.1
+                "T2_DUNGEON_MAP": 0.01,
+                "T2_ORE": 0.05
             },
             "silver": [
                 1,
@@ -152,8 +152,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 8,
             "loot": {
-                "T2_DUNGEON_MAP": 0.03,
-                "T2_HIDE": 0.1
+                "T2_DUNGEON_MAP": 0.01,
+                "T2_HIDE": 0.05
             },
             "silver": [
                 1,
@@ -172,8 +172,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 8,
             "loot": {
-                "T2_DUNGEON_MAP": 0.03,
-                "T2_FIBER": 0.1
+                "T2_DUNGEON_MAP": 0.01,
+                "T2_FIBER": 0.05
             },
             "silver": [
                 1,
@@ -192,8 +192,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 8,
             "loot": {
-                "T2_DUNGEON_MAP": 0.03,
-                "T2_HERB": 0.1
+                "T2_DUNGEON_MAP": 0.01,
+                "T2_HERB": 0.05
             },
             "silver": [
                 1,
@@ -214,8 +214,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 14,
             "loot": {
-                "T3_DUNGEON_MAP": 0.03,
-                "T3_WOOD": 0.1
+                "T3_DUNGEON_MAP": 0.01,
+                "T3_WOOD": 0.05
             },
             "silver": [
                 1,
@@ -234,8 +234,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 14,
             "loot": {
-                "T3_DUNGEON_MAP": 0.03,
-                "T3_ORE": 0.1
+                "T3_DUNGEON_MAP": 0.01,
+                "T3_ORE": 0.05
             },
             "silver": [
                 1,
@@ -254,8 +254,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 14,
             "loot": {
-                "T3_DUNGEON_MAP": 0.03,
-                "T3_HIDE": 0.1
+                "T3_DUNGEON_MAP": 0.01,
+                "T3_HIDE": 0.05
             },
             "silver": [
                 1,
@@ -274,8 +274,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 14,
             "loot": {
-                "T3_DUNGEON_MAP": 0.03,
-                "T3_FIBER": 0.1
+                "T3_DUNGEON_MAP": 0.01,
+                "T3_FIBER": 0.05
             },
             "silver": [
                 1,
@@ -294,8 +294,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 14,
             "loot": {
-                "T3_DUNGEON_MAP": 0.03,
-                "T3_HERB": 0.1
+                "T3_DUNGEON_MAP": 0.01,
+                "T3_HERB": 0.05
             },
             "silver": [
                 1,
@@ -316,8 +316,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 20,
             "loot": {
-                "T4_DUNGEON_MAP": 0.03,
-                "T4_WOOD": 0.1
+                "T4_DUNGEON_MAP": 0.01,
+                "T4_WOOD": 0.05
             },
             "silver": [
                 1,
@@ -336,8 +336,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 20,
             "loot": {
-                "T4_DUNGEON_MAP": 0.03,
-                "T4_ORE": 0.1
+                "T4_DUNGEON_MAP": 0.01,
+                "T4_ORE": 0.05
             },
             "silver": [
                 1,
@@ -356,8 +356,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 20,
             "loot": {
-                "T4_DUNGEON_MAP": 0.03,
-                "T4_HIDE": 0.1
+                "T4_DUNGEON_MAP": 0.01,
+                "T4_HIDE": 0.05
             },
             "silver": [
                 1,
@@ -376,8 +376,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 20,
             "loot": {
-                "T4_DUNGEON_MAP": 0.03,
-                "T4_FIBER": 0.1
+                "T4_DUNGEON_MAP": 0.01,
+                "T4_FIBER": 0.05
             },
             "silver": [
                 1,
@@ -396,8 +396,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 20,
             "loot": {
-                "T4_DUNGEON_MAP": 0.03,
-                "T4_HERB": 0.1
+                "T4_DUNGEON_MAP": 0.01,
+                "T4_HERB": 0.05
             },
             "silver": [
                 1,
@@ -418,8 +418,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 28,
             "loot": {
-                "T5_DUNGEON_MAP": 0.03,
-                "T5_WOOD": 0.1
+                "T5_DUNGEON_MAP": 0.01,
+                "T5_WOOD": 0.05
             },
             "silver": [
                 1,
@@ -438,8 +438,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 28,
             "loot": {
-                "T5_DUNGEON_MAP": 0.03,
-                "T5_ORE": 0.1
+                "T5_DUNGEON_MAP": 0.01,
+                "T5_ORE": 0.05
             },
             "silver": [
                 1,
@@ -458,8 +458,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 28,
             "loot": {
-                "T5_DUNGEON_MAP": 0.03,
-                "T5_HIDE": 0.1
+                "T5_DUNGEON_MAP": 0.01,
+                "T5_HIDE": 0.05
             },
             "silver": [
                 1,
@@ -478,8 +478,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 28,
             "loot": {
-                "T5_DUNGEON_MAP": 0.03,
-                "T5_FIBER": 0.1
+                "T5_DUNGEON_MAP": 0.01,
+                "T5_FIBER": 0.05
             },
             "silver": [
                 1,
@@ -498,8 +498,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 28,
             "loot": {
-                "T5_DUNGEON_MAP": 0.03,
-                "T5_HERB": 0.1
+                "T5_DUNGEON_MAP": 0.01,
+                "T5_HERB": 0.05
             },
             "silver": [
                 1,
@@ -520,8 +520,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 35,
             "loot": {
-                "T6_DUNGEON_MAP": 0.03,
-                "T6_WOOD": 0.1
+                "T6_DUNGEON_MAP": 0.01,
+                "T6_WOOD": 0.05
             },
             "silver": [
                 1,
@@ -540,8 +540,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 35,
             "loot": {
-                "T6_DUNGEON_MAP": 0.03,
-                "T6_ORE": 0.1
+                "T6_DUNGEON_MAP": 0.01,
+                "T6_ORE": 0.05
             },
             "silver": [
                 1,
@@ -560,8 +560,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 35,
             "loot": {
-                "T6_DUNGEON_MAP": 0.03,
-                "T6_HIDE": 0.1
+                "T6_DUNGEON_MAP": 0.01,
+                "T6_HIDE": 0.05
             },
             "silver": [
                 1,
@@ -580,8 +580,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 35,
             "loot": {
-                "T6_DUNGEON_MAP": 0.03,
-                "T6_FIBER": 0.1
+                "T6_DUNGEON_MAP": 0.01,
+                "T6_FIBER": 0.05
             },
             "silver": [
                 1,
@@ -600,8 +600,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 35,
             "loot": {
-                "T6_DUNGEON_MAP": 0.03,
-                "T6_HERB": 0.1
+                "T6_DUNGEON_MAP": 0.01,
+                "T6_HERB": 0.05
             },
             "silver": [
                 1,
@@ -622,8 +622,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 50,
             "loot": {
-                "T7_DUNGEON_MAP": 0.03,
-                "T7_WOOD": 0.1
+                "T7_DUNGEON_MAP": 0.01,
+                "T7_WOOD": 0.05
             },
             "silver": [
                 1,
@@ -642,8 +642,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 50,
             "loot": {
-                "T7_DUNGEON_MAP": 0.03,
-                "T7_ORE": 0.1
+                "T7_DUNGEON_MAP": 0.01,
+                "T7_ORE": 0.05
             },
             "silver": [
                 1,
@@ -662,8 +662,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 50,
             "loot": {
-                "T7_DUNGEON_MAP": 0.03,
-                "T7_HIDE": 0.1
+                "T7_DUNGEON_MAP": 0.01,
+                "T7_HIDE": 0.05
             },
             "silver": [
                 1,
@@ -682,8 +682,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 50,
             "loot": {
-                "T7_DUNGEON_MAP": 0.03,
-                "T7_FIBER": 0.1
+                "T7_DUNGEON_MAP": 0.01,
+                "T7_FIBER": 0.05
             },
             "silver": [
                 1,
@@ -702,8 +702,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 50,
             "loot": {
-                "T7_DUNGEON_MAP": 0.03,
-                "T7_HERB": 0.1
+                "T7_DUNGEON_MAP": 0.01,
+                "T7_HERB": 0.05
             },
             "silver": [
                 1,
@@ -724,8 +724,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 65,
             "loot": {
-                "T8_DUNGEON_MAP": 0.03,
-                "T8_WOOD": 0.1
+                "T8_DUNGEON_MAP": 0.01,
+                "T8_WOOD": 0.05
             },
             "silver": [
                 1,
@@ -744,8 +744,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 65,
             "loot": {
-                "T8_DUNGEON_MAP": 0.03,
-                "T8_ORE": 0.1
+                "T8_DUNGEON_MAP": 0.01,
+                "T8_ORE": 0.05
             },
             "silver": [
                 1,
@@ -764,8 +764,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 65,
             "loot": {
-                "T8_DUNGEON_MAP": 0.03,
-                "T8_HIDE": 0.1
+                "T8_DUNGEON_MAP": 0.01,
+                "T8_HIDE": 0.05
             },
             "silver": [
                 1,
@@ -784,8 +784,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 65,
             "loot": {
-                "T8_DUNGEON_MAP": 0.03,
-                "T8_FIBER": 0.1
+                "T8_DUNGEON_MAP": 0.01,
+                "T8_FIBER": 0.05
             },
             "silver": [
                 1,
@@ -804,8 +804,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 65,
             "loot": {
-                "T8_DUNGEON_MAP": 0.03,
-                "T8_HERB": 0.1
+                "T8_DUNGEON_MAP": 0.01,
+                "T8_HERB": 0.05
             },
             "silver": [
                 1,
@@ -826,8 +826,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 105,
             "loot": {
-                "T9_DUNGEON_MAP": 0.03,
-                "T9_WOOD": 0.1
+                "T9_DUNGEON_MAP": 0.01,
+                "T9_WOOD": 0.05
             },
             "silver": [
                 1,
@@ -846,8 +846,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 105,
             "loot": {
-                "T9_DUNGEON_MAP": 0.03,
-                "T9_ORE": 0.1
+                "T9_DUNGEON_MAP": 0.01,
+                "T9_ORE": 0.05
             },
             "silver": [
                 1,
@@ -866,8 +866,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 105,
             "loot": {
-                "T9_DUNGEON_MAP": 0.03,
-                "T9_HIDE": 0.1
+                "T9_DUNGEON_MAP": 0.01,
+                "T9_HIDE": 0.05
             },
             "silver": [
                 1,
@@ -886,8 +886,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 105,
             "loot": {
-                "T9_DUNGEON_MAP": 0.03,
-                "T9_FIBER": 0.1
+                "T9_DUNGEON_MAP": 0.01,
+                "T9_FIBER": 0.05
             },
             "silver": [
                 1,
@@ -906,8 +906,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 105,
             "loot": {
-                "T9_DUNGEON_MAP": 0.03,
-                "T9_HERB": 0.1
+                "T9_DUNGEON_MAP": 0.01,
+                "T9_HERB": 0.05
             },
             "silver": [
                 1,
@@ -928,8 +928,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 170,
             "loot": {
-                "T10_DUNGEON_MAP": 0.03,
-                "T10_WOOD": 0.1
+                "T10_DUNGEON_MAP": 0.01,
+                "T10_WOOD": 0.05
             },
             "silver": [
                 1,
@@ -948,8 +948,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 170,
             "loot": {
-                "T10_DUNGEON_MAP": 0.03,
-                "T10_ORE": 0.1
+                "T10_DUNGEON_MAP": 0.01,
+                "T10_ORE": 0.05
             },
             "silver": [
                 1,
@@ -968,8 +968,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 170,
             "loot": {
-                "T10_DUNGEON_MAP": 0.03,
-                "T10_HIDE": 0.1
+                "T10_DUNGEON_MAP": 0.01,
+                "T10_HIDE": 0.05
             },
             "silver": [
                 1,
@@ -988,8 +988,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 170,
             "loot": {
-                "T10_DUNGEON_MAP": 0.03,
-                "T10_FIBER": 0.1
+                "T10_DUNGEON_MAP": 0.01,
+                "T10_FIBER": 0.05
             },
             "silver": [
                 1,
@@ -1008,8 +1008,8 @@ export const MONSTERS = {
             "defense": 0,
             "xp": 125,
             "loot": {
-                "T10_DUNGEON_MAP": 0.03,
-                "T10_HERB": 0.1
+                "T10_DUNGEON_MAP": 0.01,
+                "T10_HERB": 0.05
             },
             "silver": [
                 1,
