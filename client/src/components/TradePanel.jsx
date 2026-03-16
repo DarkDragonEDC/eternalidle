@@ -663,7 +663,7 @@ const TradePanel = ({ socket, trade, charId, inventory, currentSilver, onClose, 
                                         value={quantityInput}
                                         onChange={(e) => setQuantityInput(e.target.value)}
                                         onFocus={(e) => e.target.select()}
-                                        autoFocus
+                                        autoFocus={!isMobile}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') confirmAddItem();
                                             if (e.key === 'Escape') setQuantityModal({ ...quantityModal, isOpen: false });

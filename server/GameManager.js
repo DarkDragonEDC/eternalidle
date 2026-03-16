@@ -1657,7 +1657,7 @@ export class GameManager {
 
     // Delegation Methods
     async startActivity(u, c, t, i, q) { return this.activityManager.startActivity(u, c, t, i, q); }
-    async stopActivity(u, c) { return this.activityManager.stopActivity(u, c); }
+    async stopActivity(u, c) { return this.activityManager.stopActivity(u, c, true); }
 
     async startCombat(u, c, m, t) { return this.combatManager.startCombat(u, c, m, t); }
     async stopCombat(u, c) { return this.combatManager.stopCombat(u, c); }
