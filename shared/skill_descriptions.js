@@ -30,7 +30,7 @@ export const SKILL_DESCRIPTIONS = {
         "Higher Herbalism levels are required for more advanced herbs."
     ],
     FISHING: [
-        "Fish for Fishing XP and Strength.",
+        "Fish for Fishing XP.",
         "Requires bait purchased from the Shop with gold.",
         "Fish can be cooked in Cooking to make meals that restore health and energy.",
         "Fishing efficiency can be increased with Fishing Rods from Crafting."
@@ -38,8 +38,8 @@ export const SKILL_DESCRIPTIONS = {
     COOKING: [
         "Cook raw fish and meat to create meals.",
         "Meals restore health and energy during combat or resting.",
-        "Higher level recipes provide better stat bonuses.",
-        "Earning Cooking XP also increases your Strength."
+        "Higher level recipes restore more health and energy.",
+        "Cooking more complex meals yields more Cooking XP."
     ],
     PLANK_REFINER: [
         "Refine raw Wood into high-quality Planks.",
