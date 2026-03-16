@@ -445,6 +445,13 @@ export const useAppStore = create((set, get) => ({
         if (isPreviewActive) return onPreviewActionBlocked();
         if (socket) socket.emit('trade_join', { tradeId });
     },
+    requestSync: () => {
+        const { socket, selectedCharacter, isConnecting } = get();
+        if (socket && selectedCharacter && !isConnecting) {
+            console.log('[SYNC] Requesting manual game status sync...');
+            socket.emit('request_sync');
+        }
+    },
 
     // --- FINAL UI STATE ---
     modalItem: null,

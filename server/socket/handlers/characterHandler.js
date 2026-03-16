@@ -100,6 +100,24 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
     }
   });
 
+  socket.on("request_sync", async () => {
+    if (!socket.data.characterId || !socket.user?.id) return;
+    
+    try {
+      await gameManager.executeLocked(socket.user.id, async () => {
+        const status = await gameManager.getStatus(
+          socket.user.id,
+          true, // catchup
+          socket.data.characterId,
+          false // bypassCache - usually cache is fine for visibility sync
+        );
+        socket.emit("game_status", status);
+      });
+    } catch (err) {
+      console.error("[SYNC] Error processing request_sync:", err);
+    }
+  });
+
   socket.on("acknowledge_offline_report", async () => {
     if (!socket.data.characterId) return;
     await gameManager.acknowledgeOfflineReport(socket.data.characterId);
