@@ -263,7 +263,12 @@ export class TradeManager {
                 const sender = await this.gameManager.getCharacter(null, trade.sender_id, true);
                 const receiver = await this.gameManager.getCharacter(null, trade.receiver_id, true);
 
-                if (!sender || !receiver) throw new Error("Error loading characters for trade.");
+                if (!sender || !receiver) {
+                    console.error(`[TradeManager:executeTrade] Character loading failed: sender=${sender? 'Found':'NOT FOUND'}, receiver=${receiver? 'Found':'NOT FOUND'}`);
+                    throw new Error("Error loading characters for trade.");
+                }
+
+                console.log(`[TradeManager:executeTrade] ${tradeId} - Validating silver and items for ${sender.name} and ${receiver.name}`);
 
                 // Validate offers again with fresh state
                 const sOffer = trade.sender_offer;
@@ -312,10 +317,12 @@ export class TradeManager {
                 }
 
                 // CONSUME ITEMS
+                console.log(`[TradeManager:executeTrade] ${tradeId} - Consuming items from sender and receiver`);
                 this.gameManager.inventoryManager.consumeItems(sender, sItemsReq);
                 this.gameManager.inventoryManager.consumeItems(receiver, rItemsReq);
 
                 // ADD ITEMS (Safety via Claims if inventory full)
+                console.log(`[TradeManager:executeTrade] ${tradeId} - Delivering items to sender and receiver`);
                 const deliver = (targetChar, items, fromName) => {
                     items.forEach(it => {
                         // Pass the full item object to preserve metadata like craftedBy
@@ -344,11 +351,16 @@ export class TradeManager {
                     .update({ status: 'COMPLETED', updated_at: new Date().toISOString() })
                     .eq('id', tradeId);
 
-                if (updateError) throw updateError;
+                if (updateError) {
+                    console.error(`[TradeManager:executeTrade] ${tradeId} - Database update failed:`, updateError);
+                    throw updateError;
+                }
 
+                console.log(`[TradeManager:executeTrade] ${tradeId} - Persisting sender and receiver states`);
                 // Persist both immediately
                 await this.gameManager.saveStateCritical(sender.id, sender.state);
                 await this.gameManager.saveStateCritical(receiver.id, receiver.state);
+                console.log(`[TradeManager:executeTrade] ${tradeId} - SUCCESS! Trade completed.`);
  
                 // --- Record Trade History ---
                 try {
