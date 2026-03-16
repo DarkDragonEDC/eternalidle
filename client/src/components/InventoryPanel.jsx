@@ -146,11 +146,13 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
     const filteredItems = inventoryItems.filter(item => {
         // Category Filter
         if (filter !== 'ALL') {
-            const isGear = ['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'OFF_HAND', 'CAPE'].includes(item.type) || item.type.startsWith('TOOL');
+            const isGear = ['WEAPON', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'OFF_HAND', 'CAPE'].includes(item.type);
+            const isTool = item.type && item.type.startsWith('TOOL');
             const isRaw = ['RESOURCE', 'RAW', 'REFINED', 'CRAFTING_MATERIAL'].includes(item.type) || item.id.includes('_ORE') || item.id.includes('_WOOD');
             const isConsumable = ['FOOD', 'POTION', 'MAP', 'CONSUMABLE', 'CHEST'].includes(item.type);
 
             if (filter === 'EQUIPMENT' && !isGear) return false;
+            if (filter === 'TOOL' && !isTool) return false;
             if (filter === 'RESOURCE' && !isRaw) return false;
             if (filter === 'CONSUMABLE' && !isConsumable) return false;
         }
@@ -281,7 +283,7 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                     overflowX: isMobile ? 'hidden' : 'auto',
                     width: '100%'
                 }}>
-                    {['ALL', 'EQUIPMENT', 'RESOURCE', 'CONSUMABLE'].map(f => (
+                    {['ALL', 'EQUIPMENT', 'TOOL', 'RESOURCE', 'CONSUMABLE'].map(f => (
                         <button
                             key={f}
                             onClick={() => setFilter(f)}

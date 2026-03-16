@@ -6,11 +6,17 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [unreadTabs, setUnreadTabs] = useState({});
     const [cooldown, setCooldown] = useState(0);
     const messagesEndRef = useRef(null);
     const isOpenRef = useRef(isOpen);
-
     const [activeTab, setActiveTab] = useState('GLOBAL');
+    const activeTabRef = useRef(activeTab);
+
+    useEffect(() => {
+        activeTabRef.current = activeTab;
+    }, [activeTab]);
+
     const TABS = [
         { id: 'GLOBAL', label: 'Global' },
         { id: 'PTBR', label: 'PTBR' },
@@ -47,6 +53,21 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
         if (isOpen && messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
+        
+        // Clear unread for active tab when open
+        if (isOpen && activeTab) {
+            setUnreadTabs(prev => ({
+                ...prev,
+                [activeTab]: 0
+            }));
+            
+            // Recalculate total unread
+            const total = Object.entries(unreadTabs).reduce((acc, [id, count]) => {
+                if (id === activeTab) return acc;
+                return acc + count;
+            }, 0);
+            setUnreadCount(total);
+        }
     }, [messages, isOpen, activeTab]);
 
     useEffect(() => {
@@ -81,8 +102,24 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
                     if (msg.id && prev.some(m => m.id === msg.id)) return prev;
                     return [...prev, msg];
                 });
+
+                // Handle unread counts using Refs to avoid stale closures
+                let channel = msg.channel || 'GLOBAL';
+                if (msg.sender_name === '[SYSTEM]' || msg.sender_name === '[ERROR]' || msg.channel === 'SYSTEM') {
+                    channel = 'SYSTEM';
+                }
+
                 if (!isOpenRef.current) {
                     setUnreadCount(prev => prev + 1);
+                    setUnreadTabs(prev => ({
+                        ...prev,
+                        [channel]: (prev[channel] || 0) + 1
+                    }));
+                } else if (activeTabRef.current !== channel) {
+                    setUnreadTabs(prev => ({
+                        ...prev,
+                        [channel]: (prev[channel] || 0) + 1
+                    }));
                 }
             });
 
@@ -233,10 +270,32 @@ const ChatWidget = ({ socket, user, characterName, isMobile, onInspect }) => {
                                 fontSize: '0.75rem',
                                 fontWeight: activeTab === tab.id ? 'bold' : 'normal',
                                 cursor: 'pointer',
-                                transition: '0.2s'
+                                transition: '0.2s',
+                                position: 'relative',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '4px'
                             }}
                         >
                             {tab.label}
+                            {unreadTabs[tab.id] > 0 && (
+                                <span style={{
+                                    background: '#ff4444',
+                                    color: 'white',
+                                    borderRadius: '50%',
+                                    padding: '0 5px',
+                                    fontSize: '0.6rem',
+                                    fontWeight: 'bold',
+                                    minWidth: '16px',
+                                    height: '16px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}>
+                                    {unreadTabs[tab.id]}
+                                </span>
+                            )}
                         </button>
                     ))}
                 </div>

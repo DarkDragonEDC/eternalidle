@@ -53,7 +53,9 @@ export class MarketManager {
 
         if (filters.category && filters.category !== 'ALL') {
             if (filters.category === 'EQUIPMENT') {
-                query = query.or('item_data->>type.in.(WEAPON,ARMOR,HELMET,BOOTS,OFF_HAND,GLOVES,CAPE),item_data->>type.ilike.TOOL%');
+                query = query.or('item_data->>type.in.(WEAPON,ARMOR,HELMET,BOOTS,OFF_HAND,GLOVES,CAPE)');
+            } else if (filters.category === 'TOOL') {
+                query = query.ilike('item_data->>type', 'TOOL%');
             } else if (filters.category === 'RESOURCE') {
                 // Raw resources (excluding refined, runes, and shards)
                 query = query.or('item_data->>type.eq.RAW,and(item_data->>type.eq.RESOURCE,item_id.not.ilike.%_BAR,item_id.not.ilike.%_PLANK,item_id.not.ilike.%_LEATHER,item_id.not.ilike.%_CLOTH,item_id.not.ilike.%_EXTRACT,item_id.not.ilike.%_SHARD%,item_id.not.ilike.%_RUNE_%)');
@@ -73,11 +75,9 @@ export class MarketManager {
         // Apply Sorting
         const sort = filters.sort || 'PRICE_ASC';
         if (sort === 'PRICE_ASC') {
-            query = query.order('price', { ascending: true }); // Note: This orders by TOTAL price. 
-            // If you want to order by unit price, you might need a calculated column or simpler sort.
-            // For now, let's stick to standard order.
+            query = query.order('unit_price', { ascending: true });
         } else if (sort === 'PRICE_DESC') {
-            query = query.order('price', { ascending: false });
+            query = query.order('unit_price', { ascending: false });
         } else {
             query = query.order('created_at', { ascending: false });
         }
@@ -353,7 +353,8 @@ export class MarketManager {
                     item_id: itemId,
                     item_data: { ...itemData, ...sourceMetadata, seller_character_id: char.id },
                     amount: remainingAmount,
-                    price: remainingAmount * sellPricePerUnit // Store total price for remaining items
+                    price: remainingAmount * sellPricePerUnit, // Store total price for remaining items
+                    unit_price: sellPricePerUnit
                 });
 
             if (insertError) throw insertError;

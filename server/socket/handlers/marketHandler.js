@@ -49,7 +49,7 @@ export const registerMarketHandlers = (socket, gameManager, io) => {
         const result = await gameManager.marketManager.listMarketItem(socket.user.id, socket.data.characterId, itemId, amount, price, metadata);
         socket.emit("market_action_success", result);
         socket.emit("status_update", await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
-        io.emit("market_listings_update", await gameManager.marketManager.getMarketListings());
+        io.emit("market_listings_update_notif", { type: "market_update" });
       });
     } catch (err) { 
       socket.emit("error", { message: err.message }); 
@@ -64,7 +64,7 @@ export const registerMarketHandlers = (socket, gameManager, io) => {
         const result = await gameManager.marketManager.buyMarketItem(socket.user.id, socket.data.characterId, listingId, quantity);
         socket.emit("market_action_success", result);
         socket.emit("status_update", await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
-        io.emit("market_listings_update", await gameManager.marketManager.getMarketListings());
+        io.emit("market_listings_update_notif", { type: "market_update" });
       });
     } catch (err) {
       socket.emit("error", { message: err.message });
@@ -79,7 +79,7 @@ export const registerMarketHandlers = (socket, gameManager, io) => {
         const result = await gameManager.cancelMarketListing(socket.user.id, socket.data.characterId, listingId);
         socket.emit("market_action_success", result);
         socket.emit("status_update", await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
-        io.emit("market_listings_update", await gameManager.getMarketListings());
+        io.emit("market_listings_update_notif", { type: "cancel" });
       });
     } catch (err) {
       socket.emit("error", { message: err.message });

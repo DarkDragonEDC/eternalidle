@@ -1,3 +1,11 @@
+# 📄 Patch Notes — Updates v1.6.0
+@everyone
+
+### 🛒 Melhorias no Mercado (Marketplace)
+- **Filtro de Ferramentas**: Agora existe uma categoria dedicada para **Tools**! Ficou muito mais fácil encontrar machados, picaretas e outras ferramentas sem misturar com armaduras e armas.
+- **Ordenação por Preço Unitário**: O filtro "Price: Low to High" agora é inteligente! Ele organiza os itens pelo preço de **cada unidade**, permitindo que você encontre as melhores ofertas em itens acumuláveis (como minérios e essências) de forma justa.
+- **Navegação Persistente**: Corrigimos o erro que limpava seus filtros toda vez que você comprava ou vendia algo. Agora seus filtros e a página atual permanecem ativos após uma transação.
+
 # 📄 Patch Notes — Updates v1.5.9
 @everyone
 

@@ -47,7 +47,11 @@ export const useAppStore = create((set, get) => ({
     socket: null,
     isConnected: false,
     connectSocket: (accessToken, charId, clientVersion) => {
-        const { socket } = get();
+        const { socket, isConnecting } = get();
+        if (socket || isConnecting) return;
+
+        set({ isConnecting: true });
+
         if (socket) socket.disconnect();
 
         const newSocket = io(API_URL, {
@@ -57,7 +61,7 @@ export const useAppStore = create((set, get) => ({
         });
 
         newSocket.on('connect', () => {
-            set({ isConnected: true });
+            set({ isConnected: true, isConnecting: false });
             console.log('[SOCKET] Connected to server');
             if (charId) {
                 newSocket.emit('join_character', { characterId: charId });
@@ -78,6 +82,7 @@ export const useAppStore = create((set, get) => ({
 
         newSocket.on('connect_error', (err) => {
             console.error('[SOCKET] Connection error:', err.message);
+            set({ isConnecting: false });
             
             // If it's an authentication error, force a logout/re-login
             if (err.message.toLowerCase().includes('auth') || err.message.toLowerCase().includes('token')) {

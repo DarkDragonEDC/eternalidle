@@ -11,7 +11,7 @@ import { useWindowListeners } from './hooks/useWindowListeners';
 import { useAppHandlers } from './hooks/useAppHandlers';
 
 // Versioning
-const CLIENT_VERSION = '1.5.9';
+const CLIENT_VERSION = '1.6.0';
 
 // Components
 import Auth from './components/Auth';
@@ -163,6 +163,15 @@ function App() {
         isPreviewActive,
         CLIENT_VERSION
     });
+    
+    // Reset scroll when tab or path changes
+    useEffect(() => {
+        window.scrollTo(0, 0);
+        const scrollContainers = document.querySelectorAll('.scroll-container');
+        scrollContainers.forEach(el => {
+            el.scrollTop = 0;
+        });
+    }, [activeTab, location.pathname]);
 
 
 
