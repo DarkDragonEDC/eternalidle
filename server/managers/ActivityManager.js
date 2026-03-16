@@ -158,7 +158,179 @@ export class ActivityManager {
         // Mark for persistence
         await this.gameManager.saveState(char.id, char.state);
 
+        // Check for next activity in queue
+        await this.checkQueueAndStartNext(char);
+
         return { success: true, message: "Activity stopped" };
+    }
+
+    async checkQueueAndStartNext(char) {
+        if (char.state && char.state.actionQueue && char.state.actionQueue.length > 0) {
+            const nextAction = char.state.actionQueue.shift();
+            console.log(`[ACTIVITY-QUEUE] Auto-starting next action for ${char.name}: ${nextAction.type} ${nextAction.item_id}`);
+            
+            try {
+                await this.startActivity(
+                    char.user_id,
+                    char.id,
+                    nextAction.type,
+                    nextAction.item_id,
+                    nextAction.quantity
+                );
+                
+                // Broadcast update to client
+                if (this.gameManager.io) {
+                    this.gameManager.broadcastToCharacter(char.id, 'queue_updated', { 
+                        queue: char.state.actionQueue,
+                        current: char.current_activity
+                    });
+                }
+                return true;
+            } catch (queueErr) {
+                console.error(`[ACTIVITY-QUEUE] Failed to start queued action for ${char.name}:`, queueErr.message);
+                this.gameManager.addNotification(char, 'ERROR', `Failed to start queued action: ${queueErr.message}`);
+                // Try next item in queue if this one failed? 
+                // For now just stop to avoid infinite loops of failures
+            }
+        }
+        return false;
+    }
+
+    async enqueueActivity(userId, characterId, actionType, itemId, quantity = 1) {
+        console.log(`[ACTIVITY-QUEUE] Enqueue Request: User=${userId}, Type=${actionType}, Item=${itemId}`);
+        const type = actionType.toUpperCase();
+        const char = await this.gameManager.getCharacter(userId, characterId);
+        
+        // CHECK MEMBERSHIP
+        const isMember = char.state.isPremium || char.state.membership?.active;
+        if (!isMember) {
+            throw new Error("Action Queue is a Member-only feature!");
+        }
+        if (!char.state.actionQueue) {
+            char.state.actionQueue = [];
+        }
+
+        const extraSlots = char.state.upgrades?.extraQueueSlots || 0;
+        const maxQueueSlots = 1 + extraSlots;
+
+        if (char.state.actionQueue.length >= maxQueueSlots) {
+            throw new Error(`Queue full! Maximum ${maxQueueSlots} actions can be queued.`);
+        }
+
+        const item = resolveItem(itemId);
+        if (!item) throw new Error(`Item not found: ${itemId}`);
+
+        const skillKey = getSkillForItem(itemId, type);
+        const userLevel = char.state.skills[skillKey]?.level || 1;
+        const tier = Number(item.tier) || 1;
+        const requiredLevel = getLevelRequirement(tier);
+
+        if (userLevel < requiredLevel) {
+            throw new Error(`Insufficient level! Requires ${skillKey ? skillKey.replace('_', ' ') : 'Skill'} Lv ${requiredLevel}`);
+        }
+
+        // Calculate theoretical time
+        const stats = this.gameManager.inventoryManager.calculateStats(char);
+        const efficiencyMap = {
+            'LUMBERJACK': 'WOOD', 'ORE_MINER': 'ORE', 'ANIMAL_SKINNER': 'HIDE', 'FIBER_HARVESTER': 'FIBER', 'FISHING': 'FISH', 'HERBALISM': 'HERB',
+            'PLANK_REFINER': 'PLANK', 'METAL_BAR_REFINER': 'METAL', 'LEATHER_REFINER': 'LEATHER', 'CLOTH_REFINER': 'CLOTH', 'DISTILLATION': 'EXTRACT',
+            'WARRIOR_CRAFTER': 'WARRIOR', 'HUNTER_CRAFTER': 'HUNTER', 'MAGE_CRAFTER': 'MAGE', 'ALCHEMY': 'ALCHEMY', 'COOKING': 'COOKING', 'TOOL_CRAFTER': 'TOOLS'
+        };
+
+        const efficiencyKey = efficiencyMap[skillKey];
+        const efficiencyVal = (efficiencyKey && stats.efficiency && stats.efficiency[efficiencyKey]) ? stats.efficiency[efficiencyKey] : 0;
+        const reductionFactor = Math.max(0.1, 1 - (efficiencyVal / 100));
+        let baseTime = item.time || (type === 'GATHERING' ? 3.0 : type === 'REFINING' ? 1.5 : type === 'CRAFTING' ? 4.0 : 3.0);
+        const timePerAction = Math.max(0.5, baseTime * reductionFactor);
+
+        // Check total idle time including current activity and existing queue
+        let totalQueueDuration = 0;
+        if (char.current_activity) {
+            totalQueueDuration += char.current_activity.actions_remaining * char.current_activity.time_per_action;
+        }
+        for (const queued of char.state.actionQueue) {
+            totalQueueDuration += queued.quantity * queued.time_per_action;
+        }
+
+        const newItemDuration = timePerAction * quantity;
+        const maxIdleSeconds = this.gameManager.getMaxIdleTime(char) / 1000;
+
+        if (totalQueueDuration + newItemDuration > maxIdleSeconds) {
+            throw new Error(`Queue duration would exceed idle limit! (Remaining: ${Math.floor((maxIdleSeconds - totalQueueDuration) / 60)} min)`);
+        }
+
+        // AUTO-START LOGIC: If no civil activity is currently active, start it immediately
+        // Note: Combat and Dungeons are independent and should not block starting a farm activity
+        const isCurrentlyFarming = char.current_activity && Object.keys(char.current_activity).length > 0;
+        
+        if (!isCurrentlyFarming) {
+            try {
+                const startResult = await this.startActivity(userId, characterId, type, itemId, quantity);
+                return { ...startResult, autoStarted: true, queue: char.state.actionQueue || [] };
+            } catch (err) {
+                console.error(`[ACTIVITY-QUEUE] Failed to auto-start activity:`, err.message);
+                // Fall back to enqueuing if auto-start fails (e.g. requirements not met)
+            }
+        }
+
+        char.state.actionQueue.push({
+            type,
+            item_id: itemId,
+            quantity,
+            time_per_action: timePerAction,
+            skillKey
+        });
+
+        this.gameManager.markDirty(char.id);
+        await this.gameManager.saveState(char.id, char.state);
+
+        return { success: true, queue: char.state.actionQueue };
+    }
+
+    async removeFromQueue(userId, characterId, index) {
+        const char = await this.gameManager.getCharacter(userId, characterId);
+        if (!char.state.actionQueue || !char.state.actionQueue[index]) {
+            throw new Error("Invalid queue index");
+        }
+
+        char.state.actionQueue.splice(index, 1);
+        this.gameManager.markDirty(char.id);
+        await this.gameManager.saveState(char.id, char.state);
+
+        return { success: true, queue: char.state.actionQueue };
+    }
+
+    async clearQueue(userId, characterId) {
+        const char = await this.gameManager.getCharacter(userId, characterId);
+        char.state.actionQueue = [];
+        this.gameManager.markDirty(char.id);
+        await this.gameManager.saveState(char.id, char.state);
+
+        return { success: true, message: "Queue cleared" };
+    }
+    
+    async reorderQueue(userId, characterId, index, direction) {
+        console.log(`[ActivityManager] reorderQueue: userId=${userId}, index=${index}, direction=${direction}`);
+        const char = await this.gameManager.getCharacter(userId, characterId);
+        if (!char.state.actionQueue || char.state.actionQueue.length < 2) {
+            console.warn(`[ActivityManager] reorderQueue failed: queue too small (${char.state.actionQueue?.length || 0})`);
+            throw new Error("Cannot reorder: Queue too small");
+        }
+
+        const oldQueue = [...char.state.actionQueue];
+        const newQueue = [...char.state.actionQueue];
+        const item = newQueue.splice(index, 1)[0];
+        const newIndex = direction === 'up' ? Math.max(0, index - 1) : Math.min(newQueue.length, index + 1);
+        
+        newQueue.splice(newIndex, 0, item);
+        char.state.actionQueue = newQueue;
+
+        console.log(`[ActivityManager] Queue reordered. Old first item: ${oldQueue[0]?.item_id}, New first item: ${newQueue[0]?.item_id}`);
+
+        this.gameManager.markDirty(char.id);
+        await this.gameManager.saveState(char.id, char.state);
+
+        return { success: true, queue: char.state.actionQueue };
     }
 
     async processGathering(char, item) {

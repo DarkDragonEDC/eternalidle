@@ -1,10 +1,12 @@
 import { resolveItem } from '../../shared/items.js';
 import { DEFAULT_PLAYER_ATTACK_SPEED, RESPAWN_DELAY_MS } from '../../shared/combat.js';
+import { calculateNextLevelXP } from '../../shared/skills.js';
 
 export class CatchupManager {
     constructor(gameManager) {
         this.gm = gameManager;
         this.supabase = gameManager.supabase;
+        this.useBatchCatchup = true; // Feature Toggle para otimização
     }
 
     /**
@@ -29,19 +31,24 @@ export class CatchupManager {
                 }
 
                 // 1. Process Activities
-                if (data.current_activity && typeof data.current_activity === 'object' && data.activity_started_at) {
+                while (data.current_activity && typeof data.current_activity === 'object' && data.activity_started_at) {
                     const timePerAction = data.current_activity.time_per_action || 3;
-                    if (elapsedSeconds >= timePerAction) {
+                    const remainingElapsed = elapsedSeconds - finalReport.totalTime;
+                    
+                    if (remainingElapsed >= timePerAction) {
                         const maxIdleMs = this.gm.getMaxIdleTime(data);
                         const maxEffectSeconds = Math.min(elapsedSeconds, maxIdleMs / 1000);
+                        const remainingMaxEffect = maxEffectSeconds - finalReport.totalTime;
 
-                        const actionsPossible = Math.floor(maxEffectSeconds / timePerAction);
-                        const actionsToProcess = Math.min(actionsPossible, data.current_activity.actions_remaining);
-
-                        if (elapsedSeconds * 1000 > maxIdleMs) {
+                        if (remainingMaxEffect <= 0) {
                             console.log(`[CATCHUP-LIMIT] ${data.name}: Activity idle limit exceeded.`);
-                            // We don't stop it here yet, we process what we can, then stop if it reached the limit
+                            data.current_activity = null;
+                            data.activity_started_at = null;
+                            break;
                         }
+
+                        const actionsPossible = Math.floor(remainingMaxEffect / timePerAction);
+                        const actionsToProcess = Math.min(actionsPossible, data.current_activity.actions_remaining);
 
                         if (actionsToProcess > 0) {
                             const activityReport = await this.processBatchActions(data, actionsToProcess);
@@ -49,15 +56,18 @@ export class CatchupManager {
                                 updated = true;
                                 this._mergeActivityReport(data, activityReport, finalReport);
 
-                                // If we stopped because of a limit (not just running out of actions)
-                                if (elapsedSeconds * 1000 > maxIdleMs && !data.current_activity) {
-                                    // Activity already cleared by processBatchActions if it ran out, 
-                                    // but we need to ensure it's null if we capped it here.
-                                    data.current_activity = null;
-                                    data.activity_started_at = null;
-                                }
+                                // If batch processing replaced the activity with the next one from queue, 
+                                // the loop will continue naturally. 
+                                // If it returned because it finished and the queue was empty, 
+                                // char.current_activity will be null and the loop ends.
+                            } else {
+                                break; // No progress made
                             }
+                        } else {
+                            break; // Actions possible is 0
                         }
+                    } else {
+                        break; // Not enough time for even one action
                     }
                 }
 
@@ -175,6 +185,7 @@ export class CatchupManager {
 
     async processBatchActions(char, quantity) {
         const { type } = char.current_activity;
+        const timePerAction = char.current_activity.time_per_action || 3;
         const item = resolveItem(char.current_activity.item_id);
         if (!item) return { processed: 0, itemsGained: {}, xpGained: {} };
 
@@ -186,9 +197,101 @@ export class CatchupManager {
         let autoRefineCount = 0;
         let stopReason = null;
 
-        for (let i = 0; i < quantity; i++) {
+        // OTIMIZAÇÃO: Se estiver em modo batch e a quantidade for grande, 
+        // processamos em blocos para reduzir iterações se não houver risco imediato de level up.
+        const useAveraging = this.useBatchCatchup && quantity > 10;
+        let skipCount = 1;
+
+        for (let i = 0; i < quantity; i += skipCount) {
             let result = null;
-            switch (type) {
+            skipCount = 1;
+
+            // Se estivermos em modo rápido e faltar muito para o próximo level, 
+            // processamos em lotes de até 50 para evitar milhares de cálculos de stats.
+            if (useAveraging && (quantity - i) >= 10) {
+                const currentBatchSize = Math.min(50, quantity - i);
+                
+                // Verificação de segurança: Espaço no inventário e Level Up
+                const stats = this.gm.inventoryManager.calculateStats(char);
+                const skillLevel = char.state.skills[char.state.current_activity?.skillKey || 'GATHERING']?.level || 1;
+                const currentXP = char.state.skills[char.state.current_activity?.skillKey || 'GATHERING']?.xp || 0;
+                const nextLevelXP = calculateNextLevelXP(skillLevel);
+                const xpRemaining = nextLevelXP - currentXP;
+                
+                // Estima XP por ação (simplificado para segurança)
+                const estXpPerAction = (item.xp || 10) * 5; // Margem de segurança de 5x bônus
+                
+                // Se o inventário tem espaço e o XP não vai estourar o level no lote
+                if (xpRemaining > (estXpPerAction * currentBatchSize) && 
+                    this.gm.inventoryManager.getFreeSlots(char) > 5) {
+                    
+                    // --- EXECUÇÃO EM LOTE ---
+                    const stats = this.gm.inventoryManager.calculateStats(char);
+                    const skillKey = char.current_activity.skillKey || 'GATHERING';
+                    const actType = char.current_activity.type;
+                    
+                    const efficiencyMap = {
+                        'GATHERING': 'GATHERING', 'REFINING': 'REFINING', 'CRAFTING': 'CRAFTING'
+                    };
+                    const typeKey = efficiencyMap[actType];
+                    
+                    // Calcula bônus médios (Global + Categoria + Específico)
+                    const yieldBonus = (stats.globals?.xpYield || 0); 
+                    const categoryBonus = (stats.xpBonus?.[typeKey] || 0);
+                    const specificBonus = (stats.xpBonus?.[skillKey] || 0);
+                    
+                    const totalBonusPc = yieldBonus + categoryBonus + specificBonus;
+                    const xpFactor = (1 + totalBonusPc / 100);
+                    const totalXpGained = Math.floor((item.xp || 10) * xpFactor * currentBatchSize);
+                    
+                    // Aplica ganhos de XP
+                    this.gm.addXP(char, skillKey, totalXpGained);
+                    xpGained[skillKey] = (xpGained[skillKey] || 0) + totalXpGained;
+                    
+                    // Aplica itens (calculando duplicação estatisticamente)
+                    const duplicationChance = stats.duplication?.[skillKey] || 0;
+                    const duplicationHits = Math.floor((duplicationChance * currentBatchSize) / 100);
+                    const totalItems = currentBatchSize + duplicationHits;
+                    
+                    this.gm.inventoryManager.addItemToInventory(char, item.id, totalItems);
+                    itemsGained[item.id] = (itemsGained[item.id] || 0) + totalItems;
+                    
+                    if (duplicationHits > 0) duplicationCount += duplicationHits;
+                    
+                    processed += currentBatchSize;
+                    char.current_activity.actions_remaining -= currentBatchSize;
+                    skipCount = currentBatchSize;
+                    
+                    // Se terminar a atividade atual no lote
+                    if (char.current_activity.actions_remaining <= 0) {
+                         const elapsed = processed * timePerAction;
+                         this.gm.addActionSummaryNotification(char, actType, {
+                             itemsGained, xpGained, totalTime: elapsed, duplicationCount, autoRefineCount
+                         }, 'Summary (Batch)');
+
+                         char.current_activity = null;
+                         char.activity_started_at = null;
+
+                         // Suporte à Fila de Ações no Modo Batch
+                         if (char.state && char.state.actionQueue && char.state.actionQueue.length > 0) {
+                             const nextAction = char.state.actionQueue.shift();
+                             try {
+                                 await this.gm.activityManager.startActivity(
+                                     char.user_id, char.id, nextAction.type, nextAction.item_id, nextAction.quantity
+                                 );
+                                 // O loop externo de processCatchup cuidará de chamar processBatchActions novamente
+                             } catch (e) {
+                                 console.error(`[CATCHUP-BATCH-QUEUE] Error:`, e.message);
+                             }
+                         }
+                         break;
+                    }
+                    
+                    continue; // Pula para a próxima iteração com o skipCount
+                }
+            }
+
+            switch (char.current_activity.type) {
                 case 'GATHERING': result = await this.gm.activityManager.processGathering(char, item); break;
                 case 'REFINING': result = await this.gm.activityManager.processRefining(char, item); break;
                 case 'CRAFTING': result = await this.gm.activityManager.processCrafting(char, item); break;
@@ -204,14 +307,53 @@ export class CatchupManager {
                     itemsGained[result.refinedItemGained] = (itemsGained[result.refinedItemGained] || 0) + 1;
                 }
                 if (result.xpGained) {
-                    const stats = this.gm.inventoryManager.calculateStats(char);
-                    const globalBonus = stats.globals?.xpYield || 0;
-                    const catBonus = stats.xpBonus?.[type] || 0;
-                    const finalXp = Math.floor(result.xpGained * (1 + (globalBonus + catBonus) / 100));
+                    const finalXp = Math.floor(result.xpGained);
                     xpGained[result.skillKey] = (xpGained[result.skillKey] || 0) + finalXp;
                 }
                 if (result.isDuplication) duplicationCount++;
                 if (result.isAutoRefine || result.refinedItemGained) autoRefineCount++;
+
+                char.current_activity.actions_remaining--;
+
+                // If activity finished, try to start next one from queue
+                if (char.current_activity.actions_remaining <= 0) {
+                    // Report summary for the finished activity
+                    const elapsed = processed * timePerAction;
+                    this.gm.addActionSummaryNotification(char, char.current_activity.type, {
+                        itemsGained, xpGained, totalTime: elapsed, duplicationCount, autoRefineCount
+                    }, 'Summary');
+
+                    char.current_activity = null;
+                    char.activity_started_at = null;
+
+                    // Support Action Queue Offline
+                    if (char.state && char.state.actionQueue && char.state.actionQueue.length > 0) {
+                        const nextAction = char.state.actionQueue.shift();
+                        try {
+                            await this.gm.activityManager.startActivity(
+                                char.user_id, char.id, nextAction.type, nextAction.item_id, nextAction.quantity
+                            );
+                            
+                            // Adjust Loop: Re-resolve item and time for the NEW activity
+                            const nextItem = resolveItem(char.current_activity.item_id);
+                            if (!nextItem) break;
+                            
+                            // Update local loop variables
+                            // We need to re-calculate timePerAction for the next item
+                            // but processBatchActions is called with a pre-calculated 'quantity' (actionsPossible).
+                            // This is tricky because different activities have different times.
+                            
+                            // Simplest way: break and let the main catchup loop call processBatchActions again 
+                            // for the NEW activity.
+                            break; 
+                        } catch (e) {
+                            console.error(`[CATCHUP-QUEUE] Error starting next activity:`, e.message);
+                            break;
+                        }
+                    } else {
+                        break; // No more actions in queue
+                    }
+                }
             } else {
                 stopReason = result?.error || "Stopped Early";
                 break;
@@ -219,17 +361,12 @@ export class CatchupManager {
         }
 
         if (processed > 0) {
-            const timePerAction = char.current_activity?.time_per_action || 3;
-            char.current_activity.actions_remaining -= processed;
+            // If activity is still active, update next_action_at
             if (char.current_activity) {
                 const timeProcessedMs = processed * timePerAction * 1000;
                 char.current_activity.next_action_at = (char.current_activity.next_action_at || Date.now()) + timeProcessedMs;
             }
 
-            if (char.current_activity.actions_remaining <= 0) {
-                char.current_activity = null;
-                char.activity_started_at = null;
-            }
             return { processed, leveledUp, itemsGained, xpGained, totalTime: processed * timePerAction, stopReason, duplicationCount, autoRefineCount };
         }
         return { processed: 0, leveledUp: false, itemsGained: {}, xpGained: {}, totalTime: 0, stopReason };
@@ -252,9 +389,42 @@ export class CatchupManager {
         const endTime = startTime + (rounds * atkSpeed);
 
         while (virtualTime < endTime && char.state.combat) {
-            // Process Food - REMOVED duplicative call. CombatManager.processCombatRound handles reactive healing.
-            // const foodResult = this.gm.processFood(char, virtualTime);
-            // foodConsumed += foodResult.eaten || 0;
+            // OTIMIZAÇÃO: Combate em Lote
+            if (this.useBatchCatchup && (endTime - virtualTime) > (atkSpeed * 10)) {
+                const batchRounds = Math.min(100, Math.floor((endTime - virtualTime) / atkSpeed));
+                
+                // Simulação simplificada de N rounds
+                // Se o player é muito mais forte (não perde HP significativo), processamos o lote
+                const stats = this.gameManager.inventoryManager.calculateStats(char);
+                const mobDmg = char.state.combat.mobDamage || 10;
+                const playerDef = stats.defense || 0;
+                const playerMitigation = Math.min(0.75, playerDef * 0.001); // 1% per 100 def
+                const damagePerMobHit = Math.max(1, Math.floor(mobDmg * (1 - playerMitigation)));
+                
+                // Se o dano do mob for baixo o suficiente para não morrer no lote
+                if (char.state.health > (damagePerMobHit * batchRounds * 2)) {
+                    // Executa o round completo (com drops e XP) uma vez para pegar os valores base
+                    const result = await this.gameManager.combatManager.processCombatRound(char, virtualTime);
+                    if (!result || !char.state.combat) break;
+                    
+                    // Multiplica os ganhos do round para o restante do lote (batchRounds - 1)
+                    const multiplier = batchRounds - 1;
+                    if (multiplier > 0) {
+                        kills += (result.details?.victory ? multiplier : 0);
+                        const xpAdded = (result.details?.xpGained || 0) * multiplier;
+                        combatXp += xpAdded;
+                        silverGained += (result.details?.silverGained || 0) * multiplier;
+                        
+                        // Nota: Drops raros não são multiplicados por segurança/raridade, 
+                        // apenas o XP e Silver que são constantes.
+                        
+                        virtualTime += (multiplier * atkSpeed);
+                        // Consumo de HP do lote
+                        char.state.health = Math.max(1, char.state.health - (damagePerMobHit * multiplier));
+                    }
+                    continue;
+                }
+            }
 
             const result = await this.gm.combatManager.processCombatRound(char, virtualTime);
             if (!result || !char.state.combat) {

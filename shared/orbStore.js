@@ -69,6 +69,17 @@ export const ORB_STORE = {
             category: 'CONVENIENCE',
             permanent: false,
             icon: '/items/CHANGE_NAME.webp'
+        },
+        QUEUE_EXPANSION: {
+            id: 'QUEUE_EXPANSION',
+            name: 'Queue expansion',
+            description: 'Permanently unlocks a 2nd slot in your action queue. Requires active Membership.',
+            cost: 250,
+            category: 'CONVENIENCE',
+            permanent: true,
+            maxPurchases: 1,
+            requiresMembership: true,
+            icon: '/items/QUEUE_SLOT_V2.png'
         }
     },
     COSMETICS: {},

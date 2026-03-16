@@ -229,16 +229,23 @@ const OrbShop = ({ socket, gameState, onClose, isPreviewActive, onPreviewActionB
                                             const isRealMoney = item.category === 'PACKAGE' || item.category === 'MEMBERSHIP';
                                             const isPackage = item.category === 'PACKAGE';
                                             const isMembership = item.category === 'MEMBERSHIP';
-                                            const canAfford = isRealMoney ? true : (orbs >= item.cost);
+                                            const isPremium = gameState?.state?.isPremium || (gameState?.state?.membership?.active && gameState?.state?.membership?.expiresAt > Date.now());
+                                            const meetsRequirement = !item.requiresMembership || isPremium;
+                                            const canAfford = isRealMoney ? true : (orbs >= item.cost && meetsRequirement);
                                             const isPurchasing = purchasing === item.id;
+                                            
+                                            // Check if max purchases reached
+                                            const purchaseCount = gameState?.state?.orbPurchases?.[item.id] || 0;
+                                            const isMaxReached = item.maxPurchases && purchaseCount >= item.maxPurchases;
+                                            const currentCanAfford = canAfford && !isMaxReached;
 
                                             return (
                                                 <div key={item.id} style={{
                                                     background: 'var(--slot-bg)',
-                                                    border: `1px solid ${isRealMoney ? 'var(--accent)' : (canAfford ? 'var(--border)' : 'rgba(255,0,0,0.2)')}`,
+                                                    border: `1px solid ${isRealMoney ? 'var(--accent)' : (currentCanAfford ? 'var(--border)' : (isMaxReached ? 'var(--border-active)' : 'rgba(255,0,0,0.2)'))}`,
                                                     borderRadius: '12px',
                                                     padding: '15px',
-                                                    opacity: canAfford ? 1 : 0.6,
+                                                    opacity: currentCanAfford ? 1 : 0.7,
                                                     transition: '0.2s',
                                                     position: 'relative',
                                                     overflow: 'hidden',
@@ -360,9 +367,9 @@ const OrbShop = ({ socket, gameState, onClose, isPreviewActive, onPreviewActionB
                                                         type="button"
                                                         onClick={(e) => {
                                                             e.preventDefault();
-                                                            if (canAfford && !isPurchasing) handlePurchase(item);
+                                                            if (currentCanAfford && !isPurchasing) handlePurchase(item);
                                                         }}
-                                                        disabled={!canAfford || isPurchasing}
+                                                        disabled={!currentCanAfford || isPurchasing}
                                                         className="store-buy-btn"
                                                         style={{
                                                             width: '100%',
@@ -393,7 +400,14 @@ const OrbShop = ({ socket, gameState, onClose, isPreviewActive, onPreviewActionB
                                                                 <ShoppingBag size={14} />
                                                                 {item.category === 'MEMBERSHIP' ? 'BUY MEMBERSHIP' : 'BUY ORBS'}
                                                             </>
-                                                        ) : canAfford ? (
+                                                        ) : !meetsRequirement ? (
+                                                            'MEMBERS ONLY'
+                                                        ) : isMaxReached ? (
+                                                            <>
+                                                                <Check size={14} />
+                                                                OWNED
+                                                            </>
+                                                        ) : currentCanAfford ? (
                                                             <>
                                                                 <ShoppingBag size={14} />
                                                                 PURCHASE
@@ -446,80 +460,97 @@ const OrbShop = ({ socket, gameState, onClose, isPreviewActive, onPreviewActionB
                                 Cost per unit: <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{quantityModal.item.cost}</span> Orbs
                             </div>
 
-                            <div style={{ display: 'flex', gap: '6px', marginBottom: '15px', alignItems: 'center' }}>
-                                <button
-                                    onClick={() => setQuantityModal(prev => ({ ...prev, quantity: Math.max(1, prev.quantity - 1) }))}
-                                    style={{
-                                        width: '38px', height: '38px',
-                                        background: 'var(--accent-soft)',
-                                        border: '1px solid var(--border-active)',
-                                        borderRadius: '8px',
-                                        color: 'var(--accent)',
-                                        fontWeight: '900',
-                                        fontSize: '1.2rem',
-                                        cursor: 'pointer',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        flexShrink: 0
-                                    }}
-                                >−</button>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    value={quantityModal.quantity}
-                                    onChange={(e) => {
-                                        const val = Math.max(1, Math.floor(Number(e.target.value) || 1));
-                                        setQuantityModal(prev => ({ ...prev, quantity: val }));
-                                    }}
-                                    style={{
-                                        flex: 1,
-                                        minWidth: 0,
-                                        padding: '8px 6px',
-                                        background: 'rgba(0,0,0,0.3)',
-                                        border: '1px solid var(--border)',
-                                        borderRadius: '8px',
-                                        color: 'var(--text-main)',
-                                        fontSize: '1rem',
-                                        fontWeight: 'bold',
-                                        outline: 'none',
-                                        textAlign: 'center'
-                                    }}
-                                />
-                                <button
-                                    onClick={() => setQuantityModal(prev => ({ ...prev, quantity: prev.quantity + 1 }))}
-                                    style={{
-                                        width: '38px', height: '38px',
-                                        background: 'var(--accent-soft)',
-                                        border: '1px solid var(--border-active)',
-                                        borderRadius: '8px',
-                                        color: 'var(--accent)',
-                                        fontWeight: '900',
-                                        fontSize: '1.2rem',
-                                        cursor: 'pointer',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        flexShrink: 0
-                                    }}
-                                >+</button>
-                                <button
-                                    onClick={() => {
-                                        const maxQty = Math.floor(orbs / quantityModal.item.cost);
-                                        setQuantityModal(prev => ({ ...prev, quantity: Math.max(1, maxQty) }));
-                                    }}
-                                    style={{
-                                        padding: '8px 12px',
-                                        background: 'var(--accent-soft)',
-                                        border: '1px solid var(--border-active)',
-                                        borderRadius: '8px',
-                                        color: 'var(--accent)',
-                                        fontWeight: '900',
-                                        fontSize: '0.75rem',
-                                        cursor: 'pointer',
-                                        letterSpacing: '1px',
-                                        flexShrink: 0
-                                    }}
-                                >
-                                    MAX
-                                </button>
-                            </div>
+                            {quantityModal.item.maxPurchases === 1 ? (
+                                <div style={{ 
+                                    padding: '15px', 
+                                    background: 'rgba(255,255,255,0.03)', 
+                                    borderRadius: '8px', 
+                                    textAlign: 'center',
+                                    color: 'var(--accent)',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.9rem',
+                                    marginBottom: '15px',
+                                    border: '1px solid var(--border)'
+                                }}>
+                                    SINGLE PURCHASE ITEM
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', gap: '6px', marginBottom: '15px', alignItems: 'center' }}>
+                                    <button
+                                        onClick={() => setQuantityModal(prev => ({ ...prev, quantity: Math.max(1, prev.quantity - 1) }))}
+                                        style={{
+                                            width: '38px', height: '38px',
+                                            background: 'var(--accent-soft)',
+                                            border: '1px solid var(--border-active)',
+                                            borderRadius: '8px',
+                                            color: 'var(--accent)',
+                                            fontWeight: '900',
+                                            fontSize: '1.2rem',
+                                            cursor: 'pointer',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            flexShrink: 0
+                                        }}
+                                    >−</button>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        value={quantityModal.quantity}
+                                        onChange={(e) => {
+                                            const val = Math.max(1, Math.floor(Number(e.target.value) || 1));
+                                            setQuantityModal(prev => ({ ...prev, quantity: val }));
+                                        }}
+                                        style={{
+                                            flex: 1,
+                                            minWidth: 0,
+                                            padding: '8px 6px',
+                                            background: 'rgba(0,0,0,0.3)',
+                                            border: '1px solid var(--border)',
+                                            borderRadius: '8px',
+                                            color: 'var(--text-main)',
+                                            fontSize: '1rem',
+                                            fontWeight: 'bold',
+                                            outline: 'none',
+                                            textAlign: 'center'
+                                        }}
+                                    />
+                                    <button
+                                        onClick={() => setQuantityModal(prev => ({ ...prev, quantity: prev.quantity + 1 }))}
+                                        style={{
+                                            width: '38px', height: '38px',
+                                            background: 'var(--accent-soft)',
+                                            border: '1px solid var(--border-active)',
+                                            borderRadius: '8px',
+                                            color: 'var(--accent)',
+                                            fontWeight: '900',
+                                            fontSize: '1.2rem',
+                                            cursor: 'pointer',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            flexShrink: 0
+                                        }}
+                                    >+</button>
+                                    <button
+                                        onClick={() => {
+                                            const maxQty = Math.floor(orbs / quantityModal.item.cost);
+                                            setQuantityModal(prev => ({ ...prev, quantity: Math.max(1, maxQty) }));
+                                        }}
+                                        style={{
+                                            padding: '8px 12px',
+                                            background: 'var(--accent-soft)',
+                                            border: '1px solid var(--border-active)',
+                                            borderRadius: '8px',
+                                            color: 'var(--accent)',
+                                            fontWeight: '900',
+                                            fontSize: '0.75rem',
+                                            cursor: 'pointer',
+                                            letterSpacing: '1px',
+                                            flexShrink: 0
+                                        }}
+                                    >
+                                        MAX
+                                    </button>
+                                </div>
+                            )}
+
 
                             <div style={{
                                 display: 'flex',
@@ -621,8 +652,8 @@ const OrbShop = ({ socket, gameState, onClose, isPreviewActive, onPreviewActionB
                                 </div>
 
                                 <div style={{ background: 'var(--slot-bg)', padding: '15px', borderRadius: '10px', borderLeft: '4px solid #ae00ff' }}>
-                                    <div style={{ fontWeight: 'bold', color: '#ae00ff', fontSize: '0.95rem', marginBottom: '4px' }}>Rune Automation</div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Access to <strong style={{ color: 'var(--text-main)' }}>Auto Merge</strong> feature to instantly combine runes.</div>
+                                    <div style={{ fontWeight: 'bold', color: '#ae00ff', fontSize: '0.95rem', marginBottom: '4px' }}>Action Queue</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Unlock an additional <strong style={{ color: 'var(--text-main)' }}>Action Queue slot</strong> to automate your journey.</div>
                                 </div>
 
                                 <div style={{ background: 'var(--slot-bg)', padding: '15px', borderRadius: '10px', borderLeft: '4px solid #ec407a' }}>

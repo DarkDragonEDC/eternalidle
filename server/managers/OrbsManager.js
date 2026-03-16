@@ -69,6 +69,13 @@ export class OrbsManager {
             return { success: false, error: 'Item not found' };
         }
 
+        if (item.requiresMembership) {
+            const isMember = char.state.isPremium || char.state.membership?.active;
+            if (!isMember) {
+                return { success: false, error: 'Requires Active Membership to purchase!' };
+            }
+        }
+
         const currentBalance = this.getOrbs(char);
         if (currentBalance < item.cost) {
             return {
@@ -205,6 +212,14 @@ export class OrbsManager {
                 return {
                     success: true,
                     message: 'Character slot unlocked!'
+                };
+
+            case 'QUEUE_EXPANSION':
+                if (!char.state.upgrades) char.state.upgrades = {};
+                char.state.upgrades.extraQueueSlots = (char.state.upgrades.extraQueueSlots || 0) + 1;
+                return {
+                    success: true,
+                    message: 'Action Queue expanded! You can now queue up to 2 items.'
                 };
 
             default:

@@ -3,9 +3,10 @@ import { formatNumber, formatSilver } from '@utils/format';
 import { X, Clock, Zap, Target, Star, ChevronRight, Package, Box, Sword, Shield, Heart, Lock, TrendingUp, Timer } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { resolveItem, formatItemId, QUALITIES, getSkillForItem, getLevelRequirement, BASE_QUALITY_CHANCES } from '@shared/items';
+import { useAppStore } from '../store/useAppStore';
 import CraftingOddsModal from './CraftingOddsModal';
 
-const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavigate, onSearchInMarket, isMobile }) => {
+const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavigate, onSearchInMarket, isMobile, onOpenShop }) => {
     const [quantity, setQuantity] = useState(1);
     const [isOddsModalOpen, setIsOddsModalOpen] = useState(false);
 
@@ -17,6 +18,10 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
     }, [item?.id]);
 
     if (!item || !isOpen) return null;
+    
+    const extraSlots = gameState?.state?.upgrades?.extraQueueSlots || 0;
+    const maxQueueSlots = 1 + extraSlots;
+    const isQueueFull = (gameState?.state?.actionQueue?.length || 0) >= maxQueueSlots;
 
     // --- REFACTORED SHARED LOGIC ---
     const resolvedItem = resolveItem(item.id) || item;
@@ -255,25 +260,48 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                         </div>
                     </div>
 
-                    {/* Action Button */}
-                    <div style={{ marginTop: '2px' }}>
+                    {/* Action Buttons */}
+                    <div style={{ marginTop: '2px', display: 'flex', gap: '8px' }}>
                         {locked ? (
-                            <div style={{ background: '#f8717115', border: '1px solid #f8717140', borderRadius: '14px', padding: '10px 12px', textAlign: 'center' }}>
+                            <div style={{ flex: 1, background: '#f8717115', border: '1px solid #f8717140', borderRadius: '14px', padding: '10px 12px', textAlign: 'center' }}>
                                 <div style={{ color: '#f87171', fontWeight: '900', fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                                     <Lock size={14} /> {formatItemId(skillKey)} LV {requiredLevel} REQ
                                 </div>
                                 <div style={{ fontSize: '0.55rem', color: '#f87171', opacity: 0.7, marginTop: '2px' }}>CURRENT LEVEL: {userLevel}</div>
                             </div>
                         ) : (
-                            <button onClick={hasEnoughMaterials ? () => onStart(type, item.id, currentQty) : null} disabled={!hasEnoughMaterials}
-                                style={{
-                                    width: '100%', padding: '12px', borderRadius: '14px', background: hasEnoughMaterials ? tierColor : 'var(--accent-soft)',
-                                    color: hasEnoughMaterials ? 'var(--panel-bg)' : 'var(--text-dim)', fontWeight: '900', fontSize: '0.85rem',
-                                    boxShadow: hasEnoughMaterials ? `0 6px 20px ${tierColor}30` : 'none', textTransform: 'uppercase', letterSpacing: '1px',
-                                    opacity: hasEnoughMaterials ? 1 : 0.6
-                                }}>
-                                {hasEnoughMaterials ? `BEGIN (${formatDuration(totalDuration)})` : 'INSUFFICIENT RESOURCES'}
-                            </button>
+                            <>
+                                <button onClick={hasEnoughMaterials ? () => onStart(type, item.id, currentQty) : null} disabled={!hasEnoughMaterials}
+                                    style={{
+                                        flex: 2, padding: '12px', borderRadius: '14px', background: hasEnoughMaterials ? tierColor : 'var(--accent-soft)',
+                                        color: hasEnoughMaterials ? 'var(--panel-bg)' : 'var(--text-dim)', fontWeight: '900', fontSize: '0.85rem',
+                                        boxShadow: hasEnoughMaterials ? `0 6px 20px ${tierColor}30` : 'none', textTransform: 'uppercase', letterSpacing: '1px',
+                                        opacity: hasEnoughMaterials ? 1 : 0.6
+                                    }}>
+                                    {hasEnoughMaterials ? `BEGIN (${formatDuration(totalDuration)})` : 'RESOURCES'}
+                                </button>
+                                
+                                <button 
+                                    onClick={(!isQueueFull && hasEnoughMaterials) ? (isPremium ? () => {
+                                        const { setQueueModal } = useAppStore.getState();
+                                        setQueueModal(item, type);
+                                    } : () => onOpenShop?.()) : null} 
+                                    disabled={!hasEnoughMaterials || isQueueFull}
+                                    style={{
+                                        flex: 1, padding: '12px', borderRadius: '14px', background: 'var(--panel-bg)',
+                                        border: `1px solid ${(!isQueueFull && hasEnoughMaterials) ? tierColor : 'var(--border)'}`,
+                                        color: (!isQueueFull && hasEnoughMaterials) ? tierColor : 'var(--text-dim)', fontWeight: '900', fontSize: '0.85rem',
+                                        textTransform: 'uppercase', letterSpacing: '1px',
+                                        opacity: (!isQueueFull && hasEnoughMaterials) ? 1 : 0.6,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '4px'
+                                    }}>
+                                    {!isPremium && <Lock size={14} />}
+                                    {isQueueFull ? 'QUEUE FULL' : '+ QUEUE'}
+                                </button>
+                            </>
                         )}
                     </div>
                 </div>

@@ -21,8 +21,9 @@ import SettingsModal from './SettingsModal';
 import TradePanel from './TradePanel';
 import { GuestRestrictionModal } from './AppOverlays';
 import GuildXPInfoModal from './guild/GuildXPInfoModal';
+import ActionQueueModal from './ActionQueueModal';
 
-export const AppModals = ({ 
+const AppModals = ({ 
     displayedGameState, 
     handleNavigate, 
     handleSearchInMarket, 
@@ -94,10 +95,19 @@ export const AppModals = ({
                     onStart={startActivity}
                     onNavigate={handleNavigate}
                     onSearchInMarket={handleSearchInMarket}
+                    onOpenShop={() => setModal('orbShop', true)}
                 />
             )}
 
             <ItemInfoModal item={infoItem} onClose={() => setInfoItem(null)} />
+            
+            <ActionQueueModal
+                isOpen={modals.queue}
+                onClose={() => setModal('queue', false)}
+                item={modalItem}
+                type={modalType}
+                gameState={displayedGameState}
+            />
             
             {marketSellItem && (
                 <MarketListingModal
@@ -336,3 +346,6 @@ export const AppModals = ({
         </>
     );
 };
+
+export { AppModals };
+export default AppModals;

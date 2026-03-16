@@ -98,6 +98,24 @@ export const useAppStore = create((set, get) => ({
             }
         });
 
+        newSocket.on('queue_updated', (result) => {
+            if (result.success && result.queue) {
+                console.log('[SOCKET] queue_updated received:', result.queue);
+                set((state) => {
+                    if (!state.gameState) return state;
+                    return {
+                        gameState: {
+                            ...state.gameState,
+                            state: {
+                                ...state.gameState.state,
+                                actionQueue: result.queue
+                            }
+                        }
+                    };
+                });
+            }
+        });
+        
         newSocket.on('name_availability_result', (result) => {
             set({ nameAvailability: result });
         });
@@ -161,6 +179,7 @@ export const useAppStore = create((set, get) => ({
                 if (status.state.lastFoodAt !== undefined) merged.state.lastFoodAt = status.state.lastFoodAt;
                 if (status.state.combat !== undefined) merged.state.combat = status.state.combat;
                 if (status.state.dungeon !== undefined) merged.state.dungeon = status.state.dungeon;
+                if (status.state.actionQueue !== undefined) merged.state.actionQueue = status.state.actionQueue;
                 if (status.state.notifications) merged.state.notifications = status.state.notifications;
 
                 if (status.state.equipment?.food) {
@@ -342,10 +361,16 @@ export const useAppStore = create((set, get) => ({
         rename: false,
         guildProfile: false,
         trade: false,
+        queue: false,
     },
     setModal: (modal, isOpen) => set((state) => ({
         modals: { ...state.modals, [modal]: isOpen }
     })),
+    setQueueModal: (item, type) => set({ 
+        modalItem: item, 
+        modalType: type, 
+        modals: { ...get().modals, queue: !!item } 
+    }),
     setConfirmModal: (confirmModal) => set({ confirmModal }),
 
     // --- NOTIFICATIONS ---
@@ -573,6 +598,28 @@ export const useAppStore = create((set, get) => ({
       }
       if (socket) socket.emit('start_activity', { actionType: type, itemId, quantity });
       setModalItem(null);
+    },
+    enqueueActivity: (type, itemId, quantity = 1) => {
+        const { socket, isPreviewActive, onPreviewActionBlocked, setModalItem } = get();
+        if (isPreviewActive) {
+            onPreviewActionBlocked();
+            return;
+        }
+        if (socket) socket.emit('enqueue_activity', { actionType: type, itemId, quantity });
+        setModalItem(null);
+    },
+    removeFromQueue: (index) => {
+        const { socket } = get();
+        if (socket) socket.emit('remove_from_queue', { index });
+    },
+    clearQueue: () => {
+        const { socket } = get();
+        if (socket) socket.emit('clear_queue');
+    },
+    reorderQueue: (index, direction) => {
+        console.log(`[SOCKET] Emitting reorder_queue: index=${index}, direction=${direction}`);
+        const { socket } = get();
+        if (socket) socket.emit('reorder_queue', { index, direction });
     },
     claimReward: () => {
       const { socket } = get();

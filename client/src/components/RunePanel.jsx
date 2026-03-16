@@ -55,7 +55,6 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
     const [sellModal, setSellModal] = useState(null);
     const [batchModal, setBatchModal] = useState(null);
     const [resultsModal, setResultsModal] = useState(null);
-    const [showPremiumModal, setShowPremiumModal] = useState(false);
     const [autoMergeConfirm, setAutoMergeConfirm] = useState(null);
 
     const inventory = gameState?.state?.inventory || {};
@@ -1021,12 +1020,6 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                         {activeTab === 'runes' && (
                             <button
                                 onClick={() => {
-                                    const isMember = gameState?.state?.membership?.active && new Date(gameState.state.membership.expiresAt) > new Date();
-                                    if (!isMember) {
-                                        setShowPremiumModal(true);
-                                        return;
-                                    }
-
                                     if (isPreviewActive) return onPreviewActionBlocked();
 
                                     if (isCrafting || !socket) return;
@@ -1049,12 +1042,12 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                 style={{
                                     marginTop: '8px',
                                     padding: '10px 30px',
-                                    background: (gameState?.state?.membership?.active && new Date(gameState.state.membership.expiresAt) > new Date()) ? 'rgba(174, 0, 255, 0.05)' : 'var(--bg-dark)',
-                                    color: (gameState?.state?.membership?.active && new Date(gameState.state.membership.expiresAt) > new Date()) ? '#ae00ff' : 'var(--text-dim)',
-                                    border: (gameState?.state?.membership?.active && new Date(gameState.state.membership.expiresAt) > new Date()) ? '1px solid rgba(174, 0, 255, 0.2)' : '1px solid var(--border)',
+                                    background: 'var(--bg-dark)',
+                                    color: 'var(--accent)',
+                                    border: '1px solid var(--border)',
                                     borderRadius: '8px',
                                     fontWeight: 'bold',
-                                    cursor: (gameState?.state?.membership?.active && new Date(gameState.state.membership.expiresAt) > new Date()) ? (isCrafting ? 'not-allowed' : 'pointer') : 'not-allowed',
+                                    cursor: isCrafting ? 'not-allowed' : 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '8px',
@@ -1064,7 +1057,7 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                     transition: '0.2s'
                                 }}
                             >
-                                {(gameState?.state?.membership?.active && new Date(gameState.state.membership.expiresAt) > new Date()) ? <Sparkles size={18} /> : <Lock size={16} />}
+                                <Sparkles size={18} />
                                 Auto Merge All Runes
                             </button>
                         )}
@@ -1690,67 +1683,6 @@ const RunePanel = ({ gameState, onShowInfo, isMobile, socket, onListOnMarket, on
                                 AWESOME!
                             </button>
                         </motion.div>
-                    </div>,
-                    document.body
-                )
-            }
-            {/* PREMIUM REQUIRED MODAL */}
-            {
-                showPremiumModal && createPortal(
-                    <div style={{
-                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                        background: 'rgba(0,0,0,0.85)', zIndex: 1300,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        backdropFilter: 'blur(5px)'
-                    }} onClick={() => setShowPremiumModal(false)}>
-                        <div style={{
-                            background: 'var(--panel-bg)', border: '1px solid var(--accent)',
-                            borderRadius: '16px', padding: '30px', width: '90%', maxWidth: '360px',
-                            boxShadow: '0 20px 50px rgba(0,0,0,0.6)', position: 'relative',
-                            textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '20px'
-                        }} onClick={e => e.stopPropagation()}>
-
-                            <div style={{
-                                width: '60px', height: '60px', background: 'rgba(255, 215, 0, 0.1)',
-                                borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                margin: '0 auto', border: '1px solid rgba(255, 215, 0, 0.3)'
-                            }}>
-                                <Lock size={30} color="#FFD700" />
-                            </div>
-
-                            <div>
-                                <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--text-bright)', marginBottom: '10px' }}>
-                                    Premium Feature
-                                </div>
-                                <div style={{ fontSize: '0.95rem', color: 'var(--text-dim)', lineHeight: '1.5' }}>
-                                    Auto Merge is exclusive to <span style={{ color: '#FFD700', fontWeight: 'bold' }}>VIP Members</span>.
-                                    <br />
-                                    Active membership is required to use this feature.
-                                </div>
-                            </div>
-
-                            <button
-                                onClick={() => {
-                                    if (onOpenShop) onOpenShop();
-                                    setShowPremiumModal(false);
-                                }}
-                                style={{
-                                    padding: '12px',
-                                    background: 'linear-gradient(135deg, var(--accent) 0%, #2196f3 100%)',
-                                    border: 'none',
-                                    color: '#000',
-                                    borderRadius: '10px',
-                                    fontWeight: '900',
-                                    cursor: 'pointer',
-                                    fontSize: '0.9rem',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '1px',
-                                    boxShadow: '0 4px 15px rgba(33, 150, 243, 0.3)'
-                                }}
-                            >
-                                GO TO ORB SHOP
-                            </button>
-                        </div>
                     </div>,
                     document.body
                 )

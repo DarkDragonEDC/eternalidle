@@ -11,7 +11,7 @@ import { useWindowListeners } from './hooks/useWindowListeners';
 import { useAppHandlers } from './hooks/useAppHandlers';
 
 // Versioning
-const CLIENT_VERSION = '1.6.0';
+const CLIENT_VERSION = '1.6.1';
 
 // Components
 import Auth from './components/Auth';
@@ -29,7 +29,7 @@ import PrivacyPolicy from './components/PrivacyPolicy';
 // New Modular Components
 import { GlobalHeader } from './components/GlobalHeader';
 import { GameContent } from './components/GameContent';
-import { AppModals } from './components/AppModals';
+import AppModals from './components/AppModals';
 import { 
     VersionMismatchOverlay, 
     BannedOverlay, 

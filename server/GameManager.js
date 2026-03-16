@@ -1147,6 +1147,9 @@ export class GameManager {
 
                             char.current_activity = null;
                             char.activity_started_at = null;
+
+                            // CHECK ACTION QUEUE: Start next activity if available
+                            await this.activityManager.checkQueueAndStartNext(char);
                         } else {
                             char.current_activity.actions_remaining = newActionsRemaining;
                         }
@@ -1166,6 +1169,9 @@ export class GameManager {
                         }
                         char.current_activity = null;
                         char.activity_started_at = null;
+                        
+                        // Try next activity if this one failed (e.g. out of resources)
+                        await this.activityManager.checkQueueAndStartNext(char);
                     }
                 }
             }
@@ -1346,6 +1352,7 @@ export class GameManager {
                 silver: char.state.silver,
                 combat: char.state.combat,
                 dungeon: char.state.dungeon,
+                actionQueue: char.state.actionQueue,
                 notifications: char.state.notifications?.length > 0 ? char.state.notifications : undefined,
                 equipment: char.state.equipment?.food ? { food: char.state.equipment.food } : undefined
             },
@@ -2177,10 +2184,7 @@ export class GameManager {
         const char = await this.getCharacter(userId, characterId);
         if (!char) throw new Error("Character not found");
 
-        const isMember = char.state.membership?.active && char.state.membership.expiresAt > Date.now();
-        if (!isMember) {
-            throw new Error("Auto Merge is a Premium feature. Active Membership required.");
-        }
+        // Auto Merge is now free for everyone.
 
         const {
             categoryFilter = 'ALL',

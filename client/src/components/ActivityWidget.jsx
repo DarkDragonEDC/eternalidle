@@ -11,7 +11,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
     const store = useAppStore();
     const { worldBossUpdate: worldBossData, setWorldBossUpdate } = store;
 
-    const [isOpen, setIsOpen] = useState(false);
+    const [activeView, setActiveView] = useState(null); // null, 'activity', 'queue'
     const [elapsed, setElapsed] = useState(0);
     const [combatElapsed, setCombatElapsed] = useState(0);
     const [dungeonElapsed, setDungeonElapsed] = useState(0);
@@ -198,155 +198,214 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
 
     const stopCombat = () => {
         if (socket) socket.emit('stop_combat');
-        setIsOpen(false);
+        setActiveView(null);
     };
 
     return (
         <>
-            {/* Botão Flutuante Pulsante */}
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                style={{
-                    position: 'fixed',
-                    bottom: isMobile ? '80px' : '30px',
-                    right: isMobile ? '20px' : '30px',
-                    width: '64px',
-                    height: '64px',
-                    borderRadius: '16px',
-                    background: (combat || (dungeonState?.active) || worldBossData) ? 'var(--panel-bg)' : 'var(--panel-bg)',
-                    opacity: 0.9,
-                    border: (combat || (dungeonState?.active) || worldBossData) ? '1px solid var(--accent)' : '1px solid var(--border-active)',
-                    color: 'var(--text-main)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: 'var(--panel-shadow)',
-                    zIndex: 1000,
-                    transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-                    backdropFilter: 'blur(10px)',
-                    transform: isOpen ? 'scale(0.9)' : 'scale(1)',
-                    overflow: 'hidden'
-                }}
-            >
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                    {/* ICON LOGIC: Split View or Single View */}
-                    {(() => {
-                        const isCombat = combat && (combat.mobId || combat.active);
-                        const isActivity = !!activity;
-                        const isDungeon = dungeonState?.active;
-                        const isMultitasking = (isCombat || isDungeon) && isActivity;
- 
-                        // Helper to render Mob Icon
-                        const renderMobIcon = () => {
-                            if (isDungeon && !isCombat) {
-                                return <Skull size={20} color="#ae00ff" />;
+            <div style={{
+                position: 'fixed',
+                bottom: isMobile ? '80px' : '30px',
+                right: isMobile ? '20px' : '30px',
+                display: 'flex',
+                gap: '12px',
+                alignItems: 'flex-end',
+                flexDirection: 'row-reverse',
+                zIndex: 1000,
+                pointerEvents: 'none'
+            }}>
+                {/* Main Activity Button */}
+                <button
+                    onClick={() => setActiveView(activeView === 'activity' ? null : 'activity')}
+                    style={{
+                        width: '64px',
+                        height: '64px',
+                        borderRadius: '16px',
+                        background: 'var(--panel-bg)',
+                        opacity: 0.9,
+                        border: (combat || (dungeonState?.active) || worldBossData) ? '1px solid var(--accent)' : '1px solid var(--border-active)',
+                        color: 'var(--text-main)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: 'var(--panel-shadow)',
+                        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                        backdropFilter: 'blur(10px)',
+                        transform: activeView === 'activity' ? 'scale(0.9)' : 'scale(1)',
+                        overflow: 'hidden',
+                        pointerEvents: 'auto'
+                    }}
+                >
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+                        {/* ICON LOGIC: Split View or Single View */}
+                        {(() => {
+                            const isCombat = combat && (combat.mobId || combat.active);
+                            const isActivity = !!activity;
+                            const isDungeon = dungeonState?.active;
+                            const isMultitasking = (isCombat || isDungeon) && isActivity;
+    
+                            // Helper to render Mob Icon
+                            const renderMobIcon = () => {
+                                if (isDungeon && !isCombat) {
+                                    return <Skull size={20} color="#ae00ff" />;
+                                }
+                                const tier = Number(combat.tier) || 1;
+                                const mobId = combat.mobId;
+                                const mob = MONSTERS[tier]?.find(m => m.id === mobId);
+                                if (mob && mob.image) {
+                                    return <img src={`/monsters/${mob.image}?v=2`} alt={mob.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />;
+                                }
+                                return <Skull size={20} color="#ff4444" />;
+                            };
+    
+                            // Helper to render Activity Icon
+                            const renderActivityIcon = () => {
+                                const item = resolveItem(activity?.item_id);
+                                if (item?.icon) return <img src={item.icon} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="" />;
+                                getActivityIcon();
+                            };
+    
+                            if (isMultitasking) {
+                                return (
+                                    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+    
+                                        {/* Top-Left Half: Combat */}
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '2px',
+                                            left: '2px',
+                                            width: '30px',
+                                            height: '30px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            zIndex: 2
+                                        }}>
+                                            {renderMobIcon()}
+                                        </div>
+                                        {/* Bottom-Right Half: Activity */}
+                                        <div style={{
+                                            position: 'absolute',
+                                            bottom: '2px',
+                                            right: '2px',
+                                            width: '30px',
+                                            height: '30px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            zIndex: 2
+                                        }}>
+                                            {renderActivityIcon()}
+                                        </div>
+                                    </div>
+                                );
                             }
-                            const tier = Number(combat.tier) || 1;
-                            const mobId = combat.mobId;
-                            const mob = MONSTERS[tier]?.find(m => m.id === mobId);
-                            if (mob && mob.image) {
-                                return <img src={`/monsters/${mob.image}?v=2`} alt={mob.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />;
-                            }
-                            return <Skull size={20} color="#ff4444" />;
-                        };
-
-                        // Helper to render Activity Icon
-                        const renderActivityIcon = () => {
-                            const item = resolveItem(activity?.item_id);
-                            if (item?.icon) return <img src={item.icon} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="" />;
-                            return getActivityIcon();
-                        };
-
-                        if (isMultitasking) {
-                            return (
-                                <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-
-                                    {/* Top-Left Half: Combat */}
-                                    <div style={{
-                                        position: 'absolute',
-                                        top: '2px',
-                                        left: '2px',
-                                        width: '30px',
-                                        height: '30px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        zIndex: 2
-                                    }}>
+    
+                            // Single Views
+                            if (isCombat) {
+                                return (
+                                    <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         {renderMobIcon()}
                                     </div>
-                                    {/* Bottom-Right Half: Activity */}
-                                    <div style={{
-                                        position: 'absolute',
-                                        bottom: '2px',
-                                        right: '2px',
-                                        width: '30px',
-                                        height: '30px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        zIndex: 2
-                                    }}>
+                                );
+                            }
+    
+                            if (isDungeon) {
+                                return <Skull size={24} color="#ae00ff" />;
+                            }
+    
+                            if (isActivity) {
+                                return (
+                                    <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         {renderActivityIcon()}
                                     </div>
-                                </div>
-                            );
-                        }
+                                );
+                            }
+    
+                            // Resting
+                            if (gameState?.state?.resting) {
+                                return <Flame size={24} color="#ff9329" />;
+                            }
+    
+                            return null;
+                        })()}
+    
+                        {/* Efeito de Pulso (APENAS O ANEL) */}
+                        <motion.div
+                            animate={{ opacity: [0.5, 1, 0.5], scale: [1, 1.1, 1] }}
+                            transition={{ repeat: Infinity, duration: (combat || (dungeonState?.active) || worldBossData) ? 0.8 : 2 }}
+                            style={{
+                                position: 'absolute',
+                                width: '100%',
+                                height: '100%',
+                                borderRadius: '50%',
+                                boxShadow: (combat || (dungeonState?.active) || worldBossData) ? '0 0 20px rgba(255, 68, 68, 0.4)' : '0 0 15px var(--accent-soft)',
+                                pointerEvents: 'none'
+                            }}
+                        />
+    
+                    </div>
+                </button>
 
-                        // Single Views
-                        if (isCombat) {
-                            return (
-                                <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    {renderMobIcon()}
-                                </div>
-                            );
-                        }
-
-                        if (isDungeon) {
-                            return <Skull size={24} color="#ae00ff" />;
-                        }
-
-                        if (isActivity) {
-                            return (
-                                <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    {renderActivityIcon()}
-                                </div>
-                            );
-                        }
-
-                        // Resting
-                        if (gameState?.state?.resting) {
-                            return <Flame size={24} color="#ff9329" />;
-                        }
-
-                        return null;
-                    })()}
-
-                    {/* Efeito de Pulso (APENAS O ANEL) */}
-                    <motion.div
-                        animate={{ opacity: [0.5, 1, 0.5], scale: [1, 1.1, 1] }}
-                        transition={{ repeat: Infinity, duration: (combat || (dungeonState?.active) || worldBossData) ? 0.8 : 2 }}
+                {/* --- QUEUE BUTTON --- */}
+                {gameState?.state?.actionQueue && gameState.state.actionQueue.length > 0 && (
+                    <button
+                        onClick={() => setActiveView(activeView === 'queue' ? null : 'queue')}
                         style={{
-                            position: 'absolute',
-                            width: '100%',
-                            height: '100%',
-                            borderRadius: '50%',
-                            boxShadow: (combat || (dungeonState?.active) || worldBossData) ? '0 0 20px rgba(255, 68, 68, 0.4)' : '0 0 15px var(--accent-soft)',
-                            pointerEvents: 'none'
+                            width: '48px',
+                            height: '48px',
+                            borderRadius: '12px',
+                            background: 'var(--panel-bg)',
+                            opacity: 0.9,
+                            border: '1px solid var(--accent)',
+                            color: 'var(--text-main)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: 'var(--panel-shadow)',
+                            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                            backdropFilter: 'blur(10px)',
+                            transform: activeView === 'queue' ? 'scale(0.9)' : 'scale(1)',
+                            pointerEvents: 'auto'
                         }}
-                    />
-
-                </div>
-            </button>
+                    >
+                        <div style={{ position: 'relative' }}>
+                            <Menu size={20} color="var(--accent)" />
+                            {/* Counter Badge */}
+                            <div style={{
+                                position: 'absolute',
+                                top: '-8px',
+                                right: '-8px',
+                                background: '#f87171',
+                                color: 'white',
+                                fontSize: '0.6rem',
+                                fontWeight: 'bold',
+                                minWidth: '16px',
+                                height: '16px',
+                                borderRadius: '8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                padding: '0 4px',
+                                border: '2px solid var(--panel-bg)',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                            }}>
+                                {gameState.state.actionQueue.length}
+                            </div>
+                        </div>
+                    </button>
+                )}
+            </div>
 
             {/* Container dos Cards */}
             <AnimatePresence>
-                {isOpen && (
+                {activeView && (
                     <>
                         <div
                             style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 999 }}
-                            onClick={() => setIsOpen(false)}
+                            onClick={() => setActiveView(null)}
                         />
                         <div style={{
                             position: 'fixed',
@@ -363,7 +422,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                         }}>
 
                             {/* --- ACTIVITY CARD (If any) --- */}
-                            {activity && (
+                            {activity && activeView === 'activity' && (
                                 <motion.div
                                     initial={{ opacity: 0, x: 20, scale: 0.95 }}
                                     animate={{ opacity: 1, x: 0, scale: 1 }}
@@ -481,7 +540,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             if (onStop) onStop(); // Use onStop prop from App.jsx
-                                            setIsOpen(false);
+                                            setActiveView(null);
                                         }}
                                         style={{
                                             width: '100%',
@@ -507,8 +566,94 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                 </motion.div>
                             )}
 
+                            {/* --- ACTION QUEUE CARD --- */}
+                            {gameState?.state?.actionQueue && gameState.state.actionQueue.length > 0 && activeView === 'queue' && (
+                                <motion.div
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    style={{
+                                        marginTop: '8px',
+                                        width: '280px',
+                                        maxWidth: 'calc(100vw - 60px)',
+                                        background: 'var(--panel-bg)',
+                                        backdropFilter: 'blur(20px)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '12px',
+                                        padding: '10px',
+                                        boxShadow: 'var(--panel-shadow)',
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <Menu size={12} color="var(--accent)" />
+                                            <span style={{ fontSize: '0.65rem', fontWeight: '900', color: 'var(--text-dim)', letterSpacing: '0.5px' }}>NEXT IN QUEUE ({gameState.state.actionQueue.length})</span>
+                                        </div>
+                                        <button 
+                                            onClick={(e) => { e.stopPropagation(); useAppStore.getState().clearQueue(); }}
+                                            style={{ background: 'none', border: 'none', color: '#ff4444', fontSize: '0.6rem', fontWeight: 'bold', cursor: 'pointer', padding: '2px 5px' }}
+                                        >
+                                            CLEAR ALL
+                                        </button>
+                                    </div>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                        {gameState.state.actionQueue.map((item, idx) => {
+                                            const resolved = resolveItem(item.item_id);
+                                            return (
+                                                <div key={idx} style={{ 
+                                                    display: 'flex', alignItems: 'center', gap: '8px', 
+                                                    background: 'var(--slot-bg)', padding: '6px', borderRadius: '8px',
+                                                    border: '1px solid var(--border)'
+                                                }}>
+                                                    <div style={{ width: '24px', height: '24px', flexShrink: 0 }}>
+                                                        {resolved?.icon ? (
+                                                            <img src={resolved.icon} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="" />
+                                                        ) : (
+                                                            <Package size={14} color="var(--text-dim)" />
+                                                        )}
+                                                    </div>
+                                                    <div style={{ flex: 1, overflow: 'hidden' }}>
+                                                        <div style={{ fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                            {resolved ? `T${resolved.tier} ${resolved.name}` : formatItemId(item.item_id)}
+                                                        </div>
+                                                        <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)' }}>
+                                                            {item.quantity} actions
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ display: 'flex', gap: '4px' }}>
+                                                        {idx > 0 && (
+                                                            <button 
+                                                                onClick={(e) => { e.stopPropagation(); useAppStore.getState().reorderQueue(idx, 'up'); }}
+                                                                style={{ background: 'var(--accent-soft)', border: '1px solid var(--border)', borderRadius: '4px', color: 'var(--accent)', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                                                            >
+                                                                <ChevronUp size={12} />
+                                                            </button>
+                                                        )}
+                                                        {idx < gameState.state.actionQueue.length - 1 && (
+                                                            <button 
+                                                                onClick={(e) => { e.stopPropagation(); useAppStore.getState().reorderQueue(idx, 'down'); }}
+                                                                style={{ background: 'var(--accent-soft)', border: '1px solid var(--border)', borderRadius: '4px', color: 'var(--accent)', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                                                            >
+                                                                <ChevronDown size={12} />
+                                                            </button>
+                                                        )}
+                                                        <button 
+                                                            onClick={(e) => { e.stopPropagation(); useAppStore.getState().removeFromQueue(idx); }}
+                                                            style={{ background: 'rgba(255,68,68,0.1)', border: 'none', borderRadius: '4px', color: '#ff4444', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                                                        >
+                                                            <X size={10} strokeWidth={3} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </motion.div>
+                            )}
+
                             {/* --- REST CARD (If resting) --- */}
-                            {gameState?.state?.resting && (() => {
+                            {gameState?.state?.resting && activeView === 'activity' && (() => {
                                 const resting = gameState.state.resting;
                                 const now = Date.now();
                                 const total = resting.endsAt - resting.startedAt;
@@ -521,7 +666,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                         initial={{ opacity: 0, x: 20, scale: 0.95 }}
                                         animate={{ opacity: 1, x: 0, scale: 1 }}
                                         exit={{ opacity: 0, x: 20, scale: 0.95 }}
-                                        onClick={() => { if (onNavigate) { onNavigate('rest_camp'); setIsOpen(false); } }}
+                                        onClick={() => { if (onNavigate) { onNavigate('rest_camp'); setActiveView(null); } }}
                                         style={{
                                             width: '280px',
                                             maxWidth: 'calc(100vw - 60px)',
@@ -611,7 +756,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                             })()}
 
                             {/* --- COMBAT CARD (If any) --- */}
-                            {combat && (
+                            {combat && activeView === 'activity' && (
                                 <motion.div
                                     initial={{ opacity: 0, x: 20, scale: 0.95 }}
                                     animate={{ opacity: 1, x: 0, scale: 1 }}
@@ -619,7 +764,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                     onClick={() => {
                                         if (onNavigate) {
                                             onNavigate('combat');
-                                            setIsOpen(false);
+                                            setActiveView(null);
                                         }
                                     }}
                                     style={{
@@ -837,7 +982,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                             )}
 
                             {/* --- DUNGEON CARD (If any) --- */}
-                            {(dungeonState && dungeonState.active) && (
+                            {(dungeonState && dungeonState.active) && activeView === 'activity' && (
                                 <motion.div
                                     initial={{ opacity: 0, x: 20, scale: 0.95 }}
                                     animate={{ opacity: 1, x: 0, scale: 1 }}
@@ -845,7 +990,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                     onClick={() => {
                                         if (onNavigate) {
                                             onNavigate('dungeon');
-                                            setIsOpen(false);
+                                            setActiveView(null);
                                         }
                                     }}
                                     style={{
@@ -968,7 +1113,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                             )}
 
                             {/* --- WORLD BOSS CARD (If any) --- */}
-                            {worldBossData && (
+                            {worldBossData && activeView === 'activity' && (
                                 <motion.div
                                     initial={{ opacity: 0, x: 20, scale: 0.95 }}
                                     animate={{ opacity: 1, x: 0, scale: 1 }}
@@ -976,7 +1121,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                     onClick={() => {
                                         if (onNavigate) {
                                             onNavigate('world_boss');
-                                            setIsOpen(false);
+                                            setActiveView(null);
                                         }
                                     }}
                                     style={{
@@ -1039,7 +1184,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             if (socket) socket.emit('stop_world_boss');
-                                            setIsOpen(false);
+                                            setActiveView(null);
                                         }}
                                         style={{
                                             width: '100%',
@@ -1064,7 +1209,8 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                 </motion.div>
                             )}
                             {/* --- MULTITASK INFO BOX --- */}
-                            <motion.div
+                            {activeView === 'activity' && (
+                                <motion.div
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: 20 }}
@@ -1105,6 +1251,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                     You can perform a <b>gathering</b> and a <b>combat</b> action at the same time.
                                 </div>
                             </motion.div>
+                        )}
                         </div>
 
                     </>
@@ -1149,7 +1296,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                 onClick={() => {
                                     if (socket) socket.emit('stop_dungeon_queue');
                                     setShowDungeonAbandonConfirm(false);
-                                    setIsOpen(false);
+                                    setActiveView(null);
                                 }}
                                 style={{
                                     padding: '12px', borderRadius: '12px', background: 'rgba(174, 0, 255, 0.05)', border: '1px solid rgba(174, 0, 255, 0.3)',
@@ -1163,7 +1310,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                 onClick={() => {
                                     if (socket) socket.emit('stop_dungeon');
                                     setShowDungeonAbandonConfirm(false);
-                                    setIsOpen(false);
+                                    setActiveView(null);
                                 }}
                                 style={{
                                     padding: '12px', borderRadius: '12px', background: 'rgba(255, 68, 68, 0.05)', border: '1px solid rgba(255, 68, 68, 0.3)',
