@@ -150,10 +150,9 @@ export const useGameSync = () => {
     // Auto-connect
     useEffect(() => {
         if (session?.access_token && !socket) {
-            if (typeof setIsConnecting === 'function') setIsConnecting(true);
             connectSocket(session.access_token, selectedCharacter);
         }
-    }, [session, socket, selectedCharacter, setIsConnecting, connectSocket]);
+    }, [session, socket, selectedCharacter, connectSocket]);
 
     useEffect(() => {
         const activeTheme = previewThemeId || theme;

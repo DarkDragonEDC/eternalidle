@@ -198,6 +198,27 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
 
     useEffect(() => {
         if (!socket) return;
+        
+        const handleActionSuccess = () => {
+            socket.emit('get_market_listings', {
+                category: selectedCategory,
+                tier: selectedTier,
+                quality: selectedQuality,
+                itemClass: selectedClass,
+                search: searchQuery,
+                sort: selectedSort,
+                page: currentPage,
+                limit: 10,
+                exclude_seller_id: store.user?.id || undefined
+            });
+        };
+
+        socket.on('market_action_success', handleActionSuccess);
+        return () => socket.off('market_action_success', handleActionSuccess);
+    }, [socket, selectedCategory, selectedTier, selectedQuality, selectedClass, searchQuery, selectedSort, currentPage, store.user?.id]);
+
+    useEffect(() => {
+        if (!socket) return;
 
         if (activeTab === 'HISTORY') {
             setIsLoadingHistory(true);

@@ -149,6 +149,7 @@ const MarketBrowseTab = ({
                 {[
                     { id: 'ALL', label: 'All Items', icon: <ShoppingBag size={14} /> },
                     { id: 'EQUIPMENT', label: 'Equipment', icon: <Shield size={14} /> },
+                    { id: 'TOOL', label: 'Tools', icon: <Hammer size={14} /> },
                     { id: 'RESOURCE', label: 'Resources', icon: <Package size={14} /> },
                     { id: 'REFINED', label: 'Refined', icon: <Zap size={14} /> },
                     { id: 'CONSUMABLE', label: 'Consumables', icon: <Apple size={14} /> },

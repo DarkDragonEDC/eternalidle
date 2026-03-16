@@ -71,7 +71,6 @@ export const useSocketEvents = () => {
         socket.on('market_action_success', (result) => {
             console.log('[MARKET-SYNC] market_action_success:', result);
             store.setMarketNotification({ type: 'success', message: result.message || 'Action completed successfully!' });
-            socket.emit('get_market_listings');
 
             // Refetch personal listings to ensure "My Listings" tab stays in sync
             const charId = store.selectedCharacter;

@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAppStore } from '../store/useAppStore';
-import { Flame, Heart, Coins, Shield, AlertTriangle, X } from 'lucide-react';
+import { Flame, Heart, Coins, Shield, AlertTriangle, X, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatNumber } from '@utils/format';
+import { SKILL_DESCRIPTIONS } from '@shared/skill_descriptions';
 
 const RestPanel = ({ gameState, isMobile, socket }) => {
     const [selectedPercent, setSelectedPercent] = useState(null);
+    const [showInfo, setShowInfo] = useState(false);
     const [healResult, setHealResult] = useState(null);
     const [now, setNow] = useState(Date.now());
 
@@ -115,14 +117,73 @@ const RestPanel = ({ gameState, isMobile, socket }) => {
                     <Flame size={isMobile ? 16 : 22} color="#ff9329" />
                 </div>
                 <div>
-                    <h2 style={{ fontSize: isMobile ? '0.85rem' : '1.1rem', fontWeight: '900', color: '#ff9329', margin: 0, letterSpacing: '0.5px' }}>
-                        RESTING CAMP
-                    </h2>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <h2 style={{ fontSize: isMobile ? '0.85rem' : '1.1rem', fontWeight: '900', color: '#ff9329', margin: 0, letterSpacing: '0.5px' }}>
+                            RESTING CAMP
+                        </h2>
+                        <button 
+                            onClick={() => setShowInfo(!showInfo)}
+                            style={{
+                                background: 'rgba(255, 147, 41, 0.1)',
+                                border: '1px solid rgba(255, 147, 41, 0.2)',
+                                borderRadius: '50%',
+                                width: '20px',
+                                height: '20px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                color: showInfo ? '#ff9329' : 'var(--text-dim)',
+                                transition: '0.2s'
+                            }}
+                        >
+                            <Info size={12} />
+                        </button>
+                    </div>
                     <p style={{ fontSize: isMobile ? '0.6rem' : '0.7rem', color: 'var(--text-dim)', margin: 0 }}>
                         Rest by the fire to heal your wounds
                     </p>
                 </div>
             </div>
+
+            <AnimatePresence>
+                {showInfo && SKILL_DESCRIPTIONS.CAMP && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        style={{ overflow: 'hidden' }}
+                    >
+                        <div style={{ 
+                            padding: '12px', 
+                            background: 'rgba(0,0,0,0.3)', 
+                            borderRadius: '10px', 
+                            border: '1px solid var(--border)',
+                            position: 'relative'
+                        }}>
+                            <ul style={{ margin: 0, paddingLeft: '18px', color: 'var(--text-dim)', fontSize: '0.75rem', lineHeight: '1.5' }}>
+                                {SKILL_DESCRIPTIONS.CAMP.map((line, i) => (
+                                    <li key={i}>{line}</li>
+                                ))}
+                            </ul>
+                            <button 
+                                onClick={() => setShowInfo(false)}
+                                style={{
+                                    position: 'absolute',
+                                    top: '8px',
+                                    right: '8px',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    color: 'var(--text-dim)',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <X size={14} />
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Blocked Warning */}
             {isBlocked && (
