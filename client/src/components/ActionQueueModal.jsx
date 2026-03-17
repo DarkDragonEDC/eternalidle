@@ -56,12 +56,19 @@ const ActionQueueModal = ({ isOpen, onClose, item, type, gameState }) => {
     }
     if (gameState?.state?.actionQueue) {
         gameState.state.actionQueue.forEach(q => {
+            // Priority 1: Use time_per_action sent by server
+            // Priority 2: Recalculate based on current efficiency
             const qItem = resolveItem(q.item_id);
-            // Ideally we'd use the finalTime for each item, but server handles specific item times.
-            // For simplicity in UI calculation, let's assume current stats for all.
-            // Actually, server sends time_per_action in the activity object for the current one.
-            // For queued items, we might need to approximate or just use their base times.
-            currentBusySeconds += q.quantity * (qItem?.time || 3); 
+            let timeToUse = q.time_per_action;
+            
+            if (!timeToUse && qItem) {
+                const qEffKey = getEfficiencyKey(q.item_id, q.type);
+                const qEffValue = parseFloat(gameState?.calculatedStats?.efficiency?.[qEffKey] || 0);
+                const qBaseTime = qItem.time || (q.type === 'GATHERING' ? 3.0 : q.type === 'REFINING' ? 1.5 : 4.0);
+                timeToUse = Math.max(0.5, qBaseTime * Math.max(0.1, 1 - (qEffValue / 100)));
+            }
+            
+            currentBusySeconds += q.quantity * (timeToUse || 3); 
         });
     }
 
@@ -212,7 +219,7 @@ const ActionQueueModal = ({ isOpen, onClose, item, type, gameState }) => {
                     {(() => {
                         const queueLength = gameState?.state?.actionQueue?.length || 0;
                         const extraSlots = gameState?.state?.upgrades?.extraQueueSlots || 0;
-                        const maxQueueSlots = 1 + extraSlots;
+                        const maxQueueSlots = 2 + extraSlots;
                         const isQueueFull = queueLength >= maxQueueSlots;
                         return (
                             <button 

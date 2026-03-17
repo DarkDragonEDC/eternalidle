@@ -953,7 +953,7 @@ const ActivityWidget = ({ gameState, onStop, socket, onNavigate, isMobile, serve
                                     </div>
 
                                     <button
-                                        onClick={stopCombat}
+                                        onClick={(e) => { e.stopPropagation(); stopCombat(); }}
                                         style={{
                                             width: '100%',
                                             background: 'linear-gradient(135deg, #ff4444 0%, #cc0000 100%)',

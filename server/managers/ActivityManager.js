@@ -16,7 +16,7 @@ export class ActivityManager {
         this.gameManager = gameManager;
     }
 
-    async startActivity(userId, characterId, actionType, itemId, quantity = 1) {
+    async startActivity(userId, characterId, actionType, itemId, quantity = 1, startTime = null) {
         console.log(`[ACTIVITY] Start Request: User=${userId}, Type=${actionType}, Item=${itemId}`);
         const type = actionType.toUpperCase();
         const char = await this.gameManager.getCharacter(userId, characterId);
@@ -64,17 +64,18 @@ export class ActivityManager {
         char.current_activity = {
             type: type,
             item_id: itemId,
+            skillKey: skillKey,
             actions_remaining: quantity,
             initial_quantity: quantity,
             time_per_action: timePerAction,
-            next_action_at: Date.now() + (timePerAction * 1000),
+            next_action_at: (startTime ? new Date(startTime).getTime() : Date.now()) + (timePerAction * 1000),
             req: item.req || null,
             sessionItems: {},
             sessionXp: 0,
             duplicationCount: 0,
             autoRefineCount: 0
         };
-        char.activity_started_at = new Date().toISOString();
+        char.activity_started_at = startTime ? new Date(startTime).toISOString() : new Date().toISOString();
         char.last_saved = new Date().toISOString();
 
         if (this.gameManager.pushManager) {
@@ -106,6 +107,17 @@ export class ActivityManager {
 
         if (!char.state.actionQueue) char.state.actionQueue = [];
 
+        // Validate Materials for Refining/Crafting
+        if (item.req) {
+            const totalReq = {};
+            Object.entries(item.req).forEach(([ingId, amt]) => {
+                totalReq[ingId] = amt * quantity;
+            });
+            if (!this.gameManager.inventoryManager.hasItems(char, totalReq)) {
+                throw new Error(`Insufficient materials to queue ${quantity}x ${item.name || itemId}`);
+            }
+        }
+
         // If nothing is running, start immediately
         const isFarming = char.current_activity && Object.keys(char.current_activity).length > 0;
         if (!isFarming) {
@@ -114,7 +126,7 @@ export class ActivityManager {
 
         // Limit check
         const baseSlots = 2;
-        const upgrades = char.state.upgrades?.queueSlots || char.state.upgrades?.extraQueueSlots || 0;
+        const upgrades = char.state.upgrades?.extraQueueSlots || 0;
         const maxSlots = baseSlots + upgrades;
 
         if (char.state.actionQueue.length >= maxSlots) {
@@ -146,6 +158,7 @@ export class ActivityManager {
         char.state.actionQueue.push({
             type,
             item_id: itemId,
+            skillKey,
             quantity,
             time_per_action: timePerAction
         });
@@ -158,7 +171,7 @@ export class ActivityManager {
         return { success: true, queued: true, queueLength: char.state.actionQueue.length };
     }
 
-    async stopActivity(userId, characterId, isQueueTransition = false) {
+    async stopActivity(userId, characterId, isQueueTransition = false, startTime = null) {
         const char = await this.gameManager.getCharacter(userId, characterId);
         if (!char) return { success: false };
 
@@ -209,18 +222,18 @@ export class ActivityManager {
             await this.finalizeQueueSummary(char);
         } else {
             // Check Queue for auto-start
-            await this.checkQueueAndStartNext(char);
+            await this.checkQueueAndStartNext(char, startTime);
         }
 
         await this.gameManager.saveState(char.id, char.state);
         return { success: true, message: "Activity stopped" };
     }
 
-    async checkQueueAndStartNext(char) {
+    async checkQueueAndStartNext(char, startTime = null) {
         if (char.state.actionQueue && char.state.actionQueue.length > 0) {
             const next = char.state.actionQueue.shift();
             try {
-                await this.startActivity(char.user_id, char.id, next.type, next.item_id, next.quantity);
+                await this.startActivity(char.user_id, char.id, next.type, next.item_id, next.quantity, startTime);
                 console.log(`[QUEUE] Auto-started next action for ${char.name}: ${next.item_id}`);
                 
                 if (this.gameManager.notifications) {

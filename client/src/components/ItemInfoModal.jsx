@@ -174,7 +174,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                     {baseStats.hp && <StatRow icon={Heart} label="Health" value={item.stats.hp} valColor="#fb7185" />}
                                     {baseStats.defense && <StatRow icon={Shield} label="Defense" value={item.stats.defense} valColor="#4ade80" />}
                                     {baseStats.critChance && <StatRow icon={Star} label="Crit Chance" value={`${item.stats.critChance.toFixed(2)}%`} valColor="#fbbf24" />}
-                                    {baseStats.attackSpeed && <StatRow icon={Zap} label="Attack Speed" value={(1000 / item.stats.attackSpeed).toFixed(1)} valColor="#90d5ff" />}
+                                    {baseStats.attackSpeed && <StatRow icon={Zap} label="Attack Speed" value={parseFloat((1000 / item.stats.attackSpeed).toFixed(1))} valColor="#90d5ff" />}
                                     {baseStats.speed && <StatRow icon={Zap} label="Speed" value={`${item.stats.speed}%`} valColor="#90d5ff" />}
                                     {(baseStats.warriorProf || baseStats.str) && <StatRow icon={Award} label="War. Prof." value={`+${item.stats.warriorProf || item.stats.str}`} valColor="#ff8888" />}
                                     {(baseStats.hunterProf || baseStats.agi) && <StatRow icon={Award} label="Hun. Prof." value={`+${item.stats.hunterProf || item.stats.agi}`} valColor="#88ff88" />}

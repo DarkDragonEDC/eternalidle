@@ -20,7 +20,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
     if (!item || !isOpen) return null;
     
     const extraSlots = gameState?.state?.upgrades?.extraQueueSlots || 0;
-    const maxQueueSlots = 1 + extraSlots;
+    const maxQueueSlots = 2 + extraSlots;
     const isQueueFull = (gameState?.state?.actionQueue?.length || 0) >= maxQueueSlots;
 
     // --- REFACTORED SHARED LOGIC ---
@@ -67,7 +67,7 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
     const specificBonus = (stats.xpBonus?.[type] || 0);
     const runeBonus = (stats.xpBonus?.[effKey] || 0);
     const totalBonusPc = yieldBonus + specificBonus + runeBonus;
-    const xpPerAction = parseFloat((baseXp * (1 + totalBonusPc / 100)).toFixed(1));
+    const xpPerAction = Math.round(baseXp * (1 + totalBonusPc / 100));
 
     // Limit & Max Logic
     const isPremium = gameState?.state?.isPremium || gameState?.state?.membership?.active;
@@ -250,8 +250,8 @@ const ActivityModal = ({ isOpen, onClose, item, type, gameState, onStart, onNavi
                         <StatRow icon={TrendingUp} label="Efficiency" value={`+${efficiency}%`} valColor="#90d5ff" />
                         {(stats.duplication?.[effKey] > 0) && <StatRow icon={Package} label="Duplication" value={`${stats.duplication[effKey]}%`} valColor="#4ade80" />}
                         {(type === 'GATHERING' && stats.autoRefine?.[effKey] > 0) && <StatRow icon={Zap} label="Auto-Refine" value={`${stats.autoRefine[effKey]}%`} valColor="#fcd34d" />}
-                        <StatRow icon={Star} label="XP Multiplier" value={`+${totalBonusPc.toFixed(1)}%`} valColor="#fbbf24" />
-                        <StatRow icon={Timer} label="Time per action" value={`${finalTime.toFixed(1)}s`} subValue={finalTime < baseTime ? `${baseTime}s` : null} />
+                        <StatRow icon={Star} label="XP Multiplier" value={`+${parseFloat(totalBonusPc.toFixed(1))}%`} valColor="#fbbf24" />
+                        <StatRow icon={Timer} label="Time per action" value={`${parseFloat(finalTime.toFixed(1))}s`} subValue={finalTime < baseTime ? `${baseTime}s` : null} />
                         <StatRow icon={Zap} label="XP per action" value={xpPerAction} subValue={xpPerAction > baseXp ? baseXp : null} valColor="var(--accent)" />
                         {resolvedItem.cost > 0 && <StatRow icon={Target} label="Total Silver" value={totalCost} valColor="#fbbf24" />}
                         <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

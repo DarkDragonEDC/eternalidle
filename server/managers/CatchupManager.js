@@ -52,15 +52,15 @@ export class CatchupManager {
                         const actionsToProcess = Math.min(actionsPossible, data.current_activity.actions_remaining);
 
                         if (actionsToProcess > 0) {
-                            const activityReport = await this.processBatchActions(data, actionsToProcess);
+                            const currentVirtualTime = lastSaved + (finalReport.totalTime * 1000);
+                            const activityReport = await this.processBatchActions(data, actionsToProcess, currentVirtualTime);
                             if (activityReport.processed > 0) {
                                 updated = true;
                                 this._mergeActivityReport(data, activityReport, finalReport);
 
                                 // If batch processing replaced the activity with the next one from queue, 
-                                // the loop will continue naturally. 
-                                // If it returned because it finished and the queue was empty, 
-                                // char.current_activity will be null and the loop ends.
+                                // it will have its own time_per_action and actions_remaining.
+                                // The loop will continue.
                             } else {
                                 break; // No progress made
                             }
@@ -184,7 +184,7 @@ export class CatchupManager {
         }
     }
 
-    async processBatchActions(char, quantity) {
+    async processBatchActions(char, quantity, virtualStartTimeMs) {
         const { type } = char.current_activity;
         const timePerAction = char.current_activity.time_per_action || 3;
         const item = resolveItem(char.current_activity.item_id);
@@ -213,9 +213,9 @@ export class CatchupManager {
                 const currentBatchSize = Math.min(50, quantity - i);
                 
                 // Verificação de segurança: Espaço no inventário e Level Up
-                const stats = this.gm.inventoryManager.calculateStats(char);
-                const skillLevel = char.state.skills[char.state.current_activity?.skillKey || 'GATHERING']?.level || 1;
-                const currentXP = char.state.skills[char.state.current_activity?.skillKey || 'GATHERING']?.xp || 0;
+                const skillKey = char.current_activity.skillKey || 'GATHERING';
+                const currentXP = char.state.skills[skillKey]?.xp || 0;
+                const skillLevel = char.state.skills[skillKey]?.level || 1;
                 const nextLevelXP = calculateNextLevelXP(skillLevel);
                 const xpRemaining = nextLevelXP - currentXP;
                 
@@ -228,7 +228,6 @@ export class CatchupManager {
                     
                     // --- EXECUÇÃO EM LOTE ---
                     const stats = this.gm.inventoryManager.calculateStats(char);
-                    const skillKey = char.current_activity.skillKey || 'GATHERING';
                     const actType = char.current_activity.type;
                     
                     const efficiencyMap = {
@@ -318,42 +317,11 @@ export class CatchupManager {
 
                 // If activity finished, try to start next one from queue
                 if (char.current_activity.actions_remaining <= 0) {
-                    // Report summary for the finished activity
-                    const elapsed = processed * timePerAction;
-                    /* this.gm.addActionSummaryNotification(char, char.current_activity.type, {
-                        itemsGained, xpGained, totalTime: elapsed, duplicationCount, autoRefineCount
-                    }, 'Summary'); */
-
-                    char.current_activity = null;
-                    char.activity_started_at = null;
-
-                    // Support Action Queue Offline
-                    if (char.state && char.state.actionQueue && char.state.actionQueue.length > 0) {
-                        const nextAction = char.state.actionQueue.shift();
-                        try {
-                            await this.gm.activityManager.startActivity(
-                                char.user_id, char.id, nextAction.type, nextAction.item_id, nextAction.quantity
-                            );
-                            
-                            // Adjust Loop: Re-resolve item and time for the NEW activity
-                            const nextItem = resolveItem(char.current_activity.item_id);
-                            if (!nextItem) break;
-                            
-                            // Update local loop variables
-                            // We need to re-calculate timePerAction for the next item
-                            // but processBatchActions is called with a pre-calculated 'quantity' (actionsPossible).
-                            // This is tricky because different activities have different times.
-                            
-                            // Simplest way: break and let the main catchup loop call processBatchActions again 
-                            // for the NEW activity.
-                            break; 
-                        } catch (e) {
-                            console.error(`[CATCHUP-QUEUE] Error starting next activity:`, e.message);
-                            break;
-                        }
-                    } else {
-                        break; // No more actions in queue
-                    }
+                    const activityConsumedMs = processed * timePerAction * 1000;
+                    const virtualEndTime = new Date(virtualStartTimeMs + activityConsumedMs);
+                    
+                    await this.gm.activityManager.stopActivity(char.user_id, char.id, true, virtualEndTime);
+                    break;
                 }
             } else {
                 stopReason = result?.error || "Stopped Early";

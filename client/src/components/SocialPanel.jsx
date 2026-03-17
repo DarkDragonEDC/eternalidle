@@ -5,7 +5,7 @@ import {
     Hammer, Coffee, TreePine, Pickaxe, Flame, Waves, SearchCode
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { formatItemId } from '@shared/items';
+import { formatItemId, QUALITIES, resolveItem, getTierColor } from '@shared/items';
 
 const ACTIVITY_ICONS = {
     'COMBAT': <Swords size={12} />,
@@ -1283,13 +1283,22 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, onOpenTrade, tradeInvi
                                                                 <div style={{ fontSize: '0.6rem', fontWeight: '900', color: '#ef4444', marginBottom: '8px', letterSpacing: '1px' }}>SENT</div>
                                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                                                     {(myItems || []).map((it, i) => {
-                                                                        const itemData = it || {};
+                                                                        const resolved = resolveItem(it.id || it.item_id);
+                                                                        const item = resolved ? { ...resolved, ...it } : it;
+                                                                        const tier = item.tier || 1;
+                                                                        const color = item.rarityColor || '#fff';
+                                                                        const qName = item.quality > 0 ? item.qualityName : '';
+                                                                        
                                                                         return (
-                                                                            <div key={i} style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                                {itemData.icon ? (
-                                                                                    <img src={itemData.icon} alt="" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
-                                                                                ) : <div style={{ width: '14px', height: '14px', borderRadius: '4px', background: 'rgba(255,255,255,0.1)' }} />}
-                                                                                <span>{it.amount}x <span style={{ fontWeight: 'bold' }}>{itemData.name || formatItemId(it.id)}</span></span>
+                                                                            <div key={i} title={item.name} style={{ fontSize: '0.75rem', color: '#fff', background: 'rgba(255,255,255,0.03)', padding: '4px 8px', borderRadius: '6px', border: `1px solid ${color}15`, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                                <span style={{ color: getTierColor(tier), fontWeight: '900', fontSize: '0.65rem' }}>T{tier}</span>
+                                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1 }}>
+                                                                                    {item.icon && <img src={item.icon} alt="" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />}
+                                                                                    <span style={{ color: color }}>
+                                                                                        {item.amount}x {qName} {item.name?.split(' ').pop()}
+                                                                                    </span>
+                                                                                </div>
+                                                                                {item.stars > 0 && <span style={{ color: '#ffcc00', fontSize: '0.6rem', letterSpacing: '-1px' }}>{'★'.repeat(item.stars)}</span>}
                                                                             </div>
                                                                         );
                                                                     })}
@@ -1320,13 +1329,22 @@ const SocialPanel = ({ socket, isOpen, onClose, onInvite, onOpenTrade, tradeInvi
                                                                 <div style={{ fontSize: '0.6rem', fontWeight: '900', color: '#22c55e', marginBottom: '8px', letterSpacing: '1px' }}>RECEIVED</div>
                                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                                                     {(theirItems || []).map((it, i) => {
-                                                                        const itemData = it || {};
+                                                                        const resolved = resolveItem(it.id || it.item_id);
+                                                                        const item = resolved ? { ...resolved, ...it } : it;
+                                                                        const tier = item.tier || 1;
+                                                                        const color = item.rarityColor || '#fff';
+                                                                        const qName = item.quality > 0 ? item.qualityName : '';
+
                                                                         return (
-                                                                            <div key={i} style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                                {itemData.icon ? (
-                                                                                    <img src={itemData.icon} alt="" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
-                                                                                ) : <div style={{ width: '14px', height: '14px', borderRadius: '4px', background: 'rgba(255,255,255,0.1)' }} />}
-                                                                                <span>{it.amount}x <span style={{ fontWeight: 'bold' }}>{itemData.name || formatItemId(it.id)}</span></span>
+                                                                            <div key={i} title={item.name} style={{ fontSize: '0.75rem', color: '#fff', background: 'rgba(255,255,255,0.03)', padding: '4px 8px', borderRadius: '6px', border: `1px solid ${color}15`, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                                <span style={{ color: getTierColor(tier), fontWeight: '900', fontSize: '0.65rem' }}>T{tier}</span>
+                                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1 }}>
+                                                                                    {item.icon && <img src={item.icon} alt="" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />}
+                                                                                    <span style={{ color: color }}>
+                                                                                        {item.amount}x {qName} {item.name?.split(' ').pop()}
+                                                                                    </span>
+                                                                                </div>
+                                                                                {item.stars > 0 && <span style={{ color: '#ffcc00', fontSize: '0.6rem', letterSpacing: '-1px' }}>{'★'.repeat(item.stars)}</span>}
                                                                             </div>
                                                                         );
                                                                     })}

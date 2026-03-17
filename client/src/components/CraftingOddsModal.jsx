@@ -77,7 +77,7 @@ const CraftingOddsModal = ({ isOpen, onClose, item, stats, tierColor }) => {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <span style={{ fontWeight: '900', color: q.color, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{q.name}</span>
                                     <div style={{ padding: '2px 8px', background: `${q.color}15`, borderRadius: '6px', fontSize: '0.75rem', fontWeight: '900', color: q.color }}>
-                                        {c.toFixed(2)}%
+                                        {parseFloat(c.toFixed(3))}%
                                     </div>
                                 </div>
 

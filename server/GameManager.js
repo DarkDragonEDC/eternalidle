@@ -954,7 +954,7 @@ export class GameManager {
 
                         const newActionsRemaining = actions_remaining - 1;
                         if (newActionsRemaining <= 0) {
-                            await this.activityManager.stopActivity(char.user_id, char.id, true);
+                            await this.activityManager.stopActivity(char.user_id, char.id, true, targetTime);
                             if (char.user_id) {
                                 this.pushManager.notifyUser(
                                     char.user_id,
@@ -969,7 +969,7 @@ export class GameManager {
                         }
                     } else {
                         // For failure (e.g. no ingredients), handle transition to next queued item
-                        await this.activityManager.stopActivity(char.user_id, char.id, true);
+                        await this.activityManager.stopActivity(char.user_id, char.id, true, now);
                     }
                 }
             }
