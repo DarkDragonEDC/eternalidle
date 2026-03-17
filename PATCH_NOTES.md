@@ -33,3 +33,14 @@ Corrigimos uma discrepância onde o IP do Ranking às vezes não batia com o IP 
 - **Recalibração**: Todos os personagens foram recalculados no servidor para garantir que o seu Ranking reflita exatamente o seu poder atual equipado!
 
 Agora ficou mais fácil do que nunca acompanhar o fluxo de itens raros e negociações pelo mundo!
+
+---
+
+### 🛡️ Operação Anti-Boosting (Sistema Centinela)
+Implementamos um novo sistema de proteção econômica para garantir a justiça no mercado e nas trocas.
+
+**O que mudou:**
+- **Rastreamento de IP**: Transações suspeitas entre contas do mesmo proprietário agora são sinalizadas automaticamente.
+- **Análise de Fluxo**: O sistema monitora o saldo de trocas entre jogadores nas últimas 48h para detectar transferências fatiadas.
+- **Proteção de Mercado**: Itens vendidos por preços absurdamente acima do valor base serão marcados para auditoria.
+- **Ação Rápida**: Relatórios automáticos permitem que a administração identifique e aja contra "contas mula" e abusos de rede rapidamente.

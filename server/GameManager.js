@@ -215,6 +215,33 @@ export class GameManager {
         this.socket.setIo(io);
     }
 
+    async getUserIP(userId) {
+        try {
+            // Check active sockets
+            if (this.io) {
+                const sockets = await this.io.fetchSockets();
+                for (const s of sockets) {
+                    if (s.data?.user?.id === userId) {
+                        return s.handshake.headers["x-forwarded-for"] || s.handshake.address;
+                    }
+                }
+            }
+            // Fallback to DB
+            const { data } = await this.supabase
+                .from('user_sessions')
+                .select('ip_address')
+                .eq('user_id', userId)
+                .order('last_active_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+            return data?.ip_address || 'unknown';
+        } catch (err) {
+            console.error("[GM-IP] Error fetching user IP:", err);
+            return 'unknown';
+        }
+    }
+
     async broadcastToCharacter(characterId, event, data) {
         return this.notifications.broadcastToCharacter(characterId, event, data);
     }

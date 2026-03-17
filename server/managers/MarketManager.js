@@ -494,13 +494,32 @@ export class MarketManager {
             if (updateError) throw updateError;
         }
 
-        // --- NEW: Record Market History ---
+        // --- NEW: Record Market History with Anti-Boosting logic ---
         try {
             const sellerName = seller?.name || (await this.gameManager.supabase
                 .from('characters')
                 .select('name')
                 .eq('id', sellerCharId)
                 .single()).data?.name || 'Unknown';
+
+            const buyerIP = await this.gameManager.getUserIP(buyerId);
+            const sellerIP = await this.gameManager.getUserIP(listing.seller_id);
+
+            let isSuspicious = false;
+            let suspicionReason = "";
+
+            // 1. Same IP Check (Alt-boosting)
+            if (buyerIP !== 'unknown' && buyerIP === sellerIP) {
+                isSuspicious = true;
+                suspicionReason = "IP MATCH (Self-buy); ";
+            }
+
+            // 2. Price Outlier Check (> 50x Base Value)
+            const itemBasePrice = calculateItemSellPrice(listing.item_data, listing.item_id) || 1;
+            if (unitPrice > itemBasePrice * 50) {
+                isSuspicious = true;
+                suspicionReason += `ABUSIVE PRICE (${(unitPrice / itemBasePrice).toFixed(1)}x base); `;
+            }
 
             console.log(`[MarketManager] Recording history for buyer=${buyerId}, seller=${listing.seller_id}, itemId=${listing.item_id}`);
             const { error: historyError } = await this.gameManager.supabase
@@ -517,6 +536,10 @@ export class MarketManager {
                     price_total: totalCost,
                     price_per_unit: unitPrice,
                     tax_paid: tax,
+                    buyer_ip: buyerIP,
+                    seller_ip: sellerIP,
+                    is_suspicious: isSuspicious,
+                    suspicion_reason: suspicionReason.trim() || null,
                     created_at: new Date().toISOString()
                 }]);
             
@@ -524,7 +547,7 @@ export class MarketManager {
                 console.error('[MarketManager] Supabase insert returning error for history:', historyError);
                 throw historyError;
             }
-            console.log(`[MarketManager] Recorded history for ${qtyNum}x ${listing.item_id}`);
+            if (isSuspicious) console.log(`[ANTI-BOOST] Suspicious market sale flagged: ${suspicionReason}`);
         } catch (historyErr) {
             console.error('[MarketManager] Error recording history:', historyErr);
             // Don't throw, transaction is already done

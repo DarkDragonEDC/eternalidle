@@ -370,9 +370,8 @@ export class TradeManager {
                 await this.gameManager.saveStateCritical(receiver.id, receiver.state);
                 console.log(`[TradeManager:executeTrade] ${tradeId} - SUCCESS! Trade completed.`);
  
-                // --- Record Trade History ---
+                // --- Record Trade History with Anti-Boosting logic ---
                 try {
-                    // Sanitize items: only store essential fields, not full metadata blobs
                     const sanitizeItems = (items) => (items || []).map(it => {
                         const baseId = it.id?.split('::')[0];
                         const def = resolveItem(baseId);
@@ -384,6 +383,61 @@ export class TradeManager {
                             stars: it.stars || 0
                         };
                     });
+
+                    const senderIP = await this.gameManager.getUserIP(trade.sender_id);
+                    const receiverIP = await this.gameManager.getUserIP(trade.receiver_id);
+
+                    const valSender = this.calculateOfferTax(sOffer, 1.0); // Abuse tax calc for total value (rate=1.0)
+                    const valReceiver = this.calculateOfferTax(rOffer, 1.0);
+
+                    let isSuspicious = false;
+                    let suspicionReason = "";
+
+                    // 1. Same IP Check (Multi-account boosting)
+                    if (senderIP !== 'unknown' && senderIP === receiverIP) {
+                        isSuspicious = true;
+                        suspicionReason = "IP MATCH (Multi-account); ";
+                    }
+
+                    // 2. High Value Imbalance Check (One-sided trade)
+                    const totalTradeValue = valSender + valReceiver;
+                    if (totalTradeValue > 10000) { // Only flag significant trades
+                        const gap = Math.abs(valSender - valReceiver);
+                        const gapPercent = gap / Math.max(valSender, valReceiver, 1);
+                        
+                        if (gapPercent > 0.9) {
+                            // Check if they are long-term best friends
+                            const taxRate = await this._getTradeTaxRate(trade.sender_id, trade.receiver_id);
+                            if (taxRate > 0.05) { // Not even close to max friendship (0%)
+                                isSuspicious = true;
+                                suspicionReason += `ONE-SIDED TRADE (${(gapPercent * 100).toFixed(0)}% imbalance); `;
+                            }
+                        }
+                    }
+
+                    // 3. Multi-stage Boosting Check (48h Flow)
+                    if (!isSuspicious && totalTradeValue > 50000) {
+                        const { data: recentHistory } = await this.supabase
+                            .from('trade_history')
+                            .select('sender_id, total_value_sender, total_value_receiver')
+                            .or(`and(sender_id.eq.${trade.sender_id},receiver_id.eq.${trade.receiver_id}),and(sender_id.eq.${trade.receiver_id},receiver_id.eq.${trade.sender_id})`)
+                            .gte('created_at', new Date(Date.now() - 48 * 3600000).toISOString());
+
+                        if (recentHistory && recentHistory.length >= 2) {
+                            let netFlow = 0; // Relative to sender_id
+                            recentHistory.forEach(h => {
+                                if (h.sender_id === trade.sender_id) netFlow += (h.total_value_sender - h.total_value_receiver);
+                                else netFlow += (h.total_value_receiver - h.total_value_sender);
+                            });
+                            // Add current trade
+                            netFlow += (valSender - valReceiver);
+
+                            if (Math.abs(netFlow) > 1000000) { // Flag if net flow > 1M silver value in 48h
+                                isSuspicious = true;
+                                suspicionReason += "ACCUMULATED FLOW > 1M (48h); ";
+                            }
+                        }
+                    }
 
                     const { error: historyError } = await this.supabase
                         .from('trade_history')
@@ -399,13 +453,18 @@ export class TradeManager {
                             receiver_items: sanitizeItems(rOffer.items),
                             receiver_silver: rOffer.silver,
                             receiver_tax: rTax,
+                            sender_ip: senderIP,
+                            receiver_ip: receiverIP,
+                            total_value_sender: valSender,
+                            total_value_receiver: valReceiver,
+                            is_suspicious: isSuspicious,
+                            suspicion_reason: suspicionReason.trim() || null,
                             created_at: new Date().toISOString()
                         }]);
-                    if (historyError) {
-                        console.error('[TradeManager] Error recording trade history:', historyError);
-                    } else {
-                        console.log(`[TradeManager] Recorded trade history for trade ${tradeId}`);
-                    }
+
+                    if (historyError) console.error('[TradeManager] Error recording trade history:', historyError);
+                    if (isSuspicious) console.log(`[ANTI-BOOST] Suspicious trade ${tradeId} flagged: ${suspicionReason}`);
+
                 } catch (historyErr) {
                     console.error('[TradeManager] Exception recording trade history:', historyErr);
                 }
