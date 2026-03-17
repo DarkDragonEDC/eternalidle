@@ -643,7 +643,7 @@ const InspectModal = React.memo(({ data, theme: propTheme, onClose, onItemClick,
                                         <EquipmentSlot slot="tool_sickle" icon={<Scissors size={18} />} label="SICKLE" item={equipment.tool_sickle} delay={0.55} onItemClick={onItemClick} />
                                         <EquipmentSlot slot="tool_knife" icon={<Sword size={18} style={{ transform: 'rotate(45deg)' }} />} label="KNIFE" item={equipment.tool_knife} delay={0.6} onItemClick={onItemClick} />
                                         <EquipmentSlot slot="tool_rod" icon={<Anchor size={18} />} label="ROD" item={equipment.tool_rod} delay={0.65} onItemClick={onItemClick} />
-                                        <EquipmentSlot slot="tool_pouch" icon={<ShoppingBag size={18} />} label="POUCH" item={equipment.tool_pouch} delay={0.7} onItemClick={onItemClick} />
+                                        <EquipmentSlot slot="tool_pouch" icon={<ShoppingBag size={18} />} label="BASKET" item={equipment.tool_pouch} delay={0.7} onItemClick={onItemClick} />
                                     </div>
                                 </div>
 

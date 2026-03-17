@@ -3,114 +3,129 @@ export const SKILL_DESCRIPTIONS = {
         "Chop trees to gain Wood and Lumberjack XP.",
         "Wood is used in Refining to create Planks.",
         "Better Axes increase gathering efficiency.",
-        "Higher Lumberjack levels are required for more advanced trees."
+        "Higher Lumberjack levels are required to collect higher tier logs."
     ],
     ORE_MINER: [
-        "Mine rocks to gain Ore and Ore Miner XP.",
+        "Mine to gain Ore and Miner XP.",
         "Ore is used in Refining to create Metal Bars.",
         "Better Pickaxes increase gathering efficiency.",
-        "Higher Ore Miner levels are required for more advanced nodes."
+        "Higher Miner levels are required to collect higher tier ores."
     ],
     ANIMAL_SKINNER: [
-        "Skin defeated animals to gain Hide and Animal Skinner XP.",
-        "Hide is used in Refining to create Leather.",
-        "Better Skinning Knives increase gathering efficiency.",
-        "Higher Animal Skinner levels are required for more advanced animals."
+        "Collect leather from animals to gain Raw Hide and Skinner XP.",
+        "Raw Hide is used in Refining to create Leather.",
+        "Better Skinning Knives increase efficiency.",
+        "Higher Skinner levels are required to collect higher tier hides."
     ],
     FIBER_HARVESTER: [
         "Harvest plants to gain Fiber and Fiber Harvester XP.",
         "Fiber is used in Refining to create Cloth.",
         "Better Sickles increase gathering efficiency.",
-        "Higher Fiber Harvester levels are required for more advanced plants."
+        "Higher levels are required to collect higher tier fibers."
     ],
     HERBALISM: [
-        "Gather rare herbs to gain Herbal XP.",
-        "Herbs are used in Alchemy to create powerful potions.",
+        "Collect herbs to gain herbs and Herbalism XP.",
+        "Herbs are used in Alchemy to create potions that grant buffs.",
         "Better tools increase gathering efficiency.",
-        "Higher Herbalism levels are required for more advanced herbs."
+        "Higher levels are required for higher tier herbs."
     ],
     FISHING: [
-        "Fish for Fishing XP.",
+        "Fish to gain fish and Fishing XP.",
         "Requires bait purchased from the Shop with gold.",
-        "Fish can be cooked in Cooking to make meals that restore health and energy.",
-        "Fishing efficiency can be increased with Fishing Rods from Crafting."
+        "Fish can be cooked in Cooking to create meals that restore health.",
+        "Fishing efficiency can be increased with Fishing Rods made in Toolmaker."
     ],
     COOKING: [
-        "Cook raw fish and meat to create meals.",
-        "Meals restore health and energy during combat or resting.",
-        "Higher level recipes restore more health and energy.",
-        "Cooking more complex meals yields more Cooking XP."
+        "Cook raw fish to make food.",
+        "Foods restore health during combat or rest.",
+        "Higher level foods restore more health.",
+        "Cooking higher tier fish grants more Cooking XP."
     ],
     PLANK_REFINER: [
-        "Refine raw Wood into high-quality Planks.",
-        "Planks are essential for crafting weapons and shields.",
-        "Higher tier planks require higher level refining."
+        "Refine Logs to create Planks.",
+        "Planks are essential for creating weapons and tools.",
+        "Higher level Planks are used in more advanced items.",
+        "Making higher level Planks requires a higher refining level."
     ],
     METAL_BAR_REFINER: [
-        "Smelt raw Ore into strong Metal Bars.",
-        "Bars are used to forge heavy armor and melee weapons.",
-        "Higher tier bars require higher level smelting."
+        "Refine Ores to create Bars.",
+        "Bars are used to forge warrior armor, weapons, and tools.",
+        "Higher level Bars are used in more advanced items.",
+        "Higher level Bars require a higher Metal Bar Refiner level."
     ],
     LEATHER_REFINER: [
-        "Tan raw Hides into durable Leather.",
-        "Leather is used for hunter gear and light armor.",
-        "Higher tier leather requires higher level tanning."
+        "Refine Hides to create Leather.",
+        "Leather is used for hunter clothing and tools.",
+        "Higher level Leather is used in more advanced items.",
+        "Higher level Leather requires a higher Leather Refiner level."
     ],
     CLOTH_REFINER: [
-        "Weave raw Fiber into fine Cloth.",
-        "Cloth is used for mage robes and capes.",
-        "Higher tier cloth requires higher level weaving."
+        "Refine Fiber to create Cloths.",
+        "Cloth is used for mage robes and tools.",
+        "Higher level Cloths are used in more advanced items.",
+        "Higher level Cloths require a higher Cloth Refiner level."
     ],
     DISTILLATION: [
-        "Extract essences from plants and materials.",
-        "Extracts are core components for Alchemical recipes.",
-        "Higher level distillation yields purer essences."
+        "Transform herbs into essences.",
+        "Essences are the main components for potions made in Alchemy.",
+        "Higher level Essences are used in more advanced items.",
+        "Higher level Essences require a higher Distillation level."
     ],
     WARRIOR_CRAFTER: [
-        "Forge heavy armor and melee weapons at the Warriors Forge.",
-        "Requires Metal Bars and sometimes Planks or Leather.",
-        "Higher level crafting unlocks more powerful equipment sets."
+        "Create Warrior armor and melee weapons.",
+        "Requires Metal Bars and sometimes Leather.",
+        "Higher levels unlock more powerful equipment.",
+        "To craft capes, you need a chest that can drop from dungeon chests."
     ],
     HUNTER_CRAFTER: [
-        "Craft bows, leather armor, and bags at the Hunters Lodge.",
-        "Requires Leather, Fiber, and sometimes Wood.",
-        "Higher level crafting unlocks specialized hunter equipment."
+        "Create hunter clothing and long-range weapons.",
+        "Requires Leather and sometimes Wood.",
+        "Higher levels unlock more powerful equipment.",
+        "To craft capes, you need a chest that can drop from dungeon chests."
     ],
     MAGE_CRAFTER: [
-        "Enchant robes, staves, and magical items at the Mages Tower.",
-        "Requires Cloth, Extracts, and sometimes Wood or Bars.",
-        "Higher level crafting unlocks advanced magical gear."
+        "Create mage robes and magic weapons.",
+        "Requires Cloths and sometimes Wood.",
+        "Higher levels unlock more powerful equipment.",
+        "To craft capes, you need a chest that can drop from dungeon chests."
     ],
     TOOL_CRAFTER: [
-        "Manufacture gathering tools and specialized equipment.",
-        "Create Axes, Pickaxes, Sickles, Knives, and Fishing Rods.",
-        "Better tools significantly improve gathering rates and results."
+        "Produce gathering tools.",
+        "To craft tools, you may need Metal Bars, Planks, Leather, and Cloth.",
+        "Create Axes, Pickaxes, Sickles, Knives, Fishing Rods, and Baskets.",
+        "Better tools greatly improve gathering rate and results."
     ],
     ALCHEMY: [
-        "Brew potions and elixirs to boost your stats.",
-        "Requires Extracts, Herbs, and specialized ingredients.",
-        "Higher level alchemy unlocks more potent and longer-lasting effects."
+        "Prepare potions to gain temporary bonuses.",
+        "Requires Essences to make potions.",
+        "Potions of higher levels have stronger effects."
     ],
     COMBAT: [
-        "Engage in battles with monsters to earn XP and silver.",
-        "Defeating enemies yields materials and rare equipment.",
-        "Combat prowess depends on your gear, stats, and active skills."
+        "Face monsters to gain silver, combat XP, and proficiency.",
+        "When defeating monsters, they can drop gathering materials and dungeon maps.",
+        "Your performance depends on equipment, proficiency, and runes.",
+        "Potions can temporarily improve performance."
     ],
     DUNGEONEERING: [
-        "Explore dangerous dungeons to reveal rare treasures.",
-        "Requires Dungeon Maps to find and enter specific locations.",
-        "Dungeons offer the most challenging fights and greatest rewards."
+        "Explore dangerous dungeons in search of treasure chests.",
+        "Requires Dungeon Maps and food to explore them.",
+        "Dungeons offer rare challenges and rewards.",
+        "To craft capes, you need a chest that can drop from dungeon chests."
     ],
     RUNE: [
-        "Merge and enhance runes to empower your equipment.",
-        "Runes provide passive bonuses to various activities.",
-        "Higher level runs require merging multiple lower-tier runes."
+        "Combine and improve runes to enhance your skill and combat performance.",
+        "Runes provide specific bonuses to activities.",
+        "Bonuses only work on equipped runes.",
+        "There are 2 types of runes: skill runes and combat runes.",
+        "Skill runes are made with rune shards, which can be obtained from dungeon chests and by destroying equipment.",
+        "Combat runes are made with combat rune shards, which can be obtained from world boss chests.",
+        "Higher level runes require combining 2 runes of the previous tier."
     ],
     CAMP: [
-        "Select a percentage of your maximum health to heal.",
-        "Heal price is 3 Silver per health point restored.",
-        "Resting takes time based on the amount of health being restored.",
-        "You cannot rest while in combat or inside a dungeon.",
-        "Cancelling a rest period early will refund the silver cost."
+        "Choose a percentage of your maximum health you wish to stay at.",
+        "The cost of healing is 3 silver per health point restored.",
+        "Rest time increases depending on the amount of health restored.",
+        "You cannot rest during combat or inside a dungeon.",
+        "Cancelling rest early returns the spent silver."
     ]
 };

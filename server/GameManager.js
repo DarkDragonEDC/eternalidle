@@ -1250,8 +1250,15 @@ export class GameManager {
 
         // COOLDOWN LOGIC: 5 seconds between eats
         const COOLDOWN_MS = 5000;
-        const lastFoodAt = char.state.lastFoodAt || 0;
         const now = nowOverride || Date.now();
+        let lastFoodAt = char.state.lastFoodAt || 0;
+
+        // FIX: If lastFoodAt is in the future (set by virtual combat time during catch-up),
+        // reset it so the cooldown doesn't permanently block healing after death.
+        if (lastFoodAt > now) {
+            char.state.lastFoodAt = 0;
+            lastFoodAt = 0;
+        }
 
         if (now - lastFoodAt < COOLDOWN_MS) return { used: false, amount: 0 };
         if (currentHp >= maxHp) return { used: false, amount: 0 };
