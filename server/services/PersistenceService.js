@@ -84,17 +84,7 @@ export class PersistenceService {
             }
         }
 
-        if (char.state.equipment) {
-            let totalIp = 0;
-            let count = 0;
-            for (const slot of Object.values(char.state.equipment)) {
-                if (slot && slot.ip) {
-                    totalIp += Number(slot.ip);
-                    count++;
-                }
-            }
-            ranking_item_power = count > 0 ? Math.floor(totalIp / count) : 0;
-        }
+        ranking_item_power = this.gm.inventoryManager.calculateCharacterIP(char);
         // -----------------------------------------------------
 
         const stateToPrune = JSON.parse(JSON.stringify(char.state));

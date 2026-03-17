@@ -658,9 +658,6 @@ export class InventoryManager {
         combatSlots.forEach(slot => {
             const item = equipment[slot];
             if (item) {
-                // If no weapon, only mainHand counts for IP
-                if (!hasWeapon && slot !== 'mainHand') return;
-
                 const freshItem = this.resolveItem(item.id);
                 totalIP += freshItem?.ip || item.ip || 0;
             }

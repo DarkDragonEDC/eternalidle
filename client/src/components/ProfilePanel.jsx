@@ -385,9 +385,6 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
         combatSlots.forEach(slot => {
             const rawItem = equipment[slot];
             if (rawItem) {
-                // Return early if no weapon and it's a combat gear slot
-                if (!hasWeapon && slot !== 'mainHand') return;
-
                 // Resolve item to ensure we have the 'ip' field even if it's missing in the cached raw state
                 const item = { ...rawItem, ...resolveItem(rawItem.id || rawItem.item_id) };
                 totalIP += item.ip || 0;

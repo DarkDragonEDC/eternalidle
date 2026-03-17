@@ -1047,7 +1047,7 @@ const TradeHistoryItem = ({ trade, characterId, onClick }) => {
     const isSender = trade.sender_id === characterId;
     const partnerName = isSender ? trade.receiver_name : trade.sender_name;
     
-    const formattedDate = new Date(trade.created_at).toLocaleDateString(undefined, {
+    const formattedDate = new Date(trade.created_at).toLocaleDateString('en-US', {
         month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
     });
 
@@ -1102,7 +1102,7 @@ const TradeDetailsModal = ({ trade, characterId, onClose }) => {
     const myOffer = { items: trade.sender_items, silver: trade.sender_silver };
     const partnerOffer = { items: trade.receiver_items, silver: trade.receiver_silver };
     
-    const formattedDate = new Date(trade.created_at).toLocaleString(undefined, {
+    const formattedDate = new Date(trade.created_at).toLocaleString('en-US', {
         year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
     });
 
@@ -1161,13 +1161,23 @@ const TradeDetailsModal = ({ trade, characterId, onClose }) => {
                                     <ShoppingBag size={12} /> {myOffer.silver.toLocaleString()}
                                 </div>
                             )}
-                            {hasMyItems ? myOffer.items.map((it, i) => (
-                                <div key={i} title={it.name} style={{ fontSize: '0.75rem', color: '#fff', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <span style={{ color: 'var(--accent)', fontWeight: '900', fontSize: '0.65rem' }}>T{it.tier || 1}</span>
-                                    {it.amount}x {it.name?.split(' ').pop()}
-                                    {it.stars > 0 && <span style={{ color: '#ffcc00', fontSize: '0.6rem' }}>{'★'.repeat(it.stars)}</span>}
-                                </div>
-                            )) : !myOffer.silver && <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)' }}>No items/silver given</span>}
+                            {hasMyItems ? myOffer.items.map((it, i) => {
+                                const resolved = resolveItem(it.id || it.item_id);
+                                const item = resolved ? { ...resolved, ...it } : it;
+                                const tier = item.tier || 1;
+                                const color = item.rarityColor || '#fff';
+                                const qName = item.quality > 0 ? item.qualityName : '';
+                                
+                                return (
+                                    <div key={i} title={item.name} style={{ fontSize: '0.75rem', color: '#fff', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '8px', border: `1px solid ${color}22`, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <span style={{ color: 'var(--accent)', fontWeight: '900', fontSize: '0.65rem' }}>T{tier}</span>
+                                        <span style={{ color: color }}>
+                                            {item.amount}x {qName} {item.name?.split(' ').pop()}
+                                        </span>
+                                        {item.stars > 0 && <span style={{ color: '#ffcc00', fontSize: '0.6rem' }}>{'★'.repeat(item.stars)}</span>}
+                                    </div>
+                                );
+                            }) : !myOffer.silver && <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)' }}>No items/silver given</span>}
                         </div>
                     </div>
 
@@ -1182,13 +1192,23 @@ const TradeDetailsModal = ({ trade, characterId, onClose }) => {
                                     <ShoppingBag size={12} /> {partnerOffer.silver.toLocaleString()}
                                 </div>
                             )}
-                            {hasPartnerItems ? partnerOffer.items.map((it, i) => (
-                                <div key={i} title={it.name} style={{ fontSize: '0.75rem', color: '#fff', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <span style={{ color: 'var(--accent)', fontWeight: '900', fontSize: '0.65rem' }}>T{it.tier || 1}</span>
-                                    {it.amount}x {it.name?.split(' ').pop()}
-                                    {it.stars > 0 && <span style={{ color: '#ffcc00', fontSize: '0.6rem' }}>{'★'.repeat(it.stars)}</span>}
-                                </div>
-                            )) : !partnerOffer.silver && <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)' }}>No items/silver received</span>}
+                            {hasPartnerItems ? partnerOffer.items.map((it, i) => {
+                                const resolved = resolveItem(it.id || it.item_id);
+                                const item = resolved ? { ...resolved, ...it } : it;
+                                const tier = item.tier || 1;
+                                const color = item.rarityColor || '#fff';
+                                const qName = item.quality > 0 ? item.qualityName : '';
+
+                                return (
+                                    <div key={i} title={item.name} style={{ fontSize: '0.75rem', color: '#fff', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '8px', border: `1px solid ${color}22`, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <span style={{ color: 'var(--accent)', fontWeight: '900', fontSize: '0.65rem' }}>T{tier}</span>
+                                        <span style={{ color: color }}>
+                                            {item.amount}x {qName} {item.name?.split(' ').pop()}
+                                        </span>
+                                        {item.stars > 0 && <span style={{ color: '#ffcc00', fontSize: '0.6rem' }}>{'★'.repeat(item.stars)}</span>}
+                                    </div>
+                                );
+                            }) : !partnerOffer.silver && <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)' }}>No items/silver received</span>}
                         </div>
                     </div>
                 </div>

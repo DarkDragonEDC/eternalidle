@@ -23,4 +23,13 @@ Agora a transparência chegou às trocas! Quer saber se aquele jogador é um neg
 - **Detalhes Completos**: Clique em qualquer troca para ver exatamente o que foi enviado e recebido, incluindo o **Tier** e **Estrelas** dos itens, além do montante de Silver.
 - **Interface Otimizada**: Uma lista limpa e rápida que abre detalhes em um modal dedicado para não poluir a tela.
 
+---
+
+### ⚔️ Ajuste no Item Power (IP)
+Corrigimos uma discrepância onde o IP do Ranking às vezes não batia com o IP do Perfil.
+
+**O que mudou:**
+- **Cálculo Unificado**: Agora o ranking usa a mesma regra do perfil: a média dos 7 slots de combate (Capa, Elmo, Arma, Armadura, Offhand, Luvas e Botas).
+- **Recalibração**: Todos os personagens foram recalculados no servidor para garantir que o seu Ranking reflita exatamente o seu poder atual equipado!
+
 Agora ficou mais fácil do que nunca acompanhar o fluxo de itens raros e negociações pelo mundo!
