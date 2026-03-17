@@ -176,6 +176,7 @@ const AppModals = ({
                     onMessage={handleInspectMessage}
                     onItemClick={handleItemClick}
                     onInspectGuild={(id) => setInspectGuildId(id)}
+                    socket={socket}
                 />
             )}
 

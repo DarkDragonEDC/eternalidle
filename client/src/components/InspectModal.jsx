@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sword, Shield, Heart, Zap, User, Star, Layers, Info, Award, Crosshair, Hammer, Pickaxe, Flame, Droplets, Wind, Sparkles, Scissors, Anchor, ShoppingBag, Apple, Target, ChevronRight } from 'lucide-react';
+import { X, Sword, Shield, Heart, Zap, User, Star, Layers, Info, Award, Crosshair, Hammer, Pickaxe, Flame, Droplets, Wind, Sparkles, Scissors, Anchor, ShoppingBag, Apple, Target, ChevronRight, History, ArrowRight, TrendingDown, TrendingUp } from 'lucide-react';
 import { resolveItem, calculateRuneBonus, formatItemId } from '@shared/items';
 import { calculateNextLevelXP } from '@shared/skills';
 import StatBreakdownModal from './StatBreakdownModal';
@@ -240,12 +240,15 @@ const RuneSlot = ({ slot, label, icon, item: rawItem, onItemClick }) => {
 };
 
 
-const InspectModal = React.memo(({ data, theme: propTheme, onClose, onItemClick, onInspectGuild }) => {
-    const [activeTab, setActiveTab] = useState('EQUIPMENT'); // EQUIPMENT | SKILLS | RUNES
+const InspectModal = React.memo(({ data, theme: propTheme, onClose, onItemClick, onInspectGuild, socket }) => {
+    const [activeTab, setActiveTab] = useState('EQUIPMENT'); // EQUIPMENT | SKILLS | RUNES | HISTORY
     const [expandedCategory, setExpandedCategory] = useState(null);
     const [breakdownModal, setBreakdownModal] = useState(null);
+    const [selectedTrade, setSelectedTrade] = useState(null);
+    const [tradeHistory, setTradeHistory] = useState([]);
+    const [loadingHistory, setLoadingHistory] = useState(false);
 
-    const { name, level, selectedTitle, health = 0, equipment = {}, skills = {}, runes = {}, stats = {}, isPremium, guildName, guildTag, guildId, selectedBanner } = data;
+    const { id: characterId, name, level, selectedTitle, health = 0, equipment = {}, skills = {}, runes = {}, stats = {}, isPremium, guildName, guildTag, guildId, selectedBanner } = data;
 
     // Use propTheme or fallback to data.theme, then to global default
     const activeTheme = propTheme || data.theme || 'dark';
@@ -299,6 +302,24 @@ const InspectModal = React.memo(({ data, theme: propTheme, onClose, onItemClick,
     }, [equipment]);
 
     const totalLevel = Object.values(skills).reduce((acc, s) => acc + (s.level || 0), 0);
+
+    // Fetch trade history when tab is active
+    React.useEffect(() => {
+        if (activeTab === 'HISTORY' && socket && characterId) {
+            setLoadingHistory(true);
+            socket.emit('get_player_trade_history', { targetCharacterId: characterId });
+
+            const handleHistoryUpdate = (payload) => {
+                if (payload.characterId === characterId) {
+                    setTradeHistory(payload.history || []);
+                    setLoadingHistory(false);
+                }
+            };
+
+            socket.on('player_trade_history_update', handleHistoryUpdate);
+            return () => socket.off('player_trade_history_update', handleHistoryUpdate);
+        }
+    }, [activeTab, characterId, socket]);
 
 
 
@@ -529,29 +550,29 @@ const InspectModal = React.memo(({ data, theme: propTheme, onClose, onItemClick,
                         zIndex: 0
                     }} />
 
-                    {/* Navigation */}
-                    <div style={{ display: 'flex', padding: '15px 30px 0', gap: '8px', marginTop: '0px', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
-                        {['EQUIPMENT', 'SKILLS', 'RUNES'].map(tab => (
+                    <div style={{ display: 'flex', padding: '12px 20px 0', gap: '4px', marginTop: '0px', justifyContent: 'center', position: 'relative', zIndex: 1, flexWrap: 'wrap' }}>
+                        {['EQUIPMENT', 'SKILLS', 'RUNES', 'HISTORY'].map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
                                 style={{
-                                    padding: '8px 20px', border: 'none',
+                                    padding: '6px 12px', border: 'none',
                                     background: activeTab === tab ? 'var(--accent-soft)' : 'transparent',
-                                    borderRadius: '10px',
+                                    borderRadius: '8px',
                                     color: activeTab === tab ? '#fff' : 'var(--text-dim)',
-                                    fontWeight: '900', fontSize: '0.7rem', cursor: 'pointer',
-                                    letterSpacing: '1.5px',
+                                    fontWeight: '900', fontSize: '0.65rem', cursor: 'pointer',
                                     transition: '0.3s',
                                     border: activeTab === tab ? '1px solid var(--border-active)' : '1px solid transparent',
-                                    minWidth: '80px',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    justifyContent: 'center',
-                                    textAlign: 'center'
+                                    gap: '5px'
                                 }}
                             >
-                                {tab}
+                                {tab === 'EQUIPMENT' && <Sword size={12} />}
+                                {tab === 'SKILLS' && <Star size={12} />}
+                                {tab === 'RUNES' && <Layers size={12} />}
+                                {tab === 'HISTORY' && <History size={12} />}
+                                {tab === 'EQUIPMENT' ? 'EQUIP' : tab === 'HISTORY' ? 'HIST' : tab}
                             </button>
                         ))}
                     </div>
@@ -699,6 +720,10 @@ const InspectModal = React.memo(({ data, theme: propTheme, onClose, onItemClick,
                         {activeTab === 'RUNES' && (
                             <RunesTabView equipment={equipment} onItemClick={onItemClick} />
                         )}
+
+                        {activeTab === 'HISTORY' && (
+                            <TradeHistoryTabView history={tradeHistory} characterId={characterId} loading={loadingHistory} onTradeClick={setSelectedTrade} />
+                        )}
                     </div>
 
                     {/* Footer Info */}
@@ -761,6 +786,13 @@ const InspectModal = React.memo(({ data, theme: propTheme, onClose, onItemClick,
                             equipment={equipment}
                             membership={data.membership}
                             onClose={() => setBreakdownModal(null)}
+                        />
+                    )}
+                    {selectedTrade && (
+                        <TradeDetailsModal
+                            trade={selectedTrade}
+                            characterId={characterId}
+                            onClose={() => setSelectedTrade(null)}
                         />
                     )}
                 </AnimatePresence>
@@ -968,6 +1000,199 @@ const RuneBuffSummary = ({ activeRuneBuffs, activeRuneTab }) => {
                     </div>
                 ))}
             </div>
+        </div>
+    );
+};
+
+const TradeHistoryTabView = ({ history, characterId, loading, onTradeClick }) => {
+    if (loading) {
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '15px', padding: '40px 0' }}>
+                <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                    style={{ color: 'var(--accent)', opacity: 0.5 }}
+                >
+                    <Zap size={32} />
+                </motion.div>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>LOADING HISTORY...</span>
+            </div>
+        );
+    }
+
+    if (!history || history.length === 0) {
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '15px', padding: '40px 20px', textAlign: 'center' }}>
+                <div style={{ padding: '20px', background: 'rgba(255,255,255,0.02)', borderRadius: '50%', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                    <History size={32} style={{ color: 'rgba(255,255,255,0.1)' }} />
+                </div>
+                <div>
+                    <h3 style={{ margin: '0 0 5px 0', fontSize: '0.9rem', color: '#fff' }}>No Trade History</h3>
+                    <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--text-dim)', lineHeight: 1.4 }}>This player hasn't completed any trades yet.</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {history.map((trade, idx) => (
+                <TradeHistoryItem key={trade.id || idx} trade={trade} characterId={characterId} onClick={() => onTradeClick(trade)} />
+            ))}
+        </div>
+    );
+};
+
+const TradeHistoryItem = ({ trade, characterId, onClick }) => {
+    const isSender = trade.sender_id === characterId;
+    const partnerName = isSender ? trade.receiver_name : trade.sender_name;
+    
+    const formattedDate = new Date(trade.created_at).toLocaleDateString(undefined, {
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={{ scale: 1.01, background: 'rgba(255,255,255,0.06)' }}
+            onClick={onClick}
+            style={{
+                background: 'rgba(255,255,255,0.03)',
+                borderRadius: '12px',
+                padding: '10px 14px',
+                border: '1px solid rgba(255,255,255,0.05)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                cursor: 'pointer',
+                transition: '0.2s',
+                position: 'relative',
+                overflow: 'hidden'
+            }}
+        >
+            <div style={{
+                position: 'absolute', top: 0, left: 0, width: '3px', height: '100%',
+                background: isSender ? '#ef4444' : '#4ade80',
+                opacity: 0.5
+            }} />
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{
+                    color: isSender ? '#ef4444' : '#4ade80',
+                    display: 'flex'
+                }}>
+                    {isSender ? <TrendingDown size={14} /> : <TrendingUp size={14} />}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '900', color: '#fff' }}>
+                        {isSender ? 'TO' : 'FROM'} <span style={{ color: 'var(--accent)' }}>{partnerName}</span>
+                    </span>
+                    <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>{formattedDate}</span>
+                </div>
+            </div>
+
+            <ChevronRight size={14} style={{ opacity: 0.3 }} />
+        </motion.div>
+    );
+};
+
+const TradeDetailsModal = ({ trade, characterId, onClose }) => {
+    const isSender = trade.sender_id === characterId;
+    const myOffer = { items: trade.sender_items, silver: trade.sender_silver };
+    const partnerOffer = { items: trade.receiver_items, silver: trade.receiver_silver };
+    
+    const formattedDate = new Date(trade.created_at).toLocaleString(undefined, {
+        year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+
+    const hasMyItems = myOffer.items && myOffer.items.length > 0;
+    const hasPartnerItems = partnerOffer.items && partnerOffer.items.length > 0;
+
+    return (
+        <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.4)', zIndex: 3000,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            backdropFilter: 'blur(8px)', padding: '20px'
+        }} onClick={onClose}>
+            <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                style={{
+                    background: 'var(--panel-bg)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '20px',
+                    padding: '24px',
+                    width: '100%',
+                    maxWidth: '400px',
+                    boxShadow: 'var(--panel-shadow)',
+                    position: 'relative'
+                }}
+                onClick={e => e.stopPropagation()}
+            >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ padding: '8px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px' }}>
+                            <History size={18} color="var(--accent)" />
+                        </div>
+                        <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase' }}>Trade Details</h3>
+                    </div>
+                    <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: '5px' }}>
+                        <X size={20} />
+                    </button>
+                </div>
+
+                <div style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginBottom: '4px' }}>Date & Time</div>
+                    <div style={{ fontSize: '0.8rem', color: '#fff', fontWeight: 'bold' }}>{formattedDate}</div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    {/* Outgoing */}
+                    <div style={{ background: 'rgba(239, 68, 68, 0.05)', borderRadius: '15px', padding: '15px', border: '1px solid rgba(239, 68, 68, 0.1)' }}>
+                        <div style={{ fontSize: '0.6rem', color: '#ef4444', fontWeight: '900', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <TrendingDown size={12} /> SENDER: <span style={{ color: '#fff', marginLeft: '4px' }}>{trade.sender_name}</span>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                            {myOffer.silver > 0 && (
+                                <div style={{ fontSize: '0.75rem', color: '#ffd700', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,215,0,0.1)', padding: '4px 10px', borderRadius: '8px' }}>
+                                    <ShoppingBag size={12} /> {myOffer.silver.toLocaleString()}
+                                </div>
+                            )}
+                            {hasMyItems ? myOffer.items.map((it, i) => (
+                                <div key={i} title={it.name} style={{ fontSize: '0.75rem', color: '#fff', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <span style={{ color: 'var(--accent)', fontWeight: '900', fontSize: '0.65rem' }}>T{it.tier || 1}</span>
+                                    {it.amount}x {it.name?.split(' ').pop()}
+                                    {it.stars > 0 && <span style={{ color: '#ffcc00', fontSize: '0.6rem' }}>{'★'.repeat(it.stars)}</span>}
+                                </div>
+                            )) : !myOffer.silver && <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)' }}>No items/silver given</span>}
+                        </div>
+                    </div>
+
+                    {/* Incoming */}
+                    <div style={{ background: 'rgba(34, 197, 94, 0.05)', borderRadius: '15px', padding: '15px', border: '1px solid rgba(34, 197, 94, 0.1)' }}>
+                        <div style={{ fontSize: '0.6rem', color: '#22c55e', fontWeight: '900', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <TrendingUp size={12} /> RECEIVER: <span style={{ color: '#fff', marginLeft: '4px' }}>{trade.receiver_name}</span>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                            {partnerOffer.silver > 0 && (
+                                <div style={{ fontSize: '0.75rem', color: '#ffd700', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,215,0,0.1)', padding: '4px 10px', borderRadius: '8px' }}>
+                                    <ShoppingBag size={12} /> {partnerOffer.silver.toLocaleString()}
+                                </div>
+                            )}
+                            {hasPartnerItems ? partnerOffer.items.map((it, i) => (
+                                <div key={i} title={it.name} style={{ fontSize: '0.75rem', color: '#fff', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <span style={{ color: 'var(--accent)', fontWeight: '900', fontSize: '0.65rem' }}>T{it.tier || 1}</span>
+                                    {it.amount}x {it.name?.split(' ').pop()}
+                                    {it.stars > 0 && <span style={{ color: '#ffcc00', fontSize: '0.6rem' }}>{'★'.repeat(it.stars)}</span>}
+                                </div>
+                            )) : !partnerOffer.silver && <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)' }}>No items/silver received</span>}
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
         </div>
     );
 };

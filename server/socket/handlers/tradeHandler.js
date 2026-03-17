@@ -153,4 +153,14 @@ export const registerTradeHandlers = (socket, gameManager, io) => {
       socket.emit("error", { message: err.message });
     }
   });
+
+  socket.on("get_player_trade_history", async ({ targetCharacterId }) => {
+    try {
+      if (!targetCharacterId) return;
+      const history = await gameManager.tradeManager.getPersonalTradeHistory(targetCharacterId);
+      socket.emit("player_trade_history_update", { characterId: targetCharacterId, history });
+    } catch (err) {
+      socket.emit("error", { message: err.message });
+    }
+  });
 };

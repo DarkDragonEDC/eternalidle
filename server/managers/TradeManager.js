@@ -373,11 +373,17 @@ export class TradeManager {
                 // --- Record Trade History ---
                 try {
                     // Sanitize items: only store essential fields, not full metadata blobs
-                    const sanitizeItems = (items) => (items || []).map(it => ({
-                        id: it.id,
-                        name: it.name || resolveItem(it.id?.split('::')[0])?.name || it.id,
-                        amount: it.amount || 1
-                    }));
+                    const sanitizeItems = (items) => (items || []).map(it => {
+                        const baseId = it.id?.split('::')[0];
+                        const def = resolveItem(baseId);
+                        return {
+                            id: it.id,
+                            name: it.name || def?.name || it.id,
+                            amount: it.amount || 1,
+                            tier: it.tier || def?.tier || 1,
+                            stars: it.stars || 0
+                        };
+                    });
 
                     const { error: historyError } = await this.supabase
                         .from('trade_history')

@@ -11,3 +11,16 @@ Chegou a hora de mostrar a força da sua aliança para todo o reino! Agora, a **
 - **Mercado e Trocas**: Facilita a identificação de quem é o seu parceiro comercial.
 
 Essa novidade traz mais visibilidade para as guildas ativas, ajuda no recrutamento orgânico e fomenta a competitividade. Reúna seus aliados, escolha uma Tag de respeito e deixe sua marca no mundo de Eternal Idle!
+
+---
+
+### 📜 Histórico de Trocas Público
+Agora a transparência chegou às trocas! Quer saber se aquele jogador é um negociante honesto ou ver suas conquistas comerciais? Agora você pode!
+
+**Novidades:**
+- **Nova Aba "HIST"**: Ao inspecionar qualquer jogador, você verá uma nova aba de Histórico.
+- **Transparência Total**: Veja uma lista de todas as trocas recentes feitas pelo jogador.
+- **Detalhes Completos**: Clique em qualquer troca para ver exatamente o que foi enviado e recebido, incluindo o **Tier** e **Estrelas** dos itens, além do montante de Silver.
+- **Interface Otimizada**: Uma lista limpa e rápida que abre detalhes em um modal dedicado para não poluir a tela.
+
+Agora ficou mais fácil do que nunca acompanhar o fluxo de itens raros e negociações pelo mundo!
