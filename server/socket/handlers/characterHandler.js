@@ -63,8 +63,11 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
         
         // --- DAILY SPIN STATUS ---
         try {
-          const canSpin = await gameManager.dailyRewardManager.canSpin(char);
-          socket.emit("daily_status", { canSpin });
+          const char = await gameManager.getCharacter(userId, characterId);
+          if (char) {
+            const canSpin = await gameManager.dailyRewardManager.canSpin(char);
+            socket.emit("daily_status", { canSpin });
+          }
         } catch (dailyErr) {
           console.error("[JOIN] Error checking daily spin status:", dailyErr);
         }

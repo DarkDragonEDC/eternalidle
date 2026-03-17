@@ -26,16 +26,13 @@ const XP_TABLE = [
     3749636, 4269287, 4827911, 5428432, 6073992, 6767969, 7513995, 8315973, 9178099, 10104099
 ];
 
-/**
- * Formula to calculate total XP based on level and current XP.
- */
 function calculateAccumulatedXP(level, currentXp) {
     const baseXP = XP_TABLE[level - 1] || 0;
     return baseXP + currentXp;
 }
 
 async function fixRankings() {
-    console.log("Starting FINAL production ranking fix...");
+    console.log("Starting CORRECTED production ranking fix (Standardized IP)...");
     
     // 1. Fetch all characters
     const { data: characters, error } = await supabase
@@ -49,72 +46,54 @@ async function fixRankings() {
 
     console.log(`Processing ${characters.length} characters...`);
 
-    // Detect existing columns in the database to avoid errors (Production might be missing columns)
     const { data: firstChar } = await supabase.from('characters').select('*').limit(1);
     const existingColumns = firstChar && firstChar.length > 0 ? Object.keys(firstChar[0]) : [];
-    console.log("Detected columns in DB:", existingColumns);
 
     for (const char of characters) {
         let totalLevel = 0;
         let totalXp = 0;
         let totalIp = 0;
-        let ipCount = 0;
         const skillsToUpdate = char.skills || {};
 
-        // Calculate Level and XP
         if (skillsToUpdate) {
             for (const skillKey of Object.keys(skillsToUpdate)) {
                 const skill = skillsToUpdate[skillKey];
                 const lvl = Number(skill.level) || 1;
                 const xp = Number(skill.xp) || 0;
-                
                 const skillTotalXp = calculateAccumulatedXP(lvl, xp);
-                
-                // Inject totalXp into the skill object
                 skill.totalXp = skillTotalXp;
-                
                 totalLevel += lvl;
                 totalXp += skillTotalXp;
             }
         }
 
-        // Calculate Item Power
+        // Standardized IP Calculation
         if (char.equipment) {
-            for (const slot of Object.values(char.equipment)) {
+            const COMBAT_SLOTS = ['helmet', 'chest', 'boots', 'gloves', 'cape', 'mainHand', 'offHand'];
+            
+            COMBAT_SLOTS.forEach(slotKey => {
+                const slot = char.equipment[slotKey];
                 if (slot && typeof slot === 'object') {
                     let ip = Number(slot.ip);
-                    
-                    // Fallback for pruned items: Recalculate IP from Tier and Quality
                     if (!ip || isNaN(ip)) {
                         const tier = Number(slot.id?.match(/T(\d+)/)?.[1]) || 1;
                         const quality = Number(slot.quality) || 0;
                         const qualityBonus = { 0: 0, 1: 20, 2: 50, 3: 100, 4: 200 }[quality] || 0;
                         ip = (tier * 100) + qualityBonus;
                     }
-
                     totalIp += ip;
-                    ipCount++;
                 }
-            }
+            });
         }
 
         const ranking_total_level = Math.floor(totalLevel);
         const ranking_total_xp = Math.floor(totalXp);
-        const ranking_item_power = ipCount > 0 ? Math.floor(totalIp / ipCount) : 0;
-
-        if (char.name === "Roflelf") {
-            console.log("DEBUG Roflelf:", {
-                ranking_total_level,
-                ranking_total_xp,
-                skillsSample: skillsToUpdate.MAGE_CRAFTER || skillsToUpdate.MAGE_PROFICIENCY
-            });
-        }
+        const ranking_item_power = Math.floor(totalIp / 7);
 
         const updatePayload = {
             skills: skillsToUpdate
         };
 
-        // Only include columns that exist in the DB schema
         if (existingColumns.includes('ranking_total_level')) updatePayload.ranking_total_level = ranking_total_level;
         if (existingColumns.includes('ranking_total_xp')) updatePayload.ranking_total_xp = ranking_total_xp;
         if (existingColumns.includes('ranking_item_power')) updatePayload.ranking_item_power = ranking_item_power;
@@ -127,7 +106,6 @@ async function fixRankings() {
         if (updateError) {
             console.error(`Error updating character ${char.name}:`, updateError);
         } else {
-            // --- NEW: Sincronizar com a tabela leaderboards ---
             const lbEntries = [
                 { character_id: char.id, ranking_type: 'LEVEL', value: ranking_total_level, character_name: char.name },
                 { character_id: char.id, ranking_type: 'TOTAL_XP', value: ranking_total_xp, character_name: char.name },
@@ -146,7 +124,6 @@ async function fixRankings() {
             }
 
             await supabase.from('leaderboards').upsert(lbEntries, { onConflict: 'character_id,ranking_type' });
-            // --------------------------------------------------
             console.log(`Updated ${char.name}: Lvl=${ranking_total_level}, XP=${ranking_total_xp}, IP=${ranking_item_power}`);
         }
     }

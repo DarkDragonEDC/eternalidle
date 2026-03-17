@@ -175,33 +175,41 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
             let label = 'LEVEL';
 
             if (subCategory === 'LEVEL') {
-                const skills = state.skills || {};
-                value = Object.values(skills).reduce((acc, s) => acc + (s.level || 1), 0);
-                subValue = Object.values(skills).reduce((acc, s) => acc + getTotalSkillXP(s), 0);
+                value = char.ranking_total_level || 0;
+                // Fallback for tiebreaker if needed, or if server value not present
+                if (!value && state.skills) {
+                    value = Object.values(state.skills).reduce((acc, s) => acc + (s.level || 1), 0);
+                }
+                subValue = char.ranking_total_xp || 0;
+                if (!subValue && state.skills) {
+                    subValue = Object.values(state.skills).reduce((acc, s) => acc + getTotalSkillXP(s), 0);
+                }
                 label = 'TOTAL LEVEL';
             } else if (subCategory === 'TOTAL_XP') {
-                const skills = state.skills || {};
-                // Value is Total Accumulated XP
-                value = Object.values(skills).reduce((acc, s) => acc + getTotalSkillXP(s), 0);
-                // SubValue is Total Level (tiebreaker)
-                subValue = Object.values(skills).reduce((acc, s) => acc + (s.level || 1), 0);
+                value = char.ranking_total_xp || 0;
+                if (!value && state.skills) {
+                    value = Object.values(state.skills).reduce((acc, s) => acc + getTotalSkillXP(s), 0);
+                }
+                subValue = char.ranking_total_level || 0;
+                if (!subValue && state.skills) {
+                    subValue = Object.values(state.skills).reduce((acc, s) => acc + (s.level || 1), 0);
+                }
                 label = 'TOTAL XP';
             } else if (subCategory === 'ITEM_POWER') {
+                value = char.ranking_item_power || 0;
+                
+                // Fallback / SubValue calculation (Top Item)
                 const equipment = state.equipment || {};
-                const hasWeapon = !!equipment.mainHand;
                 const combatSlots = ['helmet', 'chest', 'boots', 'gloves', 'cape', 'mainHand', 'offHand'];
-                let totalIP = 0;
                 let topItem = null;
                 let maxIP = -1;
 
                 combatSlots.forEach(slot => {
                     const rawItem = equipment[slot];
                     if (rawItem) {
-                        if (!hasWeapon && slot !== 'mainHand') return;
                         const resolved = resolveItem(rawItem.id || rawItem.item_id);
                         if (resolved) {
                             const ip = resolved.ip || 0;
-                            totalIP += ip;
                             if (ip > maxIP) {
                                 maxIP = ip;
                                 topItem = rawItem.id || rawItem.item_id;
@@ -209,7 +217,22 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                         }
                     }
                 });
-                value = Math.floor(totalIP / 7);
+
+                // If server value is missing, recalculate based on server rules (divide by 7)
+                if (!value && Object.keys(equipment).length > 0) {
+                    let totalIP = 0;
+                    combatSlots.forEach(slot => {
+                        const rawItem = equipment[slot];
+                        if (rawItem) {
+                            const resolved = resolveItem(rawItem.id || rawItem.item_id);
+                            if (resolved) {
+                                totalIP += resolved.ip || 0;
+                            }
+                        }
+                    });
+                    value = Math.floor(totalIP / 7);
+                }
+
                 subValue = topItem ? formatItemId(topItem) : '';
                 label = 'ITEM POWER';
             } else {

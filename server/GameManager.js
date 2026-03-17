@@ -1350,7 +1350,7 @@ export class GameManager {
         if (['LEVEL', 'TOTAL_XP', 'ITEM_POWER'].includes(dbType) || mode === 'IRONMAN') {
             let query = this.supabase
                 .from('characters')
-                .select('id, name, state, skills, info, ranking_total_level, ranking_total_xp, ranking_item_power, guild_members(guilds(tag))')
+                .select('id, name, state, skills, equipment, info, ranking_total_level, ranking_total_xp, ranking_item_power, guild_members(guilds(tag))')
                 .eq('is_admin', false);
 
             if (mode === 'IRONMAN') {
@@ -1389,7 +1389,7 @@ export class GameManager {
                 const ids = lbData.map(entry => entry.character_id);
                 const { data: chars, error: charError } = await this.supabase
                     .from('characters')
-                    .select('id, name, state, skills, info, ranking_total_level, ranking_total_xp, ranking_item_power, guild_members(guilds(tag))')
+                    .select('id, name, state, skills, equipment, info, ranking_total_level, ranking_total_xp, ranking_item_power, guild_members(guilds(tag))')
                     .eq('is_admin', false)
                     .in('id', ids);
 
