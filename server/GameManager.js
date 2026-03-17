@@ -1041,7 +1041,7 @@ export class GameManager {
 
                 // If Mob Died (Victory), apply delay and break loop
                 if (roundResult && roundResult.details && roundResult.details.victory) {
-                    combat.next_attack_at += RESPAWN_DELAY_MS; // Add delay penalty
+                    combat.next_attack_at = now + RESPAWN_DELAY_MS; // Set next attack to precisely after respawn
                     combat.respawn_at = now + RESPAWN_DELAY_MS; // Set visual/logic blocker
                     stateChanged = true;
                     break; // Stop multiple kills in one tick

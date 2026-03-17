@@ -1,75 +1,48 @@
-# 📄 Patch Notes — Atualização de Guildas
-
-### 🛡️ Tags de Guilda
-Chegou a hora de mostrar a força da sua aliança para todo o reino! Agora, a **Tag da sua Guilda** é exibida orgulhosamente ao lado do seu nome.
-
-**Onde você verá as Tags:**
-- **Chat do Jogo**: Mostre a presença da sua guilda nas conversas globais, de troca e chats PT-BR.
-- **Rankings Globais (Hall of Fame)**: Veja quais guildas estão dominando o topo do servidor.
-- **Rankings de World Boss**: Descubra de onde vêm os jogadores que causam mais dano aos chefes!
-- **Perfil e Lista de Amigos**: Saiba instantaneamente em qual guilda seus amigos ou outros jogadores estão.
-- **Mercado e Trocas**: Facilita a identificação de quem é o seu parceiro comercial.
-
-Essa novidade traz mais visibilidade para as guildas ativas, ajuda no recrutamento orgânico e fomenta a competitividade. Reúna seus aliados, escolha uma Tag de respeito e deixe sua marca no mundo de Eternal Idle!
-
----
-
-### 📜 Histórico de Trocas Público
-Agora a transparência chegou às trocas! Quer saber se aquele jogador é um negociante honesto ou ver suas conquistas comerciais? Agora você pode!
-
-**Novidades:**
-- **Nova Aba "HIST"**: Ao inspecionar qualquer jogador, você verá uma nova aba de Histórico.
-- **Transparência Total**: Veja uma lista de todas as trocas recentes feitas pelo jogador.
-- **Detalhes Completos**: Clique em qualquer troca para ver exatamente o que foi enviado e recebido, incluindo o **Tier** e **Estrelas** dos itens, além do montante de Silver.
-- **Interface Otimizada**: Uma lista limpa e rápida que abre detalhes em um modal dedicado para não poluir a tela.
-
----
-
-### ⚔️ Ajuste no Item Power (IP)
-Corrigimos uma discrepância onde o IP do Ranking às vezes não batia com o IP do Perfil.
-
----
-
-### ⏳ Sistema de Fila e Balanceamento
-Refinamos a lógica de progressão e a economia de tempo para uma experiência mais justa.
-
-**O que mudou:**
-- **Otimização de Fila**: Acabamos com o "tempo perdido" entre atividades. Se uma tarefa termina, a próxima começa no mesmo instante virtual.
-- **Validação de Materiais**: Agora o sistema impede enfileirar ações sem os materiais totais necessários.
-- **Ajustes em Coleta e Craft**: Rebalanceamos o ganho de XP e o tempo de execução em atividades de coleta, refino e criação para manter o desafio em todos os tiers.
-- **Nerf de Ferramentas**: Ajustamos a eficiência e a velocidade bônus das ferramentas para alinhar com a nova curva de progressão.
-
----
+# 📄 Patch Notes — Atualização de Sistema e Equilíbrio
 
 ### 🛡️ Operação Centinela (Anti-Boosting)
-Implementamos camadas rigorosas de proteção para garantir a integridade da economia do jogo.
+Implementamos camadas rigorosas de proteção para garantir a integridade da economia do jogo e combater o uso de múltiplas contas de forma abusiva.
 
 **Novas Medidas:**
-- **Rastreamento de IP**: Transações e compras no mercado entre contas no mesmo endereço IP agora são sinalizadas e bloqueadas.
-- **Análise de Valor**: O sistema detecta preços abusivos no mercado (acima de 50x o valor base) e fluxos anormais de prata entre jogadores.
-- **Monitoramento 48h**: Analisamos o balanço de trocas recente para identificar transferências fatiadas para contas "mula".
+- **Rastreamento de IP**: Transações e trocas entre contas no mesmo endereço IP agora são monitoradas e podem ser bloqueadas para evitar auto-transferência de recursos.
+- **Análise de Valor de Mercado**: O sistema agora detecta e invalida listagens com preços abusivos (acima de 50x o valor base do item).
+- **Monitoramento de Fluxo 48h**: Analisamos transferências de grande volume entre jogadores num período de 48h para identificar e agir contra contas "mula".
 
 ---
 
-### 🛠️ Melhorias de UI/UX e Visual
-Pequenas mudanças que fazem grande diferença na navegação diária.
-
-**Novidades:**
-- **De Pouch para Basket**: O item "Pouch" foi renomeado para **Basket** (Cesta), com ícones e descrições atualizados em todo o jogo.
-- **Dicas de Multitasking**: Adicionamos ícones de informação **(i)** nas abas de farm para explicar que você pode realizar coleta e combate simultaneamente.
-- **Precisão Decimal**: Ajustamos a exibição de XP, tempo e eficiência para maior clareza. As chances de qualidade no craft agora exibem até 3 casas decimais (ex: 0.625%) para precisão total.
-- **Histórico de Trade Melhorado**: Agora o detalhamento das trocas exibe o **Tier**, a **Qualidade** (Good, Masterpiece, etc.) e as **Estrelas** de cada item.
-- **Botão de Fuga (Flee)**: Corrigido o erro onde clicar em fugir abria a aba de combate por acidente.
+### 🎒 De Pouch para Basket
+Para melhor representar o armazenamento de recursos, o item **Pouch** foi oficialmente renomeado para **Basket** (Cesta).
+- Ícones e descrições foram atualizados em todas as estações de craft e no inventário.
 
 ---
 
-### 🥗 Correções de Bugs e Estabilidade
-- **Cura com Comida**: Corrigimos um problema crítico onde jogadores ficavam travados com 0 HP e não conseguiam se curar fora de combate. Agora o consumo de comida funciona corretamente em qualquer situação.
-- **Sincronia de Tempo**: Otimizamos a comunicação entre servidor e cliente para evitar "saltos" nos timers ao reconectar.
+### ℹ️ Dicas de Multitasking
+Adicionamos ícones de informação **(i)** nas abas de **Farm**.
+- Ao clicar no ícone, você encontrará uma explicação detalhada sobre como o sistema de enfileiramento permite que você realize atividades de coleta e combate simultaneamente.
 
 ---
 
-### 💰 Mercado e Economia
-- **Auto-Matching (Venda Instantânea)**: Agora, ao listar um item no mercado, o sistema verifica automaticamente se existe uma "Ordem de Compra" compatível. Se houver, a venda é realizada instantaneamente!
-- **Taxas de Escrow**: Para manter a economia saudável, as vendas no mercado possuem uma taxa de 20%. Cancelar uma listagem com menos de 1 hora de duração agora possui uma taxa de conveniência de 10%.
+### ⏳ Ajustes de Progressão e Ferramentas
+Refinamos a curva de ganhos para tornar a jornada entre os Tiers mais equilibrada e recompensadora.
 
+- **Equilíbrio de XP e Tempo**: Ajustamos os valores de XP e o tempo de execução para atividades de coleta, refino e criação em todos os dez níveis (Tiers).
+- **Nerf de Ferramentas**: A eficiência e os bônus das ferramentas foram recalibrados para se alinharem à nova velocidade de progressão do jogo.
+
+---
+
+### 📜 Melhorias no Histórico de Trocas
+A transparência nas negociações subiu de nível! Agora o detalhamento das trocas exibe informações cruciais para que você saiba exatamente o que está negociando.
+- **Tier e Qualidade**: Agora você pode ver claramente o Tier e a Qualidade do item (ex: Good, Masterpiece) diretamente no histórico.
+- **Estrelas**: O nível de aprimoramento (estrelas) também é exibido para garantir trocas seguras.
+
+---
+
+### 🛠️ UI/UX e Precisão
+- **Precisão no Craft**: As chances de obter qualidades superiores no crafting agora exibem até **3 casas decimais** (ex: 0.625%) para que você saiba suas probabilidades exatas.
+- **Cura com Comida**: Corrigimos o erro onde jogadores com 0 HP ficavam impossibilitados de comer. Agora, a cura fora de combate via comida funciona de forma instantânea e estável.
+
+---
+
+### 💰 Economia do Mercado
+- **Auto-Matching**: Ao listar um item, o sistema verifica automaticamente se existe uma Ordem de Compra compatível para realizar a venda imediata.
+- **Taxas de Escrow**: Vendas no mercado possuem taxa de 20%. Cancelar listagens com menos de 1 hora de duração agora possui uma taxa de 10%.

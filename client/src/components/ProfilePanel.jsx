@@ -718,7 +718,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                     <span style={{ fontSize: '0.8rem', fontWeight: '600', color: '#4ade80' }}>Premium</span>
                                     <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>
-                                        Expires: {new Date(gameState.state.membership.expiresAt).toLocaleDateString('pt-BR')}
+                                        Expires: {new Date(gameState.state.membership.expiresAt).toLocaleDateString('en-US')}
                                     </span>
                                 </div>
                                 <span style={{ fontSize: '0.65rem', background: 'rgba(34, 197, 94, 0.2)', color: '#4ade80', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>ACTIVE</span>

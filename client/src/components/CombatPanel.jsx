@@ -4,6 +4,7 @@ import { Sword, Shield, Activity, User, Skull, Clock, Target, Zap, TrendingUp, C
 import { resolveItem, formatItemId } from '@shared/items';
 import { formatNumber, formatCompactNumber, formatSilver } from '@utils/format';
 import { MONSTERS } from '@shared/monsters';
+import { calculateTTK } from '@shared/combat_logic';
 import { calculateSurvivalTime } from '@utils/combat';
 import { useAppStore } from '../store/useAppStore';
 
@@ -518,21 +519,11 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
                                 const activeMob = (MONSTERS[combat.tier] || []).find(m => m.id === combat.mobId);
                                 if (!activeMob) return <span style={{ fontSize: '1rem', fontWeight: 'bold', fontFamily: 'monospace', color: '#888' }}>-</span>;
 
-                                const playerDmg = stats.damage;
-                                const mobDef = activeMob.defense || 0;
-                                const mobMitigation = Math.min(0.75, mobDef / 10000);
-                                const burstChance = stats.burstChance || 0;
-                                const burstDmg = stats.burstDmg || 1.5;
-                                const avgDmgMultiplier = 1 + (burstChance / 100 * (burstDmg - 1));
-                                const finalMitigatedDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)) * avgDmgMultiplier);
-
-                                const roundsToKill = Math.ceil(activeMob.health / finalMitigatedDmg);
-                                const interval = (stats.attackSpeed || 1000) / 1000;
-                                const cycleTime = (roundsToKill * interval) + 1.0; // 1s Respawn + First Hit Delay
+                                const ttk = calculateTTK(stats, activeMob);
 
                                 return (
                                     <div style={{ fontSize: '1rem', fontWeight: 'bold', fontFamily: 'monospace', color: 'var(--accent)' }}>
-                                        {cycleTime.toFixed(1)}s
+                                        {ttk.cycleTimeSeconds.toFixed(1)}s
                                     </div>
                                 );
                             })()}
@@ -1078,32 +1069,12 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
                         const top3SilverMobIds = silverScores.slice(0, 3).map(m => m.id);
 
                         return mobsInTier.map(mob => {
-                            const playerDmg = stats.damage;
-
-                            // 1. Calculate Mitigation (Server-side formula: 100 def = 1% [def/10000])
-                            const mobDef = mob.defense || 0;
-                            const mobMitigation = Math.min(0.75, mobDef / 10000);
-
-                            // 2. Include average Burst Damage in the calculation
-                            const burstChance = stats.burstChance || 0;
-                            const burstDmg = stats.burstDmg || 1.5;
-                            const avgDmgMultiplier = 1 + (burstChance / 100 * (burstDmg - 1));
-
-                            const baseMitigatedDmg = Math.max(1, Math.floor(playerDmg * (1 - mobMitigation)));
-                            const mitigatedDmg = baseMitigatedDmg * avgDmgMultiplier;
-
-                            const finalMitigatedDmg = Math.max(1, mitigatedDmg);
-
-                            // 3. Calculate Time per Cycle
-                            // Server: Hit happens at start of round. Fight ends at lethal blow.
-                            const roundsToKill = Math.ceil(mob.health / finalMitigatedDmg);
-                            const interval = (stats.attackSpeed || 1000) / 1000;
-                            const cycleTime = (roundsToKill * interval) + 1.0;
-                            // +1s Respawn Delay
-
+                            // Use Unified Logic
+                            const ttk = calculateTTK(stats, mob);
+                            const cycleTime = ttk.cycleTimeSeconds;
                             const killsPerHour = 3600 / cycleTime;
 
-                            // 4. Rewards Calculations
+                            // Rewards Calculations
                             const xpBonus = stats.globals?.xpYield || 0;
                             const silverBonus = stats.globals?.silverYield || 0;
 

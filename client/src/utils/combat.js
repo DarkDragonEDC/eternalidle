@@ -1,11 +1,4 @@
-/**
- * Shared survival time calculation logic for Eternal Idle.
- * Accounts for:
- * - Player and Mob Mitigation (0.75 cap)
- * - Food Healing and Cooldown (5s)
- * - Mob Respawn (1s delay)
- * - Idle Limit (8h normal / 12h premium)
- */
+import { calculateTTK } from '@shared/combat_logic';
 
 export const calculateSurvivalTime = (playerStats, mobData, foodItem, foodAmountInput, currentHp, isPremium = false, profLevel = 1) => {
     if (!mobData) return { seconds: Infinity, text: "∞", color: "#4caf50" };
@@ -37,22 +30,16 @@ export const calculateSurvivalTime = (playerStats, mobData, foodItem, foodAmount
 
     const mobMaxHp = mobData.health || 100;
 
-    // Player Attack Phase
-    const playerAtkSpeed = Math.max(200, playerStats.attackSpeed || 1000);
-    const playerAtkPower = playerStats.damage || 1;
-    const mobDef = mobData.defense || 0;
-    const mobMitigation = Math.min(0.75, mobDef / 10000);
-
     // Average Hit including Burst
-    const burstChance = playerStats.burstChance || 0;
-    const burstMult = playerStats.burstDmg || 1.5;
-    const baseMitigatedHit = Math.max(1, Math.floor(playerAtkPower * (1 - mobMitigation)));
-    let avgPlayerHit = baseMitigatedHit * (1 + (burstChance / 100) * (burstMult - 1));
-
-
-    // Time to Kill (TTK)
-    const hitsToKill = Math.ceil(mobMaxHp / avgPlayerHit);
-    const timeToKill = hitsToKill * playerAtkSpeed;
+    const ttk = calculateTTK(playerStats, mobData);
+    
+    // Time to Kill (TTK) in ms
+    let timeToKill = ttk.cycleTimeSeconds * 1000;
+    
+    // Safety check: if TTK is Infinity (e.g. 0 damage), survival is bounded by food/hp
+    if (isNaN(timeToKill) || timeToKill === Infinity) {
+        timeToKill = Infinity; 
+    }
 
     // Mob Attacks during TTK
     // Mob now attacks at t=0. Subsequent attacks every 1000ms.
