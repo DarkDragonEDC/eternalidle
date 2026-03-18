@@ -1,5 +1,6 @@
 import fs from 'fs';
 import { ITEMS, getSkillForItem, getLevelRequirement, ITEM_LOOKUP, QUALITIES, resolveItem, BASE_QUALITY_CHANCES } from '../../shared/items.js';
+import { QUEST_TYPES } from '../../shared/quests.js';
 
 // === STARTUP DIAGNOSTIC ===
 const potionKeys = Object.keys(ITEM_LOOKUP).filter(k => k.includes('POTION'));
@@ -355,6 +356,9 @@ export class ActivityManager {
         const added = this.gameManager.inventoryManager.addItemToInventory(char, item.id, amountGained);
         if (!added) return { error: "Inventory Full", success: false };
 
+        // Quest Progress: COLLECT
+        this.gameManager.quests.handleProgress(char, QUEST_TYPES.COLLECT, { itemId: item.id, count: amountGained });
+
         const yieldBonus = (stats.globals?.xpYield || 0) + (stats.xpBonus?.GATHERING || 0) + (actKey ? (stats.xpBonus?.[actKey] || 0) : 0);
         let xpAmount = (item.xp || 5) * (1 + yieldBonus / 100);
         if (xpAmount > MAX_ACTIVITY_XP) xpAmount = MAX_ACTIVITY_XP;
@@ -410,6 +414,9 @@ export class ActivityManager {
 
         const added = this.gameManager.inventoryManager.addItemToInventory(char, item.id, amountGained);
         if (!added) return { error: "Inventory Full", success: false };
+
+        // Quest Progress: REFINE
+        this.gameManager.quests.handleProgress(char, QUEST_TYPES.REFINE, { itemId: item.id, count: amountGained });
 
         this.gameManager.inventoryManager.consumeItems(char, item.req);
 
@@ -484,6 +491,9 @@ export class ActivityManager {
 
         const added = this.gameManager.inventoryManager.addItemToInventory(char, finalItemId, amountGained, metadata);
         if (!added) return { error: "Inventory Full" };
+
+        // Quest Progress: CRAFT
+        this.gameManager.quests.handleProgress(char, QUEST_TYPES.CRAFT, { item, itemId: item.id, count: amountGained });
 
         this.gameManager.inventoryManager.consumeItems(char, item.req);
 

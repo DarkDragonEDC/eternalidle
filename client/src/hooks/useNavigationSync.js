@@ -1,6 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ITEMS } from '@shared/items';
+import { useAppStore } from '../store/useAppStore';
 
 export function useNavigationSync(
     selectedCharacter,
@@ -14,8 +15,17 @@ export function useNavigationSync(
     const location = useLocation();
     const navigate = useNavigate();
 
+    const { session } = useAppStore();
+
     // Unified Navigation Synchronization
     useEffect(() => {
+        // 1. If no session, force URL to root (unless it's privacy policy)
+        // This prevents stale URLs like /skills_overview from persisting on the landing page
+        if (!session && location.pathname !== '/' && !location.pathname.startsWith('/privacy')) {
+            navigate('/', { replace: true });
+            return;
+        }
+
         if (!selectedCharacter) return;
         if (location.pathname.startsWith('/privacy')) return;
 
@@ -24,7 +34,7 @@ export function useNavigationSync(
         const validTabs = [
             'world_boss', 'combat', 'dungeon', 'market', 'guild', 'ranking', 
             'taxometer', 'rest_camp', 'gathering', 'refining', 'crafting', 
-            'merging', 'inventory', 'profile', 'skills_overview', 'town_overview', 'combat_overview'
+            'merging', 'inventory', 'profile', 'skills_overview', 'town_overview', 'combat_overview', 'village'
         ];
 
         // 1. URL has a valid tab -> Sync to Store
@@ -39,14 +49,14 @@ export function useNavigationSync(
         }
         // 3. Fallback for root or invalid URL
         else if (!urlTab || !validTabs.includes(urlTab)) {
-            if (location.pathname === '/') {
+            if (location.pathname === '/' || location.pathname === '') {
                 navigate(`/${storeTab || 'inventory'}`, { replace: true });
             }
         }
-    }, [location.pathname, activeTab, selectedCharacter, navigate, setActiveTab]);
+    }, [location.pathname, activeTab, selectedCharacter, navigate, setActiveTab, session]);
 
     const handleNavigate = useCallback((itemId, category = null) => {
-        const validTabs = ['world_boss', 'combat', 'dungeon', 'market', 'guild', 'ranking', 'taxometer', 'rest_camp', 'gathering', 'refining', 'crafting', 'merging', 'inventory', 'profile', 'skills_overview', 'town_overview', 'combat_overview'];
+        const validTabs = ['world_boss', 'combat', 'dungeon', 'market', 'guild', 'ranking', 'taxometer', 'rest_camp', 'gathering', 'refining', 'crafting', 'merging', 'inventory', 'profile', 'skills_overview', 'town_overview', 'combat_overview', 'village'];
         
         if (validTabs.includes(itemId)) {
             if (itemId === 'merging' && !category) category = 'RUNE';

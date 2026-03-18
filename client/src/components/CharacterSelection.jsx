@@ -9,7 +9,7 @@ import ThemeSelector from './ThemeSelector';
 import { useAppStore } from '../store/useAppStore';
 
 const CharacterSelection = ({ onSelectCharacter, theme, setTheme, isMobile, onPreviewTheme }) => {
-    const { characters, isCharactersLoading: loading, fetchCharacters, setCharacters } = useAppStore();
+    const { characters, isCharactersLoading: loading, fetchCharacters, setCharacters, setActiveTab } = useAppStore();
     const [creating, setCreating] = useState(null); // 'normal' or 'ironman' or null
     const [newCharName, setNewCharName] = useState('');
     const [error, setError] = useState(null);
@@ -60,6 +60,10 @@ const CharacterSelection = ({ onSelectCharacter, theme, setTheme, isMobile, onPr
             setCreating(null);
             setNewCharName('');
             setError(null);
+            
+            // Auto-select and redirect for new characters
+            onSelectCharacter(newChar.id);
+            setActiveTab('village');
         } catch (err) {
             setError(err.message);
         }

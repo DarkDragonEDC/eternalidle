@@ -26,6 +26,8 @@ import { PersistenceService } from './services/PersistenceService.js';
 import { SocketService } from './services/SocketService.js';
 import { NotificationService } from './services/NotificationService.js';
 import { BanManager } from './managers/BanManager.js';
+import { QuestManager } from './managers/QuestManager.js';
+import { QUEST_TYPES } from '../shared/quests.js';
 import { pruneState, hydrateState } from './utils/statePruner.js';
 
 // Removed local ITEM_LOOKUP generation in favor of shared source of truth
@@ -56,6 +58,7 @@ export class GameManager {
         this.statsManager = new StatsManager(this);
         this.catchupManager = new CatchupManager(this);
         this.banManager = new BanManager(this);
+        this.quests = new QuestManager(this);
         this.notifications = new NotificationService(this);
         
         // Delegated to PersistenceService
@@ -491,8 +494,8 @@ export class GameManager {
         }
         // ------------------------------------------
 
-        // Add Noob Chest
-        initialState.inventory['NOOB_CHEST'] = 1;
+        // Add Noob Chest (Moved to Quest reward)
+        // initialState.inventory['NOOB_CHEST'] = 1;
 
         // Calculate initial stats (HP) based on skills
         const tempChar = { state: initialState };
@@ -1200,6 +1203,9 @@ export class GameManager {
             }
         }
 
+        // --- QUEST PROGRESSION (LEVEL) ---
+        this.quests.handleProgress(char, QUEST_TYPES.LEVEL, { globalLevel: this.quests.calculateGlobalLevel(char) });
+
         return leveledUp ? { skill: skillKey, level: skill.level } : null;
     }
 
@@ -1695,6 +1701,9 @@ export class GameManager {
                 char.state.pendingNameChange = true;
                 // message = "Name Change Unlocked! You can now change your name in the Profile panel.";
             } else if (itemData.id === 'NOOB_CHEST') {
+                // Quest Progress
+                this.quests.handleProgress(char, QUEST_TYPES.OPEN, { itemId: itemData.id });
+
                 // NOOB CHEST LOGIC
                 const rewards = [
                     { id: 'T1_FOOD', qty: 200 * safeQty },

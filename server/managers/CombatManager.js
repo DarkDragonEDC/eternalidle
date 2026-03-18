@@ -7,6 +7,7 @@ import {
 } from '../../shared/combat.js';
 import fs from 'fs';
 import crypto from 'crypto';
+import { QUEST_TYPES } from '../../shared/quests.js';
 
 const MAX_XP_PER_KILL = 10_000_000; // 10M
 const MAX_SILVER_PER_KILL = 100_000_000; // 100M
@@ -369,6 +370,9 @@ export class CombatManager {
             combat.sessionXp = (combat.sessionXp || 0) + finalXp;
             combat.sessionSilver = (combat.sessionSilver || 0) + finalSilver;
             combat.kills = (combat.kills || 0) + 1;
+
+            // Quest Progress: KILL
+            this.gameManager.quests.handleProgress(char, QUEST_TYPES.KILL, { monsterId: combat.mobId, count: 1 });
 
             roundDetails.silverGained = finalSilver;
             roundDetails.xpGained = finalXp;

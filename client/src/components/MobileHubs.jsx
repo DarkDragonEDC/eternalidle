@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import {
     Pickaxe, Box, Hammer, Sword, Castle, Trophy, ShoppingBag, Zap, Coins, Gift,
     ArrowLeftRight, Skull, Lock, Trees, PawPrint, Leaf, Fish, FlaskConical,
-    Flame, Layers, Droplets, Shield, Target, CookingPot, Sparkles, Star, Heart
+    Flame, Layers, Droplets, Shield, Target, CookingPot, Sparkles, Star, Heart, Home
 } from 'lucide-react';
 
 const HubButton = ({ id, label, icon, onClick, color = 'var(--text-main)', level, progress, showBadge, customStyle = {} }) => (
@@ -305,6 +305,12 @@ export const TownOverview = ({ onNavigate, gameState, canSpin, onOpenDailySpin, 
                     }}
                 />
             )}
+            <HubButton
+                label="Village"
+                icon={<Home />}
+                color="var(--text-main)"
+                onClick={() => onNavigate('village')}
+            />
             <HubButton
                 label="Market"
                 icon={isAnonymous ? <Lock /> : <ShoppingBag />}

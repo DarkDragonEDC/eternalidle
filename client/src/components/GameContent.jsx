@@ -13,6 +13,7 @@ import CombatPanel from './CombatPanel';
 import DungeonPanel from './DungeonPanel';
 import RunePanel from './RunePanel';
 import GuildPanel from './GuildPanel';
+import VillagePage from '../pages/VillagePage';
 import SkillProgressHeader from './SkillProgressHeader';
 import ActivityProgressBar from './ActivityProgressBar';
 import { useAppStore } from '../store/useAppStore';
@@ -162,6 +163,8 @@ export const GameContent = ({
                     />
                 </div>
             );
+        case 'village':
+            return <VillagePage />;
         case 'trade':
             return null;
         case 'taxometer':

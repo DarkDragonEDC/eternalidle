@@ -6,6 +6,7 @@ import {
 import { useAppStore } from '../store/useAppStore';
 import { formatNumber, formatSilver } from '../utils/format';
 import NotificationCenter from './NotificationCenter';
+import QuestTracker from './QuestTracker';
 
 export const GlobalHeader = ({ 
     displayedGameState, 
@@ -149,6 +150,8 @@ export const GlobalHeader = ({
                         )}
                     </AnimatePresence>
                 </div>
+                
+                <QuestTracker />
 
                 <NotificationCenter
                     notifications={displayedGameState?.state?.notifications || []}

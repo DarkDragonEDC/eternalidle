@@ -109,7 +109,16 @@ export const ITEMS = {
     MAPS: {},
     SPECIAL: {
         CREST: {},
-        CHEST: {},
+        CHEST: {
+            NOOB_CHEST: {
+                id: 'NOOB_CHEST',
+                name: 'Noob Chest',
+                description: 'A special gift for new adventurers. Open it to find essential equipment.',
+                type: 'CHEST',
+                rarity: 'EPIC',
+                icon: '/items/CHEST_EPIC.webp'
+            }
+        },
         RUNE_SHARD: {},
         RUNE: {}
     }
@@ -483,7 +492,7 @@ ITEMS.SPECIAL.NOOB_CHEST = {
     id: 'NOOB_CHEST',
     name: 'Noob Chest',
     type: 'CONSUMABLE',
-    description: 'Contains starting gear and supplies for new adventurers.',
+    description: 'Choose your path! Contains: T1 Sword, T1 Bow, T1 Staff, and 100x T1 Food.',
     icon: '/items/NOOB_CHEST.webp', // Ensure this icon exists or use a placeholder
     tier: 1,
     rarity: 'COMMON'

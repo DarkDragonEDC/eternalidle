@@ -9,6 +9,7 @@ import { registerSocialHandlers } from "./handlers/socialHandler.js";
 import { registerMarketHandlers } from "./handlers/marketHandler.js";
 import { registerOrbStoreHandlers } from "./handlers/orbStoreHandler.js";
 import { registerTradeHandlers } from "./handlers/tradeHandler.js";
+import { registerQuestHandlers } from "./handlers/questHandler.js";
 import { registerMiscHandlers } from "./handlers/miscHandler.js";
 
 export const initSocket = (io, gameManager, serverVersion) => {
@@ -97,6 +98,7 @@ export const initSocket = (io, gameManager, serverVersion) => {
     registerMarketHandlers(socket, gameManager, io);
     registerOrbStoreHandlers(socket, gameManager, io);
     registerTradeHandlers(socket, gameManager, io);
+    registerQuestHandlers(socket, gameManager, io);
     registerMiscHandlers(socket, gameManager, io);
   });
 };

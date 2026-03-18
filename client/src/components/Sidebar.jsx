@@ -3,7 +3,7 @@ import {
     Package, User, Pickaxe, Hammer, Sword,
     ChevronDown, ChevronRight, Coins, Castle,
     Trophy, Tag, Zap, Box, Axe, Shield, Users, MessageSquare, Sun, Moon, Gift, Skull, Lock,
-    Check, Sparkles, Trees, PawPrint, Leaf, FlaskConical, Flame, Layers, Droplets, Target, CookingPot, Fish, LogOut
+    Check, Sparkles, Trees, PawPrint, Leaf, FlaskConical, Flame, Layers, Droplets, Target, CookingPot, Fish, LogOut, Home
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import DailySpinModal from './DailySpinModal';
@@ -95,8 +95,8 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
             items: [
                 { id: 'profile', label: 'Profile', icon: <User size={20} /> },
                 { id: 'inventory', label: 'Inventory', icon: <Package size={20} /> },
+                { id: 'village', label: 'Village', icon: <Home size={20} /> },
                 { id: 'market', label: 'Market', icon: <Tag size={20} />, restricted: isAnonymous },
-                { id: 'ranking', label: 'Ranking', icon: <Trophy size={20} /> },
                 { id: 'rest_camp', label: 'Camp', icon: <Flame size={20} /> },
                 { id: 'guild', label: 'Guild', icon: <Shield size={20} /> },
             ]
@@ -239,8 +239,18 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
                         ))
                     )}
                     
-                    {/* Spacer/Center for Social Button */}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                    {/* Spacer/Center for Social/Ranking Button */}
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '12px' }}>
+                        <motion.button
+                            whileHover={{ scale: 1.1, background: 'rgba(255,255,255,0.1)' }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => onNavigate('ranking')}
+                            className={`sidebar-left-action-btn ${activeTab === 'ranking' ? 'active' : ''}`}
+                            title="Ranking"
+                        >
+                            <Trophy size={22} />
+                        </motion.button>
+
                         <motion.button
                             whileHover={{ scale: 1.1, background: 'rgba(255,255,255,0.1)' }}
                             whileTap={{ scale: 0.9 }}

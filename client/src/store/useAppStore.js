@@ -120,6 +120,63 @@ export const useAppStore = create((set, get) => ({
             set({ nameAvailability: result });
         });
 
+        // --- QUEST LISTENERS ---
+        newSocket.on('quest_status_update', (data) => {
+            set((state) => {
+                if (!state.gameState) return state;
+                const newQuests = { ...state.gameState.state.quests, ...data };
+                return {
+                    gameState: {
+                        ...state.gameState,
+                        state: {
+                            ...state.gameState.state,
+                            quests: newQuests
+                        }
+                    }
+                };
+            });
+        });
+
+        newSocket.on('quest_progress', ({ questId, progress }) => {
+            set((state) => {
+                if (!state.gameState?.state?.quests?.active?.[questId]) return state;
+                const active = { ...state.gameState.state.quests.active };
+                active[questId] = { ...active[questId], progress };
+                return {
+                    gameState: {
+                        ...state.gameState,
+                        state: {
+                            ...state.gameState.state,
+                            quests: {
+                                ...state.gameState.state.quests,
+                                active
+                            }
+                        }
+                    }
+                };
+            });
+        });
+
+        newSocket.on('quest_ready_to_claim', ({ questId }) => {
+            set((state) => {
+                if (!state.gameState?.state?.quests?.active?.[questId]) return state;
+                const active = { ...state.gameState.state.quests.active };
+                active[questId] = { ...active[questId], completed: true };
+                return {
+                    gameState: {
+                        ...state.gameState,
+                        state: {
+                            ...state.gameState.state,
+                            quests: {
+                                ...state.gameState.state.quests,
+                                active
+                            }
+                        }
+                    }
+                };
+            });
+        });
+
         set({ socket: newSocket });
     },
     disconnectSocket: () => {
@@ -150,6 +207,20 @@ export const useAppStore = create((set, get) => ({
         } catch (err) {
             console.warn('Could not fetch active players count');
         }
+    },
+
+    // --- QUEST ACTIONS ---
+    questInteract: (npcId) => {
+        const { socket } = get();
+        if (socket) socket.emit('quest_interact', { npcId });
+    },
+    questAccept: (questId) => {
+        const { socket } = get();
+        if (socket) socket.emit('quest_accept', { questId });
+    },
+    questClaim: (questId) => {
+        const { socket } = get();
+        if (socket) socket.emit('quest_claim', { questId });
     },
     connectionError: null,
     setConnectionError: (connectionError) => set({ connectionError }),
@@ -187,6 +258,7 @@ export const useAppStore = create((set, get) => ({
                 }
                 if (status.state.inventory !== undefined) merged.state.inventory = status.state.inventory;
                 if (status.state.bank !== undefined) merged.state.bank = status.state.bank;
+                if (status.state.quests !== undefined) merged.state.quests = status.state.quests;
             }
 
             if (status.current_activity !== undefined) merged.current_activity = status.current_activity;

@@ -1,4 +1,5 @@
 import { ITEMS, QUALITIES, resolveItem, ITEM_LOOKUP, calculateRuneBonus, getSkillForItem, getLevelRequirement, getRequiredProficiencyGroup } from '../../shared/items.js';
+import { QUEST_TYPES } from '../../shared/quests.js';
 import { getProficiencyStats } from '../../shared/proficiency_stats.js';
 
 // Removed local ITEM_LOOKUP generation in favor of shared source of truth
@@ -500,7 +501,11 @@ export class InventoryManager {
                 COMBAT_SLOTS.forEach(s => { if (state.equipment[s]) combatGear[s] = state.equipment[s]; });
                 state.equipment_sets[activeSet] = combatGear;
             }
+
         }
+        
+        // Quest Progress: EQUIP
+        this.gameManager.quests.handleProgress(char, QUEST_TYPES.EQUIP, { item: state.equipment[slotName], itemId: itemId });
 
         await this.gameManager.saveStateCritical(char.id, state);
         return { success: true };
