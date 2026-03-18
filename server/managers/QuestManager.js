@@ -1,5 +1,5 @@
 import { QUESTS, NPCS } from '../../shared/quests.js';
-import { ITEMS, getSkillForItem } from '../../shared/items.js';
+import { ITEMS, getSkillForItem, getRequiredProficiencyGroup } from '../../shared/items.js';
 
 export const QUEST_TYPES = {
     KILL: 'KILL',
@@ -232,8 +232,9 @@ export class QuestManager {
 
         // 4. Handle Proficiency XP (Dynamic based on weapon)
         if (quest.rewards.proficiencyXp) {
-            const weaponId = char.state.equipment?.weapon;
-            const skillId = weaponId ? getSkillForItem(weaponId) : 'COMBAT';
+            const weaponId = char.state.equipment?.mainHand?.id;
+            const group = getRequiredProficiencyGroup(weaponId);
+            const skillId = group ? `${group.toUpperCase()}_PROFICIENCY` : 'COMBAT';
             this.gm.addXP(char, skillId, quest.rewards.proficiencyXp);
         }
 
@@ -425,16 +426,16 @@ export class QuestManager {
 
     getClassGatherSkill(char) {
         const res = this.getClassResource(char);
-        return getSkillForItem(res, 'COLLECT');
+        return getSkillForItem(res, 'GATHERING');
     }
 
     getClassRefineSkill(char) {
         const res = this.getClassRefinedResource(char);
-        return getSkillForItem(res, 'REFINE');
+        return getSkillForItem(res, 'REFINING');
     }
 
     getClassCraftSkill(char) {
         const res = this.getClassArmor(char);
-        return getSkillForItem(res, 'CRAFT');
+        return getSkillForItem(res, 'CRAFTING');
     }
 }

@@ -640,6 +640,18 @@ export class GameManager {
                 const maxHp = stats.maxHP || 100;
                 char.state.health = Math.min(maxHp, (char.state.health || 0) + char.state.resting.healAmount);
                 console.log(`[REST] ${char.name} resting complete: healed ${char.state.resting.healAmount} HP`);
+
+                // PUSH NOTIFICATION: HP Fully Recovered (Only from resting)
+                if (char.state.health >= maxHp && char.user_id) {
+                    this.pushManager.notifyUser(
+                        char.user_id,
+                        'push_hp_recovered',
+                        'HP Fully Recovered! ❤️',
+                        'You are back to full health and ready for battle!',
+                        '/combat'
+                    );
+                }
+
                 delete char.state.resting;
                 this.markDirty(char.id);
             }
@@ -1366,17 +1378,6 @@ export class GameManager {
             // Auto-remove food if empty
             if (char.state.equipment.food.amount <= 0) {
                 delete char.state.equipment.food;
-            }
-
-            // PUSH NOTIFICATION: HP Fully Recovered
-            if (char.state.health >= maxHp && char.user_id) {
-                this.pushManager.notifyUser(
-                    char.user_id,
-                    'push_hp_recovered',
-                    'HP Fully Recovered! ❤️',
-                    'You are back to full health and ready for battle!',
-                    '/combat'
-                );
             }
 
             return { used: true, amount: actualHeal, eaten: 1, savedCount };

@@ -8,7 +8,7 @@ These are sent to your device (Mobile or Desktop) even when the game is closed.
 | Notification ID | Title | Message Body | Trigger Condition |
 | :--- | :--- | :--- | :--- |
 | `push_activity_finished` | Activity Finished! ✅ | Your activity is complete. Tap to start a new one! | When a timed activity (like refining) finishes. |
-| `push_hp_recovered` | HP Fully Recovered! ❤️ | You are back to full health and ready for battle! | When your HP reaches maximum (via resting or eating). |
+| `push_hp_recovered` | HP Fully Recovered! ❤️ | You are back to full health and ready for battle! | When your HP reaches maximum via resting. |
 | `push_daily_spin` | Daily Spin Available! 🎡 | Your daily reward is waiting for you... | Triggered daily at Midnight UTC. |
 | `push_world_boss` | World Boss Spawned! 🐉 | [Boss Name] is terrorizing the world... | Triggered when the daily World Boss spawns. |
 | `push_guild_tasks` | New Guild Tasks! 🛡️ | Fresh daily tasks are available for your guild. | Triggered daily at Midnight UTC for guild members. |
