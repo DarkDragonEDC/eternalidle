@@ -727,9 +727,8 @@ export class GameManager {
             const char = await this.getCharacter(userId, characterId);
             if (char) {
                 char.offlineReport = null;
-                if (char.state._offlineReportSent) {
-                    char.state._offlineReportSent = false;
-                    this.markDirty(charId);
+                if (char._offlineReportSent) {
+                    char._offlineReportSent = false;
                 }
             }
         });
@@ -1672,7 +1671,7 @@ export class GameManager {
     async stopDungeon(u, c) { return this.dungeonManager.stopDungeon(u, c); }
     async stopDungeonQueue(u, c) { return this.dungeonManager.stopQueue(u, c); }
     async consumeItem(userId, characterId, itemId, quantity = 1) {
-        console.log(`[DEBUG-POTION] consumeItem called for ${characterId}, item: ${itemId}, qty:`, quantity);
+
         const char = await this.getCharacter(userId, characterId);
         const itemData = this.inventoryManager.resolveItem(itemId);
         // Note: No current_activity or combat restrictions are enforced here to allow potion usage anytime.
@@ -1896,7 +1895,7 @@ export class GameManager {
         }
     }
     async craftRune(userId, characterId, shardId, qty = 1, category = 'GATHERING') {
-        console.log(`[GameManager] craftRune called for ${characterId}, shard: ${shardId}, qty: ${qty}, category: ${category}`);
+
         const count = Math.max(1, parseInt(qty) || 1);
         const char = await this.getCharacter(userId, characterId);
         if (!char) return { success: false, error: "Character not found" };
@@ -1982,7 +1981,7 @@ export class GameManager {
         };
     }
     async upgradeRune(userId, characterId, runeId, qty = 1) {
-        console.log(`[GameManager] upgradeRune called for ${characterId}, rune: ${runeId}, qty: ${qty}`);
+
         const count = Math.max(1, parseInt(qty) || 1);
         const char = await this.getCharacter(userId, characterId);
         if (!char) return { success: false, error: "Character not found" };
@@ -2019,7 +2018,7 @@ export class GameManager {
             // Evolve to Next Tier
             nextStars = 1;
             nextTier = tier + 1;
-            console.log(`[GameManager] Evolving rune ${runeId} to Tier ${nextTier}`);
+
         }
 
         // 4. Check Quantity and Silver (Need 2 * qty and 2 * tier * qty)
@@ -2081,7 +2080,7 @@ export class GameManager {
     }
 
     async autoMergeRunes(userId, characterId, filters = {}) {
-        console.log(`[GameManager] autoMergeRunes called for ${characterId} with filters:`, filters);
+
         const char = await this.getCharacter(userId, characterId);
         if (!char) throw new Error("Character not found");
 

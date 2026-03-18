@@ -234,7 +234,7 @@ export class PersistenceService {
 
     async flushDirtyCharacters() {
         if (this.dirty.size === 0) return;
-        console.log(`[DB] Periodic flush for ${this.dirty.size} characters...`);
+
         const ids = Array.from(this.dirty);
         for (const id of ids) {
             await this.persistCharacter(id);

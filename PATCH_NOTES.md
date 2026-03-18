@@ -56,3 +56,10 @@ A transparência nas negociações subiu de nível! Agora o detalhamento das tro
 ### 💰 Economia do Mercado
 - **Auto-Matching**: Ao listar um item, o sistema verifica automaticamente se existe uma Ordem de Compra compatível para realizar a venda imediata.
 - **Taxas de Escrow**: Vendas no mercado possuem taxa de 20%. Cancelar listagens com menos de 1 hora de duração agora possui uma taxa de 10%.
+
+---
+
+### 🌐 Internacionalização e Integridade
+- **Tradução de Ranking**: Todas as categorias e rótulos do Ranking Geral foram traduzidos para o inglês (`General`, `Proficiency`, `Gathering`, etc.) para manter a consistência global do projeto.
+- **Otimização de Memória**: Corrigimos uma falha na persistência de dados offline que poderia causar redundância no banco de dados. O controle de relatórios offline agora é processado estritamente em memória.
+- **Limpeza de Logs**: Removemos diversos logs de depuração do console do servidor para melhorar a performance e a legibilidade dos logs de sistema.

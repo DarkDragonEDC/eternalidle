@@ -10,25 +10,25 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const CATEGORIES = [
     { 
-        id: 'GENERAL', name: 'Geral', icon: Trophy, color: '#fbbf24',
+        id: 'GENERAL', name: 'General', icon: Trophy, color: '#fbbf24',
         subTabs: [
             { id: 'LEVEL', name: 'Total Level', icon: GraduationCap },
             { id: 'TOTAL_XP', name: 'Total XP', icon: Zap }
         ]
     },
     {
-        id: 'PROFICIENCY', name: 'Proficiência', icon: Shield, color: '#d8b4fe',
+        id: 'PROFICIENCY', name: 'Proficiency', icon: Shield, color: '#d8b4fe',
         subTabs: [
             { id: 'WARRIOR_PROFICIENCY', name: 'Warrior', icon: Sword },
             { id: 'HUNTER_PROFICIENCY', name: 'Hunter', icon: Target },
             { id: 'MAGE_PROFICIENCY', name: 'Mage', icon: Zap }
         ]
     },
-    { id: 'EQUIPMENT', name: 'Equipamento', icon: Shield, color: '#60a5fa', subTabs: [{ id: 'ITEM_POWER', name: 'Item Power', icon: Zap }] },
-    { id: 'COMBAT', name: 'Combate', icon: Activity, color: '#f87171', subTabs: [{ id: 'COMBAT', name: 'Combat Lvl', icon: Activity }] },
+    { id: 'EQUIPMENT', name: 'Equipment', icon: Shield, color: '#60a5fa', subTabs: [{ id: 'ITEM_POWER', name: 'Item Power', icon: Zap }] },
+    { id: 'COMBAT', name: 'Combat', icon: Activity, color: '#f87171', subTabs: [{ id: 'COMBAT', name: 'Combat Lvl', icon: Activity }] },
     { id: 'DUNGEONEERING', name: 'Dungeon', icon: Skull, color: '#a855f7', subTabs: [{ id: 'DUNGEONEERING', name: 'Dungeon Lvl', icon: Skull }] },
     {
-        id: 'GATHERING', name: 'Coleta', icon: Trees, color: '#4ade80',
+        id: 'GATHERING', name: 'Gathering', icon: Trees, color: '#4ade80',
         subTabs: [
             { id: 'LUMBERJACK', name: 'Woodcutting', icon: Trees },
             { id: 'ORE_MINER', name: 'Mining', icon: Pickaxe },
@@ -38,7 +38,7 @@ const CATEGORIES = [
         ]
     },
     {
-        id: 'REFINING', name: 'Refino', icon: Flame, color: '#fbbf24',
+        id: 'REFINING', name: 'Refining', icon: Flame, color: '#fbbf24',
         subTabs: [
             { id: 'PLANK_REFINER', name: 'Plank', icon: Hammer },
             { id: 'METAL_BAR_REFINER', name: 'Metal', icon: Hammer },
@@ -143,10 +143,10 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
                             <Trophy color="var(--accent)" size={24} />
                             <div>
                                 <h2 style={{ margin: 0, color: 'var(--accent)', fontSize: '1.1rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                                    Ranking Geral
+                                    General Ranking
                                 </h2>
                                 <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: '600' }}>
-                                    {isPublic ? 'VISUALIZAÇÃO PÚBLICA' : 'SISTEMA DE LIGA'}
+                                    {isPublic ? 'PUBLIC VIEW' : 'LEAGUE SYSTEM'}
                                 </div>
                             </div>
                         </div>
@@ -277,7 +277,7 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
                                     <Activity size={32} color="var(--accent)" />
                                 </motion.div>
                                 <div style={{ marginTop: '15px', color: 'var(--text-dim)', fontSize: '0.85rem', fontWeight: '700' }}>
-                                    Carregando Ranking...
+                                    Loading Ranking...
                                 </div>
                             </div>
                         ) : (
@@ -285,7 +285,7 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
                                 {data.length === 0 ? (
                                     <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-dim)' }}>
                                         <Filter size={32} style={{ opacity: 0.2, marginBottom: '10px' }} />
-                                        <div>Nenhum registro encontrado nesta categoria.</div>
+                                        <div>No records found in this category.</div>
                                     </div>
                                 ) : (
                                     Array.isArray(data) && data.map((char, index) => {
@@ -362,7 +362,7 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
 
                     {/* Footer hint */}
                     <div style={{ padding: '15px', textAlign: 'center', fontSize: '0.65rem', color: 'rgba(255,255,255,0.2)', fontWeight: '600', letterSpacing: '1px' }}>
-                        ATUALIZAÇÃO EM TEMPO REAL • ETERNAL IDLE
+                        REAL-TIME UPDATE • ETERNAL IDLE
                     </div>
                 </motion.div>
             </div>
