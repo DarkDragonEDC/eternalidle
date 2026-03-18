@@ -38,7 +38,7 @@ All quests defined in `shared/quests.js`. **Total: 14 quests**
 > - **ID:** `elder_talk_elara`
 > - **Type:** TALK
 > - **Objective:** Talk to Elara
-> - **Rewards:** 1,000 Silver
+> - **Rewards:** 1,000 Silver, 1x T1_FISHING_ROD
 > - **Requires:** `elder_equip_food`
 
 ---
@@ -65,21 +65,30 @@ All quests defined in `shared/quests.js`. **Total: 14 quests**
 
 ---
 
-## 🌿 Elara the Gatherer (3 quests) — No prerequisites
+## 🌿 Elara the Gatherer (4 quests) — No prerequisites
 
-> ### 1. Fishing for Dinner
+> ### 1. Getting Ready to Fish
+> - **ID:** `elara_equip_rod`
+> - **Type:** EQUIP
+> - **Objective:** Equip the T1_FISHING_ROD
+> - **Description:** Explains tool efficiency and its impact on gathering time.
+> - **Rewards:** 1,000 Silver
+> - **Requires:** `elder_talk_elara`
+>
+> ### 2. Fishing for Dinner
 > - **ID:** `elara_fish`
 > - **Type:** COLLECT
 > - **Objective:** Collect 10 T1_FISH
 > - **Rewards:** 1,000 Silver, 150 Fishing XP, 10 basic class resources (based on equipped weapon)
+> - **Requires:** `elara_equip_rod`
 
-> ### 2. Provision Stock
+> ### 3. Provision Stock
 > - **ID:** `elara_food`
 > - **Type:** CRAFT
 > - **Objective:** Craft 5 T1_FOOD
 > - **Rewards:** 2,000 Silver, 300 Cooking XP, 20 basic class resources (based on equipped weapon)
 
-> ### 3. Field Specialty
+> ### 4. Field Specialty
 > - **ID:** `elara_gathering`
 > - **Type:** COLLECT
 > - **Objective:** Collect 10 basic class resources

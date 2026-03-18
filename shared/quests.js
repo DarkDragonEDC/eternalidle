@@ -29,7 +29,7 @@ export const NPCS = {
         id: 'ELARA',
         name: 'Elara the Gatherer',
         image: 'elara.png',
-        quests: ['elara_fish', 'elara_food', 'elara_gathering']
+        quests: ['elara_equip_rod', 'elara_fish', 'elara_food', 'elara_gathering']
     },
     GROG: {
         id: 'GROG',
@@ -102,7 +102,10 @@ export const QUESTS = {
         npcId: 'ELDER',
         type: QUEST_TYPES.TALK,
         goal: { npcId: 'ELARA' },
-        rewards: { silver: 1000 },
+        rewards: { 
+            silver: 1000,
+            items: { T1_FISHING_ROD: 1 }
+        },
         reqQuest: 'elder_equip_food',
         navigation: { tab: 'village' }
     },
@@ -141,6 +144,17 @@ export const QUESTS = {
     },
 
     // ELARA QUESTS
+    elara_equip_rod: {
+        id: 'elara_equip_rod',
+        title: 'First Step: Tooling Up',
+        description: 'Equip the fishing rod you just received. Remember: tools provide Efficiency, which significantly reduces the time required for gathering activities! Having better tools means faster resource collection.',
+        npcId: 'ELARA',
+        type: QUEST_TYPES.EQUIP,
+        goal: { itemId: 'T1_FISHING_ROD' },
+        rewards: { silver: 1000 },
+        reqQuest: 'elder_talk_elara',
+        navigation: { tab: 'inventory' }
+    },
     elara_fish: {
         id: 'elara_fish',
         title: 'Fishing for Dinner',
@@ -149,6 +163,7 @@ export const QUESTS = {
         type: QUEST_TYPES.COLLECT,
         goal: { itemId: 'T1_FISH', count: 10 },
         rewards: { silver: 1000, xp: { FISHING: 150 }, useClassItems: 10 },
+        reqQuest: 'elara_equip_rod',
         navigation: { tab: 'gathering', category: 'FISH' }
     },
     elara_food: {
