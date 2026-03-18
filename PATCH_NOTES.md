@@ -1,65 +1,26 @@
-# 📄 Patch Notes — Atualização de Sistema e Equilíbrio
+# 📄 Patch Notes — Grande Atualização: Vila e Missões
 
-### 🔮 Mestre das Runas: Theron
-Um novo NPC chegou à vila! Theron, o Guardião das Runas (Runekeeper), agora oferece uma sequência de 4 novas missões (Quests) focadas no sistema de runas.
-- **Quest 1**: Enfrente o World Boss para ganhar Fragmentos de Runa de Batalha (Battle Rune Shards).
-- **Quest 2**: Aprenda a forjar sua primeira runa.
-- **Quest 3**: Descubra o poder da fusão combinando runas.
-- **Quest 4**: Equipe uma runa de combate para ficar mais forte (com recompensas em comida para caça!).
-- **Integração**: Para desbloquear as missões do Theron, é necessário terminar as quests do Ferreiro Grog. E atenção: O Capitão Bryn agora só falará com você após provar seu valor para o Theron!
+### 🗺️ Vila e Sistema de Missões
+Uma nova base narrativa e de progressão para sua jornada.
+- **Vila de Aventura**: Encontros dinâmicos com NPCs icônicos (Elder, Elara, Grog, Theron, Bryn) e desafios integrados.
+- **Sistema de Quests**: Progressão fluida com novos objetivos: derrotar monstros, coletar recursos, forja de itens e diálogos imersivos.
+- **Rastreador de Missões**: Acompanhe seus objetivos no topo da tela com o novo botão **"Ir"**, que leva você instantaneamente ao local da missão.
 
----
+### ⚖️ Reequilíbrio e Combate
+Ajustes para uma experiência mais dinâmica e estratégica.
+- **Velocidade de Ação**: Atividades de Coleta, Refino e Forja agora são até **2x mais rápidas**.
+- **XP e Qualidade**: Ganhos de experiência e chances de itens raros foram ajustados para manter o desafio equilibrado com a nova velocidade global.
+- **Precisão no Combate**: O sistema de combate agora é mais preciso, garantindo que os cálculos de tempo para derrotar monstros no painel de combate sejam 100% confiáveis.
+- **Aperfeiçoamento de Runas**: Otimização no bônus de velocidade das runas para um combate mais equilibrado em níveis avançados.
 
-### 🛡️ Operação Centinela (Anti-Boosting)
-Implementamos camadas rigorosas de proteção para garantir a integridade da economia do jogo e combater o uso de múltiplas contas de forma abusiva.
+### 🛒 Mercado e Navegação
+Facilitando a vida do viajante e do comerciante.
+- **Busca Inteligente**: Agora você pode buscar itens pelo seu nome real (ex: buscando "Basket" após a renomeação da cesta).
+- **Barra de Categorias**: Novos filtros com ícones no mercado para encontrar rapidamente o que você precisa.
+- **Navegação Direta**: Links em missões levam você exatamente à aba correta do seu Perfil ou Inventário.
 
-**Novas Medidas:**
-- **Rastreamento de IP**: Transações e trocas entre contas no mesmo endereço IP agora são monitoradas e podem ser bloqueadas para evitar auto-transferência de recursos.
-- **Análise de Valor de Mercado**: O sistema agora detecta e invalida listagens com preços abusivos (acima de 50x o valor base do item).
-- **Monitoramento de Fluxo 48h**: Analisamos transferências de grande volume entre jogadores num período de 48h para identificar e agir contra contas "mula".
-
----
-
-### 🎒 De Pouch para Basket
-Para melhor representar o armazenamento de recursos, o item **Pouch** foi oficialmente renomeado para **Basket** (Cesta).
-- Ícones e descrições foram atualizados em todas as estações de craft e no inventário.
-
----
-
-### ℹ️ Dicas de Multitasking
-Adicionamos ícones de informação **(i)** nas abas de **Farm**.
-- Ao clicar no ícone, você encontrará uma explicação detalhada sobre como o sistema de enfileiramento permite que você realize atividades de coleta e combate simultaneamente.
-
----
-
-### ⏳ Ajustes de Progressão e Ferramentas
-Refinamos a curva de ganhos para tornar a jornada entre os Tiers mais equilibrada e recompensadora.
-
-- **Equilíbrio de XP e Tempo**: Ajustamos os valores de XP e o tempo de execução para atividades de coleta, refino e criação em todos os dez níveis (Tiers).
-- **Nerf de Ferramentas**: A eficiência e os bônus das ferramentas foram recalibrados para se alinharem à nova velocidade de progressão do jogo.
-
----
-
-### 📜 Melhorias no Histórico de Trocas
-A transparência nas negociações subiu de nível! Agora o detalhamento das trocas exibe informações cruciais para que você saiba exatamente o que está negociando.
-- **Tier e Qualidade**: Agora você pode ver claramente o Tier e a Qualidade do item (ex: Good, Masterpiece) diretamente no histórico.
-- **Estrelas**: O nível de aprimoramento (estrelas) também é exibido para garantir trocas seguras.
-
----
-
-### 🛠️ UI/UX e Precisão
-- **Precisão no Craft**: As chances de obter qualidades superiores no crafting agora exibem até **3 casas decimais** (ex: 0.625%) para que você saiba suas probabilidades exatas.
-- **Cura com Comida**: Corrigimos o erro onde jogadores com 0 HP ficavam impossibilitados de comer. Agora, a cura fora de combate via comida funciona de forma instantânea e estável.
-
----
-
-### 💰 Economia do Mercado
-- **Auto-Matching**: Ao listar um item, o sistema verifica automaticamente se existe uma Ordem de Compra compatível para realizar a venda imediata.
-- **Taxas de Escrow**: Vendas no mercado possuem taxa de 20%. Cancelar listagens com menos de 1 hora de duração agora possui uma taxa de 10%.
-
----
-
-### 🌐 Internacionalização e Integridade
-- **Tradução de Ranking**: Todas as categorias e rótulos do Ranking Geral foram traduzidos para o inglês (`General`, `Proficiency`, `Gathering`, etc.) para manter a consistência global do projeto.
-- **Otimização de Memória**: Corrigimos uma falha na persistência de dados offline que poderia causar redundância no banco de dados. O controle de relatórios offline agora é processado estritamente em memória.
-- **Limpeza de Logs**: Removemos diversos logs de depuração do console do servidor para melhorar a performance e a legibilidade dos logs de sistema.
+### 🔧 Estabilidade e Melhorias
+Correções para um ambiente de jogo mais seguro.
+- **Segurança do Personagem**: Melhorias na estabilidade técnica para garantir que seu progresso e inventário estejam sempre seguros.
+- **Sincronização Offline**: Processamento de ações offline aprimorado, garantindo que seu tempo seja contabilizado corretamente.
+- **Notificações Push**: Novo alerta: **"Vida Totalmente Recuperada!"** avisando quando seu personagem termina de descansar.
