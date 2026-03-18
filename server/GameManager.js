@@ -1254,6 +1254,8 @@ export class GameManager {
         // --- QUEST PROGRESSION (LEVEL) ---
         this.quests.handleProgress(char, QUEST_TYPES.LEVEL, { globalLevel: this.quests.calculateGlobalLevel(char) });
 
+        this.markDirty(char.id);
+
         return leveledUp ? { skill: skillKey, level: skill.level } : null;
     }
 

@@ -90,6 +90,7 @@ export class InventoryManager {
                 if (inv[storageKey] <= 0) delete inv[storageKey];
             }
         }
+        this.gameManager.markDirty(char.id);
         return true;
     }
 
@@ -132,6 +133,8 @@ export class InventoryManager {
             inv[storageKey] -= quantity;
             if (inv[storageKey] <= 0) delete inv[storageKey];
         }
+
+        this.gameManager.markDirty(char.id);
 
         // Add Rune Shards T1
         this.addItemToInventory(char, 'T1_RUNE_SHARD', totalShards);

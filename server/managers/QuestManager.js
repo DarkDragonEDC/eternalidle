@@ -79,6 +79,8 @@ export class QuestManager {
 
         // Immediately check if quest is already "complete" (e.g., Level 10 quest accepted at Level 15)
         this.checkInitialProgress(char, questId);
+        
+        this.gm.markDirty(char.id);
 
         return { success: true };
     }
@@ -166,6 +168,7 @@ export class QuestManager {
             if (progressMade) {
                 this.checkCompletion(char, questId);
                 this.gm.socket.broadcastToCharacter(char.id, 'quest_progress', { questId, progress: state.progress });
+                this.gm.markDirty(char.id);
             }
         }
     }
@@ -270,6 +273,8 @@ export class QuestManager {
         // Finalize
         delete char.state.quests.active[questId];
         char.state.quests.completed.push(questId);
+        
+        this.gm.markDirty(char.id);
 
         return { success: true, rewards: quest.rewards };
     }

@@ -69,7 +69,8 @@ export class MarketManager {
         }
 
         if (filters.search && filters.search.trim() !== '') {
-            query = query.ilike('item_id', `%${filters.search.trim()}%`);
+            const searchTerm = filters.search.trim();
+            query = query.or(`item_id.ilike.%${searchTerm}%,item_data->>name.ilike.%${searchTerm}%`);
         }
 
         // Apply Sorting
@@ -729,7 +730,10 @@ export class MarketManager {
 
         if (filters.tier) query = query.eq('item_data->>tier', filters.tier.toString());
         if (filters.type) query = query.eq('item_data->>type', filters.type.toUpperCase());
-        if (filters.search) query = query.ilike('item_id', `%${filters.search}%`);
+        if (filters.search) {
+            const searchTerm = filters.search.trim();
+            query = query.or(`item_id.ilike.%${searchTerm}%,item_data->>name.ilike.%${searchTerm}%`);
+        }
 
         const { data, error } = await query;
         if (error) throw error;
