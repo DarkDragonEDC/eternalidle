@@ -499,6 +499,12 @@ export class GameManager {
 
         // Calculate initial stats (HP) based on skills
         const tempChar = { state: initialState };
+        
+        // Initialize Quest System
+        if (this.quests) {
+            this.quests.initQuestState(tempChar);
+        }
+
         const stats = this.inventoryManager.calculateStats(tempChar);
 
         initialState.health = stats.maxHP || 100;
