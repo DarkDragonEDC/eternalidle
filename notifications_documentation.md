@@ -8,8 +8,9 @@ These are sent to your device (Mobile or Desktop) even when the game is closed.
 | Notification ID | Title | Message Body | Trigger Condition |
 | :--- | :--- | :--- | :--- |
 | `push_activity_finished` | Activity Finished! ✅ | Your activity is complete. Tap to start a new one! | When a timed activity (like refining) finishes. |
-| `push_daily_spin` | Daily Spin Available! 🎡 | Your daily reward is waiting for you in Eternal Idle. | Triggered daily at Midnight UTC. |
-| `push_world_boss` | World Boss Spawned! 🐉 | [Boss Name] is terrorizing the world. Join the fight! | Triggered when the daily World Boss spawns. |
+| `push_hp_recovered` | HP Fully Recovered! ❤️ | You are back to full health and ready for battle! | When your HP reaches maximum (via resting or eating). |
+| `push_daily_spin` | Daily Spin Available! 🎡 | Your daily reward is waiting for you... | Triggered daily at Midnight UTC. |
+| `push_world_boss` | World Boss Spawned! 🐉 | [Boss Name] is terrorizing the world... | Triggered when the daily World Boss spawns. |
 | `push_guild_tasks` | New Guild Tasks! 🛡️ | Fresh daily tasks are available for your guild. | Triggered daily at Midnight UTC for guild members. |
 | `push_guild_new_member`| New Guild Member! 🛡️ | A new member has joined your guild. Welcome them! | When a Leader/Officer accepts a player's request. |
 | `push_guild_task` | Guild Task Complete! ✅ | Your guild has completed a task: [Task Name]. | When a collaborative guild task is reached. |
