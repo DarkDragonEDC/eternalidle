@@ -24,3 +24,5 @@ Correções para um ambiente de jogo mais seguro.
 - **Segurança do Personagem**: Melhorias na estabilidade técnica para garantir que seu progresso e inventário estejam sempre seguros.
 - **Sincronização Offline**: Processamento de ações offline aprimorado, garantindo que seu tempo seja contabilizado corretamente.
 - **Notificações Push**: Novo alerta: **"Vida Totalmente Recuperada!"** avisando quando seu personagem termina de descansar.
+- **Login do Personagem**: Corrigida a demora ao carregar o estado do jogo após selecionar um personagem.
+

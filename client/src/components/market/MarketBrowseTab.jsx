@@ -311,7 +311,6 @@ const MarketBrowseTab = ({
                                         style={{
                                             padding: '10px 20px',
                                             borderRadius: '8px',
-                                            border: 'none',
                                             cursor: silver < (l.price / ((typeof l.amount === 'object' && l.amount !== null) ? l.amount.amount : l.amount || 1)) ? 'not-allowed' : 'pointer',
                                             background: silver < (() => {
                                                 const nAmt = ((typeof l.amount === 'object' && l.amount !== null) ? l.amount.amount : l.amount) || 1;

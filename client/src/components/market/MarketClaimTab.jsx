@@ -202,7 +202,6 @@ const MarketClaimTab = ({
                                             style={{
                                                 padding: '10px 20px',
                                                 borderRadius: '8px',
-                                                border: 'none',
                                                 cursor: 'pointer',
                                                 background: 'rgba(76, 175, 80, 0.1)',
                                                 color: '#4caf50',

@@ -60,6 +60,11 @@ export const useAppStore = create((set, get) => ({
             reconnectionAttempts: 5
         });
 
+        // --- Critical Initial Sync Listeners ---
+        // Attached early to avoid race conditions between connect and useSocketEvents
+        newSocket.on('status_update', (status) => get().handleStatusUpdate(status));
+        newSocket.on('game_status', (status) => get().handleStatusUpdate(status));
+
         newSocket.on('connect', () => {
             set({ isConnected: true, isConnecting: false });
             console.log('[SOCKET] Connected to server');

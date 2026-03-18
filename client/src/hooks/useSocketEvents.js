@@ -14,8 +14,6 @@ export const useSocketEvents = () => {
         }
 
         // --- Core Events ---
-        socket.on('status_update', store.handleStatusUpdate);
-        socket.on('game_status', store.handleStatusUpdate);
         socket.on('guild_broadcast', store.addGuildMessage);
         socket.on('craft_rune_success', store.setCraftRuneSuccess);
         socket.on('item_market_price', store.setMarketPriceUpdate);
