@@ -347,7 +347,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
             ORE: (skills.ORE_MINER?.level || 1) * 0.2 + getToolEff('tool_pickaxe') + globalEff + (activeRuneBuffs.ORE?.EFF || 0) + gEffic,
             HIDE: (skills.ANIMAL_SKINNER?.level || 1) * 0.2 + getToolEff('tool_knife') + globalEff + (activeRuneBuffs.HIDE?.EFF || 0) + gEffic,
             FIBER: (skills.FIBER_HARVESTER?.level || 1) * 0.2 + getToolEff('tool_sickle') + globalEff + (activeRuneBuffs.FIBER?.EFF || 0) + gEffic,
-            HERB: (skills.HERBALISM?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.HERB?.EFF || 0) + gEffic,
+            HERB: (skills.HERBALISM?.level || 1) * 0.2 + getToolEff('tool_pouch') + globalEff + (activeRuneBuffs.HERB?.EFF || 0) + gEffic,
             FISH: (skills.FISHING?.level || 1) * 0.2 + getToolEff('tool_rod') + globalEff + (activeRuneBuffs.FISH?.EFF || 0) + gEffic,
             PLANK: (skills.PLANK_REFINER?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.PLANK?.EFF || 0) + rEffic,
             METAL: (skills.METAL_BAR_REFINER?.level || 1) * 0.2 + globalEff + (activeRuneBuffs.METAL?.EFF || 0) + rEffic,
