@@ -1,0 +1,20 @@
+{
+  "Silver": 37000,
+  "ClassProficiencyXp": 950,
+  "ClassCraftXp": 300,
+  "ClassRefineXp": 150,
+  "ClassGatherXp": 500,
+  "ClassMaterials": 30,
+  "ClassRefined": 10,
+  "ClassGearSets": 1,
+  "Items": {
+    "NOOB_CHEST": 1,
+    "T1_FOOD": 300,
+    "T1_BATTLE_RUNE_SHARD": 1000
+  },
+  "Xp": {
+    "COMBAT": 50,
+    "FISHING": 150,
+    "COOKING": 300
+  }
+}

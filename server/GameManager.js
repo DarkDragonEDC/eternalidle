@@ -515,13 +515,53 @@ export class GameManager {
         const inventory = initialState.inventory || {};
         delete initialState.inventory;
 
+        const skills = { ...initialState.skills };
+        delete initialState.skills;
+
+        const equipment = { ...initialState.equipment } || {};
+        delete initialState.equipment;
+
+        const info = {
+            stats: initialState.stats || { str: 0, agi: 0, int: 0 },
+            health: initialState.health || 100,
+            silver: initialState.silver || 0,
+            orbs: initialState.orbs || 0,
+            crowns: initialState.orbs || 0,
+            membership: initialState.membership || null,
+            active_buffs: initialState.active_buffs || {},
+            inventorySlots: initialState.inventorySlots || 30,
+            extraInventorySlots: initialState.extraInventorySlots || 0,
+            unlockedTitles: initialState.unlockedTitles || []
+        };
+        // Remove these from state as they go to 'info' column
+        delete initialState.stats;
+        delete initialState.health;
+        delete initialState.silver;
+        delete initialState.orbs;
+        delete initialState.crowns;
+        delete initialState.membership;
+        delete initialState.active_buffs;
+        delete initialState.inventorySlots;
+        delete initialState.extraInventorySlots;
+        delete initialState.unlockedTitles;
+
+        const bank = { items: {}, slots: 10 };
+        const settings = {};
+
+        const newId = crypto.randomUUID();
+
         const { data, error } = await this.supabase
             .from('characters')
             .insert({
-                id: crypto.randomUUID(),
+                id: newId,
                 user_id: userId,
                 name: name.trim(),
                 inventory: inventory,
+                skills: skills,
+                equipment: equipment,
+                info: info,
+                bank: bank,
+                settings: settings,
                 state: initialState,
                 last_saved: new Date().toISOString()
             })
@@ -536,7 +576,9 @@ export class GameManager {
         }
 
         if (data) {
-            this.cache.set(data.id, data);
+            const char = this._hydrateCharacterFromRaw(data);
+            this.cache.set(char.id, char);
+            return char;
         }
         return data;
     }

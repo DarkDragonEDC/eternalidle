@@ -91,6 +91,9 @@ export class PersistenceService {
         const prunedState = pruneState(stateToPrune);
 
         const inventoryToSave = prunedState.inventory || {};
+        if (!prunedState.inventory) {
+            console.warn(`[DB-DEBUG] WARNING: prunedState.inventory is MISSING for ${char.name}! This will wipe the inventory.`);
+        }
         delete prunedState.inventory;
         const skillsToSave = prunedState.skills || {};
         delete prunedState.skills;
