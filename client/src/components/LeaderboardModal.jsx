@@ -77,7 +77,7 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
         setLoading(true);
         if (isPublic) {
             try {
-                const apiUrl = import.meta.env.VITE_API_URL;
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
                 const res = await fetch(`${apiUrl}/api/leaderboard?type=${activeSubTab}&mode=${mode}${forceRefresh ? '&forceRefresh=true' : ''}`);
                 if (res.ok) {
                     const json = await res.json();

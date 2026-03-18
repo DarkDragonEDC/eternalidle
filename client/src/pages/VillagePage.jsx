@@ -53,14 +53,24 @@ const VillagePage = () => {
             prevNpc: 'Elara'
         },
         {
+            id: 'theron',
+            name: 'Theron',
+            title: 'Runekeeper',
+            image: 'theron.png',
+            color: '#c084fc',
+            description: 'Master of ancient runes and arcane power.',
+            requiredQuest: 'grog_equip',
+            prevNpc: 'Grog'
+        },
+        {
             id: 'bryn',
             name: 'Bryn',
             title: 'Captain of the Guard',
             image: 'bryn.png',
             color: '#f87171',
             description: 'Ensuring village safety with strength.',
-            requiredQuest: 'grog_equip',
-            prevNpc: 'Grog'
+            requiredQuest: 'theron_equip_rune',
+            prevNpc: 'Theron'
         }
     ];
 
@@ -107,6 +117,8 @@ const VillagePage = () => {
                     // Check if all quests for this NPC are completed
                     const npcData = NPCS[npcIdUpper];
                     const isAllCompleted = npcData?.quests?.length > 0 && npcData.quests.every(questId => completedQuests.includes(questId));
+
+                    if (isAllCompleted) return null;
                     
                     return (
                         <motion.div

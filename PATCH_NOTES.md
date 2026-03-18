@@ -1,5 +1,15 @@
 # 📄 Patch Notes — Atualização de Sistema e Equilíbrio
 
+### 🔮 Mestre das Runas: Theron
+Um novo NPC chegou à vila! Theron, o Guardião das Runas (Runekeeper), agora oferece uma sequência de 4 novas missões (Quests) focadas no sistema de runas.
+- **Quest 1**: Enfrente o World Boss para ganhar Fragmentos de Runa de Batalha (Battle Rune Shards).
+- **Quest 2**: Aprenda a forjar sua primeira runa.
+- **Quest 3**: Descubra o poder da fusão combinando runas.
+- **Quest 4**: Equipe uma runa de combate para ficar mais forte (com recompensas em comida para caça!).
+- **Integração**: Para desbloquear as missões do Theron, é necessário terminar as quests do Ferreiro Grog. E atenção: O Capitão Bryn agora só falará com você após provar seu valor para o Theron!
+
+---
+
 ### 🛡️ Operação Centinela (Anti-Boosting)
 Implementamos camadas rigorosas de proteção para garantir a integridade da economia do jogo e combater o uso de múltiplas contas de forma abusiva.
 

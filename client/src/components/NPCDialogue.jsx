@@ -190,6 +190,27 @@ const QuestSection = ({ quest, type, color, onAction, progress, onClose, navigat
                 {Object.entries(qData.rewards?.items || {}).map(([id, qty]) => (
                     <RewardItem key={id} icon={<Package size={14} />} color="#a78bfa" label={`${qty}x ${id}`} />
                 ))}
+                {qData.rewards?.useClassEquipment && (
+                    <RewardItem icon={<Package size={14} />} color="#f43f5e" label="Class Gear Set" />
+                )}
+                {qData.rewards?.useClassCraftXp && (
+                    <RewardItem icon={<Zap size={14} />} color="#60a5fa" label={`${qData.rewards.useClassCraftXp.toLocaleString()} Class Craft XP`} />
+                )}
+                {qData.rewards?.useClassRefineXp && (
+                    <RewardItem icon={<Zap size={14} />} color="#60a5fa" label={`${qData.rewards.useClassRefineXp.toLocaleString()} Class Refine XP`} />
+                )}
+                {qData.rewards?.useClassXp && (
+                    <RewardItem icon={<Zap size={14} />} color="#60a5fa" label={`${qData.rewards.useClassXp.toLocaleString()} Class Gather XP`} />
+                )}
+                {qData.rewards?.useClassItems && (
+                    <RewardItem icon={<Package size={14} />} color="#a78bfa" label={`${qData.rewards.useClassItems}x Class Resource`} />
+                )}
+                {qData.rewards?.useClassRefinedItems && (
+                    <RewardItem icon={<Package size={14} />} color="#a78bfa" label={`${qData.rewards.useClassRefinedItems}x Class Refined`} />
+                )}
+                {qData.rewards?.proficiencyXp && (
+                    <RewardItem icon={<Zap size={14} />} color="#60a5fa" label={`${qData.rewards.proficiencyXp.toLocaleString()} Weapon XP`} />
+                )}
             </div>
 
             {/* Action */}

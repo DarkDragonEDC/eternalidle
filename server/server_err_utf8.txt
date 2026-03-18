@@ -1,0 +1,43 @@
+﻿node : file:///C:/Users
+/Administrator/Desktop/
+Jogo/eternalidle/server
+/GameManager.js:518
+No linha:1 caractere:1
++ node index.js > 
+server_out.txt 2> 
+server_err.txt
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (file:///C:/Us   
+ er...eManager.js:5    
+18:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+        return data;
+        ^^^^^^
+
+SyntaxError: Illegal 
+return statement
+    at compileSourceTex
+tModule (node:internal/
+modules/esm/utils:344:1
+6)
+    at ModuleLoader.mod
+uleStrategy (node:inter
+nal/modules/esm/transla
+tors:105:18)
+    at #translate (node
+:internal/modules/esm/l
+oader:534:12)
+    at ModuleLoader.loa
+dAndTranslate (node:int
+ernal/modules/esm/loade
+r:581:27)
+
+Node.js v22.15.0

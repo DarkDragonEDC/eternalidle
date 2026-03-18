@@ -1918,6 +1918,9 @@ export class GameManager {
         this.markDirty(char.id);
         await this.persistCharacter(char.id);
 
+        // 8. Quest Progress Hook
+        this.quests.handleProgress(char, QUEST_TYPES.CRAFT_RUNE, { count });
+
         return {
             success: true,
             items: results,
@@ -1994,6 +1997,9 @@ export class GameManager {
         // 8. Mark Dirty & Persist Immediately
         this.markDirty(char.id);
         await this.persistCharacter(char.id);
+
+        // 9. Quest Progress Hook
+        this.quests.handleProgress(char, QUEST_TYPES.FUSE_RUNE, { count });
 
         const results = Array.from({ length: count }).map(() => ({
             item: newRuneId,
@@ -2160,6 +2166,11 @@ export class GameManager {
         char.state.inventory = finalInv;
         this.markDirty(char.id);
         await this.persistCharacter(char.id);
+
+        // Quest Progress Hook for Auto Merging
+        if (totalUpgrades > 0) {
+            this.quests.handleProgress(char, QUEST_TYPES.FUSE_RUNE, { count: totalUpgrades });
+        }
 
         return {
             success: true,

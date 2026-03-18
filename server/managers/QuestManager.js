@@ -1,4 +1,4 @@
-import { QUESTS } from '../../shared/quests.js';
+import { QUESTS, NPCS } from '../../shared/quests.js';
 import { ITEMS, getSkillForItem } from '../../shared/items.js';
 
 export const QUEST_TYPES = {
@@ -9,7 +9,10 @@ export const QUEST_TYPES = {
     REFINE: 'REFINE',
     EQUIP: 'EQUIP',
     TALK: 'TALK',
-    OPEN: 'OPEN'
+    OPEN: 'OPEN',
+    WORLD_BOSS: 'WORLD_BOSS',
+    CRAFT_RUNE: 'CRAFT_RUNE',
+    FUSE_RUNE: 'FUSE_RUNE'
 };
 
 export class QuestManager {
@@ -143,6 +146,21 @@ export class QuestManager {
                         progressMade = true;
                     }
                     break;
+
+                case QUEST_TYPES.WORLD_BOSS:
+                    state.progress += (data.count || 1);
+                    progressMade = true;
+                    break;
+
+                case QUEST_TYPES.CRAFT_RUNE:
+                    state.progress += (data.count || 1);
+                    progressMade = true;
+                    break;
+
+                case QUEST_TYPES.FUSE_RUNE:
+                    state.progress += (data.count || 1);
+                    progressMade = true;
+                    break;
             }
 
             if (progressMade) {
@@ -230,6 +248,25 @@ export class QuestManager {
             this.gm.addXP(char, skillId, quest.rewards.useClassCraftXp);
         }
 
+        // 6. Handle Class-specific item rewards
+        if (quest.rewards.useClassItems) {
+            const resourceId = this.getClassResource(char);
+            this.gm.inventoryManager.addItemToInventory(char, resourceId, quest.rewards.useClassItems);
+        }
+        if (quest.rewards.useClassRefinedItems) {
+            const resourceId = this.getClassRefinedResource(char);
+            this.gm.inventoryManager.addItemToInventory(char, resourceId, quest.rewards.useClassRefinedItems);
+        }
+
+        // 7. Handle Class-specific equipment rewards
+        if (quest.rewards.useClassEquipment) {
+            const equipmentIds = this.getClassEquipmentSet(char);
+            const npcName = NPCS[quest.npcId]?.name.split(' ')[0] || 'System';
+            for (const eqId of equipmentIds) {
+                this.gm.inventoryManager.addItemToInventory(char, eqId, 1, { craftedBy: npcName });
+            }
+        }
+
         // Finalize
         delete char.state.quests.active[questId];
         char.state.quests.completed.push(questId);
@@ -246,7 +283,8 @@ export class QuestManager {
             const item = data.item || ITEMS.GEAR[itemId] || this.gm.inventoryManager.getItemData(itemId);
             const combatTypes = ['WEAPON', 'OFF_HAND', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE'];
             if (item && combatTypes.includes(item.type)) {
-                if (goal.onlyCrafted && item.craftedBy !== char.name) return false;
+                const craftedBy = data.metadata?.craftedBy || item.craftedBy;
+                if (goal.onlyCrafted && craftedBy !== char.name) return false;
                 return true;
             }
         }
@@ -290,6 +328,11 @@ export class QuestManager {
             const armor = this.getClassArmor(char);
             return actualId.startsWith(armor);
         }
+
+        if (goal.combatRune) {
+            return actualId.includes('_RUNE_') && actualId.includes('ATTACK');
+        }
+
         return false;
     }
 
@@ -359,6 +402,13 @@ export class QuestManager {
         if (res === 'T1_ORE') return 'T1_BAR';
         if (res === 'T1_FIBER') return 'T1_CLOTH';
         return 'T1_PLANK';
+    }
+
+    getClassEquipmentSet(char) {
+        const weapon = (char.state.equipment?.mainHand?.id || '').toUpperCase();
+        if (weapon.includes('BOW')) return ['T1_LEATHER_HELMET', 'T1_LEATHER_BOOTS', 'T1_LEATHER_GLOVES', 'T1_TORCH'];
+        if (weapon.includes('STAFF')) return ['T1_CLOTH_HELMET', 'T1_CLOTH_BOOTS', 'T1_CLOTH_GLOVES', 'T1_TOME'];
+        return ['T1_PLATE_HELMET', 'T1_PLATE_BOOTS', 'T1_PLATE_GLOVES', 'T1_SHEATH'];
     }
 
     getClassArmor(char) {

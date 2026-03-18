@@ -119,7 +119,8 @@ export const useGameSync = () => {
     useEffect(() => {
         const handleUnload = () => {
             if (session?.access_token) {
-                const url = `${import.meta.env.VITE_API_URL}/api/update_last_active`;
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+                const url = `${apiUrl}/api/update_last_active`;
                 if (navigator.sendBeacon) {
                     const blob = new Blob([new URLSearchParams({ token: session.access_token }).toString()], { type: 'application/x-www-form-urlencoded' });
                     navigator.sendBeacon(url, blob);

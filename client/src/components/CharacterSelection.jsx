@@ -37,7 +37,7 @@ const CharacterSelection = ({ onSelectCharacter, theme, setTheme, isMobile, onPr
             const { data: { session } } = await supabase.auth.getSession();
             const token = session?.access_token;
 
-            const apiUrl = import.meta.env.VITE_API_URL;
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
             const res = await fetch(`${apiUrl}/api/characters`, {
                 method: 'POST',
                 headers: {
@@ -51,8 +51,18 @@ const CharacterSelection = ({ onSelectCharacter, theme, setTheme, isMobile, onPr
             });
 
             if (!res.ok) {
-                const errData = await res.json();
-                throw new Error(errData.error || 'Failed to create character');
+                let errorMessage = `Server error (${res.status})`;
+                try {
+                    const errData = await res.json();
+                    if (errData.error) {
+                        errorMessage = errData.error;
+                    }
+                } catch (parseErr) {
+                    // Fallback to text if JSON fails
+                    const textData = await res.text().catch(() => null);
+                    if (textData) errorMessage = textData;
+                }
+                throw new Error(errorMessage);
             }
 
             const newChar = await res.json();
@@ -80,7 +90,7 @@ const CharacterSelection = ({ onSelectCharacter, theme, setTheme, isMobile, onPr
             const { data: { session } } = await supabase.auth.getSession();
             const token = session?.access_token;
 
-            const apiUrl = import.meta.env.VITE_API_URL;
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
             const res = await fetch(`${apiUrl}/api/characters/${charId}`, {
                 method: 'DELETE',
                 headers: {

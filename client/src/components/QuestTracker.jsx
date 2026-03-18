@@ -35,8 +35,8 @@ const QuestTracker = () => {
                 }}
             >
                 <ClipboardList size={16} color={readyToClaimCount > 0 ? '#4ade80' : 'var(--text-dim)'} />
-                {!readyToClaimCount && <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)' }}>{activeQuests.length} Quests</span>}
-                {readyToClaimCount > 0 && <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#4ade80' }}>{readyToClaimCount} Ready!</span>}
+                {!readyToClaimCount && <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)', whiteSpace: 'nowrap' }}>{activeQuests.length} Quests</span>}
+                {readyToClaimCount > 0 && <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#4ade80', whiteSpace: 'nowrap' }}>{readyToClaimCount} Ready!</span>}
                 
                 <ChevronDown size={14} color="var(--text-dim)" style={{
                     transition: '0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', opacity: 0.6

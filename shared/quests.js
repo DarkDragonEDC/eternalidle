@@ -6,7 +6,10 @@ export const QUEST_TYPES = {
     REFINE: 'REFINE',
     EQUIP: 'EQUIP',
     TALK: 'TALK',
-    OPEN: 'OPEN'
+    OPEN: 'OPEN',
+    WORLD_BOSS: 'WORLD_BOSS',
+    CRAFT_RUNE: 'CRAFT_RUNE',
+    FUSE_RUNE: 'FUSE_RUNE'
 };
 
 export const NPCS = {
@@ -33,6 +36,12 @@ export const NPCS = {
         name: 'Grog the Blacksmith',
         image: 'grog.png',
         quests: ['grog_refine', 'grog_craft', 'grog_equip']
+    },
+    THERON: {
+        id: 'THERON',
+        name: 'Theron the Runekeeper',
+        image: 'theron.png',
+        quests: ['theron_worldboss', 'theron_craft_rune', 'theron_fuse_rune', 'theron_equip_rune']
     }
 };
 
@@ -107,6 +116,7 @@ export const QUESTS = {
         type: QUEST_TYPES.KILL,
         goal: { monsterId: 'RABBIT', count: 20 },
         rewards: { silver: 1000, proficiencyXp: 150 },
+        reqQuest: 'theron_equip_rune',
         navigation: { tab: 'combat', tier: 1 }
     },
     bryn_goblin: {
@@ -138,7 +148,7 @@ export const QUESTS = {
         npcId: 'ELARA',
         type: QUEST_TYPES.COLLECT,
         goal: { itemId: 'T1_FISH', count: 10 },
-        rewards: { silver: 1000, xp: { FISHING: 150 } },
+        rewards: { silver: 1000, xp: { FISHING: 150 }, useClassItems: 10 },
         navigation: { tab: 'gathering', category: 'FISH' }
     },
     elara_food: {
@@ -148,17 +158,17 @@ export const QUESTS = {
         npcId: 'ELARA',
         type: QUEST_TYPES.CRAFT,
         goal: { itemId: 'T1_FOOD', count: 5 },
-        rewards: { silver: 2000, xp: { COOKING: 300 } },
+        rewards: { silver: 2000, xp: { COOKING: 300 }, useClassItems: 20 },
         navigation: { tab: 'crafting', category: 'COOKING_STATION' }
     },
     elara_gathering: {
         id: 'elara_gathering',
         title: 'Field Specialty',
-        description: 'Every adventurer has their specialty. Bring 40 basic resources of your class.',
+        description: 'Every adventurer has their specialty. Bring 10 basic resources of your class.',
         npcId: 'ELARA',
         type: QUEST_TYPES.COLLECT,
-        goal: { useClassResource: true, count: 40 },
-        rewards: { silver: 5000, useClassXp: 500 },
+        goal: { useClassResource: true, count: 10 },
+        rewards: { silver: 5000, useClassXp: 500, useClassRefinedItems: 10 },
         navigation: { tab: 'gathering', useClass: true }
     },
 
@@ -166,21 +176,21 @@ export const QUESTS = {
     grog_refine: {
         id: 'grog_refine',
         title: 'The Secret of Steel',
-        description: 'Raw material is weak. Refine what you collected to make it useful. Refine 20 times.',
+        description: 'Raw material is weak. Refine what you collected to make it useful. Refine 10 times.',
         npcId: 'GROG',
         type: QUEST_TYPES.REFINE,
-        goal: { useClassRefined: true, count: 20 },
+        goal: { useClassRefined: true, count: 10 },
         rewards: { silver: 1000, useClassRefineXp: 150 },
         navigation: { tab: 'refining', useClass: true }
     },
     grog_craft: {
         id: 'grog_craft',
         title: 'Elite Forge',
-        description: 'Now use these refined materials to create a worthy piece of gear (Weapon or Armor).',
+        description: 'Now use these refined materials to create a worthy piece of armor for your class.',
         npcId: 'GROG',
         type: QUEST_TYPES.CRAFT,
-        goal: { anyCombatGear: true, onlyCrafted: true, count: 1 },
-        rewards: { silver: 2000, useClassCraftXp: 300 },
+        goal: { useClassArmor: true, count: 1 },
+        rewards: { silver: 2000, useClassCraftXp: 300, useClassEquipment: true },
         navigation: { tab: 'crafting', useClass: true }
     },
     grog_equip: {
@@ -192,5 +202,50 @@ export const QUESTS = {
         goal: { anyCombatGear: true, onlyCrafted: true },
         rewards: { silver: 5000, items: { T1_FOOD: 100 } },
         navigation: { tab: 'inventory' }
+    },
+
+    // THERON (RUNEKEEPER) QUESTS
+    theron_worldboss: {
+        id: 'theron_worldboss',
+        title: 'Face the Ancient',
+        description: 'The World Boss threatens us all. Challenge the Ancient Dragon at least once to prove your bravery.',
+        npcId: 'THERON',
+        type: QUEST_TYPES.WORLD_BOSS,
+        goal: { count: 1 },
+        rewards: { silver: 2000, items: { T1_BATTLE_RUNE_SHARD: 1000 } },
+        navigation: { tab: 'world_boss' }
+    },
+    theron_craft_rune: {
+        id: 'theron_craft_rune',
+        title: 'Rune Forging',
+        description: 'Use your rune shards to create a rune. Any category will do.',
+        npcId: 'THERON',
+        type: QUEST_TYPES.CRAFT_RUNE,
+        goal: { count: 1 },
+        rewards: { silver: 3000 },
+        reqQuest: 'theron_worldboss',
+        navigation: { tab: 'merging' }
+    },
+    theron_fuse_rune: {
+        id: 'theron_fuse_rune',
+        title: 'Rune Fusion',
+        description: 'Combine two runes of the same type to create a stronger one.',
+        npcId: 'THERON',
+        type: QUEST_TYPES.FUSE_RUNE,
+        goal: { count: 1 },
+        rewards: { silver: 4000 },
+        reqQuest: 'theron_craft_rune',
+        navigation: { tab: 'merging' }
+    },
+    theron_equip_rune: {
+        id: 'theron_equip_rune',
+        title: 'Rune Empowerment',
+        description: 'Equip a combat rune to enhance your battle capabilities.',
+        npcId: 'THERON',
+        type: QUEST_TYPES.EQUIP,
+        goal: { combatRune: true },
+        rewards: { items: { T1_FOOD: 200 } },
+        reqQuest: 'theron_fuse_rune',
+        navigation: { tab: 'profile', category: 'RUNES', tier: 'COMBAT' }
     }
 };

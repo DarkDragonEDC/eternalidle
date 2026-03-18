@@ -52,6 +52,20 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
     const [confirmModal, setConfirmModal] = useState(null); // { message, onConfirm, onCancel }
     const [selectedAvatar, setSelectedAvatar] = useState(gameState?.state?.avatar ? gameState.state.avatar.replace(/\.png$/, '.webp') : '/profile/1 - male.webp');
     const [showBannerModal, setShowBannerModal] = useState(false);
+    
+    // Deep linking support
+    const activeCategory = useAppStore(state => state.activeCategory);
+    const activeTier = useAppStore(state => state.activeTier);
+
+    React.useEffect(() => {
+        if (activeCategory === 'RUNES') {
+            setActiveProfileTab('RUNES');
+            if (['GATHERING', 'REFINING', 'CRAFTING', 'COMBAT'].includes(activeTier)) {
+                setActiveRuneTab(activeTier);
+            }
+        }
+    }, [activeCategory, activeTier]);
+
     const getValidBanner = (bannerPath) => {
         if (!bannerPath) return '/banner/ceu-noturno.webp';
 

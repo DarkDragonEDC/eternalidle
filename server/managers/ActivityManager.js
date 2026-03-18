@@ -493,7 +493,7 @@ export class ActivityManager {
         if (!added) return { error: "Inventory Full" };
 
         // Quest Progress: CRAFT
-        this.gameManager.quests.handleProgress(char, QUEST_TYPES.CRAFT, { item, itemId: item.id, count: amountGained });
+        this.gameManager.quests.handleProgress(char, QUEST_TYPES.CRAFT, { item, itemId: finalItemId, count: amountGained, metadata });
 
         this.gameManager.inventoryManager.consumeItems(char, item.req);
 

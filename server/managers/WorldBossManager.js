@@ -1,5 +1,6 @@
 import { ITEMS } from '../../shared/items.js';
 import { WORLDBOSS_DROP_TABLE } from '../../shared/chest_drops.js';
+import { QUEST_TYPES } from './QuestManager.js';
 
 export class WorldBossManager {
     constructor(gameManager) {
@@ -412,6 +413,9 @@ export class WorldBossManager {
             // Refresh local cache immediately
             console.log(`[WORLD_BOSS] Refreshing rankings...`);
             await this.refreshRankings();
+
+            // Quest Progress Hook
+            this.gameManager.quests.handleProgress(char, QUEST_TYPES.WORLD_BOSS, { count: 1 });
 
             const newTop1 = this.rankings.length > 0 ? this.rankings[0] : null;
 
