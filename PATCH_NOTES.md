@@ -32,5 +32,6 @@ Melhorias na experiência de combate global e correção de falhas críticas.
 - **Sincronização de Combate**: Aumentamos o tempo de tolerância do cronômetro para evitar que a luta feche sozinha antes do servidor processar seu dano final.
 - **Barra de Vida Detalhada**: O HP dos chefes de janela (8h) agora mostra os valores absolutos (ex: 2.4M / 2.5M) além da porcentagem, facilitando o acompanhamento do dano real.
 - **Correção de Bloqueio**: Corrigido um erro que ocasionalmente deixava o jogador "preso" em uma luta inexistente, impedindo novos desafios.
-- **Integridade do Desafio**: Ajustada a verificação de participação para impedir que o limite diário de desafios seja burlado por falhas de conexão ou recarregamento de página.
+- **Correção de Dano**: Corrigido um problema que impedia o salvamento do ataque ao World Boss se o jogador já tivesse desafiado outro chefe no mesmo dia.
+- **Múltiplos Desafios**: Agora é possível salvar corretamente o progresso no Boss Diário e em todas as 3 sessões do Boss de Janela independentemente.
 

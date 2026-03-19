@@ -149,7 +149,7 @@ const BossCard = ({ data, type, onChallenge, isMobile, setShowInfo, rankingType,
     const [historyRankings, setHistoryRankings] = useState([]);
     const [loadingHistory, setLoadingHistory] = useState(false);
 
-    const { boss, myRank, rankings = [], ironmanRankings = [], normalRankings = [], totalChallengers = 0 } = data;
+    const { boss, myRank, rankings = [], ironmanRankings = [], normalRankings = [], totalChallengers = 0 } = data || {};
     const isDead = boss?.status === 'DEFEATED';
     
     let list = (rankingType === 'IRONMAN' ? ironmanRankings : (rankingType === 'NORMAL' ? normalRankings : rankings)) || [];

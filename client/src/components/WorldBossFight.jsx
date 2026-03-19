@@ -241,12 +241,12 @@ const WorldBossFight = ({ gameState, socket, onFinish, onMinimize }) => {
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)', fontWeight: '800', marginBottom: '6px' }}>
                             <div style={{ display: 'flex', gap: '8px' }}>
                                 <span style={{ color: 'rgba(255,255,255,0.4)' }}>HP</span>
-                                <span>{formatNumber(worldBossUpdate?.bossHP ?? fightData.bossHP ?? bossObj.currentHP)} / {formatNumber(worldBossUpdate?.bossMaxHP ?? fightData.bossMaxHP ?? bossObj.maxHP)}</span>
+                                <span>{formatNumber(worldBossUpdate?.bossHP ?? fightData.bossHP ?? bossObj?.currentHP ?? 0)} / {formatNumber(worldBossUpdate?.bossMaxHP ?? fightData.bossMaxHP ?? bossObj?.maxHP ?? 1)}</span>
                             </div>
-                            <span>{Math.max(0, Math.min(100, (((worldBossUpdate?.bossHP ?? fightData.bossHP ?? bossObj.currentHP)) / (worldBossUpdate?.bossMaxHP ?? fightData.bossMaxHP ?? bossObj.maxHP)) * 100)).toFixed(1)}%</span>
+                            <span>{Math.max(0, Math.min(100, (((worldBossUpdate?.bossHP ?? fightData.bossHP ?? bossObj?.currentHP ?? 0)) / (worldBossUpdate?.bossMaxHP ?? fightData.bossMaxHP ?? bossObj?.maxHP ?? 1)) * 100)).toFixed(1)}%</span>
                         </div>
                         <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.6)', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden' }}>
-                            <div style={{ width: `${Math.max(0, Math.min(100, ((worldBossUpdate?.bossHP || bossObj.currentHP) / (worldBossUpdate?.bossMaxHP || bossObj.maxHP)) * 100))}%`, height: '100%', background: 'linear-gradient(90deg, #4d94ff, #80b3ff)', boxShadow: '0 0 10px rgba(77,148,255,0.6)' }} />
+                            <div style={{ width: `${Math.max(0, Math.min(100, ((worldBossUpdate?.bossHP || bossObj?.currentHP || 0) / (worldBossUpdate?.bossMaxHP || bossObj?.maxHP || 1)) * 100))}%`, height: '100%', background: 'linear-gradient(90deg, #4d94ff, #80b3ff)', boxShadow: '0 0 10px rgba(77,148,255,0.6)' }} />
                         </div>
                     </div>
                 )}

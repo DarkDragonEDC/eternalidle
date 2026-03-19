@@ -425,7 +425,10 @@ export class WorldBossManager {
 
         if (tickDamage > 0 && fight.type === 'window') {
             boss.currentHP -= tickDamage;
-            this.updateBossHPInDB(tickDamage);
+            // No await here to avoid blocking tick, but we should handle errors?
+            this.updateBossHPInDB(tickDamage).catch(err => {
+                console.error(`[WORLD_BOSS] Error in deferred HP update:`, err);
+            });
             if (boss.currentHP <= 0) this.handleBossDefeat();
         }
 
@@ -650,17 +653,18 @@ export class WorldBossManager {
             }
 
             if (existing) {
-                // Update existing record with new damage
+                // Use Math.max to ensure we only save better attempts (safety)
+                const newDamage = Math.max(existing.damage || 0, Math.floor(damage));
                 const { error: updateError } = await this.gameManager.supabase
                     .from('world_boss_attempts')
-                    .update({ damage: Math.floor(damage) })
+                    .update({ damage: newDamage })
                     .eq('id', existing.id);
 
                 if (updateError) {
-                    console.error(`[WORLD_BOSS] Error updating attempt:`, updateError);
+                    console.error(`[WORLD_BOSS] DB Update Error for ${characterId}:`, updateError);
                     throw updateError;
                 }
-                console.log(`[WORLD_BOSS] saveParticipation UPDATED existing: id=${existing.id}, damage=${damage}`);
+                console.log(`[WORLD_BOSS] saveParticipation UPDATED: id=${existing.id}, old=${existing.damage}, new=${newDamage}`);
             } else {
                 // Insert new record
                 const { error: insertError } = await this.gameManager.supabase
