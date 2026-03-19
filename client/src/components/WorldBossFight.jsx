@@ -46,6 +46,7 @@ const WorldBossFight = ({ gameState, socket, onFinish, onMinimize }) => {
     const logsEndRef = React.useRef(null);
 
     const { worldBossUpdate } = store;
+    const lastProcessedElapsed = React.useRef(null);
 
     useEffect(() => {
         if (!worldBossUpdate) return;
@@ -57,34 +58,38 @@ const WorldBossFight = ({ gameState, socket, onFinish, onMinimize }) => {
             elapsed: update.elapsed !== undefined ? update.elapsed : prev.elapsed,
             rankingPos: update.rankingPos !== undefined ? update.rankingPos : prev.rankingPos,
             status: update.status || prev.status,
-            type: update.type || prev.type
+            type: update.type || prev.type,
+            bossHP: update.bossHP !== undefined ? update.bossHP : prev.bossHP,
+            bossMaxHP: update.bossMaxHP !== undefined ? update.bossMaxHP : prev.bossMaxHP
         }));
 
-        // Process Hits for Log
-        if (update.hits && Array.isArray(update.hits) && update.hits.length > 0) {
-            const newLogs = update.hits.map(hit => {
-                const isCrit = hit.crit;
-                // Random angle between -180 and 0 deg (top half circle)
-                const angle = (Math.random() * Math.PI) - Math.PI;
-                const distance = (isCrit ? 100 : 70) + Math.random() * 40;
-                
-                return {
-                    id: Date.now() + Math.random(),
-                    damage: hit.damage,
-                    crit: isCrit,
-                    angle: angle,
-                    distance: distance
-                };
-            });
+        // Process Hits for Log with Staggering
+        if (update.hits && Array.isArray(update.hits) && update.hits.length > 0 && lastProcessedElapsed.current !== update.elapsed) {
+            lastProcessedElapsed.current = update.elapsed;
+            update.hits.forEach((hit, index) => {
+                setTimeout(() => {
+                    const isCrit = hit.crit;
+                    const angle = (Math.random() * Math.PI) - Math.PI;
+                    const distance = (isCrit ? 100 : 70) + Math.random() * 40;
+                    
+                    const newHit = {
+                        id: `${Date.now()}-${index}-${Math.random()}`,
+                        damage: hit.damage,
+                        crit: isCrit,
+                        angle: angle,
+                        distance: distance
+                    };
 
-            setLogs(prev => {
-                const updated = [...prev, ...newLogs];
-                return updated.slice(-15); // Keep last 15
+                    setLogs(prev => {
+                        const updated = [...prev, newHit];
+                        return updated.slice(-15);
+                    });
+                }, index * 150); // 150ms delay between each hit visual
             });
         }
 
         if (update.status === 'FINISHED') {
-            setTimeout(() => onFinish(update), 3000);
+            setTimeout(() => onFinish(update), 8000);
         }
     }, [worldBossUpdate, onFinish]);
 
@@ -92,7 +97,7 @@ const WorldBossFight = ({ gameState, socket, onFinish, onMinimize }) => {
         logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [logs]);
 
-    const timeLeft = Math.max(0, 60 - Math.floor(fightData.elapsed / 1000));
+    const timeLeft = Math.max(0, 70 - Math.floor(fightData.elapsed / 1000));
     const progress = Math.min(100, (fightData.elapsed / 60000) * 100);
     const isFinished = fightData.status === 'FINISHED';
     const isLowTime = timeLeft <= 10;
@@ -138,7 +143,7 @@ const WorldBossFight = ({ gameState, socket, onFinish, onMinimize }) => {
             ))}
 
             {/* Top Bar */}
-            <div style={{ width: '100%', padding: '20px 24px 16px', maxWidth: '800px', position: 'relative', zIndex: 10 }}>
+            <div style={{ width: '100%', padding: '10px 24px 8px', maxWidth: '800px', position: 'relative', zIndex: 10 }}>
                 <button 
                     onClick={onMinimize}
                     style={{ position: 'absolute', right: '10px', top: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
@@ -178,7 +183,7 @@ const WorldBossFight = ({ gameState, socket, onFinish, onMinimize }) => {
             <div style={{ flex: 1, position: 'relative', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 5 }}>
                 
                 {/* Boss Details */}
-                <div style={{ position: 'absolute', top: '20px', textAlign: 'center' }}>
+                <div style={{ position: 'absolute', top: '10px', textAlign: 'center' }}>
                     <h2 style={{ color: '#ff4d4d', margin: 0, fontSize: '1.8rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '4px', textShadow: '0 0 20px rgba(255,0,0,0.6)' }}>
                         {bossObj?.name || 'BOSS FIGHT'}
                     </h2>
@@ -191,14 +196,14 @@ const WorldBossFight = ({ gameState, socket, onFinish, onMinimize }) => {
 
                 {/* Boss Image Container */}
                 <motion.div
-                    animate={{ y: [-15, 15, -15], filter: ['drop-shadow(0 0 20px rgba(255,0,0,0.3))', 'drop-shadow(0 0 40px rgba(255,0,0,0.6))', 'drop-shadow(0 0 20px rgba(255,0,0,0.3))'] }}
+                    animate={{ y: [-10, 10, -10], filter: ['drop-shadow(0 0 20px rgba(255,0,0,0.3))', 'drop-shadow(0 0 40px rgba(255,0,0,0.6))', 'drop-shadow(0 0 20px rgba(255,0,0,0.3))'] }}
                     transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
-                    style={{ position: 'relative', marginTop: '40px' }}
+                    style={{ position: 'relative', marginTop: '30px', display: 'flex', justifyContent: 'center' }}
                 >
                     {bossObj?.image ? (
-                        <img src={`/monsters/${bossObj.image}`} alt="Boss" style={{ width: '320px', height: '320px', objectFit: 'contain', userSelect: 'none', pointerEvents: 'none' }} />
+                        <img src={`/monsters/${bossObj.image}`} alt="Boss" style={{ maxHeight: '35vh', maxWidth: '80vw', objectFit: 'contain', userSelect: 'none', pointerEvents: 'none' }} />
                     ) : (
-                        <div style={{ fontSize: '120px' }}>🐲</div>
+                        <div style={{ fontSize: '80px' }}>🐲</div>
                     )}
 
                     {/* Floating Damage Texts */}
@@ -232,10 +237,13 @@ const WorldBossFight = ({ gameState, socket, onFinish, onMinimize }) => {
                 
                 {/* Boss HP Bar if Window Boss */}
                 {fightData.type === 'window' && bossObj && (
-                    <div style={{ width: '80%', maxWidth: '400px', marginTop: '30px' }}>
+                    <div style={{ width: '80%', maxWidth: '400px', marginTop: '15px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)', fontWeight: '800', marginBottom: '6px' }}>
-                            <span>HP</span>
-                            <span>{Math.max(0, Math.min(100, ((worldBossUpdate?.bossHP || bossObj.currentHP) / (worldBossUpdate?.bossMaxHP || bossObj.maxHP)) * 100)).toFixed(1)}%</span>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <span style={{ color: 'rgba(255,255,255,0.4)' }}>HP</span>
+                                <span>{formatNumber(worldBossUpdate?.bossHP ?? fightData.bossHP ?? bossObj.currentHP)} / {formatNumber(worldBossUpdate?.bossMaxHP ?? fightData.bossMaxHP ?? bossObj.maxHP)}</span>
+                            </div>
+                            <span>{Math.max(0, Math.min(100, (((worldBossUpdate?.bossHP ?? fightData.bossHP ?? bossObj.currentHP)) / (worldBossUpdate?.bossMaxHP ?? fightData.bossMaxHP ?? bossObj.maxHP)) * 100)).toFixed(1)}%</span>
                         </div>
                         <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.6)', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden' }}>
                             <div style={{ width: `${Math.max(0, Math.min(100, ((worldBossUpdate?.bossHP || bossObj.currentHP) / (worldBossUpdate?.bossMaxHP || bossObj.maxHP)) * 100))}%`, height: '100%', background: 'linear-gradient(90deg, #4d94ff, #80b3ff)', boxShadow: '0 0 10px rgba(77,148,255,0.6)' }} />
@@ -245,8 +253,8 @@ const WorldBossFight = ({ gameState, socket, onFinish, onMinimize }) => {
             </div>
 
             {/* Bottom Panel: Total Damage */}
-            <div style={{ width: '100%', padding: '40px 20px', background: 'linear-gradient(to top, #000 0%, rgba(0,0,0,0.8) 50%, transparent 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10 }}>
-                <div style={{ color: 'rgba(255,77,77,0.8)', fontWeight: '800', letterSpacing: '8px', fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '8px' }}>
+            <div style={{ width: '100%', padding: '15px 20px 25px', background: 'linear-gradient(to top, #000 0%, rgba(0,0,0,0.8) 50%, transparent 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10 }}>
+                <div style={{ color: 'rgba(255,77,77,0.8)', fontWeight: '800', letterSpacing: '8px', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '4px' }}>
                     Total Damage Dealt
                 </div>
                 
@@ -256,8 +264,8 @@ const WorldBossFight = ({ gameState, socket, onFinish, onMinimize }) => {
                     </ResponsiveText>
                 </motion.div>
                 
-                <div style={{ display: 'flex', gap: '24px', opacity: 0.5, marginTop: '20px' }}>
-                    <Swords size={28} color="#ff4d4d" />
+                <div style={{ display: 'flex', gap: '12px', opacity: 0.5, marginTop: '10px' }}>
+                    <Swords size={20} color="#ff4d4d" />
                 </div>
             </div>
 

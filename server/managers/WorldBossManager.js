@@ -2,6 +2,7 @@ import { ITEMS } from '../../shared/items.js';
 import { WORLDBOSS_DROP_TABLE } from '../../shared/chest_drops.js';
 import { QUEST_TYPES } from './QuestManager.js';
 import { WORLD_BOSSES, getBossByTier, getRandomBossTier } from '../../shared/world_bosses.js';
+import { DEFAULT_PLAYER_ATTACK_SPEED } from '../../shared/combat.js';
 
 export class WorldBossManager {
     constructor(gameManager) {
@@ -261,34 +262,50 @@ export class WorldBossManager {
         const char = this.gameManager.cache.get(charId);
         const mode = char?.state?.isIronman ? 'IRONMAN' : 'NORMAL';
 
-        // Daily Boss Status
-        const dailyCategoryRankings = (this.dailyLiveRankings[mode] || []);
-        const myDailyRankIndex = dailyCategoryRankings.findIndex(r => r.character_id === charId);
-        const myDailyRank = myDailyRankIndex !== -1 ? { ...dailyCategoryRankings[myDailyRankIndex], pos: myDailyRankIndex + 1 } : null;
+        // Helper to find true rank regardless of cache state
+        const findRank = (rankingsObj, charId, preferredMode) => {
+            let categoryList = rankingsObj[preferredMode] || [];
+            let rIndex = categoryList.findIndex(r => r.character_id === charId);
+            
+            if (rIndex === -1) {
+                const otherMode = preferredMode === 'NORMAL' ? 'IRONMAN' : 'NORMAL';
+                const otherList = rankingsObj[otherMode] || [];
+                const otherIndex = otherList.findIndex(r => r.character_id === charId);
+                if (otherIndex !== -1) {
+                    categoryList = otherList;
+                    rIndex = otherIndex;
+                }
+            }
 
-        // Window Boss Status
-        const windowCategoryRankings = (this.windowLiveRankings[mode] || []);
-        const myWindowRankIndex = windowCategoryRankings.findIndex(r => r.character_id === charId);
-        const myWindowRank = myWindowRankIndex !== -1 ? { ...windowCategoryRankings[myWindowRankIndex], pos: myWindowRankIndex + 1 } : null;
+            return {
+                list: categoryList,
+                index: rIndex,
+                rank: rIndex !== -1 ? { ...categoryList[rIndex], pos: rIndex + 1 } : null
+            };
+        };
+
+        // Daily Boss Status
+        const dailyResult = findRank(this.dailyLiveRankings, charId, mode);
+        const windowResult = findRank(this.windowLiveRankings, charId, mode);
 
         const pendingReward = await this.getPendingReward(charId);
 
         return {
             daily: {
                 boss: this.dailyBoss,
-                rankings: dailyCategoryRankings.slice(0, 50),
+                rankings: dailyResult.list.slice(0, 50),
                 ironmanRankings: (this.dailyLiveRankings.IRONMAN || []).slice(0, 50),
                 normalRankings: (this.dailyLiveRankings.NORMAL || []).slice(0, 50),
                 totalChallengers: (this.dailyLiveRankings.ALL || []).length,
-                myRank: myDailyRank
+                myRank: dailyResult.rank
             },
             window: {
                 boss: this.windowBoss,
-                rankings: windowCategoryRankings.slice(0, 50),
+                rankings: windowResult.list.slice(0, 50),
                 ironmanRankings: (this.windowLiveRankings.IRONMAN || []).slice(0, 50),
                 normalRankings: (this.windowLiveRankings.NORMAL || []).slice(0, 50),
                 totalChallengers: (this.windowLiveRankings.ALL || []).length,
-                myRank: myWindowRank
+                myRank: windowResult.rank
             },
             mode: mode,
             pendingReward: pendingReward
@@ -305,6 +322,12 @@ export class WorldBossManager {
             throw new Error("This World Boss is either resting or already defeated.");
         }
 
+        // 1. Memory Lock Check
+        if (this.activeFights.has(char.id)) {
+            throw new Error("You are already in a middle of a fight with this boss.");
+        }
+
+        // 2. Database Participation Check
         const hasFought = await this.checkBossParticipation(char.id, type);
         if (hasFought) throw new Error(`You already challenged the ${type === 'daily' ? 'Daily' : 'Window'} World Boss today/this session.`);
 
@@ -312,7 +335,8 @@ export class WorldBossManager {
             characterId: char.id,
             name: char.name,
             type: type,
-            sessionId: (type === 'daily') ? `daily_${new Date().toISOString().split('T')[0]}_${char.id}_${Date.now()}` : this.windowSession?.id,
+            // FIX: Daily boss must have sessionId as NULL to be tracked correctly by date in DB
+            sessionId: (type === 'daily') ? null : this.windowSession?.id,
             startedAt: Date.now(),
             damage: 0,
             lastTick: Date.now(),
@@ -339,8 +363,14 @@ export class WorldBossManager {
             query = query.eq('session_id', this.windowSession.id);
         }
 
-        const { data } = await query.maybeSingle();
-        return !!data;
+        const { data, error } = await query.limit(1);
+        if (error) {
+            console.error('[WORLD_BOSS] Error checking participation:', error);
+            // Default to true (prevent fight) if DB errors to prevent abuse
+            return true;
+        }
+
+        return data && data.length > 0;
     }
 
     async processTick(char, virtualTime = null) {
@@ -361,7 +391,8 @@ export class WorldBossManager {
         }
 
         const stats = this.gameManager.inventoryManager.calculateStats(char);
-        const atkSpeed = Math.max(200, stats.attackSpeed || 1000);
+        // FIX: Default to 2000ms if stats.attackSpeed is missing or 0, preventing "free" speed
+        const atkSpeed = Math.max(200, stats.attackSpeed || DEFAULT_PLAYER_ATTACK_SPEED);
         let rounds = 0;
         const hits = [];
         let tickDamage = 0;
@@ -479,12 +510,26 @@ export class WorldBossManager {
             rounds++;
         }
 
+
+
         if (elapsedSinceStart >= totalDuration) {
-            await this.saveParticipation(char.id, fight.damage, char.name, fight.type, fight.sessionId);
-            if (char.state) delete char.state.activeWorldBossFight;
-            this.activeFights.delete(char.id);
-            await this.refreshAllRankings();
-            return { totalDamage: fight.damage, rounds: rounds, status: 'FINISHED' };
+            try {
+                await this.saveParticipation(char.id, fight.damage, char.name, fight.type, fight.sessionId);
+                await this.refreshAllRankings();
+            } catch (err) {
+                console.error('[WORLD_BOSS] Error in batch finish:', err);
+            } finally {
+                if (char.state) delete char.state.activeWorldBossFight;
+                this.activeFights.delete(char.id);
+            }
+
+            return { 
+                totalDamage: fight.damage, 
+                damage: fight.damage,
+                rounds: rounds, 
+                status: 'FINISHED',
+                rankingPos: this.predictRankingPos(char.id, fight.damage, fight.type)
+            };
         }
 
         return { totalDamage: fight.damage, rounds: rounds, status: 'ACTIVE' };
@@ -524,8 +569,10 @@ export class WorldBossManager {
             await this.saveParticipation(char.id, fight.damage, char.name, fight.type, fight.sessionId);
             console.log(`[WORLD_BOSS] Participation saved: char=${char.id}, damage=${fight.damage}`);
             await this.refreshAllRankings();
-            this.gameManager.quests.handleProgress(char, QUEST_TYPES.WORLD_BOSS, { count: 1 });
-            this.activeFights.delete(char.id);
+            
+            if (this.gameManager.quests) {
+                this.gameManager.quests.handleProgress(char, QUEST_TYPES.WORLD_BOSS, { count: 1 });
+            }
 
             // Announcements for Daily Boss only
             if (fight.type === 'daily') {
@@ -563,6 +610,9 @@ export class WorldBossManager {
             }
         } catch (err) {
             console.error(`[WORLD_BOSS] Error ending ${fight.type} fight:`, err);
+        } finally {
+            if (char.state) delete char.state.activeWorldBossFight;
+            this.activeFights.delete(char.id);
         }
 
         return {
@@ -617,6 +667,7 @@ export class WorldBossManager {
                     .from('world_boss_attempts')
                     .insert({
                         character_id: characterId,
+                        player_name: name,
                         date: dateStr,
                         session_id: sessionId,
                         damage: Math.floor(damage),

@@ -67,9 +67,10 @@ export const useAppStore = create((set, get) => ({
 
         newSocket.on('connect', () => {
             set({ isConnected: true, isConnecting: false });
-            console.log('[SOCKET] Connected to server');
             if (charId) {
                 newSocket.emit('join_character', { characterId: charId });
+            } else {
+                console.warn('[SOCKET] No charId provided on connect');
             }
         });
 
@@ -82,7 +83,6 @@ export const useAppStore = create((set, get) => ({
 
         newSocket.on('disconnect', () => {
             set({ isConnected: false });
-            console.log('[SOCKET] Disconnected from server');
         });
 
         newSocket.on('connect_error', (err) => {
@@ -105,7 +105,6 @@ export const useAppStore = create((set, get) => ({
 
         newSocket.on('queue_updated', (result) => {
             if (result.success && result.queue) {
-                console.log('[SOCKET] queue_updated received:', result.queue);
                 set((state) => {
                     if (!state.gameState) return state;
                     return {
@@ -581,8 +580,7 @@ export const useAppStore = create((set, get) => ({
     },
     requestSync: () => {
         const { socket, selectedCharacter, isConnecting } = get();
-        if (socket && selectedCharacter && !isConnecting) {
-            console.log('[SYNC] Requesting manual game status sync...');
+        if (socket && socket.connected && selectedCharacter) {
             socket.emit('request_sync');
         }
     },

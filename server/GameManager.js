@@ -17,7 +17,7 @@ import { TradeManager } from './managers/TradeManager.js';
 import { WorldBossManager } from './managers/WorldBossManager.js';
 import { SocialManager } from './managers/SocialManager.js';
 import { GuildManager } from './managers/GuildManager.js';
-import { PushManager } from './managers/PushManager.js';
+// import { PushManager } from './managers/PushManager.js';
 import { MigrationManager } from './managers/MigrationManager.js';
 import { UserManager } from './managers/UserManager.js';
 import { StatsManager } from './managers/StatsManager.js';
@@ -52,14 +52,14 @@ export class GameManager {
         this.worldBossManager = new WorldBossManager(this);
         this.socialManager = new SocialManager(this);
         this.guildManager = new GuildManager(this);
-        this.pushManager = new PushManager(this);
+        // this.pushManager = new PushManager(this);
         this.migrationManager = new MigrationManager(this);
         this.userManager = new UserManager(this);
         this.statsManager = new StatsManager(this);
         this.catchupManager = new CatchupManager(this);
         this.banManager = new BanManager(this);
         this.quests = new QuestManager(this);
-        this.notifications = new NotificationService(this);
+        // this.notifications = new NotificationService(this);
         
         // Delegated to PersistenceService
         this.leaderboardCache = new Map(); // type+mode -> { data, timestamp }
@@ -94,7 +94,7 @@ export class GameManager {
         setTimeout(() => this.persistence.checkTaxSnapshot(), 5000); // Check once shortly after startup
 
         // Push notification scheduler (Midnight UTC check)
-        this.notifications.scheduleMidnightTriggers();
+        // this.notifications.scheduleMidnightTriggers();
 
         this.worldBossManager.initialize();
 
@@ -265,33 +265,56 @@ export class GameManager {
         return this.persistence.flushDirtyCharacters();
     }
 
-    async executeLocked(userId, task) {
-        if (!userId) return await task();
+    async executeLocked(userId, arg2, arg3) {
+        let taskName = 'UnnamedTask';
+        let action;
 
-        // Get current lock for this user (or a resolved Promise if none)
-        const currentLock = this.userLocks.get(userId) || Promise.resolve();
+        if (typeof arg2 === 'function') {
+            action = arg2;
+        } else {
+            taskName = arg2;
+            action = arg3;
+        }
 
-        // Create the next lock that waits for the previous one
-        const nextLock = currentLock.then(async () => {
+        if (!userId) return await action();
+        
+        if (!this.userQueue) {
+            this.userQueue = {};
+        }
+        if (!this.activeTasks) {
+            this.activeTasks = {};
+        }
+        
+        if (!this.userQueue[userId]) {
+            this.userQueue[userId] = Promise.resolve();
+        }
+
+        this.activeTasks[userId] = (this.activeTasks[userId] || 0) + 1;
+
+        const currentPromise = this.userQueue[userId];
+        const nextPromise = currentPromise.then(async () => {
+            const startExec = Date.now();
+            console.log(`[LOCK] Executing ${taskName} for user ${userId}`);
             try {
-                return await task();
-            } catch (err) {
-                console.error(`[LOCK] Error executing task for user ${userId}:`, err);
-                throw err;
+                return await action();
+            } finally {
+                this.activeTasks[userId]--;
+                console.log(`[LOCK] Finished ${taskName} for ${userId} (${Date.now() - startExec}ms)`);
             }
-        }).finally(() => {
-            // If this is the last lock in the queue, clear the Map
-            if (this.userLocks.get(userId) === nextLock) {
-                this.userLocks.delete(userId);
-            }
+        }).catch((err) => {
+            this.activeTasks[userId]--;
+            console.error(`[LOCK-ERROR] Task ${taskName} failed for ${userId}:`, err);
+            // We don't rethrow here to avoid breaking the chain for subsequent tasks, 
+            // but the original caller will get the error from the returned 'result'
+            throw err; 
         });
 
-        this.userLocks.set(userId, nextLock);
-        return nextLock;
+        this.userQueue[userId] = nextPromise.catch(() => {}); // Maintain the chain even on error
+        return nextPromise;
     }
 
     isLocked(userId) {
-        return this.userLocks.has(userId);
+        return this.activeTasks && this.activeTasks[userId] > 0;
     }
 
     getMaxIdleTime(char) {
@@ -320,14 +343,24 @@ export class GameManager {
      */
 
     async getCharacter(userId, characterId, catchup = false, bypassCache = false) {
+        const start = Date.now();
+        console.log(`[DEBUG-PERF] getCharacter START for charId: ${characterId}, userId: ${userId}, catchup: ${catchup}, bypassCache: ${bypassCache}`);
+
         // Guard Clause invalid IDs (undefined string, null, etc)
-        if (!characterId || characterId === 'undefined' || characterId === 'null') return null;
+        if (!characterId || characterId === 'undefined' || characterId === 'null') {
+            console.log(`[DEBUG-PERF] getCharacter END (invalid ID) for charId: ${characterId} in ${Date.now() - start}ms`);
+            return null;
+        }
 
         const data = await this.persistence.getCharacter(userId, characterId, bypassCache);
-        if (!data) return null;
+        if (!data) {
+            console.log(`[DEBUG-PERF] getCharacter END (not found) for charId: ${characterId} in ${Date.now() - start}ms`);
+            return null;
+        }
 
         if (catchup) {
             try {
+                const catchupStart = Date.now();
                 const now = Date.now();
                 const lastSaved = data.last_saved ? new Date(data.last_saved).getTime() : now;
                 const elapsedSeconds = (now - lastSaved) / 1000;
@@ -337,6 +370,7 @@ export class GameManager {
                     (data.current_activity && elapsedSeconds >= (data.current_activity.time_per_action || 3));
 
                 await this.catchupManager.processCatchup(data, elapsedSeconds, lastSaved, isSignificant);
+                console.log(`[DEBUG-PERF] Catchup processed for ${data.name} in ${Date.now() - catchupStart}ms`);
             } catch (err) {
                 console.error(`[CATCHUP-CRASH] Critical error processing character ${data.name}:`, err);
                 const fs = await import('fs');
@@ -348,7 +382,7 @@ export class GameManager {
         if (data.state?.guild_id) {
             data.guild_bonuses = await this.getGuildBonuses(data.state.guild_id);
         }
-
+        console.log(`[DEBUG-PERF] getCharacter END for charId: ${characterId} in ${Date.now() - start}ms`);
         return data;
     }
 
@@ -399,7 +433,56 @@ export class GameManager {
      * @param {boolean} bypassCache - Whether to force a DB fetch
      */
     async getStatus(userId, catchup = false, characterId = null, bypassCache = false) {
-        return this.getCharacter(userId, characterId, catchup, bypassCache);
+        // NOTE: This method does NOT use executeLocked internally.
+        // Callers (join_character, request_sync, etc.) are responsible for locking.
+        // Using executeLocked here would cause a deadlock when called from within an existing lock.
+        const char = await this.getCharacter(userId, characterId, catchup, bypassCache);
+        if (!char) return { noCharacter: true };
+
+        // Check if resting heal is complete
+        if (char.state?.resting) {
+            const now = Date.now();
+            if (now >= char.state.resting.endsAt) {
+                const stats = this.inventoryManager.calculateStats(char);
+                const maxHp = stats.maxHP || 100;
+                char.state.health = Math.min(maxHp, (char.state.health || 0) + char.state.resting.healAmount);
+                console.log(`[REST] ${char.name} resting complete: healed ${char.state.resting.healAmount} HP`);
+
+                if (char.state.health >= maxHp && char.user_id) {
+                    this.pushManager.notifyUser(
+                        char.user_id,
+                        'push_hp_recovered',
+                        'HP Fully Recovered! ❤️',
+                        'You are back to full health and ready for battle!',
+                        '/combat'
+                    );
+                }
+
+                delete char.state.resting;
+                this.markDirty(char.id);
+            }
+        }
+
+        const stats = this.inventoryManager.calculateStats(char);
+        const ban = await this.checkBan(userId);
+
+        return {
+            character_id: char.id,
+            user_id: char.user_id,
+            name: char.name,
+            isAdmin: !!char.is_admin,
+            state: char.state,
+            calculatedStats: stats,
+            current_activity: char.current_activity,
+            activity_started_at: char.activity_started_at,
+            dungeon_state: char.state.dungeon,
+            globalStats: this.globalStats,
+            serverTime: Date.now(),
+            guild: await this.guildManager.getCharacterGuild(characterId || char.id),
+            guild_bonuses: char.guild_bonuses,
+            banWarning: (ban && ban.level === 1 && !ban.ack) ? ban.reason : null,
+            offlineReport: char.offlineReport
+        };
     }
 
     /**
@@ -618,94 +701,6 @@ export class GameManager {
         return { success: true };
     }
 
-    async getStatus(userId, catchup = false, characterId = null, bypassCache = false) {
-        // OPTIMIZATION: Interactive actions should NOT trigger catchup (it's for login/ticker)
-        // to avoid race conditions and unnecessary DB load.
-        const char = await this.getCharacter(userId, characterId, catchup, bypassCache);
-        if (!char) return { noCharacter: true };
-
-        // --- PENDING REWARDS CHECK ---
-        // If character is already in cache (bypassCache was false), we might need to check
-        // for rewards if they were added while the character was online.
-        // For performance, we could add a cooldown or trigger here, but getCharacter
-        // already handles it for fresh loads.
-        // -----------------------------
-
-        // Check if resting heal is complete
-        if (char.state?.resting) {
-            const now = Date.now();
-            if (now >= char.state.resting.endsAt) {
-                // Apply heal
-                const stats = this.inventoryManager.calculateStats(char);
-                const maxHp = stats.maxHP || 100;
-                char.state.health = Math.min(maxHp, (char.state.health || 0) + char.state.resting.healAmount);
-                console.log(`[REST] ${char.name} resting complete: healed ${char.state.resting.healAmount} HP`);
-
-                // PUSH NOTIFICATION: HP Fully Recovered (Only from resting)
-                if (char.state.health >= maxHp && char.user_id) {
-                    this.pushManager.notifyUser(
-                        char.user_id,
-                        'push_hp_recovered',
-                        'HP Fully Recovered! ❤️',
-                        'You are back to full health and ready for battle!',
-                        '/combat'
-                    );
-                }
-
-                delete char.state.resting;
-                this.markDirty(char.id);
-            }
-        }
-
-        const stats = this.inventoryManager.calculateStats(char);
-
-        const ban = await this.checkBan(userId);
-
-        const status = {
-            character_id: char.id,
-            user_id: char.user_id,
-            name: char.name,
-            isAdmin: !!char.is_admin,
-            state: char.state,
-            calculatedStats: stats,
-            current_activity: char.current_activity,
-            activity_started_at: char.activity_started_at,
-            dungeon_state: char.state.dungeon,
-            globalStats: this.globalStats,
-            serverTime: Date.now(),
-            guild: await this.guildManager.getCharacterGuild(characterId || char.id),
-            guild_bonuses: char.guild_bonuses,
-            banWarning: (ban && ban.level === 1 && !ban.ack) ? ban.reason : null,
-            offlineReport: char.offlineReport
-        };
-
-        return status;
-    }
-
-    /**
-     * Counts the total number of characters that have an active activity, combat, or dungeon session.
-     * This is used for the "Online Players" display, reflecting anyone progressing in the idle game.
-     */
-    async getActivePlayersCount() {
-        try {
-            // Count unique user_ids instead of total characters.
-            // This ensures one "player" is counted even if they have 2 active characters.
-            const { data, error } = await this.supabase
-                .from('characters')
-                .select('user_id')
-                .or('current_activity.not.is.null,combat.not.is.null,dungeon.not.is.null');
-
-            if (error) throw error;
-            if (!data) return 0;
-
-            const uniquePlayers = new Set(data.map(char => char.user_id));
-            return uniquePlayers.size;
-        } catch (err) {
-            console.error('[SERVER] Error counting active players:', err);
-            return 0;
-        }
-    }
-
     async acknowledgeBanWarning(userId) {
         try {
             const { error } = await this.supabase
@@ -723,7 +718,7 @@ export class GameManager {
     }
 
     async clearOfflineReport(userId, characterId) {
-        await this.executeLocked(userId, async () => {
+        await this.executeLocked(userId, 'clearOfflineReport', async () => {
             const char = await this.getCharacter(userId, characterId);
             if (char) {
                 char.offlineReport = null;
@@ -1160,6 +1155,10 @@ export class GameManager {
         }
 
         let worldBossResult = null;
+        if (char.state.activeWorldBossFight && !this.worldBossManager.activeFights.has(char.id)) {
+            this.worldBossManager.activeFights.set(char.id, { ...char.state.activeWorldBossFight });
+        }
+        
         if (this.worldBossManager.activeFights.has(char.id)) {
             try {
                 worldBossResult = await this.worldBossManager.processTick(char);
@@ -2466,6 +2465,21 @@ export class GameManager {
         } catch (err) {
             console.error(`[GUILD-BONUS] Error fetching for ${guildId}:`, err);
             return null;
+        }
+    }
+
+    async getActivePlayersCount() {
+        try {
+            const { data, error } = await this.supabase
+                .from('characters')
+                .select('id', { count: 'exact', head: true })
+                .or('current_activity.not.is.null,combat.not.is.null,dungeon.not.is.null');
+
+            if (error) throw error;
+            return data?.length || 0;
+        } catch (err) {
+            console.error('[GAMEMANAGER] Error getting active players count:', err);
+            return 0;
         }
     }
 }

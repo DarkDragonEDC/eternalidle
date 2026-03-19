@@ -266,7 +266,7 @@ export const useSocketEvents = () => {
         });
         socket.on('world_boss_reward_claimed', (result) => {
             if (result.success) {
-                store.setWbStatus(prev => ({ ...prev, pendingReward: null }));
+                store.setWbStatus({ ...store.wbStatus, pendingReward: null });
                 socket.emit('get_world_boss_status');
             }
         });

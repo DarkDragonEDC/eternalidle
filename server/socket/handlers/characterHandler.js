@@ -35,7 +35,7 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
         return;
       }
 
-      await gameManager.executeLocked(userId, async () => {
+      await gameManager.executeLocked(userId, "join_character", async () => {
         const status = await gameManager.getStatus(
           socket.user.id,
           true,
@@ -107,7 +107,7 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
     if (!socket.data.characterId || !socket.user?.id) return;
     
     try {
-      await gameManager.executeLocked(socket.user.id, async () => {
+      await gameManager.executeLocked(socket.user.id, "generic_task", async () => {
         const status = await gameManager.getStatus(
           socket.user.id,
           true, // catchup
@@ -154,7 +154,7 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
     try {
       if (!socket.data.characterId || socket.data.characterId === "undefined")
         return;
-      await gameManager.executeLocked(socket.user.id, async () => {
+      await gameManager.executeLocked(socket.user.id, "generic_task", async () => {
         const char = await gameManager.getCharacter(
           socket.user.id,
           socket.data.characterId,
@@ -225,7 +225,7 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
     try {
       if (!socket.data.characterId || socket.data.characterId === "undefined")
         return;
-      await gameManager.executeLocked(socket.user.id, async () => {
+      await gameManager.executeLocked(socket.user.id, "generic_task", async () => {
         const char = await gameManager.getCharacter(
           socket.user.id,
           socket.data.characterId,
@@ -259,7 +259,7 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
     try {
       if (!socket.data.characterId || socket.data.characterId === "undefined")
         return;
-      await gameManager.executeLocked(socket.user.id, async () => {
+      await gameManager.executeLocked(socket.user.id, "generic_task", async () => {
         const char = await gameManager.getCharacter(
           socket.user.id,
           socket.data.characterId,
@@ -306,7 +306,7 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
     try {
       if (!socket.data.characterId || socket.data.characterId === "undefined")
         return;
-      await gameManager.executeLocked(socket.user.id, async () => {
+      await gameManager.executeLocked(socket.user.id, "generic_task", async () => {
         const char = await gameManager.getCharacter(
           socket.user.id,
           socket.data.characterId,
@@ -349,7 +349,7 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
     try {
       if (!socket.data.characterId || socket.data.characterId === "undefined")
         return;
-      await gameManager.executeLocked(socket.user.id, async () => {
+      await gameManager.executeLocked(socket.user.id, "generic_task", async () => {
         const char = await gameManager.getCharacter(
           socket.user.id,
           socket.data.characterId,
@@ -398,7 +398,7 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
     try {
       if (!socket.data.characterId || socket.data.characterId === "undefined")
         return;
-      await gameManager.executeLocked(socket.user.id, async () => {
+      await gameManager.executeLocked(socket.user.id, "generic_task", async () => {
         const char = await gameManager.getCharacter(
           socket.user.id,
           socket.data.characterId,
@@ -458,7 +458,7 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
     try {
       if (!socket.data.characterId || socket.data.characterId === "undefined")
         return;
-      await gameManager.executeLocked(socket.user.id, async () => {
+      await gameManager.executeLocked(socket.user.id, "generic_task", async () => {
         const char = await gameManager.getCharacter(
           socket.user.id,
           socket.data.characterId,
@@ -510,7 +510,7 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
       if (!socket.data.characterId || socket.data.characterId === "undefined")
         return;
 
-      await gameManager.executeLocked(socket.user.id, async () => {
+      await gameManager.executeLocked(socket.user.id, "generic_task", async () => {
         const char = await gameManager.getCharacter(
           socket.user.id,
           socket.data.characterId,
@@ -558,7 +558,7 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
       }
 
       if (socket.data.characterId && socket.data.characterId !== "undefined") {
-        await gameManager.executeLocked(socket.user.id, async () => {
+        await gameManager.executeLocked(socket.user.id, "generic_task", async () => {
           const char = await gameManager.getCharacter(
             socket.user.id,
             socket.data.characterId,
@@ -593,7 +593,7 @@ export const registerCharacterHandlers = (socket, gameManager, io) => {
         "TUTORIAL_FINAL_MESSAGE", "COMPLETED",
       ];
 
-      await gameManager.executeLocked(socket.user.id, async () => {
+      await gameManager.executeLocked(socket.user.id, "generic_task", async () => {
         const char = await gameManager.getCharacter(
           socket.user.id,
           socket.data.characterId,

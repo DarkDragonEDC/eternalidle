@@ -26,3 +26,11 @@ Correções para um ambiente de jogo mais seguro.
 - **Notificações Push**: Novo alerta: **"Vida Totalmente Recuperada!"** avisando quando seu personagem termina de descansar.
 - **Login do Personagem**: Corrigida a demora ao carregar o estado do jogo após selecionar um personagem.
 
+### 🐉 World Boss (Chefes de Mundo)
+Melhorias na experiência de combate global e correção de falhas críticas.
+- **Painel de Resultados**: Agora o ranking final e o dano total são exibidos por 8 segundos após o fim da luta, garantindo que você veja sua posição antes de sair da arena.
+- **Sincronização de Combate**: Aumentamos o tempo de tolerância do cronômetro para evitar que a luta feche sozinha antes do servidor processar seu dano final.
+- **Barra de Vida Detalhada**: O HP dos chefes de janela (8h) agora mostra os valores absolutos (ex: 2.4M / 2.5M) além da porcentagem, facilitando o acompanhamento do dano real.
+- **Correção de Bloqueio**: Corrigido um erro que ocasionalmente deixava o jogador "preso" em uma luta inexistente, impedindo novos desafios.
+- **Integridade do Desafio**: Ajustada a verificação de participação para impedir que o limite diário de desafios seja burlado por falhas de conexão ou recarregamento de página.
+

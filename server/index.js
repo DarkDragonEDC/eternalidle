@@ -61,6 +61,7 @@ gameManager.onGlobalStatsUpdate = (stats) => {
 app.use(cors());
 
 // Webhook must be BEFORE express.json()
+app.get("/", (req, res) => res.send("Eternal Idle Server is ONLINE on Port 3000. Please access http://localhost:5173 for the game."));
 app.use("/api/webhooks", webhookRoutes(gameManager, io));
 
 app.use(express.json());
@@ -92,5 +93,5 @@ process.on("SIGTERM", () => shutdown("SIGTERM"));
 
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on port ${PORT} (0.0.0.0)`);
+  console.log(`Server running on port ${PORT} | Version: ${SERVER_VERSION}`);
 });

@@ -19,17 +19,28 @@ export function useNavigationSync(
 
     // Unified Navigation Synchronization
     useEffect(() => {
-        // 1. If no session, force URL to root (unless it's privacy policy)
-        // This prevents stale URLs like /skills_overview from persisting on the landing page
-        if (!session && location.pathname !== '/' && !location.pathname.startsWith('/privacy')) {
-            navigate('/', { replace: true });
+        // console.log('[NAV] Sync Check:', { path: location.pathname, storeTab: activeTab, selectedCharacter, hasSession: !!session });
+
+        // 1. If no session, force URL to root
+        if (!session) {
+            if (location.pathname !== '/' && !location.pathname.startsWith('/privacy')) {
+                navigate('/', { replace: true });
+            }
             return;
         }
 
-        if (!selectedCharacter) return;
+        // 2. If no selected character, stay on / (character selection)
+        if (!selectedCharacter) {
+            if (location.pathname !== '/' && !location.pathname.startsWith('/privacy')) {
+                navigate('/', { replace: true });
+            }
+            return;
+        }
+
         if (location.pathname.startsWith('/privacy')) return;
 
-        const urlTab = location.pathname.substring(1);
+        const pathSegments = location.pathname.substring(1).split('/');
+        const urlTab = pathSegments[0];
         const storeTab = activeTab;
         const validTabs = [
             'world_boss', 'combat', 'dungeon', 'market', 'guild', 'ranking', 
@@ -37,20 +48,26 @@ export function useNavigationSync(
             'merging', 'inventory', 'profile', 'skills_overview', 'town_overview', 'combat_overview', 'village'
         ];
 
-        // 1. URL has a valid tab -> Sync to Store
+        // 3. Root path with character selected -> Go to activeTab or inventory
+        if (location.pathname === '/' || location.pathname === '') {
+            const target = storeTab && validTabs.includes(storeTab) ? storeTab : 'inventory';
+            navigate(`/${target}`, { replace: true });
+            return;
+        }
+
+        // 4. URL has a valid tab -> Sync to Store
         if (urlTab && validTabs.includes(urlTab)) {
             if (urlTab !== storeTab) {
+                console.log(`[NAV] Syncing storeTab: ${storeTab} -> ${urlTab}`);
                 setActiveTab(urlTab);
             }
         } 
-        // 2. State has a tab that doesn't match URL -> Sync to URL
-        else if (storeTab && validTabs.includes(storeTab) && `/${storeTab}` !== location.pathname) {
-            navigate(`/${storeTab}`, { replace: true });
-        }
-        // 3. Fallback for root or invalid URL
-        else if (!urlTab || !validTabs.includes(urlTab)) {
-            if (location.pathname === '/' || location.pathname === '') {
-                navigate(`/${storeTab || 'inventory'}`, { replace: true });
+        // 5. State has a tab that doesn't match URL -> Sync to URL
+        else if (storeTab && validTabs.includes(storeTab)) {
+            const targetPath = `/${storeTab}`;
+            if (location.pathname !== targetPath) {
+                console.log(`[NAV] Syncing URL: ${location.pathname} -> ${targetPath}`);
+                navigate(targetPath, { replace: true });
             }
         }
     }, [location.pathname, activeTab, selectedCharacter, navigate, setActiveTab, session]);

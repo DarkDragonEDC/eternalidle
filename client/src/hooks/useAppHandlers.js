@@ -24,9 +24,12 @@ export function useAppHandlers({
     const handleCharacterSelect = useCallback((id) => {
         setSelectedCharacter(id);
         if (session?.access_token) {
+            // Disconnect existing socket (may have been auto-connected without charId)
+            // so connectSocket can create a fresh connection with the charId
+            disconnectSocket();
             connectSocket(session.access_token, id, CLIENT_VERSION);
         }
-    }, [session, setSelectedCharacter, connectSocket, CLIENT_VERSION]);
+    }, [session, setSelectedCharacter, disconnectSocket, connectSocket, CLIENT_VERSION]);
 
     const handleLogout = useCallback(async () => {
         await supabase.auth.signOut();

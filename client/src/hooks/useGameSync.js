@@ -171,7 +171,6 @@ export const useGameSync = () => {
             if (document.visibilityState === 'visible') {
                 const now = Date.now();
                 if (now - lastSync > SYNC_COOLDOWN) {
-                    console.log('[SYNC] Page became visible, triggering sync...');
                     requestSync();
                     lastSync = now;
                 }

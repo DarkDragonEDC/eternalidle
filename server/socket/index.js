@@ -14,29 +14,22 @@ import { registerMiscHandlers } from "./handlers/miscHandler.js";
 
 export const initSocket = (io, gameManager, serverVersion) => {
   io.use(async (socket, next) => {
-    const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.split(" ")[1];
-    if (!token) return next(new Error("Authentication error: No token provided"));
-
     try {
-      console.log(`[SOCKET] Verifying token: ${token?.substring(0, 15)}...`);
+      const authHeader = socket.handshake.auth.token || socket.handshake.headers.authorization;
+      console.log("[SOCKET-ENTRY] New connection attempt", socket.id);
       
-      try {
-        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-        console.log(`[SOCKET] Token payload:`, {
-          iss: payload.iss,
-          sub: payload.sub,
-          role: payload.role,
-          email: payload.email,
-          aud: payload.aud,
-          exp: payload.exp
-        });
-      } catch (e) {
-        console.log(`[SOCKET] Error decoding token payload:`, e.message);
+      if (!authHeader) {
+        console.warn("[SOCKET] No token provided", socket.id);
+        return next(new Error("Authentication error: No token provided"));
       }
 
+      const token = authHeader.replace("Bearer ", "");
+      const startAuth = Date.now();
       const { data: { user }, error } = await supabase.auth.getUser(token);
+      console.log(`[SOCKET] Auth check took ${Date.now() - startAuth}ms for ${user?.email || 'unknown'}`);
+
       if (error || !user) {
-        console.log(`[SOCKET] Auth error detail:`, JSON.stringify(error, null, 2));
+        console.error("[SOCKET] Invalid user or auth error:", error);
         return next(new Error("Authentication error: Invalid token"));
       }
       socket.user = user;
@@ -54,7 +47,12 @@ export const initSocket = (io, gameManager, serverVersion) => {
         user_id: socket.user.id,
         last_active_at: new Date().toISOString(),
         ip_address: clientIp,
-      }).then(({ error }) => { if (error) console.error("[SOCKET] session IP error:", error); });
+      }).then(({ error }) => { 
+        // Silencing duplicate key logs during debug
+        if (error && !error.message.includes('duplicate key')) {
+           console.error("[SOCKET] session IP error:", error); 
+        }
+      });
       socket.join(`user:${socket.user.id}`);
     }
 
