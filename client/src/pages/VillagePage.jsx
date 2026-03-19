@@ -16,7 +16,7 @@ import NPCDialogue from '../components/NPCDialogue';
 import { QUESTS, NPCS } from '@shared/quests';
 
 const VillagePage = () => {
-    const { gameState, questInteract } = useAppStore();
+    const { gameState, questInteract, isMobile } = useAppStore();
     const [selectedNpc, setSelectedNpc] = useState(null);
 
     const npcStates = gameState?.state?.quests?.npcTalked || {};
@@ -89,12 +89,40 @@ const VillagePage = () => {
             <motion.header 
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                style={{ marginBottom: '32px' }}
+                style={{ 
+                    marginBottom: '24px',
+                    background: 'rgba(0,0,0,0.5)',
+                    backdropFilter: 'blur(12px)',
+                    padding: isMobile ? '20px' : '16px 24px',
+                    borderRadius: '24px',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    display: 'inline-block',
+                    width: isMobile ? '100%' : 'auto',
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.4)'
+                }}
             >
-                <h1 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)', marginBottom: '8px', letterSpacing: '-1px' }}>
+                <h1 style={{ 
+                    fontSize: isMobile ? '2rem' : '2.2rem', 
+                    fontWeight: '950', 
+                    color: '#fff', 
+                    marginBottom: '4px', 
+                    letterSpacing: '-1px',
+                    textShadow: '0 4px 20px rgba(0,0,0,0.6)',
+                    lineHeight: '1',
+                    textTransform: 'uppercase'
+                }}>
                     Adventure Village
                 </h1>
-                <p style={{ color: 'var(--text-dim)', fontSize: '1rem', maxWidth: '600px' }}>
+                <p style={{ 
+                    color: 'rgba(255,255,255,0.7)', 
+                    fontSize: isMobile ? '0.75rem' : '0.85rem', 
+                    maxWidth: '500px',
+                    opacity: 1,
+                    fontWeight: '700',
+                    letterSpacing: '0.5px',
+                    textTransform: 'uppercase',
+                    marginLeft: '2px'
+                }}>
                     Speak with the residents to receive quests and advance your progression.
                 </p>
             </motion.header>

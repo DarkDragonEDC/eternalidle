@@ -23,7 +23,6 @@ export class WorldBossManager {
     }
 
     async initialize() {
-        console.log('[WORLD_BOSS] Initializing manager...');
         await this.checkBossCycle();
         await this.refreshAllRankings();
 
@@ -43,8 +42,8 @@ export class WorldBossManager {
     }
 
     async refreshDailyRankings() {
+        const dateStr = new Date().toISOString().split('T')[0];
         try {
-            const dateStr = new Date().toISOString().split('T')[0];
             const { data, error } = await this.gameManager.supabase
                 .from('world_boss_attempts')
                 .select('character_id, damage, characters(name, state, guild_members(guilds(tag)))')
@@ -53,18 +52,19 @@ export class WorldBossManager {
                 .order('damage', { ascending: false });
 
             if (error) throw error;
-            this.dailyRankings = this.formatRankings(data);
+            this.dailyRankings = this.formatRankings(data || []);
         } catch (err) {
             console.error('[WORLD_BOSS] Error refreshing daily rankings:', err);
+            this.dailyRankings = [];
         }
     }
 
     async refreshWindowRankings() {
+        if (!this.windowSession) {
+            this.windowRankings = [];
+            return;
+        }
         try {
-            if (!this.windowSession) {
-                this.windowRankings = [];
-                return;
-            }
             const { data, error } = await this.gameManager.supabase
                 .from('world_boss_attempts')
                 .select('character_id, damage, characters(name, state, guild_members(guilds(tag)))')
@@ -72,9 +72,10 @@ export class WorldBossManager {
                 .order('damage', { ascending: false });
 
             if (error) throw error;
-            this.windowRankings = this.formatRankings(data);
+            this.windowRankings = this.formatRankings(data || []);
         } catch (err) {
             console.error('[WORLD_BOSS] Error refreshing window rankings:', err);
+            this.windowRankings = [];
         }
     }
 
@@ -316,8 +317,6 @@ export class WorldBossManager {
         const boss = (type === 'daily') ? this.dailyBoss : this.windowBoss;
         const session = (type === 'daily') ? null : this.windowSession;
 
-        console.log(`[WORLD_BOSS] startFight called: char=${char.id}, type=${type}, bossAlive=${boss?.isAlive}, sessionId=${session?.id}`);
-
         if (!boss || !boss.isAlive) {
             throw new Error("This World Boss is either resting or already defeated.");
         }
@@ -335,7 +334,6 @@ export class WorldBossManager {
             characterId: char.id,
             name: char.name,
             type: type,
-            // FIX: Daily boss must have sessionId as NULL to be tracked correctly by date in DB
             sessionId: (type === 'daily') ? null : this.windowSession?.id,
             startedAt: Date.now(),
             damage: 0,
@@ -348,13 +346,13 @@ export class WorldBossManager {
         if (!char.state) char.state = {};
         char.state.activeWorldBossFight = { ...fightState };
 
-        console.log(`[WORLD_BOSS] Fight started successfully: char=${char.id}, type=${type}, sessionId=${fightState.sessionId}`);
+        console.log(`[WORLD_BOSS] Fight started successfully: char=${char.name} (${char.id}), type=${type}, sessionId=${fightState.sessionId}`);
         return { success: true };
     }
 
     async checkBossParticipation(charId, type) {
         const dateStr = new Date().toISOString().split('T')[0];
-        let query = this.gameManager.supabase.from('world_boss_attempts').select('id').eq('character_id', charId);
+        let query = this.gameManager.supabase.from('world_boss_attempts').select('id, damage').eq('character_id', charId);
 
         if (type === 'daily') {
             query = query.eq('date', dateStr).is('session_id', null);
@@ -366,7 +364,6 @@ export class WorldBossManager {
         const { data, error } = await query.limit(1);
         if (error) {
             console.error('[WORLD_BOSS] Error checking participation:', error);
-            // Default to true (prevent fight) if DB errors to prevent abuse
             return true;
         }
 
@@ -391,19 +388,19 @@ export class WorldBossManager {
         }
 
         const stats = this.gameManager.inventoryManager.calculateStats(char);
-        // FIX: Default to 2000ms if stats.attackSpeed is missing or 0, preventing "free" speed
         const atkSpeed = Math.max(200, stats.attackSpeed || DEFAULT_PLAYER_ATTACK_SPEED);
         let rounds = 0;
         const hits = [];
         let tickDamage = 0;
 
-        while (fight.lastTick + atkSpeed <= now && rounds < 10) {
-            const damage = Math.max(1, stats.damage || 1);
-            const burstChance = stats.burstChance || 0;
-            let hitDmg = damage;
+        // More rounds for catchup processing
+        const maxRounds = virtualTime ? 500 : 10;
+
+        while (fight.lastTick + atkSpeed <= now && rounds < maxRounds) {
+            let hitDmg = Math.max(1, stats.damage || 1);
             let isCrit = false;
 
-            if (burstChance > 0 && Math.random() * 100 < burstChance) {
+            if (stats.burstChance > 0 && Math.random() * 100 < stats.burstChance) {
                 hitDmg = Math.floor(hitDmg * 1.5);
                 isCrit = true;
             }
@@ -417,7 +414,9 @@ export class WorldBossManager {
             tickDamage += hitDmg;
             fight.damage += hitDmg;
             fight.lastTick += atkSpeed;
-            hits.push({ damage: hitDmg, timestamp: fight.lastTick, crit: isCrit });
+            if (!virtualTime) {
+                hits.push({ damage: hitDmg, timestamp: fight.lastTick, crit: isCrit });
+            }
             rounds++;
 
             if (fight.type === 'window' && (hitDmg === 0 || boss.currentHP - tickDamage <= 0)) break;
@@ -425,8 +424,8 @@ export class WorldBossManager {
 
         if (tickDamage > 0 && fight.type === 'window') {
             boss.currentHP -= tickDamage;
-            // No await here to avoid blocking tick, but we should handle errors?
             this.updateBossHPInDB(tickDamage).catch(err => {
+                // Silently log only to console
                 console.error(`[WORLD_BOSS] Error in deferred HP update:`, err);
             });
             if (boss.currentHP <= 0) this.handleBossDefeat();
@@ -489,53 +488,10 @@ export class WorldBossManager {
 
     async processBatchWorldBoss(char, now) {
         if (!char.state?.activeWorldBossFight) return null;
-
-        const fight = char.state.activeWorldBossFight;
-        const totalDuration = 60000;
-        const elapsedSinceStart = now - fight.startedAt;
-        const effectiveNow = Math.min(now, fight.startedAt + totalDuration);
-
-        if (elapsedSinceStart < totalDuration) {
-            this.activeFights.set(char.id, { ...fight });
+        if (!this.activeFights.has(char.id)) {
+            this.activeFights.set(char.id, { ...char.state.activeWorldBossFight });
         }
-
-        const stats = this.gameManager.inventoryManager.calculateStats(char);
-        const atkSpeed = Math.max(200, stats.attackSpeed || 1000);
-        let rounds = 0;
-
-        while (fight.lastTick + atkSpeed <= effectiveNow && rounds < 500) {
-            const damage = Math.max(1, stats.damage || 1);
-            const burstChance = stats.burstChance || 0;
-            let hitDmg = damage;
-            if (burstChance > 0 && Math.random() * 100 < burstChance) hitDmg = Math.floor(hitDmg * 1.5);
-            fight.damage += hitDmg;
-            fight.lastTick += atkSpeed;
-            rounds++;
-        }
-
-
-
-        if (elapsedSinceStart >= totalDuration) {
-            try {
-                await this.saveParticipation(char.id, fight.damage, char.name, fight.type, fight.sessionId);
-                await this.refreshAllRankings();
-            } catch (err) {
-                console.error('[WORLD_BOSS] Error in batch finish:', err);
-            } finally {
-                if (char.state) delete char.state.activeWorldBossFight;
-                this.activeFights.delete(char.id);
-            }
-
-            return { 
-                totalDamage: fight.damage, 
-                damage: fight.damage,
-                rounds: rounds, 
-                status: 'FINISHED',
-                rankingPos: this.predictRankingPos(char.id, fight.damage, fight.type)
-            };
-        }
-
-        return { totalDamage: fight.damage, rounds: rounds, status: 'ACTIVE' };
+        return await this.processTick(char, now);
     }
 
     predictRankingPos(charId, currentDamage, type) {
@@ -556,12 +512,7 @@ export class WorldBossManager {
         const fight = this.activeFights.get(char.id) || char.state?.activeWorldBossFight;
         if (!fight) return;
 
-        console.log(`[WORLD_BOSS] endFight called: char=${char.id}, type=${fight.type}, damage=${fight.damage}, sessionId=${fight.sessionId}`);
-
-        if (char.state) delete char.state.activeWorldBossFight;
-
         try {
-            // Restore original Top 1 announcement logic for Daily Boss
             let oldTop1 = null;
             if (fight.type === 'daily') {
                 const categoryRankings = (this.dailyLiveRankings.IRONMAN.concat(this.dailyLiveRankings.NORMAL))
@@ -569,15 +520,13 @@ export class WorldBossManager {
                 oldTop1 = categoryRankings.length > 0 ? categoryRankings[0] : null;
             }
 
-            await this.saveParticipation(char.id, fight.damage, char.name, fight.type, fight.sessionId);
-            console.log(`[WORLD_BOSS] Participation saved: char=${char.id}, damage=${fight.damage}`);
+            await this.saveParticipation(char, fight.damage, fight.type, fight.sessionId);
             await this.refreshAllRankings();
             
             if (this.gameManager.quests) {
                 this.gameManager.quests.handleProgress(char, QUEST_TYPES.WORLD_BOSS, { count: 1 });
             }
 
-            // Announcements for Daily Boss only
             if (fight.type === 'daily') {
                 const categoryRankings = (this.dailyLiveRankings.IRONMAN.concat(this.dailyLiveRankings.NORMAL))
                     .sort((a,b) => b.damage - a.damage);
@@ -585,30 +534,12 @@ export class WorldBossManager {
 
                 if (newTop1 && (!oldTop1 || oldTop1.character_id !== newTop1.character_id) && fight.damage > 0) {
                     const announcement = `📢 ${newTop1.name} has just taken the Top 1 spot in the World Boss Ranking with ${newTop1.damage.toLocaleString()} damage!`;
-                    try {
-                        const { data: msgData, error: msgError } = await this.gameManager.supabase
-                            .from('messages')
-                            .insert({
-                                sender_name: '[SYSTEM]',
-                                content: announcement,
-                                channel: 'SYSTEM'
-                            })
-                            .select()
-                            .single();
-
-                        if (!msgError && msgData) {
-                            this.gameManager.broadcast('new_message', msgData);
-                        } else {
-                            this.gameManager.broadcast('new_message', {
-                                id: 'wb-' + Date.now(),
-                                sender_name: '[SYSTEM]',
-                                content: announcement,
-                                created_at: new Date().toISOString()
-                            });
-                        }
-                    } catch (err) {
-                        console.error('[WORLD_BOSS] Error broadcasting Top 1 announcement:', err);
-                    }
+                    this.gameManager.broadcast('new_message', {
+                        id: 'wb-' + Date.now(),
+                        sender_name: '[SYSTEM]',
+                        content: announcement,
+                        created_at: new Date().toISOString()
+                    });
                 }
             }
         } catch (err) {
@@ -631,15 +562,15 @@ export class WorldBossManager {
         };
     }
 
-    async saveParticipation(characterId, damage, name, type, sessionId = null) {
+    async saveParticipation(char, damage, type, sessionId = null) {
         const dateStr = new Date().toISOString().split('T')[0];
-        console.log(`[WORLD_BOSS] saveParticipation: charId=${characterId}, damage=${damage}, type=${type}, sessionId=${sessionId}, date=${dateStr}`);
+        
         try {
-            // Check if an existing attempt exists for this character
+            // 1. Double check existing attempt to merge damage properly
             let query = this.gameManager.supabase
                 .from('world_boss_attempts')
                 .select('id, damage')
-                .eq('character_id', characterId);
+                .eq('character_id', char.id);
 
             if (type === 'daily') {
                 query = query.eq('date', dateStr).is('session_id', null);
@@ -648,44 +579,36 @@ export class WorldBossManager {
             }
 
             const { data: existing, error: selectError } = await query.maybeSingle();
-            if (selectError) {
-                console.error(`[WORLD_BOSS] Error checking existing attempt:`, selectError);
-            }
-
+            
             if (existing) {
-                // Use Math.max to ensure we only save better attempts (safety)
-                const newDamage = Math.max(existing.damage || 0, Math.floor(damage));
+                const oldDamage = parseInt(existing.damage) || 0;
+                const newDamage = Math.max(oldDamage, Math.floor(damage));
+                
                 const { error: updateError } = await this.gameManager.supabase
                     .from('world_boss_attempts')
-                    .update({ damage: newDamage })
+                    .update({ 
+                        damage: newDamage,
+                        player_name: char.name // Refresh name in case it changed
+                    })
                     .eq('id', existing.id);
 
-                if (updateError) {
-                    console.error(`[WORLD_BOSS] DB Update Error for ${characterId}:`, updateError);
-                    throw updateError;
-                }
-                console.log(`[WORLD_BOSS] saveParticipation UPDATED: id=${existing.id}, old=${existing.damage}, new=${newDamage}`);
+                if (updateError) throw updateError;
             } else {
-                // Insert new record
                 const { error: insertError } = await this.gameManager.supabase
                     .from('world_boss_attempts')
                     .insert({
-                        character_id: characterId,
-                        player_name: name,
+                        character_id: char.id,
+                        player_name: char.name,
                         date: dateStr,
                         session_id: sessionId,
                         damage: Math.floor(damage),
                         claimed: false
                     });
 
-                if (insertError) {
-                    console.error(`[WORLD_BOSS] Error inserting attempt:`, insertError);
-                    throw insertError;
-                }
-                console.log(`[WORLD_BOSS] saveParticipation INSERTED new: charId=${characterId}, damage=${damage}`);
+                if (insertError) throw insertError;
             }
         } catch (err) {
-            console.error('[WORLD_BOSS] Error saving participation:', err);
+            console.error('[WORLD_BOSS] Error in saveParticipation:', err);
             throw err;
         }
     }

@@ -28,10 +28,9 @@ Correções para um ambiente de jogo mais seguro.
 
 ### 🐉 World Boss (Chefes de Mundo)
 Melhorias na experiência de combate global e correção de falhas críticas.
+- **Estabilidade do Ranking**: Melhoramos a confiabilidade do ranking do World Boss, garantindo que todos os ataques sejam registrados e que sua melhor pontuação seja sempre preservada.
 - **Painel de Resultados**: Agora o ranking final e o dano total são exibidos por 8 segundos após o fim da luta, garantindo que você veja sua posição antes de sair da arena.
-- **Sincronização de Combate**: Aumentamos o tempo de tolerância do cronômetro para evitar que a luta feche sozinha antes do servidor processar seu dano final.
+- **Sincronização de Combate**: Unificamos a lógica de cálculo de dano para evitar discrepâncias entre o combate em tempo real e o processamento offline.
+- **HP do Chefe**: Corrigido um problema que impedia o salvamento do ataque se o chefe fosse derrotado durante a luta ou se o jogador já tivesse desafiado outro chefe no mesmo dia.
 - **Barra de Vida Detalhada**: O HP dos chefes de janela (8h) agora mostra os valores absolutos (ex: 2.4M / 2.5M) além da porcentagem, facilitando o acompanhamento do dano real.
-- **Correção de Bloqueio**: Corrigido um erro que ocasionalmente deixava o jogador "preso" em uma luta inexistente, impedindo novos desafios.
-- **Correção de Dano**: Corrigido um problema que impedia o salvamento do ataque ao World Boss se o jogador já tivesse desafiado outro chefe no mesmo dia.
-- **Múltiplos Desafios**: Agora é possível salvar corretamente o progresso no Boss Diário e em todas as 3 sessões do Boss de Janela independentemente.
 
