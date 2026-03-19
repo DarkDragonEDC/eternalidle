@@ -328,7 +328,7 @@ function App() {
                 />
 
                 <BanWarningOverlay banWarning={banWarning} setBanWarning={setBanWarning} socket={socket} />
-                {isWorldBossFight && <WorldBossFight gameState={displayedGameState} socket={socket} onMinimize={() => setIsWorldBossFight(false)} onFinish={() => { setIsWorldBossFight(false); setActiveTab('world_boss'); }} />}
+                {isWorldBossFight && <WorldBossFight gameState={displayedGameState} socket={socket} onMinimize={() => setIsWorldBossFight(false)} onFinish={() => { setIsWorldBossFight(false); useAppStore.getState().setWorldBossUpdate(null); setActiveTab('world_boss'); }} />}
             </div>
         </div>
     );

@@ -146,21 +146,21 @@ export const registerCombatHandlers = (socket, gameManager, io) => {
     }
   });
 
-  socket.on("start_world_boss_fight", async () => {
+  socket.on("start_world_boss_fight", async ({ type = 'window' } = {}) => {
     try {
       await gameManager.executeLocked(socket.user.id, async () => {
         const char = await gameManager.getCharacter(
           socket.user.id,
           socket.data.characterId,
         );
-        const result = await gameManager.worldBossManager.startFight(char);
+        const result = await gameManager.worldBossManager.startFight(char, type);
         if (result.success) {
           await gameManager.saveState(char.id, char.state);
-          socket.emit("world_boss_started", { success: true });
+          socket.emit("world_boss_started", { success: true, type });
         }
         socket.emit("action_result", {
           success: result.success,
-          message: "You challenge the World Boss!",
+          message: `You challenge the ${type === 'daily' ? 'Daily' : 'Window'} World Boss!`,
           worldBossStatus: await gameManager.worldBossManager.getStatus(char.id),
         });
       });

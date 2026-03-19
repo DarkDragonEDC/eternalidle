@@ -54,7 +54,7 @@ export function useAppHandlers({
         if (socket && name) socket.emit('get_public_profile', { characterName: name });
     }, [socket]);
 
-    const handleStartWorldBoss = useCallback(() => {
+    const handleStartWorldBoss = useCallback((type = 'window') => {
         if (isPreviewActive) {
             setModal('confirm', {
                 message: "Preview Mode is active! World Boss challenges are disabled.",
@@ -62,7 +62,7 @@ export function useAppHandlers({
             });
             return;
         }
-        if (socket) socket.emit('start_world_boss_fight');
+        if (socket) socket.emit('start_world_boss_fight', { type });
     }, [socket, setModal, isPreviewActive]);
 
     return {

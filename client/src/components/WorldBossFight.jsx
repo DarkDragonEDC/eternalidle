@@ -6,6 +6,9 @@ import { Timer, TrendingUp, Trophy, Swords, Minimize2 } from 'lucide-react';
 import ResponsiveText from './ResponsiveText';
 
 const WorldBossFight = ({ gameState, socket, onFinish, onMinimize }) => {
+    const store = useAppStore();
+    const storeType = store.activeWorldBossType || 'window';
+
     const [fightData, setFightData] = useState(() => {
         const persisted = gameState?.state?.activeWorldBossFight;
         if (persisted) {
@@ -13,14 +16,16 @@ const WorldBossFight = ({ gameState, socket, onFinish, onMinimize }) => {
                 damage: persisted.damage || 0,
                 elapsed: Math.max(0, Date.now() - persisted.startedAt),
                 rankingPos: persisted.lastBroadcastPos || '--',
-                status: 'ACTIVE'
+                status: 'ACTIVE',
+                type: persisted.type || storeType
             };
         }
         return {
             damage: 0,
             elapsed: 0,
             rankingPos: '--',
-            status: 'ACTIVE'
+            status: 'ACTIVE',
+            type: storeType
         };
     });
 
@@ -31,7 +36,8 @@ const WorldBossFight = ({ gameState, socket, onFinish, onMinimize }) => {
             setFightData(prev => ({
                 ...prev,
                 damage: persisted.damage,
-                rankingPos: persisted.lastBroadcastPos || prev.rankingPos
+                rankingPos: persisted.lastBroadcastPos || prev.rankingPos,
+                type: persisted.type || prev.type
             }));
         }
     }, [gameState?.state?.activeWorldBossFight?.damage]);
@@ -39,7 +45,6 @@ const WorldBossFight = ({ gameState, socket, onFinish, onMinimize }) => {
     const [logs, setLogs] = useState([]);
     const logsEndRef = React.useRef(null);
 
-    const store = useAppStore();
     const { worldBossUpdate } = store;
 
     useEffect(() => {
@@ -51,20 +56,30 @@ const WorldBossFight = ({ gameState, socket, onFinish, onMinimize }) => {
             damage: update.damage !== undefined ? update.damage : prev.damage,
             elapsed: update.elapsed !== undefined ? update.elapsed : prev.elapsed,
             rankingPos: update.rankingPos !== undefined ? update.rankingPos : prev.rankingPos,
-            status: update.status || prev.status
+            status: update.status || prev.status,
+            type: update.type || prev.type
         }));
 
         // Process Hits for Log
         if (update.hits && Array.isArray(update.hits) && update.hits.length > 0) {
-            const newLogs = update.hits.map(hit => ({
-                id: Date.now() + Math.random(),
-                damage: hit.damage,
-                crit: hit.crit
-            }));
+            const newLogs = update.hits.map(hit => {
+                const isCrit = hit.crit;
+                // Random angle between -180 and 0 deg (top half circle)
+                const angle = (Math.random() * Math.PI) - Math.PI;
+                const distance = (isCrit ? 100 : 70) + Math.random() * 40;
+                
+                return {
+                    id: Date.now() + Math.random(),
+                    damage: hit.damage,
+                    crit: isCrit,
+                    angle: angle,
+                    distance: distance
+                };
+            });
 
             setLogs(prev => {
                 const updated = [...prev, ...newLogs];
-                return updated.slice(-20); // Keep last 20
+                return updated.slice(-15); // Keep last 15
             });
         }
 
@@ -89,354 +104,184 @@ const WorldBossFight = ({ gameState, socket, onFinish, onMinimize }) => {
         }
     }, [timeLeft, isFinished, onFinish]);
 
+    const bossObj = fightData.type === 'daily' ? store.wbStatus?.daily?.boss : store.wbStatus?.window?.boss;
+
     return (
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             style={{
-                position: 'fixed',
-                top: 0, left: 0, right: 0, bottom: 0,
-                zIndex: 20000,
-                background: 'radial-gradient(ellipse at 50% 20%, rgba(40, 5, 5, 1) 0%, rgba(8, 2, 2, 1) 70%, #000 100%)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                overflow: 'hidden'
+                position: 'fixed', inset: 0, zIndex: 20000,
+                background: '#0a0a0a',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden'
             }}
         >
+            {/* Background Layer */}
+            {bossObj?.bg && (
+                <div style={{
+                    position: 'absolute', inset: 0,
+                    backgroundImage: `url(${bossObj.bg})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    opacity: 0.35,
+                    filter: 'blur(4px)',
+                    zIndex: 0
+                }} />
+            )}
+            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at bottom, transparent 0%, #050505 80%)', zIndex: 0 }} />
+
             {/* Ambient particles */}
-            {[...Array(6)].map((_, i) => (
-                <motion.div
-                    key={i}
-                    animate={{
-                        y: [0, -200],
-                        x: [0, (i % 2 === 0 ? 30 : -30)],
-                        opacity: [0, 0.4, 0]
-                    }}
-                    transition={{
-                        repeat: Infinity,
-                        duration: 3 + i * 0.5,
-                        delay: i * 0.7,
-                        ease: 'easeOut'
-                    }}
-                    style={{
-                        position: 'absolute',
-                        bottom: '20%',
-                        left: `${15 + i * 13}%`,
-                        width: '3px',
-                        height: '3px',
-                        borderRadius: '50%',
-                        background: '#ff4d4d',
-                        boxShadow: '0 0 8px rgba(255,77,77,0.6)',
-                        pointerEvents: 'none'
-                    }}
-                />
+            {[...Array(8)].map((_, i) => (
+                <motion.div key={i} animate={{ y: [0, -300], x: [0, (i % 2 === 0 ? 40 : -40)], opacity: [0, 0.5, 0] }} transition={{ repeat: Infinity, duration: 4 + i * 0.5, delay: i * 0.7, ease: 'easeOut' }}
+                    style={{ position: 'absolute', bottom: '-20px', left: `${10 + i * 11}%`, width: '4px', height: '4px', borderRadius: '50%', background: '#ff4d4d', boxShadow: '0 0 10px rgba(255,77,77,0.8)', pointerEvents: 'none', zIndex: 1 }} />
             ))}
 
             {/* Top Bar */}
-            <div style={{
-                width: '100%',
-                padding: '20px 24px 16px',
-                maxWidth: '700px',
-                position: 'relative'
-            }}>
-                {/* Minimize Button */}
+            <div style={{ width: '100%', padding: '20px 24px 16px', maxWidth: '800px', position: 'relative', zIndex: 10 }}>
                 <button 
                     onClick={onMinimize}
-                    style={{
-                        position: 'absolute',
-                        right: '10px',
-                        top: '10px',
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px',
-                        padding: '8px',
-                        color: 'rgba(255,255,255,0.6)',
-                        cursor: 'pointer',
-                        zIndex: 10,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.2s'
-                    }}
+                    style={{ position: 'absolute', right: '10px', top: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
                     onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'white'; }}
                     onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}
                     title="Minimize"
                 >
                     <Minimize2 size={18} />
                 </button>
-                {/* Stats Row */}
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '12px'
-                }}>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                     {/* Timer */}
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        padding: '8px 16px',
-                        background: isLowTime ? 'rgba(220, 38, 38, 0.15)' : 'var(--accent-soft)',
-                        borderRadius: '10px',
-                        border: `1px solid ${isLowTime ? 'rgba(220, 38, 38, 0.3)' : 'var(--border)'}`,
-                        transition: 'all 0.3s ease'
-                    }}>
-                        <Timer size={15} color={isLowTime ? '#ef4444' : '#ff4d4d'} />
-                        <motion.span
-                            key={timeLeft}
-                            animate={isLowTime ? { scale: [1, 1.1, 1] } : {}}
-                            style={{
-                                fontWeight: '800',
-                                color: isLowTime ? '#ef4444' : 'white',
-                                fontSize: '0.9rem',
-                                fontFamily: 'monospace',
-                                letterSpacing: '1px'
-                            }}
-                        >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 20px', background: isLowTime ? 'rgba(220, 38, 38, 0.2)' : 'rgba(0,0,0,0.6)', borderRadius: '12px', border: `1px solid ${isLowTime ? 'rgba(220, 38, 38, 0.5)' : 'rgba(255,255,255,0.1)'}`, backdropFilter: 'blur(5px)' }}>
+                        <Timer size={16} color={isLowTime ? '#ef4444' : '#ff4d4d'} />
+                        <motion.span key={timeLeft} animate={isLowTime ? { scale: [1, 1.1, 1] } : {}} style={{ fontWeight: '900', color: isLowTime ? '#ef4444' : 'white', fontSize: '1rem', fontFamily: 'monospace', letterSpacing: '1px' }}>
                             {timeLeft}s
                         </motion.span>
                     </div>
 
                     {/* Ranking */}
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        padding: '8px 16px',
-                        background: 'var(--accent-soft)',
-                        borderRadius: '10px',
-                        border: '1px solid var(--border)'
-                    }}>
-                        <TrendingUp size={15} color="#22c55e" />
-                        <span style={{
-                            fontWeight: '800',
-                            color: 'white',
-                            fontSize: '0.9rem',
-                            fontFamily: 'monospace'
-                        }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 20px', background: 'rgba(0,0,0,0.6)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(5px)' }}>
+                        <Trophy size={16} color="#d4af37" />
+                        <span style={{ fontWeight: '900', color: '#d4af37', fontSize: '1rem', fontFamily: 'monospace' }}>
                             #{fightData.rankingPos}
                         </span>
                     </div>
                 </div>
 
                 {/* Progress Bar */}
-                <div style={{
-                    width: '100%',
-                    height: '5px',
-                    background: 'var(--slot-bg)',
-                    borderRadius: '3px',
-                    overflow: 'hidden'
-                }}>
-                    <motion.div
-                        animate={{ width: `${progress}%` }}
-                        transition={{ duration: 0.5, ease: 'linear' }}
-                        style={{
-                            height: '100%',
-                            background: isLowTime
-                                ? 'linear-gradient(90deg, #ef4444, #dc2626)'
-                                : 'linear-gradient(90deg, #ff4d4d, #b91c1c)',
-                            borderRadius: '3px',
-                            boxShadow: `0 0 8px ${isLowTime ? 'rgba(239,68,68,0.5)' : 'rgba(255,77,77,0.3)'}`
-                        }}
-                    />
+                <div style={{ width: '100%', height: '6px', background: 'rgba(0,0,0,0.5)', borderRadius: '3px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <motion.div animate={{ width: `${progress}%` }} transition={{ duration: 0.5, ease: 'linear' }}
+                        style={{ height: '100%', background: isLowTime ? 'linear-gradient(90deg, #ef4444, #dc2626)' : 'linear-gradient(90deg, #ff4d4d, #b91c1c)', borderRadius: '3px', boxShadow: `0 0 10px ${isLowTime ? 'rgba(239,68,68,0.8)' : 'rgba(255,77,77,0.5)'}` }} />
                 </div>
             </div>
 
-            {/* Central Combat Zone */}
-            <div style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '100%',
-                maxWidth: '90vw',
-                padding: '0 20px',
-                gap: '8px'
-            }}>
-                {/* Damage Counter */}
+            {/* Central Area: Boss Image & Floaters */}
+            <div style={{ flex: 1, position: 'relative', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 5 }}>
+                
+                {/* Boss Details */}
+                <div style={{ position: 'absolute', top: '20px', textAlign: 'center' }}>
+                    <h2 style={{ color: '#ff4d4d', margin: 0, fontSize: '1.8rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '4px', textShadow: '0 0 20px rgba(255,0,0,0.6)' }}>
+                        {bossObj?.name || 'BOSS FIGHT'}
+                    </h2>
+                    {fightData.type === 'window' ? (
+                        <div style={{ color: '#4d94ff', fontSize: '0.8rem', fontWeight: '800', letterSpacing: '2px', textTransform: 'uppercase' }}>TIER {bossObj?.tier} WORLD BOSS</div>
+                    ) : (
+                        <div style={{ color: '#d4af37', fontSize: '0.8rem', fontWeight: '800', letterSpacing: '2px', textTransform: 'uppercase' }}>THE LEGENDARY DRAGON</div>
+                    )}
+                </div>
+
+                {/* Boss Image Container */}
                 <motion.div
-                    key={fightData.damage}
-                    initial={{ scale: 1 }}
-                    animate={{ scale: [1, 1.008, 1] }}
-                    transition={{ duration: 0.15, ease: "easeOut" }}
-                    style={{ width: '100%' }}
+                    animate={{ y: [-15, 15, -15], filter: ['drop-shadow(0 0 20px rgba(255,0,0,0.3))', 'drop-shadow(0 0 40px rgba(255,0,0,0.6))', 'drop-shadow(0 0 20px rgba(255,0,0,0.3))'] }}
+                    transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
+                    style={{ position: 'relative', marginTop: '40px' }}
                 >
-                    <ResponsiveText
-                        maxFontSize={80}
-                        minFontSize={24}
-                        fontWeight="950"
-                        color="white"
-                        fontFamily="monospace"
-                        textShadow="0 0 40px rgba(255,255,255,0.35), 0 0 80px rgba(255, 77, 77, 0.2)"
-                    >
+                    {bossObj?.image ? (
+                        <img src={`/monsters/${bossObj.image}`} alt="Boss" style={{ width: '320px', height: '320px', objectFit: 'contain', userSelect: 'none', pointerEvents: 'none' }} />
+                    ) : (
+                        <div style={{ fontSize: '120px' }}>🐲</div>
+                    )}
+
+                    {/* Floating Damage Texts */}
+                    <AnimatePresence>
+                        {logs.map((log) => {
+                            return (
+                                <motion.div
+                                    key={log.id}
+                                    initial={{ opacity: 0, scale: 0.5, x: 0, y: 0 }}
+                                    animate={{ opacity: [1, 1, 0], scale: log.crit ? 1.6 : 1.1, x: Math.cos(log.angle) * log.distance, y: (Math.sin(log.angle) * log.distance) - 100 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 1.0, ease: "easeOut" }}
+                                    style={{
+                                        position: 'absolute', top: '40%', left: '50%',
+                                        transform: 'translate(-50%, -50%)',
+                                        fontSize: log.crit ? '1.8rem' : '1.3rem',
+                                        fontWeight: '900',
+                                        color: log.crit ? '#ffd700' : 'white',
+                                        textShadow: log.crit ? '0 0 15px rgba(255, 215, 0, 0.8), 0 0 30px #ff0000' : '0 0 10px rgba(255, 0, 0, 0.8)',
+                                        letterSpacing: '1px',
+                                        pointerEvents: 'none',
+                                        zIndex: 20
+                                    }}
+                                >
+                                    -{formatNumber(log.damage)}{log.crit && '!'}
+                                </motion.div>
+                            );
+                        })}
+                    </AnimatePresence>
+                </motion.div>
+                
+                {/* Boss HP Bar if Window Boss */}
+                {fightData.type === 'window' && bossObj && (
+                    <div style={{ width: '80%', maxWidth: '400px', marginTop: '30px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)', fontWeight: '800', marginBottom: '6px' }}>
+                            <span>HP</span>
+                            <span>{Math.max(0, Math.min(100, ((worldBossUpdate?.bossHP || bossObj.currentHP) / (worldBossUpdate?.bossMaxHP || bossObj.maxHP)) * 100)).toFixed(1)}%</span>
+                        </div>
+                        <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.6)', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden' }}>
+                            <div style={{ width: `${Math.max(0, Math.min(100, ((worldBossUpdate?.bossHP || bossObj.currentHP) / (worldBossUpdate?.bossMaxHP || bossObj.maxHP)) * 100))}%`, height: '100%', background: 'linear-gradient(90deg, #4d94ff, #80b3ff)', boxShadow: '0 0 10px rgba(77,148,255,0.6)' }} />
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Bottom Panel: Total Damage */}
+            <div style={{ width: '100%', padding: '40px 20px', background: 'linear-gradient(to top, #000 0%, rgba(0,0,0,0.8) 50%, transparent 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10 }}>
+                <div style={{ color: 'rgba(255,77,77,0.8)', fontWeight: '800', letterSpacing: '8px', fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '8px' }}>
+                    Total Damage Dealt
+                </div>
+                
+                <motion.div key={fightData.damage} initial={{ scale: 1 }} animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 0.15, ease: "easeOut" }}>
+                    <ResponsiveText maxFontSize={72} minFontSize={32} fontWeight="900" color="white" fontFamily="monospace" textShadow="0 0 30px rgba(255,77,77,0.5), 0 0 60px rgba(255,0,0,0.3)">
                         {formatNumber(fightData.damage)}
                     </ResponsiveText>
                 </motion.div>
-
-                <div style={{
-                    color: 'rgba(255,77,77,0.6)',
-                    fontWeight: '700',
-                    letterSpacing: '6px',
-                    fontSize: '0.7rem',
-                    textTransform: 'uppercase'
-                }}>
-                    Total Damage
+                
+                <div style={{ display: 'flex', gap: '24px', opacity: 0.5, marginTop: '20px' }}>
+                    <Swords size={28} color="#ff4d4d" />
                 </div>
-
-                {/* Damage Log Scroll */}
-                <div style={{
-                    height: '100px',
-                    width: '200px',
-                    marginTop: '20px',
-                    overflow: 'hidden',
-                    position: 'relative',
-                    maskImage: 'linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)'
-                }}>
-                    <div style={{
-                        position: 'absolute', bottom: 0, left: 0, right: 0,
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px'
-                    }}>
-                        <AnimatePresence>
-                            {logs.map((log) => (
-                                <motion.div
-                                    key={log.id}
-                                    initial={{ opacity: 0, y: 10, scale: log.crit ? 1.2 : 0.8 }}
-                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    style={{
-                                        fontSize: log.crit ? '1.1rem' : '0.9rem',
-                                        fontWeight: log.crit ? '900' : 'bold',
-                                        color: log.crit ? '#ffd700' : 'rgba(255, 255, 255, 0.6)',
-                                        textShadow: log.crit
-                                            ? '0 0 10px rgba(255, 215, 0, 0.6), 0 0 20px rgba(255, 77, 77, 0.4)'
-                                            : '0 0 5px rgba(255, 77, 77, 0.5)',
-                                        letterSpacing: log.crit ? '1px' : 'normal'
-                                    }}
-                                >
-                                    +{formatNumber(log.damage)}{log.crit && '!'}
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-                        <div ref={logsEndRef} />
-                    </div>
-                </div>
-            </div>
-
-            {/* Combat Visualization */}
-            <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '60px',
-                marginBottom: '40px',
-                padding: '20px'
-            }}>
-                {/* Player */}
-                <motion.div
-                    animate={{ x: [0, 8, -4, 0] }}
-                    transition={{ repeat: Infinity, duration: 0.6, ease: 'easeInOut' }}
-                    style={{
-                        fontSize: '3.5rem',
-                        filter: 'drop-shadow(0 0 8px rgba(100,200,255,0.3))'
-                    }}
-                >
-                    🛡️
-                </motion.div>
-
-                {/* VS Slash */}
-                <motion.div
-                    animate={{ opacity: [0.3, 1, 0.3], rotate: [0, 5, -5, 0] }}
-                    transition={{ repeat: Infinity, duration: 0.8 }}
-                    style={{
-                        fontSize: '1.5rem',
-                        color: '#ff4d4d',
-                        fontWeight: '900',
-                        textShadow: '0 0 20px rgba(255,77,77,0.5)'
-                    }}
-                >
-                    ⚔️
-                </motion.div>
-
-                {/* Dragon */}
-                <motion.div
-                    animate={{ scale: [1, 1.06, 1], rotate: [0, -2, 2, 0] }}
-                    transition={{ repeat: Infinity, duration: 0.4 }}
-                    style={{
-                        fontSize: '5rem',
-                        filter: 'drop-shadow(0 0 20px rgba(255,0,0,0.4))'
-                    }}
-                >
-                    🐲
-                </motion.div>
             </div>
 
             {/* ==== Finish Overlay ==== */}
             <AnimatePresence>
                 {isFinished && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        style={{
-                            position: 'absolute',
-                            inset: 0,
-                            background: 'rgba(0,0,0,0.92)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            zIndex: 10
-                        }}
-                    >
-                        <motion.div
-                            initial={{ scale: 0.5, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-                            style={{ textAlign: 'center' }}
-                        >
-                            <motion.div
-                                animate={{ rotate: [0, -5, 5, 0] }}
-                                transition={{ repeat: Infinity, duration: 2 }}
-                                style={{ fontSize: '4rem', marginBottom: '16px' }}
-                            >
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.95)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 30000 }}>
+                        <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 200, damping: 15 }} style={{ textAlign: 'center' }}>
+                            <motion.div animate={{ rotate: [0, -5, 5, 0] }} transition={{ repeat: Infinity, duration: 2 }} style={{ fontSize: '5rem', marginBottom: '20px' }}>
                                 🏆
                             </motion.div>
-                            <h2 style={{
-                                color: '#ff4d4d',
-                                fontSize: '2.2rem',
-                                fontWeight: '900',
-                                margin: '0 0 12px 0',
-                                letterSpacing: '4px',
-                                textShadow: '0 0 30px rgba(255,77,77,0.4)'
-                            }}>
-                                COMBAT FINISHED
-                            </h2>
-                            <div style={{
-                                padding: '12px 32px',
-                                background: 'rgba(212, 175, 55, 0.1)',
-                                border: '1px solid rgba(212, 175, 55, 0.25)',
-                                borderRadius: '12px',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '10px'
-                            }}>
-                                <Trophy size={20} color="#d4af37" />
-                                <span style={{
-                                    fontSize: '1.3rem',
-                                    color: '#d4af37',
-                                    fontWeight: '800',
-                                    letterSpacing: '2px'
-                                }}>
-                                    RANK #{fightData.rankingPos}
-                                </span>
+                            <h2 style={{ color: '#ff4d4d', fontSize: '2.5rem', fontWeight: '900', margin: '0 0 16px 0', letterSpacing: '6px', textShadow: '0 0 40px rgba(255,77,77,0.5)' }}>COMBAT FINISHED</h2>
+                            
+                            <div style={{ background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 100%)', border: '1px solid rgba(212, 175, 55, 0.4)', borderRadius: '16px', padding: '24px', display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: '12px', minWidth: '240px' }}>
+                                <div style={{ color: 'var(--text-dim)', fontSize: '0.8rem', letterSpacing: '2px', textTransform: 'uppercase' }}>FINAL DAMAGE</div>
+                                <div style={{ fontSize: '2rem', fontWeight: '900', color: 'white', fontFamily: 'monospace' }}>{formatNumber(fightData.damage)}</div>
+                                <div style={{ width: '100%', height: '1px', background: 'rgba(212, 175, 55, 0.2)', margin: '8px 0' }} />
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <Trophy size={22} color="#d4af37" />
+                                    <span style={{ fontSize: '1.4rem', color: '#d4af37', fontWeight: '800', letterSpacing: '2px' }}>RANK #{fightData.rankingPos}</span>
+                                </div>
                             </div>
-                            <motion.p
-                                animate={{ opacity: [0.3, 0.7, 0.3] }}
-                                transition={{ repeat: Infinity, duration: 2 }}
-                                style={{ color: 'var(--text-dim)', marginTop: '32px', fontSize: '0.85rem', letterSpacing: '2px' }}
-                            >
+                            
+                            <motion.p animate={{ opacity: [0.3, 0.8, 0.3] }} transition={{ repeat: Infinity, duration: 2 }} style={{ color: 'var(--text-dim)', marginTop: '40px', fontSize: '0.9rem', letterSpacing: '3px', textTransform: 'uppercase' }}>
                                 Leaving the arena...
                             </motion.p>
                         </motion.div>

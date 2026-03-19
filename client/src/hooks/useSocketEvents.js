@@ -47,7 +47,10 @@ export const useSocketEvents = () => {
                 store.setLootModalData(result.rewards);
             }
         });
-        socket.on('world_boss_started', () => store.setIsWorldBossFight(true));
+        socket.on('world_boss_started', (data) => {
+            store.setActiveWorldBossType(data?.type || 'window');
+            store.setIsWorldBossFight(true);
+        });
         socket.on('action_result', (result) => {
             if (result.combatUpdate || result.healingUpdate) {
                 store.setCombatActionResult(result);

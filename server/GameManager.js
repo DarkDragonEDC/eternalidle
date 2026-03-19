@@ -1212,6 +1212,7 @@ export class GameManager {
                 silver: char.state.silver,
                 combat: char.state.combat,
                 dungeon: char.state.dungeon,
+                activeWorldBossFight: char.state.activeWorldBossFight || null,
                 actionQueue: char.state.actionQueue,
                 notifications: char.state.notifications?.length > 0 ? char.state.notifications : undefined,
                 equipment: char.state.equipment?.food ? { food: char.state.equipment.food } : undefined

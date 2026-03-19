@@ -255,6 +255,7 @@ export const useAppStore = create((set, get) => ({
                 if (status.state.lastFoodAt !== undefined) merged.state.lastFoodAt = status.state.lastFoodAt;
                 if (status.state.combat !== undefined) merged.state.combat = status.state.combat;
                 if (status.state.dungeon !== undefined) merged.state.dungeon = status.state.dungeon;
+                if (status.state.activeWorldBossFight !== undefined) merged.state.activeWorldBossFight = status.state.activeWorldBossFight;
                 if (status.state.actionQueue !== undefined) merged.state.actionQueue = status.state.actionQueue;
                 if (status.state.notifications) merged.state.notifications = status.state.notifications;
 
@@ -274,6 +275,8 @@ export const useAppStore = create((set, get) => ({
         }
 
         let isWorldBossFight = state.isWorldBossFight;
+        let activeWorldBossType = state.activeWorldBossType;
+        const wbUpdateStatus = state.worldBossUpdate?.status;
         
         // Auto-open only if we detect a NEW fight or if we are logging in (state.gameState is null)
         const hasActiveFight = !!newGameState?.state?.activeWorldBossFight;
@@ -284,20 +287,16 @@ export const useAppStore = create((set, get) => ({
             const elapsed = Date.now() - (fight.startedAt || 0);
             if (elapsed < 60000) {
                 isWorldBossFight = true;
+                activeWorldBossType = fight.type || 'window';
             }
         }
 
-        // If the update is lightweight and we ARE in a fight, ensure the fight state persists in the store
-        if (status._lightweight && isWorldBossFight && !newGameState.state.activeWorldBossFight) {
-            newGameState.state.activeWorldBossFight = state.gameState?.state?.activeWorldBossFight;
-        }
-
-        // If fight finished (persisted state gone in a full status update), set to false
+        // If fight finished (persisted state gone in a full status update), sync UI flag
         if (!status._lightweight && !hasActiveFight) {
             isWorldBossFight = false;
         }
 
-        return { gameState: newGameState, isConnecting: false, globalStats, isWorldBossFight };
+        return { gameState: newGameState, isConnecting: false, globalStats, isWorldBossFight, activeWorldBossType };
     }),
     setSelectedCharacter: (id) => {
         if (id) localStorage.setItem('selectedCharacterId', id);
@@ -485,6 +484,8 @@ export const useAppStore = create((set, get) => ({
     setCombatHistory: (combatHistory) => set({ combatHistory }),
     isWorldBossFight: false,
     setIsWorldBossFight: (isWorldBossFight) => set({ isWorldBossFight }),
+    activeWorldBossType: 'window',
+    setActiveWorldBossType: (activeWorldBossType) => set({ activeWorldBossType }),
     versionMismatch: false,
     setVersionMismatch: (versionMismatch) => set({ versionMismatch }),
     lootModalData: null,
@@ -492,7 +493,38 @@ export const useAppStore = create((set, get) => ({
     combatActionResult: null,
     setCombatActionResult: (combatActionResult) => set({ combatActionResult }),
     worldBossUpdate: null,
-    setWorldBossUpdate: (worldBossUpdate) => set({ worldBossUpdate }),
+    lastFinishedWorldBossSessionId: null,
+    setWorldBossUpdate: (worldBossUpdate) => {
+        const current = get().worldBossUpdate;
+        const lastFinishedId = get().lastFinishedWorldBossSessionId;
+        
+        // If we are trying to set a truthy update
+        if (worldBossUpdate) {
+            // 1. If this session was already marked as finished, ignore it
+            if (worldBossUpdate.sessionId === lastFinishedId && worldBossUpdate.status !== 'ACTIVE') {
+                return;
+            }
+
+            // 2. If we have a current update for the same session
+            if (current && worldBossUpdate.sessionId === current.sessionId) {
+                // If it's already FINISHED, ignore more FINISHED
+                if (current.status === 'FINISHED' && worldBossUpdate.status === 'FINISHED') return;
+
+                // If same data, ignore to prevent re-renders
+                const isSameDamage = worldBossUpdate.damage === current.damage;
+                const currentSec = Math.floor((current.elapsed || 0) / 1000);
+                const newSec = Math.floor((worldBossUpdate.elapsed || 0) / 1000);
+                if (worldBossUpdate.status === current.status && isSameDamage && currentSec === newSec) return;
+            }
+
+            // If this is a new session or a status change to FINISHED, track it
+            if (worldBossUpdate.status === 'FINISHED') {
+                set({ lastFinishedWorldBossSessionId: worldBossUpdate.sessionId });
+            }
+        }
+
+        set({ worldBossUpdate });
+    },
     dailySpinResult: null,
     setDailySpinResult: (dailySpinResult) => set({ dailySpinResult }),
     lastActionResult: null,

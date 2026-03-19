@@ -107,7 +107,7 @@ All quests defined in `shared/quests.js`. **Total: 14 quests**
 > ### 2. Elite Forge
 > - **ID:** `grog_craft`
 > - **Type:** CRAFT
-> - **Objective:** Craft 1 armor piece of your class
+> - **Objective:** Craft 1 Armor of your class
 > - **Rewards:** 2,000 Silver, 300 Class Craft XP, 1x Helmet, 1x Boots, 1x Gloves, 1x Offhand (all T1 class gear)
 
 > ### 3. Ready for Combat

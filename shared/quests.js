@@ -201,7 +201,7 @@ export const QUESTS = {
     grog_craft: {
         id: 'grog_craft',
         title: 'Elite Forge',
-        description: 'Now use these refined materials to create a worthy piece of armor for your class.',
+        description: 'Now use these refined materials to create a worthy Armor for your class.',
         npcId: 'GROG',
         type: QUEST_TYPES.CRAFT,
         goal: { useClassArmor: true, count: 1 },
