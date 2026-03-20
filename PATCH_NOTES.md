@@ -34,3 +34,10 @@ Melhorias na experiência de combate global e correção de falhas críticas.
 - **HP do Chefe**: Corrigido um problema que impedia o salvamento do ataque se o chefe fosse derrotado durante a luta ou se o jogador já tivesse desafiado outro chefe no mesmo dia.
 - **Barra de Vida Detalhada**: O HP dos chefes de janela (8h) agora mostra os valores absolutos (ex: 2.4M / 2.5M) além da porcentagem, facilitando o acompanhamento do dano real.
 
+### 🔨 Sistema de Aprimoramento (Enhancement)
+Melhorias na progressão de equipamentos e correção de falhas de salvamento.
+- **Limite Tier 10**: Itens de Tier 10 agora podem ser aprimorados até **+20**, oferecendo um bônus total de até **+40%** em todos os atributos (Dano, Defesa, HP, Speed, etc).
+- **Persistência de Melhorias**: Corrigido um problema crítico onde as melhorias (+X) e bônus de runas eram perdidos ao desequipar um item. Agora seu progresso está 100% seguro.
+- **Interface de Melhoria**: O modal de aprimoramento agora exibe as cores corretas de raridade e o botão de melhoria aparece apenas para itens que possuem pedras correspondentes.
+- **Auditoria Técnica**: Todo o sistema de atributos foi revisado e validado em todos os 210 equipamentos do jogo para garantir que cada nível de melhoria aplique exatamente +2% de bônus real.
+
