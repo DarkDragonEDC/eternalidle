@@ -10,8 +10,8 @@ export class InventoryManager {
         this.gameManager = gameManager;
     }
 
-    resolveItem(id) {
-        return resolveItem(id);
+    resolveItem(itemOrId) {
+        return resolveItem(itemOrId);
     }
 
     getMaxSlots(char, nowOverride = null) {
@@ -514,6 +514,86 @@ export class InventoryManager {
         return { success: true };
     }
 
+    async enhanceItem(userId, charId, itemStorageKey, stoneStorageKey) {
+        const char = await this.gameManager.getCharacter(userId, charId);
+        if (!char) throw new Error("Character not found");
+
+        const inv = char.state.inventory;
+        if (!inv) throw new Error("Inventory is empty");
+
+        const itemEntry = inv[itemStorageKey];
+        if (!itemEntry) throw new Error("Item not found in inventory");
+
+        const stoneEntry = inv[stoneStorageKey];
+        if (!stoneEntry) throw new Error("Stone not found in inventory");
+
+        // Use resolveItem to get full definitions
+        const item = this.resolveItem(typeof itemEntry === 'object' ? { ...itemEntry, id: itemStorageKey.split('::')[0] } : itemStorageKey.split('::')[0]);
+        const stone = this.resolveItem(typeof stoneEntry === 'object' ? { ...stoneEntry, id: stoneStorageKey.split('::')[0] } : stoneStorageKey.split('::')[0]);
+
+        if (!item) throw new Error("Invalid item");
+        if (!stone || stone.type !== 'ENHANCEMENT_STONE') throw new Error("Invalid enhancement stone");
+
+        // Validate if item is gear
+        const gearTypes = ['WEAPON', 'OFF_HAND', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE'];
+        if (!gearTypes.includes(item.type)) throw new Error("This item cannot be enhanced");
+
+        // Validate Class and Slot match
+        // Item Class detection
+        const itemClass = getRequiredProficiencyGroup(item.id)?.toUpperCase();
+        // Item Slot normalized to enhancement stone format
+        const slotMap = {
+            'WEAPON': 'WEAPON', 'OFF_HAND': 'OFF_HAND', 'ARMOR': 'ARMOR',
+            'HELMET': 'HELMET', 'BOOTS': 'BOOTS', 'GLOVES': 'GLOVES', 'CAPE': 'CAPE'
+        };
+        const itemSlot = slotMap[item.type];
+
+        if (stone.targetClass !== itemClass || stone.targetSlot !== itemSlot) {
+            throw new Error(`Stone mismatch! Requires ${itemClass} ${itemSlot} stone.`);
+        }
+
+        // Enhancement Limits
+        const tier = item.tier || 1;
+        let maxEnhancement = 15;
+        if (tier <= 3) maxEnhancement = 5;
+        else if (tier <= 6) maxEnhancement = 10;
+
+        const currentEnhancement = item.enhancement || 0;
+        if (currentEnhancement >= maxEnhancement) {
+            throw new Error(`Item already at maximum enhancement (+${maxEnhancement}) for Tier ${tier}`);
+        }
+
+        // Silver Cost: Tier * 1000 * (Current + 1)
+        const cost = tier * 1000 * (currentEnhancement + 1);
+        const currentSilver = Number(char.state.silver) || 0;
+        if (currentSilver < cost) throw new Error(`Insufficient Silver! Need ${cost.toLocaleString()} (Have: ${currentSilver.toLocaleString()})`);
+
+        // Apply Enhancement
+        const newEnhancement = currentEnhancement + 1;
+
+        // Update inventory entry
+        if (typeof inv[itemStorageKey] !== 'object') {
+            inv[itemStorageKey] = { amount: inv[itemStorageKey] };
+        }
+        inv[itemStorageKey].enhancement = newEnhancement;
+
+        // Consume Silver and Stone
+        char.state.silver -= cost;
+        this.consumeItems(char, { [stone.id]: 1 });
+
+        // Update Stats
+        this.calculateStats(char);
+        this.gameManager.markDirty(char.id);
+        await this.gameManager.saveStateCritical(char.id, char.state);
+
+        return {
+            success: true,
+            message: `Successfully enhanced ${item.name} to +${newEnhancement}!`,
+            newEnhancement,
+            cost
+        };
+    }
+
     async unequipItem(userId, characterId, slotName) {
         const char = await this.gameManager.getCharacter(userId, characterId);
         if (!char) throw new Error("Character not found");
@@ -666,7 +746,7 @@ export class InventoryManager {
         combatSlots.forEach(slot => {
             const item = equipment[slot];
             if (item) {
-                const freshItem = this.resolveItem(item.id);
+                const freshItem = this.resolveItem(item);
                 totalIP += freshItem?.ip || item.ip || 0;
             }
         });
@@ -708,7 +788,7 @@ export class InventoryManager {
                 if (!hasWeapon && combatSlots.includes(slot)) return;
 
                 // HOTFIX: Re-resolve item stats to ensure balance changes apply retroactively
-                const freshItem = this.resolveItem(item.id);
+                const freshItem = this.resolveItem(item);
                 const statsToUse = freshItem ? freshItem.stats : item.stats;
 
                 if (statsToUse) {

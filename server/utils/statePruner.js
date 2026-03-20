@@ -13,8 +13,10 @@ export const pruneState = (state) => {
                     id: item.id,
                     quality: item.quality,
                     stars: item.stars,
+                    enhancement: item.enhancement || 0,
                     amount: item.amount || 1
                 };
+
             }
         }
     }
@@ -30,8 +32,10 @@ export const pruneState = (state) => {
                     amount: item.amount || 1,
                     quality: item.quality,
                     stars: item.stars,
-                    rarity: item.rarity
+                    rarity: item.rarity,
+                    enhancement: item.enhancement || 0
                 };
+
             }
         }
     }
@@ -45,8 +49,10 @@ export const pruneState = (state) => {
                     amount: item.amount || 1,
                     quality: item.quality,
                     stars: item.stars,
-                    rarity: item.rarity
+                    rarity: item.rarity,
+                    enhancement: item.enhancement || 0
                 };
+
             }
         }
     }
@@ -83,14 +89,16 @@ export const hydrateState = (state) => {
         for (const slot in state.equipment) {
             const pruned = state.equipment[slot];
             if (pruned && pruned.id) {
-                const fullItem = resolveItem(pruned.id, pruned.quality);
+                const fullItem = resolveItem({ id: pruned.id, ...pruned }, pruned.quality);
                 if (fullItem) {
                     state.equipment[slot] = {
                         ...fullItem,
                         stars: pruned.stars || fullItem.stars || 0,
-                        amount: pruned.amount || 1
+                        amount: pruned.amount || 1,
+                        enhancement: pruned.enhancement || 0
                     };
                 }
+
             }
         }
     }

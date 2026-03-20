@@ -4,6 +4,8 @@ import { formatNumber, formatSilver } from '@utils/format';
 import { resolveItem, getTierColor, calculateItemSellPrice, formatItemId, formatItemNameShort } from '@shared/items';
 import { Package, Shield, Coins, Tag, Trash2, Info, ChevronDown, ChevronUp, ArrowUpAZ, ArrowDownZA, Search, Hammer, Zap, PlusCircle } from 'lucide-react';
 import ItemActionModal from './ItemActionModal';
+import EnhanceItemModal from './EnhanceItemModal';
+
 
 const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, onShowInfo, onUse, isMobile, onSelectItem, isPreviewActive, onPreviewActionBlocked }) => {
     const [selectedItemForModal, setSelectedItemForModal] = useState(null);
@@ -23,6 +25,8 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
     const [withdrawModal, setWithdrawModal] = useState(null);
     const [buySlotModal, setBuySlotModal] = useState(null);
     const [foodEquipModal, setFoodEquipModal] = useState(null);
+    const [enhanceModal, setEnhanceModal] = useState(null);
+
     
     // Sync sortBy with settings for auto-sort reactivity
     React.useEffect(() => {
@@ -128,20 +132,21 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
         : (gameState?.state?.bank?.items || {});
 
     const inventoryItems = Object.entries(rawItems).map(([id, entry]) => {
-        const item = resolveItem(id);
+        const metadata = (entry && typeof entry === 'object') ? entry : {};
+        const item = resolveItem({ id, ...metadata });
+        
         if (!item) {
             console.warn(`[${activeTab}] Failed to resolve item: ${id}`);
             return null;
         }
 
-        const qty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
+        const qty = metadata.amount || (Number(entry) || 0);
         if (qty <= 0) return null;
-        if (activeTab === 'INVENTORY' && item.noInventorySpace) return null; // Filter out items that don't take space
+        if (activeTab === 'INVENTORY' && item.noInventorySpace) return null;
 
-        // Merge metadata if entry is an object (for craftedBy, craftedAt, stars, etc.)
-        const metadata = (entry && typeof entry === 'object') ? entry : {};
-        return { ...metadata, ...item, qty, id }; // item (resolved) overrides metadata stats/icon/etc.
+        return { ...item, qty, id, storageKey: metadata.storageKey || id };
     }).filter(Boolean);
+
 
     const filteredItems = inventoryItems.filter(item => {
         // Category Filter
@@ -557,7 +562,13 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                                     minHeight: '80px'
                                 }}
                             >
-                                {item.tier && <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: 'var(--text-main)', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)', zIndex: 10 }}>T{item.tier}</div>}
+                                {item.tier && (
+                                    <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.65rem', color: 'var(--text-main)', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)', zIndex: 10, display: 'flex', gap: '4px' }}>
+                                        <span>T{item.tier}</span>
+                                        {item.enhancement > 0 && <span style={{ color: '#4ade80' }}>+{item.enhancement}</span>}
+                                    </div>
+                                )}
+
                                 <div style={{ position: 'absolute', top: 6, right: 6, fontSize: '0.7rem', color: 'var(--text-main)', fontWeight: 'bold', zIndex: 10 }}>
                                     x{(item.qty && typeof item.qty === 'object') ? (item.qty.amount || 0) : (item.qty || 0)}
                                 </div>
@@ -594,17 +605,14 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                                     fontSize: '0.65rem',
                                     color: 'var(--text-dim)',
                                     fontWeight: 'bold',
-                                    textAlign: 'center',
                                     width: '100%',
-                                    display: '-webkit-box',
-                                    WebkitLineClamp: 2,
-                                    WebkitBoxOrient: 'vertical',
+                                    textAlign: 'center',
+                                    marginTop: '5px',
+                                    whiteSpace: 'nowrap',
                                     overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    lineHeight: '1.2',
-                                    height: '1.55rem' // Ensure fixed height for 2 lines to keep grid consistent
+                                    textOverflow: 'ellipsis'
                                 }}>
-                                    {formatItemNameShort(item.id || item.name)}
+                                    {formatItemNameShort(item)}
                                 </div>
                             </div>
                         );
@@ -649,6 +657,10 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                             onSell={isInventory ? (id) => { setSelectedItemForModal(null); handleQuickSell(id); } : null}
                             onList={isInventory ? (id, item) => { setSelectedItemForModal(null); onListOnMarket({ itemId: id, max: item.qty }); } : null}
                             onDismantle={isInventory ? (id) => { setSelectedItemForModal(null); handleDismantle(id); } : null}
+                            onEnhance={isInventory ? () => {
+                                setEnhanceModal(selectedItemForModal);
+                                setSelectedItemForModal(null);
+                            } : null}
                             onDeposit={isInventory ? handleDeposit : null}
                             onWithdraw={isBank ? handleWithdraw : null}
                         />
@@ -1549,7 +1561,17 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                 </div>,
                 document.body
             )}
+            {enhanceModal && (
+                <EnhanceItemModal
+                    item={enhanceModal}
+                    inventory={gameState?.state?.inventory || {}}
+                    character={gameState}
+                    socket={socket}
+                    onClose={() => setEnhanceModal(null)}
+                />
+            )}
         </div>
+
     );
 };
 

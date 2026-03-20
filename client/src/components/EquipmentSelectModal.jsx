@@ -11,7 +11,9 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onEquipFood
         const itemArray = [];
         Object.entries(inventory).forEach(([itemId, qty]) => {
             if (qty <= 0) return;
-            const item = resolveItem(itemId);
+            const itemMetadata = typeof qty === 'object' ? qty : {};
+            const item = resolveItem({ id: itemId, ...itemMetadata });
+
             if (!item) return;
 
             let matches = false;
@@ -111,7 +113,8 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onEquipFood
     // Resolve current item for comparison
     const resolvedCurrent = React.useMemo(() => {
         if (!currentItem) return null;
-        return { ...resolveItem(currentItem.id), ...currentItem };
+        return resolveItem(currentItem);
+
     }, [currentItem]);
 
     React.useEffect(() => {
@@ -164,7 +167,8 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onEquipFood
             >
                 {/* Header */}
                 <div style={{
-                    padding: '20px',
+                    padding: '15px 20px',
+
                     borderBottom: '1px solid rgba(255,255,255,0.05)',
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -181,13 +185,15 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onEquipFood
                 </div>
                 <div style={{
                     flex: 1,
-                    padding: '20px',
-                    paddingBottom: '20px',
+                    padding: '15px',
+                    paddingBottom: '15px',
+
                     overflowY: 'auto',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '20px',
+                    gap: '12px',
                     minHeight: 0
+
                 }}>
 
                     {/* Recommendation Section */}
@@ -283,9 +289,11 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onEquipFood
                                         )}
                                     </div>
                                     <div>
-                                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>
-                                            {bestCandidate.name || formatItemId(bestCandidate.id)}
+                                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            {bestCandidate.name || formatItemId(bestCandidate.id, { nameOnly: true })}
+                                            {bestCandidate.enhancement > 0 && <span style={{ color: '#4ade80' }}>+{bestCandidate.enhancement}</span>}
                                         </div>
+
                                         <div style={{ fontSize: '0.8rem', color: bestCandidate.rarityColor || 'var(--accent)' }}>
                                             {bestCandidate.type === 'RUNE' ? `Tier ${bestCandidate.tier} • ${bestCandidate.stars} Stars` :
                                                 bestCandidate.type === 'FOOD' ? `Heal ${bestCandidate.healPercent}% • Tier ${bestCandidate.tier}` :
@@ -370,8 +378,10 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onEquipFood
                                         )}
                                     </div>
                                     <div style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
-                                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{resolvedCurrent?.name || formatItemId(currentItem.id || currentItem.name)}</span>
+                                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap', minWidth: 0 }}>
+                                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{resolvedCurrent?.name || formatItemId(currentItem.id || currentItem.name, { nameOnly: true })}</span>
+                                            {resolvedCurrent?.enhancement > 0 && <span style={{ color: '#4ade80', flexShrink: 0 }}>+{resolvedCurrent.enhancement}</span>}
+
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); if (gameState?.state?.tutorialStep && gameState.state.tutorialStep !== 'COMPLETED') return; onShowInfo(currentItem); }}
                                                 style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.5, flexShrink: 0 }}
@@ -380,9 +390,10 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onEquipFood
                                             </button>
                                         </div>
                                         <div style={{ fontSize: '0.8rem', color: resolvedCurrent?.rarityColor || '#888' }}>
-                                            {resolvedCurrent?.type === 'RUNE' ? `Tier ${currentItem.tier} • ${resolvedCurrent.stars} Stars` :
-                                                resolvedCurrent?.type === 'FOOD' ? `Tier ${currentItem.tier} • Heal ${resolvedCurrent.healPercent}%` :
-                                                    `Tier ${currentItem.tier}${(currentItem.ip > 0 && !resolvedCurrent?.type?.startsWith('TOOL')) ? ` • IP ${currentItem.ip}` : ''}`}
+                                            {resolvedCurrent?.type === 'RUNE' ? `Tier ${resolvedCurrent.tier} • ${resolvedCurrent.stars} Stars` :
+                                                resolvedCurrent?.type === 'FOOD' ? `Tier ${resolvedCurrent.tier} • Heal ${resolvedCurrent.healPercent}%` :
+                                                    `Tier ${resolvedCurrent.tier}${(resolvedCurrent.ip > 0 && !resolvedCurrent?.type?.startsWith('TOOL')) ? ` • IP ${resolvedCurrent.ip}` : ''}`}
+
                                         </div>
                                     </div>
                                 </div>
@@ -542,7 +553,9 @@ const EquipmentSelectModal = ({ slot, onClose, currentItem, onEquip, onEquipFood
                                                 </div>
                                                 <div>
                                                     <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                        {item.name || formatItemId(item.id || item.name)}
+                                                        {item.name || formatItemId(item.id || item.name, { nameOnly: true })}
+                                                        {item.enhancement > 0 && <span style={{ color: '#4ade80' }}>+{item.enhancement}</span>}
+
                                                         {isItemRecommended && (
                                                             <span style={{ fontSize: '0.6rem', background: 'var(--accent)', color: '#000', padding: '1px 4px', borderRadius: '3px', fontWeight: '900' }}>BEST</span>
                                                         )}

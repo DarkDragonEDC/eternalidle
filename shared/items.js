@@ -596,7 +596,9 @@ for (const stone of ENHANCEMENT_STONE_DEFS) {
         targetSlot: stone.targetSlot,
         rarity: 'UNCOMMON',
         rarityColor: '#10b981',
+        icon: '/items/ORB.webp',
         description: `An enhancement stone for ${stone.targetClass.charAt(0) + stone.targetClass.slice(1).toLowerCase()} ${stone.targetSlot.replace('_', ' ').toLowerCase()} gear. Used to upgrade equipment.`
+
     };
 }
 
@@ -1142,6 +1144,7 @@ export const resolveItem = (itemOrId, overrideQuality = null) => {
 
     // Handle object input
     const itemId = typeof itemOrId === 'object' ? (itemOrId.id || itemOrId.item_id) : itemOrId;
+    const enhancement = typeof itemOrId === 'object' ? (itemOrId.enhancement || 0) : 0;
     if (!itemId) return null;
 
     // Normalize ID
@@ -1329,8 +1332,27 @@ export const resolveItem = (itemOrId, overrideQuality = null) => {
         originalId: baseId,
         craftedBy: creatorName, // Ensure signature is part of the resolved object
         ip: newStats.ip || (baseItem.ip || 0) + ipBonus,
-        stats: newStats
+        stats: newStats,
+        enhancement: enhancement
     };
+
+    // Apply Enhancement Bonus (2% per level) to all numeric stats
+    if (enhancement > 0) {
+        const multiplier = 1 + (enhancement * 0.02);
+        
+        // Multiply IP as well
+        if (finalItem.ip) {
+            finalItem.ip = Math.round(finalItem.ip * multiplier);
+        }
+
+        for (const key in finalItem.stats) {
+            if (typeof finalItem.stats[key] === 'number') {
+                // Don't multiply efficiency if it's already complex, but user said "all attributes"
+                // For safety, we multiply everything numeric
+                finalItem.stats[key] = parseFloat((finalItem.stats[key] * multiplier).toFixed(2));
+            }
+        }
+    }
 
 
     // Secondary emergency fix for ORE and LEATHER T1
@@ -1886,13 +1908,15 @@ export const formatItemId = (itemOrId, options = {}) => {
     }
 
     return formatted;
+
 };
 
 // Returns a shorter name without Tier prefix (e.g. "T1 ") and Quality suffix (e.g. " Q3")
-export const formatItemNameShort = (itemId) => {
-    let name = formatItemId(itemId);
+export const formatItemNameShort = (itemOrId) => {
+    let name = formatItemId(itemOrId);
     name = name.replace(/^T\d+\s+/i, '');
     name = name.replace(/\s+Q\d+$/i, '');
     return name;
 };
+
 

@@ -4,11 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Shield, Coins, Tag, Trash2, ArrowRight, Zap, Award, Info, Heart, Sword, Star, Sparkles, Package } from 'lucide-react';
 import { getTierColor, calculateItemSellPrice, resolveItem, formatItemId } from '@shared/items';
 
-const ItemActionModal = ({ item: rawItem, onClose, onEquip, onEquipFood, onSell, onList, onUse, onDismantle, onDeposit, onWithdraw, customAction, isIronman }) => {
+const ItemActionModal = ({ item: rawItem, onClose, onEquip, onEquipFood, onSell, onList, onUse, onDismantle, onEnhance, onDeposit, onWithdraw, customAction, isIronman }) => {
+
     if (!rawItem) return null;
 
     // Robust resolution: ensure we have full details
-    const resolved = resolveItem(rawItem.id, rawItem.quality);
+    const resolved = resolveItem(rawItem, rawItem.quality || rawItem.stars);
     const item = { ...rawItem, ...resolved, id: rawItem.id };
 
 
@@ -121,30 +122,40 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onEquipFood, onSell,
                         background: `radial-gradient(circle, ${tierColor}20 0%, transparent 70%)`, pointerEvents: 'none'
                     }} />
 
-                    <div style={{ padding: '24px 24px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+                    <div style={{ padding: '15px 20px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
                         <button onClick={onClose} style={{ position: 'absolute', top: '12px', right: '12px', color: 'var(--text-dim)', border: 'none', background: 'none', cursor: 'pointer' }}><X size={22} /></button>
 
                         <div style={{
-                            width: '70px', height: '70px', background: 'var(--slot-bg)', borderRadius: '18px', border: '1px solid var(--border)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px', boxShadow: `0 0 20px ${tierColor}15`
+                            width: '64px', height: '64px', background: 'var(--slot-bg)', borderRadius: '16px', border: '1px solid var(--border)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px', boxShadow: `0 0 20px ${tierColor}15`
                         }}>
+
                             <img src={item.icon} style={{ width: item.scale || '130%', height: item.scale || '130%', objectFit: 'contain', filter: `drop-shadow(0 0 8px ${tierColor}40)` }} alt="" />
                         </div>
 
-                        <h2 style={{ fontSize: '1.4rem', fontWeight: '900', color: tierColor, letterSpacing: '-0.5px', marginBottom: '4px', textAlign: 'center' }}>{formatItemId(cleanBaseName, { nameOnly: true })}</h2>
+                        <h2 style={{ fontSize: '1.4rem', fontWeight: '900', color: tierColor, letterSpacing: '-0.5px', marginBottom: '4px', textAlign: 'center' }}>
+                            {formatItemId(cleanBaseName, { nameOnly: true })}
+                            {item.enhancement > 0 && <span style={{ color: '#4ade80', marginLeft: '8px' }}>+{item.enhancement}</span>}
+                        </h2>
+
+
+
                         {item.tier && (
                             <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '800', border: `1px solid ${tierColor}40`, padding: '2px 10px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '1px' }}>
                                 T{item.tier} Item
                             </div>
+
+
                         )}
                     </div>
 
                     <div style={{ padding: '0 24px 24px', display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto' }} className="custom-scrollbar">
                         {/* Stats Display */}
                         {hasMeaningfulStats && (
-                            <div className="glass-panel" style={{ padding: '14px', borderRadius: '16px', background: 'var(--accent-soft)', border: '1px solid var(--border)' }}>
-                                <div style={{ fontSize: '0.6rem', fontWeight: '800', color: 'var(--text-dim)', marginBottom: '8px', letterSpacing: '1px' }}>ITEM ATTRIBUTES</div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <div className="glass-panel" style={{ padding: '10px 14px', borderRadius: '12px', background: 'var(--accent-soft)', border: '1px solid var(--border)' }}>
+                                <div style={{ fontSize: '0.6rem', fontWeight: '800', color: 'var(--text-dim)', marginBottom: '6px', letterSpacing: '1px' }}>ITEM ATTRIBUTES</div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+
                                     {item.stats.damage > 0 && <StatRow icon={Sword} label="Damage" value={item.stats.damage} valColor="#f87171" />}
                                     {item.stats.defense > 0 && <StatRow icon={Shield} label="Defense" value={item.stats.defense} valColor="#4ade80" />}
                                     {item.stats.hp > 0 && <StatRow icon={Heart} label="Health" value={`+${item.stats.hp}`} valColor="#fb7185" />}
@@ -152,7 +163,8 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onEquipFood, onSell,
                                     {item.stats.speed > 0 && <StatRow icon={Zap} label="Speed" value={`${item.stats.speed}%`} valColor="#90d5ff" />}
 
                                     {(item.stats.str > 0 || item.stats.agi > 0 || item.stats.int > 0) && (
-                                        <div style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-around', gap: '8px' }}>
+                                        <div style={{ marginTop: '4px', paddingTop: '4px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-around' }}>
+
                                             {item.stats.str > 0 && <div style={{ color: '#ff8888', fontWeight: '900', fontSize: '0.75rem' }}>+{item.stats.str} STR</div>}
                                             {item.stats.agi > 0 && <div style={{ color: '#88ff88', fontWeight: '900', fontSize: '0.75rem' }}>+{item.stats.agi} AGI</div>}
                                             {item.stats.int > 0 && <div style={{ color: '#8888ff', fontWeight: '900', fontSize: '0.75rem' }}>+{item.stats.int} INT</div>}
@@ -160,7 +172,7 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onEquipFood, onSell,
                                     )}
 
                                     {item.stats.efficiency && (
-                                        <div style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
+                                        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: '16px', padding: '12px' }}>
                                             <span style={{ color: '#d4af37', fontWeight: '900', fontSize: '0.75rem', textTransform: 'uppercase' }}>
                                                 Efficiency: {typeof item.stats.efficiency === 'object' ? 'Global Bonus' : `+${item.stats.efficiency}%`}
                                             </span>
@@ -171,7 +183,17 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onEquipFood, onSell,
                         )}
 
                         {/* Actions Grid */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+
+                            {onEnhance && (
+                                <ActionButton
+                                    onClick={() => { onEnhance(item.id); onClose(); }}
+                                    icon={Zap}
+                                    label="Enhance"
+                                    variant="primary"
+                                    subLabel="Upgrade Stats"
+                                />
+                            )}
                             {customAction && (
                                 <ActionButton id={customAction.id} onClick={() => { customAction.onClick(item); onClose(); }} icon={customAction.id === 'tutorial-rune-use-merge' ? Sparkles : (customAction.icon ? () => customAction.icon : Zap)} label={customAction.label} />
                             )}

@@ -340,4 +340,17 @@ export const registerInventoryHandlers = (socket, gameManager, io) => {
       });
     } catch (err) { socket.emit("error", { message: err.message }); }
   });
+
+  socket.on("enhance_item", async ({ itemStorageKey, stoneStorageKey }) => {
+    try {
+      if (!socket.data.characterId || socket.data.characterId === "undefined") return;
+      await gameManager.executeLocked(socket.user.id, async () => {
+        const result = await gameManager.inventoryManager.enhanceItem(socket.user.id, socket.data.characterId, itemStorageKey, stoneStorageKey);
+        socket.emit("item_enhanced", result);
+        socket.emit("status_update", await gameManager.getStatus(socket.user.id, true, socket.data.characterId));
+      });
+    } catch (err) {
+      socket.emit("error", { message: err.message });
+    }
+  });
 };

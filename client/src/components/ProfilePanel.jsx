@@ -194,7 +194,8 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
         // Gear Bonuses
         Object.values(equipment).forEach(item => {
             if (item) {
-                const fresh = resolveItem(item.id || item.item_id);
+                const fresh = resolveItem(item);
+
                 const statsToUse = fresh?.stats || item.stats;
                 if (statsToUse) {
                     if (statsToUse.str) warriorProf += statsToUse.str;
@@ -257,33 +258,39 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
         // Fallback para cálculo local (útil para updates otimistas antes do servidor responder)
         const gearDamage = Object.entries(equipment).reduce((acc, [slot, item]) => {
             if (!item || (!hasWeapon && combatSlots.includes(slot))) return acc;
-            const fresh = resolveItem(item.id || item.item_id);
+            const fresh = resolveItem(item);
             return acc + (fresh?.stats?.damage || 0);
+
         }, 0);
         const gearDefense = Object.entries(equipment).reduce((acc, [slot, item]) => {
             if (!item || (!hasWeapon && combatSlots.includes(slot))) return acc;
-            const fresh = resolveItem(item.id || item.item_id);
+            const fresh = resolveItem(item);
             return acc + (fresh?.stats?.defense || 0);
+
         }, 0);
         const gearHP = Object.entries(equipment).reduce((acc, [slot, item]) => {
             if (!item || (!hasWeapon && combatSlots.includes(slot))) return acc;
-            const fresh = resolveItem(item.id || item.item_id);
+            const fresh = resolveItem(item);
             return acc + (fresh?.stats?.hp || 0);
+
         }, 0);
         const gearDmgBonus = Object.entries(equipment).reduce((acc, [slot, item]) => {
             if (!item || (!hasWeapon && combatSlots.includes(slot))) return acc;
-            const fresh = resolveItem(item.id || item.item_id);
+            const fresh = resolveItem(item);
             return acc + (fresh?.stats?.dmgBonus || 0);
+
         }, 0);
         const gearCritChance = Object.entries(equipment).reduce((acc, [slot, item]) => {
             if (!item || (!hasWeapon && combatSlots.includes(slot))) return acc;
-            const fresh = resolveItem(item.id || item.item_id);
+            const fresh = resolveItem(item);
             return acc + (fresh?.stats?.critChance || 0);
+
         }, 0);
 
         // Resolve Weapon Speed
         const weapon = equipment.mainHand;
-        const freshWeapon = weapon ? resolveItem(weapon.id || weapon.item_id) : null;
+        const freshWeapon = weapon ? resolveItem(weapon) : null;
+
         const weaponId = (freshWeapon?.id || weapon?.id || '').toUpperCase();
 
         let activeProf = null;
@@ -297,7 +304,8 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
         // Resolve Gear Speed (including weapon)
         const gearSpeedBonus = Object.entries(equipment).reduce((acc, [slot, item]) => {
             if (!item) return acc;
-            const fresh = resolveItem(item.id || item.item_id);
+            const fresh = resolveItem(item);
+
             return acc + (fresh?.stats?.speed || fresh?.stats?.attackSpeed || 0);
         }, 0);
 
@@ -320,13 +328,15 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
         const getToolEff = (toolSlot) => {
             const tool = equipment[toolSlot];
             if (!tool) return 0;
-            const fresh = resolveItem(tool.id || tool.item_id);
+            const fresh = resolveItem(tool);
+
             return fresh?.stats?.efficiency || 0;
         };
 
         let globalEff = Object.entries(equipment).reduce((acc, [slot, item]) => {
             if (!item || (!hasWeapon && combatSlots.includes(slot))) return acc;
-            const fresh = resolveItem(item.id || item.item_id);
+            const fresh = resolveItem(item);
+
             const statsToUse = fresh?.stats || item.stats;
             const effVal = typeof statsToUse?.efficiency === 'object' ? (statsToUse.efficiency.GLOBAL || 0) : 0;
             return acc + effVal;
@@ -400,7 +410,8 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
             const rawItem = equipment[slot];
             if (rawItem) {
                 // Resolve item to ensure we have the 'ip' field even if it's missing in the cached raw state
-                const item = { ...rawItem, ...resolveItem(rawItem.id || rawItem.item_id) };
+                const item = resolveItem(rawItem);
+
                 totalIP += item.ip || 0;
             }
         });
@@ -411,7 +422,8 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
 
     const EquipmentSlot = ({ slot, icon, label, item: rawItem, onClick, onShowInfo, isLocked = false, weaponClass = null }) => {
         // Resolve item to ensure we have latest stats and rarity color (even for Normal items if logic changes, but mostly for _Q items)
-        const item = rawItem ? { ...rawItem, ...resolveItem(rawItem.id || rawItem.item_id, rawItem.quality || rawItem.stars) } : null;
+        const item = rawItem ? resolveItem(rawItem, rawItem.quality || rawItem.stars) : null;
+
 
         const tierColor = item ? '#666' : 'var(--glass-bg)';
 
@@ -566,7 +578,9 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                         WebkitBoxOrient: 'vertical',
                         overflow: 'hidden'
                     }}>
-                        {formatItemId(item.id || item.name, { nameOnly: true })}
+                        {item.name || formatItemId(item.id || item.name, { nameOnly: true })}
+                        {item.enhancement > 0 && <span style={{ color: '#4ade80' }}> +{item.enhancement}</span>}
+
                     </span>
                 )}
             </div>

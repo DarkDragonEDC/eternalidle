@@ -8,7 +8,8 @@ import { CHEST_DROP_TABLE, getChestRuneShardRange, WORLDBOSS_DROP_TABLE } from '
 const ItemInfoModal = ({ item: rawItem, onClose }) => {
     if (!rawItem) return null;
 
-    const resolved = resolveItem(rawItem.id || rawItem.item_id, rawItem.quality || rawItem.stars);
+    const resolved = resolveItem(rawItem, rawItem.quality || rawItem.stars);
+
     const item = {
         ...resolved,
         ...rawItem,
@@ -107,18 +108,25 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                         background: `radial-gradient(circle, ${tierColor}20 0%, transparent 70%)`, pointerEvents: 'none'
                     }} />
 
-                    <div style={{ padding: '20px 20px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+                    <div style={{ padding: '15px 20px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
                         <button onClick={onClose} style={{ position: 'absolute', top: '12px', right: '12px', color: 'var(--text-dim)', border: 'none', background: 'none', cursor: 'pointer' }}><X size={22} /></button>
 
                         <div style={{
-                            width: '70px', height: '70px', background: 'var(--slot-bg)', borderRadius: '18px', border: '1px solid var(--border)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px', boxShadow: `0 0 20px ${tierColor}15`
+                            width: '64px', height: '64px', background: 'var(--slot-bg)', borderRadius: '16px', border: '1px solid var(--border)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px', boxShadow: `0 0 20px ${tierColor}15`
                         }}>
                             <img src={item.icon} style={{ width: item.scale || '130%', height: item.scale || '130%', objectFit: 'contain', filter: `drop-shadow(0 0 8px ${tierColor}40)` }} alt="" />
                         </div>
 
+
                         <div style={{ textAlign: 'center' }}>
-                            <h2 style={{ fontSize: '1.4rem', fontWeight: '900', color: tierColor, letterSpacing: '-0.5px', marginBottom: '4px' }}>{formatItemId(item.id || item.name, { nameOnly: true })}</h2>
+                            <h2 style={{ fontSize: '1.4rem', fontWeight: '900', color: tierColor, letterSpacing: '-0.5px', marginBottom: '4px' }}>
+                                {formatItemId(item.id || item.name, { nameOnly: true })}
+                                {item.enhancement > 0 && <span style={{ color: '#4ade80', marginLeft: '8px' }}>+{item.enhancement}</span>}
+                            </h2>
+
+
+
                             <div style={{ display: 'center', justifyContent: 'center', gap: '4px', marginBottom: '8px' }}>
                                 {item.stars > 0 && Array.from({ length: item.stars }).map((_, i) => (
                                     <Star key={i} size={14} color="#fbbf24" fill="#fbbf24" strokeWidth={3} />
@@ -126,9 +134,15 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-                            {item.tier && <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', fontWeight: '800', border: '1px solid var(--border)', padding: '2px 8px', borderRadius: '100px', textTransform: 'uppercase' }}>T{item.tier}</div>}
+                        <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+
+                            {item.tier && (
+                                <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '800', border: `1px solid ${tierColor}40`, padding: '2px 10px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                    T{item.tier} Item
+                                </div>
+                            )}
                             <div style={{ fontSize: '0.6rem', color: tierColor, fontWeight: '800', border: `1px solid ${tierColor}40`, padding: '2px 10px', borderRadius: '100px', textTransform: 'uppercase' }}>{item.type}</div>
+
                             {item.ip > 0 && <div style={{ fontSize: '0.6rem', color: '#fbbf24', fontWeight: '800', border: '1px solid rgba(251, 191, 36, 0.3)', padding: '2px 8px', borderRadius: '100px' }}>IP {item.ip}</div>}
                         </div>
                     </div>
@@ -167,9 +181,9 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
 
                         {/* Attributes Section */}
                         {statKeys.length > 0 && (
-                            <div className="glass-panel" style={{ padding: '12px', borderRadius: '14px', background: 'var(--accent-soft)', border: '1px solid var(--border)' }}>
-                                <div style={{ fontSize: '0.6rem', fontWeight: '800', color: 'var(--text-dim)', marginBottom: '8px', letterSpacing: '1px' }}>ITEM ATTRIBUTES</div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <div className="glass-panel" style={{ padding: '10px 14px', borderRadius: '12px', background: 'var(--accent-soft)', border: '1px solid var(--border)' }}>
+                                <div style={{ fontSize: '0.6rem', fontWeight: '800', color: 'var(--text-dim)', marginBottom: '6px', letterSpacing: '1px' }}>ITEM ATTRIBUTES</div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                                     {baseStats.damage && <StatRow icon={Sword} label="Damage" value={item.stats.damage} valColor="#f87171" />}
                                     {baseStats.hp && <StatRow icon={Heart} label="Health" value={item.stats.hp} valColor="#fb7185" />}
                                     {baseStats.defense && <StatRow icon={Shield} label="Defense" value={item.stats.defense} valColor="#4ade80" />}

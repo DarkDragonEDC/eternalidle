@@ -25,14 +25,16 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                     : activeProf === 'mage' ? 'Mage' : null;
 
             const gearDamage = Object.values(equipment).reduce((acc, item) => {
-                const fresh = item ? resolveItem(item.id || item.item_id) : null;
+                const fresh = item ? resolveItem(item) : null;
                 return acc + (fresh?.stats?.damage || 0);
             }, 0);
 
+
             const gearDmgBonus = Object.values(equipment).reduce((acc, item) => {
-                const fresh = item ? resolveItem(item.id || item.item_id) : null;
+                const fresh = item ? resolveItem(item) : null;
                 return acc + (fresh?.stats?.dmgBonus || 0);
             }, 0);
+
 
             const damageRuneBonus = Object.entries(equipment).reduce((acc, [slot, item]) => {
                 if (slot.startsWith('rune_') && item) {
@@ -40,8 +42,9 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                     const act = parts[1];
                     const eff = parts.slice(2).join('_');
                     if (act === 'ATTACK' && eff === 'ATTACK') {
-                        const freshRune = resolveItem(item.id || item.item_id);
+                        const freshRune = resolveItem(item);
                         return acc + calculateRuneBonus(freshRune.tier, freshRune.stars, eff);
+
                     }
                 }
                 return acc;
@@ -67,7 +70,11 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
             const activeProf = stats.activeProf;
             const profData = activeProf ? getProficiencyStats(activeProf, stats[`${activeProf}Prof`]) : { def: 0 };
             const activeProfDefense = profData.def || 0;
-            const gearDefense = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.defense || 0), 0);
+            const gearDefense = Object.values(equipment).reduce((acc, item) => {
+                const fresh = item ? resolveItem(item) : null;
+                return acc + (fresh?.stats?.defense || 0);
+            }, 0);
+
 
 
             if (activeProfDefense > 0) {
@@ -86,9 +93,10 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
             const activeSpeedBonus = profData.speedBonus || 0;
             const gearSpeed = Object.entries(equipment).reduce((acc, [slot, item]) => {
                 if (!item) return acc;
-                const fresh = resolveItem(item.id || item.item_id);
+                const fresh = resolveItem(item);
                 return acc + (fresh?.stats?.speed || fresh?.stats?.attackSpeed || 0);
             }, 0);
+
 
             const runeSpeedBonus = Object.entries(equipment).reduce((acc, [slot, item]) => {
                 if (slot.startsWith('rune_') && item) {
@@ -96,8 +104,9 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                     if (parts.length >= 3) {
                         const eff = parts.slice(2).join('_');
                         if (eff === 'ATTACK_SPEED') {
-                            const fresh = resolveItem(item.id || item.item_id);
+                            const fresh = resolveItem(item);
                             return acc + calculateRuneBonus(fresh.tier, fresh.stars, eff);
+
                         }
                     }
                 }
@@ -156,7 +165,11 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
             const activeProf = stats.activeProf;
             const profData = activeProf ? getProficiencyStats(activeProf, stats[`${activeProf}Prof`]) : { dmg: 0, hp: 0 };
             const activeHP = profData.hp;
-            const gearHP = Object.values(equipment).reduce((acc, item) => acc + (item?.stats?.hp || 0), 0);
+            const gearHP = Object.values(equipment).reduce((acc, item) => {
+                const fresh = item ? resolveItem(item) : null;
+                return acc + (fresh?.stats?.hp || 0);
+            }, 0);
+
 
             breakdown.push({ label: 'Base', value: 100 });
             if (activeHP > 0) {
@@ -172,12 +185,14 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
 
                 const globalSource = Object.values(equipment).find(item => {
                     if (!item) return false;
-                    const fresh = resolveItem(item.id || item.item_id);
+                    const fresh = resolveItem(item);
                     return fresh?.stats?.efficiency?.GLOBAL > 0;
+
                 });
 
                 if (globalSource) {
-                    const freshGlobal = resolveItem(globalSource.id || globalSource.item_id);
+                    const freshGlobal = resolveItem(globalSource);
+
                     breakdown.push({ label: `Global Item (${freshGlobal.name.split(' ').pop()})`, value: `+${freshGlobal?.stats?.efficiency?.GLOBAL}%` });
                 }
             } else {
@@ -197,7 +212,8 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                 const toolMap = { WOOD: 'tool_axe', ORE: 'tool_pickaxe', HIDE: 'tool_knife', FIBER: 'tool_sickle', FISH: 'tool_rod', HERB: 'tool_pouch' };
                 const toolKey = toolMap[effId];
                 if (toolKey && equipment[toolKey]) {
-                    const freshTool = resolveItem(equipment[toolKey].id || equipment[toolKey].item_id);
+                    const freshTool = resolveItem(equipment[toolKey]);
+
                     breakdown.push({ label: 'Tool Bonus', value: `+${freshTool?.stats?.efficiency || 0}%` });
                 }
 
@@ -207,8 +223,9 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
                         const act = parts[1];
                         const eff = parts.slice(2).join('_');
                         if (act === effId && eff === 'EFF') {
-                            const freshRune = resolveItem(item.id || item.item_id);
+                            const freshRune = resolveItem(item);
                             const bonus = calculateRuneBonus(freshRune.tier, freshRune.stars, eff);
+
                             breakdown.push({ label: 'Rune Bonus', value: `+${bonus}%`, sub: freshRune.name });
                         }
                     }
@@ -234,15 +251,17 @@ const StatBreakdownModal = ({ statType, statId, value, stats, equipment, members
             }
         } else if (statType === 'CRIT') {
             const gearCritChance = Object.values(equipment).reduce((acc, item) => {
-                const fresh = item ? resolveItem(item.id || item.item_id) : null;
+                const fresh = item ? resolveItem(item) : null;
                 return acc + (fresh?.stats?.critChance || 0);
             }, 0);
+
             const burstRuneBonus = Object.entries(equipment).reduce((acc, [slot, item]) => {
                 if (slot.startsWith('rune_') && item) {
                     const parts = slot.split('_');
                     if (parts[1] === 'ATTACK' && parts.slice(2).join('_') === 'BURST') {
-                        const freshRune = resolveItem(item.id || item.item_id);
+                        const freshRune = resolveItem(item);
                         return acc + calculateRuneBonus(freshRune.tier, freshRune.stars, 'BURST');
+
                     }
                 }
                 return acc;
