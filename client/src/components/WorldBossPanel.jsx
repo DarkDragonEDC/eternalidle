@@ -526,20 +526,20 @@ const WorldBossPanel = ({ gameState, isMobile, socket, onChallenge, onInspect, o
                                 <h2 style={{ color: '#4d94ff', textAlign: 'center', margin: '0 0 16px 0', fontSize: '1rem', fontWeight: '900', letterSpacing: '2px', textTransform: 'uppercase' }}>Cycled Boss Guide</h2>
                                 <div style={{ color: 'var(--text-dim)', fontSize: '0.75rem', lineHeight: '1.4', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', background: 'var(--accent-soft)', padding: '10px', borderRadius: '10px' }}>
-                                        <span style={{ fontSize: '1.2rem', lineHeight: '1' }}>🕒</span>
-                                        <div><strong style={{ color: 'var(--text-main)', fontSize: '0.7rem', display: 'block', marginBottom: '2px' }}>SPAWN CYCLE</strong>A new boss appears every <span style={{ color: '#4d94ff' }}>8 hours</span> (00:00, 08:00, 16:00 UTC).</div>
+                                        <span style={{ fontSize: '1.2rem', lineHeight: '1', flexShrink: 0 }}>🕒</span>
+                                        <div><strong style={{ color: 'var(--text-main)', fontSize: '0.7rem', display: 'block', marginBottom: '2px' }}>SPAWN CYCLE</strong>A new boss shows up every <span style={{ color: '#4d94ff' }}>8 hours</span> (00:00, 08:00, 16:00 UTC) and sticks around for <span style={{ color: '#4d94ff' }}>7h 50m</span>.</div>
                                     </div>
                                     <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', background: 'var(--accent-soft)', padding: '10px', borderRadius: '10px' }}>
-                                        <span style={{ fontSize: '1.2rem', lineHeight: '1' }}>🔥</span>
-                                        <div><strong style={{ color: 'var(--text-main)', fontSize: '0.7rem', display: 'block', marginBottom: '2px' }}>ACTIVE PHASE</strong>The boss stays alive for up to <span style={{ color: '#4d94ff' }}>7h 50m</span>. Defeat it before it escapes!</div>
+                                        <span style={{ fontSize: '1.2rem', lineHeight: '1', flexShrink: 0 }}>⚔️</span>
+                                        <div><strong style={{ color: 'var(--text-main)', fontSize: '0.7rem', display: 'block', marginBottom: '2px' }}>COMBAT</strong>You get <span style={{ color: '#4d94ff' }}>1 minute</span> to deal damage. This boss has <span style={{ color: '#ff4d4d' }}>real HP</span> that everyone chips away at together. You can only fight <span style={{ color: '#4d94ff' }}>once</span> per session.</div>
                                     </div>
                                     <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', background: 'var(--accent-soft)', padding: '10px', borderRadius: '10px' }}>
-                                        <span style={{ fontSize: '1.2rem', lineHeight: '1' }}>🛡️</span>
-                                        <div><strong style={{ color: 'var(--text-main)', fontSize: '0.7rem', display: 'block', marginBottom: '2px' }}>COMMUNITY EFFORT</strong>Instead of a 1-minute global rush, you deal continuous damage. <span style={{ color: '#22c55e' }}>Everyone gets rewards</span> if the boss is defeated.</div>
+                                        <span style={{ fontSize: '1.2rem', lineHeight: '1', flexShrink: 0 }}>🎁</span>
+                                        <div><strong style={{ color: 'var(--text-main)', fontSize: '0.7rem', display: 'block', marginBottom: '2px' }}>REWARDS</strong>Kill the boss and everyone who fought gets an <span style={{ color: '#d4af37' }}>Enhancement Chest</span>. If it <span style={{ color: '#ff4d4d' }}>escapes</span>, nobody gets anything.</div>
                                     </div>
                                     <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', background: 'var(--accent-soft)', padding: '10px', borderRadius: '10px' }}>
-                                        <span style={{ fontSize: '1.2rem', lineHeight: '1' }}>⭐</span>
-                                        <div><strong style={{ color: 'var(--text-main)', fontSize: '0.7rem', display: 'block', marginBottom: '2px' }}>TIER SCALING</strong>Bosses range from Tier 1 to 10. Higher tiers have significantly more HP but drop <span style={{ color: '#d4af37' }}>valuable and rare loot</span>.</div>
+                                        <span style={{ fontSize: '1.2rem', lineHeight: '1', flexShrink: 0 }}>⭐</span>
+                                        <div><strong style={{ color: 'var(--text-main)', fontSize: '0.7rem', display: 'block', marginBottom: '2px' }}>TIER SCALING</strong>Goes from T1 to T10. Higher tier = way more HP, so you'll need more people to take it down.</div>
                                     </div>
                                 </div>
                             </>

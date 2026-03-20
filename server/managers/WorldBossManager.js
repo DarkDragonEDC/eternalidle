@@ -847,7 +847,11 @@ export class WorldBossManager {
             if (isWindowBoss && unclaimed.world_boss_sessions?.status === 'DEFEATED') {
                 chestId = 'ENHANCEMENT_CHEST';
                 chestName = 'Enhancement Chest';
+            } else if (isWindowBoss) {
+                // Window Boss not defeated = no reward, skip this entry
+                continue;
             } else {
+                // Daily Boss = WB Chest based on damage milestones
                 const damage = Number(unclaimed.damage) || 0;
                 const result = this.calculateChestRewardByDamage(damage);
                 chestId = result.id;
