@@ -2482,13 +2482,13 @@ export class GameManager {
 
     async getActivePlayersCount() {
         try {
-            const { data, error } = await this.supabase
+            const { count, error } = await this.supabase
                 .from('characters')
                 .select('id', { count: 'exact', head: true })
                 .or('current_activity.not.is.null,combat.not.is.null,dungeon.not.is.null');
 
             if (error) throw error;
-            return data?.length || 0;
+            return count || 0;
         } catch (err) {
             console.error('[GAMEMANAGER] Error getting active players count:', err);
             return 0;
