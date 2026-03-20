@@ -179,7 +179,11 @@ export class MarketManager {
         }
 
         const quality = typeof entry === 'object' ? entry.quality : undefined;
+        const enhancement = typeof entry === 'object' ? entry.enhancement : undefined;
         const stars = typeof entry === 'object' ? entry.stars : undefined;
+        // Collect all instance metadata (enhancement, etc) to preserve during selling/listing
+        const sourceMetadata = typeof entry === 'object' ? { ...entry } : {};
+        delete sourceMetadata.amount;
 
         const itemData = this.gameManager.inventoryManager.resolveItem(itemId, quality);
         if (!itemData) throw new Error("Invalid item");
@@ -198,14 +202,25 @@ export class MarketManager {
 
         try {
             // Build the item ID variants that buy orders might use
-            // Buy orders encode quality/stars in the item_id (e.g., T1_SWORD_Q2, RUNE_XP_WOOD_2STAR)
-            const possibleIds = [itemId];
+            // Buy orders encode quality/enhancement/stars in the item_id (e.g., T1_SWORD_Q2_E5, RUNE_XP_WOOD_2STAR)
+            const idWithoutSuffixes = itemId.replace(/_Q\d$/, '').replace(/_E\d+$/, '').replace(/_\dSTAR$/, '');
+            const possibleIds = [idWithoutSuffixes];
+            
             if (quality !== undefined && quality > 0) {
-                possibleIds.push(`${itemId}_Q${quality}`);
+                possibleIds.push(`${idWithoutSuffixes}_Q${quality}`);
+            }
+            if (enhancement !== undefined && enhancement > 0) {
+                possibleIds.push(`${idWithoutSuffixes}_E${enhancement}`);
+            }
+            if (quality !== undefined && quality > 0 && enhancement !== undefined && enhancement > 0) {
+                possibleIds.push(`${idWithoutSuffixes}_Q${quality}_E${enhancement}`);
             }
             if (stars !== undefined) {
-                possibleIds.push(`${itemId}_${stars}STAR`);
+                possibleIds.push(`${idWithoutSuffixes}_${stars}STAR`);
             }
+
+            // Also include the original itemId just in case
+            if (!possibleIds.includes(itemId)) possibleIds.push(itemId);
 
             console.log(`[AUTO-MATCH] Selling ${itemId}, checking buy orders for IDs: ${possibleIds.join(', ')}, sellPricePerUnit: ${sellPricePerUnit}, totalPrice: ${parsedPrice}, amount: ${parsedAmount}`);
 
@@ -260,7 +275,7 @@ export class MarketManager {
                             type: 'BOUGHT_ITEM',
                             itemId: itemId,
                             amount: fillQty,
-                            metadata: { quality, stars },
+                            metadata: sourceMetadata,
                             timestamp: Date.now(),
                             cost: fillQty * transactionPricePerUnit, // Total they paid initially
                             orderType: 'AUTO_MATCH_BUY'
@@ -305,7 +320,7 @@ export class MarketManager {
                     await this.gameManager.supabase.from('market_history').insert([{
                         id: Math.floor(Date.now() * 100) + Math.floor(Math.random() * 100),
                         item_id: itemId,
-                        item_data: { ...itemData, quality, stars },
+                        item_data: { ...itemData, ...sourceMetadata },
                         seller_id: userId,
                         buyer_id: order.buyer_id,
                         seller_name: char.name,
@@ -341,10 +356,6 @@ export class MarketManager {
         await this.gameManager.saveStateCritical(char.id, char.state);
 
         if (remainingAmount > 0) {
-            // Clean metadata from server's entry
-            const sourceMetadata = typeof entry === 'object' ? { ...entry } : {};
-            delete sourceMetadata.amount;
-
             if (stars !== undefined) sourceMetadata.stars = stars;
             if (quality !== undefined) sourceMetadata.quality = quality;
 
@@ -771,18 +782,19 @@ export class MarketManager {
         if (countError) throw countError;
         if (count >= maxOrders) throw new Error(`Buy order limit reached (${count}/${maxOrders}).`);
 
-        // Check if itemId contains quality/stars using precise regex
+        // Check if itemId contains quality/stars/enhancement using precise regex
         let baseItemId = itemId;
-        let quality, stars;
+        let quality, stars, enhancement;
 
-        // Matches _Q followed by a digit (e.g. _Q1, _Q2) at the end of the string
-        const qualityMatch = itemId.match(/^(.+?)_Q(\d)$/);
-        if (qualityMatch) {
-            baseItemId = qualityMatch[1];
-            quality = parseInt(qualityMatch[2]);
+        // Unified regex for quality and enhancement (e.g. T1_SWORD_Q2_E5)
+        const gearMatch = itemId.match(/^(.+?)(?:_Q(\d))?(?:_E(\d+))?$/);
+        if (gearMatch && (gearMatch[2] || gearMatch[3])) {
+            baseItemId = gearMatch[1];
+            if (gearMatch[2]) quality = parseInt(gearMatch[2]);
+            if (gearMatch[3]) enhancement = parseInt(gearMatch[3]);
         }
 
-        // Matches _ followed by a digit and STAR (e.g. _2STAR) at the end of the string
+        // Separate regex for Stars (Runes: e.g. RUNE_XP_WOOD_2STAR)
         const starMatch = itemId.match(/^(.+?)_(\d)STAR$/);
         if (starMatch) {
             baseItemId = starMatch[1];
@@ -793,6 +805,18 @@ export class MarketManager {
         if (!itemData) throw new Error("Invalid item");
         if (stars !== undefined) itemData.stars = stars;
         if (quality !== undefined) itemData.quality = quality;
+        if (enhancement !== undefined) {
+            const tier = itemData.tier || 1;
+            let maxE = 15;
+            if (tier <= 3) maxE = 5;
+            else if (tier <= 6) maxE = 10;
+            else if (tier === 10) maxE = 20;
+
+            if (enhancement > maxE) {
+                throw new Error(`Maximum enhancement for Tier ${tier} is +${maxE}.`);
+            }
+            itemData.enhancement = enhancement;
+        }
 
         // Enforce minimum price (cannot be below item's quick sell value)
         const minPrice = calculateItemSellPrice(itemData, baseItemId) || 1;

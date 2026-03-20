@@ -1763,6 +1763,13 @@ export class GameManager {
                     { id: 'T1_RUNE_SHARD', qty: 100 * safeQty }
                 ];
 
+                // Check Space
+                const rewardDict = {};
+                rewards.forEach(r => rewardDict[r.id] = r.qty);
+                if (!this.inventoryManager.canAddItems(char, rewardDict)) {
+                    throw new Error("Inventory Full! Cannot open Noob Chest.");
+                }
+
                 // Add Silver
                 const addedSilver = 5000 * safeQty;
                 char.state.silver = parseInt(char.state.silver || 0) + addedSilver;
@@ -1780,6 +1787,19 @@ export class GameManager {
             } else if ((itemData.id || '').toUpperCase() === 'ENHANCEMENT_CHEST') {
                 const stones = Object.keys(ITEM_LOOKUP).filter(k => k.startsWith('ENHANCEMENT_STONE_'));
                 if (stones.length === 0) throw new Error("No enhancement stones configured!");
+
+                // Check Space (Worst case: safeQty new slots if they aren't in inventory)
+                const potentialRewardDict = {};
+                stones.forEach(s => potentialRewardDict[s] = 1);
+                // We use a simplified check: at least enough space for safeQty new items if they are all different
+                const freeSlots = this.inventoryManager.getMaxSlots(char) - this.inventoryManager.getUsedSlots(char);
+                const stonesInInventory = stones.filter(s => char.state.inventory && char.state.inventory[s]);
+                const newStonesPossible = stones.length - stonesInInventory.length;
+                const neededSlots = Math.min(safeQty, newStonesPossible);
+
+                if (freeSlots < neededSlots) {
+                    throw new Error("Inventory Full! You might not have space for all enhancement stones.");
+                }
 
                 // IMPORTANT: Deduct the chest from inventory
                 this.inventoryManager.consumeItems(char, { [itemId]: safeQty });
@@ -1809,62 +1829,27 @@ export class GameManager {
             } else if (itemData.id.includes('CHEST')) {
                 // Chest Logic
                 const tier = itemData.tier || 1;
+                const totalRewards = { items: {} };
 
-                // Simulate adding items to check for space (Approximation)
-                const tempInv = { ...char.state.inventory };
-                const simulatedMax = this.inventoryManager.getMaxSlots(char);
-
-                const totalRewards = {
-                    items: {}
-                };
-
-                // 2. Loop for Quantity
                 const rarityConfig = CHEST_DROP_TABLE.RARITIES[itemData.rarity] || CHEST_DROP_TABLE.RARITIES.COMMON;
                 const crestChance = rarityConfig.crestChance;
-
                 const [min, max] = getChestRuneShardRange(tier, itemData.id.includes('WORLDBOSS') ? 'COMMON' : itemData.rarity);
-
-                // Determine Shard Type: WorldBoss Chests drop Battle Rune Shards
                 const shardId = itemData.id.includes('WORLDBOSS') ? `T1_BATTLE_RUNE_SHARD` : `T1_RUNE_SHARD`;
 
                 for (let i = 0; i < safeQty; i++) {
-                    // Collect all potential new items first
-                    const potentialDrops = [];
-
                     if (!itemData.id.includes('WORLDBOSS') && Math.random() < crestChance) {
                         const crestId = `T${tier}_CREST`;
                         totalRewards.items[crestId] = (totalRewards.items[crestId] || 0) + 1;
                     }
 
-                    // Rune Shards
-                    let shardQty;
-                    if (itemData.id.includes('WORLDBOSS') && WORLDBOSS_DROP_TABLE[itemData.id]) {
-                        shardQty = WORLDBOSS_DROP_TABLE[itemData.id];
-                    } else {
-                        // Standard Formula (Guaranteed range per chest: 80% min, 20% max)
-                        shardQty = Math.random() < 0.8 ? min : max;
-                    }
+                    let shardQty = (itemData.id.includes('WORLDBOSS') && WORLDBOSS_DROP_TABLE[itemData.id]) ? 
+                                    WORLDBOSS_DROP_TABLE[itemData.id] : 
+                                    (Math.random() < 0.8 ? min : max);
                     totalRewards.items[shardId] = (totalRewards.items[shardId] || 0) + shardQty;
                 }
 
                 // 3. Check Space using TOTAL rewards list
-                // Calculate current used slots (excluding noInventorySpace items like Runes)
-                const currentUsedSlots = Object.keys(tempInv).filter(k => {
-                    const item = this.inventoryManager.resolveItem(k);
-                    return item && !item.noInventorySpace;
-                }).length;
-
-                let newSlotsNeeded = 0;
-                for (const [rId, qty] of Object.entries(totalRewards.items)) {
-                    if (!tempInv[rId]) {
-                        const item = this.inventoryManager.resolveItem(rId);
-                        if (item && !item.noInventorySpace) {
-                            newSlotsNeeded++;
-                        }
-                    }
-                }
-
-                if (currentUsedSlots + newSlotsNeeded > simulatedMax) {
+                if (!this.inventoryManager.canAddItems(char, totalRewards.items)) {
                     throw new Error("Inventory Full! Cannot open all chests.");
                 }
 

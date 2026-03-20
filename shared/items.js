@@ -1145,6 +1145,13 @@ export const resolveItem = (itemOrId, overrideQuality = null) => {
     // Handle object input
     const itemId = typeof itemOrId === 'object' ? (itemOrId.id || itemOrId.item_id) : itemOrId;
     let enhancement = typeof itemOrId === 'object' ? (itemOrId.enhancement || 0) : 0;
+    
+    // Parse enhancement from string ID if present (_E1 to _E20)
+    if (typeof itemOrId === 'string' && itemOrId.includes('_E')) {
+        const eMatch = itemOrId.match(/_E(\d+)/);
+        if (eMatch) enhancement = parseInt(eMatch[1]);
+    }
+
     if (!itemId) return null;
 
     // Normalize ID

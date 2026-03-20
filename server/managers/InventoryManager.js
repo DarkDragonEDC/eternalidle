@@ -160,6 +160,26 @@ export class InventoryManager {
         return true;
     }
 
+    canAddItems(char, itemsDict) {
+        if (!char.state.inventory) return true;
+        const inv = char.state.inventory;
+        const maxSlots = this.getMaxSlots(char);
+        const usedSlots = this.getUsedSlots(char);
+        
+        let newSlotsNeeded = 0;
+        for (const itemId of Object.keys(itemsDict)) {
+            const item = this.resolveItem(itemId);
+            if (item && !item.noInventorySpace) {
+                // If item doesn't exist in inventory, it will need a new slot
+                if (!inv[itemId] || (typeof inv[itemId] === 'object' && (inv[itemId].amount || 0) <= 0)) {
+                    newSlotsNeeded++;
+                }
+            }
+        }
+
+        return (usedSlots + newSlotsNeeded) <= maxSlots;
+    }
+
     hasItems(char, req) {
         if (!req) return true;
         const inv = char.state.inventory;

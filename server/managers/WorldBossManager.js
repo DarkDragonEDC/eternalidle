@@ -166,6 +166,7 @@ export class WorldBossManager {
             for (const charId of timedOut) {
                 const char = this.gameManager.cache.get(charId);
                 if (char) {
+                    // endFight now handles the 60s catch-up automatically
                     await this.endFight(char);
                 } else {
                     // Force delete from memory if character is not even in cache
@@ -471,11 +472,12 @@ export class WorldBossManager {
             return await this.endFight(char);
         }
 
-        const now = virtualTime || Date.now();
+        let now = virtualTime || Date.now();
         const elapsed = now - fight.startedAt;
 
-        if (elapsed >= 60000) {
-            return await this.endFight(char);
+        // If this is a catch-up tick (from disconnect/cleanup), cap it to exactly 60s
+        if (elapsed > 60000) {
+            now = fight.startedAt + 60000;
         }
 
         const stats = this.gameManager.inventoryManager.calculateStats(char);
@@ -520,6 +522,10 @@ export class WorldBossManager {
                 console.error(`[WORLD_BOSS] Error in deferred HP update:`, err);
             });
             if (boss.currentHP <= 0) this.handleBossDefeat();
+        }
+
+        if (now - fight.startedAt >= 60000 || (fight.type === 'window' && boss.currentHP <= 0)) {
+            return await this.endFight(char);
         }
 
         const currentPos = this.predictRankingPos(char.id, fight.damage, fight.type);
@@ -604,8 +610,18 @@ export class WorldBossManager {
     }
 
     async endFight(char) {
-        const fight = this.activeFights.get(char.id) || char.state?.activeWorldBossFight;
+        const fight = this.activeFights.get(char.id) || (char.state && char.state.activeWorldBossFight);
         if (!fight) return;
+
+        // Ensure full 60s damage if fight is ended early (catch-up for disconnects or manual early exit)
+        if (fight.lastTick < fight.startedAt + 60000) {
+            const boss = (fight.type === 'daily') ? this.dailyBoss : this.windowBoss;
+            if (boss && boss.isAlive && (fight.type !== 'window' || boss.status === 'ACTIVE')) {
+                debugLog(`Forcing final catch-up for ${char.name} (${char.id}) at ${fight.lastTick}`);
+                // processTick will call endFight again when it hits the 60s limit
+                return await this.processTick(char, fight.startedAt + 60000);
+            }
+        }
 
         try {
             let oldTop1 = null;

@@ -173,6 +173,7 @@ const MarketBuyOrdersTab = ({
             pricePerUnit: 1,
             searchText: '',
             quality: 0,
+            enhancement: 0,
             stars: 1,
             canHaveQuality: false,
             canHaveStars: false
@@ -254,6 +255,10 @@ const MarketBuyOrdersTab = ({
                         <span style={{ fontWeight: 'bold', fontSize: '1rem', color: 'var(--text-main)' }}>
                             {itemInfo?.qualityName && itemInfo?.qualityName !== 'Normal' ? `${itemInfo.qualityName} ` : ''}
                             {itemInfo?.name}
+                            {(() => {
+                                const eMatch = String(order.item_id).match(/_E(\d+)/);
+                                return eMatch ? <span style={{ color: '#4ade80' }}> +{eMatch[1]}</span> : '';
+                            })()}
                         </span>
                         <button 
                             onClick={() => socket.emit('get_item_info', { itemId: order.item_id })} 
@@ -296,7 +301,10 @@ const MarketBuyOrdersTab = ({
                                 setConfirmModal({
                                     message: `Cancel this Buy Order?`,
                                     subtext: `The remaining ${remaining}x items will be cancelled. ${fee > 0 ? `A 10% cancellation fee (${formatNumber(fee)} Silver) applies as the order is less than 1h old.` : 'No cancellation fee applies.'}`,
-                                    onConfirm: () => socket.emit('cancel_buy_order', { orderId: order.id })
+                                    onConfirm: () => {
+                                        socket.emit('cancel_buy_order', { orderId: order.id });
+                                        setConfirmModal(null);
+                                    }
                                 });
                             }}
                             style={{
@@ -756,7 +764,16 @@ const MarketBuyOrdersTab = ({
                                                     onClick={() => {
                                                         const resolved = resolveItem(item.id);
                                                         const autoPrice = calculateItemSellPrice(resolved || item, item.id) || 1;
-                                                        setCreateBuyOrderModal(prev => ({ ...prev, itemId: item.id, searchText: item.name, canHaveQuality: item.canHaveQuality, canHaveStars: item.canHaveStars, pricePerUnit: autoPrice }));
+                                                                                                                 setCreateBuyOrderModal(prev => ({ 
+                                                            ...prev, 
+                                                            itemId: item.id, 
+                                                            searchText: item.name, 
+                                                            canHaveQuality: item.canHaveQuality, 
+                                                            canHaveStars: item.canHaveStars, 
+                                                            pricePerUnit: autoPrice,
+                                                            enhancement: 0
+                                                        }));
+
                                                         setItemSuggestions([]);
                                                     }}
                                                     style={{ padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', borderBottom: '1px solid var(--border)', transition: '0.15s' }}
@@ -782,26 +799,54 @@ const MarketBuyOrdersTab = ({
                         {createBuyOrderModal.itemId && (createBuyOrderModal.canHaveQuality || createBuyOrderModal.canHaveStars) && (
                             <div style={{ background: 'rgba(0,0,0,0.15)', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px 14px', marginBottom: '14px' }}>
                                 {createBuyOrderModal.canHaveQuality && (
-                                    <div>
-                                        <label style={{ display: 'block', color: 'var(--text-dim)', fontSize: '0.8rem', marginBottom: '6px', fontWeight: '500' }}>Select Quality</label>
-                                        <select
-                                            value={createBuyOrderModal.quality}
-                                            onChange={(e) => {
-                                                const newQuality = parseInt(e.target.value);
-                                                const qualitySuffix = newQuality > 0 ? `_Q${newQuality}` : '';
-                                                const fullItemId = createBuyOrderModal.itemId.replace(/_Q\d$/, '') + qualitySuffix;
-                                                const resolved = resolveItem(fullItemId);
-                                                const autoPrice = calculateItemSellPrice(resolved || resolveItem(createBuyOrderModal.itemId), fullItemId) || 1;
-                                                setCreateBuyOrderModal(prev => ({ ...prev, quality: newQuality, pricePerUnit: autoPrice }));
-                                            }}
-                                            style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border)', borderRadius: '8px', padding: '10px 12px', color: ['#fff', '#4caf50', '#4a90e2', '#9013fe', '#f5a623'][createBuyOrderModal.quality] || 'var(--text-main)', fontSize: '0.9rem', fontWeight: 'bold' }}
-                                        >
-                                            <option value="0" style={{ color: '#fff', background: '#1a1a2e' }}>Normal</option>
-                                            <option value="1" style={{ color: '#4caf50', background: '#1a1a2e' }}>Good</option>
-                                            <option value="2" style={{ color: '#4a90e2', background: '#1a1a2e' }}>Outstanding</option>
-                                            <option value="3" style={{ color: '#9013fe', background: '#1a1a2e' }}>Excellent</option>
-                                            <option value="4" style={{ color: '#f5a623', background: '#1a1a2e' }}>Masterpiece</option>
-                                        </select>
+                                    <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
+                                        <div style={{ flex: 1 }}>
+                                            <label style={{ display: 'block', color: 'var(--text-dim)', fontSize: '0.8rem', marginBottom: '6px', fontWeight: '500' }}>Select Quality</label>
+                                            <select
+                                                value={createBuyOrderModal.quality}
+                                                onChange={(e) => {
+                                                    const newQuality = parseInt(e.target.value);
+                                                    const qualitySuffix = newQuality > 0 ? `_Q${newQuality}` : '';
+                                                    const fullItemId = createBuyOrderModal.itemId.replace(/_Q\d$/, '') + qualitySuffix;
+                                                    const resolved = resolveItem(fullItemId);
+                                                    const autoPrice = calculateItemSellPrice(resolved || resolveItem(createBuyOrderModal.itemId), fullItemId) || 1;
+                                                    setCreateBuyOrderModal(prev => ({ ...prev, quality: newQuality, pricePerUnit: autoPrice }));
+                                                }}
+                                                style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border)', borderRadius: '8px', padding: '10px 12px', color: ['#fff', '#4caf50', '#4a90e2', '#9013fe', '#f5a623'][createBuyOrderModal.quality] || 'var(--text-main)', fontSize: '0.9rem', fontWeight: 'bold' }}
+                                            >
+                                                <option value="0" style={{ color: '#fff', background: '#1a1a2e' }}>Normal</option>
+                                                <option value="1" style={{ color: '#4caf50', background: '#1a1a2e' }}>Good</option>
+                                                <option value="2" style={{ color: '#4a90e2', background: '#1a1a2e' }}>Outstanding</option>
+                                                <option value="3" style={{ color: '#9013fe', background: '#1a1a2e' }}>Excellent</option>
+                                                <option value="4" style={{ color: '#f5a623', background: '#1a1a2e' }}>Masterpiece</option>
+                                            </select>
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <label style={{ display: 'block', color: 'var(--text-dim)', fontSize: '0.8rem', marginBottom: '6px', fontWeight: '500' }}>Enhancement Level</label>
+                                            <select
+                                                value={createBuyOrderModal.enhancement}
+                                                onChange={(e) => {
+                                                    const newEnhancement = parseInt(e.target.value);
+                                                    setCreateBuyOrderModal(prev => ({ ...prev, enhancement: newEnhancement }));
+                                                }}
+                                                style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border)', borderRadius: '8px', padding: '10px 12px', color: createBuyOrderModal.enhancement > 0 ? '#4ade80' : 'var(--text-main)', fontSize: '0.9rem', fontWeight: 'bold' }}
+                                            >
+                                                {(() => {
+                                                    const selectedItem = resolveItem(createBuyOrderModal.itemId);
+                                                    const tier = selectedItem?.tier || 1;
+                                                    let maxE = 15;
+                                                    if (tier <= 3) maxE = 5;
+                                                    else if (tier <= 6) maxE = 10;
+                                                    else if (tier === 10) maxE = 20;
+                                                    
+                                                    return Array.from({ length: maxE + 1 }).map((_, i) => (
+                                                        <option key={i} value={i} style={{ color: i > 0 ? '#4ade80' : '#fff', background: '#1a1a2e' }}>
+                                                            {i === 0 ? 'No Enhancement' : `+${i}`}
+                                                        </option>
+                                                    ));
+                                                })()}
+                                            </select>
+                                        </div>
                                     </div>
                                 )}
                                 {createBuyOrderModal.canHaveStars && (
@@ -861,13 +906,16 @@ const MarketBuyOrdersTab = ({
                         {/* POST BUY ORDER button */}
                         <button
                             onClick={() => {
+                                const qualitySuffix = createBuyOrderModal.quality > 0 ? `_Q${createBuyOrderModal.quality}` : '';
+                                const enhancementSuffix = createBuyOrderModal.enhancement > 0 ? `_E${createBuyOrderModal.enhancement}` : '';
+                                const finalItemId = createBuyOrderModal.itemId + qualitySuffix + enhancementSuffix;
+
                                 socket.emit('create_buy_order', {
-                                    itemId: createBuyOrderModal.itemId,
+                                    itemId: finalItemId,
                                     amount: createBuyOrderModal.amount,
-                                    pricePerUnit: createBuyOrderModal.pricePerUnit,
-                                    quality: createBuyOrderModal.quality,
-                                    stars: createBuyOrderModal.stars
+                                    pricePerUnit: createBuyOrderModal.pricePerUnit
                                 });
+                                setCreateBuyOrderModal(null);
                             }}
                             disabled={!createBuyOrderModal.itemId}
                             style={{
