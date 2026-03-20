@@ -313,7 +313,7 @@ const BossCard = ({ data, type, onChallenge, isMobile, setShowInfo, rankingType,
                                                                 animate={{ opacity: 1, y: 0 }}
                                                                 transition={{ delay: index * 0.03 }}
                                                                 className={`ranking-row ${isMe ? 'me' : ''} ${isTop3 ? 'top-3' : ''}`}
-                                                                style={{ marginBottom: '6px' }}
+                                                                style={{ marginBottom: '6px', flexShrink: 0 }}
                                                             >
                                                                 <div className="ranking-position">
                                                                     <MedalIcon index={index} size={isMobile ? 22 : 26} />
