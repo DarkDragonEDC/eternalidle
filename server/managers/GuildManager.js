@@ -1724,44 +1724,55 @@ export class GuildManager {
             'DAMAGE': '_POTION_DAMAGE'
         };
 
-        // Distribution of task types
-        const typeDistribution = [
-            ...Array(6).fill('RAW'),
-            ...Array(5).fill('REFINED'),
-            'POTION',
-            'FOOD'
-        ];
+        let taskId = 0;
 
-        for (let i = 0; i < config.MAX_TASKS; i++) {
-            const type = typeDistribution[i] || 'RAW';
-            const pool = config.POOLS[type];
-            if (!pool || pool.length === 0) continue;
-
-            // Pick a random material from the pool for this type
-            // (In the future we could ensure uniqueness if needed, but for now simple random is fine)
-            const mat = pool[Math.floor(Math.random() * pool.length)];
-            
-            let itemId;
-            if (type === 'POTION') {
-                const suffix = potionSuffixMap[mat] || `_POTION_${mat}`;
-                itemId = `T${tier}${suffix}`;
-            } else if (type === 'FOOD') {
-                itemId = `T${tier}_FOOD`;
-            } else {
-                itemId = `T${tier}_${mat}`;
-            }
-
-            const requiredAmount = config.REQUIREMENTS[type]?.[tier] || 100;
-
+        // 1. RAW: Fixed (one of each item in the pool)
+        config.POOLS.RAW.forEach(mat => {
             tasks.push({
-                id: i,
-                type: type,
-                itemId: itemId,
-                required: requiredAmount,
+                id: taskId++,
+                type: 'RAW',
+                itemId: `T${tier}_${mat}`,
+                required: config.REQUIREMENTS.RAW?.[tier] || 100,
                 progress: 0,
                 contributors: {}
             });
-        }
+        });
+
+        // 2. REFINED: Fixed (one of each item in the pool)
+        config.POOLS.REFINED.forEach(mat => {
+            tasks.push({
+                id: taskId++,
+                type: 'REFINED',
+                itemId: `T${tier}_${mat}`,
+                required: config.REQUIREMENTS.REFINED?.[tier] || 100,
+                progress: 0,
+                contributors: {}
+            });
+        });
+
+        // 3. FOOD: Fixed
+        tasks.push({
+            id: taskId++,
+            type: 'FOOD',
+            itemId: `T${tier}_FOOD`,
+            required: config.REQUIREMENTS.FOOD?.[tier] || 100,
+            progress: 0,
+            contributors: {}
+        });
+
+        // 4. POTION: Random choice from pool
+        const potionPool = config.POOLS.POTION;
+        const mat = potionPool[Math.floor(Math.random() * potionPool.length)];
+        const suffix = potionSuffixMap[mat] || `_POTION_${mat}`;
+        
+        tasks.push({
+            id: taskId++,
+            type: 'POTION',
+            itemId: `T${tier}${suffix}`,
+            required: config.REQUIREMENTS.POTION?.[tier] || 11,
+            progress: 0,
+            contributors: {}
+        });
 
         return tasks;
     }

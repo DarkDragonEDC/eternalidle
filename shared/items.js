@@ -563,7 +563,7 @@ ITEMS.SPECIAL.RUNE_SHARD['BATTLE'] = {
 const ENHANCEMENT_STONE_DEFS = [
     // Warrior
     { key: 'WARRIOR_WEAPON', id: 'ENHANCEMENT_STONE_WARRIOR_WEAPON', name: 'Warrior Weapon Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'WEAPON' },
-    { key: 'WARRIOR_OFFHAND', id: 'ENHANCEMENT_STONE_WARRIOR_OFFHAND', name: 'Warrior Off-Hand Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'OFF_HAND' },
+    { key: 'WARRIOR_OFF_HAND', id: 'ENHANCEMENT_STONE_WARRIOR_OFF_HAND', name: 'Warrior Off-Hand Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'OFF_HAND' },
     { key: 'WARRIOR_ARMOR', id: 'ENHANCEMENT_STONE_WARRIOR_ARMOR', name: 'Warrior Armor Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'ARMOR' },
     { key: 'WARRIOR_HELMET', id: 'ENHANCEMENT_STONE_WARRIOR_HELMET', name: 'Warrior Helmet Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'HELMET' },
     { key: 'WARRIOR_BOOTS', id: 'ENHANCEMENT_STONE_WARRIOR_BOOTS', name: 'Warrior Boots Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'BOOTS' },
@@ -571,7 +571,7 @@ const ENHANCEMENT_STONE_DEFS = [
     { key: 'WARRIOR_CAPE', id: 'ENHANCEMENT_STONE_WARRIOR_CAPE', name: 'Warrior Cape Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'CAPE' },
     // Hunter
     { key: 'HUNTER_WEAPON', id: 'ENHANCEMENT_STONE_HUNTER_WEAPON', name: 'Hunter Weapon Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'WEAPON' },
-    { key: 'HUNTER_OFFHAND', id: 'ENHANCEMENT_STONE_HUNTER_OFFHAND', name: 'Hunter Off-Hand Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'OFF_HAND' },
+    { key: 'HUNTER_OFF_HAND', id: 'ENHANCEMENT_STONE_HUNTER_OFF_HAND', name: 'Hunter Off-Hand Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'OFF_HAND' },
     { key: 'HUNTER_ARMOR', id: 'ENHANCEMENT_STONE_HUNTER_ARMOR', name: 'Hunter Armor Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'ARMOR' },
     { key: 'HUNTER_HELMET', id: 'ENHANCEMENT_STONE_HUNTER_HELMET', name: 'Hunter Helmet Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'HELMET' },
     { key: 'HUNTER_BOOTS', id: 'ENHANCEMENT_STONE_HUNTER_BOOTS', name: 'Hunter Boots Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'BOOTS' },
@@ -579,7 +579,7 @@ const ENHANCEMENT_STONE_DEFS = [
     { key: 'HUNTER_CAPE', id: 'ENHANCEMENT_STONE_HUNTER_CAPE', name: 'Hunter Cape Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'CAPE' },
     // Mage
     { key: 'MAGE_WEAPON', id: 'ENHANCEMENT_STONE_MAGE_WEAPON', name: 'Mage Weapon Enhancement Stone', targetClass: 'MAGE', targetSlot: 'WEAPON' },
-    { key: 'MAGE_OFFHAND', id: 'ENHANCEMENT_STONE_MAGE_OFFHAND', name: 'Mage Off-Hand Enhancement Stone', targetClass: 'MAGE', targetSlot: 'OFF_HAND' },
+    { key: 'MAGE_OFF_HAND', id: 'ENHANCEMENT_STONE_MAGE_OFF_HAND', name: 'Mage Off-Hand Enhancement Stone', targetClass: 'MAGE', targetSlot: 'OFF_HAND' },
     { key: 'MAGE_ARMOR', id: 'ENHANCEMENT_STONE_MAGE_ARMOR', name: 'Mage Armor Enhancement Stone', targetClass: 'MAGE', targetSlot: 'ARMOR' },
     { key: 'MAGE_HELMET', id: 'ENHANCEMENT_STONE_MAGE_HELMET', name: 'Mage Helmet Enhancement Stone', targetClass: 'MAGE', targetSlot: 'HELMET' },
     { key: 'MAGE_BOOTS', id: 'ENHANCEMENT_STONE_MAGE_BOOTS', name: 'Mage Boots Enhancement Stone', targetClass: 'MAGE', targetSlot: 'BOOTS' },

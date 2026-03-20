@@ -185,7 +185,7 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onEquipFood, onSell,
                         {/* Actions Grid */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
 
-                            {onEnhance && (
+                            {onEnhance && ['WEAPON', 'OFF_HAND', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE'].includes(item.type) && (
                                 <ActionButton
                                     onClick={() => { onEnhance(item.id); onClose(); }}
                                     icon={Zap}

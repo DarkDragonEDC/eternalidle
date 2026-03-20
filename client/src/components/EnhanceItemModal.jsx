@@ -31,6 +31,7 @@ const EnhanceItemModal = ({ item: initialItem, inventory, character, socket, onC
     let maxEnhancement = 15;
     if (tier <= 3) maxEnhancement = 5;
     else if (tier <= 6) maxEnhancement = 10;
+    else if (tier === 10) maxEnhancement = 20;
 
     const isMaxed = currentEnhancement >= maxEnhancement;
 
@@ -90,6 +91,7 @@ const EnhanceItemModal = ({ item: initialItem, inventory, character, socket, onC
     };
 
     const tierColor = getTierColor(tier);
+    const rarityColor = currentItem?.rarityColor || '#fff';
 
     return createPortal(
         <AnimatePresence>
@@ -120,8 +122,8 @@ const EnhanceItemModal = ({ item: initialItem, inventory, character, socket, onC
 
                         <div style={{ position: 'relative' }}>
                             <div style={{
-                                width: '80px', height: '80px', background: 'var(--slot-bg)', borderRadius: '22px', border: `2px solid ${tierColor}`,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 30px ${tierColor}30`
+                                width: '80px', height: '80px', background: 'var(--slot-bg)', borderRadius: '22px', border: `2px solid ${rarityColor}`,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 30px ${rarityColor}30`
                             }}>
                                 <img src={currentItem?.icon} style={{ width: '80%', height: '80%', objectFit: 'contain' }} alt="" />
                             </div>
@@ -184,7 +186,7 @@ const EnhanceItemModal = ({ item: initialItem, inventory, character, socket, onC
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                                     <div style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${hasStone ? 'var(--border)' : '#ef444450'}`, borderRadius: '16px', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                                         <div style={{ width: '40px', height: '40px', background: 'var(--slot-bg)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <img src={stoneDef?.icon || '/items/ENHANCEMENT_STONE.webp'} style={{ width: '80%', height: '80%' }} alt="" />
+                                            <img src={stoneDef?.icon || '/items/ORB.webp'} style={{ width: '80%', height: '80%' }} alt="" />
                                         </div>
                                         <div style={{ flex: 1 }}>
                                             <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', fontWeight: '800' }}>STONE</div>

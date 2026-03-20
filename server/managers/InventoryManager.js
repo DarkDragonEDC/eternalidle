@@ -557,6 +557,7 @@ export class InventoryManager {
         let maxEnhancement = 15;
         if (tier <= 3) maxEnhancement = 5;
         else if (tier <= 6) maxEnhancement = 10;
+        else if (tier === 10) maxEnhancement = 20;
 
         const currentEnhancement = item.enhancement || 0;
         if (currentEnhancement >= maxEnhancement) {
@@ -626,8 +627,9 @@ export class InventoryManager {
         }
         // -----------------------------
 
-        const amount = Number(item.amount) || 1;
-        this.addItemToInventory(char, returnId, amount);
+        const { id: _, stats: __, amount: itemAmount, ...metadata } = item;
+        const amount = Number(itemAmount) || 1;
+        this.addItemToInventory(char, returnId, amount, Object.keys(metadata).length > 0 ? metadata : null);
 
         delete state.equipment[slotName];
 
@@ -1215,11 +1217,11 @@ export class InventoryManager {
                 // Optimization: We manually move items here and save ONCE.
                 if (state.equipment[slot]) {
                     const item = state.equipment[slot];
-                    const returnId = item.id;
-                    const amount = Number(item.amount) || 1;
+                    const { id: returnId, stats: _, amount: itemAmount, ...metadata } = item;
+                    const amount = Number(itemAmount) || 1;
 
                     // We can reuse addItemToInventory, checks space there
-                    const added = this.addItemToInventory(char, returnId, amount);
+                    const added = this.addItemToInventory(char, returnId, amount, Object.keys(metadata).length > 0 ? metadata : null);
                     if (added) {
                         delete state.equipment[slot];
                     } else {
