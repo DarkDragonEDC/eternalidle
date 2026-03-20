@@ -318,7 +318,7 @@ const BossCard = ({ data, type, onChallenge, isMobile, setShowInfo, rankingType,
                                                                 <div className="ranking-position">
                                                                     <MedalIcon index={index} size={isMobile ? 22 : 26} />
                                                                 </div>
-                                                                <div style={{ flex: 1, marginLeft: isMobile ? '12px' : '16px', overflow: 'hidden' }}>
+                                                                <div style={{ flex: 1, marginLeft: isMobile ? '12px' : '16px', minWidth: 0, paddingBottom: '2px' }}>
                                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                                         <span
                                                                             onClick={onInspect ? () => onInspect(rank.name) : undefined}
