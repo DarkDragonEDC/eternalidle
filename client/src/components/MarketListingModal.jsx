@@ -17,7 +17,7 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
     useEffect(() => {
         if (listingItem) {
             setAmount('1');
-            const itemData = resolveItem(listingItem.itemId);
+            const itemData = resolveItem(listingItem);
             const minP = itemData ? (calculateItemSellPrice(itemData, listingItem.itemId) || 1) : 1;
             setUnitPrice(minP.toString());
             setCurrentMarketPrice(null);
@@ -45,7 +45,7 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
 
     if (!listingItem) return null;
 
-    const itemData = resolveItem(listingItem.itemId);
+    const itemData = resolveItem(listingItem);
     const tierColor = getTierColor(itemData?.tier || 1);
     const maxQty = (() => {
         const raw = listingItem.max || listingItem.qty || 0;
@@ -164,7 +164,10 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                         )}
                     </div>
                     <div>
-                        <div style={{ fontWeight: 'bold', color: 'var(--text-main)', fontSize: '1rem' }}>{itemData?.name || formatItemId(listingItem.itemId)}</div>
+                        <div style={{ fontWeight: 'bold', color: 'var(--text-main)', fontSize: '1rem' }}>
+                            {itemData?.name || formatItemId(listingItem.itemId)}
+                            {itemData?.enhancement > 0 && <span style={{ color: '#4ade80', marginLeft: '8px' }}>+{itemData.enhancement}</span>}
+                        </div>
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '2px' }}>Owned: <b style={{ color: 'var(--text-main)' }}>{maxQty}</b></div>
                     </div>
                 </div>

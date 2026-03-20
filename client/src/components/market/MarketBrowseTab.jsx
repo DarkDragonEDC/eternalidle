@@ -217,7 +217,7 @@ const MarketBrowseTab = ({
                                     boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.4)'
                                 }}>
                                     {(() => {
-                                        const resolved = resolveItem(l.item_id, l.item_data?.quality);
+                                        const resolved = resolveItem(l.item_data || l.item_id);
                                         const icon = resolved?.icon || l.item_data?.icon;
                                         // Force .webp extension for icons
                                         const normalizedIcon = typeof icon === 'string' ? icon.replace(/\.(png|jpg|jpeg)$/, '.webp') : icon;
@@ -260,7 +260,15 @@ const MarketBrowseTab = ({
 
                                 <div style={{ flex: '2 1 0%', minWidth: '150px' }}>
                                     <div style={{ fontWeight: 'bold', fontSize: '1rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                        <span>{resolveItem(l.item_id)?.name || l.item_data.name}</span>
+                                        {(() => {
+                                            const resolved = resolveItem(l.item_data || l.item_id);
+                                            return (
+                                                <>
+                                                    <span>{resolved?.name || l.item_data.name}</span>
+                                                    {resolved?.enhancement > 0 && <span style={{ color: '#4ade80' }}>+{resolved.enhancement}</span>}
+                                                </>
+                                            );
+                                        })()}
                                         <button 
                                             onClick={() => onShowInfo && onShowInfo(l.item_data)} 
                                             style={{ background: 'none', border: 'none', padding: '0', color: 'var(--text-dim)', cursor: 'pointer', display: 'flex' }}

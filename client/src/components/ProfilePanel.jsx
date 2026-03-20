@@ -421,9 +421,9 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
     }, [equipment]);
 
     const EquipmentSlot = ({ slot, icon, label, item: rawItem, onClick, onShowInfo, isLocked = false, weaponClass = null }) => {
-        // Resolve item to ensure we have latest stats and rarity color (even for Normal items if logic changes, but mostly for _Q items)
-        const item = rawItem ? resolveItem(rawItem, rawItem.quality || rawItem.stars) : null;
-
+        // Resolve item and merge with raw data to preserve instance props like enhancement, amount/qty, etc.
+        const resolved = rawItem ? resolveItem(rawItem, rawItem.quality || rawItem.stars) : null;
+        const item = rawItem ? { ...resolved, ...rawItem } : null;
 
         const tierColor = item ? '#666' : 'var(--glass-bg)';
 

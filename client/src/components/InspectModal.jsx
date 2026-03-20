@@ -1,14 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sword, Shield, Heart, Zap, User, Star, Layers, Info, Award, Crosshair, Hammer, Pickaxe, Flame, Droplets, Wind, Sparkles, Scissors, Anchor, ShoppingBag, Apple, Target, ChevronRight, History, ArrowRight, TrendingDown, TrendingUp } from 'lucide-react';
-import { resolveItem, calculateRuneBonus, formatItemId } from '@shared/items';
+import { resolveItem, calculateRuneBonus, formatItemId, formatItemNameShort } from '@shared/items';
 import { calculateNextLevelXP } from '@shared/skills';
 import StatBreakdownModal from './StatBreakdownModal';
 
 const EquipmentSlot = ({ slot, icon, label, item: rawItem, delay = 0, onItemClick }) => {
-    const item = rawItem ? { ...rawItem, ...resolveItem(rawItem.id || rawItem.item_id, rawItem.quality || rawItem.stars) } : null;
+    // RESOLVE FIX: Pass the whole rawItem to resolveItem to preserve enhancement, stats, etc.
+    // And spread resolveItem BEFORE rawItem so rawItem's specific instance data (like enhancement) wins.
+    const resolved = rawItem ? resolveItem(rawItem) : null;
+    const item = rawItem ? { ...resolved, ...rawItem } : null;
     const rarityColor = item && item.rarityColor ? item.rarityColor : 'rgba(255,255,255,0.05)';
+    const borderColor = item && item.rarityColor ? item.rarityColor : 'rgba(255,255,255,0.05)';
     const glowColor = item ? `${rarityColor}33` : 'transparent';
+    const hasQuality = (item && item.quality > 0) || (item && item.stars > 0);
 
     return (
         <motion.div
@@ -43,10 +48,10 @@ const EquipmentSlot = ({ slot, icon, label, item: rawItem, delay = 0, onItemClic
                         T{item.tier}
                     </div>
                 )}
-                {item && item.stars > 0 && (
-                    <div style={{ position: 'absolute', top: 3, right: 3, display: 'flex', gap: '1px', zIndex: 10 }}>
-                        {[...Array(item.stars)].map((_, i) => (
-                            <Star key={i} size={8} fill={rarityColor} stroke={rarityColor} />
+                {item && hasQuality && (
+                    <div style={{ position: 'absolute', top: 2, right: 2, display: 'flex', gap: '1px', zIndex: 10 }}>
+                        {[...Array(item.stars || 1)].map((_, i) => (
+                            <Star key={i} size={10} fill="#FFD700" color="#FFD700" strokeWidth={1} />
                         ))}
                     </div>
                 )}
@@ -67,6 +72,28 @@ const EquipmentSlot = ({ slot, icon, label, item: rawItem, delay = 0, onItemClic
                         {icon}
                     </div>
                 )}
+
+                {/* ITEM QUANTITY (FOR FOOD) */}
+                {(() => {
+                    const amount = item ? (typeof item.amount === 'object' ? item.amount.amount : item.amount) : 0;
+                    if (amount > 1) {
+                        return (
+                            <span style={{
+                                position: 'absolute',
+                                bottom: 3,
+                                left: 5,
+                                fontSize: '0.65rem',
+                                color: 'var(--text-main)',
+                                fontWeight: '900',
+                                textShadow: '0 1px 3px rgba(0,0,0,1)',
+                                zIndex: 10
+                            }}>
+                                {amount}
+                            </span>
+                        );
+                    }
+                    return null;
+                })()}
 
                 {item && (
                     <div
@@ -96,19 +123,21 @@ const EquipmentSlot = ({ slot, icon, label, item: rawItem, delay = 0, onItemClic
             </div>
             {item ? (
                 <span style={{
-                    fontSize: '0.45rem',
+                    fontSize: '0.6rem',
                     color: '#bbb',
                     textAlign: 'center',
-                    maxWidth: '70px',
-                    lineHeight: '1',
-                    minHeight: '2em',
+                    maxWidth: '85px',
+                    lineHeight: '1.2',
+                    minHeight: '2.4em',
                     display: '-webkit-box',
                     WebkitLineClamp: 2,
                     WebkitBoxOrient: 'vertical',
                     overflow: 'hidden',
-                    marginTop: '2px'
+                    marginTop: '2px',
+                    fontWeight: 'bold'
                 }}>
-                    {formatItemId(item.id || item.name)}
+                    {formatItemNameShort(item)}
+                    {item.enhancement > 0 && <span style={{ color: '#4ade80' }}> +{item.enhancement}</span>}
                 </span>
             ) : (
                 <span style={{ fontSize: '0.45rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.5px', opacity: 0.6 }}>
@@ -215,9 +244,9 @@ const RuneSlot = ({ slot, label, icon, item: rawItem, onItemClick }) => {
                     </div>
                 )}
                 {item && item.stars > 0 && (
-                    <div style={{ position: 'absolute', top: 2, right: 3, display: 'flex', gap: '1px' }}>
+                    <div style={{ position: 'absolute', top: 2, right: 2, display: 'flex', gap: '1px' }}>
                         {[...Array(item.stars)].map((_, i) => (
-                            <Star key={i} size={6} fill={rarityColor} stroke={rarityColor} />
+                            <Star key={i} size={10} fill="#FFD700" color="#FFD700" strokeWidth={1} />
                         ))}
                     </div>
                 )}
@@ -550,7 +579,7 @@ const InspectModal = React.memo(({ data, theme: propTheme, onClose, onItemClick,
                         zIndex: 0
                     }} />
 
-                    <div style={{ display: 'flex', padding: '12px 20px 0', gap: '4px', marginTop: '0px', justifyContent: 'center', position: 'relative', zIndex: 1, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', padding: '12px 20px 0', gap: '4px', marginTop: '0px', justifyContent: 'center', position: 'relative', zIndex: 1, flexWrap: 'nowrap' }}>
                         {['EQUIPMENT', 'SKILLS', 'RUNES', 'HISTORY'].map(tab => (
                             <button
                                 key={tab}
