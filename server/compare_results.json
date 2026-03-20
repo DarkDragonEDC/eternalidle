@@ -1,0 +1,483 @@
+[
+  {
+    "table": "accounts",
+    "project": {
+      "exists": false
+    },
+    "newInstance": {
+      "exists": false
+    }
+  },
+  {
+    "table": "ban_list",
+    "project": {
+      "exists": false
+    },
+    "newInstance": {
+      "exists": false
+    }
+  },
+  {
+    "table": "characters",
+    "project": {
+      "exists": true,
+      "columns": [
+        "activity_started_at",
+        "bank",
+        "combat",
+        "created_at",
+        "current_activity",
+        "dungeon",
+        "dungeon_state",
+        "equipment",
+        "id",
+        "info",
+        "inventory",
+        "is_admin",
+        "last_saved",
+        "name",
+        "ranking_item_power",
+        "ranking_total_level",
+        "ranking_total_xp",
+        "settings",
+        "skills",
+        "state",
+        "user_id"
+      ]
+    },
+    "newInstance": {
+      "exists": true,
+      "columns": [
+        "activity_started_at",
+        "bank",
+        "combat",
+        "created_at",
+        "current_activity",
+        "dungeon",
+        "dungeon_state",
+        "equipment",
+        "id",
+        "info",
+        "inventory",
+        "is_admin",
+        "last_saved",
+        "name",
+        "ranking_item_power",
+        "ranking_total_level",
+        "ranking_total_xp",
+        "settings",
+        "skills",
+        "state",
+        "user_id"
+      ]
+    }
+  },
+  {
+    "table": "chat_messages",
+    "project": {
+      "exists": false
+    },
+    "newInstance": {
+      "exists": false
+    }
+  },
+  {
+    "table": "combat_history",
+    "project": {
+      "exists": true,
+      "columns": [],
+      "empty": true
+    },
+    "newInstance": {
+      "exists": true,
+      "columns": [
+        "character_id",
+        "damage_dealt",
+        "damage_taken",
+        "duration_seconds",
+        "food_consumed",
+        "food_tier",
+        "id",
+        "kills",
+        "loot_gained",
+        "mob_id",
+        "mob_name",
+        "occurred_at",
+        "outcome",
+        "silver_gained",
+        "xp_gained"
+      ]
+    }
+  },
+  {
+    "table": "crafting_history",
+    "project": {
+      "exists": false
+    },
+    "newInstance": {
+      "exists": false
+    }
+  },
+  {
+    "table": "daily_rewards",
+    "project": {
+      "exists": true,
+      "columns": [
+        "character_name",
+        "created_at",
+        "last_spin",
+        "reward_id",
+        "user_id"
+      ]
+    },
+    "newInstance": {
+      "exists": true,
+      "columns": [
+        "character_name",
+        "created_at",
+        "last_spin",
+        "reward_id",
+        "user_id"
+      ]
+    }
+  },
+  {
+    "table": "dungeon_history",
+    "project": {
+      "exists": true,
+      "columns": [],
+      "empty": true
+    },
+    "newInstance": {
+      "exists": true,
+      "columns": [
+        "character_id",
+        "dungeon_id",
+        "dungeon_name",
+        "duration_seconds",
+        "id",
+        "loot_gained",
+        "max_waves",
+        "occurred_at",
+        "outcome",
+        "runs_completed",
+        "silver_gained",
+        "tier",
+        "total_runs",
+        "wave_reached",
+        "xp_gained"
+      ]
+    }
+  },
+  {
+    "table": "global_stats",
+    "project": {
+      "exists": true,
+      "columns": [
+        "history",
+        "id",
+        "last_snapshot_at",
+        "market_tax_total",
+        "tax_24h_ago",
+        "total_market_tax",
+        "trade_tax_total",
+        "updated_at"
+      ]
+    },
+    "newInstance": {
+      "exists": true,
+      "columns": [
+        "history",
+        "id",
+        "last_snapshot_at",
+        "market_tax_total",
+        "tax_24h_ago",
+        "total_market_tax",
+        "trade_tax_total",
+        "updated_at"
+      ]
+    }
+  },
+  {
+    "table": "guild_invitations",
+    "project": {
+      "exists": false
+    },
+    "newInstance": {
+      "exists": false
+    }
+  },
+  {
+    "table": "guild_members",
+    "project": {
+      "exists": true,
+      "columns": [],
+      "empty": true
+    },
+    "newInstance": {
+      "exists": true,
+      "columns": [
+        "character_id",
+        "donated_items_value",
+        "donated_silver",
+        "donated_xp",
+        "guild_id",
+        "joined_at",
+        "role"
+      ]
+    }
+  },
+  {
+    "table": "guilds",
+    "project": {
+      "exists": true,
+      "columns": [],
+      "empty": true
+    },
+    "newInstance": {
+      "exists": true,
+      "columns": [
+        "bank_items",
+        "bank_silver",
+        "bg_color",
+        "country_code",
+        "crafting_duplic_level",
+        "crafting_effic_level",
+        "crafting_xp_level",
+        "created_at",
+        "daily_tasks",
+        "gathering_auto_level",
+        "gathering_duplic_level",
+        "gathering_xp_level",
+        "guild_hall_level",
+        "guild_points",
+        "icon",
+        "icon_color",
+        "id",
+        "join_mode",
+        "leader_id",
+        "level",
+        "library_level",
+        "min_level",
+        "name",
+        "refining_duplic_level",
+        "refining_effic_level",
+        "refining_xp_level",
+        "roles",
+        "summary",
+        "tag",
+        "tasks_last_reset",
+        "xp"
+      ]
+    }
+  },
+  {
+    "table": "leaderboards",
+    "project": {
+      "exists": false
+    },
+    "newInstance": {
+      "exists": true,
+      "columns": [
+        "character_id",
+        "character_name",
+        "ranking_type",
+        "updated_at",
+        "value"
+      ]
+    }
+  },
+  {
+    "table": "market_listings",
+    "project": {
+      "exists": true,
+      "columns": [
+        "amount",
+        "created_at",
+        "id",
+        "item_data",
+        "item_id",
+        "price",
+        "seller_id",
+        "seller_name",
+        "unit_price"
+      ]
+    },
+    "newInstance": {
+      "exists": true,
+      "columns": [
+        "amount",
+        "created_at",
+        "id",
+        "item_data",
+        "item_id",
+        "price",
+        "seller_id",
+        "seller_name",
+        "unit_price"
+      ]
+    }
+  },
+  {
+    "table": "pending_rewards",
+    "project": {
+      "exists": true,
+      "columns": [],
+      "empty": true
+    },
+    "newInstance": {
+      "exists": true,
+      "columns": [
+        "applied",
+        "character_id",
+        "created_at",
+        "id",
+        "loot_gained",
+        "reason",
+        "silver_gained",
+        "xp_gained"
+      ]
+    }
+  },
+  {
+    "table": "push_subscriptions",
+    "project": {
+      "exists": true,
+      "columns": [],
+      "empty": true
+    },
+    "newInstance": {
+      "exists": true,
+      "columns": [
+        "auth",
+        "created_at",
+        "endpoint",
+        "id",
+        "p256dh",
+        "settings",
+        "updated_at",
+        "user_id"
+      ]
+    }
+  },
+  {
+    "table": "trade_history",
+    "project": {
+      "exists": true,
+      "columns": [
+        "created_at",
+        "id",
+        "is_suspicious",
+        "receiver_id",
+        "receiver_ip",
+        "receiver_items",
+        "receiver_name",
+        "receiver_silver",
+        "receiver_tax",
+        "sender_id",
+        "sender_ip",
+        "sender_items",
+        "sender_name",
+        "sender_silver",
+        "sender_tax",
+        "suspicion_reason",
+        "total_value_receiver",
+        "total_value_sender",
+        "trade_id"
+      ]
+    },
+    "newInstance": {
+      "exists": true,
+      "columns": [
+        "created_at",
+        "id",
+        "is_suspicious",
+        "receiver_id",
+        "receiver_ip",
+        "receiver_items",
+        "receiver_name",
+        "receiver_silver",
+        "receiver_tax",
+        "sender_id",
+        "sender_ip",
+        "sender_items",
+        "sender_name",
+        "sender_silver",
+        "sender_tax",
+        "suspicion_reason",
+        "total_value_receiver",
+        "total_value_sender",
+        "trade_id"
+      ]
+    }
+  },
+  {
+    "table": "world_boss_attempts",
+    "project": {
+      "exists": true,
+      "columns": [
+        "character_id",
+        "claimed",
+        "created_at",
+        "damage",
+        "date",
+        "id",
+        "player_name",
+        "session_id"
+      ]
+    },
+    "newInstance": {
+      "exists": true,
+      "columns": [
+        "character_id",
+        "claimed",
+        "created_at",
+        "damage",
+        "date",
+        "id",
+        "player_name",
+        "session_id"
+      ]
+    }
+  },
+  {
+    "table": "world_boss_notifications",
+    "project": {
+      "exists": false
+    },
+    "newInstance": {
+      "exists": false
+    }
+  },
+  {
+    "table": "world_boss_sessions",
+    "project": {
+      "exists": true,
+      "columns": [
+        "boss_id",
+        "created_at",
+        "current_hp",
+        "end_time",
+        "id",
+        "max_hp",
+        "start_time",
+        "status",
+        "tier"
+      ]
+    },
+    "newInstance": {
+      "exists": true,
+      "columns": [],
+      "empty": true
+    }
+  },
+  {
+    "table": "world_boss_subscribers",
+    "project": {
+      "exists": false
+    },
+    "newInstance": {
+      "exists": false
+    }
+  }
+]

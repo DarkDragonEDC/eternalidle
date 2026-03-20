@@ -1,0 +1,21 @@
+=== SUPABASE SCHEMA COMPARISON ===
+Project:  cxwivaxqmuzsahydekmv.supabase.co
+New:      rozwhqxbpsxlxbkfzvce.supabase.co
+
+[OK] TABLE "characters": IDENTICAL (21 columns)
+[WARN] TABLE "combat_history": Project EMPTY, New has 15 cols: [character_id, damage_dealt, damage_taken, duration_seconds, food_consumed, food_tier, id, kills, loot_gained, mob_id, mob_name, occurred_at, outcome, silver_gained, xp_gained]
+[OK] TABLE "daily_rewards": IDENTICAL (5 columns)
+[WARN] TABLE "dungeon_history": Project EMPTY, New has 15 cols: [character_id, dungeon_id, dungeon_name, duration_seconds, id, loot_gained, max_waves, occurred_at, outcome, runs_completed, silver_gained, tier, total_runs, wave_reached, xp_gained]
+[OK] TABLE "global_stats": IDENTICAL (8 columns)
+[WARN] TABLE "guild_members": Project EMPTY, New has 7 cols: [character_id, donated_items_value, donated_silver, donated_xp, guild_id, joined_at, role]
+[WARN] TABLE "guilds": Project EMPTY, New has 31 cols: [bank_items, bank_silver, bg_color, country_code, crafting_duplic_level, crafting_effic_level, crafting_xp_level, created_at, daily_tasks, gathering_auto_level, gathering_duplic_level, gathering_xp_level, guild_hall_level, guild_points, icon, icon_color, id, join_mode, leader_id, level, library_level, min_level, name, refining_duplic_level, refining_effic_level, refining_xp_level, roles, summary, tag, tasks_last_reset, xp]
+[EXTRA] TABLE "leaderboards": MISSING in Project, EXISTS in New
+   New columns: [character_id, character_name, ranking_type, updated_at, value]
+[OK] TABLE "market_listings": IDENTICAL (9 columns)
+[WARN] TABLE "pending_rewards": Project EMPTY, New has 8 cols: [applied, character_id, created_at, id, loot_gained, reason, silver_gained, xp_gained]
+[WARN] TABLE "push_subscriptions": Project EMPTY, New has 8 cols: [auth, created_at, endpoint, id, p256dh, settings, updated_at, user_id]
+[OK] TABLE "trade_history": IDENTICAL (19 columns)
+[OK] TABLE "world_boss_attempts": IDENTICAL (8 columns)
+[WARN] TABLE "world_boss_sessions": New EMPTY, Project has 9 cols: [boss_id, created_at, current_hp, end_time, id, max_hp, start_time, status, tier]
+
+=== DIFFERENCES FOUND! ===
