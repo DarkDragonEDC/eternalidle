@@ -613,13 +613,19 @@ export class WorldBossManager {
         const fight = this.activeFights.get(char.id) || (char.state && char.state.activeWorldBossFight);
         if (!fight) return;
 
+        // Prevent infinite recursion and guarantee the save proceeds exactly once
+        if (fight.isEnding) return;
+        fight.isEnding = true;
+
         // Ensure full 60s damage if fight is ended early (catch-up for disconnects or manual early exit)
         if (fight.lastTick < fight.startedAt + 60000) {
             const boss = (fight.type === 'daily') ? this.dailyBoss : this.windowBoss;
             if (boss && boss.isAlive && (fight.type !== 'window' || boss.status === 'ACTIVE')) {
                 debugLog(`Forcing final catch-up for ${char.name} (${char.id}) at ${fight.lastTick}`);
                 // processTick will call endFight again when it hits the 60s limit
-                return await this.processTick(char, fight.startedAt + 60000);
+                // The fight.isEnding flag ensures the recursive endFight returns instantly, 
+                // allowing this await to finish and this Outer endFight to proceed to the DB save.
+                await this.processTick(char, fight.startedAt + 60000);
             }
         }
 
