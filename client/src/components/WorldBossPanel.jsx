@@ -228,14 +228,14 @@ const BossCard = ({ data, type, onChallenge, isMobile, setShowInfo, rankingType,
                                             </div>
                                         )}
                                         
-                                        <div style={{ marginTop: '20px' }}>
-                                            <button onClick={() => { setActiveTab('RANKING'); if(type === 'daily') setViewingHistory(false); else { setViewingHistory(false); setHistorySessionId(null); } }} style={{ padding: '10px 28px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-main)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', fontWeight: '800' }}>
-                                                {type === 'daily' ? <Trophy size={16} color="#d4af37" /> : <Timer size={16} color="#d4af37" />}
-                                                <span style={{ color: '#d4af37' }}>{type === 'daily' ? 'VIEW RANKINGS' : 'VIEW HISTORY & RANKINGS'}</span>
-                                            </button>
-                                        </div>
                                     </>
                                 )}
+                                <div style={{ marginTop: '20px' }}>
+                                    <button onClick={() => { setActiveTab('RANKING'); if(type === 'daily') setViewingHistory(false); else { setViewingHistory(false); setHistorySessionId(null); } }} style={{ padding: '10px 28px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-main)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', fontWeight: '800' }}>
+                                        {type === 'daily' ? <Trophy size={16} color="#d4af37" /> : <Timer size={16} color="#d4af37" />}
+                                        <span style={{ color: '#d4af37' }}>{type === 'daily' ? 'VIEW RANKINGS' : 'VIEW HISTORY & RANKINGS'}</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
