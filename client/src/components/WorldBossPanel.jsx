@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { formatNumber } from '@utils/format';
 import { resolveItem } from '@shared/items';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Medal, Timer, Sword, Gift, Users, Shield, ScrollText, Info } from 'lucide-react';
+import { Trophy, Medal, Timer, Sword, Gift, Users, Shield, ScrollText, Info, X } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 
 const HPBar = ({ current, max, color = '#ff4d4d' }) => {
@@ -186,29 +186,8 @@ const BossCard = ({ data, type, onChallenge, isMobile, setShowInfo, rankingType,
             flex: 1, minHeight: isMobile ? '400px' : '500px', display: 'flex', flexDirection: 'column',
             background: 'var(--slot-bg)', borderRadius: '16px', border: '1px solid var(--border)', overflow: 'hidden'
         }}>
-            <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
-                <button onClick={() => { setActiveTab('BOSS'); setViewingHistory(false); setHistorySessionId(null); }} style={{ flex: 1, padding: '10px', background: activeTab === 'BOSS' ? 'rgba(255, 77, 77, 0.1)' : 'transparent', border: 'none', borderBottom: `2px solid ${activeTab === 'BOSS' ? '#ff4d4d' : 'transparent'}`, color: activeTab === 'BOSS' ? '#ff4d4d' : 'var(--text-dim)', cursor: 'pointer', fontWeight: '800', fontSize: '0.75rem', textTransform: 'uppercase' }}>
-                    <ScrollText size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} /> BOSS INFO
-                </button>
-                <button 
-                    onClick={() => {
-                        setActiveTab('RANKING');
-                        if (type === 'daily') setViewingHistory(false);
-                        else {
-                            setViewingHistory(false);
-                            setHistorySessionId(null);
-                        }
-                    }} 
-                    style={{ flex: 1, padding: '10px', background: activeTab === 'RANKING' ? 'rgba(212, 175, 55, 0.1)' : 'transparent', border: 'none', borderBottom: `2px solid ${activeTab === 'RANKING' ? '#d4af37' : 'transparent'}`, color: activeTab === 'RANKING' ? '#d4af37' : 'var(--text-dim)', cursor: 'pointer', fontWeight: '800', fontSize: '0.75rem', textTransform: 'uppercase' }}
-                >
-                    {type === 'daily' ? <><Trophy size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} /> RANKING</> : <><Timer size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} /> HISTORY</>}
-                </button>
-            </div>
-
             <div style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                <AnimatePresence mode="wait">
-                    {activeTab === 'BOSS' ? (
-                        <motion.div key="boss" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
                             <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${type === 'daily' ? '/backgrounds/dragon_boss_bg.png' : '/backgrounds/new_boss_bg.png'})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: type === 'daily' ? 0.6 : 0.4, pointerEvents: 'none', zIndex: 0 }} />
                             <div style={{ position: 'relative', flex: 1, padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', background: type === 'daily' ? 'rgba(0,0,0,0.5)' : 'transparent' }}>
                                 <button onClick={() => setShowInfo(type)} style={{ position: 'absolute', top: '12px', right: '12px', background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '50%', color: type === 'daily' ? 'rgba(255,77,77,0.7)' : 'rgba(77,148,255,0.7)', cursor: 'pointer' }}><Info size={16} /></button>
@@ -248,119 +227,138 @@ const BossCard = ({ data, type, onChallenge, isMobile, setShowInfo, rankingType,
                                                 {myRank ? `RANKED #${myRank.pos}` : 'RESTING'}
                                             </div>
                                         )}
+                                        
+                                        <div style={{ marginTop: '20px' }}>
+                                            <button onClick={() => { setActiveTab('RANKING'); if(type === 'daily') setViewingHistory(false); else { setViewingHistory(false); setHistorySessionId(null); } }} style={{ padding: '10px 28px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-main)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', fontWeight: '800' }}>
+                                                {type === 'daily' ? <Trophy size={16} color="#d4af37" /> : <Timer size={16} color="#d4af37" />}
+                                                <span style={{ color: '#d4af37' }}>{type === 'daily' ? 'VIEW RANKINGS' : 'VIEW HISTORY & RANKINGS'}</span>
+                                            </button>
+                                        </div>
                                     </>
                                 )}
                             </div>
-                        </motion.div>
-                    ) : (
-                        <motion.div key="ranking" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '12px' }}>
-                            {type === 'window' && !viewingHistory ? (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
-                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Recent Bosses</div>
-                                    {history.map((session, idx) => (
-                                        <motion.div 
-                                            key={session.id} 
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: idx * 0.05 }}
-                                            onClick={() => fetchHistory(null, session.id)}
-                                            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 16px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                                            whileHover={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--accent-dim)' }}
-                                        >
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                <div style={{ padding: '8px', background: session.status === 'DEFEATED' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(255,255,255,0.05)', borderRadius: '8px', color: session.status === 'DEFEATED' ? '#22c55e' : 'var(--text-dim)' }}>
-                                                    {session.status === 'DEFEATED' ? <Sword size={16} /> : <Timer size={16} />}
-                                                </div>
-                                                <div>
-                                                    <div style={{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-main)' }}>{session.name} {session.id === boss?.sessionId && <span style={{ color: 'var(--accent)', fontSize: '0.65rem' }}>(CURRENT)</span>}</div>
-                                                    <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>
-                                                        Tier {session.tier} • {session.status} • {new Date(session.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div style={{ fontSize: '0.7rem', color: 'var(--accent)', fontWeight: '700' }}>VIEW RANKING</div>
-                                        </motion.div>
-                                    ))}
+                        </div>
+
+                    <AnimatePresence>
+                    {activeTab === 'RANKING' && (
+                        <div style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: isMobile ? 0 : '20px' }} onClick={() => setActiveTab('BOSS')}>
+                            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} onClick={e => e.stopPropagation()} style={{ background: 'var(--panel-bg)', borderRadius: isMobile ? 0 : '16px', border: isMobile ? 'none' : '1px solid var(--border)', width: '100%', maxWidth: '600px', height: isMobile ? '100%' : '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '900', color: type === 'daily' ? '#ff4d4d' : '#4d94ff', fontSize: '1.1rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                                        {type === 'daily' ? <Trophy size={20} /> : <Timer size={20} />} {type === 'daily' ? 'BOSS RANKING' : 'BOSS HISTORY & RANKING'}
+                                    </div>
+                                    <button onClick={() => setActiveTab('BOSS')} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', cursor: 'pointer', color: '#fff', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={18} /></button>
                                 </div>
-                            ) : (
-                                <>
-                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '12px' }}>
-                                        {type === 'window' && viewingHistory && (
-                                            <button onClick={() => { setViewingHistory(false); setHistorySessionId(null); }} style={{ padding: '6px 10px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-main)', fontSize: '0.65rem', cursor: 'pointer', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                ← Back
-                                            </button>
-                                        )}
-                                        <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '2px', flex: 1 }}>
-                                            {['NORMAL', 'IRONMAN'].map(mode => (
-                                                <button key={mode} onClick={() => setRankingType(mode)} style={{ flex: 1, padding: '6px', background: rankingType === mode ? 'var(--accent)' : 'transparent', border: 'none', borderRadius: '6px', color: rankingType === mode ? 'white' : 'var(--text-dim)', fontSize: '0.7rem', cursor: 'pointer', fontWeight: '700' }}>{mode}</button>
+                                <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', padding: '16px', background: 'rgba(0,0,0,0.2)' }}>
+                                    {type === 'window' && !viewingHistory ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
+                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Recent Bosses</div>
+                                            {history.map((session, idx) => (
+                                                <motion.div 
+                                                    key={session.id} 
+                                                    initial={{ opacity: 0, y: 10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: idx * 0.05 }}
+                                                    onClick={() => fetchHistory(null, session.id)}
+                                                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 16px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                                                    whileHover={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--accent-dim)' }}
+                                                >
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                        <div style={{ padding: '8px', background: session.status === 'DEFEATED' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(255,255,255,0.05)', borderRadius: '8px', color: session.status === 'DEFEATED' ? '#22c55e' : 'var(--text-dim)' }}>
+                                                            {session.status === 'DEFEATED' ? <Sword size={16} /> : <Timer size={16} />}
+                                                        </div>
+                                                        <div>
+                                                            <div style={{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-main)' }}>{session.name} {session.id === boss?.sessionId && <span style={{ color: 'var(--accent)', fontSize: '0.65rem' }}>(CURRENT)</span>}</div>
+                                                            <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>
+                                                                Tier {session.tier} • {session.status} • {new Date(session.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ fontSize: '0.7rem', color: 'var(--accent)', fontWeight: '700' }}>VIEW RANKING</div>
+                                                </motion.div>
                                             ))}
                                         </div>
-                                        {type === 'daily' && (
-                                            <button onClick={viewingHistory ? () => setViewingHistory(false) : () => fetchHistory(new Date(Date.now() - 86400000).toISOString().split('T')[0])} style={{ padding: '6px 10px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-main)', fontSize: '0.65rem', cursor: 'pointer', fontWeight: '700' }}>
-                                                {viewingHistory ? 'Today' : 'Yesterday'}
-                                            </button>
-                                        )}
-                                    </div>
-                                    <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                        {loadingHistory ? (
-                                            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem' }}>Loading ranking...</div>
-                                        ) : list.length === 0 ? (
-                                            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem' }}>No challengers.</div>
-                                        ) : (
-                                            list.map((rank, index) => {
-                                                const isMe = rank.character_id === gameState?.character?.id;
-                                                const isTop3 = index < 3;
-                                                return (
-                                                    <motion.div
-                                                        key={rank.character_id}
-                                                        initial={{ opacity: 0, y: 10 }}
-                                                        animate={{ opacity: 1, y: 0 }}
-                                                        transition={{ delay: index * 0.03 }}
-                                                        className={`ranking-row ${isMe ? 'me' : ''} ${isTop3 ? 'top-3' : ''}`}
-                                                        style={{ marginBottom: '6px' }}
-                                                    >
-                                                        <div className="ranking-position">
-                                                            <MedalIcon index={index} size={isMobile ? 22 : 26} />
-                                                        </div>
-                                                        <div style={{ flex: 1, marginLeft: isMobile ? '12px' : '16px', overflow: 'hidden' }}>
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                <span
-                                                                    onClick={onInspect ? () => onInspect(rank.name) : undefined}
-                                                                    className={`ranking-name ${isMe ? 'me' : ''}`}
-                                                                    style={{ cursor: onInspect ? 'pointer' : 'default' }}
-                                                                >
-                                                                    {rank.guild_tag && <span style={{ color: 'var(--accent)', opacity: 0.8, fontSize: '0.8rem', marginRight: '4px' }}>[{rank.guild_tag}]</span>}
-                                                                    {rank.isIronman && <span title="Ironman" style={{ fontSize: '0.8rem' }}>🛡️</span>}
-                                                                    {rank.name}
-                                                                </span>
-                                                                {isMe && <span style={{ fontSize: '0.65rem', opacity: 0.5, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>— yours</span>}
-                                                            </div>
-                                                            <div
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    const isWindow = type === 'window';
-                                                                    const chest = isWindow ? { label: 'Enhancement Chest', id: 'ENHANCEMENT_CHEST' } : calculatePotentialChest(rank.damage);
-                                                                    if (onShowItem) onShowItem(resolveItem(chest.id));
-                                                                }}
-                                                                className="chest-label"
-                                                                style={{ fontSize: '0.65rem', color: type === 'window' ? '#d4af37' : '#ae00ff', cursor: 'pointer', marginTop: '2px', opacity: 0.9, letterSpacing: '0.5px' }}
+                                    ) : (
+                                        <>
+                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '12px' }}>
+                                                {type === 'window' && viewingHistory && (
+                                                    <button onClick={() => { setViewingHistory(false); setHistorySessionId(null); }} style={{ padding: '6px 10px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-main)', fontSize: '0.65rem', cursor: 'pointer', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        ← Back
+                                                    </button>
+                                                )}
+                                                <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '2px', flex: 1 }}>
+                                                    {['NORMAL', 'IRONMAN'].map(mode => (
+                                                        <button key={mode} onClick={() => setRankingType(mode)} style={{ flex: 1, padding: '6px', background: rankingType === mode ? 'var(--accent)' : 'transparent', border: 'none', borderRadius: '6px', color: rankingType === mode ? 'white' : 'var(--text-dim)', fontSize: '0.7rem', cursor: 'pointer', fontWeight: '700' }}>{mode}</button>
+                                                    ))}
+                                                </div>
+                                                {type === 'daily' && (
+                                                    <button onClick={viewingHistory ? () => setViewingHistory(false) : () => fetchHistory(new Date(Date.now() - 86400000).toISOString().split('T')[0])} style={{ padding: '6px 10px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-main)', fontSize: '0.65rem', cursor: 'pointer', fontWeight: '700' }}>
+                                                        {viewingHistory ? 'Today' : 'Yesterday'}
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                {loadingHistory ? (
+                                                    <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem' }}>Loading ranking...</div>
+                                                ) : list.length === 0 ? (
+                                                    <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem' }}>No challengers.</div>
+                                                ) : (
+                                                    list.map((rank, index) => {
+                                                        const isMe = rank.character_id === gameState?.character?.id;
+                                                        const isTop3 = index < 3;
+                                                        return (
+                                                            <motion.div
+                                                                key={rank.character_id}
+                                                                initial={{ opacity: 0, y: 10 }}
+                                                                animate={{ opacity: 1, y: 0 }}
+                                                                transition={{ delay: index * 0.03 }}
+                                                                className={`ranking-row ${isMe ? 'me' : ''} ${isTop3 ? 'top-3' : ''}`}
+                                                                style={{ marginBottom: '6px' }}
                                                             >
-                                                                {type === 'window' ? 'Enhancement Chest' : calculatePotentialChest(rank.damage).label}
-                                                            </div>
-                                                        </div>
-                                                        <div className="ranking-damage-container">
-                                                            <div className="ranking-damage-value">
-                                                                {formatNumber(rank.damage)}
-                                                            </div>
-                                                        </div>
-                                                    </motion.div>
-                                                );
-                                            })
-                                        )}
-                                    </div>
-                                </>
-                            )}
-                        </motion.div>
+                                                                <div className="ranking-position">
+                                                                    <MedalIcon index={index} size={isMobile ? 22 : 26} />
+                                                                </div>
+                                                                <div style={{ flex: 1, marginLeft: isMobile ? '12px' : '16px', overflow: 'hidden' }}>
+                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                        <span
+                                                                            onClick={onInspect ? () => onInspect(rank.name) : undefined}
+                                                                            className={`ranking-name ${isMe ? 'me' : ''}`}
+                                                                            style={{ cursor: onInspect ? 'pointer' : 'default' }}
+                                                                        >
+                                                                            {rank.guild_tag && <span style={{ color: 'var(--accent)', opacity: 0.8, fontSize: '0.8rem', marginRight: '4px' }}>[{rank.guild_tag}]</span>}
+                                                                            {rank.isIronman && <span title="Ironman" style={{ fontSize: '0.8rem' }}>🛡️</span>}
+                                                                            {rank.name}
+                                                                        </span>
+                                                                        {isMe && <span style={{ fontSize: '0.65rem', opacity: 0.5, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>— yours</span>}
+                                                                    </div>
+                                                                    <div
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            const isWindow = type === 'window';
+                                                                            const chest = isWindow ? { label: 'Enhancement Chest', id: 'ENHANCEMENT_CHEST' } : calculatePotentialChest(rank.damage);
+                                                                            if (onShowItem) onShowItem(resolveItem(chest.id));
+                                                                        }}
+                                                                        className="chest-label"
+                                                                        style={{ fontSize: '0.65rem', color: type === 'window' ? '#d4af37' : '#ae00ff', cursor: 'pointer', marginTop: '2px', opacity: 0.9, letterSpacing: '0.5px' }}
+                                                                    >
+                                                                        {type === 'window' ? 'Enhancement Chest' : calculatePotentialChest(rank.damage).label}
+                                                                    </div>
+                                                                </div>
+                                                                <div className="ranking-damage-container">
+                                                                    <div className="ranking-damage-value">
+                                                                        {formatNumber(rank.damage)}
+                                                                    </div>
+                                                                </div>
+                                                            </motion.div>
+                                                        );
+                                                    })
+                                                )}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </motion.div>
+                        </div>
                     )}
                 </AnimatePresence>
             </div>
