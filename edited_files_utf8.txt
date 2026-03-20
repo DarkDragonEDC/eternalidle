@@ -1,0 +1,11 @@
+﻿PATCH_NOTES.md
+client/public/monsters/wb_t1_void_slime.webp
+client/public/monsters/wb_t2_grove_guardian.webp
+client/public/monsters/wb_t3_dune_behemoth.webp
+client/public/monsters/wb_t4_frost_sovereign.webp
+client/public/monsters/wb_t5_umbra_stalker.webp
+client/src/components/EnhanceItemModal.jsx
+server/managers/InventoryManager.js
+server/managers/WorldBossManager.js
+shared/items.js
+shared/world_bosses.js

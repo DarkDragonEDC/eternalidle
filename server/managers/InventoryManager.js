@@ -543,7 +543,7 @@ export class InventoryManager {
         const itemClass = getRequiredProficiencyGroup(item.id)?.toUpperCase();
         // Item Slot normalized to enhancement stone format
         const slotMap = {
-            'WEAPON': 'WEAPON', 'OFF_HAND': 'OFF_HAND', 'ARMOR': 'ARMOR',
+            'WEAPON': 'WEAPON', 'OFF_HAND': 'OFFHAND', 'ARMOR': 'ARMOR',
             'HELMET': 'HELMET', 'BOOTS': 'BOOTS', 'GLOVES': 'GLOVES', 'CAPE': 'CAPE'
         };
         const itemSlot = slotMap[item.type];
@@ -580,7 +580,13 @@ export class InventoryManager {
 
         // Consume Silver and Stone
         char.state.silver -= cost;
-        this.consumeItems(char, { [stone.id]: 1 });
+        
+        // Calculate stones required based on Tier
+        let stoneCount = 1;
+        if (tier >= 7 && tier <= 9) stoneCount = 2;
+        else if (tier >= 10) stoneCount = 3;
+
+        this.consumeItems(char, { [stone.id]: stoneCount });
 
         // Update Stats
         this.calculateStats(char);
@@ -1126,16 +1132,16 @@ export class InventoryManager {
         });
         efficiency.GLOBAL = parseFloat((efficiency.GLOBAL + (globals.efficiency || 0)).toFixed(2));
 
-        // --- NOVA FÓRMULA DE VELOCIDADE (H/S) ---
+        // --- NEW SPEED FORMULA (H/S) ---
         // Base Global = 0.5 H/S
-        // Bônus Total % = Gear + Proficiency + Runes
+        // Total Bonus % = Gear + Proficiency + Runes
         const totalBonusPercent = gearSpeedBonus + activeSpeedBonus + (combatRunes.ATTACK_SPEED || 0);
         
-        // H/S = 0.5 * (1 + bônus/100)
+        // H/S = 0.5 * (1 + bonus/100)
         const finalHPS = 0.5 * (1 + (totalBonusPercent / 100));
         
         // Intervalo em ms = 1000 / HPS
-        // Aplicamos um cap de 200ms (5 H/S) por segurança global
+        // Global safety cap at 200ms (5 H/S)
         let finalAttackSpeed = Math.max(200, Math.floor(1000 / finalHPS));
 
         const stats = {

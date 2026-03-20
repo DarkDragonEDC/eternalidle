@@ -40,17 +40,22 @@ const EnhanceItemModal = ({ item: initialItem, inventory, character, socket, onC
                      initialItem.id.includes('BOW') || initialItem.id.includes('LEATHER') || initialItem.id.includes('TORCH') || initialItem.id.includes('HUNTER_CAPE') ? 'HUNTER' : 'MAGE';
     
     const slotMap = {
-        'WEAPON': 'WEAPON', 'OFF_HAND': 'OFF_HAND', 'ARMOR': 'ARMOR',
+        'WEAPON': 'WEAPON', 'OFF_HAND': 'OFFHAND', 'ARMOR': 'ARMOR',
         'HELMET': 'HELMET', 'BOOTS': 'BOOTS', 'GLOVES': 'GLOVES', 'CAPE': 'CAPE'
     };
     const itemSlot = slotMap[currentItem?.type];
     const stoneId = `ENHANCEMENT_STONE_${itemClass}_${itemSlot}`;
     const stoneDef = resolveItem(stoneId);
 
+    // Stone Requirements based on Tier
+    let requiredStones = 1;
+    if (tier >= 7 && tier <= 9) requiredStones = 2;
+    else if (tier >= 10) requiredStones = 3;
+
     // Find stone in inventory
     const stoneEntryKey = Object.keys(inventory).find(key => key.split('::')[0] === stoneId);
     const stoneQty = stoneEntryKey ? (typeof inventory[stoneEntryKey] === 'object' ? inventory[stoneEntryKey].amount : inventory[stoneEntryKey]) : 0;
-    const hasStone = stoneQty >= 1;
+    const hasStone = stoneQty >= requiredStones;
 
     // Cost Logic
     const silverCost = tier * 1000 * (currentEnhancement + 1);
@@ -191,7 +196,7 @@ const EnhanceItemModal = ({ item: initialItem, inventory, character, socket, onC
                                         <div style={{ flex: 1 }}>
                                             <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', fontWeight: '800' }}>STONE</div>
                                             <div style={{ fontSize: '0.85rem', fontWeight: '900', color: hasStone ? 'var(--text-main)' : '#ef4444' }}>
-                                                {stoneQty} / 1
+                                                {stoneQty} / {requiredStones}
                                             </div>
                                         </div>
                                     </div>

@@ -563,7 +563,7 @@ ITEMS.SPECIAL.RUNE_SHARD['BATTLE'] = {
 const ENHANCEMENT_STONE_DEFS = [
     // Warrior
     { key: 'WARRIOR_WEAPON', id: 'ENHANCEMENT_STONE_WARRIOR_WEAPON', name: 'Warrior Weapon Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'WEAPON' },
-    { key: 'WARRIOR_OFF_HAND', id: 'ENHANCEMENT_STONE_WARRIOR_OFF_HAND', name: 'Warrior Off-Hand Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'OFF_HAND' },
+    { key: 'WARRIOR_OFFHAND', id: 'ENHANCEMENT_STONE_WARRIOR_OFFHAND', name: 'Warrior Off-Hand Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'OFF_HAND' },
     { key: 'WARRIOR_ARMOR', id: 'ENHANCEMENT_STONE_WARRIOR_ARMOR', name: 'Warrior Armor Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'ARMOR' },
     { key: 'WARRIOR_HELMET', id: 'ENHANCEMENT_STONE_WARRIOR_HELMET', name: 'Warrior Helmet Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'HELMET' },
     { key: 'WARRIOR_BOOTS', id: 'ENHANCEMENT_STONE_WARRIOR_BOOTS', name: 'Warrior Boots Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'BOOTS' },
@@ -571,7 +571,7 @@ const ENHANCEMENT_STONE_DEFS = [
     { key: 'WARRIOR_CAPE', id: 'ENHANCEMENT_STONE_WARRIOR_CAPE', name: 'Warrior Cape Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'CAPE' },
     // Hunter
     { key: 'HUNTER_WEAPON', id: 'ENHANCEMENT_STONE_HUNTER_WEAPON', name: 'Hunter Weapon Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'WEAPON' },
-    { key: 'HUNTER_OFF_HAND', id: 'ENHANCEMENT_STONE_HUNTER_OFF_HAND', name: 'Hunter Off-Hand Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'OFF_HAND' },
+    { key: 'HUNTER_OFFHAND', id: 'ENHANCEMENT_STONE_HUNTER_OFFHAND', name: 'Hunter Off-Hand Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'OFF_HAND' },
     { key: 'HUNTER_ARMOR', id: 'ENHANCEMENT_STONE_HUNTER_ARMOR', name: 'Hunter Armor Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'ARMOR' },
     { key: 'HUNTER_HELMET', id: 'ENHANCEMENT_STONE_HUNTER_HELMET', name: 'Hunter Helmet Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'HELMET' },
     { key: 'HUNTER_BOOTS', id: 'ENHANCEMENT_STONE_HUNTER_BOOTS', name: 'Hunter Boots Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'BOOTS' },
@@ -579,7 +579,7 @@ const ENHANCEMENT_STONE_DEFS = [
     { key: 'HUNTER_CAPE', id: 'ENHANCEMENT_STONE_HUNTER_CAPE', name: 'Hunter Cape Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'CAPE' },
     // Mage
     { key: 'MAGE_WEAPON', id: 'ENHANCEMENT_STONE_MAGE_WEAPON', name: 'Mage Weapon Enhancement Stone', targetClass: 'MAGE', targetSlot: 'WEAPON' },
-    { key: 'MAGE_OFF_HAND', id: 'ENHANCEMENT_STONE_MAGE_OFF_HAND', name: 'Mage Off-Hand Enhancement Stone', targetClass: 'MAGE', targetSlot: 'OFF_HAND' },
+    { key: 'MAGE_OFFHAND', id: 'ENHANCEMENT_STONE_MAGE_OFFHAND', name: 'Mage Off-Hand Enhancement Stone', targetClass: 'MAGE', targetSlot: 'OFF_HAND' },
     { key: 'MAGE_ARMOR', id: 'ENHANCEMENT_STONE_MAGE_ARMOR', name: 'Mage Armor Enhancement Stone', targetClass: 'MAGE', targetSlot: 'ARMOR' },
     { key: 'MAGE_HELMET', id: 'ENHANCEMENT_STONE_MAGE_HELMET', name: 'Mage Helmet Enhancement Stone', targetClass: 'MAGE', targetSlot: 'HELMET' },
     { key: 'MAGE_BOOTS', id: 'ENHANCEMENT_STONE_MAGE_BOOTS', name: 'Mage Boots Enhancement Stone', targetClass: 'MAGE', targetSlot: 'BOOTS' },
@@ -1144,7 +1144,7 @@ export const resolveItem = (itemOrId, overrideQuality = null) => {
 
     // Handle object input
     const itemId = typeof itemOrId === 'object' ? (itemOrId.id || itemOrId.item_id) : itemOrId;
-    const enhancement = typeof itemOrId === 'object' ? (itemOrId.enhancement || 0) : 0;
+    let enhancement = typeof itemOrId === 'object' ? (itemOrId.enhancement || 0) : 0;
     if (!itemId) return null;
 
     // Normalize ID
@@ -1174,24 +1174,32 @@ export const resolveItem = (itemOrId, overrideQuality = null) => {
         }
     }
 
+    // Enhancement Stone Legacy Support: OFF_HAND -> OFFHAND
+    if (baseId.startsWith('ENHANCEMENT_STONE_') && baseId.includes('_OFF_HAND')) {
+        baseId = baseId.replace('_OFF_HAND', '_OFFHAND');
+    }
+
     let baseItem = null;
 
 
     // 2. Quality Detection (Legacy Split Method - Safer)
     if (upperId.includes('_Q')) {
         const parts = upperId.split('_Q');
-        // Handle cases where ID might have multiple _Q (unlikely but safe) by taking the last part?
-        // Actually, the standard structure is ID_SUFFIX_QX.
-        // If split has > 2 parts, it might be tricky.
-        // Let's assume the LAST part is the quality if it's a number.
         const lastPart = parts[parts.length - 1];
-        const possibleQ = parseInt(lastPart);
+        const qSubParts = lastPart.split('_');
+        const possibleQ = parseInt(qSubParts[0]);
 
         if (!isNaN(possibleQ)) {
             qualityId = possibleQ;
             // The base ID is everything before the last _Q
             baseId = parts.slice(0, parts.length - 1).join('_Q');
             baseItem = ITEM_LOOKUP[baseId];
+
+            // Parse enhancement from ID if present (e.g. T10_TOME_Q4_20)
+            if (qSubParts.length > 1) {
+                const eVal = parseInt(qSubParts[1]);
+                if (!isNaN(eVal)) enhancement = eVal;
+            }
         }
     }
 
@@ -1600,7 +1608,7 @@ export const calculateRuneBonus = (tier, stars, effType = null) => {
     const starBonusMap = { 1: 1, 2: 3, 3: 5 }; // Max 3 stars
     let bonus = (tier - 1) * 5 + (starBonusMap[stars] || stars);
 
-    // --- NOVOS BÔNUS DE RUNAS DE COMBATE (User Request) ---
+    // --- NEW COMBAT RUNE BONUSES (User Request) ---
     // Cada "rank" (Tiers x 3 Estrelas) adiciona:
     // Velocidade: 3.33% por rank (Total 100%)
     // Dano: 40 por rank (Total 1200)
@@ -1610,7 +1618,7 @@ export const calculateRuneBonus = (tier, stars, effType = null) => {
             // Retorna o valor em % (ex: 3.3, 10.0, 100)
             return parseFloat((rank * (100 / 30)).toFixed(1));
         } else {
-            // ATTACK -> Bônus de Dano Flat
+            // ATTACK -> Flat Damage Bonus
             return rank * 40;
         }
     }

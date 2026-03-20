@@ -12,7 +12,7 @@ function debugLog(msg) {
     try {
         fs.appendFileSync(DEBUG_LOG_PATH, `[${timestamp}] ${msg}\n`);
     } catch (e) {}
-    console.log(`[WB-DEBUG] ${msg}`);
+
 }
 
 export class WorldBossManager {
@@ -190,11 +190,14 @@ export class WorldBossManager {
 
         const isAlive = now < endsAt;
 
-        // Daily Ancient Dragon is always Tier 10
-        const bossData = WORLD_BOSSES['T10'];
+        // Daily Ancient Dragon is always Tier 10 equivalent but unique character
         this.dailyBoss = {
-            ...bossData,
+            id: "DAILY_CELESTIAL_RAVAGER",
             name: "The Celestial Ravager",
+            tier: 10,
+            maxHP: 9500000,
+            image: "wb_daily_celestial_ravager.webp",
+            bg: "/backgrounds/arcane.webp",
             isAlive: isAlive,
             endsAt: endsAt.toISOString(),
             type: 'daily'
@@ -419,7 +422,7 @@ export class WorldBossManager {
         if (!char.state) char.state = {};
         char.state.activeWorldBossFight = { ...fightState };
 
-        console.log(`[WORLD_BOSS] Fight started successfully: char=${char.name} (${char.id}), type=${type}, sessionId=${fightState.sessionId}`);
+
         return { success: true };
     }
 

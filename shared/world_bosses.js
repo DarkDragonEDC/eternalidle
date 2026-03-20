@@ -44,39 +44,39 @@ export const WORLD_BOSSES = {
         name: "Chaos Entity X-0",
         tier: 6,
         maxHP: 5500000,
-        image: "boss_void_entity.webp",
+        image: "wb_t6_chaos_entity.webp",
         bg: "/backgrounds/arcane.webp"
     },
     "T7": {
         id: "T7_BOSS",
-        name: "Aegis of the Forgotten",
+        name: "Ancient Arcanist Golem",
         tier: 7,
         maxHP: 6500000,
-        image: "RUNE_GUARDIAN.png",
+        image: "wb_t7_arcanist_golem.webp",
         bg: "/backgrounds/arcane.webp"
     },
     "T8": {
         id: "T8_BOSS",
-        name: "Abyssal Juggernaut",
+        name: "The Infernal Dreadknight",
         tier: 8,
         maxHP: 7500000,
-        image: "abyssal_knight.webp",
+        image: "wb_t8_dreadknight.webp",
         bg: "/backgrounds/dark.webp"
     },
     "T9": {
         id: "T9_BOSS",
-        name: "Nightmare Overlord",
+        name: "Soul-Stalker of the Abyss",
         tier: 9,
         maxHP: 8500000,
-        image: "void_reaper.webp",
+        image: "wb_t9_soul_stalker.webp",
         bg: "/backgrounds/dark.webp"
     },
     "T10": {
         id: "T10_BOSS",
-        name: "The Celestial Ravager",
+        name: "The Primordial Star-Eater",
         tier: 10,
         maxHP: 9500000,
-        image: "ancient_dragon.webp",
+        image: "wb_t10_star_eater.webp",
         bg: "/backgrounds/arcane.webp"
     }
 };
