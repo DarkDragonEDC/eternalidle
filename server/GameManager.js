@@ -17,7 +17,7 @@ import { TradeManager } from './managers/TradeManager.js';
 import { WorldBossManager } from './managers/WorldBossManager.js';
 import { SocialManager } from './managers/SocialManager.js';
 import { GuildManager } from './managers/GuildManager.js';
-// import { PushManager } from './managers/PushManager.js';
+import { PushManager } from './managers/PushManager.js';
 import { MigrationManager } from './managers/MigrationManager.js';
 import { UserManager } from './managers/UserManager.js';
 import { StatsManager } from './managers/StatsManager.js';
@@ -52,14 +52,14 @@ export class GameManager {
         this.worldBossManager = new WorldBossManager(this);
         this.socialManager = new SocialManager(this);
         this.guildManager = new GuildManager(this);
-        // this.pushManager = new PushManager(this);
+        this.pushManager = new PushManager(this);
         this.migrationManager = new MigrationManager(this);
         this.userManager = new UserManager(this);
         this.statsManager = new StatsManager(this);
         this.catchupManager = new CatchupManager(this);
         this.banManager = new BanManager(this);
         this.quests = new QuestManager(this);
-        // this.notifications = new NotificationService(this);
+        this.notifications = new NotificationService(this);
         
         // Delegated to PersistenceService
         this.leaderboardCache = new Map(); // type+mode -> { data, timestamp }
@@ -94,7 +94,7 @@ export class GameManager {
         setTimeout(() => this.persistence.checkTaxSnapshot(), 5000); // Check once shortly after startup
 
         // Push notification scheduler (Midnight UTC check)
-        // this.notifications.scheduleMidnightTriggers();
+        this.notifications.scheduleMidnightTriggers();
 
         this.worldBossManager.initialize();
 
@@ -1771,13 +1771,40 @@ export class GameManager {
                     this.inventoryManager.addItemToInventory(char, reward.id, reward.qty);
                 }
 
-                // Consume Chest
-                this.inventoryManager.consumeItems(char, { [itemId]: safeQty });
 
                 const message = "You opened the Noob Chest!\nReceived:\n• 5.000 Silver\n• 200x Food\n• 1x Sword\n• 1x Bow\n• 1x Fire Staff\n• 100x Rune Shards";
 
                 await this.saveState(char.id, char.state);
                 return { success: true, message, itemId, rewards: { items: rewards, silver: addedSilver } };
+
+            } else if ((itemData.id || '').toUpperCase() === 'ENHANCEMENT_CHEST') {
+                const stones = Object.keys(ITEM_LOOKUP).filter(k => k.startsWith('ENHANCEMENT_STONE_'));
+                if (stones.length === 0) throw new Error("No enhancement stones configured!");
+
+                // IMPORTANT: Deduct the chest from inventory
+                this.inventoryManager.consumeItems(char, { [itemId]: safeQty });
+
+                const rewards = { items: [] };
+                let message = "You opened the Enhancement Chest! 🛠️\nReceived:";
+
+                for (let i = 0; i < safeQty; i++) {
+                    const randomStone = stones[Math.floor(Math.random() * stones.length)];
+                    this.inventoryManager.addItemToInventory(char, randomStone, 1);
+                    
+                    const existing = rewards.items.find(r => r.id === randomStone);
+                    if (existing) {
+                        existing.qty += 1;
+                    } else {
+                        rewards.items.push({ id: randomStone, qty: 1 });
+                    }
+                }
+
+                for (const r of rewards.items) {
+                    message += `\n• ${r.qty}x ${r.id.replace('ENHANCEMENT_STONE_', '').replace(/_/g, ' ')}`;
+                }
+                
+                await this.saveState(char.id, char.state);
+                return { success: true, message, itemId, rewards: { items: rewards.items, silver: 0 } };
 
             } else if (itemData.id.includes('CHEST')) {
                 // Chest Logic

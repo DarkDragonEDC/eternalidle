@@ -8,11 +8,11 @@ import { CHEST_DROP_TABLE, getChestRuneShardRange, WORLDBOSS_DROP_TABLE } from '
 const ItemInfoModal = ({ item: rawItem, onClose }) => {
     if (!rawItem) return null;
 
-    const resolved = resolveItem(rawItem.id || rawItem.item_id);
+    const resolved = resolveItem(rawItem.id || rawItem.item_id, rawItem.quality || rawItem.stars);
     const item = {
         ...resolved,
         ...rawItem,
-        stats: { ...resolved?.stats, ...rawItem.stats }
+        stats: { ...rawItem.stats, ...resolved?.stats }
     };
 
     const handleBackdropClick = (e) => {
@@ -127,7 +127,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                         </div>
 
                         <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-                            <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', fontWeight: '800', border: '1px solid var(--border)', padding: '2px 8px', borderRadius: '100px', textTransform: 'uppercase' }}>T{item.tier}</div>
+                            {item.tier && <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', fontWeight: '800', border: '1px solid var(--border)', padding: '2px 8px', borderRadius: '100px', textTransform: 'uppercase' }}>T{item.tier}</div>}
                             <div style={{ fontSize: '0.6rem', color: tierColor, fontWeight: '800', border: `1px solid ${tierColor}40`, padding: '2px 10px', borderRadius: '100px', textTransform: 'uppercase' }}>{item.type}</div>
                             {item.ip > 0 && <div style={{ fontSize: '0.6rem', color: '#fbbf24', fontWeight: '800', border: '1px solid rgba(251, 191, 36, 0.3)', padding: '2px 8px', borderRadius: '100px' }}>IP {item.ip}</div>}
                         </div>

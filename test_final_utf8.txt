@@ -1,0 +1,15 @@
+﻿--- Test Case 1: Window Boss DEFEATED ---
+Reward Chest ID: T10_WORLDBOSS_CHEST_MASTERPIECE
+RESULT: PASS
+
+--- Test Case 2: Window Boss ACTIVE (Timed out) ---
+Reward Chest ID: None
+RESULT: PASS
+
+--- Test Case 3: Daily Boss (T1 Normal) ---
+Reward Chest ID: T1_WORLDBOSS_CHEST_NORMAL
+RESULT: PASS
+
+--- Test Case 4: Daily Boss High Damage (T10 Masterpiece) ---
+Reward Chest ID: T10_WORLDBOSS_CHEST_MASTERPIECE
+RESULT: PASS

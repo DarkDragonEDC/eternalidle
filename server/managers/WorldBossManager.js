@@ -3,6 +3,17 @@ import { WORLDBOSS_DROP_TABLE } from '../../shared/chest_drops.js';
 import { QUEST_TYPES } from './QuestManager.js';
 import { WORLD_BOSSES, getBossByTier, getRandomBossTier } from '../../shared/world_bosses.js';
 import { DEFAULT_PLAYER_ATTACK_SPEED } from '../../shared/combat.js';
+import fs from 'fs';
+import path from 'path';
+
+const DEBUG_LOG_PATH = './wb_debug.log';
+function debugLog(msg) {
+    const timestamp = new Date().toISOString();
+    try {
+        fs.appendFileSync(DEBUG_LOG_PATH, `[${timestamp}] ${msg}\n`);
+    } catch (e) {}
+    console.log(`[WB-DEBUG] ${msg}`);
+}
 
 export class WorldBossManager {
     constructor(gameManager) {
@@ -23,14 +34,19 @@ export class WorldBossManager {
     }
 
     async initialize() {
-        await this.checkBossCycle();
-        await this.refreshAllRankings();
+        // Kick off initial state fetch but don't block the intervals
+        this.checkBossCycle().catch(e => debugLog(`Error in initial cycle check: ${e.message}`));
+        this.refreshAllRankings().catch(e => debugLog(`Error in initial ranking refresh: ${e.message}`));
 
         // Refresh DB rankings every 5 minutes
         setInterval(() => this.refreshAllRankings(), 300000);
 
         // Refresh Live Rankings (Memory Merge) every 1 second
         setInterval(() => this.updateAllLiveRankings(), 1000);
+
+        // Cleanup orphaned fights (every 5 seconds)
+        setInterval(() => this.cleanupOrphanedFights(), 5000);
+        debugLog('WorldBossManager initialized (non-blocking)');
     }
 
     async refreshAllRankings() {
@@ -133,6 +149,33 @@ export class WorldBossManager {
         };
     }
 
+    async cleanupOrphanedFights() {
+        const now = Date.now();
+        const timedOut = [];
+        
+        this.activeFights.forEach((fight, charId) => {
+            const elapsed = now - fight.startedAt;
+            // 60s fight + 10s grace period for client lag/sync
+            if (elapsed > 70000) {
+                timedOut.push(charId);
+            }
+        });
+
+        if (timedOut.length > 0) {
+            debugLog(`Cleaning up ${timedOut.length} orphaned/timed-out fights: ${timedOut.join(', ')}`);
+            for (const charId of timedOut) {
+                const char = this.gameManager.cache.get(charId);
+                if (char) {
+                    await this.endFight(char);
+                } else {
+                    // Force delete from memory if character is not even in cache
+                    this.activeFights.delete(charId);
+                    debugLog(`Force removed ${charId} from activeFights (character not in cache)`);
+                }
+            }
+        }
+    }
+
     async checkBossCycle() {
         await Promise.all([
             this.checkDailyBoss(),
@@ -151,7 +194,7 @@ export class WorldBossManager {
         const bossData = WORLD_BOSSES['T10'];
         this.dailyBoss = {
             ...bossData,
-            name: "The Ancient Dragon",
+            name: "The Celestial Ravager",
             isAlive: isAlive,
             endsAt: endsAt.toISOString(),
             type: 'daily'
@@ -216,6 +259,7 @@ export class WorldBossManager {
 
         this.windowBoss = {
             ...bossData,
+            sessionId: session.id,
             isAlive: isAlive,
             currentHP: parseInt(session.current_hp),
             maxHP: parseInt(session.max_hp),
@@ -289,7 +333,34 @@ export class WorldBossManager {
         const dailyResult = findRank(this.dailyLiveRankings, charId, mode);
         const windowResult = findRank(this.windowLiveRankings, charId, mode);
 
-        const pendingReward = await this.getPendingReward(charId);
+        const pendingRewards = await this.getPendingRewards(charId);
+
+        // Fetch last 3 window boss sessions for history
+        let windowHistory = [];
+        try {
+            const { data: historyData } = await this.gameManager.supabase
+                .from('world_boss_sessions')
+                .select('*')
+                .order('start_time', { ascending: false })
+                .limit(3);
+            
+            if (historyData) {
+                windowHistory = historyData.map(s => {
+                    const bossData = WORLD_BOSSES[`T${s.tier}`];
+                    return {
+                        id: s.id,
+                        bossId: s.boss_id,
+                        name: bossData?.name || 'Unknown Boss',
+                        tier: s.tier,
+                        status: s.status,
+                        startTime: s.start_time,
+                        endTime: s.end_time
+                    };
+                });
+            }
+        } catch (err) {
+            console.error('[WORLD_BOSS] Error fetching session history:', err);
+        }
 
         return {
             daily: {
@@ -302,6 +373,7 @@ export class WorldBossManager {
             },
             window: {
                 boss: this.windowBoss,
+                history: windowHistory,
                 rankings: windowResult.list.slice(0, 50),
                 ironmanRankings: (this.windowLiveRankings.IRONMAN || []).slice(0, 50),
                 normalRankings: (this.windowLiveRankings.NORMAL || []).slice(0, 50),
@@ -309,7 +381,8 @@ export class WorldBossManager {
                 myRank: windowResult.rank
             },
             mode: mode,
-            pendingReward: pendingReward
+            pendingRewards: pendingRewards,
+            serverTime: Date.now()
         };
     }
 
@@ -351,23 +424,38 @@ export class WorldBossManager {
     }
 
     async checkBossParticipation(charId, type) {
+        const normalizedType = type?.toLowerCase();
         const dateStr = new Date().toISOString().split('T')[0];
         let query = this.gameManager.supabase.from('world_boss_attempts').select('id, damage').eq('character_id', charId);
 
-        if (type === 'daily') {
+        if (normalizedType === 'daily') {
             query = query.eq('date', dateStr).is('session_id', null);
         } else {
-            if (!this.windowSession) return true;
+            if (!this.windowSession) return true; // If no session exists, we treat it as "can't fight" or "already done"
             query = query.eq('session_id', this.windowSession.id);
         }
 
-        const { data, error } = await query.limit(1);
-        if (error) {
-            console.error('[WORLD_BOSS] Error checking participation:', error);
+        debugLog(`checkBossParticipation START: char=${charId}, type=${normalizedType}, date=${dateStr}`);
+        try {
+            const timeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('DB_TIMEOUT')), ms));
+            
+            const { data, error } = await Promise.race([
+                query,
+                timeout(10000)
+            ]);
+
+            if (error) {
+                console.error(`[WORLD_BOSS] DB Error checking participation for ${charId} (${normalizedType}):`, error);
+                debugLog(`checkBossParticipation ERROR: ${error.message}`);
+                return true; 
+            }
+            debugLog(`checkBossParticipation DONE: found=${data?.length || 0}`);
+            return (data && data.length > 0);
+        } catch (err) {
+            console.error(`[WORLD_BOSS] Exception checking participation for ${charId}:`, err);
+            debugLog(`checkBossParticipation EXCEPTION: ${err.message}`);
             return true;
         }
-
-        return data && data.length > 0;
     }
 
     async processTick(char, virtualTime = null) {
@@ -458,10 +546,14 @@ export class WorldBossManager {
     async updateBossHPInDB(damageDealt) {
         if (!this.windowSession) return;
         try {
-            await this.gameManager.supabase.rpc('deduct_world_boss_hp', { 
-                session_id: this.windowSession.id, 
-                damage: Math.floor(damageDealt) 
-            });
+            const timeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('DB_TIMEOUT')), ms));
+            await Promise.race([
+                this.gameManager.supabase.rpc('deduct_world_boss_hp', { 
+                    session_id: this.windowSession.id, 
+                    damage: Math.floor(damageDealt) 
+                }),
+                timeout(5000)
+            ]);
         } catch (err) {
             console.error('[WORLD_BOSS] Error updating window boss HP:', err);
         }
@@ -520,8 +612,12 @@ export class WorldBossManager {
                 oldTop1 = categoryRankings.length > 0 ? categoryRankings[0] : null;
             }
 
+            debugLog(`Ending ${fight.type} fight for ${char.name} (${char.id}). Damage: ${fight.damage}`);
+            
             await this.saveParticipation(char, fight.damage, fight.type, fight.sessionId);
-            await this.refreshAllRankings();
+            debugLog(`Save successful for ${char.name}`);
+
+            this.refreshAllRankings().catch(e => debugLog(`Error refreshing rankings: ${e.message}`));
             
             if (this.gameManager.quests) {
                 this.gameManager.quests.handleProgress(char, QUEST_TYPES.WORLD_BOSS, { count: 1 });
@@ -545,70 +641,116 @@ export class WorldBossManager {
         } catch (err) {
             console.error(`[WORLD_BOSS] Error ending ${fight.type} fight:`, err);
         } finally {
-            if (char.state) delete char.state.activeWorldBossFight;
-            this.activeFights.delete(char.id);
-        }
-
-        return {
-            worldBossUpdate: {
-                status: 'FINISHED',
-                finalDamage: fight.damage,
-                damage: fight.damage,
-                elapsed: Math.min(60000, Date.now() - (fight.startedAt || Date.now())),
-                type: fight.type,
-                sessionId: fight.sessionId,
-                rankingPos: this.predictRankingPos(char.id, fight.damage, fight.type)
+            // Ensure it's removed from character state if fully loaded character
+            if (char && char.state) {
+                delete char.state.activeWorldBossFight;
             }
-        };
+            this.activeFights.delete(char.id);
+
+            return {
+                worldBossUpdate: {
+                    damage: fight ? fight.damage : 0,
+                    status: 'FINISHED',
+                    elapsed: fight ? Math.min(60000, Date.now() - (fight.startedAt || Date.now())) : 60000,
+                    type: fight ? fight.type : 'window',
+                    sessionId: fight ? fight.sessionId : null,
+                    rankingPos: fight ? this.predictRankingPos(char.id, fight.damage, fight.type) : '--'
+                }
+            };
+        }
     }
 
     async saveParticipation(char, damage, type, sessionId = null) {
+        const normalizedType = type?.toLowerCase();
         const dateStr = new Date().toISOString().split('T')[0];
+        const charId = char?.id;
+        debugLog(`saveParticipation START: name=${char?.name}, id=${charId}, type=${normalizedType}, damage=${damage}, date=${dateStr}, session=${sessionId}`);
         
         try {
-            // 1. Double check existing attempt to merge damage properly
-            let query = this.gameManager.supabase
-                .from('world_boss_attempts')
-                .select('id, damage')
-                .eq('character_id', char.id);
-
-            if (type === 'daily') {
-                query = query.eq('date', dateStr).is('session_id', null);
+            // 1. Double check existing attempt
+            let query;
+            if (normalizedType === 'daily') {
+                query = this.gameManager.supabase
+                    .from('world_boss_attempts')
+                    .select('id, damage')
+                    .eq('character_id', charId)
+                    .eq('date', dateStr)
+                    .is('session_id', null);
             } else {
-                query = query.eq('session_id', sessionId);
+                query = this.gameManager.supabase
+                    .from('world_boss_attempts')
+                    .select('id, damage')
+                    .eq('character_id', charId);
+                
+                if (sessionId === null || sessionId === undefined) {
+                    query = query.is('session_id', null);
+                } else {
+                    query = query.eq('session_id', sessionId);
+                }
             }
 
-            const { data: existing, error: selectError } = await query.maybeSingle();
+            // Add a 10-second timeout to the query to prevent total server hang
+            const timeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('DB_TIMEOUT')), ms));
             
+            debugLog(`[${charId}] Querying for existing attempt...`);
+            const { data: existingRecords, error: selectError } = await Promise.race([
+                query,
+                timeout(10000)
+            ]);
+
+            if (selectError) {
+                debugLog(`[${charId}] SELECT error: ${JSON.stringify(selectError)}`);
+                throw selectError;
+            }
+            
+            const existing = (existingRecords && existingRecords.length > 0) ? existingRecords[0] : null;
+            debugLog(`[${charId}] Search results: ${existingRecords?.length || 0} found. Existing ID=${existing?.id || 'none'}`);
+
             if (existing) {
                 const oldDamage = parseInt(existing.damage) || 0;
                 const newDamage = Math.max(oldDamage, Math.floor(damage));
                 
-                const { error: updateError } = await this.gameManager.supabase
-                    .from('world_boss_attempts')
-                    .update({ 
-                        damage: newDamage,
-                        player_name: char.name // Refresh name in case it changed
-                    })
-                    .eq('id', existing.id);
+                debugLog(`[${charId}] Updating existing record ${existing.id} with damage ${newDamage}`);
+                const { error: updateError } = await Promise.race([
+                    this.gameManager.supabase
+                        .from('world_boss_attempts')
+                        .update({ 
+                            damage: newDamage,
+                            player_name: char.name
+                        })
+                        .eq('id', existing.id),
+                    timeout(10000)
+                ]);
 
-                if (updateError) throw updateError;
+                if (updateError) {
+                    debugLog(`[${charId}] UPDATE error: ${JSON.stringify(updateError)}`);
+                    throw updateError;
+                }
             } else {
-                const { error: insertError } = await this.gameManager.supabase
-                    .from('world_boss_attempts')
-                    .insert({
-                        character_id: char.id,
-                        player_name: char.name,
-                        date: dateStr,
-                        session_id: sessionId,
-                        damage: Math.floor(damage),
-                        claimed: false
-                    });
+                debugLog(`[${charId}] Inserting NEW record. Damage=${damage}`);
+                const { error: insertError } = await Promise.race([
+                    this.gameManager.supabase
+                        .from('world_boss_attempts')
+                        .insert({
+                            character_id: charId,
+                            player_name: char.name,
+                            date: dateStr,
+                            session_id: (normalizedType === 'daily') ? null : sessionId,
+                            damage: Math.floor(damage),
+                            claimed: false
+                        }),
+                    timeout(10000)
+                ]);
 
-                if (insertError) throw insertError;
+                if (insertError) {
+                    debugLog(`[${charId}] INSERT error: ${JSON.stringify(insertError)}`);
+                    throw insertError;
+                }
             }
+            debugLog(`[${charId}] saveParticipation COMPLETE for ${char.name}`);
         } catch (err) {
-            console.error('[WORLD_BOSS] Error in saveParticipation:', err);
+            debugLog(`[${charId}] Critical exception in saveParticipation: ${err.message}`);
+            console.error('[WORLD_BOSS] Critical exception in saveParticipation:', err);
             throw err;
         }
     }
@@ -676,10 +818,7 @@ export class WorldBossManager {
         return { id: chestId, name: `${tier} WB Chest (${rarity})` };
     }
 
-    async getPendingReward(charId) {
-        // Daily reward (Ancient Dragon) uses rank-based chests? 
-        // Or damage milestones? The original implementation used damage milestones.
-        // We'll stick to damage milestones for now for both.
+    async getPendingRewards(charId) {
         const { data, error } = await this.gameManager.supabase
             .from('world_boss_attempts')
             .select('*, world_boss_sessions(*)')
@@ -687,34 +826,60 @@ export class WorldBossManager {
             .eq('claimed', false)
             .order('created_at', { ascending: false });
 
-        if (error || !data || data.length === 0) return null;
+        if (error || !data || data.length === 0) return [];
 
-        // Find the oldest unclaimed attempt that is NOT the current active one
-        const unclaimed = data.find(r => {
-            if (r.session_id) {
-                return !this.windowSession || r.session_id !== this.windowSession.id;
+        const pending = [];
+
+        for (const unclaimed of data) {
+            // Skip current active sessions
+            if (unclaimed.session_id) {
+                if (this.windowSession && unclaimed.session_id === this.windowSession.id) continue;
             } else {
-                return r.date !== new Date().toISOString().split('T')[0];
+                if (unclaimed.date === new Date().toISOString().split('T')[0]) continue;
             }
-        });
 
-        if (!unclaimed) return null;
+            let chestId, chestName;
+            const isWindowBoss = !!unclaimed.session_id;
 
-        const damage = Number(unclaimed.damage) || 0;
-        const { id: chestId, name: chestName } = this.calculateChestRewardByDamage(damage);
-        const bossName = unclaimed.world_boss_sessions ? (WORLD_BOSSES[`T${unclaimed.world_boss_sessions.tier}`]?.name || 'Window Boss') : 'Ancient Dragon';
+            if (isWindowBoss && unclaimed.world_boss_sessions?.status === 'DEFEATED') {
+                chestId = 'ENHANCEMENT_CHEST';
+                chestName = 'Enhancement Chest';
+            } else {
+                const damage = Number(unclaimed.damage) || 0;
+                const result = this.calculateChestRewardByDamage(damage);
+                chestId = result.id;
+                chestName = result.name;
+            }
 
-        return {
-            ...unclaimed,
-            chest: chestName,
-            chestId: chestId,
-            bossName: bossName
-        };
+            const bossName = unclaimed.world_boss_sessions ? (WORLD_BOSSES[`T${unclaimed.world_boss_sessions.tier}`]?.name || 'Window Boss') : 'Ancient Dragon';
+
+            pending.push({
+                id: unclaimed.id,
+                sessionId: unclaimed.session_id,
+                date: unclaimed.date,
+                chestId: chestId,
+                chest: chestName,
+                bossName: bossName,
+                damage: unclaimed.damage
+            });
+        }
+
+        return pending;
     }
 
-    async claimReward(char) {
-        const reward = await this.getPendingReward(char.id);
-        if (!reward) throw new Error("No pending rewards found.");
+    async claimReward(char, attemptId = null) {
+        const rewards = await this.getPendingRewards(char.id);
+        if (!rewards || rewards.length === 0) throw new Error("No pending rewards found.");
+        
+        let reward;
+        if (attemptId) {
+            reward = rewards.find(r => r.id === attemptId);
+        } else {
+            reward = rewards[0]; // Claim oldest/first
+        }
+
+        if (!reward) throw new Error("Reward not found or already claimed.");
+
         const added = this.gameManager.inventoryManager.addItemToInventory(char, reward.chestId, 1);
         if (added) {
             await this.gameManager.supabase.from('world_boss_attempts').update({ claimed: true }).eq('id', reward.id);
@@ -725,14 +890,24 @@ export class WorldBossManager {
         }
     }
 
-    async getRankingHistory(dateStr) {
+    async getRankingHistory(dateStr, sessionId = null) {
         try {
-            const { data, error } = await this.gameManager.supabase
+            let query = this.gameManager.supabase
                 .from('world_boss_attempts')
-                .select('character_id, damage, session_id, characters(name, state, guild_members(guilds(tag)))')
-                .eq('date', dateStr)
+                .select('character_id, damage, session_id, characters(name, state, guild_members(guilds(tag)))');
+            
+            if (sessionId) {
+                query = query.eq('session_id', sessionId);
+            } else if (dateStr) {
+                query = query.eq('date', dateStr).is('session_id', null);
+            } else {
+                return [];
+            }
+
+            const { data, error } = await query
                 .order('damage', { ascending: false })
                 .limit(50);
+
             if (error) throw error;
             return this.formatRankings(data);
         } catch (err) {

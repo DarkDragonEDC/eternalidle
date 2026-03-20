@@ -117,8 +117,16 @@ export const ITEMS = {
                 type: 'CHEST',
                 rarity: 'EPIC',
                 icon: '/items/CHEST_EPIC.webp'
+            },
+            ENHANCEMENT_CHEST: {
+                id: 'ENHANCEMENT_CHEST',
+                name: 'Enhancement Chest',
+                description: 'A mysterious chest that contains upgrade stones for gears.',
+                type: 'CHEST',
+                rarity: 'COMMON'
             }
         },
+        ENHANCEMENT_STONE: {},
         RUNE_SHARD: {},
         RUNE: {}
     }
@@ -550,6 +558,47 @@ ITEMS.SPECIAL.RUNE_SHARD['BATTLE'] = {
     icon: '/items/Battle_Rune_Shard.webp',
     description: 'A shard forged in the heat of battle. Used for advanced rune crafting.'
 };
+
+// --- ENHANCEMENT STONES (21 total: 7 slots × 3 classes) ---
+const ENHANCEMENT_STONE_DEFS = [
+    // Warrior
+    { key: 'WARRIOR_WEAPON', id: 'ENHANCEMENT_STONE_WARRIOR_WEAPON', name: 'Warrior Weapon Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'WEAPON' },
+    { key: 'WARRIOR_OFFHAND', id: 'ENHANCEMENT_STONE_WARRIOR_OFFHAND', name: 'Warrior Off-Hand Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'OFF_HAND' },
+    { key: 'WARRIOR_ARMOR', id: 'ENHANCEMENT_STONE_WARRIOR_ARMOR', name: 'Warrior Armor Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'ARMOR' },
+    { key: 'WARRIOR_HELMET', id: 'ENHANCEMENT_STONE_WARRIOR_HELMET', name: 'Warrior Helmet Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'HELMET' },
+    { key: 'WARRIOR_BOOTS', id: 'ENHANCEMENT_STONE_WARRIOR_BOOTS', name: 'Warrior Boots Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'BOOTS' },
+    { key: 'WARRIOR_GLOVES', id: 'ENHANCEMENT_STONE_WARRIOR_GLOVES', name: 'Warrior Gloves Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'GLOVES' },
+    { key: 'WARRIOR_CAPE', id: 'ENHANCEMENT_STONE_WARRIOR_CAPE', name: 'Warrior Cape Enhancement Stone', targetClass: 'WARRIOR', targetSlot: 'CAPE' },
+    // Hunter
+    { key: 'HUNTER_WEAPON', id: 'ENHANCEMENT_STONE_HUNTER_WEAPON', name: 'Hunter Weapon Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'WEAPON' },
+    { key: 'HUNTER_OFFHAND', id: 'ENHANCEMENT_STONE_HUNTER_OFFHAND', name: 'Hunter Off-Hand Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'OFF_HAND' },
+    { key: 'HUNTER_ARMOR', id: 'ENHANCEMENT_STONE_HUNTER_ARMOR', name: 'Hunter Armor Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'ARMOR' },
+    { key: 'HUNTER_HELMET', id: 'ENHANCEMENT_STONE_HUNTER_HELMET', name: 'Hunter Helmet Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'HELMET' },
+    { key: 'HUNTER_BOOTS', id: 'ENHANCEMENT_STONE_HUNTER_BOOTS', name: 'Hunter Boots Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'BOOTS' },
+    { key: 'HUNTER_GLOVES', id: 'ENHANCEMENT_STONE_HUNTER_GLOVES', name: 'Hunter Gloves Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'GLOVES' },
+    { key: 'HUNTER_CAPE', id: 'ENHANCEMENT_STONE_HUNTER_CAPE', name: 'Hunter Cape Enhancement Stone', targetClass: 'HUNTER', targetSlot: 'CAPE' },
+    // Mage
+    { key: 'MAGE_WEAPON', id: 'ENHANCEMENT_STONE_MAGE_WEAPON', name: 'Mage Weapon Enhancement Stone', targetClass: 'MAGE', targetSlot: 'WEAPON' },
+    { key: 'MAGE_OFFHAND', id: 'ENHANCEMENT_STONE_MAGE_OFFHAND', name: 'Mage Off-Hand Enhancement Stone', targetClass: 'MAGE', targetSlot: 'OFF_HAND' },
+    { key: 'MAGE_ARMOR', id: 'ENHANCEMENT_STONE_MAGE_ARMOR', name: 'Mage Armor Enhancement Stone', targetClass: 'MAGE', targetSlot: 'ARMOR' },
+    { key: 'MAGE_HELMET', id: 'ENHANCEMENT_STONE_MAGE_HELMET', name: 'Mage Helmet Enhancement Stone', targetClass: 'MAGE', targetSlot: 'HELMET' },
+    { key: 'MAGE_BOOTS', id: 'ENHANCEMENT_STONE_MAGE_BOOTS', name: 'Mage Boots Enhancement Stone', targetClass: 'MAGE', targetSlot: 'BOOTS' },
+    { key: 'MAGE_GLOVES', id: 'ENHANCEMENT_STONE_MAGE_GLOVES', name: 'Mage Gloves Enhancement Stone', targetClass: 'MAGE', targetSlot: 'GLOVES' },
+    { key: 'MAGE_CAPE', id: 'ENHANCEMENT_STONE_MAGE_CAPE', name: 'Mage Cape Enhancement Stone', targetClass: 'MAGE', targetSlot: 'CAPE' },
+];
+
+for (const stone of ENHANCEMENT_STONE_DEFS) {
+    ITEMS.SPECIAL.ENHANCEMENT_STONE[stone.key] = {
+        id: stone.id,
+        name: stone.name,
+        type: 'ENHANCEMENT_STONE',
+        targetClass: stone.targetClass,
+        targetSlot: stone.targetSlot,
+        rarity: 'UNCOMMON',
+        rarityColor: '#10b981',
+        description: `An enhancement stone for ${stone.targetClass.charAt(0) + stone.targetClass.slice(1).toLowerCase()} ${stone.targetSlot.replace('_', ' ').toLowerCase()} gear. Used to upgrade equipment.`
+    };
+}
 
 // Generate Dungeon Chests
 for (const t of TIERS) {
@@ -1090,7 +1139,7 @@ indexItems(ITEMS); // Populate ITEM_LOOKUP so resolveItem works
 
 export const resolveItem = (itemOrId, overrideQuality = null) => {
     if (!itemOrId) return null;
-    
+
     // Handle object input
     const itemId = typeof itemOrId === 'object' ? (itemOrId.id || itemOrId.item_id) : itemOrId;
     if (!itemId) return null;
@@ -1310,6 +1359,7 @@ export const calculateItemSellPrice = (item, itemId) => {
     // 0. Specific Price Overrides (User Requested)
     if (item.id === 'T1_RUNE_SHARD') return 5;
     if (item.id === 'T1_BATTLE_RUNE_SHARD') return 10;
+    if (item.type === 'ENHANCEMENT_STONE') return 10000;
 
     // 0. Unsellable Items (Premium, Special, Chests)
     if (item.id === 'INVENTORY_SLOT_TICKET' ||
@@ -1795,7 +1845,7 @@ indexItems(ITEMS);
 export const formatItemId = (itemOrId, options = {}) => {
     if (!itemOrId) return '';
     const { nameOnly = false } = options;
-    
+
     // Handle object input
     const itemId = typeof itemOrId === 'object' ? (itemOrId.id || itemOrId.item_id) : itemOrId;
     if (!itemId || typeof itemId !== 'string') return String(itemId || '');

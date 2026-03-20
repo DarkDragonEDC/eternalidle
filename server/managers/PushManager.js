@@ -12,12 +12,16 @@ export class PushManager {
         const privateKey = process.env.VAPID_PRIVATE_KEY;
 
         if (publicKey && privateKey) {
-            webpush.setVapidDetails(
-                'mailto:admin@eternalidle.com',
-                publicKey,
-                privateKey
-            );
-            console.log('[PUSH] VAPID details set successfully');
+            try {
+                webpush.setVapidDetails(
+                    'mailto:admin@eternalidle.com',
+                    publicKey,
+                    privateKey
+                );
+                console.log('[PUSH] VAPID details set successfully');
+            } catch (err) {
+                console.warn('[PUSH] Failed to set VAPID details. Push notifications will be disabled:', err.message);
+            }
         } else {
             console.warn('[PUSH] VAPID keys missing in .env. Push notifications will not work.');
         }

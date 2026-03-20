@@ -411,7 +411,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
 
     const EquipmentSlot = ({ slot, icon, label, item: rawItem, onClick, onShowInfo, isLocked = false, weaponClass = null }) => {
         // Resolve item to ensure we have latest stats and rarity color (even for Normal items if logic changes, but mostly for _Q items)
-        const item = rawItem ? { ...resolveItem(rawItem.id || rawItem.item_id), ...rawItem } : null;
+        const item = rawItem ? { ...rawItem, ...resolveItem(rawItem.id || rawItem.item_id, rawItem.quality || rawItem.stars) } : null;
 
         const tierColor = item ? '#666' : 'var(--glass-bg)';
 
@@ -498,7 +498,7 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
                     )}
                     {item ? (
                         <div style={{ color: tierColor, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.6rem', fontWeight: 'bold', position: 'absolute', top: 2, left: 4 }}>T{item.tier}</span>
+                            {item.tier && <span style={{ fontSize: '0.6rem', fontWeight: 'bold', position: 'absolute', top: 2, left: 4 }}>T{item.tier}</span>}
                             {/* Quantidade (especialmente para food) */}
                             {((typeof item.amount === 'object' ? item.amount.amount : item.amount) > 1) && (
                                 <span style={{

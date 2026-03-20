@@ -49,6 +49,7 @@ export const useSocketEvents = () => {
         });
         socket.on('world_boss_started', (data) => {
             store.setActiveWorldBossType(data?.type || 'window');
+            store.setWorldBossUpdate(null); // Clear previous results
             store.setIsWorldBossFight(true);
         });
         socket.on('action_result', (result) => {
@@ -266,10 +267,6 @@ export const useSocketEvents = () => {
         });
         socket.on('world_boss_reward_claimed', (result) => {
             if (result.success) {
-                const currentStatus = store.wbStatus;
-                if (currentStatus) {
-                    store.setWbStatus({ ...currentStatus, pendingReward: null });
-                }
                 socket.emit('get_world_boss_status');
             }
         });

@@ -97,7 +97,7 @@ const WorldBossFight = ({ gameState, socket, onFinish, onMinimize }) => {
         logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [logs]);
 
-    const timeLeft = Math.max(0, 70 - Math.floor(fightData.elapsed / 1000));
+    const timeLeft = Math.max(0, 60 - Math.floor(fightData.elapsed / 1000));
     const progress = Math.min(100, (fightData.elapsed / 60000) * 100);
     const isFinished = fightData.status === 'FINISHED';
     const isLowTime = timeLeft <= 10;

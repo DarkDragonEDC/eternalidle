@@ -136,10 +136,10 @@ export const registerCombatHandlers = (socket, gameManager, io) => {
     }
   });
 
-  socket.on("get_world_boss_ranking_history", async ({ date }) => {
+  socket.on("get_world_boss_ranking_history", async ({ date, sessionId }) => {
     try {
-      const rankings = await gameManager.worldBossManager.getRankingHistory(date);
-      socket.emit("world_boss_ranking_history", { date, rankings });
+      const rankings = await gameManager.worldBossManager.getRankingHistory(date, sessionId);
+      socket.emit("world_boss_ranking_history", { date, sessionId, rankings });
     } catch (err) {
       console.error("[WORLD_BOSS] history error:", err);
       socket.emit("error", { message: err.message });
@@ -170,14 +170,14 @@ export const registerCombatHandlers = (socket, gameManager, io) => {
     }
   });
 
-  socket.on("claim_world_boss_reward", async () => {
+  socket.on("claim_world_boss_reward", async ({ attemptId } = {}) => {
     try {
       await gameManager.executeLocked(socket.user.id, async () => {
         const char = await gameManager.getCharacter(
           socket.user.id,
           socket.data.characterId,
         );
-        const result = await gameManager.worldBossManager.claimReward(char);
+        const result = await gameManager.worldBossManager.claimReward(char, attemptId);
         socket.emit("world_boss_reward_claimed", result);
         socket.emit("action_result", {
           success: result.success,

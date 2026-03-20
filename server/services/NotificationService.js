@@ -47,13 +47,23 @@ export class NotificationService {
         if (!char || !char.state) return;
         if (!char.state.notifications) char.state.notifications = [];
         
-        const notification = {
-            id: Date.now() + Math.random(),
-            type,
-            message,
-            timestamp: Date.now(),
-            read: false
-        };
+        let notification;
+        if (typeof type === 'object' && type !== null) {
+            notification = {
+                id: Date.now() + Math.random(),
+                timestamp: Date.now(),
+                read: false,
+                ...type
+            };
+        } else {
+            notification = {
+                id: Date.now() + Math.random(),
+                type,
+                message,
+                timestamp: Date.now(),
+                read: false
+            };
+        }
 
         char.state.notifications.unshift(notification);
         // Keep only last 10 for generic notifications to avoid bloat

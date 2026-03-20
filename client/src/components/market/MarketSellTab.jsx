@@ -207,7 +207,7 @@ const MarketSellTab = ({
                         const inventoryItems = Object.entries(gameState?.state?.inventory || {}).map(([id, entry]) => {
                             const qty = (entry && typeof entry === 'object') ? (entry.amount || 0) : (Number(entry) || 0);
                             const data = resolveItem(id);
-                            const mergedData = (entry && typeof entry === 'object') ? { ...data, ...entry } : data;
+                            const mergedData = (entry && typeof entry === 'object') ? { ...entry, ...data } : data;
                             return { id, qty, data: mergedData };
                         }).filter(item => {
                             if (item.qty <= 0) return false;
@@ -215,10 +215,16 @@ const MarketSellTab = ({
                             if (item.data.type === 'QUEST') return false;
 
                             if (sellSearchQuery) {
-                                const searchLower = sellSearchQuery.toLowerCase();
+                                const words = sellSearchQuery.trim().toLowerCase().split(/\s+/);
                                 const itemName = item.data.name?.toLowerCase() || '';
                                 const itemId = item.id.toLowerCase();
-                                if (!itemName.includes(searchLower) && !itemId.includes(searchLower)) return false;
+                                const itemTier = item.data.tier;
+
+                                const matchesKeywords = words.every(word => {
+                                    return itemName.includes(word) || itemId.includes(word) || `t${itemTier}` === word;
+                                });
+
+                                if (!matchesKeywords) return false;
                             }
 
                             if (sellSelectedTier !== 'ALL' && item.data.tier !== parseInt(sellSelectedTier)) return false;
@@ -305,7 +311,7 @@ const MarketSellTab = ({
                                     onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'var(--accent)'; }}
                                     onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = specificBorderColor; }}
                                 >
-                                    <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: 'var(--text-main)', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)', zIndex: 10 }}>T{data.tier}</div>
+                                    {data.tier && <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: 'var(--text-main)', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)', zIndex: 10 }}>T{data.tier}</div>}
                                     <div style={{ position: 'absolute', top: 6, right: 6, fontSize: '0.7rem', color: 'var(--text-main)', fontWeight: 'bold', zIndex: 10 }}>x{qty}</div>
 
                                     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>

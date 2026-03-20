@@ -140,7 +140,7 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
 
         // Merge metadata if entry is an object (for craftedBy, craftedAt, stars, etc.)
         const metadata = (entry && typeof entry === 'object') ? entry : {};
-        return { ...item, ...metadata, qty, id }; // id is key
+        return { ...metadata, ...item, qty, id }; // item (resolved) overrides metadata stats/icon/etc.
     }).filter(Boolean);
 
     const filteredItems = inventoryItems.filter(item => {
@@ -557,7 +557,7 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                                     minHeight: '80px'
                                 }}
                             >
-                                <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: 'var(--text-main)', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)', zIndex: 10 }}>T{item.tier}</div>
+                                {item.tier && <div style={{ position: 'absolute', top: 6, left: 6, fontSize: '0.6rem', color: 'var(--text-main)', fontWeight: '900', textShadow: '0 0 4px rgba(0,0,0,0.8)', zIndex: 10 }}>T{item.tier}</div>}
                                 <div style={{ position: 'absolute', top: 6, right: 6, fontSize: '0.7rem', color: 'var(--text-main)', fontWeight: 'bold', zIndex: 10 }}>
                                     x{(item.qty && typeof item.qty === 'object') ? (item.qty.amount || 0) : (item.qty || 0)}
                                 </div>
@@ -944,8 +944,24 @@ const InventoryPanel = ({ gameState, socket, settings, onEquip, onListOnMarket, 
                                             color: '#ccc',
                                             fontSize: '0.8rem'
                                         }}>
-                                            Contains random resources.<br />
-                                            Opening multiple aggregates all rewards.
+                                            {(() => {
+                                                const upperItemId = (usePotionModal.itemId || '').toUpperCase();
+                                                const upperItemDefId = (usePotionModal.item?.id || '').toUpperCase();
+                                                if (upperItemDefId === 'ENHANCEMENT_CHEST' || upperItemId.includes('ENHANCEMENT_CHEST')) {
+                                                    return (
+                                                        <>
+                                                            Contains Enhancement Stones. 🛠️<br />
+                                                            Randomly drops one stone of any class and gear type per chest.
+                                                        </>
+                                                    );
+                                                }
+                                                return (
+                                                    <>
+                                                        Contains random resources.<br />
+                                                        Opening multiple aggregates all rewards.
+                                                    </>
+                                                );
+                                            })()}
                                         </div>
                                     )}
                                 </div>

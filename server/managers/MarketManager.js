@@ -69,8 +69,10 @@ export class MarketManager {
         }
 
         if (filters.search && filters.search.trim() !== '') {
-            const searchTerm = filters.search.trim();
-            query = query.or(`item_id.ilike.%${searchTerm}%,item_data->>name.ilike.%${searchTerm}%`);
+            const words = filters.search.trim().toLowerCase().split(/\s+/);
+            words.forEach(word => {
+                query = query.or(`item_id.ilike.%${word}%,item_data->>name.ilike.%${word}%`);
+            });
         }
 
         // Apply Sorting
@@ -730,9 +732,11 @@ export class MarketManager {
 
         if (filters.tier) query = query.eq('item_data->>tier', filters.tier.toString());
         if (filters.type) query = query.eq('item_data->>type', filters.type.toUpperCase());
-        if (filters.search) {
-            const searchTerm = filters.search.trim();
-            query = query.or(`item_id.ilike.%${searchTerm}%,item_data->>name.ilike.%${searchTerm}%`);
+        if (filters.search && filters.search.trim() !== '') {
+            const words = filters.search.trim().toLowerCase().split(/\s+/);
+            words.forEach(word => {
+                query = query.or(`item_id.ilike.%${word}%,item_data->>name.ilike.%${word}%`);
+            });
         }
 
         const { data, error } = await query;

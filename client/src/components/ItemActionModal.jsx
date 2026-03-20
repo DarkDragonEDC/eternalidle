@@ -132,9 +132,11 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onEquipFood, onSell,
                         </div>
 
                         <h2 style={{ fontSize: '1.4rem', fontWeight: '900', color: tierColor, letterSpacing: '-0.5px', marginBottom: '4px', textAlign: 'center' }}>{formatItemId(cleanBaseName, { nameOnly: true })}</h2>
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '800', border: `1px solid ${tierColor}40`, padding: '2px 10px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                            T{item.tier} Item
-                        </div>
+                        {item.tier && (
+                            <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', fontWeight: '800', border: `1px solid ${tierColor}40`, padding: '2px 10px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                T{item.tier} Item
+                            </div>
+                        )}
                     </div>
 
                     <div style={{ padding: '0 24px 24px', display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto' }} className="custom-scrollbar">
@@ -202,7 +204,7 @@ const ItemActionModal = ({ item: rawItem, onClose, onEquip, onEquipFood, onSell,
                                 <ActionButton onClick={() => { onDismantle(item.id); onClose(); }} icon={Trash2} label="Dismantle" variant="dismantle" />
                             )}
 
-                            {onList && !isIronman && item.id !== 'NOOB_CHEST' && (
+                            {onList && !isIronman && item.id !== 'NOOB_CHEST' && item.id !== 'ENHANCEMENT_CHEST' && (
                                 <ActionButton onClick={() => { onList(item.id, item); onClose(); }} icon={Tag} label="List on Market" variant="outline" />
                             )}
 

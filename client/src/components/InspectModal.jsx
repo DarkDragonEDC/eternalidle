@@ -6,7 +6,7 @@ import { calculateNextLevelXP } from '@shared/skills';
 import StatBreakdownModal from './StatBreakdownModal';
 
 const EquipmentSlot = ({ slot, icon, label, item: rawItem, delay = 0, onItemClick }) => {
-    const item = rawItem ? { ...resolveItem(rawItem.id || rawItem.item_id), ...rawItem } : null;
+    const item = rawItem ? { ...rawItem, ...resolveItem(rawItem.id || rawItem.item_id, rawItem.quality || rawItem.stars) } : null;
     const rarityColor = item && item.rarityColor ? item.rarityColor : 'rgba(255,255,255,0.05)';
     const glowColor = item ? `${rarityColor}33` : 'transparent';
 
@@ -187,7 +187,7 @@ const SkillCategory = ({ title, icon, skillsList, color, isExpanded, onToggle, s
 
 
 const RuneSlot = ({ slot, label, icon, item: rawItem, onItemClick }) => {
-    const item = rawItem ? { ...resolveItem(rawItem.id || rawItem.item_id), ...rawItem } : null;
+    const item = rawItem ? { ...rawItem, ...resolveItem(rawItem.id || rawItem.item_id, rawItem.stars) } : null;
     const rarityColor = item && item.rarityColor ? item.rarityColor : 'rgba(255,255,255,0.05)';
 
     return (
@@ -556,7 +556,7 @@ const InspectModal = React.memo(({ data, theme: propTheme, onClose, onItemClick,
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
                                 style={{
-                                    padding: '6px 12px', border: 'none',
+                                    padding: '6px 12px',
                                     background: activeTab === tab ? 'var(--accent-soft)' : 'transparent',
                                     borderRadius: '8px',
                                     color: activeTab === tab ? '#fff' : 'var(--text-dim)',

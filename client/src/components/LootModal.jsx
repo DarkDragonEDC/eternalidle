@@ -145,24 +145,25 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                                     style={{
                                         display: 'flex',
                                         alignItems: 'center',
-                                        gap: '15px',
+                                        gap: '12px',
                                         background: 'var(--slot-bg)',
-                                        padding: '15px 20px',
-                                        borderRadius: '12px',
+                                        padding: '10px 15px',
+                                        borderRadius: '10px',
                                         border: `1px solid ${specificBorderColor}`,
                                         boxShadow: (resolvedItem?.rarity && resolvedItem.rarity !== 'COMMON') ? `0 0 8px ${specificBorderColor}40` : 'none'
                                     }}
                                 >
                                     <div style={{
-                                        width: '48px', height: '48px',
+                                        width: '40px', height: '40px',
                                         background: `${tierColor}22`,
-                                        borderRadius: '8px',
+                                        borderRadius: '6px',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         border: `1px solid ${tierColor}66`,
                                         overflow: 'hidden',
-                                        padding: '5px'
+                                        padding: '4px',
+                                        flexShrink: 0
                                     }}>
                                         {resolvedItem?.icon ? (
                                             <img src={resolvedItem.icon} alt={item.id} style={{ width: resolvedItem.scale || '100%', height: resolvedItem.scale || '100%', objectFit: 'contain' }} />
@@ -171,16 +172,21 @@ const LootModal = ({ isOpen, onClose, rewards }) => {
                                         )}
                                     </div>
                                     <div style={{ textAlign: 'left', flex: 1, overflow: 'hidden' }}>
-                                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                            {item.qty}x <span style={{ color: resolvedItem?.rarityColor || tierColor }}>{resolvedItem ? ((resolvedItem.tier && !item.id.includes('RUNE_SHARD')) ? `T${resolvedItem.tier} ${resolvedItem.name}` : resolvedItem.name) : formatItemId(item.id)}</span>
+                                        <div style={{ fontSize: '0.9rem', lineHeight: '1.2', fontWeight: 'bold', color: 'var(--text-main)', display: 'inline-block', width: '100%' }}>
+                                            <span style={{ marginRight: '6px', color: 'var(--text-dim)' }}>{item.qty}x</span>
+                                            <span style={{ color: resolvedItem?.rarityColor || tierColor }}>{resolvedItem ? ((resolvedItem.tier && !item.id.includes('RUNE_SHARD')) ? `T${resolvedItem.tier} ${resolvedItem.name}` : resolvedItem.name) : formatItemId(item.id)}</span>
                                             {item.id.includes('::') && (
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'var(--accent)', opacity: 0.8, fontSize: '0.6rem', border: '1px solid var(--accent)', padding: '1px 4px', borderRadius: '4px' }}>
+                                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: 'var(--accent)', opacity: 0.8, fontSize: '0.6rem', border: '1px solid var(--accent)', padding: '1px 4px', borderRadius: '4px', marginLeft: '6px', verticalAlign: 'middle' }}>
                                                     <Hammer size={10} />
                                                     {item.id.split('::')[1]}
-                                                </div>
+                                                </span>
                                             )}
                                         </div>
-                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>{resolvedItem?.type || 'Resource'}</div>
+                                        {resolvedItem?.type !== 'ENHANCEMENT_STONE' && (
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '2px' }}>
+                                                {resolvedItem?.type ? resolvedItem.type.replace(/_/g, ' ') : 'Resource'}
+                                            </div>
+                                        )}
                                     </div>
                                 </motion.div>
                             );

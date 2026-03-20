@@ -92,6 +92,7 @@ process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 
 const PORT = process.env.PORT || 3000;
+// Force restart for WB fix: RESTART-SYNC-2254
 httpServer.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT} | Version: ${SERVER_VERSION}`);
 });

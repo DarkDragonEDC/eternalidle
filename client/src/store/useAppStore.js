@@ -282,16 +282,14 @@ export const useAppStore = create((set, get) => ({
         const wasInFight = !!state.gameState?.state?.activeWorldBossFight;
         
         if (hasActiveFight && (!wasInFight || state.gameState === null)) {
-            const fight = newGameState.state.activeWorldBossFight;
-            const elapsed = Date.now() - (fight.startedAt || 0);
-            if (elapsed < 60000) {
-                isWorldBossFight = true;
-                activeWorldBossType = fight.type || 'window';
-            }
+            // If the fight is in the state, we should be in the fight UI
+            isWorldBossFight = true;
+            activeWorldBossType = newGameState.state.activeWorldBossFight.type || 'window';
         }
 
         // If fight finished (persisted state gone in a full status update), sync UI flag
-        if (!status._lightweight && !hasActiveFight) {
+        // BUT don't auto-close if we are currently showing the FINISHED summary screen
+        if (!status._lightweight && !hasActiveFight && wbUpdateStatus !== 'FINISHED') {
             isWorldBossFight = false;
         }
 
