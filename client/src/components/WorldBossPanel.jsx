@@ -338,13 +338,14 @@ const BossCard = ({ data, type, onChallenge, isMobile, setShowInfo, rankingType,
                                                             <div
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
-                                                                    const chest = calculatePotentialChest(rank.damage);
+                                                                    const isWindow = type === 'window';
+                                                                    const chest = isWindow ? { label: 'Enhancement Chest', id: 'ENHANCEMENT_CHEST' } : calculatePotentialChest(rank.damage);
                                                                     if (onShowItem) onShowItem(resolveItem(chest.id));
                                                                 }}
                                                                 className="chest-label"
-                                                                style={{ fontSize: '0.65rem', color: '#ae00ff', cursor: 'pointer', marginTop: '2px', opacity: 0.9, letterSpacing: '0.5px' }}
+                                                                style={{ fontSize: '0.65rem', color: type === 'window' ? '#d4af37' : '#ae00ff', cursor: 'pointer', marginTop: '2px', opacity: 0.9, letterSpacing: '0.5px' }}
                                                             >
-                                                                {calculatePotentialChest(rank.damage).label}
+                                                                {type === 'window' ? 'Enhancement Chest' : calculatePotentialChest(rank.damage).label}
                                                             </div>
                                                         </div>
                                                         <div className="ranking-damage-container">

@@ -248,6 +248,15 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                             );
                                         }
 
+                                        if (item.id === 'ENHANCEMENT_CHEST') {
+                                            return (
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#d4af37' }}>Random Enhancement Stone</span>
+                                                    <span style={{ fontSize: '0.7rem', fontWeight: '900', color: '#4ade80' }}>100%</span>
+                                                </div>
+                                            );
+                                        }
+
                                         const isWorldBoss = item.id.includes('WORLDBOSS');
                                         const shardName = isWorldBoss ? 'Battle Rune Shard' : 'Rune Shard';
                                         if (isWorldBoss) {
@@ -259,7 +268,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                                 </div>
                                             );
                                         }
-                                        const [min, max] = getChestRuneShardRange(item.tier, item.rarity);
+                                        const [min, max] = getChestRuneShardRange(item.tier || 1, item.rarity);
                                         return (
                                             <>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -270,7 +279,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
                                             </>
                                         );
                                     })()}
-                                    {!item.id.includes('WORLDBOSS') && item.id !== 'NOOB_CHEST' && CHEST_DROP_TABLE.RARITIES[item.rarity]?.crestChance > 0 && (
+                                    {item.id !== 'ENHANCEMENT_CHEST' && !item.id.includes('WORLDBOSS') && item.id !== 'NOOB_CHEST' && CHEST_DROP_TABLE.RARITIES[item.rarity]?.crestChance > 0 && (
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '4px', borderTop: '1px solid var(--border)' }}>
                                             <span style={{ fontSize: '0.75rem', fontWeight: '800', color: tierColor }}>Boss Crest (T{item.tier})</span>
                                             <span style={{ fontSize: '0.7rem', fontWeight: '900', color: tierColor }}>{(CHEST_DROP_TABLE.RARITIES[item.rarity].crestChance * 100).toFixed(0)}%</span>

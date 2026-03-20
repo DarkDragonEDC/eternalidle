@@ -6,6 +6,10 @@ export const CHEST_DROP_TABLE = {
         RARE: { baseQty: 8, crestChance: 0.08, runeShardRange: [5, 6] },
         EPIC: { baseQty: 12, crestChance: 0.13, runeShardRange: [7, 8] },
         LEGENDARY: { baseQty: 20, crestChance: 0.20, runeShardRange: [9, 10] }
+    },
+    ENHANCEMENT_CHEST: {
+        stones: 1,
+        stoneChance: 1.0
     }
 };
 
