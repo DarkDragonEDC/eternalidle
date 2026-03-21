@@ -144,6 +144,11 @@ export class CatchupManager {
                 finalReport.totalTime = Math.min(finalReport.totalTime, elapsedSeconds);
                 const processedMs = Math.floor(finalReport.totalTime * 1000);
                 const nextSavedTimestamp = lastSaved + processedMs;
+                
+                if (isNaN(nextSavedTimestamp)) {
+                    console.error("DEBUG: lastSaved=" + lastSaved + " processedMs=" + processedMs + " finalReportTotalTime=" + finalReport.totalTime + " elapsedSeconds=" + elapsedSeconds);
+                }
+                
                 data.last_saved = new Date(nextSavedTimestamp).toISOString();
 
                 if (data.current_activity && typeof data.current_activity === 'object' && data.activity_started_at) {
@@ -321,6 +326,9 @@ export class CatchupManager {
                     const virtualEndTime = new Date(virtualStartTimeMs + activityConsumedMs);
                     
                     await this.gm.activityManager.stopActivity(char.user_id, char.id, true, virtualEndTime);
+                    
+                    // Set a flag so we don't incorrectly advance next_action_at on the newly restarted activity
+                    char._justRestartedActivity = true;
                     break;
                 }
             } else {
@@ -330,11 +338,13 @@ export class CatchupManager {
         }
 
         if (processed > 0) {
-            // If activity is still active, update next_action_at
-            if (char.current_activity) {
+            // Only advance next_action_at if the activity hasn't just been freshly Auto-Restarted.
+            // If it was auto-restarted, stopActivity -> startActivity already initialized it relative to now.
+            if (char.current_activity && !char._justRestartedActivity) {
                 const timeProcessedMs = processed * timePerAction * 1000;
                 char.current_activity.next_action_at = (char.current_activity.next_action_at || Date.now()) + timeProcessedMs;
             }
+            delete char._justRestartedActivity;
 
             return { processed, leveledUp, itemsGained, xpGained, totalTime: processed * timePerAction, stopReason, duplicationCount, autoRefineCount };
         }
@@ -491,6 +501,15 @@ export class CatchupManager {
                     virtualTime += 100; // Safety advancement
                 }
             }
+        }
+
+        if (char.state.combat && !died) {
+            // Sync timers to real Date.now() to prevent the live ticker from rapid-firing
+            // missed rounds (bursts) resulting from hitting the idle limit, which leaves timers behind.
+            const syncTime = Date.now();
+            char.state.combat.next_attack_at = syncTime; 
+            char.state.combat.player_next_attack_at = syncTime + atkSpeed;
+            char.state.combat.mob_next_attack_at = syncTime + (char.state.combat.mobAtkSpeed || 3000);
         }
 
         const totalProcessedTime = virtualTime - startTime;
