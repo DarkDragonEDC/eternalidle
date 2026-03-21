@@ -1456,7 +1456,7 @@ export class GameManager {
         if (['LEVEL', 'TOTAL_XP', 'ITEM_POWER'].includes(dbType) || mode === 'IRONMAN') {
             let query = this.supabase
                 .from('characters')
-                .select('id, name, state, skills, equipment, info, ranking_total_level, ranking_total_xp, ranking_item_power, guild_members(guilds(tag))')
+                .select('id, name, state, skills, equipment, info, ranking_total_level, ranking_total_xp, ranking_item_power, ranking_altar_donated, guild_members(guilds(tag))')
                 .eq('is_admin', false);
 
             if (mode === 'IRONMAN') {
@@ -1471,6 +1471,8 @@ export class GameManager {
                 query = query.order('ranking_total_xp', { ascending: false, nullsFirst: false });
             } else if (dbType === 'ITEM_POWER') {
                 query = query.order('ranking_item_power', { ascending: false, nullsFirst: false });
+            } else if (dbType === 'ALTAR_DONATION') {
+                query = query.order('ranking_altar_donated', { ascending: false, nullsFirst: false });
             } else {
                 query = query.order(`skills->${dbType}->totalXp`, { ascending: false, nullsFirst: false });
             }
@@ -1495,7 +1497,7 @@ export class GameManager {
                 const ids = lbData.map(entry => entry.character_id);
                 const { data: chars, error: charError } = await this.supabase
                     .from('characters')
-                    .select('id, name, state, skills, equipment, info, ranking_total_level, ranking_total_xp, ranking_item_power, guild_members(guilds(tag))')
+                    .select('id, name, state, skills, equipment, info, ranking_total_level, ranking_total_xp, ranking_item_power, ranking_altar_donated, guild_members(guilds(tag))')
                     .eq('is_admin', false)
                     .in('id', ids);
 
@@ -1553,6 +1555,7 @@ export class GameManager {
                 ranking_total_level: char.ranking_total_level,
                 ranking_total_xp: char.ranking_total_xp,
                 ranking_item_power: char.ranking_item_power,
+                ranking_altar_donated: char.ranking_altar_donated,
                 info: {
                     membership: char.info?.membership,
                     active_title: char.info?.active_title

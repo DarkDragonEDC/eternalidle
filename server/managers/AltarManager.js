@@ -104,6 +104,11 @@ export class AltarManager {
             playerState.donated += amount;
             this.globalAltar.totalSilver += amount;
 
+            // Tracking all-time donation for ranking
+            char.ranking_altar_donated = (Number(char.ranking_altar_donated) || 0) + amount;
+            if (!char.state.altar_total_donated) char.state.altar_total_donated = 0;
+            char.state.altar_total_donated += amount;
+
             this.gm.markDirty(char.id);
             this._saveAltar();
 

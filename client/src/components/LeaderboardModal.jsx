@@ -16,6 +16,7 @@ const CATEGORIES = [
             { id: 'TOTAL_XP', name: 'Total XP', icon: Zap }
         ]
     },
+    { id: 'ALTAR', name: 'Altar', icon: Flame, color: '#f59e0b', subTabs: [{ id: 'ALTAR_DONATION', name: 'Donations', icon: Trophy }] },
     {
         id: 'PROFICIENCY', name: 'Proficiency', icon: Shield, color: '#d8b4fe',
         subTabs: [
@@ -301,6 +302,8 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
                                         } else if (activeSubTab === 'ITEM_POWER') {
                                             score = char.ranking_total_level || 0; // Temp use level as proxy if IP not sent, but server should send it
                                             if ('ranking_item_power' in char) score = char.ranking_item_power;
+                                        } else if (activeSubTab === 'ALTAR_DONATION') {
+                                            score = char.ranking_altar_donated || 0;
                                         } else {
                                             score = char.state?.skills?.[activeSubTab]?.level || 1;
                                         }
@@ -349,7 +352,7 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
                                                         {formatNumber(score)}
                                                     </div>
                                                     <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>
-                                                        {activeSubTab === 'TOTAL_XP' ? 'XP' : activeSubTab === 'ITEM_POWER' ? 'IP' : 'LEVEL'}
+                                                        {activeSubTab === 'TOTAL_XP' ? 'XP' : activeSubTab === 'ITEM_POWER' ? 'IP' : activeSubTab === 'ALTAR_DONATION' ? 'DONATION' : 'LEVEL'}
                                                     </div>
                                                 </div>
                                             </motion.div>

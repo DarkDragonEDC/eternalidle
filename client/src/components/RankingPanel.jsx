@@ -7,7 +7,7 @@ import { GUILD_XP_TABLE } from '@shared/guilds.js';
 import { formatNumber, formatSilver } from '@utils/format';
 import { motion, AnimatePresence } from 'framer-motion';
 import { COUNTRIES } from '@shared/countries';
-import { Trophy, Users, Star, Coins, Circle, ChevronDown, Sword, Shield, Swords, Sparkles, Settings, Plus, Info, Check, X, Tag, User, Zap, Landmark, ClipboardList, Pickaxe, FlaskConical, Hammer, Lock, Dices, Library } from 'lucide-react';
+import { Trophy, Users, Star, Coins, Circle, ChevronDown, Sword, Shield, Swords, Sparkles, Settings, Plus, Info, Check, X, Tag, User, Zap, Landmark, ClipboardList, Pickaxe, FlaskConical, Hammer, Lock, Dices, Library, Flame } from 'lucide-react';
 
 const CountryFlag = ({ code, name, size = '1.2rem', style = {} }) => {
     if (!code) return <span style={{ fontSize: size, ...style }}>🌐</span>;
@@ -34,6 +34,12 @@ const CATEGORIES = {
         options: [
             { key: 'LEVEL', label: 'Total Level' },
             { key: 'TOTAL_XP', label: 'Total XP' }
+        ]
+    },
+    ALTAR: {
+        label: 'ALTAR',
+        options: [
+            { key: 'ALTAR_DONATION', label: 'Donations' }
         ]
     },
     PROFICIENCIES: {
@@ -235,6 +241,10 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
 
                 subValue = topItem ? formatItemId(topItem) : '';
                 label = 'ITEM POWER';
+            } else if (subCategory === 'ALTAR_DONATION') {
+                value = char.ranking_altar_donated || 0;
+                subValue = 0;
+                label = 'DONATED SILVER';
             } else {
                 // Generic Skill Handler
                 const skill = (state.skills || {})[subCategory] || { level: 1, xp: 0 };
@@ -361,6 +371,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                         {key === 'COMBAT' && <Star size={14} />}
                                         {key === 'DUNGEON' && <Circle size={14} />}
                                         {key === 'PROFICIENCIES' && <Sword size={14} />}
+                                        {key === 'ALTAR' && <Flame size={14} />}
                                         {CATEGORIES[key].label}
                                     </button>
                                 ))}
@@ -542,7 +553,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                             <div style={{ fontSize: '1.1rem', fontWeight: '900', color: index === 0 ? 'var(--accent)' : 'var(--text-main)', lineHeight: 1 }}>
                                                 {formatNumber(char.value)}
                                             </div>
-                                            {rankMode !== 'GUILDS' && subCategory !== 'ITEM_POWER' ? (
+                                            {rankMode !== 'GUILDS' && !['ITEM_POWER', 'ALTAR_DONATION'].includes(subCategory) ? (
                                                 <div style={{ fontSize: '0.65rem', color: index === 0 ? 'var(--accent)' : 'var(--text-dim)', fontWeight: 'bold', opacity: 0.8, marginTop: '2px' }}>
                                                     {subCategory === 'TOTAL_XP' ? `LVL ${formatNumber(char.subValue)}` : 
                                                      `${formatNumber(char.subValue)} XP`}
@@ -653,12 +664,13 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                                             });
                                                             val = Math.floor(totalIP / 7);
                                                         }
+                                                        else if (subCategory === 'ALTAR_DONATION') val = char.ranking_altar_donated || 0;
                                                         else val = (char.state.skills?.[subCategory]?.level || 1);
 
                                                         return formatNumber(val);
                                                     })()}
                                                 </div>
-                                                {(rankMode === 'GUILDS' || subCategory !== 'ITEM_POWER') && (
+                                                {rankMode !== 'GUILDS' && !['ITEM_POWER', 'ALTAR_DONATION'].includes(subCategory) && (
                                                     <div style={{ fontSize: '0.65rem', color: 'var(--accent)', fontWeight: 'bold', opacity: 0.8, marginTop: '2px' }}>
                                                         {(() => {
                                                             if (rankMode === 'GUILDS') return `${formatNumber(userRankData.guild?.xp || 0)} XP`;

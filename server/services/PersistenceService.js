@@ -165,6 +165,7 @@ export class PersistenceService {
                 ranking_total_level,
                 ranking_total_xp: Math.floor(ranking_total_xp),
                 ranking_item_power: Math.floor(ranking_item_power),
+                ranking_altar_donated: Number(char.ranking_altar_donated) || 0,
                 current_activity: char.current_activity,
                 activity_started_at: char.activity_started_at,
                 last_saved: saveTime
@@ -176,7 +177,8 @@ export class PersistenceService {
             const leaderboardEntries = [
                 { character_id: charId, ranking_type: 'LEVEL', value: ranking_total_level, character_name: char.name },
                 { character_id: charId, ranking_type: 'TOTAL_XP', value: Math.floor(ranking_total_xp), character_name: char.name },
-                { character_id: charId, ranking_type: 'ITEM_POWER', value: Math.floor(ranking_item_power), character_name: char.name }
+                { character_id: charId, ranking_type: 'ITEM_POWER', value: Math.floor(ranking_item_power), character_name: char.name },
+                { character_id: charId, ranking_type: 'ALTAR_DONATION', value: Number(char.ranking_altar_donated) || 0, character_name: char.name }
             ];
 
             for (const [skillKey, skillData] of Object.entries(skillsToSave)) {
