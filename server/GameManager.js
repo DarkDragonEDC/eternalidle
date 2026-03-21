@@ -1453,7 +1453,7 @@ export class GameManager {
         // Use the type directly as dbType, the frontend keys now match the DB ranking_type
         const dbType = type;
 
-        if (['LEVEL', 'TOTAL_XP', 'ITEM_POWER'].includes(dbType) || mode === 'IRONMAN') {
+        if (['LEVEL', 'TOTAL_XP', 'ITEM_POWER', 'ALTAR_DONATION'].includes(dbType) || mode === 'IRONMAN') {
             let query = this.supabase
                 .from('characters')
                 .select('id, name, state, skills, equipment, info, ranking_total_level, ranking_total_xp, ranking_item_power, ranking_altar_donated, guild_members(guilds(tag))')

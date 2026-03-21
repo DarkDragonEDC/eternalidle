@@ -58,7 +58,10 @@ export class AltarManager {
         const playerState = this._getPlayerState(char);
         return {
             global: this.globalAltar,
-            player: playerState,
+            player: {
+                ...playerState,
+                totalDonated: Number(char.ranking_altar_donated) || 0
+            },
             tiers: this.TIERS,
             minDonations: this.MIN_DONATIONS
         };
@@ -100,17 +103,41 @@ export class AltarManager {
                 throw new Error("Not enough silver!");
             }
 
-            char.state.silver -= amount;
-            playerState.donated += amount;
-            this.globalAltar.totalSilver += amount;
+            // ATOMIC UPDATE: Use Postgres function to increment both global and player totals safely
+            const today = new Date().toISOString().split('T')[0];
+            const { data: rpcData, error: rpcError } = await this.supabase.rpc('increment_altar_v3', {
+                char_id: charId,
+                amount: amount,
+                target_date_val: today
+            });
 
-            // Tracking all-time donation for ranking
-            char.ranking_altar_donated = (Number(char.ranking_altar_donated) || 0) + amount;
+            if (rpcError) {
+                console.error('[AltarManager] RPC increment_altar error:', rpcError);
+                throw new Error("Failed to process donation in database.");
+            }
+
+            // Sync memory with Atomic DB result
+            const newGlobalTotal = Number(rpcData.new_global_total);
+            const newPlayerRankingTotal = Number(rpcData.new_player_total);
+
+            this.globalAltar.totalSilver = newGlobalTotal;
+            this.globalAltar.date = today;
+            
+            // Deduct silver from character
+            char.state.silver -= amount;
+            
+            // Update daily donation in playerState (retrieved from getPlayerState)
+            playerState.donated += amount;
+
+            // Sync all-time ranking value
+            char.ranking_altar_donated = newPlayerRankingTotal;
+            
+            // Still update daily tracking in char.state (historical redundancy)
             if (!char.state.altar_total_donated) char.state.altar_total_donated = 0;
-            char.state.altar_total_donated += amount;
+            char.state.altar_total_donated = newPlayerRankingTotal; // Keep in sync
 
             this.gm.markDirty(char.id);
-            this._saveAltar();
+            // We don't call this._saveAltar() here anymore as the RPC handled the global save atomically
 
             // Check if we reached a new tier and notify
             this._checkTierNotification();
@@ -141,8 +168,8 @@ export class AltarManager {
                 throw new Error(`Global goal of ${requiredGoal.toLocaleString()} not reached yet for Tier ${tierIndex}!`);
             }
 
-            if (playerState.donated < requiredDonation) {
-                throw new Error(`You must donate at least ${requiredDonation.toLocaleString()} silver to activate Tier ${tierIndex} buff.`);
+            if ((Number(char.ranking_altar_donated) || 0) < requiredDonation) {
+                throw new Error(`You must have donated at least ${requiredDonation.toLocaleString()} silver (all-time) to activate Tier ${tierIndex} buff.`);
             }
 
             const tierKey = `tier${tierIndex}EndTime`;
