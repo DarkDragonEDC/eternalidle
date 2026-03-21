@@ -11,7 +11,7 @@ import { useWindowListeners } from './hooks/useWindowListeners';
 import { useAppHandlers } from './hooks/useAppHandlers';
 
 // Versioning
-const CLIENT_VERSION = '1.6.8';
+const CLIENT_VERSION = '1.6.9';
 
 // Components
 import Auth from './components/Auth';

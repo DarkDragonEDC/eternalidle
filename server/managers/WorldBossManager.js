@@ -34,9 +34,18 @@ export class WorldBossManager {
     }
 
     async initialize() {
-        // Kick off initial state fetch but don't block the intervals
-        this.checkBossCycle().catch(e => debugLog(`Error in initial cycle check: ${e.message}`));
-        this.refreshAllRankings().catch(e => debugLog(`Error in initial ranking refresh: ${e.message}`));
+        // CRITICAL: Await initial data load in correct order.
+        // 1. checkBossCycle() MUST complete first so windowSession is set.
+        // 2. refreshAllRankings() MUST run after so it has the session context.
+        // This guarantees rankings are populated before any client request.
+        try {
+            await this.checkBossCycle();
+            await this.refreshAllRankings();
+            debugLog('WorldBossManager initialized with data loaded.');
+        } catch (e) {
+            debugLog(`Error in initial data load: ${e.message}`);
+            console.error('[WORLD_BOSS] Error in initial data load:', e);
+        }
 
         // Refresh DB rankings every 5 minutes
         setInterval(() => this.refreshAllRankings(), 300000);
@@ -46,7 +55,6 @@ export class WorldBossManager {
 
         // Cleanup orphaned fights (every 5 seconds)
         setInterval(() => this.cleanupOrphanedFights(), 5000);
-        debugLog('WorldBossManager initialized (non-blocking)');
     }
 
     async refreshAllRankings() {

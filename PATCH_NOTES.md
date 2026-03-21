@@ -1,3 +1,18 @@
+# 📄 Patch Notes — v1.6.9 — Correções de Estabilidade
+
+## 🛠️ Correções
+
+### ⛪ Altar de Oferendas
+- **Correção crítica:** O progresso global do Altar era zerado indevidamente quando o servidor reiniciava ou quando havia diferença de fuso horário. O total acumulado podia ser sobrescrito por zero no banco de dados.
+- **Como foi corrigido:** O reset diário agora só limpa a memória interna — o banco de dados é atualizado apenas atomicamente pela função SQL a cada doação, garantindo que o total nunca seja perdido.
+
+### ⚔️ World Boss
+- **Correção:** A contagem de participantes mostrava **0** e o ranking pessoal não aparecia após reinício do servidor.
+- **Causa:** O carregamento inicial dos rankings e da sessão do boss era feito de forma assíncrona sem aguardar conclusão, causando dados vazios para jogadores que conectavam logo após o boot.
+- **Como foi corrigido:** O servidor agora aguarda o carregamento completo da sessão e rankings antes de aceitar conexões, garantindo dados corretos desde o primeiro acesso.
+
+---
+
 # 📄 Patch Notes — v1.6.8 — Altar of Offerings
 
 ## 🔥 NEW FEATURE: Altar of Offerings

@@ -45,11 +45,14 @@ export class AltarManager {
     checkDailyReset() {
         const today = new Date().toISOString().split('T')[0];
         if (this.globalAltar.date !== today) {
-            console.log(`[AltarManager] New day detected (${today}), resetting altar progress.`);
+            console.log(`[AltarManager] New day detected (${today}), resetting in-memory altar progress.`);
             this.globalAltar.date = today;
             this.globalAltar.totalSilver = 0;
             this.globalAltar.lastNotifiedTier = 0;
-            this._saveAltar();
+            // NOTE: Do NOT call _saveAltar() here.
+            // The DB reset is handled atomically by increment_altar_v3 on the next donation.
+            // Saving here would overwrite the real accumulated total with 0 if the server
+            // restarts mid-day or if there's a timezone mismatch.
         }
     }
 
