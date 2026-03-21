@@ -58,7 +58,7 @@ const EnhanceItemModal = ({ item: initialItem, inventory, character, socket, onC
     const hasStone = stoneQty >= requiredStones;
 
     // Cost Logic
-    const silverCost = tier * 1000 * (currentEnhancement + 1);
+    const silverCost = tier * 3000 * (currentEnhancement + 1);
     const hasSilver = (character?.state?.silver || 0) >= silverCost;
 
     const canEnhance = !isMaxed && hasStone && hasSilver && !isEnhancing;

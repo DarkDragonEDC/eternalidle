@@ -22,6 +22,7 @@ import TradePanel from './TradePanel';
 import { GuestRestrictionModal } from './AppOverlays';
 import GuildXPInfoModal from './guild/GuildXPInfoModal';
 import ActionQueueModal from './ActionQueueModal';
+import { AltarModal } from './AltarModal';
 
 const AppModals = ({ 
     displayedGameState, 
@@ -239,6 +240,15 @@ const AppModals = ({
             <AnimatePresence>
                 {modals?.guest && (
                     <GuestRestrictionModal onClose={() => setModal('guest', false)} />
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {modals?.altar && (
+                    <AltarModal
+                        isOpen={modals?.altar}
+                        onClose={() => setModal('altar', false)}
+                    />
                 )}
             </AnimatePresence>
 

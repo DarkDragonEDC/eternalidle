@@ -1,7 +1,7 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { 
-    User, ChevronDown, Coins, Circle, Settings, Users, LogOut 
+    User, ChevronDown, Coins, Circle, Settings, Users, LogOut, Flame 
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { formatNumber, formatSilver } from '../utils/format';
@@ -165,6 +165,21 @@ export const GlobalHeader = ({
                     onClickTrigger={() => setModal('notifications', !modals.notifications)}
                     isMobile={isMobile}
                 />
+
+                <div style={{ position: 'relative' }}>
+                    <button
+                        title="Altar of Offerings"
+                        onClick={() => setModal('altar', !modals?.altar)}
+                        style={{
+                            color: 'var(--accent)', fontSize: '0.65rem', fontWeight: '900',
+                            padding: isMobile ? '6px' : '8px', background: 'var(--slot-bg)', borderRadius: '6px',
+                            border: '1px solid rgba(251, 146, 60, 0.4)', display: 'flex', alignItems: 'center',
+                            justifyContent: 'center', opacity: 0.9, gap: '6px', cursor: 'pointer', transition: '0.2s'
+                        }}
+                    >
+                        <Flame size={16} color="#fb923c" />
+                    </button>
+                </div>
 
                 <div style={{ position: 'relative' }}>
                     <button

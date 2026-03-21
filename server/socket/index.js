@@ -11,6 +11,7 @@ import { registerOrbStoreHandlers } from "./handlers/orbStoreHandler.js";
 import { registerTradeHandlers } from "./handlers/tradeHandler.js";
 import { registerQuestHandlers } from "./handlers/questHandler.js";
 import { registerMiscHandlers } from "./handlers/miscHandler.js";
+import { registerAltarHandlers } from "./handlers/altarHandler.js";
 
 export const initSocket = (io, gameManager, serverVersion) => {
   io.use(async (socket, next) => {
@@ -98,5 +99,6 @@ export const initSocket = (io, gameManager, serverVersion) => {
     registerTradeHandlers(socket, gameManager, io);
     registerQuestHandlers(socket, gameManager, io);
     registerMiscHandlers(socket, gameManager, io);
+    registerAltarHandlers(socket, gameManager, io);
   });
 };

@@ -287,7 +287,7 @@ const BuffsDrawer = ({ gameState, isMobile }) => {
                                                                     const msValue = (isPremium && key === 'GLOBAL_XP') ? 10 : 0;
                                                                     const displayBase = baseBonus - msValue;
                                                                     if (displayBase > 0.1) {
-                                                                        return <span style={{ whiteSpace: 'nowrap' }}>BASE: <span style={{ color: 'var(--accent)' }}>+{displayBase.toFixed(1)}%</span></span>;
+                                                                        return <span style={{ whiteSpace: 'nowrap' }}>ALTAR: <span style={{ color: 'var(--accent)' }}>+{displayBase.toFixed(1)}%</span></span>;
                                                                     }
                                                                     return null;
                                                                 })()}

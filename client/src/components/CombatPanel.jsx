@@ -1212,7 +1212,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
                                                 border: '1px solid rgba(212, 175, 55, 0.2)',
                                                 fontWeight: '900'
                                             }}>
-                                                <Coins size={10} fill="#d4af37" /> 80% {mob.silver[0] === mob.silver[1] ? formatNumber(mob.silver[0]) : `${formatNumber(mob.silver[0])}-${formatNumber(mob.silver[1])}`} SILVER
+                                                <Coins size={10} fill="#d4af37" /> 80% {mob.silver[0] === mob.silver[1] ? formatNumber(Math.floor(mob.silver[0] * (1 + silverBonus / 100))) : `${formatNumber(Math.floor(mob.silver[0] * (1 + silverBonus / 100)))}-${formatNumber(Math.floor(mob.silver[1] * (1 + silverBonus / 100)))}`} SILVER
                                             </div>
                                             {Object.entries(mob.loot).map(([id, lootInfo]) => {
                                                 let chance = 0;
@@ -1242,7 +1242,7 @@ const CombatPanel = ({ socket, gameState, isMobile, onShowHistory, serverTimeOff
                                                         alignItems: 'center',
                                                         gap: '4px'
                                                     }}>
-                                                        <Target size={10} /> {(chance * 100).toFixed(chance < 0.01 ? 1 : 0)}% {qtyText}T{activeTier} {formatItemId(id.replace(/T\d+_/, ''))}
+                                                        <Target size={10} /> {((chance * (1 + (stats.globals?.dropRate || 0) / 100)) * 100).toFixed(chance < 0.01 ? 1 : 1)}% {qtyText}T{activeTier} {formatItemId(id.replace(/T\d+_/, ''))}
                                                     </div>
                                                 );
                                             })}

@@ -22,6 +22,7 @@ import { MigrationManager } from './managers/MigrationManager.js';
 import { UserManager } from './managers/UserManager.js';
 import { StatsManager } from './managers/StatsManager.js';
 import { CatchupManager } from './managers/CatchupManager.js';
+import { AltarManager } from './managers/AltarManager.js';
 import { PersistenceService } from './services/PersistenceService.js';
 import { SocketService } from './services/SocketService.js';
 import { NotificationService } from './services/NotificationService.js';
@@ -57,6 +58,7 @@ export class GameManager {
         this.userManager = new UserManager(this);
         this.statsManager = new StatsManager(this);
         this.catchupManager = new CatchupManager(this);
+        this.altarManager = new AltarManager(this);
         this.banManager = new BanManager(this);
         this.quests = new QuestManager(this);
         this.notifications = new NotificationService(this);
@@ -1235,6 +1237,20 @@ export class GameManager {
 
         // Safety Cap & Type check
         let safeAmount = Number(amount) || 0;
+
+        // --- GLOBAL XP BUFF (ALTAR 3-TIERS ACCUMULATED) ---
+        let altarXpBonus = 0;
+        if (char.state.altar) {
+            const now = Date.now();
+            if (char.state.altar.tier1EndTime > now) altarXpBonus += 5;
+            if (char.state.altar.tier2EndTime > now) altarXpBonus += 10;
+            if (char.state.altar.tier3EndTime > now) altarXpBonus += 15;
+        }
+
+        if (altarXpBonus > 0) {
+            safeAmount = safeAmount * (1 + (altarXpBonus / 100)); // Up to 30% XP Buff
+        }
+
         if (safeAmount > 100_000_000) safeAmount = 100_000_000;
         if (safeAmount < 0) safeAmount = 0;
 

@@ -124,6 +124,11 @@ export const useAppStore = create((set, get) => ({
             set({ nameAvailability: result });
         });
 
+        // --- ALTAR LISTENER ---
+        newSocket.on('altar_update', (altarState) => {
+            set({ altarState: altarState.global ? altarState : { global: altarState } });
+        });
+
         // --- QUEST LISTENERS ---
         newSocket.on('quest_status_update', (data) => {
             set((state) => {
@@ -190,6 +195,8 @@ export const useAppStore = create((set, get) => ({
     },
 
     gameState: null,
+    altarState: null,
+    setAltarState: (altarState) => set({ altarState }),
     nameAvailability: null,
     setNameAvailability: (nameAvailability) => set({ nameAvailability }),
     checkNameAvailability: (name) => {
@@ -435,6 +442,7 @@ export const useAppStore = create((set, get) => ({
         guildProfile: false,
         trade: false,
         queue: false,
+        altar: false,
     },
     setModal: (modal, isOpen) => set((state) => ({
         modals: { ...state.modals, [modal]: isOpen }

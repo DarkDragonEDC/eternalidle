@@ -584,8 +584,8 @@ export class InventoryManager {
             throw new Error(`Item already at maximum enhancement (+${maxEnhancement}) for Tier ${tier}`);
         }
 
-        // Silver Cost: Tier * 1000 * (Current + 1)
-        const cost = tier * 1000 * (currentEnhancement + 1);
+        // Silver Cost: Tier * 3000 * (Current + 1)
+        const cost = tier * 3000 * (currentEnhancement + 1);
         const currentSilver = Number(char.state.silver) || 0;
         if (currentSilver < cost) throw new Error(`Insufficient Silver! Need ${cost.toLocaleString()} (Have: ${currentSilver.toLocaleString()})`);
 
@@ -1143,6 +1143,36 @@ export class InventoryManager {
             }
         }
         // -------------------------------
+
+        // --- ALTAR GLOBAL BUFF (EXTENDED 3-TIERS ACCUMULATED) ---
+        let altarRefDouble = 0;
+        let altarSilver = 0;
+        let altarDropQual = 0;
+        let altarXp = 0;
+
+        if (char.state.altar) {
+            const now = nowOverride || Date.now();
+            if (char.state.altar.tier1EndTime > now) {
+                altarRefDouble += 2.5; altarSilver += 5; altarDropQual += 2.5; altarXp += 5;
+            }
+            if (char.state.altar.tier2EndTime > now) {
+                altarRefDouble += 5; altarSilver += 10; altarDropQual += 5; altarXp += 10;
+            }
+            if (char.state.altar.tier3EndTime > now) {
+                altarRefDouble += 10; altarSilver += 15; altarDropQual += 10; altarXp += 15;
+            }
+        }
+
+        if (altarSilver > 0 || altarDropQual > 0 || altarRefDouble > 0 || altarXp > 0) {
+            globals.silverYield = (globals.silverYield || 0) + altarSilver;
+            globals.dropRate = (globals.dropRate || 0) + altarDropQual;
+            globals.qualityChance = (globals.qualityChance || 0) + altarDropQual; 
+            globals.xpYield = (globals.xpYield || 0) + altarXp;
+            
+            Object.keys(duplication).forEach(k => duplication[k] += altarRefDouble);
+            Object.keys(autoRefine).forEach(k => autoRefine[k] += altarRefDouble);
+        }
+        // ------------------------------------
 
         // Apply Global and Membership efficiency to all specific categories
         const keys = Object.keys(efficiency).filter(k => k !== 'GLOBAL');
