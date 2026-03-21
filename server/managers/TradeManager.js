@@ -315,9 +315,9 @@ export class TradeManager {
                     throw new Error(`${receiver.name} has insufficient items: ${m.amountNeeded}x ${m.name} (Has: ${m.amountOwned})`);
                 }
 
-                // TRANSFER SILVER & CHARGE TAX
-                sender.state.silver = (sender.state.silver || 0) - (sOffer.silver + sTax) + rOffer.silver;
-                receiver.state.silver = (receiver.state.silver || 0) - (rOffer.silver + rTax) + sOffer.silver;
+                // TRANSFER SILVER (Tax is already charged in acceptTrade)
+                sender.state.silver = (sender.state.silver || 0) - sOffer.silver + rOffer.silver;
+                receiver.state.silver = (receiver.state.silver || 0) - rOffer.silver + sOffer.silver;
 
                 // Update Global Taxometer
                 if (sTax + rTax > 0) {
@@ -333,8 +333,10 @@ export class TradeManager {
                 console.log(`[TradeManager:executeTrade] ${tradeId} - Delivering items to sender and receiver`);
                 const deliver = (targetChar, items, fromName) => {
                     items.forEach(it => {
-                        // Pass the full item object to preserve metadata like craftedBy
-                        const added = this.gameManager.inventoryManager.addItemToInventory(targetChar, it.id, it.amount, it);
+                        // Only pass metadata if it has unique properties (craftedBy, quality, stars, enhancement)
+                        // This prevents standard stackables (Plank, Food, Potions) from becoming objects unnecessarily.
+                        const hasMetadata = it.craftedBy || it.quality > 0 || it.stars > 0 || it.enhancement > 0;
+                        const added = this.gameManager.inventoryManager.addItemToInventory(targetChar, it.id, it.amount, hasMetadata ? it : null);
 
                         if (!added) {
                             // Inventory Full - Send to Claims
@@ -346,12 +348,19 @@ export class TradeManager {
                                 itemData: it, // Store full item data for claim retrieval
                                 timestamp: Date.now()
                             });
+
+                            // Notify the receiver about the claim
+                            this.gameManager.addNotification(targetChar, 'MARKET', `Inventory Full: ${it.amount}x ${it.name} sent to Market -> Claims.`);
                         }
                     });
                 };
 
                 deliver(sender, rOffer.items, receiver.name);
                 deliver(receiver, sOffer.items, sender.name);
+
+                // Add general success notifications
+                this.gameManager.addNotification(sender, 'TRADE', `Trade with ${receiver.name} completed.`);
+                this.gameManager.addNotification(receiver, 'TRADE', `Trade with ${sender.name} completed.`);
 
                 // Update Status
                 const { error: updateError } = await this.supabase

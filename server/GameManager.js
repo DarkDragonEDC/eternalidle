@@ -929,6 +929,7 @@ export class GameManager {
         }
         let leveledUp = null;
         let itemsGained = 0;
+        let xpGained = false; // New flag for UI sync
         let lastActivityResult = null;
         let combatResult = null;
         let activityFinished = false;
@@ -997,6 +998,7 @@ export class GameManager {
                                 activity.sessionItems[result.refinedItemGained] = (activity.sessionItems[result.refinedItemGained] || 0) + 1;
                             }
                             if (result.xpGained) {
+                                xpGained = true; // Mark for UI sync
                                 const stats = this.inventoryManager.calculateStats(char);
                                 const xpBonus = stats.globals?.xpYield || 0;
                                 const finalXp = Math.floor(result.xpGained * (1 + xpBonus / 100));
@@ -1089,6 +1091,8 @@ export class GameManager {
                 if (roundResult) {
                     combatRounds.push(roundResult);
                     combatResult = roundResult;
+                    if (roundResult.details?.lootGained?.length > 0) itemsGained++;
+                    if (roundResult.details?.xpGained > 0) xpGained = true;
                 }
 
                 // Advance the timer by exactly one interval
@@ -1149,6 +1153,10 @@ export class GameManager {
                     }
                     if (dungeonResult.leveledUp) {
                         leveledUp = dungeonResult.leveledUp;
+                        xpGained = true;
+                    }
+                    if (dungeonResult.dungeonUpdate?.rewards?.items?.length > 0) {
+                        itemsGained++;
                     }
                 }
             } catch (e) {
@@ -1166,6 +1174,9 @@ export class GameManager {
                 worldBossResult = await this.worldBossManager.processTick(char);
                 if (worldBossResult) {
                     stateChanged = true;
+                    if (worldBossResult.worldBossUpdate?.damage > 0) {
+                        xpGained = true; // For damage/ranking update visibility
+                    }
                 }
             } catch (e) {
                 console.error("World Boss Error:", e);
@@ -1187,7 +1198,7 @@ export class GameManager {
                 dungeonUpdate: dungeonResult?.dungeonUpdate,
                 worldBossUpdate: worldBossResult?.worldBossUpdate,
                 healingUpdate: foodUsed ? { amount: foodResult.amount, source: 'FOOD' } : null,
-                status: fullSync ? await this.getStatus(char.user_id, false, char.id) : await this.getLightweightStatus(char)
+                status: fullSync ? await this.getStatus(char.user_id, false, char.id) : await this.getLightweightStatus(char, itemsGained > 0, xpGained)
             };
             return returnObj;
         }
@@ -1198,12 +1209,12 @@ export class GameManager {
      * Returns a minimal version of the character status for frequent WebSocket updates.
      * This excludes heavy fields like inventory, bank, and full skill list unless requested.
      */
-    async getLightweightStatus(char) {
+    async getLightweightStatus(char, includeInventory = false, includeSkills = false) {
         if (!char) return null;
         
         const stats = this.inventoryManager.calculateStats(char);
         
-        return {
+        const status = {
             _lightweight: true,
             character_id: char.id,
             name: char.name,
@@ -1222,6 +1233,16 @@ export class GameManager {
             activity_started_at: char.activity_started_at,
             serverTime: Date.now()
         };
+
+        if (includeInventory) {
+            status.state.inventory = char.state.inventory;
+        }
+
+        if (includeSkills) {
+            status.state.skills = char.state.skills;
+        }
+
+        return status;
     }
 
     addXP(char, skillKey, amount) {

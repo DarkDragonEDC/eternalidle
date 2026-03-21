@@ -22,20 +22,20 @@ export const pruneState = (state) => {
     }
 
     // 2. Prune Inventory (for items stored as objects)
-    // Currently inventory is mostly ID: amount, but some runes might be objects if bugged
-    // or if we decide to store quality there. We'll stick to ID: amount for now but keep it safe.
     if (state.inventory) {
         for (const id in state.inventory) {
             if (typeof state.inventory[id] === 'object' && state.inventory[id] !== null) {
                 const item = state.inventory[id];
                 state.inventory[id] = {
+                    id: item.id,
+                    name: item.name,
                     amount: item.amount || 1,
                     quality: item.quality,
                     stars: item.stars,
                     rarity: item.rarity,
-                    enhancement: item.enhancement || 0
+                    enhancement: item.enhancement || 0,
+                    craftedBy: item.craftedBy
                 };
-
             }
         }
     }
@@ -46,13 +46,15 @@ export const pruneState = (state) => {
             if (typeof state.bank.items[id] === 'object' && state.bank.items[id] !== null) {
                 const item = state.bank.items[id];
                 state.bank.items[id] = {
+                    id: item.id,
+                    name: item.name,
                     amount: item.amount || 1,
                     quality: item.quality,
                     stars: item.stars,
                     rarity: item.rarity,
-                    enhancement: item.enhancement || 0
+                    enhancement: item.enhancement || 0,
+                    craftedBy: item.craftedBy
                 };
-
             }
         }
     }
