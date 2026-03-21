@@ -119,6 +119,15 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
             });
         });
 
+        // Add Enhancement Stones (Fixed IDs, not tiered)
+        const stoneClasses = ['WARRIOR', 'HUNTER', 'MAGE'];
+        const stoneSlots = ['WEAPON', 'OFFHAND', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE'];
+        stoneClasses.forEach(cls => {
+            stoneSlots.forEach(slot => {
+                list.push(`ENHANCEMENT_STONE_${cls}_${slot}`);
+            });
+        });
+
         return list.map(id => {
             const resolved = resolveItem(id);
             if (!resolved) return null;
