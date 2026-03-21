@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS public.global_altar (
     id VARCHAR(50) PRIMARY KEY DEFAULT 'global',
     target_date DATE NOT NULL,
     total_silver BIGINT NOT NULL DEFAULT 0,
+    last_notified_tier INT NOT NULL DEFAULT 0,
     last_updated TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

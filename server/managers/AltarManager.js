@@ -2,7 +2,7 @@ export class AltarManager {
     constructor(gameManager) {
         this.gm = gameManager;
         this.supabase = gameManager.supabase;
-        this.globalAltar = { date: null, totalSilver: 0 };
+        this.globalAltar = { date: null, totalSilver: 0, lastNotifiedTier: 0 };
         this.TIERS = [2_000_000, 5_000_000, 10_000_000];
         this.MIN_DONATIONS = [2000, 5000, 10000];
         this.init();
@@ -19,6 +19,7 @@ export class AltarManager {
             if (data) {
                 this.globalAltar.date = data.target_date;
                 this.globalAltar.totalSilver = Number(data.total_silver) || 0;
+                this.globalAltar.lastNotifiedTier = Number(data.last_notified_tier) || 0;
             }
         } catch (err) {
             console.error('[AltarManager] Error loading global altar:', err);
@@ -33,6 +34,7 @@ export class AltarManager {
                 id: 'global',
                 target_date: targetDate,
                 total_silver: this.globalAltar.totalSilver,
+                last_notified_tier: this.globalAltar.lastNotifiedTier,
                 last_updated: new Date().toISOString()
             });
         } catch (err) {
@@ -46,6 +48,7 @@ export class AltarManager {
             console.log(`[AltarManager] New day detected (${today}), resetting altar progress.`);
             this.globalAltar.date = today;
             this.globalAltar.totalSilver = 0;
+            this.globalAltar.lastNotifiedTier = 0;
             this._saveAltar();
         }
     }
@@ -104,6 +107,9 @@ export class AltarManager {
             this.gm.markDirty(char.id);
             this._saveAltar();
 
+            // Check if we reached a new tier and notify
+            this._checkTierNotification();
+
             // Broadcast update to all clients
             this.gm.broadcast('altar_update', this.globalAltar);
 
@@ -149,5 +155,24 @@ export class AltarManager {
 
             return this.getAltarState(char);
         });
+    }
+
+    _checkTierNotification() {
+        for (let i = this.TIERS.length - 1; i >= 0; i--) {
+            const tierNum = i + 1;
+            const threshold = this.TIERS[i];
+
+            if (this.globalAltar.totalSilver >= threshold && this.globalAltar.lastNotifiedTier < tierNum) {
+                console.log(`[AltarManager] New Global Tier Goal reached: Tier ${tierNum}! Broadcasting notifications.`);
+                this.globalAltar.lastNotifiedTier = tierNum;
+                this._saveAltar(); // Update notified tier in DB
+                
+                // Trigger push notification
+                if (this.gm.notificationService) {
+                    this.gm.notificationService.broadcastAltarTier(tierNum);
+                }
+                break; // Only notify once for the highest reached tier in this call
+            }
+        }
     }
 }

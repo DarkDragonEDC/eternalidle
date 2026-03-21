@@ -83,6 +83,36 @@ export const GlobalHeader = ({
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 6 : 20 }}>
+                <div style={{ position: 'relative' }}>
+                    <motion.button
+                        title="Altar of Offerings"
+                        onClick={() => setModal('altar', !modals?.altar)}
+                        animate={{ 
+                            boxShadow: [
+                                '0 0 5px rgba(251, 146, 60, 0.4)',
+                                '0 0 15px rgba(251, 146, 60, 0.6)',
+                                '0 0 5px rgba(251, 146, 60, 0.4)'
+                            ]
+                        }}
+                        transition={{ 
+                            duration: 2,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                        }}
+                        style={{
+                            color: 'var(--accent)', fontSize: '0.65rem', fontWeight: '900',
+                            padding: isMobile ? '6px' : '8px', 
+                            background: 'rgba(251, 146, 60, 0.1)', 
+                            borderRadius: '6px',
+                            border: '1px solid rgba(251, 146, 60, 0.6)', 
+                            display: 'flex', alignItems: 'center',
+                            justifyContent: 'center', 
+                            gap: '6px', cursor: 'pointer', transition: '0.2s'
+                        }}
+                    >
+                        <Flame size={16} color="#fb923c" fill="#fb923c" style={{ filter: 'drop-shadow(0 0 2px #fb1)' }} />
+                    </motion.button>
+                </div>
                 {/* Currency Display with Dropdown */}
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }} data-currency-dropdown>
                     <button
@@ -166,20 +196,6 @@ export const GlobalHeader = ({
                     isMobile={isMobile}
                 />
 
-                <div style={{ position: 'relative' }}>
-                    <button
-                        title="Altar of Offerings"
-                        onClick={() => setModal('altar', !modals?.altar)}
-                        style={{
-                            color: 'var(--accent)', fontSize: '0.65rem', fontWeight: '900',
-                            padding: isMobile ? '6px' : '8px', background: 'var(--slot-bg)', borderRadius: '6px',
-                            border: '1px solid rgba(251, 146, 60, 0.4)', display: 'flex', alignItems: 'center',
-                            justifyContent: 'center', opacity: 0.9, gap: '6px', cursor: 'pointer', transition: '0.2s'
-                        }}
-                    >
-                        <Flame size={16} color="#fb923c" />
-                    </button>
-                </div>
 
                 <div style={{ position: 'relative' }}>
                     <button

@@ -163,4 +163,29 @@ export class NotificationService {
             console.error('[PUSH] Fatal error in checkMidnightTriggers:', err);
         }
     }
+
+    async broadcastAltarTier(tier) {
+        console.log(`[PUSH] Broadcasting Altar Tier ${tier} notification...`);
+        try {
+            const { data: subs, error } = await this.supabase
+                .from('push_subscriptions')
+                .select('user_id, settings');
+
+            if (error || !subs || subs.length === 0) return;
+
+            // Get unique users who haven't disabled altar notifications
+            const usersToNotify = [...new Set(subs
+                .filter(s => s.settings?.push_altar_tier !== false)
+                .map(s => s.user_id))];
+
+            const title = `Altar Tier ${tier} Unlocked! 🌟`;
+            const body = `The community has reached the Goal for Tier ${tier}! Activate your buff now and enjoy the rewards. 🔥`;
+
+            for (const userId of usersToNotify) {
+                this.gm.pushManager.notifyUser(userId, 'push_altar_tier', title, body, '/altar');
+            }
+        } catch (err) {
+            console.error('[PUSH] Error in broadcastAltarTier:', err);
+        }
+    }
 }
