@@ -55,6 +55,9 @@ export class WorldBossManager {
 
         // Cleanup orphaned fights (every 5 seconds)
         setInterval(() => this.cleanupOrphanedFights(), 5000);
+
+        // Periodic boss cycle check and expiration (every 1 minute)
+        setInterval(() => this.checkBossCycle(), 60000);
     }
 
     async refreshAllRankings() {
@@ -215,6 +218,18 @@ export class WorldBossManager {
 
     async checkWindowBoss() {
         const now = new Date();
+        
+        // Expire old active sessions that were not defeated
+        try {
+            await this.gameManager.supabase
+                .from('world_boss_sessions')
+                .update({ status: 'EXPIRED' })
+                .eq('status', 'ACTIVE')
+                .lt('end_time', now.toISOString());
+        } catch (e) {
+            console.error('[WORLD_BOSS] Error expiring old sessions:', e);
+        }
+
         const utcHours = now.getUTCHours();
         const windowStartHours = Math.floor(utcHours / 8) * 8;
         
@@ -347,14 +362,14 @@ export class WorldBossManager {
 
         const pendingRewards = await this.getPendingRewards(charId);
 
-        // Fetch last 3 window boss sessions for history
+        // Fetch last 5 window boss sessions for history
         let windowHistory = [];
         try {
             const { data: historyData } = await this.gameManager.supabase
                 .from('world_boss_sessions')
                 .select('*')
                 .order('start_time', { ascending: false })
-                .limit(3);
+                .limit(5);
             
             if (historyData) {
                 windowHistory = historyData.map(s => {
