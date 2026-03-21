@@ -1852,8 +1852,12 @@ export class GameManager {
                 const [min, max] = getChestRuneShardRange(tier, itemData.id.includes('WORLDBOSS') ? 'COMMON' : itemData.rarity);
                 const shardId = itemData.id.includes('WORLDBOSS') ? `T1_BATTLE_RUNE_SHARD` : `T1_RUNE_SHARD`;
 
+                const stats = this.inventoryManager.calculateStats(char);
+                const dropBonus = 1 + (stats.globals.dropRate / 100);
+                const finalCrestChance = crestChance * dropBonus;
+
                 for (let i = 0; i < safeQty; i++) {
-                    if (!itemData.id.includes('WORLDBOSS') && Math.random() < crestChance) {
+                    if (!itemData.id.includes('WORLDBOSS') && Math.random() < finalCrestChance) {
                         const crestId = `T${tier}_CREST`;
                         totalRewards.items[crestId] = (totalRewards.items[crestId] || 0) + 1;
                     }

@@ -179,7 +179,10 @@ export class DungeonManager {
 
         const leveledUp = this.gameManager.addXP(char, 'DUNGEONEERING', dungeonXp);
 
-        const roll = Math.random();
+        const stats = this.gameManager.inventoryManager.calculateStats(char);
+        const dropBonus = 1 + (stats.globals.dropRate / 100);
+        const roll = Math.random() / dropBonus;
+        
         let rarity = 'NORMAL';
 
         if (roll < 0.01) rarity = 'MASTERPIECE';
@@ -189,7 +192,7 @@ export class DungeonManager {
         else rarity = 'NORMAL';
 
         const chestId = `T${config.tier}_CHEST_${rarity}`;
-        console.log(`[DUNGEON-DEBUG] Adding ${chestId} for ${char.name}`);
+        console.log(`[DUNGEON-DEBUG] ${char.name} rolled rarity: ${rarity} (bonus: ${stats.globals.dropRate}%) -> ${chestId}`);
         const added = this.gameManager.inventoryManager.addItemToInventory(char, chestId, 1);
 
         let inventoryFullStop = false;
