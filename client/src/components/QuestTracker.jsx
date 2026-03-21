@@ -6,7 +6,7 @@ import { ClipboardList, ChevronDown, CheckCircle2, Circle } from 'lucide-react';
 import { QUESTS } from '@shared/quests';
 
 const QuestTracker = () => {
-    const { gameState, setActiveTab } = useAppStore();
+    const { gameState, setActiveTab, isMobile } = useAppStore();
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
 
@@ -24,21 +24,20 @@ const QuestTracker = () => {
                 style={{
                     background: readyToClaimCount > 0 ? 'rgba(74, 222, 128, 0.1)' : 'var(--slot-bg)',
                     border: `1px solid ${readyToClaimCount > 0 ? '#4ade8055' : 'var(--border)'}`,
-                    borderRadius: '8px',
-                    padding: '6px 12px',
+                    borderRadius: isMobile ? '6px' : '8px',
+                    padding: isMobile ? '4px 8px' : '6px 12px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '10px',
+                    gap: isMobile ? '6px' : '10px',
                     cursor: 'pointer',
                     transition: '0.2s',
                     position: 'relative'
                 }}
             >
-                <ClipboardList size={16} color={readyToClaimCount > 0 ? '#4ade80' : 'var(--text-dim)'} />
-                {!readyToClaimCount && <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)', whiteSpace: 'nowrap' }}>{activeQuests.length} Quests</span>}
-                {readyToClaimCount > 0 && <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#4ade80', whiteSpace: 'nowrap' }}>{readyToClaimCount} Ready!</span>}
+                <ClipboardList size={isMobile ? 14 : 16} color={readyToClaimCount > 0 ? '#4ade80' : 'var(--text-dim)'} />
+                <span style={{ fontSize: isMobile ? '0.7rem' : '0.75rem', fontWeight: 'bold', color: readyToClaimCount > 0 ? '#4ade80' : 'var(--text-dim)', whiteSpace: 'nowrap' }}>{readyToClaimCount > 0 ? readyToClaimCount : activeQuests.length}</span>
                 
-                <ChevronDown size={14} color="var(--text-dim)" style={{
+                <ChevronDown size={isMobile ? 12 : 14} color="var(--text-dim)" style={{
                     transition: '0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', opacity: 0.6
                 }} />
 

@@ -35,25 +35,25 @@ export const GlobalHeader = ({
             background: 'var(--glass-bg)',
             backdropFilter: 'blur(20px)',
             borderBottom: '1px solid var(--glass-border)',
-            padding: isMobile ? '12px 15px' : '15px 40px',
+            padding: isMobile ? '6px 10px' : '15px 40px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             zIndex: (modals.headerMenu || modals.currencyDropdown) ? 5001 : 100,
             flexWrap: 'nowrap',
-            gap: '10px'
+            gap: isMobile ? '6px' : '10px'
         }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : 20, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '4px' : 20, minWidth: 0 }}>
                 {isMobile && (
                     <div style={{
-                        display: 'flex', alignItems: 'center', gap: '8px',
-                        background: 'rgba(74, 222, 128, 0.05)', padding: '6px 12px',
-                        borderRadius: '8px', border: '1px solid rgba(74, 222, 128, 0.15)',
-                        marginRight: '12px',
+                        display: 'flex', alignItems: 'center', gap: '4px',
+                        background: 'rgba(74, 222, 128, 0.05)', padding: '4px 8px',
+                        borderRadius: '6px', border: '1px solid rgba(74, 222, 128, 0.15)',
+                        marginRight: '4px',
                         cursor: 'help'
                     }} title="Players Online">
-                        <span style={{ width: '8px', height: '8px', background: '#4ade80', borderRadius: '50%', boxShadow: '0 0 8px #4ade80' }}></span>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#4ade80', fontFamily: 'monospace' }}>{activePlayers}</span>
+                        <span style={{ width: '6px', height: '6px', background: '#4ade80', borderRadius: '50%', boxShadow: '0 0 6px #4ade80' }}></span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#4ade80', fontFamily: 'monospace' }}>{activePlayers}</span>
                     </div>
                 )}
 
@@ -82,20 +82,20 @@ export const GlobalHeader = ({
                 )}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 12 : 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 6 : 20 }}>
                 {/* Currency Display with Dropdown */}
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }} data-currency-dropdown>
                     <button
                         onClick={() => setModal('currencyDropdown', !modals.currencyDropdown)}
                         style={{
                             background: 'var(--accent-soft)', border: '1px solid var(--border-active)',
-                            borderRadius: '8px', padding: '6px 12px', display: 'flex',
-                            alignItems: 'center', gap: '10px', cursor: 'pointer', transition: '0.2s',
+                            borderRadius: '6px', padding: isMobile ? '4px 8px' : '6px 12px', display: 'flex',
+                            alignItems: 'center', gap: isMobile ? '6px' : '10px', cursor: 'pointer', transition: '0.2s',
                         }}
                     >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Coins size={16} color="var(--accent)" />
-                            <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--accent)', fontFamily: 'monospace' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '4px' : '8px' }}>
+                            <Coins size={isMobile ? 14 : 16} color="var(--accent)" />
+                            <span style={{ fontSize: isMobile ? '0.8rem' : '0.9rem', fontWeight: 'bold', color: 'var(--accent)', fontFamily: 'monospace' }}>
                                 {formatSilver(displayedGameState?.state?.silver || 0, true)}
                             </span>
                         </div>
@@ -163,6 +163,7 @@ export const GlobalHeader = ({
                     onMarkAllAsRead={() => socket?.emit('mark_all_notifications_read')}
                     onClearAll={() => socket?.emit('clear_notifications')}
                     onClickTrigger={() => setModal('notifications', !modals.notifications)}
+                    isMobile={isMobile}
                 />
 
                 <div style={{ position: 'relative' }}>
@@ -170,7 +171,7 @@ export const GlobalHeader = ({
                         onClick={() => setModal('headerMenu', !modals?.headerMenu)}
                         style={{
                             color: 'var(--text-main)', fontSize: '0.65rem', fontWeight: '900',
-                            padding: '8px', background: 'var(--slot-bg)', borderRadius: '6px',
+                            padding: isMobile ? '6px' : '8px', background: 'var(--slot-bg)', borderRadius: '6px',
                             border: '1px solid var(--border)', display: 'flex', alignItems: 'center',
                             justifyContent: 'center', opacity: 0.8
                         }}

@@ -3,7 +3,7 @@ import { Bell, X, Star, Info, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatSkillName } from '../utils/format';
 
-const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onMarkAllAsRead, onClearAll, onClickTrigger }) => {
+const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onMarkAllAsRead, onClearAll, onClickTrigger, isMobile }) => {
     const [activeTab, setActiveTab] = React.useState('LEVEL_UP');
     const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -46,15 +46,15 @@ const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onMa
                 style={{
                     background: 'var(--slot-bg)',
                     border: '1px solid var(--border)',
-                    padding: '8px',
-                    borderRadius: '8px',
+                    padding: isMobile ? '6px' : '8px',
+                    borderRadius: isMobile ? '6px' : '8px',
                     color: unreadCount > 0 ? 'var(--accent)' : 'var(--text-main)',
                     cursor: 'pointer',
                     position: 'relative',
                     transition: '0.2s'
                 }}
             >
-                <Bell size={20} />
+                <Bell size={isMobile ? 16 : 20} />
                 {unreadCount > 0 && (
                     <span style={{
                         position: 'absolute',

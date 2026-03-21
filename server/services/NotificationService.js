@@ -138,9 +138,9 @@ export class NotificationService {
                 this.gm.pushManager.notifyUser(userId, 'push_daily_spin', 'Daily Spin Available! 🎡', 'Your daily reward is waiting for you in Eternal Idle.');
             }
 
-            // 2. World Boss
+            // 2. World Boss (Daily)
             const wbUsers = [...new Set(subs.filter(s => s.settings?.push_world_boss !== false).map(s => s.user_id))];
-            const bossName = "The Ancient Dragon";
+            const bossName = this.gm.worldBossManager?.dailyBoss?.name || "The Celestial Ravager";
             for (const userId of wbUsers) {
                 this.gm.pushManager.notifyUser(userId, 'push_world_boss', 'World Boss Spawned! 🐉', `${bossName} is terrorizing the world. Join the fight!`, '/world_boss');
             }
