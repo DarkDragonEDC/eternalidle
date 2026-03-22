@@ -2500,13 +2500,34 @@ export class GameManager {
 
     async getActivePlayersCount() {
         try {
-            const { count, error } = await this.supabase
+            // Optimization: Fetch only characters updated in the last 12 hours (max possible limit)
+            const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
+            
+            const { data, error } = await this.supabase
                 .from('characters')
-                .select('id', { count: 'exact', head: true })
-                .or('current_activity.not.is.null,combat.not.is.null,dungeon.not.is.null');
+                .select('user_id, last_saved, info')
+                .or('current_activity.not.is.null,combat.not.is.null,dungeon.not.is.null')
+                .gt('last_saved', twelveHoursAgo);
 
             if (error) throw error;
-            return count || 0;
+            if (!data || data.length === 0) return 0;
+
+            const activeUsers = new Set();
+            const now = Date.now();
+
+            for (const char of data) {
+                const membership = char.info?.membership;
+                const isPremium = membership?.active && new Date(membership.expiresAt) > now;
+                const limitMs = (isPremium ? 12 : 8) * 60 * 60 * 1000;
+                const lastSavedMs = new Date(char.last_saved).getTime();
+
+                // Only count if the user is still within their progress limit
+                if (now - lastSavedMs < limitMs) {
+                    activeUsers.add(char.user_id);
+                }
+            }
+
+            return activeUsers.size;
         } catch (err) {
             console.error('[GAMEMANAGER] Error getting active players count:', err);
             return 0;
