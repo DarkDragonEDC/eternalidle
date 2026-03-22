@@ -354,6 +354,11 @@ export class GameManager {
 
         if (catchup) {
             try {
+                const lastSaved = data.last_saved ? new Date(data.last_saved).getTime() : Date.now();
+                const now = Date.now();
+                const elapsedSeconds = Math.floor((now - lastSaved) / 1000);
+                const isSignificant = elapsedSeconds > 60;
+
                 await this.catchupManager.processCatchup(data, elapsedSeconds, lastSaved, isSignificant);
             } catch (err) {
                 console.error(`[CATCHUP-CRASH] Critical error processing character ${data.name}:`, err);
