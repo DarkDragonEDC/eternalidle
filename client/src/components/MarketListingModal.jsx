@@ -39,6 +39,16 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
             setCurrentMarketPrice(marketPriceUpdate.lowestPrice);
             setHighestBuyOrder(marketPriceUpdate.highestBuyOrder);
             setLoadingPrice(false);
+
+            // Auto-fill price logic:
+            // 1. Prioritize Lowest Market Price (for competitive listing)
+            // 2. Fallback to Highest Buy Order (for "Quick Sell" behavior)
+            if (marketPriceUpdate.lowestPrice && marketPriceUpdate.lowestPrice > 0) {
+                setUnitPrice(marketPriceUpdate.lowestPrice.toString());
+            } else if (marketPriceUpdate.highestBuyOrder && marketPriceUpdate.highestBuyOrder > 0) {
+                setUnitPrice(marketPriceUpdate.highestBuyOrder.toString());
+            }
+
             setMarketPriceUpdate(null); // Clear once consumed
         }
     }, [marketPriceUpdate, listingItem?.itemId, setMarketPriceUpdate]);
@@ -136,10 +146,28 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
                         {(() => {
                             const icon = itemData?.icon;
                             const normalizedIcon = typeof icon === 'string' ? icon.replace(/\.(png|jpg|jpeg)$/, '.webp') : icon;
+                            
                             return normalizedIcon ? (
-                                <img src={normalizedIcon} alt={itemData.name} style={{ width: '130%', height: '130%', objectFit: 'contain' }} />
+                                <img 
+                                    src={normalizedIcon} 
+                                    alt={itemData?.name} 
+                                    style={{ width: '130%', height: '130%', objectFit: 'contain' }}
+                                    onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        // Show placeholder instead
+                                        const parent = e.target.parentElement;
+                                        if (parent && !parent.querySelector('.fallback-text')) {
+                                            const span = document.createElement('span');
+                                            span.className = 'fallback-text';
+                                            span.innerText = `T${itemData?.tier || '?'}`;
+                                            span.style.color = tierColor;
+                                            span.style.fontWeight = 'bold';
+                                            parent.appendChild(span);
+                                        }
+                                    }}
+                                />
                             ) : (
-                                <span style={{ color: tierColor, fontWeight: 'bold' }}>T{itemData?.tier}</span>
+                                <span className="fallback-text" style={{ color: tierColor, fontWeight: 'bold' }}>T{itemData?.tier}</span>
                             );
                         })()}
                         {/* Rune Stars Overlay */}

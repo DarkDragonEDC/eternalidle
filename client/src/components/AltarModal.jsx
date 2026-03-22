@@ -194,7 +194,7 @@ export const AltarModal = ({ isOpen, onClose }) => {
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                                 <div style={{ fontSize: '0.7rem' }}>
                                     <span style={{ color: 'var(--text-dim)' }}>You: </span>
-                                    <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{formatNumber(playerState.totalDonated || 0)}</span>
+                                    <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{formatNumber(playerState.donated || 0)}</span>
                                 </div>
                                 <div style={{ fontSize: '0.7rem' }}>
                                     <span style={{ color: 'var(--text-dim)' }}>Wallet: </span>
@@ -243,7 +243,7 @@ export const AltarModal = ({ isOpen, onClose }) => {
                                         const endTime = playerState[tierKey];
                                         const isActive = !!endTime && Date.now() < endTime;
                                         const isGlobalMet = globalState.totalSilver >= reqGlobal;
-                                        const isDonationMet = (playerState.totalDonated || 0) >= reqDonation;
+                                        const isDonationMet = (playerState.donated || 0) >= reqDonation;
                                         const canActivate = isGlobalMet && isDonationMet && !isActive;
 
                                         // Calculate potential duration until 00:00 UTC, max 12h

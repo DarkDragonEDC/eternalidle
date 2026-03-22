@@ -1143,7 +1143,7 @@ export const resolveItem = (itemOrId, overrideQuality = null) => {
     if (!itemOrId) return null;
 
     // Handle object input
-    const itemId = typeof itemOrId === 'object' ? (itemOrId.id || itemOrId.item_id) : itemOrId;
+    const itemId = typeof itemOrId === 'object' ? (itemOrId.id || itemOrId.item_id || itemOrId.itemId) : itemOrId;
     let enhancement = typeof itemOrId === 'object' ? (itemOrId.enhancement || 0) : 0;
     
     // Parse enhancement from string ID if present (_E1 to _E20)
@@ -1836,6 +1836,22 @@ for (const t of TIERS) {
     }
 }
 
+// Override Icons for Plate Armor
+for (const t of TIERS) {
+    if (ITEMS.GEAR.WARRIORS_FORGE.PLATE_ARMOR[t]) {
+        ITEMS.GEAR.WARRIORS_FORGE.PLATE_ARMOR[t].icon = `/items/T${t}_PLATE_ARMOR.webp`;
+        ITEMS.GEAR.WARRIORS_FORGE.PLATE_ARMOR[t].scale = '190%';
+    }
+}
+
+// Override Icons for Plate Boots
+for (const t of TIERS) {
+    if (ITEMS.GEAR.WARRIORS_FORGE.PLATE_BOOTS[t]) {
+        ITEMS.GEAR.WARRIORS_FORGE.PLATE_BOOTS[t].icon = `/items/T${t}_PLATE_BOOTS.webp`;
+        ITEMS.GEAR.WARRIORS_FORGE.PLATE_BOOTS[t].scale = '190%';
+    }
+}
+
 // --- HUNTER GEAR ICON & SCALE OVERRIDES ---
 for (const t of TIERS) {
     // Bows
@@ -1872,6 +1888,45 @@ for (const t of TIERS) {
     if (ITEMS.GEAR.HUNTERS_LODGE.LEATHER_CAPE[t]) {
         ITEMS.GEAR.HUNTERS_LODGE.LEATHER_CAPE[t].icon = `/items/T${t}_LEATHER_CAPE.webp`;
         ITEMS.GEAR.HUNTERS_LODGE.LEATHER_CAPE[t].scale = '190%';
+    }
+}
+
+// --- MAGE GEAR ICON & SCALE OVERRIDES ---
+for (const t of TIERS) {
+    // Fire Staff
+    if (ITEMS.GEAR.MAGES_TOWER.FIRE_STAFF[t]) {
+        ITEMS.GEAR.MAGES_TOWER.FIRE_STAFF[t].icon = `/items/T${t}_STAFF.webp`;
+        ITEMS.GEAR.MAGES_TOWER.FIRE_STAFF[t].scale = '190%';
+    }
+    // Tome
+    if (ITEMS.GEAR.MAGES_TOWER.TOME[t]) {
+        ITEMS.GEAR.MAGES_TOWER.TOME[t].icon = `/items/T${t}_TOME.webp`;
+        ITEMS.GEAR.MAGES_TOWER.TOME[t].scale = '190%';
+    }
+    // Cloth Armor
+    if (ITEMS.GEAR.MAGES_TOWER.CLOTH_ARMOR[t]) {
+        ITEMS.GEAR.MAGES_TOWER.CLOTH_ARMOR[t].icon = `/items/T${t}_CLOTH_ARMOR.webp`;
+        ITEMS.GEAR.MAGES_TOWER.CLOTH_ARMOR[t].scale = '190%';
+    }
+    // Cloth Helmet
+    if (ITEMS.GEAR.MAGES_TOWER.CLOTH_HELMET[t]) {
+        ITEMS.GEAR.MAGES_TOWER.CLOTH_HELMET[t].icon = `/items/T${t}_CLOTH_HELMET.webp`;
+        ITEMS.GEAR.MAGES_TOWER.CLOTH_HELMET[t].scale = '190%';
+    }
+    // Cloth Boots
+    if (ITEMS.GEAR.MAGES_TOWER.CLOTH_BOOTS[t]) {
+        ITEMS.GEAR.MAGES_TOWER.CLOTH_BOOTS[t].icon = `/items/T${t}_CLOTH_BOOTS.webp`;
+        ITEMS.GEAR.MAGES_TOWER.CLOTH_BOOTS[t].scale = '190%';
+    }
+    // Cloth Gloves
+    if (ITEMS.GEAR.MAGES_TOWER.CLOTH_GLOVES[t]) {
+        ITEMS.GEAR.MAGES_TOWER.CLOTH_GLOVES[t].icon = `/items/T${t}_CLOTH_GLOVES.webp`;
+        ITEMS.GEAR.MAGES_TOWER.CLOTH_GLOVES[t].scale = '190%';
+    }
+    // Mage Cape
+    if (ITEMS.GEAR.MAGES_TOWER.CAPE[t]) {
+        ITEMS.GEAR.MAGES_TOWER.CAPE[t].icon = `/items/T${t}_CLOTH_CAPE.webp`;
+        ITEMS.GEAR.MAGES_TOWER.CAPE[t].scale = '190%';
     }
 }
 

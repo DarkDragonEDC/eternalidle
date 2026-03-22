@@ -171,8 +171,8 @@ export class AltarManager {
                 throw new Error(`Global goal of ${requiredGoal.toLocaleString()} not reached yet for Tier ${tierIndex}!`);
             }
 
-            if ((Number(char.ranking_altar_donated) || 0) < requiredDonation) {
-                throw new Error(`You must have donated at least ${requiredDonation.toLocaleString()} silver (all-time) to activate Tier ${tierIndex} buff.`);
+            if ((Number(playerState.donated) || 0) < requiredDonation) {
+                throw new Error(`You must have donated at least ${requiredDonation.toLocaleString()} silver today to activate Tier ${tierIndex} buff.`);
             }
 
             const tierKey = `tier${tierIndex}EndTime`;
