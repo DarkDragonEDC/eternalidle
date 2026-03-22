@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldAlert, LogOut, AlertTriangle, Zap, Lock } from 'lucide-react';
+import { ShieldAlert, LogOut, AlertTriangle, Zap, Lock, MessageCircle } from 'lucide-react';
 import { supabase } from '../supabase';
+
+const DISCORD_LINK = "https://discord.gg/uVGYW2gJtB";
 
 export const VersionMismatchOverlay = () => (
     <div style={{
@@ -76,6 +78,32 @@ export const BannedOverlay = ({ banModalData }) => (
                     </>
                 )}
             </p>
+
+            <div style={{
+                margin: '20px 0', padding: '15px', borderRadius: '16px',
+                background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)'
+            }}>
+                <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', marginBottom: '12px' }}>
+                    Need help or want to appeal?
+                </p>
+                <a
+                    href={DISCORD_LINK}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                        color: '#5865F2', fontWeight: 'bold', textDecoration: 'none', fontSize: '0.9rem',
+                        padding: '10px', borderRadius: '8px', background: 'rgba(88, 101, 242, 0.1)',
+                        transition: '0.2s'
+                    }}
+                    onMouseOver={e => e.currentTarget.style.background = 'rgba(88, 101, 242, 0.2)'}
+                    onMouseOut={e => e.currentTarget.style.background = 'rgba(88, 101, 242, 0.1)'}
+                >
+                    <MessageCircle size={18} />
+                    CONTACT VIA DISCORD
+                </a>
+            </div>
+
             <button
                 onClick={async () => {
                     await supabase.auth.signOut();
@@ -136,6 +164,31 @@ export const BanWarningOverlay = ({ banWarning, setBanWarning, socket }) => {
                             <br /><br />
                             Please follow the game rules to avoid 24h or permanent bans.
                         </p>
+
+                        <div style={{
+                            margin: '0 0 24px', padding: '15px', borderRadius: '16px',
+                            background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)'
+                        }}>
+                            <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', marginBottom: '12px' }}>
+                                For rules or support, join us:
+                            </p>
+                            <a
+                                href={DISCORD_LINK}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                    color: '#5865F2', fontWeight: 'bold', textDecoration: 'none', fontSize: '0.9rem',
+                                    padding: '10px', borderRadius: '8px', background: 'rgba(88, 101, 242, 0.1)',
+                                    transition: '0.2s'
+                                }}
+                                onMouseOver={e => e.currentTarget.style.background = 'rgba(88, 101, 242, 0.2)'}
+                                onMouseOut={e => e.currentTarget.style.background = 'rgba(88, 101, 242, 0.1)'}
+                            >
+                                <MessageCircle size={18} />
+                                CONTACT VIA DISCORD
+                            </a>
+                        </div>
 
                         <div
                             onClick={() => setBanWarningRead(!banWarningRead)}

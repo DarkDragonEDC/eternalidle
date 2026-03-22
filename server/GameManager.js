@@ -164,7 +164,7 @@ export class GameManager {
      * Applies or upgrades a ban for a user.
      * Progression: 1 (Warning) -> 2 (24h) -> 3 (Permanent)
      */
-    async applyBan(userId, reason, playerName = null) {
+    async applyBan(userId, reason, playerName = null, levelOverride = null) {
         try {
             const { data: currentBan } = await this.supabase
                 .from('user_bans')
@@ -172,17 +172,19 @@ export class GameManager {
                 .eq('user_id', userId)
                 .maybeSingle();
 
-            let nextLevel = 1;
-            let bannedUntil = null;
+            let nextLevel = levelOverride || 1;
 
-            if (currentBan) {
+            if (!levelOverride && currentBan) {
                 nextLevel = Math.min(3, currentBan.ban_level + 1);
             }
 
+            let bannedUntil = null;
             if (nextLevel === 2) {
                 const tomorrow = new Date();
                 tomorrow.setHours(tomorrow.getHours() + 24);
                 bannedUntil = tomorrow.toISOString();
+            } else if (nextLevel === 3) {
+                bannedUntil = null; // Permanent
             }
 
             const { error } = await this.supabase

@@ -254,19 +254,30 @@ export class AdminManager {
     }
 
     async cmdBan(socket, args) {
-        // Usage: /ban [player_name] [reason...]
+        // Usage: /ban [player_name] [level?] [reason...]
         if (args.length < 2) {
-            return { success: false, error: "Usage: /ban [player_name] [reason]" };
+            return { success: false, error: "Usage: /ban [player_name] [level?] [reason]" };
         }
 
         const targetName = args[0];
-        const reason = args.slice(1).join(' ');
+        let levelOverride = null;
+        let reasonIndex = 1;
+
+        // Check if the second argument is a level (1, 2, or 3)
+        const possibleLevel = parseInt(args[1]);
+        if (!isNaN(possibleLevel) && [1, 2, 3].includes(possibleLevel)) {
+            levelOverride = possibleLevel;
+            reasonIndex = 2;
+        }
+
+        const reason = args.slice(reasonIndex).join(' ');
+        if (!reason) return { success: false, error: "Please provide a reason for the ban." };
 
         try {
             const char = await this.resolveTarget(socket, targetName);
             const userId = char.user_id;
 
-            const result = await this.gameManager.applyBan(userId, reason, char.name);
+            const result = await this.gameManager.applyBan(userId, reason, char.name, levelOverride);
             if (result.success) {
                 // If it's a block level (2 or 3), disconnect all sockets of that user
                 if (result.level >= 2) {
@@ -342,7 +353,7 @@ export class AdminManager {
     async cmdHelp(socket) {
         return {
             success: true,
-            message: "Commands: /give, /heal, /add_orbs, /xp, /gxp, /gp, /title, /ban, /resetdaily, /refresh-ranking. (Optional target argument supported)"
+            message: "Commands: /give, /heal, /add_orbs, /xp, /gxp, /gp, /title, /ban [name] [level?] [reason], /resetdaily, /refresh-ranking."
         };
     }
 
