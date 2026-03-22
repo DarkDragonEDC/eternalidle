@@ -1,0 +1,957 @@
+﻿diff --git a/server/managers/AltarManager.js b/server/managers/AltarManager.js
+new file mode 100644
+index 0000000..78f6fa2
+--- /dev/null
++++ b/server/managers/AltarManager.js
+@@ -0,0 +1,213 @@
++export class AltarManager {
++    constructor(gameManager) {
++        this.gm = gameManager;
++        this.supabase = gameManager.supabase;
++        this.globalAltar = { date: null, totalSilver: 0, lastNotifiedTier: 0 };
++        this.TIERS = [2_000_000, 5_000_000, 10_000_000];
++        this.MIN_DONATIONS = [2000, 5000, 10000];
++        this.init();
++    }
++
++    async init() {
++        try {
++            const { data, error } = await this.supabase
++                .from('global_altar')
++                .select('*')
++                .eq('id', 'global')
++                .maybeSingle();
++            
++            if (data) {
++                this.globalAltar.date = data.target_date;
++                this.globalAltar.totalSilver = Number(data.total_silver) || 0;
++                this.globalAltar.lastNotifiedTier = Number(data.last_notified_tier) || 0;
++            }
++        } catch (err) {
++            console.error('[AltarManager] Error loading global altar:', err);
++        }
++        this.checkDailyReset();
++    }
++
++    async _saveAltar() {
++        try {
++            const targetDate = this.globalAltar.date || new Date().toISOString().split('T')[0];
++            await this.supabase.from('global_altar').upsert({
++                id: 'global',
++                target_date: targetDate,
++                total_silver: this.globalAltar.totalSilver,
++                last_notified_tier: this.globalAltar.lastNotifiedTier,
++                last_updated: new Date().toISOString()
++            });
++        } catch (err) {
++            console.error('[AltarManager] Error saving global altar:', err);
++        }
++    }
++
++    checkDailyReset() {
++        const today = new Date().toISOString().split('T')[0];
++        if (this.globalAltar.date !== today) {
++            console.log(`[AltarManager] New day detected (${today}), resetting in-memory altar progress.`);
++            this.globalAltar.date = today;
++            this.globalAltar.totalSilver = 0;
++            this.globalAltar.lastNotifiedTier = 0;
++            // NOTE: Do NOT call _saveAltar() here.
++            // The DB reset is handled atomically by increment_altar_v3 on the next donation.
++            // Saving here would overwrite the real accumulated total with 0 if the server
++            // restarts mid-day or if there's a timezone mismatch.
++        }
++    }
++
++    getAltarState(char) {
++        this.checkDailyReset();
++        const playerState = this._getPlayerState(char);
++        return {
++            global: this.globalAltar,
++            player: {
++                ...playerState,
++                totalDonated: Number(char.ranking_altar_donated) || 0
++            },
++            tiers: this.TIERS,
++            minDonations: this.MIN_DONATIONS
++        };
++    }
++
++    _getPlayerState(char) {
++        if (!char.state.altar) {
++            char.state.altar = { date: null, donated: 0, tier1EndTime: null, tier2EndTime: null, tier3EndTime: null };
++        }
++        
++        // Clean up legacy keys if they exist
++        if (char.state.altar.buffActive !== undefined) delete char.state.altar.buffActive;
++        if (char.state.altar.buffEndTime !== undefined) delete char.state.altar.buffEndTime;
++
++        const today = new Date().toISOString().split('T')[0];
++        if (char.state.altar.date !== today) {
++            char.state.altar.date = today;
++            char.state.altar.donated = 0;
++            char.state.altar.tier1EndTime = null;
++            char.state.altar.tier2EndTime = null;
++            char.state.altar.tier3EndTime = null;
++            this.gm.markDirty(char.id);
++        }
++        return char.state.altar;
++    }
++
++    async donate(userId, charId, amount) {
++        amount = Math.floor(Number(amount));
++        if (isNaN(amount) || amount <= 0) throw new Error("Invalid donation amount");
++
++        return await this.gm.executeLocked(userId, 'altar_donate', async () => {
++            const char = await this.gm.getCharacter(userId, charId);
++            if (!char) throw new Error("Character not found");
++
++            this.checkDailyReset();
++            const playerState = this._getPlayerState(char);
++
++            if ((char.state.silver || 0) < amount) {
++                throw new Error("Not enough silver!");
++            }
++
++            // ATOMIC UPDATE: Use Postgres function to increment both global and player totals safely
++            const today = new Date().toISOString().split('T')[0];
++            const { data: rpcData, error: rpcError } = await this.supabase.rpc('increment_altar_v3', {
++                char_id: charId,
++                amount: amount,
++                target_date_val: today
++            });
++
++            if (rpcError) {
++                console.error('[AltarManager] RPC increment_altar error:', rpcError);
++                throw new Error("Failed to process donation in database.");
++            }
++
++            // Sync memory with Atomic DB result
++            const newGlobalTotal = Number(rpcData.new_global_total);
++            const newPlayerRankingTotal = Number(rpcData.new_player_total);
++
++            this.globalAltar.totalSilver = newGlobalTotal;
++            this.globalAltar.date = today;
++            
++            // Deduct silver from character
++            char.state.silver -= amount;
++            
++            // Update daily donation in playerState (retrieved from getPlayerState)
++            playerState.donated += amount;
++
++            // Sync all-time ranking value
++            char.ranking_altar_donated = newPlayerRankingTotal;
++            
++            // Still update daily tracking in char.state (historical redundancy)
++            if (!char.state.altar_total_donated) char.state.altar_total_donated = 0;
++            char.state.altar_total_donated = newPlayerRankingTotal; // Keep in sync
++
++            this.gm.markDirty(char.id);
++            // We don't call this._saveAltar() here anymore as the RPC handled the global save atomically
++
++            // Check if we reached a new tier and notify
++            this._checkTierNotification();
++
++            // Broadcast update to all clients
++            this.gm.broadcast('altar_update', this.globalAltar);
++
++            return this.getAltarState(char);
++        });
++    }
++
++    async activateBuff(userId, charId, tierIndex) {
++        return await this.gm.executeLocked(userId, 'altar_activate', async () => {
++            if (!tierIndex || tierIndex < 1 || tierIndex > 3) {
++                throw new Error("Invalid tier specified.");
++            }
++
++            const char = await this.gm.getCharacter(userId, charId);
++            if (!char) throw new Error("Character not found");
++
++            this.checkDailyReset();
++            const playerState = this._getPlayerState(char);
++
++            const requiredGoal = this.TIERS[tierIndex - 1];
++            const requiredDonation = this.MIN_DONATIONS[tierIndex - 1];
++
++            if (this.globalAltar.totalSilver < requiredGoal) {
++                throw new Error(`Global goal of ${requiredGoal.toLocaleString()} not reached yet for Tier ${tierIndex}!`);
++            }
++
++            if ((Number(playerState.donated) || 0) < requiredDonation) {
++                throw new Error(`You must have donated at least ${requiredDonation.toLocaleString()} silver today to activate Tier ${tierIndex} buff.`);
++            }
++
++            const tierKey = `tier${tierIndex}EndTime`;
++            if (playerState[tierKey] && Date.now() < playerState[tierKey]) {
++                throw new Error(`Tier ${tierIndex} buff is already active!`);
++            }
++
++            // Activate 12h buff (caps at next midnight UTC)
++            const tomorrow = new Date();
++            tomorrow.setUTCHours(24, 0, 0, 0);
++            
++            playerState[tierKey] = Math.min(Date.now() + (12 * 60 * 60 * 1000), tomorrow.getTime());
++            
++            this.gm.markDirty(char.id);
++
++            return this.getAltarState(char);
++        });
++    }
++
++    _checkTierNotification() {
++        for (let i = this.TIERS.length - 1; i >= 0; i--) {
++            const tierNum = i + 1;
++            const threshold = this.TIERS[i];
++
++            if (this.globalAltar.totalSilver >= threshold && this.globalAltar.lastNotifiedTier < tierNum) {
++                console.log(`[AltarManager] New Global Tier Goal reached: Tier ${tierNum}! Broadcasting notifications.`);
++                this.globalAltar.lastNotifiedTier = tierNum;
++                this._saveAltar(); // Update notified tier in DB
++                
++                // Trigger push notification
++                if (this.gm.notificationService) {
++                    this.gm.notificationService.broadcastAltarTier(tierNum);
++                }
++                break; // Only notify once for the highest reached tier in this call
++            }
++        }
++    }
++}
+diff --git a/server/managers/CatchupManager.js b/server/managers/CatchupManager.js
+index 7936705..d881b5d 100644
+--- a/server/managers/CatchupManager.js
++++ b/server/managers/CatchupManager.js
+@@ -144,6 +144,11 @@ export class CatchupManager {
+                 finalReport.totalTime = Math.min(finalReport.totalTime, elapsedSeconds);
+                 const processedMs = Math.floor(finalReport.totalTime * 1000);
+                 const nextSavedTimestamp = lastSaved + processedMs;
++                
++                if (isNaN(nextSavedTimestamp)) {
++                    console.error("DEBUG: lastSaved=" + lastSaved + " processedMs=" + processedMs + " finalReportTotalTime=" + finalReport.totalTime + " elapsedSeconds=" + elapsedSeconds);
++                }
++                
+                 data.last_saved = new Date(nextSavedTimestamp).toISOString();
+ 
+                 if (data.current_activity && typeof data.current_activity === 'object' && data.activity_started_at) {
+@@ -321,6 +326,9 @@ export class CatchupManager {
+                     const virtualEndTime = new Date(virtualStartTimeMs + activityConsumedMs);
+                     
+                     await this.gm.activityManager.stopActivity(char.user_id, char.id, true, virtualEndTime);
++                    
++                    // Set a flag so we don't incorrectly advance next_action_at on the newly restarted activity
++                    char._justRestartedActivity = true;
+                     break;
+                 }
+             } else {
+@@ -330,11 +338,13 @@ export class CatchupManager {
+         }
+ 
+         if (processed > 0) {
+-            // If activity is still active, update next_action_at
+-            if (char.current_activity) {
++            // Only advance next_action_at if the activity hasn't just been freshly Auto-Restarted.
++            // If it was auto-restarted, stopActivity -> startActivity already initialized it relative to now.
++            if (char.current_activity && !char._justRestartedActivity) {
+                 const timeProcessedMs = processed * timePerAction * 1000;
+                 char.current_activity.next_action_at = (char.current_activity.next_action_at || Date.now()) + timeProcessedMs;
+             }
++            delete char._justRestartedActivity;
+ 
+             return { processed, leveledUp, itemsGained, xpGained, totalTime: processed * timePerAction, stopReason, duplicationCount, autoRefineCount };
+         }
+@@ -493,6 +503,15 @@ export class CatchupManager {
+             }
+         }
+ 
++        if (char.state.combat && !died) {
++            // Sync timers to real Date.now() to prevent the live ticker from rapid-firing
++            // missed rounds (bursts) resulting from hitting the idle limit, which leaves timers behind.
++            const syncTime = Date.now();
++            char.state.combat.next_attack_at = syncTime; 
++            char.state.combat.player_next_attack_at = syncTime + atkSpeed;
++            char.state.combat.mob_next_attack_at = syncTime + (char.state.combat.mobAtkSpeed || 3000);
++        }
++
+         const totalProcessedTime = virtualTime - startTime;
+         const roundsProcessed = Math.floor(totalProcessedTime / atkSpeed);
+ 
+diff --git a/server/managers/DungeonManager.js b/server/managers/DungeonManager.js
+index 9ff9b23..e3efa52 100644
+--- a/server/managers/DungeonManager.js
++++ b/server/managers/DungeonManager.js
+@@ -179,7 +179,10 @@ export class DungeonManager {
+ 
+         const leveledUp = this.gameManager.addXP(char, 'DUNGEONEERING', dungeonXp);
+ 
+-        const roll = Math.random();
++        const stats = this.gameManager.inventoryManager.calculateStats(char);
++        const dropBonus = 1 + (stats.globals.dropRate / 100);
++        const roll = Math.random() / dropBonus;
++        
+         let rarity = 'NORMAL';
+ 
+         if (roll < 0.01) rarity = 'MASTERPIECE';
+@@ -189,7 +192,7 @@ export class DungeonManager {
+         else rarity = 'NORMAL';
+ 
+         const chestId = `T${config.tier}_CHEST_${rarity}`;
+-        console.log(`[DUNGEON-DEBUG] Adding ${chestId} for ${char.name}`);
++        console.log(`[DUNGEON-DEBUG] ${char.name} rolled rarity: ${rarity} (bonus: ${stats.globals.dropRate}%) -> ${chestId}`);
+         const added = this.gameManager.inventoryManager.addItemToInventory(char, chestId, 1);
+ 
+         let inventoryFullStop = false;
+diff --git a/server/managers/GuildManager.js b/server/managers/GuildManager.js
+index 6cfa040..bf44da8 100644
+--- a/server/managers/GuildManager.js
++++ b/server/managers/GuildManager.js
+@@ -66,7 +66,8 @@ export class GuildManager {
+                 icon_color: iconColor || "#FFD700",
+                 bg_color: bgColor || "#1a1a1a",
+                 leader_id: char.id,
+-                country_code: countryCode || null
++                country_code: countryCode || null,
++                is_ironman: !!char.state.isIronman
+             })
+             .select()
+             .single();
+@@ -313,7 +314,7 @@ export class GuildManager {
+ 
+         const { data: guild, error: guildError } = await this.supabase
+             .from('guilds')
+-            .select('id, name, tag, level, xp, summary, icon, icon_color, bg_color, country_code, guild_hall_level, created_at, roles')
++            .select('id, name, tag, level, xp, summary, icon, icon_color, bg_color, country_code, guild_hall_level, created_at, roles, is_ironman')
+             .eq('id', guildId)
+             .single();
+ 
+@@ -505,12 +506,23 @@ export class GuildManager {
+         // Check if guild exists and is not full
+         const { data: guild, error: guildErr } = await this.supabase
+             .from('guilds')
+-            .select('id, tag, min_level, join_mode, guild_hall_level')
++            .select('id, tag, min_level, join_mode, guild_hall_level, is_ironman')
+             .eq('id', guildId)
+             .maybeSingle();
+ 
+         if (guildErr || !guild) throw new Error("Guild not found");
+ 
++        // CHECK IRONMAN RESTRICTIONS
++        const charIsIronman = !!char.state.isIronman;
++        const guildIsIronman = !!guild.is_ironman;
++
++        if (charIsIronman && !guildIsIronman) {
++            throw new Error("Ironman characters can only join Ironman guilds.");
++        }
++        if (!charIsIronman && guildIsIronman) {
++            throw new Error("Regular characters cannot join Ironman guilds.");
++        }
++
+         // Check minimum level
+         const charLevel = this._calculateCharLevel(char.state ? { skills: char.skills, ...char.state } : { skills: char.skills });
+         if (guild.min_level && charLevel < guild.min_level) {
+@@ -685,7 +697,7 @@ export class GuildManager {
+         // Count members (dynamic max based on Guild Hall level)
+         const { data: guildData } = await this.supabase
+             .from('guilds')
+-            .select('tag, guild_hall_level')
++            .select('tag, guild_hall_level, is_ironman')
+             .eq('id', member.guild_id)
+             .single();
+ 
+diff --git a/server/managers/InventoryManager.js b/server/managers/InventoryManager.js
+index 57c3b39..d5df5b4 100644
+--- a/server/managers/InventoryManager.js
++++ b/server/managers/InventoryManager.js
+@@ -160,6 +160,26 @@ export class InventoryManager {
+         return true;
+     }
+ 
++    canAddItems(char, itemsDict) {
++        if (!char.state.inventory) return true;
++        const inv = char.state.inventory;
++        const maxSlots = this.getMaxSlots(char);
++        const usedSlots = this.getUsedSlots(char);
++        
++        let newSlotsNeeded = 0;
++        for (const itemId of Object.keys(itemsDict)) {
++            const item = this.resolveItem(itemId);
++            if (item && !item.noInventorySpace) {
++                // If item doesn't exist in inventory, it will need a new slot
++                if (!inv[itemId] || (typeof inv[itemId] === 'object' && (inv[itemId].amount || 0) <= 0)) {
++                    newSlotsNeeded++;
++                }
++            }
++        }
++
++        return (usedSlots + newSlotsNeeded) <= maxSlots;
++    }
++
+     hasItems(char, req) {
+         if (!req) return true;
+         const inv = char.state.inventory;
+@@ -543,7 +563,7 @@ export class InventoryManager {
+         const itemClass = getRequiredProficiencyGroup(item.id)?.toUpperCase();
+         // Item Slot normalized to enhancement stone format
+         const slotMap = {
+-            'WEAPON': 'WEAPON', 'OFF_HAND': 'OFF_HAND', 'ARMOR': 'ARMOR',
++            'WEAPON': 'WEAPON', 'OFF_HAND': 'OFFHAND', 'ARMOR': 'ARMOR',
+             'HELMET': 'HELMET', 'BOOTS': 'BOOTS', 'GLOVES': 'GLOVES', 'CAPE': 'CAPE'
+         };
+         const itemSlot = slotMap[item.type];
+@@ -564,8 +584,8 @@ export class InventoryManager {
+             throw new Error(`Item already at maximum enhancement (+${maxEnhancement}) for Tier ${tier}`);
+         }
+ 
+-        // Silver Cost: Tier * 1000 * (Current + 1)
+-        const cost = tier * 1000 * (currentEnhancement + 1);
++        // Silver Cost: Tier * 3000 * (Current + 1)
++        const cost = tier * 3000 * (currentEnhancement + 1);
+         const currentSilver = Number(char.state.silver) || 0;
+         if (currentSilver < cost) throw new Error(`Insufficient Silver! Need ${cost.toLocaleString()} (Have: ${currentSilver.toLocaleString()})`);
+ 
+@@ -580,7 +600,13 @@ export class InventoryManager {
+ 
+         // Consume Silver and Stone
+         char.state.silver -= cost;
+-        this.consumeItems(char, { [stone.id]: 1 });
++        
++        // Calculate stones required based on Tier
++        let stoneCount = 1;
++        if (tier >= 7 && tier <= 9) stoneCount = 2;
++        else if (tier >= 10) stoneCount = 3;
++
++        this.consumeItems(char, { [stone.id]: stoneCount });
+ 
+         // Update Stats
+         this.calculateStats(char);
+@@ -853,26 +879,27 @@ export class InventoryManager {
+             }
+         });
+ 
+-        // 3. Skill Bonuses (Level * 0.2 per level => Max 20% at Lvl 100)
+-        efficiency.WOOD += getLvl('LUMBERJACK') * 0.2;
+-        efficiency.ORE += getLvl('ORE_MINER') * 0.2;
+-        efficiency.HIDE += getLvl('ANIMAL_SKINNER') * 0.2;
+-        efficiency.FIBER += getLvl('FIBER_HARVESTER') * 0.2;
+-        efficiency.FISH += getLvl('FISHING') * 0.2;
+-        efficiency.HERB += getLvl('HERBALISM') * 0.2;
+-
+-        efficiency.PLANK += getLvl('PLANK_REFINER') * 0.2;
+-        efficiency.METAL += getLvl('METAL_BAR_REFINER') * 0.2;
+-        efficiency.LEATHER += getLvl('LEATHER_REFINER') * 0.2;
+-        efficiency.CLOTH += getLvl('CLOTH_REFINER') * 0.2;
+-        efficiency.EXTRACT += getLvl('DISTILLATION') * 0.2;
+-
+-        efficiency.WARRIOR += getLvl('WARRIOR_CRAFTER') * 0.2;
+-        efficiency.HUNTER += getLvl('HUNTER_CRAFTER') * 0.2;
+-        efficiency.MAGE += getLvl('MAGE_CRAFTER') * 0.2;
+-        efficiency.COOKING += getLvl('COOKING') * 0.2;
+-        efficiency.ALCHEMY += getLvl('ALCHEMY') * 0.2;
+-        efficiency.TOOLS += getLvl('TOOL_CRAFTER') * 0.2;
++        // 3. Skill Bonuses (Linear 0% to 40% from Lv 1 to 200)
++        efficiency.WOOD += (getLvl('LUMBERJACK') - 1) * (40 / 199);
++        efficiency.ORE += (getLvl('ORE_MINER') - 1) * (40 / 199);
++        efficiency.HIDE += (getLvl('ANIMAL_SKINNER') - 1) * (40 / 199);
++        efficiency.FIBER += (getLvl('FIBER_HARVESTER') - 1) * (40 / 199);
++        efficiency.FISH += (getLvl('FISHING') - 1) * (40 / 199);
++        efficiency.HERB += (getLvl('HERBALISM') - 1) * (40 / 199);
++
++        efficiency.PLANK += (getLvl('PLANK_REFINER') - 1) * (40 / 199);
++        efficiency.METAL += (getLvl('METAL_BAR_REFINER') - 1) * (40 / 199);
++        efficiency.LEATHER += (getLvl('LEATHER_REFINER') - 1) * (40 / 199);
++        efficiency.CLOTH += (getLvl('CLOTH_REFINER') - 1) * (40 / 199);
++        efficiency.EXTRACT += (getLvl('DISTILLATION') - 1) * (40 / 199);
++
++
++        efficiency.WARRIOR += (getLvl('WARRIOR_CRAFTER') - 1) * (40 / 199);
++        efficiency.HUNTER += (getLvl('HUNTER_CRAFTER') - 1) * (40 / 199);
++        efficiency.MAGE += (getLvl('MAGE_CRAFTER') - 1) * (40 / 199);
++        efficiency.COOKING += (getLvl('COOKING') - 1) * (40 / 199);
++        efficiency.ALCHEMY += (getLvl('ALCHEMY') - 1) * (40 / 199);
++        efficiency.TOOLS += (getLvl('TOOL_CRAFTER') - 1) * (40 / 199);
+ 
+         // 4. Weapon Class Detection ÔåÆ Proficiency Gating
+         // Only the proficiency matching the equipped weapon provides combat bonuses
+@@ -1118,6 +1145,36 @@ export class InventoryManager {
+         }
+         // -------------------------------
+ 
++        // --- ALTAR GLOBAL BUFF (EXTENDED 3-TIERS ACCUMULATED) ---
++        let altarRefDouble = 0;
++        let altarSilver = 0;
++        let altarDropQual = 0;
++        let altarXp = 0;
++
++        if (char.state.altar) {
++            const now = nowOverride || Date.now();
++            if (char.state.altar.tier1EndTime > now) {
++                altarRefDouble += 2.5; altarSilver += 5; altarDropQual += 2.5; altarXp += 5;
++            }
++            if (char.state.altar.tier2EndTime > now) {
++                altarRefDouble += 5; altarSilver += 10; altarDropQual += 5; altarXp += 10;
++            }
++            if (char.state.altar.tier3EndTime > now) {
++                altarRefDouble += 10; altarSilver += 15; altarDropQual += 10; altarXp += 15;
++            }
++        }
++
++        if (altarSilver > 0 || altarDropQual > 0 || altarRefDouble > 0 || altarXp > 0) {
++            globals.silverYield = (globals.silverYield || 0) + altarSilver;
++            globals.dropRate = (globals.dropRate || 0) + altarDropQual;
++            globals.qualityChance = (globals.qualityChance || 0) + altarDropQual; 
++            globals.xpYield = (globals.xpYield || 0) + altarXp;
++            
++            Object.keys(duplication).forEach(k => duplication[k] += altarRefDouble);
++            Object.keys(autoRefine).forEach(k => autoRefine[k] += altarRefDouble);
++        }
++        // ------------------------------------
++
+         // Apply Global and Membership efficiency to all specific categories
+         const keys = Object.keys(efficiency).filter(k => k !== 'GLOBAL');
+         keys.forEach(k => {
+@@ -1126,16 +1183,16 @@ export class InventoryManager {
+         });
+         efficiency.GLOBAL = parseFloat((efficiency.GLOBAL + (globals.efficiency || 0)).toFixed(2));
+ 
+-        // --- NOVA F├ôRMULA DE VELOCIDADE (H/S) ---
++        // --- NEW SPEED FORMULA (H/S) ---
+         // Base Global = 0.5 H/S
+-        // B├┤nus Total % = Gear + Proficiency + Runes
++        // Total Bonus % = Gear + Proficiency + Runes
+         const totalBonusPercent = gearSpeedBonus + activeSpeedBonus + (combatRunes.ATTACK_SPEED || 0);
+         
+-        // H/S = 0.5 * (1 + b├┤nus/100)
++        // H/S = 0.5 * (1 + bonus/100)
+         const finalHPS = 0.5 * (1 + (totalBonusPercent / 100));
+         
+         // Intervalo em ms = 1000 / HPS
+-        // Aplicamos um cap de 200ms (5 H/S) por seguran├ºa global
++        // Global safety cap at 200ms (5 H/S)
+         let finalAttackSpeed = Math.max(200, Math.floor(1000 / finalHPS));
+ 
+         const stats = {
+diff --git a/server/managers/MarketManager.js b/server/managers/MarketManager.js
+index a5cae9c..daf042a 100644
+--- a/server/managers/MarketManager.js
++++ b/server/managers/MarketManager.js
+@@ -179,7 +179,11 @@ export class MarketManager {
+         }
+ 
+         const quality = typeof entry === 'object' ? entry.quality : undefined;
++        const enhancement = typeof entry === 'object' ? entry.enhancement : undefined;
+         const stars = typeof entry === 'object' ? entry.stars : undefined;
++        // Collect all instance metadata (enhancement, etc) to preserve during selling/listing
++        const sourceMetadata = typeof entry === 'object' ? { ...entry } : {};
++        delete sourceMetadata.amount;
+ 
+         const itemData = this.gameManager.inventoryManager.resolveItem(itemId, quality);
+         if (!itemData) throw new Error("Invalid item");
+@@ -198,15 +202,26 @@ export class MarketManager {
+ 
+         try {
+             // Build the item ID variants that buy orders might use
+-            // Buy orders encode quality/stars in the item_id (e.g., T1_SWORD_Q2, RUNE_XP_WOOD_2STAR)
+-            const possibleIds = [itemId];
++            // Buy orders encode quality/enhancement/stars in the item_id (e.g., T1_SWORD_Q2_E5, RUNE_XP_WOOD_2STAR)
++            const idWithoutSuffixes = itemId.replace(/_Q\d$/, '').replace(/_E\d+$/, '').replace(/_\dSTAR$/, '');
++            const possibleIds = [idWithoutSuffixes];
++            
+             if (quality !== undefined && quality > 0) {
+-                possibleIds.push(`${itemId}_Q${quality}`);
++                possibleIds.push(`${idWithoutSuffixes}_Q${quality}`);
++            }
++            if (enhancement !== undefined && enhancement > 0) {
++                possibleIds.push(`${idWithoutSuffixes}_E${enhancement}`);
++            }
++            if (quality !== undefined && quality > 0 && enhancement !== undefined && enhancement > 0) {
++                possibleIds.push(`${idWithoutSuffixes}_Q${quality}_E${enhancement}`);
+             }
+             if (stars !== undefined) {
+-                possibleIds.push(`${itemId}_${stars}STAR`);
++                possibleIds.push(`${idWithoutSuffixes}_${stars}STAR`);
+             }
+ 
++            // Also include the original itemId just in case
++            if (!possibleIds.includes(itemId)) possibleIds.push(itemId);
++
+             console.log(`[AUTO-MATCH] Selling ${itemId}, checking buy orders for IDs: ${possibleIds.join(', ')}, sellPricePerUnit: ${sellPricePerUnit}, totalPrice: ${parsedPrice}, amount: ${parsedAmount}`);
+ 
+             const { data: matches, error: matchError } = await this.gameManager.supabase
+@@ -260,7 +275,7 @@ export class MarketManager {
+                             type: 'BOUGHT_ITEM',
+                             itemId: itemId,
+                             amount: fillQty,
+-                            metadata: { quality, stars },
++                            metadata: sourceMetadata,
+                             timestamp: Date.now(),
+                             cost: fillQty * transactionPricePerUnit, // Total they paid initially
+                             orderType: 'AUTO_MATCH_BUY'
+@@ -305,7 +320,7 @@ export class MarketManager {
+                     await this.gameManager.supabase.from('market_history').insert([{
+                         id: Math.floor(Date.now() * 100) + Math.floor(Math.random() * 100),
+                         item_id: itemId,
+-                        item_data: { ...itemData, quality, stars },
++                        item_data: { ...itemData, ...sourceMetadata },
+                         seller_id: userId,
+                         buyer_id: order.buyer_id,
+                         seller_name: char.name,
+@@ -341,10 +356,6 @@ export class MarketManager {
+         await this.gameManager.saveStateCritical(char.id, char.state);
+ 
+         if (remainingAmount > 0) {
+-            // Clean metadata from server's entry
+-            const sourceMetadata = typeof entry === 'object' ? { ...entry } : {};
+-            delete sourceMetadata.amount;
+-
+             if (stars !== undefined) sourceMetadata.stars = stars;
+             if (quality !== undefined) sourceMetadata.quality = quality;
+ 
+@@ -771,18 +782,19 @@ export class MarketManager {
+         if (countError) throw countError;
+         if (count >= maxOrders) throw new Error(`Buy order limit reached (${count}/${maxOrders}).`);
+ 
+-        // Check if itemId contains quality/stars using precise regex
++        // Check if itemId contains quality/stars/enhancement using precise regex
+         let baseItemId = itemId;
+-        let quality, stars;
+-
+-        // Matches _Q followed by a digit (e.g. _Q1, _Q2) at the end of the string
+-        const qualityMatch = itemId.match(/^(.+?)_Q(\d)$/);
+-        if (qualityMatch) {
+-            baseItemId = qualityMatch[1];
+-            quality = parseInt(qualityMatch[2]);
++        let quality, stars, enhancement;
++
++        // Unified regex for quality and enhancement (e.g. T1_SWORD_Q2_E5)
++        const gearMatch = itemId.match(/^(.+?)(?:_Q(\d))?(?:_E(\d+))?$/);
++        if (gearMatch && (gearMatch[2] || gearMatch[3])) {
++            baseItemId = gearMatch[1];
++            if (gearMatch[2]) quality = parseInt(gearMatch[2]);
++            if (gearMatch[3]) enhancement = parseInt(gearMatch[3]);
+         }
+ 
+-        // Matches _ followed by a digit and STAR (e.g. _2STAR) at the end of the string
++        // Separate regex for Stars (Runes: e.g. RUNE_XP_WOOD_2STAR)
+         const starMatch = itemId.match(/^(.+?)_(\d)STAR$/);
+         if (starMatch) {
+             baseItemId = starMatch[1];
+@@ -793,6 +805,18 @@ export class MarketManager {
+         if (!itemData) throw new Error("Invalid item");
+         if (stars !== undefined) itemData.stars = stars;
+         if (quality !== undefined) itemData.quality = quality;
++        if (enhancement !== undefined) {
++            const tier = itemData.tier || 1;
++            let maxE = 15;
++            if (tier <= 3) maxE = 5;
++            else if (tier <= 6) maxE = 10;
++            else if (tier === 10) maxE = 20;
++
++            if (enhancement > maxE) {
++                throw new Error(`Maximum enhancement for Tier ${tier} is +${maxE}.`);
++            }
++            itemData.enhancement = enhancement;
++        }
+ 
+         // Enforce minimum price (cannot be below item's quick sell value)
+         const minPrice = calculateItemSellPrice(itemData, baseItemId) || 1;
+diff --git a/server/managers/TradeManager.js b/server/managers/TradeManager.js
+index 11dbdbd..2e543aa 100644
+--- a/server/managers/TradeManager.js
++++ b/server/managers/TradeManager.js
+@@ -315,9 +315,9 @@ export class TradeManager {
+                     throw new Error(`${receiver.name} has insufficient items: ${m.amountNeeded}x ${m.name} (Has: ${m.amountOwned})`);
+                 }
+ 
+-                // TRANSFER SILVER & CHARGE TAX
+-                sender.state.silver = (sender.state.silver || 0) - (sOffer.silver + sTax) + rOffer.silver;
+-                receiver.state.silver = (receiver.state.silver || 0) - (rOffer.silver + rTax) + sOffer.silver;
++                // TRANSFER SILVER (Tax is already charged in acceptTrade)
++                sender.state.silver = (sender.state.silver || 0) - sOffer.silver + rOffer.silver;
++                receiver.state.silver = (receiver.state.silver || 0) - rOffer.silver + sOffer.silver;
+ 
+                 // Update Global Taxometer
+                 if (sTax + rTax > 0) {
+@@ -333,8 +333,10 @@ export class TradeManager {
+                 console.log(`[TradeManager:executeTrade] ${tradeId} - Delivering items to sender and receiver`);
+                 const deliver = (targetChar, items, fromName) => {
+                     items.forEach(it => {
+-                        // Pass the full item object to preserve metadata like craftedBy
+-                        const added = this.gameManager.inventoryManager.addItemToInventory(targetChar, it.id, it.amount, it);
++                        // Only pass metadata if it has unique properties (craftedBy, quality, stars, enhancement)
++                        // This prevents standard stackables (Plank, Food, Potions) from becoming objects unnecessarily.
++                        const hasMetadata = it.craftedBy || it.quality > 0 || it.stars > 0 || it.enhancement > 0;
++                        const added = this.gameManager.inventoryManager.addItemToInventory(targetChar, it.id, it.amount, hasMetadata ? it : null);
+ 
+                         if (!added) {
+                             // Inventory Full - Send to Claims
+@@ -346,6 +348,9 @@ export class TradeManager {
+                                 itemData: it, // Store full item data for claim retrieval
+                                 timestamp: Date.now()
+                             });
++
++                            // Notify the receiver about the claim
++                            this.gameManager.addNotification(targetChar, 'MARKET', `Inventory Full: ${it.amount}x ${it.name} sent to Market -> Claims.`);
+                         }
+                     });
+                 };
+@@ -353,6 +358,10 @@ export class TradeManager {
+                 deliver(sender, rOffer.items, receiver.name);
+                 deliver(receiver, sOffer.items, sender.name);
+ 
++                // Add general success notifications
++                this.gameManager.addNotification(sender, 'TRADE', `Trade with ${receiver.name} completed.`);
++                this.gameManager.addNotification(receiver, 'TRADE', `Trade with ${sender.name} completed.`);
++
+                 // Update Status
+                 const { error: updateError } = await this.supabase
+                     .from('trade_sessions')
+diff --git a/server/managers/WorldBossManager.js b/server/managers/WorldBossManager.js
+index 4c7cc31..99da68b 100644
+--- a/server/managers/WorldBossManager.js
++++ b/server/managers/WorldBossManager.js
+@@ -12,7 +12,7 @@ function debugLog(msg) {
+     try {
+         fs.appendFileSync(DEBUG_LOG_PATH, `[${timestamp}] ${msg}\n`);
+     } catch (e) {}
+-    console.log(`[WB-DEBUG] ${msg}`);
++
+ }
+ 
+ export class WorldBossManager {
+@@ -34,9 +34,18 @@ export class WorldBossManager {
+     }
+ 
+     async initialize() {
+-        // Kick off initial state fetch but don't block the intervals
+-        this.checkBossCycle().catch(e => debugLog(`Error in initial cycle check: ${e.message}`));
+-        this.refreshAllRankings().catch(e => debugLog(`Error in initial ranking refresh: ${e.message}`));
++        // CRITICAL: Await initial data load in correct order.
++        // 1. checkBossCycle() MUST complete first so windowSession is set.
++        // 2. refreshAllRankings() MUST run after so it has the session context.
++        // This guarantees rankings are populated before any client request.
++        try {
++            await this.checkBossCycle();
++            await this.refreshAllRankings();
++            debugLog('WorldBossManager initialized with data loaded.');
++        } catch (e) {
++            debugLog(`Error in initial data load: ${e.message}`);
++            console.error('[WORLD_BOSS] Error in initial data load:', e);
++        }
+ 
+         // Refresh DB rankings every 5 minutes
+         setInterval(() => this.refreshAllRankings(), 300000);
+@@ -46,7 +55,9 @@ export class WorldBossManager {
+ 
+         // Cleanup orphaned fights (every 5 seconds)
+         setInterval(() => this.cleanupOrphanedFights(), 5000);
+-        debugLog('WorldBossManager initialized (non-blocking)');
++
++        // Periodic boss cycle check and expiration (every 1 minute)
++        setInterval(() => this.checkBossCycle(), 60000);
+     }
+ 
+     async refreshAllRankings() {
+@@ -166,6 +177,7 @@ export class WorldBossManager {
+             for (const charId of timedOut) {
+                 const char = this.gameManager.cache.get(charId);
+                 if (char) {
++                    // endFight now handles the 60s catch-up automatically
+                     await this.endFight(char);
+                 } else {
+                     // Force delete from memory if character is not even in cache
+@@ -190,11 +202,14 @@ export class WorldBossManager {
+ 
+         const isAlive = now < endsAt;
+ 
+-        // Daily Ancient Dragon is always Tier 10
+-        const bossData = WORLD_BOSSES['T10'];
++        // Daily Ancient Dragon is always Tier 10 equivalent but unique character
+         this.dailyBoss = {
+-            ...bossData,
++            id: "DAILY_CELESTIAL_RAVAGER",
+             name: "The Celestial Ravager",
++            tier: 10,
++            maxHP: 9500000,
++            image: "wb_daily_celestial_ravager.webp",
++            bg: "/backgrounds/arcane.webp",
+             isAlive: isAlive,
+             endsAt: endsAt.toISOString(),
+             type: 'daily'
+@@ -203,6 +218,18 @@ export class WorldBossManager {
+ 
+     async checkWindowBoss() {
+         const now = new Date();
++        
++        // Expire old active sessions that were not defeated
++        try {
++            await this.gameManager.supabase
++                .from('world_boss_sessions')
++                .update({ status: 'EXPIRED' })
++                .eq('status', 'ACTIVE')
++                .lt('end_time', now.toISOString());
++        } catch (e) {
++            console.error('[WORLD_BOSS] Error expiring old sessions:', e);
++        }
++
+         const utcHours = now.getUTCHours();
+         const windowStartHours = Math.floor(utcHours / 8) * 8;
+         
+@@ -335,14 +362,14 @@ export class WorldBossManager {
+ 
+         const pendingRewards = await this.getPendingRewards(charId);
+ 
+-        // Fetch last 3 window boss sessions for history
++        // Fetch last 5 window boss sessions for history
+         let windowHistory = [];
+         try {
+             const { data: historyData } = await this.gameManager.supabase
+                 .from('world_boss_sessions')
+                 .select('*')
+                 .order('start_time', { ascending: false })
+-                .limit(3);
++                .limit(5);
+             
+             if (historyData) {
+                 windowHistory = historyData.map(s => {
+@@ -419,7 +446,7 @@ export class WorldBossManager {
+         if (!char.state) char.state = {};
+         char.state.activeWorldBossFight = { ...fightState };
+ 
+-        console.log(`[WORLD_BOSS] Fight started successfully: char=${char.name} (${char.id}), type=${type}, sessionId=${fightState.sessionId}`);
++
+         return { success: true };
+     }
+ 
+@@ -468,11 +495,12 @@ export class WorldBossManager {
+             return await this.endFight(char);
+         }
+ 
+-        const now = virtualTime || Date.now();
++        let now = virtualTime || Date.now();
+         const elapsed = now - fight.startedAt;
+ 
+-        if (elapsed >= 60000) {
+-            return await this.endFight(char);
++        // If this is a catch-up tick (from disconnect/cleanup), cap it to exactly 60s
++        if (elapsed > 60000) {
++            now = fight.startedAt + 60000;
+         }
+ 
+         const stats = this.gameManager.inventoryManager.calculateStats(char);
+@@ -519,6 +547,10 @@ export class WorldBossManager {
+             if (boss.currentHP <= 0) this.handleBossDefeat();
+         }
+ 
++        if (now - fight.startedAt >= 60000 || (fight.type === 'window' && boss.currentHP <= 0)) {
++            return await this.endFight(char);
++        }
++
+         const currentPos = this.predictRankingPos(char.id, fight.damage, fight.type);
+         fight.lastBroadcastPos = currentPos;
+ 
+@@ -601,9 +633,25 @@ export class WorldBossManager {
+     }
+ 
+     async endFight(char) {
+-        const fight = this.activeFights.get(char.id) || char.state?.activeWorldBossFight;
++        const fight = this.activeFights.get(char.id) || (char.state && char.state.activeWorldBossFight);
+         if (!fight) return;
+ 
++        // Prevent infinite recursion and guarantee the save proceeds exactly once
++        if (fight.isEnding) return;
++        fight.isEnding = true;
++
++        // Ensure full 60s damage if fight is ended early (catch-up for disconnects or manual early exit)
++        if (fight.lastTick < fight.startedAt + 60000) {
++            const boss = (fight.type === 'daily') ? this.dailyBoss : this.windowBoss;
++            if (boss && boss.isAlive && (fight.type !== 'window' || boss.status === 'ACTIVE')) {
++                debugLog(`Forcing final catch-up for ${char.name} (${char.id}) at ${fight.lastTick}`);
++                // processTick will call endFight again when it hits the 60s limit
++                // The fight.isEnding flag ensures the recursive endFight returns instantly, 
++                // allowing this await to finish and this Outer endFight to proceed to the DB save.
++                await this.processTick(char, fight.startedAt + 60000);
++            }
++        }
++
+         try {
+             let oldTop1 = null;
+             if (fight.type === 'daily') {
+@@ -844,7 +892,11 @@ export class WorldBossManager {
+             if (isWindowBoss && unclaimed.world_boss_sessions?.status === 'DEFEATED') {
+                 chestId = 'ENHANCEMENT_CHEST';
+                 chestName = 'Enhancement Chest';
++            } else if (isWindowBoss) {
++                // Window Boss not defeated = no reward, skip this entry
++                continue;
+             } else {
++                // Daily Boss = WB Chest based on damage milestones
+                 const damage = Number(unclaimed.damage) || 0;
+                 const result = this.calculateChestRewardByDamage(damage);
+                 chestId = result.id;
+diff --git a/server/services/NotificationService.js b/server/services/NotificationService.js
+index 88fdf8a..9c483c2 100644
+--- a/server/services/NotificationService.js
++++ b/server/services/NotificationService.js
+@@ -138,9 +138,9 @@ export class NotificationService {
+                 this.gm.pushManager.notifyUser(userId, 'push_daily_spin', 'Daily Spin Available! ­ƒÄí', 'Your daily reward is waiting for you in Eternal Idle.');
+             }
+ 
+-            // 2. World Boss
++            // 2. World Boss (Daily)
+             const wbUsers = [...new Set(subs.filter(s => s.settings?.push_world_boss !== false).map(s => s.user_id))];
+-            const bossName = "The Ancient Dragon";
++            const bossName = this.gm.worldBossManager?.dailyBoss?.name || "The Celestial Ravager";
+             for (const userId of wbUsers) {
+                 this.gm.pushManager.notifyUser(userId, 'push_world_boss', 'World Boss Spawned! ­ƒÉë', `${bossName} is terrorizing the world. Join the fight!`, '/world_boss');
+             }
+@@ -163,4 +163,29 @@ export class NotificationService {
+             console.error('[PUSH] Fatal error in checkMidnightTriggers:', err);
+         }
+     }
++
++    async broadcastAltarTier(tier) {
++        console.log(`[PUSH] Broadcasting Altar Tier ${tier} notification...`);
++        try {
++            const { data: subs, error } = await this.supabase
++                .from('push_subscriptions')
++                .select('user_id, settings');
++
++            if (error || !subs || subs.length === 0) return;
++
++            // Get unique users who haven't disabled altar notifications
++            const usersToNotify = [...new Set(subs
++                .filter(s => s.settings?.push_altar_tier !== false)
++                .map(s => s.user_id))];
++
++            const title = `Altar Tier ${tier} Unlocked! ­ƒîƒ`;
++            const body = `The community has reached the Goal for Tier ${tier}! Activate your buff now and enjoy the rewards. ­ƒöÑ`;
++
++            for (const userId of usersToNotify) {
++                this.gm.pushManager.notifyUser(userId, 'push_altar_tier', title, body, '/altar');
++            }
++        } catch (err) {
++            console.error('[PUSH] Error in broadcastAltarTier:', err);
++        }
++    }
+ }
+diff --git a/server/services/PersistenceService.js b/server/services/PersistenceService.js
+index 993d42c..ff7ec54 100644
+--- a/server/services/PersistenceService.js
++++ b/server/services/PersistenceService.js
+@@ -165,6 +165,7 @@ export class PersistenceService {
+                 ranking_total_level,
+                 ranking_total_xp: Math.floor(ranking_total_xp),
+                 ranking_item_power: Math.floor(ranking_item_power),
++                ranking_altar_donated: Number(char.ranking_altar_donated) || 0,
+                 current_activity: char.current_activity,
+                 activity_started_at: char.activity_started_at,
+                 last_saved: saveTime
+@@ -176,7 +177,8 @@ export class PersistenceService {
+             const leaderboardEntries = [
+                 { character_id: charId, ranking_type: 'LEVEL', value: ranking_total_level, character_name: char.name },
+                 { character_id: charId, ranking_type: 'TOTAL_XP', value: Math.floor(ranking_total_xp), character_name: char.name },
+-                { character_id: charId, ranking_type: 'ITEM_POWER', value: Math.floor(ranking_item_power), character_name: char.name }
++                { character_id: charId, ranking_type: 'ITEM_POWER', value: Math.floor(ranking_item_power), character_name: char.name },
++                { character_id: charId, ranking_type: 'ALTAR_DONATION', value: Number(char.ranking_altar_donated) || 0, character_name: char.name }
+             ];
+ 
+             for (const [skillKey, skillData] of Object.entries(skillsToSave)) {

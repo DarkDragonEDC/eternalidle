@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Shield, X } from 'lucide-react';
+import GuildProfileModal from '../GuildProfileModal';
 import { COUNTRIES } from '@shared/countries';
 
 const CountryFlag = ({ code, name, size = '1.2rem', style = {} }) => {
@@ -32,7 +33,8 @@ export const GuildSearch = ({
     isMobile,
     ICONS,
     socket,
-    isIronman
+    isIronman,
+    onInspect
 }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCountry, setSelectedCountry] = useState(null);
@@ -380,7 +382,7 @@ export const GuildSearch = ({
                                         }}
                                     >
                                         {isIronman !== !!g.is_ironman 
-                                            ? (isIronman ? "IRONMAN ONLY" : "NO IRONMAN") 
+                                            ? (g.is_ironman ? "IRONMAN ONLY" : "NORMAL ONLY") 
                                             : (playerLevel < g.min_level ? `REQ. LVL ${g.min_level}` : (g.join_mode === 'OPEN' ? 'JOIN' : 'APPLY'))
                                         }
                                     </motion.button>
@@ -399,6 +401,18 @@ export const GuildSearch = ({
                     </div>
                 )}
             </div>
+
+            <GuildProfileModal
+                isOpen={!!selectedGuildId}
+                onClose={() => setSelectedGuildId(null)}
+                guildId={selectedGuildId}
+                socket={socket}
+                onInspect={(name) => {
+                    setSelectedGuildId(null);
+                    if (onInspect) onInspect(name);
+                }}
+                isMobile={isMobile}
+            />
         </motion.div>
     );
 };

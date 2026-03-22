@@ -1,0 +1,519 @@
+﻿diff --git a/client/src/components/AppModals.jsx b/client/src/components/AppModals.jsx
+index 45b4c67..e91e591 100644
+--- a/client/src/components/AppModals.jsx
++++ b/client/src/components/AppModals.jsx
+@@ -22,6 +22,7 @@ import TradePanel from './TradePanel';
+ import { GuestRestrictionModal } from './AppOverlays';
+ import GuildXPInfoModal from './guild/GuildXPInfoModal';
+ import ActionQueueModal from './ActionQueueModal';
++import { AltarModal } from './AltarModal';
+ 
+ const AppModals = ({ 
+     displayedGameState, 
+@@ -242,6 +243,15 @@ const AppModals = ({
+                 )}
+             </AnimatePresence>
+ 
++            <AnimatePresence>
++                {modals?.altar && (
++                    <AltarModal
++                        isOpen={modals?.altar}
++                        onClose={() => setModal('altar', false)}
++                    />
++                )}
++            </AnimatePresence>
++
+             <AnimatePresence>
+                 {modals?.orbShop && (
+                     <OrbShop
+diff --git a/client/src/components/BuffsDrawer.jsx b/client/src/components/BuffsDrawer.jsx
+index 53525a9..d26ef54 100644
+--- a/client/src/components/BuffsDrawer.jsx
++++ b/client/src/components/BuffsDrawer.jsx
+@@ -287,7 +287,7 @@ const BuffsDrawer = ({ gameState, isMobile }) => {
+                                                                     const msValue = (isPremium && key === 'GLOBAL_XP') ? 10 : 0;
+                                                                     const displayBase = baseBonus - msValue;
+                                                                     if (displayBase > 0.1) {
+-                                                                        return <span style={{ whiteSpace: 'nowrap' }}>BASE: <span style={{ color: 'var(--accent)' }}>+{displayBase.toFixed(1)}%</span></span>;
++                                                                        return <span style={{ whiteSpace: 'nowrap' }}>ALTAR: <span style={{ color: 'var(--accent)' }}>+{displayBase.toFixed(1)}%</span></span>;
+                                                                     }
+                                                                     return null;
+                                                                 })()}
+diff --git a/client/src/components/EnhanceItemModal.jsx b/client/src/components/EnhanceItemModal.jsx
+index cc5ca39..c1fa4c1 100644
+--- a/client/src/components/EnhanceItemModal.jsx
++++ b/client/src/components/EnhanceItemModal.jsx
+@@ -40,20 +40,25 @@ const EnhanceItemModal = ({ item: initialItem, inventory, character, socket, onC
+                      initialItem.id.includes('BOW') || initialItem.id.includes('LEATHER') || initialItem.id.includes('TORCH') || initialItem.id.includes('HUNTER_CAPE') ? 'HUNTER' : 'MAGE';
+     
+     const slotMap = {
+-        'WEAPON': 'WEAPON', 'OFF_HAND': 'OFF_HAND', 'ARMOR': 'ARMOR',
++        'WEAPON': 'WEAPON', 'OFF_HAND': 'OFFHAND', 'ARMOR': 'ARMOR',
+         'HELMET': 'HELMET', 'BOOTS': 'BOOTS', 'GLOVES': 'GLOVES', 'CAPE': 'CAPE'
+     };
+     const itemSlot = slotMap[currentItem?.type];
+     const stoneId = `ENHANCEMENT_STONE_${itemClass}_${itemSlot}`;
+     const stoneDef = resolveItem(stoneId);
+ 
++    // Stone Requirements based on Tier
++    let requiredStones = 1;
++    if (tier >= 7 && tier <= 9) requiredStones = 2;
++    else if (tier >= 10) requiredStones = 3;
++
+     // Find stone in inventory
+     const stoneEntryKey = Object.keys(inventory).find(key => key.split('::')[0] === stoneId);
+     const stoneQty = stoneEntryKey ? (typeof inventory[stoneEntryKey] === 'object' ? inventory[stoneEntryKey].amount : inventory[stoneEntryKey]) : 0;
+-    const hasStone = stoneQty >= 1;
++    const hasStone = stoneQty >= requiredStones;
+ 
+     // Cost Logic
+-    const silverCost = tier * 1000 * (currentEnhancement + 1);
++    const silverCost = tier * 3000 * (currentEnhancement + 1);
+     const hasSilver = (character?.state?.silver || 0) >= silverCost;
+ 
+     const canEnhance = !isMaxed && hasStone && hasSilver && !isEnhancing;
+@@ -191,7 +196,7 @@ const EnhanceItemModal = ({ item: initialItem, inventory, character, socket, onC
+                                         <div style={{ flex: 1 }}>
+                                             <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', fontWeight: '800' }}>STONE</div>
+                                             <div style={{ fontSize: '0.85rem', fontWeight: '900', color: hasStone ? 'var(--text-main)' : '#ef4444' }}>
+-                                                {stoneQty} / 1
++                                                {stoneQty} / {requiredStones}
+                                             </div>
+                                         </div>
+                                     </div>
+diff --git a/client/src/components/InspectModal.jsx b/client/src/components/InspectModal.jsx
+index 1e87d8c..52e83f1 100644
+--- a/client/src/components/InspectModal.jsx
++++ b/client/src/components/InspectModal.jsx
+@@ -1,14 +1,19 @@
+ import React, { useState, useMemo } from 'react';
+ import { motion, AnimatePresence } from 'framer-motion';
+ import { X, Sword, Shield, Heart, Zap, User, Star, Layers, Info, Award, Crosshair, Hammer, Pickaxe, Flame, Droplets, Wind, Sparkles, Scissors, Anchor, ShoppingBag, Apple, Target, ChevronRight, History, ArrowRight, TrendingDown, TrendingUp } from 'lucide-react';
+-import { resolveItem, calculateRuneBonus, formatItemId } from '@shared/items';
++import { resolveItem, calculateRuneBonus, formatItemId, formatItemNameShort } from '@shared/items';
+ import { calculateNextLevelXP } from '@shared/skills';
+ import StatBreakdownModal from './StatBreakdownModal';
+ 
+ const EquipmentSlot = ({ slot, icon, label, item: rawItem, delay = 0, onItemClick }) => {
+-    const item = rawItem ? { ...rawItem, ...resolveItem(rawItem.id || rawItem.item_id, rawItem.quality || rawItem.stars) } : null;
++    // RESOLVE FIX: Pass the whole rawItem to resolveItem to preserve enhancement, stats, etc.
++    // And spread resolveItem BEFORE rawItem so rawItem's specific instance data (like enhancement) wins.
++    const resolved = rawItem ? resolveItem(rawItem) : null;
++    const item = rawItem ? { ...resolved, ...rawItem } : null;
+     const rarityColor = item && item.rarityColor ? item.rarityColor : 'rgba(255,255,255,0.05)';
++    const borderColor = item && item.rarityColor ? item.rarityColor : 'rgba(255,255,255,0.05)';
+     const glowColor = item ? `${rarityColor}33` : 'transparent';
++    const hasQuality = (item && item.quality > 0) || (item && item.stars > 0);
+ 
+     return (
+         <motion.div
+@@ -43,10 +48,10 @@ const EquipmentSlot = ({ slot, icon, label, item: rawItem, delay = 0, onItemClic
+                         T{item.tier}
+                     </div>
+                 )}
+-                {item && item.stars > 0 && (
+-                    <div style={{ position: 'absolute', top: 3, right: 3, display: 'flex', gap: '1px', zIndex: 10 }}>
+-                        {[...Array(item.stars)].map((_, i) => (
+-                            <Star key={i} size={8} fill={rarityColor} stroke={rarityColor} />
++                {item && hasQuality && (
++                    <div style={{ position: 'absolute', top: 2, right: 2, display: 'flex', gap: '1px', zIndex: 10 }}>
++                        {[...Array(item.stars || 1)].map((_, i) => (
++                            <Star key={i} size={10} fill="#FFD700" color="#FFD700" strokeWidth={1} />
+                         ))}
+                     </div>
+                 )}
+@@ -68,6 +73,28 @@ const EquipmentSlot = ({ slot, icon, label, item: rawItem, delay = 0, onItemClic
+                     </div>
+                 )}
+ 
++                {/* ITEM QUANTITY (FOR FOOD) */}
++                {(() => {
++                    const amount = item ? (typeof item.amount === 'object' ? item.amount.amount : item.amount) : 0;
++                    if (amount > 1) {
++                        return (
++                            <span style={{
++                                position: 'absolute',
++                                bottom: 3,
++                                left: 5,
++                                fontSize: '0.65rem',
++                                color: 'var(--text-main)',
++                                fontWeight: '900',
++                                textShadow: '0 1px 3px rgba(0,0,0,1)',
++                                zIndex: 10
++                            }}>
++                                {amount}
++                            </span>
++                        );
++                    }
++                    return null;
++                })()}
++
+                 {item && (
+                     <div
+                         onClick={(e) => {
+@@ -96,19 +123,21 @@ const EquipmentSlot = ({ slot, icon, label, item: rawItem, delay = 0, onItemClic
+             </div>
+             {item ? (
+                 <span style={{
+-                    fontSize: '0.45rem',
++                    fontSize: '0.6rem',
+                     color: '#bbb',
+                     textAlign: 'center',
+-                    maxWidth: '70px',
+-                    lineHeight: '1',
+-                    minHeight: '2em',
++                    maxWidth: '85px',
++                    lineHeight: '1.2',
++                    minHeight: '2.4em',
+                     display: '-webkit-box',
+                     WebkitLineClamp: 2,
+                     WebkitBoxOrient: 'vertical',
+                     overflow: 'hidden',
+-                    marginTop: '2px'
++                    marginTop: '2px',
++                    fontWeight: 'bold'
+                 }}>
+-                    {formatItemId(item.id || item.name)}
++                    {formatItemNameShort(item)}
++                    {item.enhancement > 0 && <span style={{ color: '#4ade80' }}> +{item.enhancement}</span>}
+                 </span>
+             ) : (
+                 <span style={{ fontSize: '0.45rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.5px', opacity: 0.6 }}>
+@@ -157,7 +186,7 @@ const SkillCategory = ({ title, icon, skillsList, color, isExpanded, onToggle, s
+                             {skillsList.map(sId => {
+                                 const skill = skills[sId] || { level: 1, xp: 0 };
+                                 const nextXP = calculateNextLevelXP(skill.level);
+-                                const progress = skill.level >= 100 ? 100 : Math.min(100, (skill.xp / nextXP) * 100);
++                                const progress = skill.level >= 200 ? 100 : Math.min(100, (skill.xp / nextXP) * 100);
+                                 return (
+                                     <div key={sId} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+@@ -215,9 +244,9 @@ const RuneSlot = ({ slot, label, icon, item: rawItem, onItemClick }) => {
+                     </div>
+                 )}
+                 {item && item.stars > 0 && (
+-                    <div style={{ position: 'absolute', top: 2, right: 3, display: 'flex', gap: '1px' }}>
++                    <div style={{ position: 'absolute', top: 2, right: 2, display: 'flex', gap: '1px' }}>
+                         {[...Array(item.stars)].map((_, i) => (
+-                            <Star key={i} size={6} fill={rarityColor} stroke={rarityColor} />
++                            <Star key={i} size={10} fill="#FFD700" color="#FFD700" strokeWidth={1} />
+                         ))}
+                     </div>
+                 )}
+@@ -550,7 +579,7 @@ const InspectModal = React.memo(({ data, theme: propTheme, onClose, onItemClick,
+                         zIndex: 0
+                     }} />
+ 
+-                    <div style={{ display: 'flex', padding: '12px 20px 0', gap: '4px', marginTop: '0px', justifyContent: 'center', position: 'relative', zIndex: 1, flexWrap: 'wrap' }}>
++                    <div style={{ display: 'flex', padding: '12px 20px 0', gap: '4px', marginTop: '0px', justifyContent: 'center', position: 'relative', zIndex: 1, flexWrap: 'nowrap' }}>
+                         {['EQUIPMENT', 'SKILLS', 'RUNES', 'HISTORY'].map(tab => (
+                             <button
+                                 key={tab}
+diff --git a/client/src/components/ItemInfoModal.jsx b/client/src/components/ItemInfoModal.jsx
+index 173e989..dcfbef1 100644
+--- a/client/src/components/ItemInfoModal.jsx
++++ b/client/src/components/ItemInfoModal.jsx
+@@ -248,6 +248,15 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
+                                             );
+                                         }
+ 
++                                        if (item.id === 'ENHANCEMENT_CHEST') {
++                                            return (
++                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
++                                                    <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#d4af37' }}>Random Enhancement Stone</span>
++                                                    <span style={{ fontSize: '0.7rem', fontWeight: '900', color: '#4ade80' }}>100%</span>
++                                                </div>
++                                            );
++                                        }
++
+                                         const isWorldBoss = item.id.includes('WORLDBOSS');
+                                         const shardName = isWorldBoss ? 'Battle Rune Shard' : 'Rune Shard';
+                                         if (isWorldBoss) {
+@@ -259,7 +268,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
+                                                 </div>
+                                             );
+                                         }
+-                                        const [min, max] = getChestRuneShardRange(item.tier, item.rarity);
++                                        const [min, max] = getChestRuneShardRange(item.tier || 1, item.rarity);
+                                         return (
+                                             <>
+                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+@@ -270,7 +279,7 @@ const ItemInfoModal = ({ item: rawItem, onClose }) => {
+                                             </>
+                                         );
+                                     })()}
+-                                    {!item.id.includes('WORLDBOSS') && item.id !== 'NOOB_CHEST' && CHEST_DROP_TABLE.RARITIES[item.rarity]?.crestChance > 0 && (
++                                    {item.id !== 'ENHANCEMENT_CHEST' && !item.id.includes('WORLDBOSS') && item.id !== 'NOOB_CHEST' && CHEST_DROP_TABLE.RARITIES[item.rarity]?.crestChance > 0 && (
+                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '4px', borderTop: '1px solid var(--border)' }}>
+                                             <span style={{ fontSize: '0.75rem', fontWeight: '800', color: tierColor }}>Boss Crest (T{item.tier})</span>
+                                             <span style={{ fontSize: '0.7rem', fontWeight: '900', color: tierColor }}>{(CHEST_DROP_TABLE.RARITIES[item.rarity].crestChance * 100).toFixed(0)}%</span>
+diff --git a/client/src/components/LeaderboardModal.jsx b/client/src/components/LeaderboardModal.jsx
+index 873d232..b4c78c3 100644
+--- a/client/src/components/LeaderboardModal.jsx
++++ b/client/src/components/LeaderboardModal.jsx
+@@ -16,6 +16,7 @@ const CATEGORIES = [
+             { id: 'TOTAL_XP', name: 'Total XP', icon: Zap }
+         ]
+     },
++    { id: 'ALTAR', name: 'Altar', icon: Flame, color: '#f59e0b', subTabs: [{ id: 'ALTAR_DONATION', name: 'Donations', icon: Trophy }] },
+     {
+         id: 'PROFICIENCY', name: 'Proficiency', icon: Shield, color: '#d8b4fe',
+         subTabs: [
+@@ -301,6 +302,8 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
+                                         } else if (activeSubTab === 'ITEM_POWER') {
+                                             score = char.ranking_total_level || 0; // Temp use level as proxy if IP not sent, but server should send it
+                                             if ('ranking_item_power' in char) score = char.ranking_item_power;
++                                        } else if (activeSubTab === 'ALTAR_DONATION') {
++                                            score = char.ranking_altar_donated || 0;
+                                         } else {
+                                             score = char.state?.skills?.[activeSubTab]?.level || 1;
+                                         }
+@@ -349,7 +352,7 @@ const LeaderboardModal = ({ isOpen, onClose, socket, isMobile, onInspect, isPubl
+                                                         {formatNumber(score)}
+                                                     </div>
+                                                     <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>
+-                                                        {activeSubTab === 'TOTAL_XP' ? 'XP' : activeSubTab === 'ITEM_POWER' ? 'IP' : 'LEVEL'}
++                                                        {activeSubTab === 'TOTAL_XP' ? 'XP' : activeSubTab === 'ITEM_POWER' ? 'IP' : activeSubTab === 'ALTAR_DONATION' ? 'DONATION' : 'LEVEL'}
+                                                     </div>
+                                                 </div>
+                                             </motion.div>
+diff --git a/client/src/components/MobileHubs.jsx b/client/src/components/MobileHubs.jsx
+index 171fd47..3fb189a 100644
+--- a/client/src/components/MobileHubs.jsx
++++ b/client/src/components/MobileHubs.jsx
+@@ -190,7 +190,7 @@ export const SkillsOverview = ({ onNavigate, gameState }) => {
+                                 const skill = gameState?.state?.skills?.[skillKey];
+                                 const level = skill?.level || 1;
+                                 const nextXP = calculateNextLevelXP(level);
+-                                const progress = level >= 100 ? 100 : Math.min(100, ((skill?.xp || 0) / nextXP) * 100);
++                                const progress = level >= 200 ? 100 : Math.min(100, ((skill?.xp || 0) / nextXP) * 100);
+ 
+                                 return (
+                                     <button
+@@ -360,11 +360,11 @@ export const CombatOverview = ({ onNavigate, gameState }) => {
+ 
+     const combatLevel = combatSkill.level;
+     const combatNextXP = calculateNextLevelXP(combatLevel);
+-    const combatProgress = combatLevel >= 100 ? 100 : (combatSkill.xp / combatNextXP) * 100;
++    const combatProgress = combatLevel >= 200 ? 100 : (combatSkill.xp / combatNextXP) * 100;
+ 
+     const dungeonLevel = dungeonSkill.level;
+     const dungeonNextXP = calculateNextLevelXP(dungeonLevel);
+-    const dungeonProgress = dungeonLevel >= 100 ? 100 : (dungeonSkill.xp / dungeonNextXP) * 100;
++    const dungeonProgress = dungeonLevel >= 200 ? 100 : (dungeonSkill.xp / dungeonNextXP) * 100;
+ 
+     // Determine Adventure Button Icon
+     let adventureIcon = <Sword />;
+diff --git a/client/src/components/NotificationCenter.jsx b/client/src/components/NotificationCenter.jsx
+index 7029327..5cf55f0 100644
+--- a/client/src/components/NotificationCenter.jsx
++++ b/client/src/components/NotificationCenter.jsx
+@@ -3,7 +3,7 @@ import { Bell, X, Star, Info, Check } from 'lucide-react';
+ import { motion, AnimatePresence } from 'framer-motion';
+ import { formatSkillName } from '../utils/format';
+ 
+-const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onMarkAllAsRead, onClearAll, onClickTrigger }) => {
++const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onMarkAllAsRead, onClearAll, onClickTrigger, isMobile }) => {
+     const [activeTab, setActiveTab] = React.useState('LEVEL_UP');
+     const unreadCount = notifications.filter(n => !n.read).length;
+ 
+@@ -46,15 +46,15 @@ const NotificationCenter = ({ notifications, isOpen, onClose, onMarkAsRead, onMa
+                 style={{
+                     background: 'var(--slot-bg)',
+                     border: '1px solid var(--border)',
+-                    padding: '8px',
+-                    borderRadius: '8px',
++                    padding: isMobile ? '6px' : '8px',
++                    borderRadius: isMobile ? '6px' : '8px',
+                     color: unreadCount > 0 ? 'var(--accent)' : 'var(--text-main)',
+                     cursor: 'pointer',
+                     position: 'relative',
+                     transition: '0.2s'
+                 }}
+             >
+-                <Bell size={20} />
++                <Bell size={isMobile ? 16 : 20} />
+                 {unreadCount > 0 && (
+                     <span style={{
+                         position: 'absolute',
+diff --git a/client/src/components/ProfilePanel.jsx b/client/src/components/ProfilePanel.jsx
+index 52e2fb5..ab9a632 100644
+--- a/client/src/components/ProfilePanel.jsx
++++ b/client/src/components/ProfilePanel.jsx
+@@ -421,9 +421,9 @@ const ProfilePanel = ({ gameState, session, socket, settings, onShowInfo, isMobi
+     }, [equipment]);
+ 
+     const EquipmentSlot = ({ slot, icon, label, item: rawItem, onClick, onShowInfo, isLocked = false, weaponClass = null }) => {
+-        // Resolve item to ensure we have latest stats and rarity color (even for Normal items if logic changes, but mostly for _Q items)
+-        const item = rawItem ? resolveItem(rawItem, rawItem.quality || rawItem.stars) : null;
+-
++        // Resolve item and merge with raw data to preserve instance props like enhancement, amount/qty, etc.
++        const resolved = rawItem ? resolveItem(rawItem, rawItem.quality || rawItem.stars) : null;
++        const item = rawItem ? { ...resolved, ...rawItem } : null;
+ 
+         const tierColor = item ? '#666' : 'var(--glass-bg)';
+ 
+diff --git a/client/src/components/QuestTracker.jsx b/client/src/components/QuestTracker.jsx
+index 33368e5..e35df11 100644
+--- a/client/src/components/QuestTracker.jsx
++++ b/client/src/components/QuestTracker.jsx
+@@ -6,7 +6,7 @@ import { ClipboardList, ChevronDown, CheckCircle2, Circle } from 'lucide-react';
+ import { QUESTS } from '@shared/quests';
+ 
+ const QuestTracker = () => {
+-    const { gameState, setActiveTab } = useAppStore();
++    const { gameState, setActiveTab, isMobile } = useAppStore();
+     const [isOpen, setIsOpen] = useState(false);
+     const navigate = useNavigate();
+ 
+@@ -24,21 +24,20 @@ const QuestTracker = () => {
+                 style={{
+                     background: readyToClaimCount > 0 ? 'rgba(74, 222, 128, 0.1)' : 'var(--slot-bg)',
+                     border: `1px solid ${readyToClaimCount > 0 ? '#4ade8055' : 'var(--border)'}`,
+-                    borderRadius: '8px',
+-                    padding: '6px 12px',
++                    borderRadius: isMobile ? '6px' : '8px',
++                    padding: isMobile ? '4px 8px' : '6px 12px',
+                     display: 'flex',
+                     alignItems: 'center',
+-                    gap: '10px',
++                    gap: isMobile ? '6px' : '10px',
+                     cursor: 'pointer',
+                     transition: '0.2s',
+                     position: 'relative'
+                 }}
+             >
+-                <ClipboardList size={16} color={readyToClaimCount > 0 ? '#4ade80' : 'var(--text-dim)'} />
+-                {!readyToClaimCount && <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-dim)', whiteSpace: 'nowrap' }}>{activeQuests.length} Quests</span>}
+-                {readyToClaimCount > 0 && <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#4ade80', whiteSpace: 'nowrap' }}>{readyToClaimCount} Ready!</span>}
++                <ClipboardList size={isMobile ? 14 : 16} color={readyToClaimCount > 0 ? '#4ade80' : 'var(--text-dim)'} />
++                <span style={{ fontSize: isMobile ? '0.7rem' : '0.75rem', fontWeight: 'bold', color: readyToClaimCount > 0 ? '#4ade80' : 'var(--text-dim)', whiteSpace: 'nowrap' }}>{readyToClaimCount > 0 ? readyToClaimCount : activeQuests.length}</span>
+                 
+-                <ChevronDown size={14} color="var(--text-dim)" style={{
++                <ChevronDown size={isMobile ? 12 : 14} color="var(--text-dim)" style={{
+                     transition: '0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', opacity: 0.6
+                 }} />
+ 
+diff --git a/client/src/components/RankingPanel.jsx b/client/src/components/RankingPanel.jsx
+index 2175f23..436343d 100644
+--- a/client/src/components/RankingPanel.jsx
++++ b/client/src/components/RankingPanel.jsx
+@@ -7,7 +7,7 @@ import { GUILD_XP_TABLE } from '@shared/guilds.js';
+ import { formatNumber, formatSilver } from '@utils/format';
+ import { motion, AnimatePresence } from 'framer-motion';
+ import { COUNTRIES } from '@shared/countries';
+-import { Trophy, Users, Star, Coins, Circle, ChevronDown, Sword, Shield, Swords, Sparkles, Settings, Plus, Info, Check, X, Tag, User, Zap, Landmark, ClipboardList, Pickaxe, FlaskConical, Hammer, Lock, Dices, Library } from 'lucide-react';
++import { Trophy, Users, Star, Coins, Circle, ChevronDown, Sword, Shield, Swords, Sparkles, Settings, Plus, Info, Check, X, Tag, User, Zap, Landmark, ClipboardList, Pickaxe, FlaskConical, Hammer, Lock, Dices, Library, Flame } from 'lucide-react';
+ 
+ const CountryFlag = ({ code, name, size = '1.2rem', style = {} }) => {
+     if (!code) return <span style={{ fontSize: size, ...style }}>­ƒîÉ</span>;
+@@ -36,6 +36,12 @@ const CATEGORIES = {
+             { key: 'TOTAL_XP', label: 'Total XP' }
+         ]
+     },
++    ALTAR: {
++        label: 'ALTAR',
++        options: [
++            { key: 'ALTAR_DONATION', label: 'Donations' }
++        ]
++    },
+     PROFICIENCIES: {
+         label: 'PROFICIENCIES',
+         options: [
+@@ -235,6 +241,10 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
+ 
+                 subValue = topItem ? formatItemId(topItem) : '';
+                 label = 'ITEM POWER';
++            } else if (subCategory === 'ALTAR_DONATION') {
++                value = char.ranking_altar_donated || 0;
++                subValue = 0;
++                label = 'DONATED SILVER';
+             } else {
+                 // Generic Skill Handler
+                 const skill = (state.skills || {})[subCategory] || { level: 1, xp: 0 };
+@@ -361,6 +371,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
+                                         {key === 'COMBAT' && <Star size={14} />}
+                                         {key === 'DUNGEON' && <Circle size={14} />}
+                                         {key === 'PROFICIENCIES' && <Sword size={14} />}
++                                        {key === 'ALTAR' && <Flame size={14} />}
+                                         {CATEGORIES[key].label}
+                                     </button>
+                                 ))}
+@@ -542,7 +553,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
+                                             <div style={{ fontSize: '1.1rem', fontWeight: '900', color: index === 0 ? 'var(--accent)' : 'var(--text-main)', lineHeight: 1 }}>
+                                                 {formatNumber(char.value)}
+                                             </div>
+-                                            {rankMode !== 'GUILDS' && subCategory !== 'ITEM_POWER' ? (
++                                            {rankMode !== 'GUILDS' && !['ITEM_POWER', 'ALTAR_DONATION'].includes(subCategory) ? (
+                                                 <div style={{ fontSize: '0.65rem', color: index === 0 ? 'var(--accent)' : 'var(--text-dim)', fontWeight: 'bold', opacity: 0.8, marginTop: '2px' }}>
+                                                     {subCategory === 'TOTAL_XP' ? `LVL ${formatNumber(char.subValue)}` : 
+                                                      `${formatNumber(char.subValue)} XP`}
+@@ -653,12 +664,13 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
+                                                             });
+                                                             val = Math.floor(totalIP / 7);
+                                                         }
++                                                        else if (subCategory === 'ALTAR_DONATION') val = char.ranking_altar_donated || 0;
+                                                         else val = (char.state.skills?.[subCategory]?.level || 1);
+ 
+                                                         return formatNumber(val);
+                                                     })()}
+                                                 </div>
+-                                                {(rankMode === 'GUILDS' || subCategory !== 'ITEM_POWER') && (
++                                                {rankMode !== 'GUILDS' && !['ITEM_POWER', 'ALTAR_DONATION'].includes(subCategory) && (
+                                                     <div style={{ fontSize: '0.65rem', color: 'var(--accent)', fontWeight: 'bold', opacity: 0.8, marginTop: '2px' }}>
+                                                         {(() => {
+                                                             if (rankMode === 'GUILDS') return `${formatNumber(userRankData.guild?.xp || 0)} XP`;
+diff --git a/client/src/components/Sidebar.jsx b/client/src/components/Sidebar.jsx
+index d44282c..6eb0384 100644
+--- a/client/src/components/Sidebar.jsx
++++ b/client/src/components/Sidebar.jsx
+@@ -51,7 +51,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
+         const level = skill.level || 1;
+         const xp = skill.xp || 0;
+         const nextLevelXp = calculateNextLevelXP(level);
+-        const progress = level >= 100 ? 100 : Math.min(100, (xp / nextLevelXp) * 100);
++        const progress = level >= 200 ? 100 : Math.min(100, (xp / nextLevelXp) * 100);
+ 
+         return (
+             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px', minWidth: '45px' }}>
+diff --git a/client/src/components/SkillProgressHeader.jsx b/client/src/components/SkillProgressHeader.jsx
+index 6ef2f0c..9df232c 100644
+--- a/client/src/components/SkillProgressHeader.jsx
++++ b/client/src/components/SkillProgressHeader.jsx
+@@ -80,7 +80,7 @@ const SkillProgressHeader = ({ tab, category }) => {
+   }
+ 
+   const nextXP = calculateNextLevelXP(skill.level);
+-  const progress = Math.min(100, (skill.xp / nextXP) * 100);
++  const progress = skill.level >= 200 ? 100 : Math.min(100, (skill.xp / nextXP) * 100);
+ 
+   return (
+     <div className="glass-panel" style={{
+diff --git a/client/src/utils/xpTable.js b/client/src/utils/xpTable.js
+index 671cb0e..e30a977 100644
+--- a/client/src/utils/xpTable.js
++++ b/client/src/utils/xpTable.js
+@@ -9,11 +9,21 @@ export const XP_TABLE = [
+     220417, 232945, 246859, 262341, 279598, 298871, 320434, 344603, 371744, 402278,
+     441971, 486789, 537487, 594941, 660170, 734360, 818896, 915396, 1025752, 1152182,
+     1316749, 1492835, 1681248, 1882849, 2098562, 2329375, 2576345, 2840603, 3123359, 3425908,
+-    3749636, 4269287, 4827911, 5428432, 6073992, 6767969, 7513995, 8315973, 9178099, 10104099
++    3749636, 4269287, 4827911, 5428432, 6073992, 6767969, 7513995, 8315973, 9178099, 10104099,
++    11122699, 12227880, 13427001, 14728048, 16139684, 17671309, 19333122, 21136189, 23092517, 25215132,
++    27868401, 30747198, 33870693, 37259685, 40936741, 44926347, 49255069, 53951732, 59047611, 64576640,
++    71487926, 78986671, 87122809, 95950518, 105528582, 115920781, 127196317, 139430273, 152704115, 167106234,
++    185108882, 204641755, 225834922, 248829508, 273778634, 300848435, 330219169, 362086415, 396662377, 434177295,
++    481070942, 531950549, 587154922, 647051667, 712039635, 782551580, 859057040, 942065464, 1032129604, 1129849195,
++    1251998683, 1384530877, 1528328307, 1684348518, 1853630446, 2037301337, 2236584253, 2452806216, 2687407045, 2941948944,
++    3260126317, 3605348766, 3979915123, 4386319620, 4827268499, 5305698032, 5824794075, 6388013281, 6999106119, 7662141848,
++    8490936509, 9390178716, 10365856510, 11424466916, 12573059206, 13819281840, 15171433397, 16638517836, 18230304452, 19957392930,
++    22116253527, 24458617274, 27000081939, 29757571100, 32749496839, 35995736265, 39517906042, 43339460250, 47485846565, 51984675716,
++    57608212154, 63709748688, 70329915827, 77512797172, 85306223431, 93762090922, 102936707149, 112891165755, 123691753342, 135410390873
+ ];
+ 
+ export const calculateNextLevelXP = (level) => {
+-    if (level >= 100) return Infinity;
++    if (level >= 200) return Infinity;
+     const targetTotal = XP_TABLE[level] || Infinity;
+     const currentTotal = XP_TABLE[level - 1] || 0;
+     return targetTotal - currentTotal;

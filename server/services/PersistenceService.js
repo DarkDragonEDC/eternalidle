@@ -24,7 +24,6 @@ export class PersistenceService {
         const nextLock = currentLock.then(async () => {
             try { return await task(); }
             catch (err) {
-                console.error(`[LOCK] Error executing task for user ${userId}:`, err);
                 throw err;
             }
         }).finally(() => {
@@ -91,9 +90,6 @@ export class PersistenceService {
         const prunedState = pruneState(stateToPrune);
 
         const inventoryToSave = prunedState.inventory || {};
-        if (!prunedState.inventory) {
-            console.warn(`[DB-DEBUG] WARNING: prunedState.inventory is MISSING for ${char.name}! This will wipe the inventory.`);
-        }
         delete prunedState.inventory;
         const skillsToSave = prunedState.skills || {};
         delete prunedState.skills;
@@ -196,7 +192,7 @@ export class PersistenceService {
                 .from('leaderboards')
                 .upsert(leaderboardEntries, { onConflict: 'character_id,ranking_type' });
         } catch (lbErr) {
-            console.error('[PersistenceService] Leaderboard Update Error:', lbErr);
+            // Fail silently on leaderboard errors to prevent blocking main save
         }
         // ------------------------------------------------
 
@@ -214,7 +210,6 @@ export class PersistenceService {
             this.dirty.delete(charId);
             return true;
         } else {
-            console.error(`[DB] Error persisting ${char.name}:`, error);
             return false;
         }
     }
@@ -315,7 +310,6 @@ export class PersistenceService {
         if (!error && dbChar) {
             const currentDbHash = this.calculateHash(dbChar.state);
             if (currentDbHash !== char.dbHash) {
-                console.log(`[SYNC] Refreshing character ${char.name} from DB (Manual edit detected)`);
                 this.dirty.delete(charId);
                 dbChar.state = hydrateState(dbChar.state || {});
                 if (dbChar.inventory) dbChar.state.inventory = dbChar.inventory;
@@ -346,7 +340,6 @@ export class PersistenceService {
                 };
 
                 if (this.globalStats.tax_24h_ago === 0 && this.globalStats.total_market_tax > 0) {
-                    console.log(`[PersistenceService] Initializing tax_24h_ago baseline to: ${this.globalStats.total_market_tax}`);
                     this.globalStats.tax_24h_ago = this.globalStats.total_market_tax;
 
                     if (this.globalStats.market_tax_total < 1000 && this.globalStats.trade_tax_total === 0) {

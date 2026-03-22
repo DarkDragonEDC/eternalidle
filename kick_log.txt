@@ -1,0 +1,7 @@
+Connected to Supabase
+Processing SeiseIron...
+Deleted from guild_members: 0 rows
+Updated character state: 1 rows
+Processing DIABLO'...
+Deleted from guild_members: 1 rows
+Updated character state: 1 rows

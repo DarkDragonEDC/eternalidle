@@ -445,6 +445,8 @@ const GuildPanel = ({ gameState, socket, isMobile, onInspect }) => {
                                         isMobile={isMobile}
                                         ICONS={ICONS}
                                         isIronman={!!gameState?.state?.isIronman}
+                                        onInspect={onInspect}
+                                        socket={socket}
                                     />
                                 ) : (
                                     <GuildCreate 

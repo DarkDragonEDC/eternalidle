@@ -1,0 +1,440 @@
+﻿diff --git a/client/src/components/GuildPanel.jsx b/client/src/components/GuildPanel.jsx
+index e926a7e..4a90204 100644
+--- a/client/src/components/GuildPanel.jsx
++++ b/client/src/components/GuildPanel.jsx
+@@ -444,6 +444,7 @@ const GuildPanel = ({ gameState, socket, isMobile, onInspect }) => {
+                                         playerLevel={playerLevel}
+                                         isMobile={isMobile}
+                                         ICONS={ICONS}
++                                        isIronman={!!gameState?.state?.isIronman}
+                                     />
+                                 ) : (
+                                     <GuildCreate 
+@@ -454,6 +455,7 @@ const GuildPanel = ({ gameState, socket, isMobile, onInspect }) => {
+                                         userOrbs={gameState?.state?.orbs || 0}
+                                         isMobile={isMobile}
+                                         ICONS={ICONS}
++                                        isIronman={!!gameState?.state?.isIronman}
+                                     />
+                                 )}
+                             </AnimatePresence>
+diff --git a/client/src/components/GuildProfileModal.jsx b/client/src/components/GuildProfileModal.jsx
+index 8927a23..802c053 100644
+--- a/client/src/components/GuildProfileModal.jsx
++++ b/client/src/components/GuildProfileModal.jsx
+@@ -285,6 +285,24 @@ const GuildProfileModal = ({ isOpen, onClose, guildId, socket, onInspect, isMobi
+                                                 boxShadow: '0 2px 8px rgba(212, 175, 55, 0.3)',
+                                                 letterSpacing: '0.5px'
+                                             }}>{guild.tag}</span>
++
++                                            {guild.is_ironman && (
++                                                <div style={{
++                                                    background: 'rgba(255, 165, 0, 0.15)',
++                                                    border: '1px solid rgba(255, 165, 0, 0.4)',
++                                                    color: '#ffa500',
++                                                    fontSize: '0.6rem',
++                                                    padding: '2px 8px',
++                                                    borderRadius: '6px',
++                                                    fontWeight: '900',
++                                                    display: 'flex',
++                                                    alignItems: 'center',
++                                                    gap: '4px',
++                                                    boxShadow: '0 2px 10px rgba(255, 165, 0, 0.1)'
++                                                }}>
++                                                    <Shield size={12} /> IRONMAN
++                                                </div>
++                                            )}
+                                         </div>
+ 
+                                         {/* Level & Members List */}
+diff --git a/client/src/components/MarketListingModal.jsx b/client/src/components/MarketListingModal.jsx
+index 81034a1..aae4279 100644
+--- a/client/src/components/MarketListingModal.jsx
++++ b/client/src/components/MarketListingModal.jsx
+@@ -17,7 +17,7 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
+     useEffect(() => {
+         if (listingItem) {
+             setAmount('1');
+-            const itemData = resolveItem(listingItem.itemId);
++            const itemData = resolveItem(listingItem);
+             const minP = itemData ? (calculateItemSellPrice(itemData, listingItem.itemId) || 1) : 1;
+             setUnitPrice(minP.toString());
+             setCurrentMarketPrice(null);
+@@ -39,13 +39,23 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
+             setCurrentMarketPrice(marketPriceUpdate.lowestPrice);
+             setHighestBuyOrder(marketPriceUpdate.highestBuyOrder);
+             setLoadingPrice(false);
++
++            // Auto-fill price logic:
++            // 1. Prioritize Lowest Market Price (for competitive listing)
++            // 2. Fallback to Highest Buy Order (for "Quick Sell" behavior)
++            if (marketPriceUpdate.lowestPrice && marketPriceUpdate.lowestPrice > 0) {
++                setUnitPrice(marketPriceUpdate.lowestPrice.toString());
++            } else if (marketPriceUpdate.highestBuyOrder && marketPriceUpdate.highestBuyOrder > 0) {
++                setUnitPrice(marketPriceUpdate.highestBuyOrder.toString());
++            }
++
+             setMarketPriceUpdate(null); // Clear once consumed
+         }
+     }, [marketPriceUpdate, listingItem?.itemId, setMarketPriceUpdate]);
+ 
+     if (!listingItem) return null;
+ 
+-    const itemData = resolveItem(listingItem.itemId);
++    const itemData = resolveItem(listingItem);
+     const tierColor = getTierColor(itemData?.tier || 1);
+     const maxQty = (() => {
+         const raw = listingItem.max || listingItem.qty || 0;
+@@ -136,10 +146,28 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
+                         {(() => {
+                             const icon = itemData?.icon;
+                             const normalizedIcon = typeof icon === 'string' ? icon.replace(/\.(png|jpg|jpeg)$/, '.webp') : icon;
++                            
+                             return normalizedIcon ? (
+-                                <img src={normalizedIcon} alt={itemData.name} style={{ width: '130%', height: '130%', objectFit: 'contain' }} />
++                                <img 
++                                    src={normalizedIcon} 
++                                    alt={itemData?.name} 
++                                    style={{ width: '130%', height: '130%', objectFit: 'contain' }}
++                                    onError={(e) => {
++                                        e.target.style.display = 'none';
++                                        // Show placeholder instead
++                                        const parent = e.target.parentElement;
++                                        if (parent && !parent.querySelector('.fallback-text')) {
++                                            const span = document.createElement('span');
++                                            span.className = 'fallback-text';
++                                            span.innerText = `T${itemData?.tier || '?'}`;
++                                            span.style.color = tierColor;
++                                            span.style.fontWeight = 'bold';
++                                            parent.appendChild(span);
++                                        }
++                                    }}
++                                />
+                             ) : (
+-                                <span style={{ color: tierColor, fontWeight: 'bold' }}>T{itemData?.tier}</span>
++                                <span className="fallback-text" style={{ color: tierColor, fontWeight: 'bold' }}>T{itemData?.tier}</span>
+                             );
+                         })()}
+                         {/* Rune Stars Overlay */}
+@@ -164,7 +192,10 @@ const MarketListingModal = ({ listingItem, onClose, socket }) => {
+                         )}
+                     </div>
+                     <div>
+-                        <div style={{ fontWeight: 'bold', color: 'var(--text-main)', fontSize: '1rem' }}>{itemData?.name || formatItemId(listingItem.itemId)}</div>
++                        <div style={{ fontWeight: 'bold', color: 'var(--text-main)', fontSize: '1rem' }}>
++                            {itemData?.name || formatItemId(listingItem.itemId)}
++                            {itemData?.enhancement > 0 && <span style={{ color: '#4ade80', marginLeft: '8px' }}>+{itemData.enhancement}</span>}
++                        </div>
+                         <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '2px' }}>Owned: <b style={{ color: 'var(--text-main)' }}>{maxQty}</b></div>
+                     </div>
+                 </div>
+diff --git a/client/src/components/MarketPanel.jsx b/client/src/components/MarketPanel.jsx
+index 3aa59d3..95061af 100644
+--- a/client/src/components/MarketPanel.jsx
++++ b/client/src/components/MarketPanel.jsx
+@@ -119,6 +119,15 @@ const MarketPanel = ({ socket, gameState, silver = 0, onShowInfo, onListOnMarket
+             });
+         });
+ 
++        // Add Enhancement Stones (Fixed IDs, not tiered)
++        const stoneClasses = ['WARRIOR', 'HUNTER', 'MAGE'];
++        const stoneSlots = ['WEAPON', 'OFFHAND', 'ARMOR', 'HELMET', 'BOOTS', 'GLOVES', 'CAPE'];
++        stoneClasses.forEach(cls => {
++            stoneSlots.forEach(slot => {
++                list.push(`ENHANCEMENT_STONE_${cls}_${slot}`);
++            });
++        });
++
+         return list.map(id => {
+             const resolved = resolveItem(id);
+             if (!resolved) return null;
+diff --git a/client/src/components/guild/GuildCreate.jsx b/client/src/components/guild/GuildCreate.jsx
+index c46e35c..f41e607 100644
+--- a/client/src/components/guild/GuildCreate.jsx
++++ b/client/src/components/guild/GuildCreate.jsx
+@@ -31,7 +31,8 @@ export const GuildCreate = ({
+     userSilver, 
+     userOrbs, 
+     isMobile,
+-    ICONS 
++    ICONS,
++    isIronman
+ }) => {
+     const [guildName, setGuildName] = useState('');
+     const [guildTag, setGuildTag] = useState('');
+@@ -156,6 +157,24 @@ export const GuildCreate = ({
+                         <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>1/10</span>
+                     </div>
+                 </motion.div>
++                {isIronman && (
++                    <div style={{
++                        marginTop: '10px',
++                        padding: '8px 12px',
++                        background: 'rgba(255, 165, 0, 0.1)',
++                        border: '1px solid rgba(255, 165, 0, 0.3)',
++                        borderRadius: '10px',
++                        display: 'flex',
++                        alignItems: 'center',
++                        gap: '8px',
++                        fontSize: '0.7rem',
++                        color: '#ffa500',
++                        fontWeight: 'bold'
++                    }}>
++                        <Shield size={14} />
++                        NOTICE: As an Ironman, your guild will be Ironman-only.
++                    </div>
++                )}
+             </div>
+ 
+             {/* Main Interaction Grid */}
+diff --git a/client/src/components/guild/GuildSearch.jsx b/client/src/components/guild/GuildSearch.jsx
+index d4b30a4..a6e3e70 100644
+--- a/client/src/components/guild/GuildSearch.jsx
++++ b/client/src/components/guild/GuildSearch.jsx
+@@ -31,7 +31,8 @@ export const GuildSearch = ({
+     playerLevel,
+     isMobile,
+     ICONS,
+-    socket
++    socket,
++    isIronman
+ }) => {
+     const [searchQuery, setSearchQuery] = useState('');
+     const [selectedCountry, setSelectedCountry] = useState(null);
+@@ -320,6 +321,22 @@ export const GuildSearch = ({
+                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                         <div style={{ fontWeight: 'bold', color: '#fff' }}>{g.name}</div>
+                                         <span style={{ color: 'var(--accent)', fontSize: '0.7rem', fontWeight: 'bold' }}>[{g.tag}]</span>
++                                        {g.is_ironman && (
++                                            <div style={{
++                                                background: 'rgba(255, 165, 0, 0.15)',
++                                                border: '1px solid rgba(255, 165, 0, 0.4)',
++                                                color: '#ffa500',
++                                                fontSize: '0.55rem',
++                                                padding: '1px 5px',
++                                                borderRadius: '4px',
++                                                fontWeight: '900',
++                                                display: 'flex',
++                                                alignItems: 'center',
++                                                gap: '3px'
++                                            }}>
++                                                <Shield size={10} /> IRONMAN
++                                            </div>
++                                        )}
+                                     </div>
+                                     <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>
+                                         LVL {g.level || 1} ÔÇó MIN LVL {g.min_level || 1} ÔÇó {g.summary || 'Stronger Together'}
+@@ -346,23 +363,26 @@ export const GuildSearch = ({
+                                     </div>
+                                 ) : (
+                                     <motion.button
+-                                        whileHover={!(isApplying || playerLevel < g.min_level) ? { scale: 1.05 } : {}}
+-                                        whileTap={!(isApplying || playerLevel < g.min_level) ? { scale: 0.95 } : {}}
+-                                        disabled={isApplying || parentIsApplying || playerLevel < g.min_level}
++                                        whileHover={!(isApplying || playerLevel < g.min_level || (isIronman !== !!g.is_ironman)) ? { scale: 1.05 } : {}}
++                                        whileTap={!(isApplying || playerLevel < g.min_level || (isIronman !== !!g.is_ironman)) ? { scale: 0.95 } : {}}
++                                        disabled={isApplying || parentIsApplying || playerLevel < g.min_level || (isIronman !== !!g.is_ironman)}
+                                         onClick={() => handleApply(g.id, g.min_level, g.join_mode)}
+                                         style={{
+                                             padding: '6px 16px',
+-                                            background: playerLevel < g.min_level ? 'rgba(255,255,255,0.05)' : 'var(--accent)',
+-                                            border: playerLevel < g.min_level ? '1px solid rgba(255,255,255,0.1)' : 'none',
++                                            background: (playerLevel < g.min_level || (isIronman !== !!g.is_ironman)) ? 'rgba(255,255,255,0.05)' : 'var(--accent)',
++                                            border: (playerLevel < g.min_level || (isIronman !== !!g.is_ironman)) ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                                             borderRadius: '8px',
+-                                            color: playerLevel < g.min_level ? 'rgba(255,255,255,0.2)' : '#000',
++                                            color: (playerLevel < g.min_level || (isIronman !== !!g.is_ironman)) ? 'rgba(255,255,255,0.2)' : '#000',
+                                             fontSize: '0.7rem',
+                                             fontWeight: '900',
+-                                            cursor: (isApplying || parentIsApplying || playerLevel < g.min_level) ? 'not-allowed' : 'pointer',
++                                            cursor: (isApplying || parentIsApplying || playerLevel < g.min_level || (isIronman !== !!g.is_ironman)) ? 'not-allowed' : 'pointer',
+                                             transition: '0.2s'
+                                         }}
+                                     >
+-                                        {playerLevel < g.min_level ? `REQ. LVL ${g.min_level}` : (g.join_mode === 'OPEN' ? 'JOIN' : 'APPLY')}
++                                        {isIronman !== !!g.is_ironman 
++                                            ? (isIronman ? "IRONMAN ONLY" : "NO IRONMAN") 
++                                            : (playerLevel < g.min_level ? `REQ. LVL ${g.min_level}` : (g.join_mode === 'OPEN' ? 'JOIN' : 'APPLY'))
++                                        }
+                                     </motion.button>
+                                 )}
+                                 <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>{g.memberCount || 0}/{g.maxMembers || 10}</span>
+diff --git a/client/src/components/market/MarketBrowseTab.jsx b/client/src/components/market/MarketBrowseTab.jsx
+index d4028b1..5da6bdf 100644
+--- a/client/src/components/market/MarketBrowseTab.jsx
++++ b/client/src/components/market/MarketBrowseTab.jsx
+@@ -217,7 +217,7 @@ const MarketBrowseTab = ({
+                                     boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.4)'
+                                 }}>
+                                     {(() => {
+-                                        const resolved = resolveItem(l.item_id, l.item_data?.quality);
++                                        const resolved = resolveItem(l.item_data || l.item_id);
+                                         const icon = resolved?.icon || l.item_data?.icon;
+                                         // Force .webp extension for icons
+                                         const normalizedIcon = typeof icon === 'string' ? icon.replace(/\.(png|jpg|jpeg)$/, '.webp') : icon;
+@@ -260,7 +260,15 @@ const MarketBrowseTab = ({
+ 
+                                 <div style={{ flex: '2 1 0%', minWidth: '150px' }}>
+                                     <div style={{ fontWeight: 'bold', fontSize: '1rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+-                                        <span>{resolveItem(l.item_id)?.name || l.item_data.name}</span>
++                                        {(() => {
++                                            const resolved = resolveItem(l.item_data || l.item_id);
++                                            return (
++                                                <>
++                                                    <span>{resolved?.name || l.item_data.name}</span>
++                                                    {resolved?.enhancement > 0 && <span style={{ color: '#4ade80' }}>+{resolved.enhancement}</span>}
++                                                </>
++                                            );
++                                        })()}
+                                         <button 
+                                             onClick={() => onShowInfo && onShowInfo(l.item_data)} 
+                                             style={{ background: 'none', border: 'none', padding: '0', color: 'var(--text-dim)', cursor: 'pointer', display: 'flex' }}
+diff --git a/client/src/components/market/MarketBuyOrdersTab.jsx b/client/src/components/market/MarketBuyOrdersTab.jsx
+index c74a9ee..a8b0e11 100644
+--- a/client/src/components/market/MarketBuyOrdersTab.jsx
++++ b/client/src/components/market/MarketBuyOrdersTab.jsx
+@@ -173,6 +173,7 @@ const MarketBuyOrdersTab = ({
+             pricePerUnit: 1,
+             searchText: '',
+             quality: 0,
++            enhancement: 0,
+             stars: 1,
+             canHaveQuality: false,
+             canHaveStars: false
+@@ -254,6 +255,10 @@ const MarketBuyOrdersTab = ({
+                         <span style={{ fontWeight: 'bold', fontSize: '1rem', color: 'var(--text-main)' }}>
+                             {itemInfo?.qualityName && itemInfo?.qualityName !== 'Normal' ? `${itemInfo.qualityName} ` : ''}
+                             {itemInfo?.name}
++                            {(() => {
++                                const eMatch = String(order.item_id).match(/_E(\d+)/);
++                                return eMatch ? <span style={{ color: '#4ade80' }}> +{eMatch[1]}</span> : '';
++                            })()}
+                         </span>
+                         <button 
+                             onClick={() => socket.emit('get_item_info', { itemId: order.item_id })} 
+@@ -296,7 +301,10 @@ const MarketBuyOrdersTab = ({
+                                 setConfirmModal({
+                                     message: `Cancel this Buy Order?`,
+                                     subtext: `The remaining ${remaining}x items will be cancelled. ${fee > 0 ? `A 10% cancellation fee (${formatNumber(fee)} Silver) applies as the order is less than 1h old.` : 'No cancellation fee applies.'}`,
+-                                    onConfirm: () => socket.emit('cancel_buy_order', { orderId: order.id })
++                                    onConfirm: () => {
++                                        socket.emit('cancel_buy_order', { orderId: order.id });
++                                        setConfirmModal(null);
++                                    }
+                                 });
+                             }}
+                             style={{
+@@ -756,7 +764,16 @@ const MarketBuyOrdersTab = ({
+                                                     onClick={() => {
+                                                         const resolved = resolveItem(item.id);
+                                                         const autoPrice = calculateItemSellPrice(resolved || item, item.id) || 1;
+-                                                        setCreateBuyOrderModal(prev => ({ ...prev, itemId: item.id, searchText: item.name, canHaveQuality: item.canHaveQuality, canHaveStars: item.canHaveStars, pricePerUnit: autoPrice }));
++                                                                                                                 setCreateBuyOrderModal(prev => ({ 
++                                                            ...prev, 
++                                                            itemId: item.id, 
++                                                            searchText: item.name, 
++                                                            canHaveQuality: item.canHaveQuality, 
++                                                            canHaveStars: item.canHaveStars, 
++                                                            pricePerUnit: autoPrice,
++                                                            enhancement: 0
++                                                        }));
++
+                                                         setItemSuggestions([]);
+                                                     }}
+                                                     style={{ padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', borderBottom: '1px solid var(--border)', transition: '0.15s' }}
+@@ -782,26 +799,54 @@ const MarketBuyOrdersTab = ({
+                         {createBuyOrderModal.itemId && (createBuyOrderModal.canHaveQuality || createBuyOrderModal.canHaveStars) && (
+                             <div style={{ background: 'rgba(0,0,0,0.15)', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px 14px', marginBottom: '14px' }}>
+                                 {createBuyOrderModal.canHaveQuality && (
+-                                    <div>
+-                                        <label style={{ display: 'block', color: 'var(--text-dim)', fontSize: '0.8rem', marginBottom: '6px', fontWeight: '500' }}>Select Quality</label>
+-                                        <select
+-                                            value={createBuyOrderModal.quality}
+-                                            onChange={(e) => {
+-                                                const newQuality = parseInt(e.target.value);
+-                                                const qualitySuffix = newQuality > 0 ? `_Q${newQuality}` : '';
+-                                                const fullItemId = createBuyOrderModal.itemId.replace(/_Q\d$/, '') + qualitySuffix;
+-                                                const resolved = resolveItem(fullItemId);
+-                                                const autoPrice = calculateItemSellPrice(resolved || resolveItem(createBuyOrderModal.itemId), fullItemId) || 1;
+-                                                setCreateBuyOrderModal(prev => ({ ...prev, quality: newQuality, pricePerUnit: autoPrice }));
+-                                            }}
+-                                            style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border)', borderRadius: '8px', padding: '10px 12px', color: ['#fff', '#4caf50', '#4a90e2', '#9013fe', '#f5a623'][createBuyOrderModal.quality] || 'var(--text-main)', fontSize: '0.9rem', fontWeight: 'bold' }}
+-                                        >
+-                                            <option value="0" style={{ color: '#fff', background: '#1a1a2e' }}>Normal</option>
+-                                            <option value="1" style={{ color: '#4caf50', background: '#1a1a2e' }}>Good</option>
+-                                            <option value="2" style={{ color: '#4a90e2', background: '#1a1a2e' }}>Outstanding</option>
+-                                            <option value="3" style={{ color: '#9013fe', background: '#1a1a2e' }}>Excellent</option>
+-                                            <option value="4" style={{ color: '#f5a623', background: '#1a1a2e' }}>Masterpiece</option>
+-                                        </select>
++                                    <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
++                                        <div style={{ flex: 1 }}>
++                                            <label style={{ display: 'block', color: 'var(--text-dim)', fontSize: '0.8rem', marginBottom: '6px', fontWeight: '500' }}>Select Quality</label>
++                                            <select
++                                                value={createBuyOrderModal.quality}
++                                                onChange={(e) => {
++                                                    const newQuality = parseInt(e.target.value);
++                                                    const qualitySuffix = newQuality > 0 ? `_Q${newQuality}` : '';
++                                                    const fullItemId = createBuyOrderModal.itemId.replace(/_Q\d$/, '') + qualitySuffix;
++                                                    const resolved = resolveItem(fullItemId);
++                                                    const autoPrice = calculateItemSellPrice(resolved || resolveItem(createBuyOrderModal.itemId), fullItemId) || 1;
++                                                    setCreateBuyOrderModal(prev => ({ ...prev, quality: newQuality, pricePerUnit: autoPrice }));
++                                                }}
++                                                style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border)', borderRadius: '8px', padding: '10px 12px', color: ['#fff', '#4caf50', '#4a90e2', '#9013fe', '#f5a623'][createBuyOrderModal.quality] || 'var(--text-main)', fontSize: '0.9rem', fontWeight: 'bold' }}
++                                            >
++                                                <option value="0" style={{ color: '#fff', background: '#1a1a2e' }}>Normal</option>
++                                                <option value="1" style={{ color: '#4caf50', background: '#1a1a2e' }}>Good</option>
++                                                <option value="2" style={{ color: '#4a90e2', background: '#1a1a2e' }}>Outstanding</option>
++                                                <option value="3" style={{ color: '#9013fe', background: '#1a1a2e' }}>Excellent</option>
++                                                <option value="4" style={{ color: '#f5a623', background: '#1a1a2e' }}>Masterpiece</option>
++                                            </select>
++                                        </div>
++                                        <div style={{ flex: 1 }}>
++                                            <label style={{ display: 'block', color: 'var(--text-dim)', fontSize: '0.8rem', marginBottom: '6px', fontWeight: '500' }}>Enhancement Level</label>
++                                            <select
++                                                value={createBuyOrderModal.enhancement}
++                                                onChange={(e) => {
++                                                    const newEnhancement = parseInt(e.target.value);
++                                                    setCreateBuyOrderModal(prev => ({ ...prev, enhancement: newEnhancement }));
++                                                }}
++                                                style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border)', borderRadius: '8px', padding: '10px 12px', color: createBuyOrderModal.enhancement > 0 ? '#4ade80' : 'var(--text-main)', fontSize: '0.9rem', fontWeight: 'bold' }}
++                                            >
++                                                {(() => {
++                                                    const selectedItem = resolveItem(createBuyOrderModal.itemId);
++                                                    const tier = selectedItem?.tier || 1;
++                                                    let maxE = 15;
++                                                    if (tier <= 3) maxE = 5;
++                                                    else if (tier <= 6) maxE = 10;
++                                                    else if (tier === 10) maxE = 20;
++                                                    
++                                                    return Array.from({ length: maxE + 1 }).map((_, i) => (
++                                                        <option key={i} value={i} style={{ color: i > 0 ? '#4ade80' : '#fff', background: '#1a1a2e' }}>
++                                                            {i === 0 ? 'No Enhancement' : `+${i}`}
++                                                        </option>
++                                                    ));
++                                                })()}
++                                            </select>
++                                        </div>
+                                     </div>
+                                 )}
+                                 {createBuyOrderModal.canHaveStars && (
+@@ -861,13 +906,16 @@ const MarketBuyOrdersTab = ({
+                         {/* POST BUY ORDER button */}
+                         <button
+                             onClick={() => {
++                                const qualitySuffix = createBuyOrderModal.quality > 0 ? `_Q${createBuyOrderModal.quality}` : '';
++                                const enhancementSuffix = createBuyOrderModal.enhancement > 0 ? `_E${createBuyOrderModal.enhancement}` : '';
++                                const finalItemId = createBuyOrderModal.itemId + qualitySuffix + enhancementSuffix;
++
+                                 socket.emit('create_buy_order', {
+-                                    itemId: createBuyOrderModal.itemId,
++                                    itemId: finalItemId,
+                                     amount: createBuyOrderModal.amount,
+-                                    pricePerUnit: createBuyOrderModal.pricePerUnit,
+-                                    quality: createBuyOrderModal.quality,
+-                                    stars: createBuyOrderModal.stars
++                                    pricePerUnit: createBuyOrderModal.pricePerUnit
+                                 });
++                                setCreateBuyOrderModal(null);
+                             }}
+                             disabled={!createBuyOrderModal.itemId}
+                             style={{

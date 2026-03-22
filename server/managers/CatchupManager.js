@@ -7,7 +7,7 @@ export class CatchupManager {
     constructor(gameManager) {
         this.gm = gameManager;
         this.supabase = gameManager.supabase;
-        this.useBatchCatchup = false; // Feature Toggle para otimização (Desativado via modo Legacy)
+        this.useBatchCatchup = false; // Feature Toggle for optimization (Disabled via Legacy mode)
     }
 
     /**
@@ -27,9 +27,6 @@ export class CatchupManager {
             const needsHealing = (data.state.health || 0) < (this.gm.inventoryManager.calculateStats(data).maxHP || 100) && (data.state.equipment?.food?.amount > 0);
             
             if ((data.current_activity || data.state.combat || data.state.dungeon || needsHealing) && data.last_saved) {
-                if (isSignificantCatchup) {
-                    console.log(`[CATCHUP] ${data.name}: last_saved=${data.last_saved}, elapsed=${elapsedSeconds.toFixed(1)}s, hasActivity=${!!data.current_activity}, hasCombat=${!!data.state.combat}, needsHealing=${needsHealing}`);
-                }
 
                 // 1. Process Activities
                 while (data.current_activity && typeof data.current_activity === 'object' && data.activity_started_at) {
@@ -42,7 +39,6 @@ export class CatchupManager {
                         const remainingMaxEffect = maxEffectSeconds - finalReport.totalTime;
 
                         if (remainingMaxEffect <= 0) {
-                            console.log(`[CATCHUP-LIMIT] ${data.name}: Activity idle limit exceeded.`);
                             data.current_activity = null;
                             data.activity_started_at = null;
                             break;
@@ -83,7 +79,6 @@ export class CatchupManager {
                         const maxEffectSeconds = Math.min(elapsedSeconds, maxIdleMs / 1000);
 
                         if (elapsedSeconds * 1000 > maxIdleMs) {
-                            console.log(`[CATCHUP-LIMIT] ${data.name}: Combat idle limit exceeded. Saving log.`);
                             await this.gm.combatManager.saveCombatLog(data, 'FLEE').catch(e => console.error(`[CATCHUP-SAVE-ERROR]`, e));
                         }
 
@@ -102,7 +97,6 @@ export class CatchupManager {
                 if (data.state.dungeon) {
                     const maxIdleMs = this.gm.getMaxIdleTime(data);
                     if (elapsedSeconds * 1000 > maxIdleMs) {
-                        console.log(`[CATCHUP-LIMIT] ${data.name}: Dungeon idle limit exceeded. Saving log.`);
                         await this.gm.dungeonManager.saveDungeonLog(data, 'ABANDONED').catch(e => console.error(`[CATCHUP-SAVE-ERROR]`, e));
                     }
 
@@ -145,9 +139,6 @@ export class CatchupManager {
                 const processedMs = Math.floor(finalReport.totalTime * 1000);
                 const nextSavedTimestamp = lastSaved + processedMs;
                 
-                if (isNaN(nextSavedTimestamp)) {
-                    console.error("DEBUG: lastSaved=" + lastSaved + " processedMs=" + processedMs + " finalReportTotalTime=" + finalReport.totalTime + " elapsedSeconds=" + elapsedSeconds);
-                }
                 
                 data.last_saved = new Date(nextSavedTimestamp).toISOString();
 
@@ -185,7 +176,9 @@ export class CatchupManager {
                 }
             }
         } catch (err) {
-            console.error(`[CATCHUP-CRASH] Critical error processing character ${data.name}:`, err);
+            // Log crash to catchup_errors.log instead of flooding console
+            const fs = await import('fs');
+            fs.appendFileSync('catchup_errors.log', `[${new Date().toISOString()}] Catchup error for char ${data.name}: ${err.message}\n${err.stack}\n---\n`);
         }
     }
 
@@ -240,7 +233,7 @@ export class CatchupManager {
                     };
                     const typeKey = efficiencyMap[actType];
                     
-                    // Calcula bônus médios (Global + Categoria + Específico)
+                    // Calculate average bonuses (Global + Category + Specific)
                     const yieldBonus = (stats.globals?.xpYield || 0); 
                     const categoryBonus = (stats.xpBonus?.[typeKey] || 0);
                     const specificBonus = (stats.xpBonus?.[skillKey] || 0);
@@ -372,7 +365,6 @@ export class CatchupManager {
             if (this.useBatchCatchup && (endTime - virtualTime) > (atkSpeed * 10)) {
                 const batchRounds = Math.min(100, Math.floor((endTime - virtualTime) / atkSpeed));
                 
-                // Simulação simplificada de N rounds
                 // Se o player é muito mais forte (não perde HP significativo), processamos o lote
                 const stats = this.gm.inventoryManager.calculateStats(char);
                 const mobDmg = char.state.combat.mobDamage || 10;

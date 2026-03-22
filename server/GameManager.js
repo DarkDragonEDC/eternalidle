@@ -199,7 +199,6 @@ export class GameManager {
 
             if (error) throw error;
 
-            console.log(`[BAN] Applied level ${nextLevel} ban to ${userId} (${playerName}). Reason: ${reason}`);
             return { success: true, level: nextLevel, bannedUntil };
         } catch (err) {
             console.error(`[BAN] Error applying ban to ${userId}:`, err);
@@ -296,18 +295,13 @@ export class GameManager {
         const currentPromise = this.userQueue[userId];
         const nextPromise = currentPromise.then(async () => {
             const startExec = Date.now();
-            console.log(`[LOCK] Executing ${taskName} for user ${userId}`);
             try {
                 return await action();
             } finally {
                 this.activeTasks[userId]--;
-                console.log(`[LOCK] Finished ${taskName} for ${userId} (${Date.now() - startExec}ms)`);
             }
         }).catch((err) => {
             this.activeTasks[userId]--;
-            console.error(`[LOCK-ERROR] Task ${taskName} failed for ${userId}:`, err);
-            // We don't rethrow here to avoid breaking the chain for subsequent tasks, 
-            // but the original caller will get the error from the returned 'result'
             throw err; 
         });
 
@@ -346,33 +340,19 @@ export class GameManager {
 
     async getCharacter(userId, characterId, catchup = false, bypassCache = false) {
         const start = Date.now();
-        console.log(`[DEBUG-PERF] getCharacter START for charId: ${characterId}, userId: ${userId}, catchup: ${catchup}, bypassCache: ${bypassCache}`);
-
         // Guard Clause invalid IDs (undefined string, null, etc)
         if (!characterId || characterId === 'undefined' || characterId === 'null') {
-            console.log(`[DEBUG-PERF] getCharacter END (invalid ID) for charId: ${characterId} in ${Date.now() - start}ms`);
             return null;
         }
 
         const data = await this.persistence.getCharacter(userId, characterId, bypassCache);
         if (!data) {
-            console.log(`[DEBUG-PERF] getCharacter END (not found) for charId: ${characterId} in ${Date.now() - start}ms`);
             return null;
         }
 
         if (catchup) {
             try {
-                const catchupStart = Date.now();
-                const now = Date.now();
-                const lastSaved = data.last_saved ? new Date(data.last_saved).getTime() : now;
-                const elapsedSeconds = (now - lastSaved) / 1000;
-                
-                // Significant if > 1 minute or activity time reached
-                const isSignificant = elapsedSeconds >= 60 || 
-                    (data.current_activity && elapsedSeconds >= (data.current_activity.time_per_action || 3));
-
                 await this.catchupManager.processCatchup(data, elapsedSeconds, lastSaved, isSignificant);
-                console.log(`[DEBUG-PERF] Catchup processed for ${data.name} in ${Date.now() - catchupStart}ms`);
             } catch (err) {
                 console.error(`[CATCHUP-CRASH] Critical error processing character ${data.name}:`, err);
                 const fs = await import('fs');
@@ -384,7 +364,6 @@ export class GameManager {
         if (data.state?.guild_id) {
             data.guild_bonuses = await this.getGuildBonuses(data.state.guild_id);
         }
-        console.log(`[DEBUG-PERF] getCharacter END for charId: ${characterId} in ${Date.now() - start}ms`);
         return data;
     }
 
@@ -403,7 +382,6 @@ export class GameManager {
             if (error) throw error;
             if (!rewards || rewards.length === 0) return;
 
-            console.log(`[REWARDS] Applying ${rewards.length} pending rewards to ${char.name}...`);
             for (const reward of rewards) {
                 if (reward.silver_gained) {
                     char.state.silver = (char.state.silver || 0) + Number(reward.silver_gained);
@@ -448,7 +426,6 @@ export class GameManager {
                 const stats = this.inventoryManager.calculateStats(char);
                 const maxHp = stats.maxHP || 100;
                 char.state.health = Math.min(maxHp, (char.state.health || 0) + char.state.resting.healAmount);
-                console.log(`[REST] ${char.name} resting complete: healed ${char.state.resting.healAmount} HP`);
 
                 if (char.state.health >= maxHp && char.user_id) {
                     this.pushManager.notifyUser(
@@ -494,7 +471,6 @@ export class GameManager {
         if (!charId) return;
         const char = this.cache.get(charId);
         if (char) {
-            console.log(`[CATCHUP] Offline report acknowledged and cleared for ${char.name}`);
             delete char.offlineReport;
             if (char._offlineReportSent) {
                 char._offlineReportSent = false;
@@ -511,7 +487,6 @@ export class GameManager {
 
 
     async createCharacter(userId, name, isIronman = false) {
-        console.log(`[SERVER] GameManager.createCharacter: "${name}", isIronman=${isIronman}`);
         // Check character limit
         const { data: chars, error: countError } = await this.supabase
             .from('characters')
@@ -574,7 +549,7 @@ export class GameManager {
                     expiresAt: membershipInfo.expiresAt,
                     source: 'MEMBERSHIP'
                 };
-                console.log(`[CREATE-CHAR] Inheriting active membership for ${name} until ${new Date(membershipInfo.expiresAt).toLocaleDateString()}`);
+                // Inheriting active membership
             }
         }
         // ------------------------------------------
@@ -595,7 +570,6 @@ export class GameManager {
         initialState.health = stats.maxHP || 100;
         initialState.maxHealth = stats.maxHP || 100;
 
-        console.log(`[SERVER] Final initialState.isIronman: ${initialState.isIronman}`);
 
         const inventory = initialState.inventory || {};
         delete initialState.inventory;
@@ -711,7 +685,6 @@ export class GameManager {
                 .eq('user_id', userId);
 
             if (error) throw error;
-            console.log(`[BAN] User ${userId} acknowledged their warning.`);
             return { success: true };
         } catch (err) {
             console.error(`[BAN] Error acknowledging warning for ${userId}:`, err);
@@ -733,7 +706,6 @@ export class GameManager {
 
     async runMaintenance() {
         const nowMs = Date.now();
-        console.log(`[MAINTENANCE] Starting background cleanup (Dynamic Limits 8h/12h)...`);
 
         try {
             // Find all characters with any active activity
@@ -745,7 +717,6 @@ export class GameManager {
             if (error) throw error;
 
             if (!allActive || allActive.length === 0) {
-                console.log("[MAINTENANCE] No active characters found.");
                 return;
             }
 
@@ -770,14 +741,12 @@ export class GameManager {
             });
 
             if (toCleanup.length === 0) {
-                console.log("[MAINTENANCE] No characters found exceeding their respective idle limits.");
                 return;
             }
 
             console.log(`[MAINTENANCE] Found ${toCleanup.length} characters to clean up.`);
 
             for (const char of toCleanup) {
-                console.log(`[MAINTENANCE] Cleaning up ${char.name} (${char.id})...`);
                 // Calling getCharacter with catchup=true will process gains up to limit
                 await this.executeLocked(char.user_id, async () => {
                     const fullChar = await this.getCharacter(char.user_id, char.id, true);
@@ -790,7 +759,6 @@ export class GameManager {
                         if (fullChar.state.combat?.started_at) {
                             const combatAge = nowMs - new Date(fullChar.state.combat.started_at).getTime();
                             if (combatAge > limitMs) {
-                                console.log(`[MAINTENANCE] Stopping combat for ${fullChar.name} (${Math.floor(combatAge / 3600000)}h exceeded limit)`);
                                 await this.combatManager.stopCombat(fullChar.user_id, fullChar.id);
                                 stopped = true;
                             }
@@ -798,7 +766,6 @@ export class GameManager {
                         if (fullChar.state.dungeon?.started_at) {
                             const dungeonAge = nowMs - new Date(fullChar.state.dungeon.started_at).getTime();
                             if (dungeonAge > limitMs) {
-                                console.log(`[MAINTENANCE] Stopping dungeon for ${fullChar.name} (${Math.floor(dungeonAge / 3600000)}h exceeded limit)`);
                                 await this.dungeonManager.stopDungeon(fullChar.user_id, fullChar.id);
                                 stopped = true;
                             }
@@ -806,14 +773,12 @@ export class GameManager {
                         if (fullChar.current_activity && fullChar.activity_started_at) {
                             const activityAge = nowMs - new Date(fullChar.activity_started_at).getTime();
                             if (activityAge > limitMs) {
-                                console.log(`[MAINTENANCE] Stopping activity for ${fullChar.name} (${Math.floor(activityAge / 3600000)}h exceeded limit)`);
                                 await this.activityManager.stopActivity(fullChar.user_id, fullChar.id);
                                 stopped = true;
                             }
                         }
 
                         if (stopped) {
-                            console.log(`[MAINTENANCE] Character ${fullChar.name} cleanup complete.`);
                         }
                     }
                 });
@@ -874,7 +839,6 @@ export class GameManager {
         // Independent Activity Limit Check
         if (char.current_activity && char.activity_started_at) {
             if (now - new Date(char.activity_started_at).getTime() > IDLE_LIMIT_MS) {
-                console.log(`[LIMIT] ${limitHours}h activity limit reached for ${char.name}. Stopping activity.`);
                 await this.activityManager.stopActivity(char.user_id, char.id);
                 hasChanges = true;
             }
@@ -883,7 +847,6 @@ export class GameManager {
         // Independent Combat Limit Check
         if (char.state.combat && char.state.combat.started_at) {
             if (now - new Date(char.state.combat.started_at).getTime() > IDLE_LIMIT_MS) {
-                console.log(`[LIMIT] ${limitHours}h combat limit reached for ${char.name}. Stopping combat.`);
 
                 // --- CRITICAL FIX: Save log before deleting state ---
                 try {
@@ -900,7 +863,6 @@ export class GameManager {
         // Independent Dungeon Limit Check
         if (char.state.dungeon && char.state.dungeon.started_at) {
             if (now - new Date(char.state.dungeon.started_at).getTime() > IDLE_LIMIT_MS) {
-                console.log(`[LIMIT] ${limitHours}h dungeon limit reached for ${char.name}. Stopping dungeon.`);
 
                 // --- CRITICAL FIX: Save log before deleting state ---
                 try {
@@ -1445,12 +1407,20 @@ export class GameManager {
         let error = null;
 
         if (type === 'GUILDS') {
-            const result = await this.supabase
+            let query = this.supabase
                 .from('guilds')
-                .select('id, name, tag, level, xp, icon, icon_color, bg_color, country_code, guild_hall_level, guild_members(character_id)')
+                .select('id, name, tag, level, xp, icon, icon_color, bg_color, country_code, guild_hall_level, is_ironman, guild_members(character_id)')
                 .order('level', { ascending: false })
                 .order('xp', { ascending: false })
                 .limit(100);
+
+            if (mode === 'IRONMAN') {
+                query = query.eq('is_ironman', true);
+            } else if (mode === 'NORMAL') {
+                query = query.eq('is_ironman', false);
+            }
+
+            const result = await query;
             
             data = result.data || [];
             error = result.error;
@@ -1960,11 +1930,9 @@ export class GameManager {
         const activeShardIdPrecheck = shardId || 'T1_RUNE_SHARD';
         if (activeShardIdPrecheck === 'T1_BATTLE_RUNE_SHARD' || activeShardIdPrecheck.includes('BATTLE')) {
             if (category !== 'COMBAT') {
-                console.log(`[GameManager] Auto-correcting category from '${category}' to 'COMBAT' (battle shard detected)`);
                 category = 'COMBAT';
             }
         } else if (category === 'COMBAT') {
-            console.log(`[GameManager] Auto-correcting category from 'COMBAT' to 'GATHERING' (non-battle shard used)`);
             category = 'GATHERING';
         }
 
@@ -2431,7 +2399,6 @@ export class GameManager {
             data.state.crowns = finalBalance; // Mirror for runtime compatibility
 
             if (finalBalance > 0 && infoOrbs === 0) {
-                console.log(`[MIGRATION-ORBS] Recovered/Migrated ${finalBalance} units for ${data.name}`);
             }
             if (data.info.membership) data.state.membership = data.info.membership;
             if (data.info.active_buffs) data.state.active_buffs = data.info.active_buffs;

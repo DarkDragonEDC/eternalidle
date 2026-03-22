@@ -124,7 +124,7 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
         if (!socket || !gameState) return;
 
         const type = rankMode === 'GUILDS' ? 'GUILDS' : subCategory;
-        const mode = rankMode === 'GUILDS' ? 'NORMAL' : rankMode;
+        const mode = rankMode === 'GUILDS' ? 'ALL' : rankMode;
         
         // Prevent infinite loops by only fetching when parameters actually change
         const fetchKey = `${type}_${mode}_${socket.id}`;
@@ -493,7 +493,10 @@ const RankingPanel = ({ gameState, isMobile, socket, onInspect }) => {
                                                         : (index < 3 ? 'var(--text-main)' : 'var(--text-dim)')
                                                 }}>
                                                     {rankMode === 'GUILDS' ? (
-                                                        <span style={{ color: 'var(--accent)', opacity: 0.8 }}>[{char.tag}]</span>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                            {char.is_ironman && <Shield size={14} color="#a855f7" style={{ marginRight: '4px' }} />}
+                                                            <span style={{ color: 'var(--accent)', opacity: 0.8 }}>[{char.tag}]</span>
+                                                        </div>
                                                     ) : (
                                                         char.guild_tag && <span style={{ color: 'var(--accent)', opacity: 0.8, fontSize: '0.8em' }}>[{char.guild_tag}] </span>
                                                     )}

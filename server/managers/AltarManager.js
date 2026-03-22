@@ -45,7 +45,6 @@ export class AltarManager {
     checkDailyReset() {
         const today = new Date().toISOString().split('T')[0];
         if (this.globalAltar.date !== today) {
-            console.log(`[AltarManager] New day detected (${today}), resetting in-memory altar progress.`);
             this.globalAltar.date = today;
             this.globalAltar.totalSilver = 0;
             this.globalAltar.lastNotifiedTier = 0;
@@ -115,7 +114,7 @@ export class AltarManager {
             });
 
             if (rpcError) {
-                console.error('[AltarManager] RPC increment_altar error:', rpcError);
+                // Fail silently or handle at GMA level, per rules to avoid flooding logs
                 throw new Error("Failed to process donation in database.");
             }
 
@@ -198,7 +197,6 @@ export class AltarManager {
             const threshold = this.TIERS[i];
 
             if (this.globalAltar.totalSilver >= threshold && this.globalAltar.lastNotifiedTier < tierNum) {
-                console.log(`[AltarManager] New Global Tier Goal reached: Tier ${tierNum}! Broadcasting notifications.`);
                 this.globalAltar.lastNotifiedTier = tierNum;
                 this._saveAltar(); // Update notified tier in DB
                 

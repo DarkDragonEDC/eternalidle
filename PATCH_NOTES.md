@@ -1,38 +1,76 @@
-# 📄 Patch Notes — v1.6.9 — Correções de Estabilidade
-
-## 🛠️ Correções
-
-### ⛪ Altar de Oferendas
-- **Correção crítica:** O progresso global do Altar era zerado indevidamente quando o servidor reiniciava ou quando havia diferença de fuso horário. O total acumulado podia ser sobrescrito por zero no banco de dados.
-- **Como foi corrigido:** O reset diário agora só limpa a memória interna — o banco de dados é atualizado apenas atomicamente pela função SQL a cada doação, garantindo que o total nunca seja perdido.
-
-### ⚔️ World Boss
-- **Correção:** A contagem de participantes mostrava **0** e o ranking pessoal não aparecia após reinício do servidor.
-- **Causa:** O carregamento inicial dos rankings e da sessão do boss era feito de forma assíncrona sem aguardar conclusão, causando dados vazios para jogadores que conectavam logo após o boot.
-- **Como foi corrigido:** O servidor agora aguarda o carregamento completo da sessão e rankings antes de aceitar conexões, garantindo dados corretos desde o primeiro acesso.
+# 📄 Notas da Atualização — v1.7.0
+## **O Despertar do Altar**
 
 ---
 
-# 📄 Patch Notes — v1.6.8 — Altar of Offerings
+### 🔥 **NOVA FUNCIONALIDADE: Altar de Oferendas**
+Um novo sistema global onde todos os jogadores colaboram para desbloquear bônus poderosos!
 
-## 🔥 NEW FEATURE: Altar of Offerings
-A new global system where all players collaborate to unlock powerful bonuses!
+*   **Doação Coletiva:** Doe sua **Prata** no Altar e ajude a comunidade a atingir metas globais.
+*   **Níveis de Recompensa:** Três marcos principais: **2M**, **5M** e **10M** de prata.
+*   **Buffs Dinâmicos:** Ao atingir uma meta, bônus de **XP, Prata, Drop e Qualidade** são liberados para todos!
+*   **Ativação:** Faça uma doação mínima para ativar seu buff por até **12 horas** (limitado ao reset diário às 00:00 UTC).
+*   **Notificações:** Receba um alerta no seu dispositivo sempre que a comunidade desbloquear um novo Nível! 🔔
 
-### ⚙️ How it works:
-- **Collective Donation:** Donate your Silver to the Altar and help the community reach global milestones.
-- **Reward Tiers:** There are three global milestone levels (2M, 5M, and 10M).
-- **Buff Scaling:** Unlike other systems, **all bonuses** (XP, Silver, Drops, Quality, etc.) are unlocked as soon as **Tier 1** is reached, and their values increase with each new level reached by the community!
-- **Activation:** Once a milestone is reached and you have made your minimum donation, you can activate the buff for up to **12 hours** (limited to the daily reset at 00:00 UTC).
+---
 
-### 📈 Bonus Progression:
-- **Tier 1 (2M Goal):** +5% XP/Silver, +2.5% on other chances (Drops, Quality, etc).
-- **Tier 2 (5M Goal):** +10% XP/Silver, +5% on other chances.
-- **Tier 3 (10M Goal):** +15% XP/Silver, +10% on other chances.
+### 📈 **EXPANSÃO DE PROGRESSÃO: Level 200**
+O limite de nível das habilidades foi dobrado!
 
-### 🚀 Highlights:
-- **Push Notifications:** Receive an alert on your device whenever the community unlocks a new Tier! 🔔
-- **Dynamic Interface:** Track progress in real-time, see remaining buff time, and easily locate the Altar via the new animated button in the header.
-- **Integrated Status:** Your Altar bonuses now clearly appear in the **Combat** panel and with the **"ALTAR:"** tag in active bonuses.
-- **Expanded Drop Influence:** The Altar's Global Drop Rate bonus now affects:
-    - Rarity bonus luck for chests upon completing Dungeons.
-    - Chance to find **Crests** inside Dungeon chests.
+*   **Novo Limite:** Habilidades agora podem chegar até o **Nível 200**.
+*   **Eficiência Aprimorada:** A eficiência de coleta e refinamento agora escala de forma mais suave, chegando a até **40% de bônus** no nível máximo.
+*   **Tabelas de XP:** Curvas de experiência ajustadas para uma jornada equilibrada até o novo topo.
+
+---
+
+### 🛡️ **GUILDAS IRONMAN**
+Novas opções e restrições para jogadores que buscam o desafio máximo.
+
+*   **Selo Ironman:** Guildas agora exibem um **selo exclusivo** se forem lideradas por jogadores Ironman.
+*   **Restrições de Entrada:** Jogadores Ironman só podem criar ou entrar em guildas também identificadas como Ironman.
+*   **Interface:** Visualize facilmente o status da guilda na busca e no perfil.
+
+---
+
+### 👺 **REFORMA NO WORLD BOSS**
+O sistema de World Boss foi completamente reformulado para ser mais estável e informativo.
+
+*   **Painel Centralizado:** Nova interface com abas de **Boss Ativo**, **Histórico** e **Rankings**.
+*   **Boss de Janela (Window Boss):** Ciclos de 8 horas com **HP real** compartilhado entre todos.
+*   **Histórico de Combate:** Veja o desempenho das últimas 3 sessões e quem foram os maiores causadores de dano.
+*   **Melhoria Visual:** Barra de vida em tempo real e fundos dinâmicos baseados no nível do boss.
+
+---
+
+### 💻 **MELHORIAS NA INTERFACE (UI/UX)**
+
+#### 📱 **Experiência Mobile**
+*   **Cabeçalho Inteligente:** Layout do topo otimizado para celulares, garantindo moedas e notificações sempre visíveis.
+*   **Navegação Compacta:** Menu lateral e rastreador de missões com tamanhos reduzidos para melhor aproveitamento de tela.
+
+#### 🔍 **Inspeção e Visibilidade**
+*   **Inspeção de Jogadores:** Níveis de aprimoramento (+X) e atributos reais exibidos corretamente ao inspecionar outros.
+*   **Quantidade de Itens:** Equipamentos que possuem pilhas (como comida) agora mostram a quantidade no slot.
+*   **Estrelas de Qualidade:** Visual das estrelas de itens de alta qualidade padronizado e aprimorado.
+
+---
+
+### 🏪 **MERCADO E ECONOMIA**
+
+#### 💰 **Facilidade no Mercado**
+*   **Preço Automático:** Ao listar um item, o preço é preenchido com base no menor valor do mercado ou maior pedido de compra.
+*   **Busca Avançada:** Pedras de Aprimoramento agora são fáceis de encontrar no mercado.
+*   **Ordens de Compra:** Agora é possível especificar o **nível de aprimoramento (+X)** desejado nos pedidos.
+
+#### 📦 **Itens e Drops**
+*   **Baú de Aprimoramento:** Novo item que garante uma Pedra de Aprimoramento aleatória (obtido via Bosses de Janela).
+*   **Consistência Visual:** Ajustes visuais nos ícones de diversos itens (Placas, Tecidos, Cajados, Tomos).
+*   **Progressão de Tiers:** Novos atributos de combate adicionados para equipamentos de tiers elevados.
+
+---
+
+### 🛠️ **CORREÇÕES E ESTABILIDADE**
+*   **Sincronização de Dados:** Sistema de doação e rankings protegidos contra perdas de dados.
+*   **Bugs de Inventário:** Corrigido erro que consumia baús em duplicidade.
+*   **Temporizadores:** Lógica de inatividade (Catch-up) ajustada para maior precisão no combate.
+*   **Performance:** Carregamento inicial do jogo mais rápido e estável.
