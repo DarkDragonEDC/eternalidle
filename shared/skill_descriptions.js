@@ -31,7 +31,6 @@ export const SKILL_DESCRIPTIONS = {
     ],
     FISHING: [
         "Fish to gain fish and Fishing XP.",
-        "Requires bait purchased from the Shop with gold.",
         "Fish can be cooked in Cooking to create meals that restore health.",
         "Fishing efficiency can be increased with Fishing Rods made in Toolmaker."
     ],
