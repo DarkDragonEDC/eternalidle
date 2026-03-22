@@ -285,6 +285,24 @@ const GuildProfileModal = ({ isOpen, onClose, guildId, socket, onInspect, isMobi
                                                 boxShadow: '0 2px 8px rgba(212, 175, 55, 0.3)',
                                                 letterSpacing: '0.5px'
                                             }}>{guild.tag}</span>
+
+                                            {guild.is_ironman && (
+                                                <div style={{
+                                                    background: 'rgba(255, 165, 0, 0.15)',
+                                                    border: '1px solid rgba(255, 165, 0, 0.4)',
+                                                    color: '#ffa500',
+                                                    fontSize: '0.6rem',
+                                                    padding: '2px 8px',
+                                                    borderRadius: '6px',
+                                                    fontWeight: '900',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '4px',
+                                                    boxShadow: '0 2px 10px rgba(255, 165, 0, 0.1)'
+                                                }}>
+                                                    <Shield size={12} /> IRONMAN
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Level & Members List */}

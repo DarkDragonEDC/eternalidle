@@ -31,7 +31,8 @@ export const GuildSearch = ({
     playerLevel,
     isMobile,
     ICONS,
-    socket
+    socket,
+    isIronman
 }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCountry, setSelectedCountry] = useState(null);
@@ -320,6 +321,22 @@ export const GuildSearch = ({
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <div style={{ fontWeight: 'bold', color: '#fff' }}>{g.name}</div>
                                         <span style={{ color: 'var(--accent)', fontSize: '0.7rem', fontWeight: 'bold' }}>[{g.tag}]</span>
+                                        {g.is_ironman && (
+                                            <div style={{
+                                                background: 'rgba(255, 165, 0, 0.15)',
+                                                border: '1px solid rgba(255, 165, 0, 0.4)',
+                                                color: '#ffa500',
+                                                fontSize: '0.55rem',
+                                                padding: '1px 5px',
+                                                borderRadius: '4px',
+                                                fontWeight: '900',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '3px'
+                                            }}>
+                                                <Shield size={10} /> IRONMAN
+                                            </div>
+                                        )}
                                     </div>
                                     <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>
                                         LVL {g.level || 1} • MIN LVL {g.min_level || 1} • {g.summary || 'Stronger Together'}
@@ -346,23 +363,26 @@ export const GuildSearch = ({
                                     </div>
                                 ) : (
                                     <motion.button
-                                        whileHover={!(isApplying || playerLevel < g.min_level) ? { scale: 1.05 } : {}}
-                                        whileTap={!(isApplying || playerLevel < g.min_level) ? { scale: 0.95 } : {}}
-                                        disabled={isApplying || parentIsApplying || playerLevel < g.min_level}
+                                        whileHover={!(isApplying || playerLevel < g.min_level || (isIronman !== !!g.is_ironman)) ? { scale: 1.05 } : {}}
+                                        whileTap={!(isApplying || playerLevel < g.min_level || (isIronman !== !!g.is_ironman)) ? { scale: 0.95 } : {}}
+                                        disabled={isApplying || parentIsApplying || playerLevel < g.min_level || (isIronman !== !!g.is_ironman)}
                                         onClick={() => handleApply(g.id, g.min_level, g.join_mode)}
                                         style={{
                                             padding: '6px 16px',
-                                            background: playerLevel < g.min_level ? 'rgba(255,255,255,0.05)' : 'var(--accent)',
-                                            border: playerLevel < g.min_level ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                                            background: (playerLevel < g.min_level || (isIronman !== !!g.is_ironman)) ? 'rgba(255,255,255,0.05)' : 'var(--accent)',
+                                            border: (playerLevel < g.min_level || (isIronman !== !!g.is_ironman)) ? '1px solid rgba(255,255,255,0.1)' : 'none',
                                             borderRadius: '8px',
-                                            color: playerLevel < g.min_level ? 'rgba(255,255,255,0.2)' : '#000',
+                                            color: (playerLevel < g.min_level || (isIronman !== !!g.is_ironman)) ? 'rgba(255,255,255,0.2)' : '#000',
                                             fontSize: '0.7rem',
                                             fontWeight: '900',
-                                            cursor: (isApplying || parentIsApplying || playerLevel < g.min_level) ? 'not-allowed' : 'pointer',
+                                            cursor: (isApplying || parentIsApplying || playerLevel < g.min_level || (isIronman !== !!g.is_ironman)) ? 'not-allowed' : 'pointer',
                                             transition: '0.2s'
                                         }}
                                     >
-                                        {playerLevel < g.min_level ? `REQ. LVL ${g.min_level}` : (g.join_mode === 'OPEN' ? 'JOIN' : 'APPLY')}
+                                        {isIronman !== !!g.is_ironman 
+                                            ? (isIronman ? "IRONMAN ONLY" : "NO IRONMAN") 
+                                            : (playerLevel < g.min_level ? `REQ. LVL ${g.min_level}` : (g.join_mode === 'OPEN' ? 'JOIN' : 'APPLY'))
+                                        }
                                     </motion.button>
                                 )}
                                 <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>{g.memberCount || 0}/{g.maxMembers || 10}</span>

@@ -66,7 +66,8 @@ export class GuildManager {
                 icon_color: iconColor || "#FFD700",
                 bg_color: bgColor || "#1a1a1a",
                 leader_id: char.id,
-                country_code: countryCode || null
+                country_code: countryCode || null,
+                is_ironman: !!char.state.isIronman
             })
             .select()
             .single();
@@ -313,7 +314,7 @@ export class GuildManager {
 
         const { data: guild, error: guildError } = await this.supabase
             .from('guilds')
-            .select('id, name, tag, level, xp, summary, icon, icon_color, bg_color, country_code, guild_hall_level, created_at, roles')
+            .select('id, name, tag, level, xp, summary, icon, icon_color, bg_color, country_code, guild_hall_level, created_at, roles, is_ironman')
             .eq('id', guildId)
             .single();
 
@@ -505,11 +506,22 @@ export class GuildManager {
         // Check if guild exists and is not full
         const { data: guild, error: guildErr } = await this.supabase
             .from('guilds')
-            .select('id, tag, min_level, join_mode, guild_hall_level')
+            .select('id, tag, min_level, join_mode, guild_hall_level, is_ironman')
             .eq('id', guildId)
             .maybeSingle();
 
         if (guildErr || !guild) throw new Error("Guild not found");
+
+        // CHECK IRONMAN RESTRICTIONS
+        const charIsIronman = !!char.state.isIronman;
+        const guildIsIronman = !!guild.is_ironman;
+
+        if (charIsIronman && !guildIsIronman) {
+            throw new Error("Ironman characters can only join Ironman guilds.");
+        }
+        if (!charIsIronman && guildIsIronman) {
+            throw new Error("Regular characters cannot join Ironman guilds.");
+        }
 
         // Check minimum level
         const charLevel = this._calculateCharLevel(char.state ? { skills: char.skills, ...char.state } : { skills: char.skills });
@@ -685,7 +697,7 @@ export class GuildManager {
         // Count members (dynamic max based on Guild Hall level)
         const { data: guildData } = await this.supabase
             .from('guilds')
-            .select('tag, guild_hall_level')
+            .select('tag, guild_hall_level, is_ironman')
             .eq('id', member.guild_id)
             .single();
 

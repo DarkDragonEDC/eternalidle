@@ -31,7 +31,8 @@ export const GuildCreate = ({
     userSilver, 
     userOrbs, 
     isMobile,
-    ICONS 
+    ICONS,
+    isIronman
 }) => {
     const [guildName, setGuildName] = useState('');
     const [guildTag, setGuildTag] = useState('');
@@ -156,6 +157,24 @@ export const GuildCreate = ({
                         <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold' }}>1/10</span>
                     </div>
                 </motion.div>
+                {isIronman && (
+                    <div style={{
+                        marginTop: '10px',
+                        padding: '8px 12px',
+                        background: 'rgba(255, 165, 0, 0.1)',
+                        border: '1px solid rgba(255, 165, 0, 0.3)',
+                        borderRadius: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        fontSize: '0.7rem',
+                        color: '#ffa500',
+                        fontWeight: 'bold'
+                    }}>
+                        <Shield size={14} />
+                        NOTICE: As an Ironman, your guild will be Ironman-only.
+                    </div>
+                )}
             </div>
 
             {/* Main Interaction Grid */}

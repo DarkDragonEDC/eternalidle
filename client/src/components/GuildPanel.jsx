@@ -444,6 +444,7 @@ const GuildPanel = ({ gameState, socket, isMobile, onInspect }) => {
                                         playerLevel={playerLevel}
                                         isMobile={isMobile}
                                         ICONS={ICONS}
+                                        isIronman={!!gameState?.state?.isIronman}
                                     />
                                 ) : (
                                     <GuildCreate 
@@ -454,6 +455,7 @@ const GuildPanel = ({ gameState, socket, isMobile, onInspect }) => {
                                         userOrbs={gameState?.state?.orbs || 0}
                                         isMobile={isMobile}
                                         ICONS={ICONS}
+                                        isIronman={!!gameState?.state?.isIronman}
                                     />
                                 )}
                             </AnimatePresence>
