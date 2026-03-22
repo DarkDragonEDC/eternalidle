@@ -242,9 +242,10 @@ export const AltarModal = ({ isOpen, onClose }) => {
                                         const tierKey = `tier${tier}EndTime`;
                                         const endTime = playerState[tierKey];
                                         const isActive = !!endTime && Date.now() < endTime;
+                                        const isUsed = !!endTime;
                                         const isGlobalMet = globalState.totalSilver >= reqGlobal;
                                         const isDonationMet = (playerState.donated || 0) >= reqDonation;
-                                        const canActivate = isGlobalMet && isDonationMet && !isActive;
+                                        const canActivate = isGlobalMet && isDonationMet && !isUsed;
 
                                         // Calculate potential duration until 00:00 UTC, max 12h
                                         const now = Date.now();
@@ -296,6 +297,10 @@ export const AltarModal = ({ isOpen, onClose }) => {
                                                         return `Ends in ${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
                                                     })()}
                                                 </div>
+                                            ) : isUsed ? (
+                                                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 'bold', textTransform: 'uppercase', opacity: 0.8 }}>
+                                                    Already Used Today
+                                                </div>
                                             ) : (
                                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
                                                     <button
@@ -312,7 +317,7 @@ export const AltarModal = ({ isOpen, onClose }) => {
                                                     >
                                                         {activatingTier === tier ? '...' : (isGlobalMet ? 'Activate' : 'Locked')}
                                                     </button>
-                                                    {!isActive && isGlobalMet && (
+                                                    {isGlobalMet && (
                                                         <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', opacity: 0.8, fontWeight: 'bold' }}>
                                                             {potText} buff
                                                         </div>

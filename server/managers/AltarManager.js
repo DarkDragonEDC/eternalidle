@@ -175,8 +175,8 @@ export class AltarManager {
             }
 
             const tierKey = `tier${tierIndex}EndTime`;
-            if (playerState[tierKey] && Date.now() < playerState[tierKey]) {
-                throw new Error(`Tier ${tierIndex} buff is already active!`);
+            if (playerState[tierKey]) {
+                throw new Error(`Tier ${tierIndex} buff can only be activated once per day!`);
             }
 
             // Activate 12h buff (caps at next midnight UTC)
