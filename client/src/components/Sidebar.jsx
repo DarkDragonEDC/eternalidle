@@ -51,7 +51,7 @@ const Sidebar = ({ gameState, activeTab, setActiveTab, onNavigate, activeCategor
         const level = skill.level || 1;
         const xp = skill.xp || 0;
         const nextLevelXp = calculateNextLevelXP(level);
-        const progress = level >= 100 ? 100 : Math.min(100, (xp / nextLevelXp) * 100);
+        const progress = level >= 200 ? 100 : Math.min(100, (xp / nextLevelXp) * 100);
 
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px', minWidth: '45px' }}>

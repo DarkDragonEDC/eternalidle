@@ -1,4 +1,3 @@
-// Custom XP Curve provided by user
 export const XP_TABLE = [
     0, 84, 192, 324, 480, 645, 820, 1005, 1200, 1407,
     1735, 2082, 2449, 2838, 3249, 3684, 4144, 4631, 5146, 5691,
@@ -9,49 +8,30 @@ export const XP_TABLE = [
     220417, 232945, 246859, 262341, 279598, 298871, 320434, 344603, 371744, 402278,
     441971, 486789, 537487, 594941, 660170, 734360, 818896, 915396, 1025752, 1152182,
     1316749, 1492835, 1681248, 1882849, 2098562, 2329375, 2576345, 2840603, 3123359, 3425908,
-    3749636, 4269287, 4827911, 5428432, 6073992, 6767969, 7513995, 8315973, 9178099, 10104099
+    3749636, 4269287, 4827911, 5428432, 6073992, 6767969, 7513995, 8315973, 9178099, 10104099,
+    11122699, 12227880, 13427001, 14728048, 16139684, 17671309, 19333122, 21136189, 23092517, 25215132,
+    27868401, 30747198, 33870693, 37259685, 40936741, 44926347, 49255069, 53951732, 59047611, 64576640,
+    71487926, 78986671, 87122809, 95950518, 105528582, 115920781, 127196317, 139430273, 152704115, 167106234,
+    185108882, 204641755, 225834922, 248829508, 273778634, 300848435, 330219169, 362086415, 396662377, 434177295,
+    481070942, 531950549, 587154922, 647051667, 712039635, 782551580, 859057040, 942065464, 1032129604, 1129849195,
+    1251998683, 1384530877, 1528328307, 1684348518, 1853630446, 2037301337, 2236584253, 2452806216, 2687407045, 2941948944,
+    3260126317, 3605348766, 3979915123, 4386319620, 4827268499, 5305698032, 5824794075, 6388013281, 6999106119, 7662141848,
+    8490936509, 9390178716, 10365856510, 11424466916, 12573059206, 13819281840, 15171433397, 16638517836, 18230304452, 19957392930,
+    22116253527, 24458617274, 27000081939, 29757571100, 32749496839, 35995736265, 39517906042, 43339460250, 47485846565, 51984675716,
+    57608212154, 63709748688, 70329915827, 77512797172, 85306223431, 93762090922, 102936707149, 112891165755, 123691753342, 135410390873
 ];
 
 export const calculateNextLevelXP = (level) => {
     // Level is the CURRENT level. We return XP needed to reach NEXT level.
-    // User table: Lvl 1->2 needs 84 xp? Or Lvl 2 is 84 total?
-    // Usually tables are "Total XP required for Level X".
-    // User list: 1 -> 0, 2 -> 84.
-    // So to get from 1 to 2, you need 84 XP.
-    // If input is level 1, return XP_TABLE[1] (84).
-    // If input is level 99, return XP_TABLE[99] (10M).
-    // If input is level 100, return Infinity (Max Level).
-
-    if (level >= 100) return Infinity;
+    if (level >= 200) return Infinity;
 
     const xpCurrentLevelTotal = XP_TABLE[level - 1] || 0;
     const xpNextLevelTotal = XP_TABLE[level] || 0;
 
-    // Actually, usually games store "XP required for next level" vs "Cumulative XP".
-    // The user's list looks like Cumulative XP for that level.
-    // Lvl 1 = 0, Lvl 2 = 84. Delta = 84.
-    // If current level is 1, calculating next level XP usually means "How much do I need per level" or "Total"?
-    // The existing function usage is: skill.xp >= nextLevelXP means level up.
-    // Existing logic used: `100 * 1.15^(level-1)`.
-    // Lvl 1: 100. Lvl 2: 115. These look like "XP required for THIS specific level step".
-
-    // BUT the user provided a Curve "LVL XP".
-    // Lvl 1 0. Lvl 2 84.
-    // This implies Cumulative XP to REACH that level.
-    // So at level 1 (0 XP), you need 84 XP to reach Level 2.
-    // At Level 2 (84 XP), you need (192-84 = 108) XP to reach Level 3.
-    // The previous code seemed to treat skill.xp as "current progress in this level" NOT total accumulated.
-    // Let's check GameManager.js line 386: `skill.xp -= nextLevelXP`.
-    // This CONFIRMS that skill.xp is "XP in current level bucket", not total.
-    // So calculateNextLevelXP matches "Delta XP to next level".
-
-    // So for Level L, we need (XP_TABLE[L] - XP_TABLE[L-1]).
-    // Example: Level 1. Need (XP_TABLE[1] - XP_TABLE[0]) = 84-0 = 84.
-
-    const targetTotal = XP_TABLE[level]; // XP for next level (level+1 index in 1-based logic, or just index=level)
+    const targetTotal = XP_TABLE[level]; 
     const currentTotal = XP_TABLE[level - 1];
 
-    if (targetTotal === undefined) return 999999999;
+    if (targetTotal === undefined) return Infinity;
 
     return targetTotal - currentTotal;
 };

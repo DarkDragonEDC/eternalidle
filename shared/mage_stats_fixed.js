@@ -1665,12 +1665,20 @@ export const MAGE_STATS_FIXED = {
                 "hp": 337,
                 "ip": 750
             },
+            "2": {
+                "damage": 540,
+                "defense": 180,
+                "hp": 367,
+                "ip": 800
+            },
             "3": {
+                "damage": 585,
                 "defense": 195,
                 "hp": 398,
                 "ip": 850
             },
             "4": {
+                "damage": 630,
                 "defense": 210,
                 "hp": 429,
                 "ip": 900
@@ -1678,6 +1686,7 @@ export const MAGE_STATS_FIXED = {
         },
         "8": {
             "0": {
+                "damage": 567,
                 "defense": 189,
                 "hp": 386,
                 "ip": 840

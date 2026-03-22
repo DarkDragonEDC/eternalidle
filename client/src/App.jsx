@@ -305,7 +305,7 @@ function App() {
                     onOpenWorldBoss={() => setIsWorldBossFight(true)}
                     skillProgress={gameState?.current_activity && displayedGameState?.state?.skills ? (() => {
                         const s = displayedGameState.state.skills[getSkillForItem(gameState.current_activity.item_id, gameState.current_activity.type)];
-                        if (!s || s.level >= 100) return s?.level >= 100 ? 100 : 0;
+                        if (!s || s.level >= 200) return s?.level >= 200 ? 100 : 0;
                         return (s.xp / calculateNextLevelXP(s.level || 1)) * 100;
                     })() : 0}
                 />

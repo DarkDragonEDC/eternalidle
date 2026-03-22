@@ -879,26 +879,27 @@ export class InventoryManager {
             }
         });
 
-        // 3. Skill Bonuses (Level * 0.2 per level => Max 20% at Lvl 100)
-        efficiency.WOOD += getLvl('LUMBERJACK') * 0.2;
-        efficiency.ORE += getLvl('ORE_MINER') * 0.2;
-        efficiency.HIDE += getLvl('ANIMAL_SKINNER') * 0.2;
-        efficiency.FIBER += getLvl('FIBER_HARVESTER') * 0.2;
-        efficiency.FISH += getLvl('FISHING') * 0.2;
-        efficiency.HERB += getLvl('HERBALISM') * 0.2;
+        // 3. Skill Bonuses (Linear 0% to 40% from Lv 1 to 200)
+        efficiency.WOOD += (getLvl('LUMBERJACK') - 1) * (40 / 199);
+        efficiency.ORE += (getLvl('ORE_MINER') - 1) * (40 / 199);
+        efficiency.HIDE += (getLvl('ANIMAL_SKINNER') - 1) * (40 / 199);
+        efficiency.FIBER += (getLvl('FIBER_HARVESTER') - 1) * (40 / 199);
+        efficiency.FISH += (getLvl('FISHING') - 1) * (40 / 199);
+        efficiency.HERB += (getLvl('HERBALISM') - 1) * (40 / 199);
 
-        efficiency.PLANK += getLvl('PLANK_REFINER') * 0.2;
-        efficiency.METAL += getLvl('METAL_BAR_REFINER') * 0.2;
-        efficiency.LEATHER += getLvl('LEATHER_REFINER') * 0.2;
-        efficiency.CLOTH += getLvl('CLOTH_REFINER') * 0.2;
-        efficiency.EXTRACT += getLvl('DISTILLATION') * 0.2;
+        efficiency.PLANK += (getLvl('PLANK_REFINER') - 1) * (40 / 199);
+        efficiency.METAL += (getLvl('METAL_BAR_REFINER') - 1) * (40 / 199);
+        efficiency.LEATHER += (getLvl('LEATHER_REFINER') - 1) * (40 / 199);
+        efficiency.CLOTH += (getLvl('CLOTH_REFINER') - 1) * (40 / 199);
+        efficiency.EXTRACT += (getLvl('DISTILLATION') - 1) * (40 / 199);
 
-        efficiency.WARRIOR += getLvl('WARRIOR_CRAFTER') * 0.2;
-        efficiency.HUNTER += getLvl('HUNTER_CRAFTER') * 0.2;
-        efficiency.MAGE += getLvl('MAGE_CRAFTER') * 0.2;
-        efficiency.COOKING += getLvl('COOKING') * 0.2;
-        efficiency.ALCHEMY += getLvl('ALCHEMY') * 0.2;
-        efficiency.TOOLS += getLvl('TOOL_CRAFTER') * 0.2;
+
+        efficiency.WARRIOR += (getLvl('WARRIOR_CRAFTER') - 1) * (40 / 199);
+        efficiency.HUNTER += (getLvl('HUNTER_CRAFTER') - 1) * (40 / 199);
+        efficiency.MAGE += (getLvl('MAGE_CRAFTER') - 1) * (40 / 199);
+        efficiency.COOKING += (getLvl('COOKING') - 1) * (40 / 199);
+        efficiency.ALCHEMY += (getLvl('ALCHEMY') - 1) * (40 / 199);
+        efficiency.TOOLS += (getLvl('TOOL_CRAFTER') - 1) * (40 / 199);
 
         // 4. Weapon Class Detection → Proficiency Gating
         // Only the proficiency matching the equipped weapon provides combat bonuses

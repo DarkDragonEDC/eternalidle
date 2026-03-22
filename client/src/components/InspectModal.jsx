@@ -186,7 +186,7 @@ const SkillCategory = ({ title, icon, skillsList, color, isExpanded, onToggle, s
                             {skillsList.map(sId => {
                                 const skill = skills[sId] || { level: 1, xp: 0 };
                                 const nextXP = calculateNextLevelXP(skill.level);
-                                const progress = skill.level >= 100 ? 100 : Math.min(100, (skill.xp / nextXP) * 100);
+                                const progress = skill.level >= 200 ? 100 : Math.min(100, (skill.xp / nextXP) * 100);
                                 return (
                                     <div key={sId} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>

@@ -80,7 +80,7 @@ const SkillProgressHeader = ({ tab, category }) => {
   }
 
   const nextXP = calculateNextLevelXP(skill.level);
-  const progress = Math.min(100, (skill.xp / nextXP) * 100);
+  const progress = skill.level >= 200 ? 100 : Math.min(100, (skill.xp / nextXP) * 100);
 
   return (
     <div className="glass-panel" style={{

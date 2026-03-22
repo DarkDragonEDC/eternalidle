@@ -1279,7 +1279,7 @@ export class GameManager {
         let leveledUp = false;
         let nextLevelXP = calculateNextLevelXP(skill.level);
         // Loop while we have enough XP and haven't hit the cap
-        while (skill.xp >= nextLevelXP && skill.level < 100) {
+        while (skill.xp >= nextLevelXP && skill.level < 200) {
             skill.level++;
             skill.xp -= nextLevelXP;
             leveledUp = true;
